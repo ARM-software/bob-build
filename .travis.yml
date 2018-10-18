@@ -1,0 +1,40 @@
+language: go
+
+go:
+  - "1.8"
+  - "1.9"
+  - "1.10"
+
+cache:
+  directories:
+    - $HOME/ninjabin
+
+before_install:
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
+  - sudo apt-get update
+  - sudo apt-get install -y rsync python-ply
+
+install:
+  - bash .travis/install-ninja.sh
+  - export PATH=$PATH:~/ninjabin
+
+before_script:
+  - mkdir -p ~/bob_workspace
+  - mkdir -p ~/bob_workspace/src/github.com/google/
+  - mkdir -p ~/bob_workspace/src/github.com/ARM-software/
+  - ln -s "$(pwd)/blueprint/" ~/bob_workspace/src/github.com/google/blueprint
+  - ln -s "$(pwd)"            ~/bob_workspace/src/github.com/ARM-software/bob-build
+
+script:
+  - export GOROOT=$(go env GOROOT)
+  - export BOB_ROOT=$(pwd)
+  - export BOB_WORKSPACE=~/bob_workspace
+  - export GOPATH=${BOB_WORKSPACE}
+  - echo "GOROOT        =${GOROOT}"
+  - echo "GOPATH        =${GOPATH}"
+  - echo "BOB_ROOT      =${BOB_ROOT}"
+  - echo "BOB_WORKSPACE =${BOB_WORKSPACE}"
+  - bash .travis/run_all_tests.sh
