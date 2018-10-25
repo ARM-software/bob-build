@@ -34,5 +34,5 @@ function create_link() {
         echo "Can't create link from $linkname to $target - $linkname already exists and is not a symbolic link"
         return 1
     fi
-    ln -s -T "$target" "$linkname"
+    ln -s "$target" "$linkname"
 }

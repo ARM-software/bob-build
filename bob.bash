@@ -30,11 +30,14 @@ cd "${WORKDIR}"
 # Generate config.go from Mconfig
 python "${BOB_DIR}/scripts/generate_config_json.py" --database "${SRCDIR}/Mconfig" --output "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS} "${BUILDDIR}/${CONFIGNAME}"
 
+# Source the pathtools script - we need bob_realpath for CCACHE_BASEDIR.
+source "${BOB_DIR}/pathtools.bash"
+
 # If enabled, the following environment variables optimize the performance
 # of ccache. Otherwise they have no effect.
 # To build with ccache, set the environment variable CCACHE_DIR to where the
 # cache is to reside and add CCACHE=y to the build config to enable.
-export CCACHE_BASEDIR="$(readlink -f "${SRCDIR}")"
+export CCACHE_BASEDIR="$(bob_realpath ${SRCDIR})"
 export CCACHE_CPP2=y
 export CCACHE_SLOPPINESS=file_macro,time_macros
 

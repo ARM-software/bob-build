@@ -38,13 +38,25 @@ function shortest_path() {
     fi
 }
 
+# Portable version of readlink. There are no requirements on path components existing.
+if which realpath >&/dev/null &&
+   [[ -n "$(realpath --version 2>&1 | grep 'GNU coreutils')" ]]; then
+    function bob_realpath {
+        realpath -m "$1"
+    }
+else
+    function bob_realpath() {
+        python -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
+    }
+fi
+
 # Return a path that references $2 from $1
 # $1 and $2 must exist
 # This is a simple implementation. We rely on readlink to sort out symlink issues for us.
 # If there are fewer path elements in the absolute version, return that instead.
 function relative_path() {
-    SRC_ABS=$(readlink -f $1)
-    TGT_ABS=$(readlink -f $2)
+    SRC_ABS=$(bob_realpath $1)
+    TGT_ABS=$(bob_realpath $2)
 
     BACK=
     # ${TGT_ABS#SRC_ABS} removes the SRC_ABS from TGT_ABS
