@@ -68,7 +68,7 @@ WORKDIR=$(relative_path "${BUILDDIR}" $(pwd))
 
 # Calculate Bob directory relative to working directory and absolute
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
-BOB_DIR_ABS="$(readlink -f "${SCRIPT_DIR}")"
+BOB_DIR_ABS="$(bob_realpath "${SCRIPT_DIR}")"
 
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
