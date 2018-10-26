@@ -426,16 +426,12 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper")
 
+var wholeStaticScript = filepath.Join(bobdir, "scripts", "whole_static.py")
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
-		Command: "rm -f $out && { " +
-			"echo create $out; " +
-			"for i in $in; do echo addmod $$i; done; " +
-			"for i in $whole_static_libs; do echo addlib $$i; done; " +
-			"echo save; echo end; } " +
-			"| $build_wrapper $ar -M && test -f $out",
+		Command:     "$whole_static_tool --ar $ar --out $out $in $whole_static_libs",
 		Description: "$out",
-	}, "ar", "build_wrapper", "whole_static_libs")
+	}, "ar", "build_wrapper", "whole_static_libs", "whole_static_tool")
 
 func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 	if len(m.Properties.Static_libs) > 0 || len(m.Properties.Shared_libs) > 0 {
@@ -455,10 +451,13 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 	}
 
 	wholeStaticLibs := m.library.GetWholeStaticLibs(ctx)
+	implicits := wholeStaticLibs
 
 	if len(wholeStaticLibs) > 0 {
 		rule = wholeStaticLibraryRule
+		args["whole_static_tool"] = wholeStaticScript
 		args["whole_static_libs"] = strings.Join(wholeStaticLibs, " ")
+		implicits = append(implicits, wholeStaticScript)
 	}
 
 	// The archiver rules do not allow adding arguments that the user can
@@ -470,7 +469,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 			Rule:      rule,
 			Outputs:   m.outputs(g),
 			Inputs:    objectFiles,
-			Implicits: wholeStaticLibs,
+			Implicits: implicits,
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
 			Args:      args,

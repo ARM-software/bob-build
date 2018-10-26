@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,10 @@ bob_alias {
 
 bob_static_library {
     name: "sl_liba",
-    srcs: ["a.c"],
+    srcs: [
+        "a/a.c",
+        "a.c",
+    ],
     export_cflags: ["-DFOO=1"],
 }
 
