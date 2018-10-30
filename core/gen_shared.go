@@ -18,8 +18,6 @@
 package core
 
 import (
-	"reflect"
-
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/utils"
@@ -63,7 +61,7 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 
 func genSharedLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
-	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), reflect.TypeOf(GenerateProps{}))
+	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{})
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

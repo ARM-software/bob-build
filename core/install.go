@@ -19,7 +19,6 @@ package core
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/google/blueprint"
 )
@@ -259,14 +258,14 @@ func (m *resource) getAliasList() []string {
 
 func installGroupFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &installGroup{}
-	module.Properties.Features.Init(config.getAvailableFeatures(), reflect.TypeOf(InstallGroupProps{}))
+	module.Properties.Features.Init(config.getAvailableFeatures(), InstallGroupProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
 
 func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &resource{}
-	module.Properties.Features.Init(config.getAvailableFeatures(), reflect.TypeOf(ResourceProps{}))
+	module.Properties.Features.Init(config.getAvailableFeatures(), ResourceProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
