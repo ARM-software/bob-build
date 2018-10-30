@@ -18,8 +18,6 @@
 package core
 
 import (
-	"reflect"
-
 	"github.com/google/blueprint"
 )
 
@@ -78,7 +76,7 @@ func (m *alias) GenerateBuildActions(ctx blueprint.ModuleContext) {
 // Create the structure representing the bob_alias
 func aliasFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &alias{}
-	module.Properties.Features.Init(config.getAvailableFeatures(), reflect.TypeOf(AliasProps{}))
+	module.Properties.Features.Init(config.getAvailableFeatures(), AliasProps{})
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 

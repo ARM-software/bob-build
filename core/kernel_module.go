@@ -20,7 +20,6 @@ package core
 import (
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -162,9 +161,9 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
 	availableFeatures := config.getAvailableFeatures()
-	module.Properties.Features.Init(availableFeatures, reflect.TypeOf(BuildProps{}))
-	module.Properties.Build.Target.Init(availableFeatures, reflect.TypeOf(BuildProps{}))
-	module.Properties.Build.Host.Init(availableFeatures, reflect.TypeOf(BuildProps{}))
+	module.Properties.Features.Init(availableFeatures, BuildProps{})
+	module.Properties.Build.Target.Init(availableFeatures, BuildProps{})
+	module.Properties.Build.Host.Init(availableFeatures, BuildProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }

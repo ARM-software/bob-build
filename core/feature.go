@@ -27,13 +27,13 @@ import (
 	"github.com/ARM-software/bob-build/utils"
 )
 
-func titleFirst(a string) string {
-	result := ""
-	if len(a) > 0 {
-		result += strings.ToUpper(a[0:1])
-	}
-	if len(a) > 1 {
-		result += strings.ToLower(a[1:])
+// featurePropertyName returns name of feature. Name needs to start from capital letter because
+// this is how it works in go exported/unexported properties
+// e.g. Android, Foo_bar
+func featurePropertyName(name string) string {
+	result := strings.ToLower(name) // e.g. android, foo_bar
+	if len(name) > 0 {
+		return strings.ToUpper(name[0:1]) + result[1:]
 	}
 	return result
 }
@@ -47,53 +47,132 @@ type Features struct {
 	BlueprintEmbed interface{}
 }
 
+func typesOf(list ...interface{}) []reflect.Type {
+	types := make([]reflect.Type, len(list))
+	for i, element := range list {
+		types[i] = reflect.TypeOf(element)
+	}
+	return types
+}
+
 // Init generates and initializes a struct containing a field of type
-// 'propsType' for every available feature. The generated object is embedded
+// 'propsType' for every available feature. 'propsType' will be constructed
+// from list of types. By constructed we mean properties of each
+// type will be merged together. It is important to set here
+// every available feature not only enabled ones, because blueprint will
+// fail during reading .bp files. The generated object is embedded
 // in each module types' properties instance, and is used by Blueprint to
 // decide what properties can be set inside features in each module type.
 //
 // An example generated type:
-// type featureSetType struct {
+// type BlueprintEmbedType struct {
 //         Debug PropsType
 //         Enable_something PropsType
 //         Some_other_feature PropsType
 // }
-func (f *Features) Init(availableFeatures []string, propsType reflect.Type) {
-	fields := make([]reflect.StructField, len(availableFeatures))
-
-	for i, key := range availableFeatures {
-		field := reflect.StructField{
-			Name: titleFirst(key),
-			Type: propsType,
-		}
-		fields[i] = field
+// Name of each property in this struct is custom feature name.
+// Blueprint will inflate this structure with data read from .bp files.
+// Only exported properties can be set so property name MUST start from capital letter.
+func (f *Features) Init(availableFeatures []string, list ...interface{}) {
+	if len(list) == 0 {
+		panic("List can't be empty")
 	}
 
-	featureSetType := reflect.StructOf(fields)
-	featureSetValPtr := reflect.New(featureSetType)
-	f.BlueprintEmbed = featureSetValPtr.Interface()
+	propsType := coalesceTypes(typesOf(list...)...)
+	fields := make([]reflect.StructField, len(availableFeatures))
+
+	for i, featureName := range availableFeatures {
+		fields[i] = reflect.StructField{
+			Name: featurePropertyName(featureName),
+			Type: propsType,
+		}
+	}
+
+	bpFeatureStruct := reflect.StructOf(fields)
+	instance := reflect.New(bpFeatureStruct)
+	f.BlueprintEmbed = instance.Interface()
+}
+
+// coalesceTypes will squash multiple types to new type. This has different result
+// than Go composition of structs.
+//
+// Example (go composition):
+// type compositeStruct struct {
+//     testPropsGroupA
+//     testPropsGroupB
+// }
+// Debug print:
+// {
+//     testPropsGroupA: core.testPropsGroupA
+//     {
+//       Field_a: string
+//       Field_c: string
+//       Field_f: string
+//     }
+//     testPropsGroupB: core.testPropsGroupB
+//     {
+//       Field_b: string
+//     }
+// }
+//
+// Example for: coalesceTypes([]reflect.Type{
+//    testPropsGroupA{},
+//    testPropsGroupB{},
+// })
+// Debug print:
+// {
+//     Field_a: string
+//     Field_c: string
+//     Field_f: string
+//     Field_b: string
+// }
+func coalesceTypes(list ...reflect.Type) reflect.Type {
+	if len(list) == 0 {
+		panic("List can't be empty")
+	}
+	if len(list) == 1 {
+		return list[0]
+	}
+
+	fieldsKeys := map[string]bool{}
+	fields := []reflect.StructField{}
+
+	for _, elementType := range list {
+		for i := 0; i < elementType.NumField(); i++ {
+			field := elementType.Field(i)
+			fieldName := field.Name
+			if _, ok := fieldsKeys[fieldName]; ok {
+				panic(fmt.Sprintf("Name collision: '%v'\n", fieldName))
+			} else {
+				fieldsKeys[fieldName] = true
+				fields = append(fields, field)
+			}
+		}
+	}
+
+	return reflect.StructOf(fields)
 }
 
 // AppendProps merges properties from BlueprintEmbed to dst, but only for enabled features
 func (f *Features) AppendProps(dst []interface{}, properties *configProperties) error {
-	featureSetVal := reflect.ValueOf(f.BlueprintEmbed).Elem()
+	// featuresData is struct created in Features.Init function
+	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()
 
-	for _, key := range utils.SortedKeysBoolMap(properties.Features) {
-		// Check the feature is enabled
-		if properties.Features[key] {
-			field := featureSetVal.FieldByName(titleFirst(key))
-
-			if !field.IsValid() {
-				panic(fmt.Sprintf("Field returned for property %s isn't valid\n", key))
+	for _, featureKey := range utils.SortedKeysBoolMap(properties.Features) {
+		if properties.Features[featureKey] { // Check the feature is enabled
+			// Features are matched like "Feature_name" - feature structure
+			featureFieldName := featurePropertyName(featureKey)
+			featureStruct := featuresData.FieldByName(featureFieldName)
+			if !featureStruct.IsValid() {
+				panic(fmt.Sprintf("Field returned for property %s isn't valid\n", featureFieldName))
 			}
-
 			// AppendProperties expects a pointer to a struct.
-			featureProps := field.Addr().Interface()
+			featureStructPointer := featureStruct.Addr().Interface()
 
 			// If featureProps is nil then we've determined that we can skip this,
 			// so avoid calling AppendProperties
-			if featureProps != nil {
-				err := proptools.AppendMatchingProperties(dst, featureProps, nil)
+			if featureStructPointer != nil {
+				err := proptools.AppendMatchingProperties(dst, featureStructPointer, nil)
 				if err != nil {
 					return err
 				}
