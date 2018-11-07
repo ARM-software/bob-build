@@ -1,0 +1,54 @@
+# Copyright 2018 Arm Limited.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+LOCAL_PATH:=$(call my-dir)
+include $(CLEAR_VARS)
+
+PROJ:=@@BOB_PROJ_NAME@@
+
+# This file is a template for an Android.mk to be put in the top level
+# directory that will invoke the Blueprint builder.
+
+# ./bootstrap_android.bash
+# mm -j 16
+
+LOCAL_MODULE:=$(PROJ)
+LOCAL_MODULE_CLASS:=STATIC_LIBRARIES # local-generated-sources-dir requires a class
+
+BOB_ANDROIDMK_DIR:=$(local-generated-sources-dir)
+
+BOB_$(PROJ)_DIR:=$(LOCAL_PATH)
+
+# Soong clears the GOROOT environment, so store the root we want to use
+BOB_$(PROJ)_GOROOT:=@@BOB_GOROOT@@
+
+# It is important to have the ./ before the output directory, due to kati ignoring
+# any shell command that begins with "out/"
+BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/generate_android_inc.bash" "$(LOCAL_PATH)" "./$(BOB_ANDROIDMK_DIR)" "$(BOB_$(PROJ)_GOROOT)"
+
+$(info Running '$(BOB_GEN_CMD)')
+
+BOB_GEN_RESULT:=$(shell $(BOB_GEN_CMD))
+BOB_GEN_RET_VAL:=$(lastword $(BOB_GEN_RESULT))
+
+# The preferred solution here would be to do:
+# BOB_GEN_RESULT:=$(shell $(BOB_GEN_CMD); echo $$? )
+# However, kati ignores changes to any command that contains "echo".
+ifneq ($(BOB_GEN_RET_VAL),Success)
+  $(info $(BOB_GEN_RESULT))
+  $(error Running '$(BOB_GEN_CMD)' failed)
+endif
+
+include $(BOB_ANDROIDMK_DIR)/Android.inc

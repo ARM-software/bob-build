@@ -1,0 +1,75 @@
+config A_STRING_VALUE
+	string "String value"
+	default "foo"
+
+config STRING_IS_FOO
+	bool "String is 'foo'"
+	default y if A_STRING_VALUE = "foo"
+
+config STRING_IS_BAR
+	bool "String is 'bar'"
+	default y if A_STRING_VALUE = "bar"
+
+config STRING_IS_NOT_BAZ
+	bool "String is not 'baz'"
+	default y if A_STRING_VALUE != "baz"
+
+config A_NUMBER_VALUE
+	int "A number"
+	default 42
+
+config NUMBER_IS_42
+	bool "Number is 42"
+	default y if A_NUMBER_VALUE = 42
+
+config NUMBER_IS_NOT_42
+	bool "Number is not 42"
+	default y if A_NUMBER_VALUE != 42
+
+config NUMBER_IS_LESS_THAN_60
+	bool "Number is < 60"
+	default y if A_NUMBER_VALUE < 60
+
+config NUMBER_IS_LESS_THAN_30
+	bool "Number is < 30"
+	default y if A_NUMBER_VALUE < 30
+
+config NUMBER_IS_LESS_OR_EQ_THAN_42
+	bool "Number is <= 42"
+	default y if A_NUMBER_VALUE <= 42
+
+config NUMBER_IS_LESS_OR_EQ_THAN_41
+	bool "Number is <= 41"
+	default y if A_NUMBER_VALUE <= 41
+
+config NUMBER_IS_GREATER_THAN_42
+	bool "Number is > 42"
+	default y if A_NUMBER_VALUE > 42
+
+config NUMBER_IS_GREATER_THAN_5
+	bool "Number is > 5"
+	default y if A_NUMBER_VALUE > 5
+
+config NUMBER_IS_GREATER_OR_EQ_THAN_42
+	bool "Number is >= 42"
+	default y if A_NUMBER_VALUE >= 42
+
+config NUMBER_IS_GREATER_OR_EQ_THAN_43
+	bool "Number is >= 43"
+	default y if A_NUMBER_VALUE >= 43
+
+# Testing if conditions are working for numbers and strings either as values.
+# ASSERT: STRING_IS_FOO=y
+# ASSERT: STRING_IS_BAR=n
+# ASSERT: STRING_IS_NOT_BAZ=y
+# ASSERT: NUMBER_IS_42=y
+# ASSERT: NUMBER_IS_NOT_42=n
+# ASSERT: NUMBER_IS_LESS_THAN_60=y
+# ASSERT: NUMBER_IS_LESS_THAN_30=n
+# ASSERT: NUMBER_IS_LESS_OR_EQ_THAN_42=y
+# ASSERT: NUMBER_IS_LESS_OR_EQ_THAN_41=n
+# ASSERT: NUMBER_IS_GREATER_THAN_42=n
+# ASSERT: NUMBER_IS_GREATER_THAN_5=y
+# ASSERT: NUMBER_IS_GREATER_OR_EQ_THAN_42=y
+# ASSERT: NUMBER_IS_GREATER_OR_EQ_THAN_43=n
+

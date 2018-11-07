@@ -1,0 +1,6 @@
+#ifndef BOB_TEST_LIBA2_H
+#define BOB_TEST_LIBA2_H
+
+#define BOB_TEST_LIBA_TEST_VALUE 42
+
+#endif

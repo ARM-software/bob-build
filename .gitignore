@@ -1,0 +1,26 @@
+# python ignores, mostly for scons, based on github's .gitignore for python
+*.py[cod]
+*.log
+
+# IDE and editors
+# * Eclipse
+.cproject
+.project
+.settings
+
+# * VIm
+*~
+*.sw[nop]
+
+# * patch
+*.orig
+*.rej
+
+# Files created by git mergetool
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+
+# CTAGS
+tags
+TAGS

@@ -1,0 +1,28 @@
+# In a choice, where different (non-enablable) options are selected,
+# the latest selection should apply when it becomes enableable.
+
+config MODE
+  bool "Mode"
+  default n
+
+choice
+  prompt "Choose"
+  default OPTION_A
+
+config OPTION_A
+  bool "A"
+
+config OPTION_B
+  bool "B"
+  depends on MODE
+
+config OPTION_C
+  bool "C"
+  depends on MODE
+
+endchoice
+
+# SET: OPTION_B=y
+# SET: OPTION_C=y
+# SET: MODE=y
+# ASSERT: OPTION_C=y

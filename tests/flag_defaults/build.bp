@@ -1,0 +1,69 @@
+/*
+ * Copyright 2018 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_defaults {
+    name: "bob_test_flag_test_defaults_root",
+    cxxflags: ["-DROOT_VAR=1"],
+    host: {
+        cflags: [
+            "-target",
+            "x86_64-linux-gnu",
+        ],
+    },
+}
+
+bob_defaults {
+    name: "bob_test_flag_defaults_second",
+    defaults: ["bob_test_flag_test_defaults_root"],
+    cflags: ["-DSECOND_VAR=2"],
+    target: {
+        cflags: [
+            "-target",
+            "aarch64-linux-gnu",
+        ],
+    },
+}
+
+check_cmd = "${tool} ${out} ${args} ${conlyflags} ${cflags} ${cxxflags}"
+
+bob_generate_source {
+    name: "bob_test_flag_defaults_host",
+    flag_defaults: ["bob_test_flag_defaults_second"],
+    cmd: check_cmd,
+    tool: "check_cflags.py",
+    args: ["--check-host"],
+    out: ["flags.txt"],
+    target: "host",
+}
+
+bob_generate_source {
+    name: "bob_test_flag_defaults_target",
+    flag_defaults: ["bob_test_flag_defaults_second"],
+    cmd: check_cmd,
+    tool: "check_cflags.py",
+    args: ["--check-target"],
+    out: ["flags.txt"],
+    target: "target",
+}
+
+bob_alias {
+    name: "bob_test_flag_defaults",
+    srcs: [
+        "bob_test_flag_defaults_host",
+        "bob_test_flag_defaults_target",
+    ],
+}

@@ -1,0 +1,36 @@
+/*
+ * Copyright 2018 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+subname = "build.bp"
+
+bob_alias {
+    name: "bob_tests",
+    srcs: [
+        "bob_test_aliases",
+        "bob_test_cflags",
+        "bob_test_export_include_dirs",
+        "bob_test_flag_defaults",
+        "bob_test_generate_libs",
+        "bob_test_generate_source",
+        "bob_test_kernel_modules",
+        "bob_test_properties",
+        "bob_test_resources",
+        "bob_test_static_libs",
+        "bob_test_templates",
+        "bob_test_transform_source",
+    ],
+}

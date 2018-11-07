@@ -1,0 +1,31 @@
+# This checks the case where a choice cannot be enabled despite it's
+# condition being satisfied; and there is a backstop default
+#
+# The backstop should be used.
+
+config OPTION_A
+  bool "Option A"
+  default n
+
+config OPTION_A_IS_DEFAULT
+  bool "A is default"
+  default y
+
+choice
+  prompt "Choice"
+  default CHOICE_A if OPTION_A_IS_DEFAULT
+  default CHOICE_NONE
+
+config CHOICE_A
+  bool "A"
+  depends on OPTION_A
+
+config CHOICE_B
+  bool "B"
+
+config CHOICE_NONE
+  bool "None"
+
+endchoice
+
+# ASSERT: CHOICE_NONE=y

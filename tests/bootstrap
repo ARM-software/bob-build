@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Copyright 2018 Arm Limited.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This is expected to be called from within the bob/tests directory
+#
+# This script is always using a relative path to SRCDIR, so BUILDDIR
+# and SRCDIR should be moved together (i.e. BUILDDIR is not
+# independent of SRCDIR).
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+if [ "$SCRIPT_DIR" != "." ]; then
+	echo "SCRIPT_DIR:$SCRIPT_DIR"
+	echo "bootstrap needs to be run inside tests directory"
+	exit 1
+fi
+
+source "${SCRIPT_DIR}/bootstrap_utils.sh"
+
+# Select a BUILDDIR if not provided one
+if [[ -z "$BUILDDIR" ]]; then
+    echo "BUILDDIR is not set - using build"
+    BUILDDIR=build
+fi
+
+# The tests need a symlink in the source directory to the parent bob
+# directory, as Blueprint won't accept ..
+create_link .. "${SCRIPT_DIR}/bob"
+
+# Bootstrap Bob
+export CONFIGNAME="bob.config"
+export TOPNAME="build.bp"
+export SRCDIR="."
+export BUILDDIR
+export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
+
+${SCRIPT_DIR}/bob/bootstrap_linux.bash
+
+# Pick up some info that bob has worked out
+BOOTSTRAP=".bob.bootstrap"
+source ${BUILDDIR}/${BOOTSTRAP}
+
+# Setup the buildme script to just run bob
+ln -sf "bob" "${BUILDDIR}/buildme"
+
+# Print info for users
+echo "To configure the build directory, run ${BUILDDIR}/config ARGS"
+echo "Then build with ${BUILDDIR}/buildme"

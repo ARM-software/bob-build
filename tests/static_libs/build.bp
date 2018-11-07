@@ -1,0 +1,168 @@
+/*
+ * Copyright 2018 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_alias {
+    name: "bob_test_static_libs",
+    srcs: [
+        "sl_main_whole",
+        "sl_main_export_static",
+        "sl_main_ordered",
+        "sl_main_dd",
+    ],
+}
+
+bob_static_library {
+    name: "sl_liba",
+    srcs: ["a.c"],
+    export_cflags: ["-DFOO=1"],
+}
+
+bob_static_library {
+    name: "sl_libb_whole_inclusion",
+    srcs: ["b.c"],
+    whole_static_libs: ["sl_liba"],
+}
+
+bob_static_library {
+    name: "sl_libb",
+    srcs: ["b.c"],
+    // Must define FOO for the a.h include
+    cflags: ["-DFOO=1"],
+}
+
+bob_binary {
+    name: "sl_main_whole",
+    srcs: ["main.c"],
+    static_libs: ["sl_libb_whole_inclusion"],
+}
+
+bob_static_library {
+    name: "sl_libb_export_static",
+    srcs: ["b.c"],
+    export_static_libs: ["sl_liba"],
+}
+
+bob_binary {
+    name: "sl_main_export_static",
+    srcs: ["main.c"],
+    static_libs: ["sl_libb_export_static"],
+}
+
+// Simple check that library orderring within a static lib is preserved
+bob_binary {
+    name: "sl_main_ordered",
+    srcs: ["main.c"],
+    static_libs: [
+        "sl_libb",
+        "sl_liba",
+    ],
+}
+
+// Check that library orderring is preserved when you have multiple
+// dependencies on the same library. Attempt to setup the test so that
+// multiple dependency orders are checked
+//
+//       main
+//     /     \
+//    c       d
+//  /   \   /   \
+// e     f g     h
+//      /       /
+//     g       e
+//
+bob_static_library {
+    name: "sl_libc",
+    srcs: ["call_two_functions.c"],
+    cflags: [
+        "-DFUNCTION=do_c",
+        "-DCALL1=do_e1",
+        "-DCALL2=do_f",
+    ],
+    export_static_libs: [
+        "sl_libe",
+        "sl_libf",
+    ],
+}
+
+bob_static_library {
+    name: "sl_libd",
+    srcs: ["call_two_functions.c"],
+    cflags: [
+        "-DFUNCTION=do_d",
+        "-DCALL1=do_g1",
+        "-DCALL2=do_h",
+    ],
+    export_static_libs: [
+        "sl_libg",
+        "sl_libh",
+    ],
+}
+
+bob_static_library {
+    name: "sl_libf",
+    srcs: ["call_one_function.c"],
+    cflags: [
+        "-DFUNCTION=do_f",
+        "-DCALL=do_g2",
+    ],
+    export_static_libs: ["sl_libg"],
+}
+
+bob_static_library {
+    name: "sl_libh",
+    srcs: ["call_one_function.c"],
+    cflags: [
+        "-DFUNCTION=do_h",
+        "-DCALL=do_e2",
+    ],
+    export_static_libs: ["sl_libe"],
+}
+
+bob_static_library {
+    name: "sl_libe",
+    srcs: ["call_no_functions.c"],
+    cflags: [
+        "-DFUNCTION=do_e",
+    ],
+}
+
+bob_static_library {
+    name: "sl_libg",
+    srcs: ["call_no_functions.c"],
+    cflags: [
+        "-DFUNCTION=do_g",
+    ],
+
+}
+
+bob_binary {
+    name: "sl_main_dd",
+    srcs: ["main2.c"],
+    static_libs: [
+        "sl_libc",
+        "sl_libd",
+    ],
+
+    // The linker actually isn't complaining when the link order is
+    // incorrect, so use a custom build wrapper to check that the static
+    // libraries are in a good order.
+    build_wrapper: "static_libs/check_link_order.py",
+
+    android: {
+        enabled: false
+    },
+}

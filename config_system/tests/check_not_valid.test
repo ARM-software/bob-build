@@ -1,0 +1,60 @@
+# Test to validate that user specified "num" is eventually selected when the
+# configuration is not valid during the initial evaluation, but becomes valid.
+
+config HAS_ONE
+	bool
+
+config HAS_TWO
+	bool
+
+config HAS_THREE
+	bool
+
+
+choice
+	prompt "num"
+
+config ONE
+	bool "one"
+	depends on HAS_ONE
+
+config TWO
+	bool "two"
+	depends on HAS_TWO
+
+config THREE
+	bool "three"
+	depends on HAS_THREE
+
+endchoice
+
+
+choice
+	prompt "shoogle"
+	default WOBBLE
+
+config WARBLE
+	bool "warble"
+	select HAS_ONE
+	select HAS_TWO
+
+config WIBBLE
+	bool "wibble"
+	select HAS_TWO
+	select HAS_THREE
+
+config WOBBLE
+	bool "wobble"
+	select HAS_ONE
+	select HAS_TWO
+	select HAS_THREE
+
+endchoice
+
+
+# SET: THREE=y
+# SET: WIBBLE=y
+
+# ASSERT: WIBBLE=y
+# ASSERT: THREE=y
+

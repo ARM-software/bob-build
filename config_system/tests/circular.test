@@ -1,0 +1,19 @@
+
+config ENABLER
+  bool
+  default y if MODE
+
+config ITEM
+  bool
+  depends on ENABLER
+
+config MODE
+  bool "B"
+  select ITEM
+  default n
+
+# This is slightly circular.
+# If the MODE selects are done before defaults, the select may not be done as the item is not enabled yet.
+# SET: MODE=y
+# ASSERT: ITEM=y
+# ASSERT: ENABLER=y

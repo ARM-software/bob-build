@@ -1,0 +1,203 @@
+/*
+ * Copyright 2018 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Tests that features all within a module work
+bob_binary {
+    name: "bob_test_feature",
+    host_supported: true,
+    target_supported: true,
+
+    srcs: [
+        "bob_test_a.c",
+        "main.c",
+    ],
+    cflags: ["-DFOO=1"],
+    // rely on having debug and ndebug features
+    debug: {
+        cflags: ["-DDEBUG=1"],
+    },
+    ndebug: {
+        cflags: ["-DDEBUG=0"],
+    },
+
+    target: {
+        cflags: ["-DTARGET=1"],
+        debug: {
+            cflags: ["-DTARGET_DEBUG=1"],
+        },
+        ndebug: {
+            cflags: ["-DTARGET_DEBUG=0"],
+        },
+    },
+    host: {
+        cflags: ["-DHOST=1"],
+        debug: {
+            cflags: ["-DHOST_DEBUG=1"],
+        },
+        ndebug: {
+            cflags: ["-DHOST_DEBUG=0"],
+        },
+    },
+}
+
+// Test features specified via a default work
+bob_defaults {
+    name: "bob_test_common_a",
+    host_supported: true,
+    target_supported: true,
+
+    cflags: ["-DFOO=1"],
+    // rely on having debug and ndebug features
+    debug: {
+        cflags: ["-DDEBUG=1"],
+    },
+    ndebug: {
+        cflags: ["-DDEBUG=0"],
+    },
+
+    target: {
+        cflags: ["-DTARGET=1"],
+        debug: {
+            cflags: ["-DTARGET_DEBUG=1"],
+        },
+        ndebug: {
+            cflags: ["-DTARGET_DEBUG=0"],
+        },
+    },
+    host: {
+        cflags: ["-DHOST=1"],
+        debug: {
+            cflags: ["-DHOST_DEBUG=1"],
+        },
+        ndebug: {
+            cflags: ["-DHOST_DEBUG=0"],
+        },
+    },
+}
+
+bob_binary {
+    name: "bob_test_defaults",
+    srcs: [
+        "bob_test_a.c",
+        "main.c",
+    ],
+    defaults: ["bob_test_common_a"],
+}
+
+// Test boolean inheritance via defaults
+
+bob_defaults {
+    name: "bob_test_debug_enable",
+    enabled: true,
+    debug: {
+        enabled: true,
+    },
+    target: {
+        enabled: true,
+    },
+}
+
+bob_defaults {
+    name: "bob_test_debug_disable",
+    enabled: false,
+    debug: {
+        enabled: false,
+    },
+    target: {
+        enabled: false,
+    },
+}
+
+bob_binary {
+    name: "bob_test_inherit_enable",
+    defaults: ["bob_test_debug_enable"],
+    // Module disable should override enable in default
+    srcs: ["bob_error.c"],
+    enabled: false,
+}
+
+bob_static_library {
+    name: "bob_test_inherit_disable",
+    defaults: [
+        "bob_test_debug_disable",
+        "bob_test_common_a",
+    ],
+    // Module enable should override disable in default
+    srcs: ["bob_test_a.c"],
+    enabled: true,
+}
+
+bob_binary {
+    name: "bob_test_feat_inherit_enable",
+    defaults: [
+        "bob_test_debug_enable",
+        "bob_test_common_a",
+    ],
+    // Module feature disable should override enable in default
+    debug: {
+        srcs: ["bob_error.c"],
+        enabled: false,
+    },
+    ndebug: {
+        srcs: ["bob_error.c"],
+        enabled: false,
+    },
+}
+
+bob_static_library {
+    name: "bob_test_feat_inherit_disable",
+    defaults: [
+        "bob_test_debug_disable",
+        "bob_test_common_a",
+    ],
+    // Module feature enable should override disable in default
+    debug: {
+        srcs: ["bob_test_a.c"],
+        enabled: true,
+    },
+    ndebug: {
+        srcs: ["bob_test_a.c"],
+        enabled: true,
+    },
+}
+
+// This executable tries to link the things that should be enabled
+// If they haven't been enabled then blueprint will complain with unmet dependencies
+bob_binary {
+    name: "bob_test_enables",
+    host_supported: true,
+    target_supported: true,
+    srcs: ["main.c"],
+    static_libs: [
+        "bob_test_inherit_disable",
+        "bob_test_feat_inherit_disable",
+    ],
+}
+
+bob_alias {
+    name: "bob_test_properties",
+    srcs: [
+        "bob_test_feature:host,target",
+        "bob_test_feature:target",
+        "bob_test_defaults:host,target",
+        "bob_test_inherit_enable:target",
+        "bob_test_inherit_disable:host,target",
+        "bob_test_feat_inherit_enable:host,target",
+        "bob_test_feat_inherit_disable:host,target",
+        "bob_test_enables:host,target",
+    ],
+}

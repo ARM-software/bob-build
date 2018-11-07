@@ -1,0 +1,21 @@
+bob_kernel_module {
+    name: "test_module",
+    /* Usually kernel_dir would be an absolute path. For testing use this
+     * workaround to use the spoofed kernel build system included with the Bob
+     * tests. */
+    android: {
+        kernel_dir: "$(LOCAL_PATH)/kernel_module/kdir",
+    },
+    linux: {
+        kernel_dir: "kernel_module/kdir",
+    },
+    srcs: [
+        "Kbuild",
+        "test_module.c",
+    ],
+}
+
+bob_alias {
+    name: "bob_test_kernel_modules",
+    srcs: ["test_module"],
+}

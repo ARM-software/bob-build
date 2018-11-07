@@ -1,0 +1,99 @@
+/*
+ * Copyright 2018 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_install_group {
+    name: "ig_genlib_lib",
+    android: {
+        install_path: "$(TARGET_OUT)/gen_sh_lib",
+    },
+    linux: {
+        install_path: "${BuildDir}/gen_sh_lib",
+    },
+}
+
+bob_install_group {
+    name: "ig_genlib_bin",
+    android: {
+        install_path: "$(TARGET_OUT)/gen_sh_bin",
+    },
+    linux: {
+        install_path: "${BuildDir}/gen_sh_bin",
+    },
+}
+
+bob_generate_shared_library {
+    name: "libblah_shared",
+    srcs: ["libblah/libblah.c"],
+    headers: ["libblah.h"],
+    install_group: "ig_genlib_lib",
+    export_gen_include_dirs: ["include"],
+
+    /* To avoid checking in a binary, call gcc directly.
+     * Note that we make this a host library to avoid having to figure
+     * out GCC arguments.
+     */
+    cmd: "gcc -o ${gen_dir}/libblah_shared.so -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${gen_dir}/include/.",
+    target: "host",
+}
+
+bob_binary {
+    name: "binary_linked_to_gen_shared",
+    srcs: ["main.c"],
+    shared_libs: ["libblah_shared"],
+    install_group: "ig_genlib_bin",
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+    android: {
+        enabled: false,
+    },
+}
+
+bob_generate_static_library {
+    name: "libblah_static",
+    srcs: ["libblah/libblah.c"],
+    headers: ["libblah.h"],
+    export_gen_include_dirs: ["include"],
+
+    /* To avoid checking in a binary, call gcc directly.
+     * Note that we make this a host library to avoid having to figure
+     * out GCC arguments.
+     */
+    cmd: "gcc -c -o ${gen_dir}/libblah.o ${in}; ar rcs ${gen_dir}/libblah_static.a ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include;  cp ${module_dir}/libblah/libblah.h ${gen_dir}/include/.",
+    target: "host",
+}
+
+bob_binary {
+    name: "binary_linked_to_gen_static",
+    srcs: ["main.c"],
+    install_group: "ig_genlib_bin",
+    static_libs: ["libblah_static"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+    android: {
+        enabled: false,
+    },
+}
+
+bob_alias {
+    name: "bob_test_generate_libs",
+    srcs: [
+        "binary_linked_to_gen_static",
+        "binary_linked_to_gen_shared",
+    ],
+}

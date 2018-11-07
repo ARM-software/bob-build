@@ -1,0 +1,22 @@
+config MENU_ENABLE
+	bool "Enable the menu"
+
+menu "A menu"
+	depends on MENU_ENABLE
+
+config AN_OPTION
+	bool "An option in the menu"
+	default y
+
+endmenu
+
+menuconfig FOO_MENU
+	bool "Foo menu"
+
+config ANOTHER_OPTION
+	bool "Another option"
+	default y
+	depends on FOO_MENU
+
+# The option should be disabled because the menu is disabled
+# ASSERT: AN_OPTION=n

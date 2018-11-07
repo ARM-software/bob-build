@@ -1,0 +1,26 @@
+choice
+	prompt "Operating System"
+	default LINUX
+
+config ANDROID
+	bool "Android"
+
+config LINUX
+	bool "Linux"
+
+config WINDOWS
+	bool "Windows"
+
+endchoice
+
+config VALUE_TEST
+	string "If Android is set, value should be set to default value"
+	depends on ANDROID
+	default "this depends on android"
+
+
+# Check that the correct default value is selected after a 'depends on' test becomes true
+
+# ASSERT: VALUE_TEST=
+# SET: ANDROID=y
+# ASSERT: VALUE_TEST=this depends on android

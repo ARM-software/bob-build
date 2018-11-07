@@ -1,0 +1,108 @@
+# This is an example configuration database containing the minimal set
+# of configuration options required by Bob.
+
+choice
+    prompt "OS"
+    default LINUX
+
+config LINUX
+    bool "Linux"
+
+config ANDROID
+    bool "Android"
+
+endchoice
+
+## Need to select the BUILDER_ for Bob
+choice
+    prompt "Builder"
+    default BUILDER_ANDROID if ANDROID
+    default BUILDER_LINUX
+
+config BUILDER_LINUX
+    bool "Linux"
+
+config BUILDER_ANDROID
+    bool "Android"
+
+endchoice
+
+## Select toolchain for Bob
+choice
+    prompt "Toolchain"
+    default TOOLCHAIN_CLANG if ANDROID
+    default TOOLCHAIN_GNU
+
+config TOOLCHAIN_GNU
+    bool "GNU"
+
+config TOOLCHAIN_CLANG
+    bool "Clang"
+
+endchoice
+
+## Toolchain prefix needed for Bob (for gcc)
+config TOOLCHAIN_PREFIX
+    string
+    default ""
+
+## Various tools need to be defined for Bob
+config PKG_CONFIG
+    bool "PKG_CONFIG"
+
+config TARGET_TOOLCHAIN_VERSION
+    string "Version reported by the underlying GNU cross-compiler"
+    depends on TOOLCHAIN_CLANG
+    default "4.9.1"
+
+config CLANG_BINARY
+    string
+    default "clang"
+
+config CLANGXX_BINARY
+    string
+    default "clang++"
+
+config CLANG_TARGET
+    string
+    default "x86_64-linux-gnu"
+
+config GCC_BINARY
+    string
+    default "gcc"
+
+config GXX_BINARY
+    string
+    default "g++"
+
+config GCC_TARGET_FLAGS
+    string
+    default ""
+
+config AR_BINARY
+    string
+    default "ar"
+
+config AS_BINARY
+    string
+    default "as"
+
+# Filled in by host_explore.py during the configuration step
+config EXTRA_HOST_LDFLAGS
+    string "Extra Host Linker options"
+
+config EXTRA_TARGET_LDFLAGS
+    string "Extra Target Linker options"
+
+config EXTRA_LD_LIBRARY_PATH
+    string "Extra LD_LIBRARY_PATH Entries"
+
+## Bob needs sysroot for clang
+config CLANG_SYSROOT
+    string
+    default ""
+
+## Include this if you expect to call scripts/host_explore
+config ALLOW_HOST_EXPLORE
+    bool
+    default y

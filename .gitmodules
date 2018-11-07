@@ -1,0 +1,3 @@
+[submodule "blueprint"]
+	path = blueprint
+	url = ../../blueprint
