@@ -163,6 +163,6 @@ bob_binary {
     build_wrapper: "static_libs/check_link_order.py",
 
     android: {
-        enabled: false
+        enabled: false,
     },
 }

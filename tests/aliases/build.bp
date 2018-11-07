@@ -34,5 +34,5 @@ bob_alias {
 
     srcs: [
         "widgetb",
-    ]
+    ],
 }

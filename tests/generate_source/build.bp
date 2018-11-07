@@ -22,70 +22,70 @@
 // On Linux output path can look like: build/gen/generate_source_single/single.cpp
 
 bob_generate_source {
-	name: "generate_source_single",
-	srcs: [
-		"before_generate.in",
-	],
-	out: ["single.cpp"],
+    name: "generate_source_single",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["single.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_not_unique_in",
-	srcs: [
-		"before_generate.in",
-		"before_generate.in",
-		"before_generate.in",
-	],
-	out: ["not_unique_in.cpp"],
+    name: "generate_source_not_unique_in",
+    srcs: [
+        "before_generate.in",
+        "before_generate.in",
+        "before_generate.in",
+    ],
+    out: ["not_unique_in.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_multiple_in",
-	srcs: [
-		"before_generate.in",
-		"before_generate2.in",
-		"before_generate3.in",
-	],
-	out: ["multiple_in.cpp"],
+    name: "generate_source_multiple_in",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: ["multiple_in.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_multiple_out",
-	srcs: [
-		"before_generate.in",
-	],
-	out: [
-		"multiple_out.cpp",
-		"multiple_out2.cpp",
-	],
+    name: "generate_source_multiple_out",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "multiple_out.cpp",
+        "multiple_out2.cpp",
+    ],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_multiple_in_out",
-	srcs: [
-		"before_generate.in",
-		"before_generate2.in",
-		"before_generate3.in",
-	],
-	out: [
-		"multiple_in_out.cpp",
-		"multiple_in_out2.cpp",
-	],
+    name: "generate_source_multiple_in_out",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: [
+        "multiple_in_out.cpp",
+        "multiple_in_out2.cpp",
+    ],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 // Simple cases
@@ -95,46 +95,46 @@ bob_generate_source {
 // Nested cases
 
 bob_generate_source {
-	name: "generate_source_single_level1",
-	module_srcs: ["generate_source_single"],
+    name: "generate_source_single_level1",
+    module_srcs: ["generate_source_single"],
 
-	out: ["level_1_single.cpp"],
+    out: ["level_1_single.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_single_level2",
-	module_srcs: ["generate_source_single_level1"],
+    name: "generate_source_single_level2",
+    module_srcs: ["generate_source_single_level1"],
 
-	out: ["level_2_single.cpp"],
+    out: ["level_2_single.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_single_level3",
-	module_srcs: ["generate_source_single_level2"],
+    name: "generate_source_single_level3",
+    module_srcs: ["generate_source_single_level2"],
 
-	out: ["level_3_single.cpp"],
+    out: ["level_3_single.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_single_nested_with_extra",
-	module_srcs: ["generate_source_single_level2"],
+    name: "generate_source_single_nested_with_extra",
+    module_srcs: ["generate_source_single_level2"],
 
-	srcs: [
-		"before_generate.in",
-	],
-	out: ["extra_single.cpp"],
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["extra_single.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 // Nested cases
@@ -144,57 +144,57 @@ bob_generate_source {
 // Depends cases
 
 bob_generate_source {
-	name: "generate_source_single_dependend",
-	module_deps: ["generate_source_single"],
+    name: "generate_source_single_dependend",
+    module_deps: ["generate_source_single"],
 
-	srcs: [
-		"before_generate.in",
-	],
-	out: ["deps.cpp"],
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["deps.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} ${generate_source_single_out} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} ${generate_source_single_out} --out ${out}",
 }
 
 bob_generate_source {
-	name: "generate_source_single_dependend_nested",
-	module_srcs: ["generate_source_single_dependend"],
+    name: "generate_source_single_dependend_nested",
+    module_srcs: ["generate_source_single_dependend"],
 
-	srcs: [
-		"before_generate.in",
-	],
-	out: ["deps2.cpp"],
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["deps2.cpp"],
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 // Depends cases
 /////////////////////////////////////////////////////////////////////////////////////
 
 bob_binary {
-	name: "validate_link_generate_sources",
-	generated_sources: [
-		"generate_source_single",
-		"generate_source_not_unique_in",
-		"generate_source_multiple_in",
-		"generate_source_multiple_out",
-		"generate_source_multiple_in_out",
+    name: "validate_link_generate_sources",
+    generated_sources: [
+        "generate_source_single",
+        "generate_source_not_unique_in",
+        "generate_source_multiple_in",
+        "generate_source_multiple_out",
+        "generate_source_multiple_in_out",
 
-		"generate_source_single_level1",
-		"generate_source_single_level2",
-		"generate_source_single_level3",
-		"generate_source_single_nested_with_extra",
+        "generate_source_single_level1",
+        "generate_source_single_level2",
+        "generate_source_single_level3",
+        "generate_source_single_nested_with_extra",
 
-		"generate_source_single_dependend",
-		"generate_source_single_dependend_nested",
-	],
-	srcs: ["main.cpp"],
+        "generate_source_single_dependend",
+        "generate_source_single_dependend_nested",
+    ],
+    srcs: ["main.cpp"],
 }
 
 bob_alias {
     name: "bob_test_generate_source",
     srcs: [
-    	"validate_link_generate_sources",
+        "validate_link_generate_sources",
     ],
 }

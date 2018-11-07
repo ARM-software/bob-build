@@ -39,4 +39,3 @@ config FOOBAR
 # Because update_defaults would only consider two of the configuration options (the one potentially affected by a change
 # in dependencies and the current selected one) it would not update to the 'best' option (i.e. the default in this case).
 # ASSERT: DEFAULT_OPTION=y
-

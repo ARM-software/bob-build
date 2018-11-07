@@ -16,62 +16,62 @@
  */
 
 bob_transform_source {
-	name: "transform_source_single_dir",
-	srcs: [
-		"f.in",
-	],
-	out: {
-		match: "(.+)\\.in",
-		replace: ["single/$1.cpp"], // inside extra directory
-	},
+    name: "transform_source_single_dir",
+    srcs: [
+        "f.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: ["single/$1.cpp"], // inside extra directory
+    },
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_transform_source {
-	name: "transform_source_single",
-	srcs: [
-		"f2.in",
-	],
-	out: {
-		match: "(.+)\\.in",
-		replace: ["$1.cpp"],
-	},
+    name: "transform_source_single",
+    srcs: [
+        "f2.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: ["$1.cpp"],
+    },
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_transform_source {
-	name: "transform_source_multiple_in",
-	srcs: [
-		"f3.in",
-		"f4.in",
-		"f5.in",
-	],
-	out: {
-		match: "(.+)\\.in",
-		replace: ["$1.cpp"],
-	},
+    name: "transform_source_multiple_in",
+    srcs: [
+        "f3.in",
+        "f4.in",
+        "f5.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: ["$1.cpp"],
+    },
 
-	tool: "generator.py",
-	cmd: "python ${tool} --in ${in} --out ${out}"
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 }
 
 bob_binary {
-	name: "validate_link_transform_source",
-	generated_sources: [
-		"transform_source_single_dir",
-		"transform_source_single",
-		"transform_source_multiple_in",
-	],
-	srcs: ["main.cpp"],
+    name: "validate_link_transform_source",
+    generated_sources: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+    ],
+    srcs: ["main.cpp"],
 }
 
 bob_alias {
-	name: "bob_test_transform_source",
-	srcs: [
-		"validate_link_transform_source",
-	],
+    name: "bob_test_transform_source",
+    srcs: [
+        "validate_link_transform_source",
+    ],
 }
