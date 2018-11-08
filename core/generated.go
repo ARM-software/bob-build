@@ -70,7 +70,7 @@ type GenerateProps struct {
 	 * $tool       - the path to the tool
 	 * $host_bin   - the path to the binary that is produced by the host_bin module
 	 * $(name)_dir - the build directory for each dep in generated_dep
-	 * $src_dir    - the path to the driver source directory - this will be different than the build source directory
+	 * $src_dir    - the path to the project source directory - this will be different than the build source directory
 	 *               for Android.
 	 * $module_dir - the path to the module directory */
 	Cmd string

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script sets up the environment to be able to build the driver
+# This script sets up the environment to be able to build the project
 # using Android paths only.
 
 # This script should be called like:
