@@ -31,28 +31,28 @@ Bob has three kinds of tests:
   should all build, or be deliberately disabled. Please test this on Linux
   or Android.
 
- - Linux: (run inside Bob directory)
+  - Linux: (run inside Bob directory)
 
-   ```bash
-   cd tests
-   ./bootstrap
-   ./build/config
-   ./build/buildme
-   ```
-   (thereafter just run `buildme`)
+    ```bash
+    cd tests
+    ./bootstrap
+    ./build/config
+    ./build/buildme
+    ```
+    (thereafter just run `buildme`)
 
- - Android: (substitute variables appropriately - `$ANDROID_TOP` is a full
-   checkout of the Android source code)
+  - Android: (substitute variables appropriately - `$ANDROID_TOP` is a full
+    checkout of the Android source code)
 
-   ```bash
-   # Usual Android setup - envsetup/lunch/etc
-   mkdir -p $ANDROID_TOP/external/bob
-   bindfs -n $BOB_LOCATION $ANDROID_TOP/external/bob
-   cd $ANDROID_TOP/external/bob/tests
-   ./bootstrap_android ANDROID=y
-   mm
-   ```
-   (thereafter just run `mm`)
+    ```bash
+    # Usual Android setup - envsetup/lunch/etc
+    mkdir -p $ANDROID_TOP/external/bob
+    bindfs -n $BOB_LOCATION $ANDROID_TOP/external/bob
+    cd $ANDROID_TOP/external/bob/tests
+    ./bootstrap_android ANDROID=y
+    mm
+    ```
+    (thereafter just run `mm`)
 
 - Go unit tests, which can be run using `go test` after running
   `setup_workspace_for_bob.bash`:
