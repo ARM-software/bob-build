@@ -154,6 +154,8 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 }
 
 // AppendProps merges properties from BlueprintEmbed to dst, but only for enabled features
+// expect that Features are inited (before using this function we should call Features.Init)
+// expect that properties.Features should contain all available features (whenever disabled/enabled)
 func (f *Features) AppendProps(dst []interface{}, properties *configProperties) error {
 	// featuresData is struct created in Features.Init function
 	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()

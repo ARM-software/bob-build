@@ -33,6 +33,7 @@ func setupTestConfig(m map[string]string) *configProperties {
 }
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, msg string) {
+	t.Helper() // To indicate the function is a helper and we're not interested in line numbers coming from it.
 	if a != b {
 		t.Errorf("%s (%s != %s)", msg, a, b)
 	}
