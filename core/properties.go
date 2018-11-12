@@ -24,12 +24,6 @@ import (
 	"github.com/google/blueprint/proptools"
 )
 
-// Used to map a set of properties to destination properties
-type propmap struct {
-	dst []interface{}
-	src interface{}
-}
-
 // Applies default options
 func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	// This method walks down the dependency list to include all defaults that include other defaults
@@ -114,6 +108,12 @@ func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	}
 }
 
+// Used to map a set of properties to destination properties
+type propmap struct {
+	dst []interface{}
+	src *Features
+}
+
 // Applies feature specific properties within each module
 func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	if m, ok := mctx.Module().(featurable); ok {
@@ -122,12 +122,12 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where
 		// supported, the host-specific and target-specific set.
-		var props = []propmap{propmap{m.topLevelProperties(), m.features().BlueprintEmbed}}
+		var props = []propmap{propmap{m.topLevelProperties(), m.features()}}
 
 		if m, ok := mctx.Module().(moduleWithBuildProps); ok {
 			var tgtprops = []propmap{
-				propmap{[]interface{}{&m.build().Host.BuildProps}, m.build().Host.Features.BlueprintEmbed},
-				propmap{[]interface{}{&m.build().Target.BuildProps}, m.build().Target.Features.BlueprintEmbed},
+				propmap{[]interface{}{&m.build().Host.BuildProps}, &m.build().Host.Features},
+				propmap{[]interface{}{&m.build().Target.BuildProps}, &m.build().Target.Features},
 			}
 			props = append(props, tgtprops...)
 		}
@@ -137,7 +137,7 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 			//
 			// Note: when appending (pointers to) bools we always override
 			// the dst value. i.e. feature-specific value takes precedence.
-			err := AppendProps(prop.dst, prop.src, cfgProps)
+			err := prop.src.AppendProps(prop.dst, cfgProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
