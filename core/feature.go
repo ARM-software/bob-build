@@ -74,9 +74,9 @@ func (f *Features) Init(availableFeatures []string, propsType reflect.Type) {
 	f.BlueprintEmbed = featureSetValPtr.Interface()
 }
 
-// AppendProps merges properties from src to dst, but only for enabled features
-func AppendProps(dst []interface{}, src interface{}, properties *configProperties) error {
-	featureSetVal := reflect.ValueOf(src).Elem()
+// AppendProps merges properties from BlueprintEmbed to dst, but only for enabled features
+func (f *Features) AppendProps(dst []interface{}, properties *configProperties) error {
+	featureSetVal := reflect.ValueOf(f.BlueprintEmbed).Elem()
 
 	for _, key := range utils.SortedKeysBoolMap(properties.Features) {
 		// Check the feature is enabled
