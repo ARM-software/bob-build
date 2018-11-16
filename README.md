@@ -33,7 +33,8 @@ to this project are accepted under the same license.
 
 ### Setting up a project
 
-TBD
+Refer to the [documentation](docs/project_setup.md) for instructions
+on how to setup a project to use Bob.
 
 ### Config file format
 
@@ -51,78 +52,12 @@ config DEFAULT_LOCALE
     default "sv_SE"
 ```
 
+For more information see the [documentation](docs/config_system.md).
+
 ### Build file format
 
-The build files are very simple. There are no conditional or control flow statements.
-
-#### Modules
-
-A module starts with a module type followed by a set of properties in
-`name: value` format.
-
-```
-bob_binary {
-    name: "less",
-    srcs: ["src/less.c"],
-    ldlibs: ["-lncurses"],
-}
-```
-
-Every module has a `name` property that is unique.
-
-#### Globs
-
-Properties taking filenames also accept glob patterns. `*` is the normal
-Unix wildcard, so `src/*.c` would select all C files in the src
-directory. `**` will match zero or more path elements, so `src/**.c`
-will match all C files in the src directory and its subdirectories.
-
-#### Variables
-
-Build files may contain top-level variable assignments:
-
-```
-less_srcs = ["src/less.c"]
-
-bob_binary {
-    name: "less",
-    srcs: less_srcs,
-    ldlibs: ["-lncurses"],
-}
-```
-
-Before they are referenced, variables can be appended to with
-`+=`. After they have been referenced by a module they are immutable.
-
-#### Comments
-
-Comments use C-style multiline `/* */` and C++ style single-line `//`
-formats.
-
-#### Types
-
-The type of a variable is determined by the assignment. The type of a
-property is determined by the module type.
-
-* Bool (`true` or `false`)
-* Integers
-* Strings (`"string"`)
-* Lists of strings(`["string1", "string2"]`)
-* Maps (`{ key1: "value1", key2: 10, key3: ["value3"] }`)
-
-Maps may contain values of any type. Lists and maps may have trailing
-commas after the last value.
-
-#### Operators
-
-Strings, lists  of strings,  and maps  can be  appended using  the `+`
-operator.
-
-#### Defaults
-
-A defaults module can be used to repeat the same properties in
-multiple modules (currently restricted to the types `bob_binary`,
-`bob_static_library`, `bob_shared_library` and `bob_kernel_module`)
+The build files are very simple. There are no conditional or control
+flow statements.
 
 ```
 bob_defaults {
@@ -134,43 +69,9 @@ bob_binary {
     name: "less",
     defaults: ["common_libs"],
     srcs: ["src/less.c"],
-}
-```
 
-Defaults can name other defaults.
-
-#### Features
-
-In most module types, every boolean configuration item (feature) is a
-map property (lower cased). Within this map the standard module
-properties can be used. This appends the properties to the module when
-the feature is enabled.
-
-```
-bob_binary {
-    name: "less",
-    srcs: ["src/less.c"],
-    ldlibs: ["-lncurses"],
-    use_locales: {
-        srcs: ["src/locales.c"],
-    }
-}
-```
-
-Features cannot nest. Instead of nesting, separate features should be
-used.
-
-#### Referencing configuration values
-
-Configuration values can be used within string properties via Go
-templates. As with features, the configuration identifier is lower
-cased.
-
-```
-bob_binary {
-    name: "less",
-    srcs: ["src/less.c"],
-    ldlibs: ["-lncurses"],
+    // use_locales is a feature. When enabled in the configuration
+    // src/locales.c will be compiled and linked.
     use_locales: {
         srcs: ["src/locales.c"],
         cflags: ["-DDEFAULT_LOCALE={{.default_locale}}"],
@@ -178,17 +79,7 @@ bob_binary {
 }
 ```
 
-#### Formatter
-
-Bob includes a canonical formatter for blueprint files. To format a
-build file in place:
-
-```
-bpfmt -w build.bp
-```
-
-The canonical format uses 4 space indent, newlines after every element
-of a multi-element list, and always includes trailing commas.
+For more information see the [documentation](docs/build_defs.md).
 
 ## Development
 
@@ -198,10 +89,15 @@ of a multi-element list, and always includes trailing commas.
 
 `config_system` - contains the Python-based configuration system
 
+`docs` - project documentation
+
+`example` - example files for project setup
+
 `scripts` - miscellaneous scripts
 
 `tests` - contains build tests
 
+#### Go code directories
 
 `cmd` - contains the Go code for command line tools
 
@@ -224,4 +120,5 @@ bob/scripts/setup_workspace_for_bob.bash
 
 ## Documentation
 
-TBD
+Detailed [documentation](docs/index.md) is in the docs directory of
+the repository.

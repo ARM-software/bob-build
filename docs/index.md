@@ -1,20 +1,23 @@
-## Bob module_types types
-- [bob_alias](module_types/bob_alias.bp)
-- [bob_binary](module_types/bob_binary.bp)
-- [bob_defaults](module_types/bob_defaults.bp)
-- [bob_generate_shared_library](module_types/bob_generate_library.bp)
-- [bob_generate_source](module_types/bob_generate_source.bp)
-- [bob_generate_static_library](module_types/bob_generate_library.bp)
-- [bob_install_group](module_types/bob_install_group.bp)
-- [bob_kernel_module](module_types/bob_kernel_module.bp)
-- [bob_resource](module_types/bob_resource.bp)
-- [bob_shared_library](module_types/bob_library.bp)
-- [bob_static_library](module_types/bob_library.bp)
-- [bob_transform_source](module_types/bob_transform_source.bp)
+# Bob
 
-## See also
+## Contents
 - [Config system](config_system.md)
+- [Build definitions](build_defs.md)
 - [Initial project setup](project_setup.md)
 - [Features](features.md)
+
+## Reference info
 - [Common module properties](module_types/common_module_properties.md)
 - [Common generate module properties](module_types/common_generate_module_properties.md)
+- [bob_alias](module_types/bob_alias.md)
+- [bob_binary](module_types/bob_binary.md)
+- [bob_defaults](module_types/bob_defaults.md)
+- [bob_generate_shared_library](module_types/bob_generate_library.md)
+- [bob_generate_source](module_types/bob_generate_source.md)
+- [bob_generate_static_library](module_types/bob_generate_library.md)
+- [bob_install_group](module_types/bob_install_group.md)
+- [bob_kernel_module](module_types/bob_kernel_module.md)
+- [bob_resource](module_types/bob_resource.md)
+- [bob_shared_library](module_types/bob_shared_library.md)
+- [bob_static_library](module_types/bob_static_library.md)
+- [bob_transform_source](module_types/bob_transform_source.md)
