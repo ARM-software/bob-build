@@ -1,6 +1,7 @@
 # Bob
 
 ## Contents
+- [Overview](overview.md)
 - [Config system](config_system.md)
 - [Build definitions](build_defs.md)
 - [Initial project setup](project_setup.md)
