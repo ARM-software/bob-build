@@ -1,4 +1,5 @@
-# Bob Build System
+Bob Build System
+================
 
 ## Introduction
 

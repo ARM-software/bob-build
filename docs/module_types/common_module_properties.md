@@ -1,4 +1,6 @@
-# Common properties for modules
+Common properties for modules
+=============================
+
 Executables, Shared Libraries and Static Libraries use some or all of the
 properties described here.
 

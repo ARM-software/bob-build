@@ -1,4 +1,6 @@
-# Module: bob_binary
+Module: bob_binary
+==================
+
 Target is an executable.
 
 ## Full specification of `bob_binary` properties

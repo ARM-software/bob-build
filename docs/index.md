@@ -1,4 +1,5 @@
-# Bob
+Bob
+===
 
 ## Contents
 - [Overview](overview.md)

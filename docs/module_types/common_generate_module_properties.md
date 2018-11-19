@@ -1,4 +1,5 @@
-# Common properties for generate modules
+Common properties for generate modules
+======================================
 
 There are two module types supporting source generation.
 The first, `bob_generate_source` runs an arbitrary command

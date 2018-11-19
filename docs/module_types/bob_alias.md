@@ -1,4 +1,6 @@
-# Module: bob_alias
+Module: bob_alias
+=================
+
 This target is used to trigger builds of multiple other targets.
 This target itself does not build anything, it just ensures all
 the sources that it mentions are built.

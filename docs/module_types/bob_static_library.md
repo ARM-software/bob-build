@@ -1,4 +1,6 @@
-# Module: bob_static_lib
+Module: bob_static_lib
+======================
+
 Used to create a static library, i.e. `.a` file.
 
 ## Static library dependencies

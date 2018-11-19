@@ -1,4 +1,6 @@
-# Module: bob_generate_shared_library & bob_generate_static_library
+Module: bob_generate_shared_library & bob_generate_static_library
+=================================================================
+
 This target generates a shared/static library and headers using a
 custom command, instead of via the default compiler and linker. The
 library can be linked to other modules using the normal properties

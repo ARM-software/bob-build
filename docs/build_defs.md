@@ -1,4 +1,5 @@
-# Build file format
+Build file format
+=================
 
 The build files are very simple. There are no conditional or control
 flow statements.
