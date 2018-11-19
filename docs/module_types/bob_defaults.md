@@ -1,4 +1,6 @@
-# Module: bob_defaults
+Module: bob_defaults
+====================
+
 Defaults are used to share common settings between multiple modules.
 
 `bob_defaults` can be used by `bob_static_lib`, `bob_shared_lib`, `bob_binary`,

@@ -1,4 +1,6 @@
-# Module: bob_kernel_module
+Module: bob_kernel_module
+=========================
+
 This target is a kernel module (.ko) that will be built as an
 external kernel module.
 

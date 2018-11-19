@@ -1,4 +1,6 @@
-# Module: bob_resource
+Module: bob_resource
+====================
+
 This target identifies files in the source tree which should be copied to
 the installation directory, e.g. files which the project may
 need while executing.

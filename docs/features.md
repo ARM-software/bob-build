@@ -1,4 +1,6 @@
-# Features
+Features
+========
+
 The feature system allows for the possibility of changing aspects of the build
 depending on the configuration.
 

@@ -1,4 +1,6 @@
-# Module: bob_shared_library
+Module: bob_shared_library
+==========================
+
 Used to create a shared library i.e. `.so` file.
 
 ## Full specification of `bob_shared_library` properties

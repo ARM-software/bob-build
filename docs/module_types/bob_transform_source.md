@@ -1,4 +1,6 @@
-# Module: bob_transform_source
+Module: bob_transform_source
+============================
+
 This target generates source code (headers or C files). A single
 module generates output from each input (i.e. it runs the command
 separately on each input file).

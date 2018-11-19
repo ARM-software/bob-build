@@ -1,4 +1,6 @@
-# Module: bob_generate_source
+Module: bob_generate_source
+===========================
+
 This target generates source code (headers or C files). A single
 module can generate multiple outputs from common inputs, by running a
 custom command.
