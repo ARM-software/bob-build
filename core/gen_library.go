@@ -86,3 +86,7 @@ func (m *generateLibrary) setVariant(variant string) {
 func (m *generateLibrary) getSplittableProps() *SplittableProps {
 	return &m.generateCommon.Properties.flagArgsBuild.SplittableProps
 }
+
+func (m *generateLibrary) topLevelProperties() []interface{} {
+	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateLibraryProps)
+}

@@ -61,7 +61,8 @@ func (m *generateStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 
 func genStaticLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateStaticLibrary{}
-	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{})
+	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{},
+		GenerateLibraryProps{})
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

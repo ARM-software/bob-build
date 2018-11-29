@@ -61,7 +61,8 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 
 func genSharedLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
-	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{})
+	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{},
+		GenerateLibraryProps{})
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

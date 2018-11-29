@@ -36,7 +36,11 @@ bob_transform_source {
     ],
     out: {
         match: "(.+)\\.in",
-        replace: ["$1.cpp"],
+    },
+    always_enabled_feature: {
+        out: {
+            replace: ["$1.cpp"],
+        },
     },
 
     tool: "generator.py",

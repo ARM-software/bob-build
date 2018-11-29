@@ -247,7 +247,7 @@ func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
 func (m *generateSource) topLevelProperties() []interface{} {
-	return []interface{}{&m.Properties.GenerateSourceProps, &m.generateCommon.Properties.GenerateProps}
+	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateSourceProps)
 }
 
 // Returns the tool binary for a generateSource module. This is different from the "tool"
@@ -383,19 +383,16 @@ func (m *generateSource) filesToInstall(ctx blueprint.ModuleContext) []string {
 // bob_transform_source module. This module supports one command execution
 // per input file.
 type TransformSourceProps struct {
-	generateCommon
-	Properties struct {
-		// The regular expression that is used to transform the source path to the target path.
-		Out struct {
-			// Regular expression to capture groups from srcs
-			Match string
-			// Names of outputs, which can use capture groups from match
-			Replace []string
-			// Name of the dependency file (if needed), which can use capture groups from match
-			Depfile string
-			// List of implicit sources not described by the depfile
-			Implicit_srcs []string
-		}
+	// The regular expression that is used to transform the source path to the target path.
+	Out struct {
+		// Regular expression to capture groups from srcs
+		Match string
+		// Names of outputs, which can use capture groups from match
+		Replace []string
+		// Name of the dependency file (if needed), which can use capture groups from match
+		Depfile string
+		// List of implicit sources not described by the depfile
+		Implicit_srcs []string
 	}
 }
 
@@ -411,6 +408,10 @@ func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 		}
 		getBackend(ctx).transformSourceActions(m, ctx, inouts)
 	}
+}
+
+func (m *transformSource) topLevelProperties() []interface{} {
+	return append(m.generateCommon.topLevelProperties(), &m.Properties.TransformSourceProps)
 }
 
 func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
@@ -490,20 +491,25 @@ func (m *transformSource) filesToInstall(ctx blueprint.ModuleContext) []string {
 // The working directory will be the source directory, and all paths will be relative to the source directory
 // if not else noted
 type transformSource struct {
-	TransformSourceProps
+	generateCommon
+	Properties struct {
+		TransformSourceProps
+	}
 	outs []string
 }
 
 func generateSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
-	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{})
+	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(),
+		GenerateProps{}, GenerateSourceProps{})
 	return module, []interface{}{&module.generateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }
 
 func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &transformSource{}
-	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(), GenerateProps{})
+	module.generateCommon.Properties.Features.Init(config.getAvailableFeatures(),
+		GenerateProps{}, TransformSourceProps{})
 	return module, []interface{}{&module.generateCommon.Properties,
 		&module.Properties,
 		&module.SimpleName.Properties}
