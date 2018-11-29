@@ -62,12 +62,22 @@ func printDebugType(value reflect.Type, optionalIndent ...int) {
 // runtime structure. It behaves like injecting json values
 // to matching keys e.g. level1.level2.variable.
 // Check printDebug output to more easily navigate.
-func (features *Features) injectData(path string, data interface{}) {
-	value := reflect.ValueOf(features.BlueprintEmbed).Elem()
-	if !value.IsValid() {
+func (features *Features) injectData(featureName string, path string, data interface{}) {
+	allFeatures := reflect.ValueOf(features.BlueprintEmbed).Elem()
+	if !allFeatures.IsValid() {
 		printDebug(reflect.ValueOf(features.BlueprintEmbed).Elem())
 		panic(fmt.Sprintf("invalid '%s'\n", path))
 	}
+
+	propsInFeatureVal := allFeatures.FieldByName(featureName)
+	if !propsInFeatureVal.IsValid() {
+		printDebug(reflect.ValueOf(allFeatures))
+		panic(fmt.Sprintf("Couldn't find struct for feature '%s'", featureName))
+	}
+	propsInFeature := propsInFeatureVal.Interface().(singleFeature)
+
+	value := reflect.ValueOf(propsInFeature.BlueprintEmbed).Elem()
+
 	for _, name := range strings.Split(path, ".") {
 		previous := value
 		value = value.FieldByName(name)
@@ -128,18 +138,18 @@ func createTestModuleAndFeatures() (testProps, configProperties) {
 		testPropsGroupC{},
 	)
 
-	module.injectData("Feature_a.FieldA", "Props_a")
-	module.injectData("Feature_a.FieldC", "Props_c")
-	module.injectData("Feature_a.FieldG", "Props_g")
-	module.injectData("Feature_b.FieldB", "Props_b")
-	module.injectData("Feature_c.FieldE", "Props_e")
-	module.injectData("Feature_c.FieldF", "Props_f")
-	module.injectData("Feature_d.FieldA", "+D_a")
-	module.injectData("Feature_d.FieldC", "+D_c")
-	module.injectData("Feature_d.FieldG", "+D_g")
-	module.injectData("Feature_d.FieldB", "+D_b")
-	module.injectData("Feature_d.FieldE", "+D_e")
-	module.injectData("Feature_d.FieldF", "+D_f")
+	module.injectData("Feature_a", "FieldA", "Props_a")
+	module.injectData("Feature_a", "FieldC", "Props_c")
+	module.injectData("Feature_a", "FieldG", "Props_g")
+	module.injectData("Feature_b", "FieldB", "Props_b")
+	module.injectData("Feature_c", "FieldE", "Props_e")
+	module.injectData("Feature_c", "FieldF", "Props_f")
+	module.injectData("Feature_d", "FieldA", "+D_a")
+	module.injectData("Feature_d", "FieldC", "+D_c")
+	module.injectData("Feature_d", "FieldG", "+D_g")
+	module.injectData("Feature_d", "FieldB", "+D_b")
+	module.injectData("Feature_d", "FieldE", "+D_e")
+	module.injectData("Feature_d", "FieldF", "+D_f")
 
 	properties := enabledFeatures(featuresNames...)
 	return module, properties
@@ -310,8 +320,8 @@ func Test_should_append_properties_when_using_nested_destinations(t *testing.T) 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Injecting data to features. This is only for test purpose. Normally this step would be skipped
 	// by blueprint and data will be injected from .bp directly to "struct" created by reflection
-	module.Properties.injectData("My_feature_a.A", "+value_a")
-	module.Properties.injectData("My_feature_b.B", "+value_b")
+	module.Properties.injectData("My_feature_a", "A", "+value_a")
+	module.Properties.injectData("My_feature_b", "B", "+value_b")
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	dst := []interface{}{&module.testSource.Properties.TestSourceProps,
@@ -389,12 +399,12 @@ func Test_should_append_props_when_using_nested_structs(t *testing.T) {
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Injecting data to features. This is only for test purpose. Normally this step would be skipped
 	// by blueprint and data will be injected from .bp directly to "struct" created by reflection
-	module.Properties.injectData("My_feature.DerivedPropA", "+feature.DerivedPropA")
-	module.Properties.injectData("My_feature.TestSourceProps.A", "+feature.A")
-	module.Properties.injectData("My_feature.TestInstallProps.B", "+feature.B")
-	module.Properties.injectData("My_feature.Nested.Foo", "+feature.Foo")
+	module.Properties.injectData("My_feature", "DerivedPropA", "+feature.DerivedPropA")
+	module.Properties.injectData("My_feature", "TestSourceProps.A", "+feature.A")
+	module.Properties.injectData("My_feature", "TestInstallProps.B", "+feature.B")
+	module.Properties.injectData("My_feature", "Nested.Foo", "+feature.Foo")
 	magicBool2 := true
-	module.Properties.injectData("My_feature.Nested.Bar", &magicBool2)
+	module.Properties.injectData("My_feature", "Nested.Bar", &magicBool2)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	dst := []interface{}{&module.Properties.TestDerivedModuleProps,
@@ -457,7 +467,8 @@ func Test_should_composite_new_type(t *testing.T) {
 	// }
 
 	// Below code shouldn't fail
-	feature := reflect.ValueOf(module.BlueprintEmbed).Elem().FieldByName("Feature_compose")
+	propsInFeature := reflect.ValueOf(module.BlueprintEmbed).Elem().FieldByName("Feature_compose").Interface().(singleFeature)
+	feature := reflect.ValueOf(propsInFeature.BlueprintEmbed).Elem()
 	feature.FieldByName("FieldA").SetString("+value_a")
 	feature.FieldByName("FieldB").SetString("+value_b")
 }
