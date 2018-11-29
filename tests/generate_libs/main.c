@@ -1,4 +1,5 @@
 #include "libblah.h"
+#include "libblah_feature.h"
 
 int main(int argc, const char **argv)
 {

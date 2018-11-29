@@ -133,3 +133,8 @@ config DEBUG
 config NDEBUG
     bool
     default n if DEBUG
+
+# Have a feature which is always enabled, to test properties inside features
+config ALWAYS_ENABLED_FEATURE
+    bool
+    default y

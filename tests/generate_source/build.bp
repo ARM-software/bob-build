@@ -79,10 +79,10 @@ bob_generate_source {
         "before_generate2.in",
         "before_generate3.in",
     ],
-    out: [
-        "multiple_in_out.cpp",
-        "multiple_in_out2.cpp",
-    ],
+    out: ["multiple_in_out.cpp"],
+    always_enabled_feature: {
+        out: ["multiple_in_out2.cpp"],
+    },
 
     tool: "generator.py",
     cmd: "python ${tool} --in ${in} --out ${out}",
