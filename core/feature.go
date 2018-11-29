@@ -47,6 +47,10 @@ type Features struct {
 	BlueprintEmbed interface{}
 }
 
+type singleFeature struct {
+	BlueprintEmbed interface{}
+}
+
 func typesOf(list ...interface{}) []reflect.Type {
 	types := make([]reflect.Type, len(list))
 	for i, element := range list {
@@ -84,13 +88,20 @@ func (f *Features) Init(availableFeatures []string, list ...interface{}) {
 	for i, featureName := range availableFeatures {
 		fields[i] = reflect.StructField{
 			Name: featurePropertyName(featureName),
-			Type: propsType,
+			Type: reflect.TypeOf(singleFeature{}),
 		}
 	}
 
 	bpFeatureStruct := reflect.StructOf(fields)
-	instance := reflect.New(bpFeatureStruct)
-	f.BlueprintEmbed = instance.Interface()
+	instancePtr := reflect.New(bpFeatureStruct)
+	f.BlueprintEmbed = instancePtr.Interface()
+
+	instance := reflect.Indirect(instancePtr)
+	for i, _ := range availableFeatures {
+		propsInFeature := instance.Field(i).Addr().Interface().(*singleFeature)
+		propsInFeature.BlueprintEmbed = reflect.New(propsType).Interface()
+	}
+
 }
 
 // coalesceTypes will squash multiple types to new type. This has different result
@@ -169,7 +180,7 @@ func (f *Features) AppendProps(dst []interface{}, properties *configProperties) 
 				panic(fmt.Sprintf("Field returned for property %s isn't valid\n", featureFieldName))
 			}
 			// AppendProperties expects a pointer to a struct.
-			featureStructPointer := featureStruct.Addr().Interface()
+			featureStructPointer := featureStruct.FieldByName("BlueprintEmbed").Interface()
 
 			// If featureProps is nil then we've determined that we can skip this,
 			// so avoid calling AppendProperties
