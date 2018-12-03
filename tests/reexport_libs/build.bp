@@ -60,9 +60,6 @@ bob_static_library {
 
     // This should propagate 1 level up cflags and include paths that were exported
     reexport_libs: ["lib_reexport_level_1"],
-    android: {
-        enabled: false,
-    },
 }
 
 bob_static_library {
@@ -73,9 +70,6 @@ bob_static_library {
 
     // This should propagate 1 level up cflags and include paths that were exported
     reexport_libs: ["lib_reexport_level_2"],
-    android: {
-        enabled: false,
-    },
 }
 
 ////////////////////////////////////////////////
@@ -94,18 +88,12 @@ bob_binary {
     name: "test_reexport_include_level_1",
     srcs: ["main_include.cpp"],
     static_libs: ["lib_reexport_level_1"],
-    android: {
-        enabled: false,
-    },
 }
 
 bob_binary {
     name: "test_reexport_cflags_level_1",
     srcs: ["main_cflags.cpp"],
     static_libs: ["lib_reexport_level_1"],
-    android: {
-        enabled: false,
-    },
 }
 
 // Level 2 of nesting
@@ -114,18 +102,12 @@ bob_binary {
     name: "test_reexport_include_level_2",
     srcs: ["main_include.cpp"],
     static_libs: ["lib_reexport_level_2"],
-    android: {
-        enabled: false,
-    },
 }
 
 bob_binary {
     name: "test_reexport_cflags_level_2",
     srcs: ["main_cflags.cpp"],
     static_libs: ["lib_reexport_level_2"],
-    android: {
-        enabled: false,
-    },
 }
 
 // Level 3 of nesting
@@ -134,18 +116,12 @@ bob_binary {
     name: "test_reexport_include_level_3",
     srcs: ["main_include.cpp"],
     static_libs: ["lib_reexport_level_3"],
-    android: {
-        enabled: false,
-    },
 }
 
 bob_binary {
     name: "test_reexport_cflags_level_3",
     srcs: ["main_cflags.cpp"],
     static_libs: ["lib_reexport_level_3"],
-    android: {
-        enabled: false,
-    },
 }
 
 bob_binary {
@@ -182,9 +158,6 @@ bob_binary {
     name: "test_reexport_host",
     srcs: ["main_cflags.cpp"],
     static_libs: ["lib_reexport_host"],
-    android: {
-        enabled: false,
-    },
 }
 
 ////////////////////////////////////////////////
@@ -225,9 +198,6 @@ bob_binary {
     srcs: ["main_cflags.cpp"],
     static_libs: ["lib_reexport_host_2"],
     host_supported: true,
-    android: {
-        enabled: false,
-    },
 }
 
 ////////////////////////////////////////////////
