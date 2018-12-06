@@ -594,11 +594,12 @@ func (g *androidMkGenerator) outputs(m *generateCommon) string {
 	return "$(" + outputsVarName(m) + ")"
 }
 
+// The following makefile snippets are based on Android makefiles from AOSP
+//  See aosp/build/core/make/prebuilt_internal.mk
 const cmnLibraryMkText string = "include $(BUILD_SYSTEM)/base_rules.mk\n\n" +
 	"export_includes:=$(intermediates)/export_includes\n" +
 
 	//  Setup rule to create export_includes
-	//  See prebuilt_internal.mk
 	"$(export_includes): PRIVATE_EXPORT_C_INCLUDE_DIRS:=$(LOCAL_EXPORT_C_INCLUDE_DIRS)\n" +
 	"$(export_includes): $(LOCAL_MODULE_MAKEFILE_DEP)\n" +
 	"\t@echo Export includes file: $< -- $@\n" +
@@ -613,7 +614,35 @@ const cmnLibraryMkText string = "include $(BUILD_SYSTEM)/base_rules.mk\n\n" +
 
 	"$(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES) | $(export_includes)\n" +
 	"\tmkdir -p $(dir $@)\n" +
-	"\tcp $< $@\n"
+	"\tcp $< $@\n\n" +
+
+	// Setup link type
+	// We assume LOCAL_SDK_VERSION and LOCAL_USE_VNDK will not be set
+	"ifeq ($(PLATFORM_SDK_VERSION),25)\n" +
+	"  # link_type not required\n" +
+
+	// Android O only.
+	"else ifeq ($(PLATFORM_SDK_VERSION),26)\n" +
+	"  my_link_type := $(intermediates)/link_type\n\n" +
+
+	"$(my_link_type): PRIVATE_LINK_TYPE := native:platform\n" +
+	"$(eval $(call link-type-partitions,$(my_link_type)))\n" +
+	"$(my_link_type):\n" +
+	"\t@echo Check module type: $@\n" +
+	"\t$(hide) mkdir -p $(dir $@) && rm -f $@\n" +
+	"\t$(hide) echo \"$(PRIVATE_LINK_TYPE)\" >$@\n" +
+
+	"$(LOCAL_BUILT_MODULE): | $(my_link_type)\n\n" +
+
+	// Android OMR1 and later
+	"else\n" +
+	"  include $(BUILD_SYSTEM)/allowed_ndk_types.mk\n\n" +
+	"  my_link_type := native:platform\n" +
+	"  my_link_deps :=\n" +
+	"  my_2nd_arch_prefix := $(LOCAL_2ND_ARCH_VAR_PREFIX)\n" +
+	"  my_common :=\n" +
+	"  include $(BUILD_SYSTEM)/link_type.mk\n" +
+	"endif\n"
 
 func declarePrebuiltStaticLib(moduleName, path, includePaths string, target bool) string {
 	text := "\ninclude $(CLEAR_VARS)\n"

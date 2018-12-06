@@ -38,9 +38,9 @@ bob_install_group {
 bob_generate_shared_library {
     name: "libblah_shared",
     srcs: ["libblah/libblah.c"],
-    headers: ["libblah.h"],
+    headers: ["include/libblah.h"],
     always_enabled_feature: {
-        headers: ["libblah_feature.h"],
+        headers: ["include/libblah_feature.h"],
     },
     install_group: "ig_genlib_lib",
     export_gen_include_dirs: ["include"],
@@ -61,17 +61,14 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    android: {
-        enabled: false,
-    },
 }
 
 bob_generate_static_library {
     name: "libblah_static",
     srcs: ["libblah/libblah.c"],
-    headers: ["libblah.h"],
+    headers: ["include/libblah.h"],
     always_enabled_feature: {
-        headers: ["libblah_feature.h"],
+        headers: ["include/libblah_feature.h"],
     },
     export_gen_include_dirs: ["include"],
 
@@ -91,9 +88,6 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    android: {
-        enabled: false,
-    },
 }
 
 bob_alias {
