@@ -15,126 +15,171 @@
 
 ## Need to select the BUILDER_ for Bob
 choice
-    prompt "Builder"
-    default BUILDER_ANDROID if ANDROID
-    default BUILDER_LINUX
+	prompt "Builder"
+	default BUILDER_ANDROID if ANDROID
+	default BUILDER_LINUX
 
 config BUILDER_LINUX
-    bool "Linux"
+	bool "Linux"
 
 config BUILDER_ANDROID
-    bool "Android"
+	bool "Android"
 
 endchoice
 
 ## Select toolchain for Bob
 choice
-    prompt "Toolchain"
-    default TOOLCHAIN_CLANG if ANDROID
-    default TOOLCHAIN_GNU
+	prompt "Toolchain"
+	default TARGET_TOOLCHAIN_CLANG if ANDROID
+	default TARGET_TOOLCHAIN_GNU
 
-config TOOLCHAIN_GNU
-    bool "GNU"
+config TARGET_TOOLCHAIN_GNU
+	bool "GNU"
 
-config TOOLCHAIN_CLANG
-    bool "Clang"
+config TARGET_TOOLCHAIN_CLANG
+	bool "Clang"
 
 endchoice
 
 ## Toolchain prefix needed for Bob (for gcc)
-config TOOLCHAIN_PREFIX
-    string
-    default ""
+config TARGET_GNU_TOOLCHAIN_PREFIX
+	string
+	default ""
 
 ## Various tools need to be defined for Bob
 config PKG_CONFIG
-    bool "PKG_CONFIG"
+	bool "PKG_CONFIG"
 
-config TARGET_TOOLCHAIN_VERSION
-    string "Version reported by the underlying GNU cross-compiler"
-    depends on TOOLCHAIN_CLANG
-    default "4.9.1"
+config TARGET_GNU_TOOLCHAIN_VERSION
+	string "Version reported by the underlying GNU cross-compiler"
+	depends on TARGET_TOOLCHAIN_CLANG
+	default "4.9.1"
 
-config CLANG_BINARY
-    string
-    default "clang"
+config CLANG_CC_BINARY
+	string
+	default "clang"
 
-config CLANGXX_BINARY
-    string
-    default "clang++"
+config CLANG_CXX_BINARY
+	string
+	default "clang++"
 
-config CLANG_TARGET
-    string
-    default "x86_64-linux-gnu"
+config TARGET_CLANG_TRIPLE
+	string
+	default "x86_64-linux-gnu"
 
-config GCC_BINARY
-    string
-    default "gcc"
+config GNU_CC_BINARY
+	string
+	default "gcc"
 
-config GXX_BINARY
-    string
-    default "g++"
+config GNU_CXX_BINARY
+	string
+	default "g++"
 
-config GCC_TARGET_FLAGS
-    string
-    default ""
+config TARGET_GNU_FLAGS
+	string
+	default ""
 
 config AR_BINARY
-    string
-    default "ar"
+	string
+	default "ar"
 
 config AS_BINARY
-    string
-    default "as"
+	string
+	default "as"
 
 # Filled in by host_explore.py during the configuration step
 config EXTRA_HOST_LDFLAGS
-    string "Extra Host Linker options"
+	string "Extra Host Linker options"
 
 config EXTRA_TARGET_LDFLAGS
-    string "Extra Target Linker options"
+	string "Extra Target Linker options"
 
 config EXTRA_LD_LIBRARY_PATH
-    string "Extra LD_LIBRARY_PATH Entries"
+	string "Extra LD_LIBRARY_PATH Entries"
 
 ## Bob needs sysroot for clang
-config CLANG_SYSROOT
-    string
-    default ""
+config TARGET_SYSROOT
+	string
+	default ""
 
 ## Include this to allow us to test Bob host exploration if needed
 config ALLOW_HOST_EXPLORE
-    bool
-    default y
+	bool
+	default y
 
 ## TEMPLATE_TEST_VALUE used in template testing
 config TEMPLATE_TEST_VALUE
-    int
-    default 6
+	int
+	default 6
 
 ## LINUX and ANDROID used in resource testing
 choice
-    prompt "OS"
-    default LINUX
+	prompt "OS"
+	default LINUX
 
 config LINUX
-    bool "Linux"
+	bool "Linux"
 
 config ANDROID
-    bool "Android"
+	bool "Android"
 
 endchoice
 
 ## DEBUG and NDEBUG used in property testing
 config DEBUG
-    bool
-    default y
+	bool
+	default y
 
 config NDEBUG
-    bool
-    default n if DEBUG
+	bool
+	default n if DEBUG
 
 # Have a feature which is always enabled, to test properties inside features
 config ALWAYS_ENABLED_FEATURE
-    bool
-    default y
+	bool
+	default y
+
+config TARGET_CC_BINARY
+	string
+	default CLANG_CC_BINARY if TARGET_TOOLCHAIN_CLANG
+	default GNU_CC_BINARY if TARGET_TOOLCHAIN_GNU
+
+config TARGET_CXX_BINARY
+	string
+	default CLANG_CXX_BINARY if TARGET_TOOLCHAIN_CLANG
+	default GNU_CXX_BINARY if TARGET_TOOLCHAIN_GNU
+
+choice
+	prompt "Host toolchain"
+	default HOST_TOOLCHAIN_CLANG if TARGET_TOOLCHAIN_CLANG
+	default HOST_TOOLCHAIN_GNU
+	help
+		A few different compilers are supported. They are classed by
+		toolchain which allows a limited amount of flexibility to
+		accommodate similar compilers.
+
+		Select the compiler toolchain to be used when compiling for the host.
+
+config HOST_TOOLCHAIN_CLANG
+	bool "Clang"
+	help
+		Build with Clang toolchain.
+
+		Linux support is still experimental, and requires the GNU
+		assembler (as) and GNU archiver (ar)
+
+config HOST_TOOLCHAIN_GNU
+	bool "GNU"
+	help
+		Build with GNU toolchain.
+endchoice
+
+config HOST_CC_BINARY
+	string
+	default CLANG_CC_BINARY if HOST_TOOLCHAIN_CLANG
+	default GNU_CC_BINARY if HOST_TOOLCHAIN_GNU
+
+config HOST_CXX_BINARY
+	string
+	default CLANG_CXX_BINARY if HOST_TOOLCHAIN_CLANG
+	default GNU_CXX_BINARY if HOST_TOOLCHAIN_GNU

@@ -291,7 +291,7 @@ bob_binary {
     },
     target: {
         cflags: ["-DPLATFORM_NAME=target"],
-        toolchain_clang: {
+        target_toolchain_clang: {
             cflags: ["-mtune=..."],
         },
     },

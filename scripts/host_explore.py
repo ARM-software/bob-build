@@ -72,24 +72,24 @@ def compiler_config():
     '''
     extra_target_ldflags = ''
     extra_host_ldflags = ''
-    host_cxx = ''
+    host_cxx = get_config('HOST_CXX_BINARY')['value']
+    host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
+
     # No toolchain prefix indicates a native build
-    native_build = get_config('TOOLCHAIN_PREFIX')['value'] == ''
-    if get_config('TOOLCHAIN_CLANG')['value'] == 'y':
-        host_cxx = get_config('CLANGXX_BINARY')['value']
-        host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
+    native_build = get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] == ''
+    if get_config('TARGET_TOOLCHAIN_CLANG')['value'] == 'y':
         if native_build:
             target_libstdcxx_path = host_libstdcxx_path
         else:
-            cross_gcc = which_binary(get_config('TOOLCHAIN_PREFIX')['value'] +
-                get_config('GCC_BINARY')['value'])
-            flags = get_config('GCC_TARGET_FLAGS')['value'].split(" ")
+            cross_gcc = which_binary(get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] +
+                get_config('GNU_CC_BINARY')['value'])
+            flags = get_config('TARGET_GNU_FLAGS')['value'].split(" ")
             flags = list(filter(None, flags))
 
             cross_sysroot = check_output([cross_gcc] + flags + ['-print-sysroot'])
-            set_config('CLANG_SYSROOT', cross_sysroot)
+            set_config('TARGET_SYSROOT', cross_sysroot)
             cross_version = check_output([cross_gcc] + flags + ['-dumpversion'])
-            set_config('TARGET_TOOLCHAIN_VERSION', cross_version)
+            set_config('TARGET_GNU_TOOLCHAIN_VERSION', cross_version)
             target_libstdcxx_path = check_output([cross_gcc] + flags + ['-print-file-name=libstdc++.so'])
             crt_path = os.path.split(check_output([cross_gcc] + flags + ['-print-file-name=crt1.o']))[0]
             if crt_path != '':
@@ -103,11 +103,9 @@ def compiler_config():
             if crosslib_path != '':
                 extra_target_ldflags += '-L{0} '.format(crosslib_path)
 
-    elif get_config('TOOLCHAIN_GNU')['value'] == 'y':
-        host_cxx = get_config('GXX_BINARY')['value']
-        flags = get_config('GCC_TARGET_FLAGS')['value'].split(" ")
+    elif get_config('TARGET_TOOLCHAIN_GNU')['value'] == 'y':
+        flags = get_config('TARGET_GNU_FLAGS')['value'].split(" ")
         flags = list(filter(None, flags))
-        host_libstdcxx_path = check_output([host_cxx,'-print-file-name=libstdc++.so'])
         target_libstdcxx_path = check_output([host_cxx] + flags + ['-print-file-name=libstdc++.so'])
 
     host_libstdcxx_dir = os.path.split(host_libstdcxx_path)[0]
@@ -127,7 +125,7 @@ def compiler_config():
 
     builder_android = get_config('BUILDER_ANDROID')['value'] == 'y'
     if not builder_android:
-        cross_ld = which_binary(get_config('TOOLCHAIN_PREFIX')['value'] + 'ld')
+        cross_ld = which_binary(get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] + 'ld')
         if cross_ld:
             cross_ld_version = check_output([cross_ld, '-version'])
             if cross_ld_version.count('gold') == 1:

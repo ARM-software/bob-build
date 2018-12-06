@@ -19,10 +19,10 @@ package core
 
 import (
 	"errors"
-	"path/filepath"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -113,19 +113,19 @@ func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 	props := config.Properties
 	tc.arBinary = props.GetString("ar_binary")
 	tc.asBinary = props.GetString("as_binary")
-	tc.gccBinary = props.GetString("gcc_binary")
-	tc.gxxBinary = props.GetString("gxx_binary")
+	tc.gccBinary = props.GetString("gnu_cc_binary")
+	tc.gxxBinary = props.GetString("gnu_cxx_binary")
 	return
 }
 
 func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	props := config.Properties
-	tc.prefix = props.GetString("toolchain_prefix")
+	tc.prefix = props.GetString("target_gnu_toolchain_prefix")
 	tc.arBinary = tc.prefix + props.GetString("ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
-	tc.gccBinary = tc.prefix + props.GetString("gcc_binary")
-	tc.gxxBinary = tc.prefix + props.GetString("gxx_binary")
-	tc.cflags = strings.Split(props.GetString("gcc_target_flags"), " ")
+	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
+	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
+	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
 	return
 }
 
@@ -171,20 +171,20 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 
 func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainClangCommon) {
 	props := config.Properties
-	tc.clangBinary = props.GetString("clang_binary")
-	tc.clangxxBinary = props.GetString("clangxx_binary")
+	tc.clangBinary = props.GetString("clang_cc_binary")
+	tc.clangxxBinary = props.GetString("clang_cxx_binary")
 	tc.gnu = gnu
 
 	// Tell Clang where the GNU toolchain is installed, so it can use its
 	// headers and libraries, for example, if we are using libstdc++.
-	tc.cflags = append(tc.cflags, "--gcc-toolchain=" + getToolchainInstallDir(tc.gnu))
+	tc.cflags = append(tc.cflags, "--gcc-toolchain="+getToolchainInstallDir(tc.gnu))
 
 	// Add the GNU toolchain's binary directories to Clang's binary search
 	// path, so that Clang can find the correct linker. If the GNU toolchain
 	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
 	// be in Clang's search path, so these arguments have no effect.
 	for _, dir := range tc.gnu.getBinDirs() {
-		tc.cflags = append(tc.cflags, "-B" + dir)
+		tc.cflags = append(tc.cflags, "-B"+dir)
 	}
 
 	return
@@ -206,16 +206,16 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
 
 	props := config.Properties
-	tc.target = props.GetString("clang_target")
-	tc.sysroot = props.GetString("clang_sysroot")
-	tc.toolchainVersion = props.GetString("target_toolchain_version")
+	tc.target = props.GetString("target_clang_triple")
+	tc.sysroot = props.GetString("target_sysroot")
+	tc.toolchainVersion = props.GetString("target_gnu_toolchain_version")
 
 	if tc.sysroot != "" {
 		if tc.target == "" {
-			panic(errors.New("CLANG_TARGET is not set"))
+			panic(errors.New("TARGET_CLANG_TRIPLE is not set"))
 		}
 		if tc.toolchainVersion == "" {
-			panic(errors.New("TARGET_TOOLCHAIN_VERSION is not set"))
+			panic(errors.New("TARGET_GNU_TOOLCHAIN_VERSION is not set"))
 		}
 		tc.cflags = append(tc.cflags, "--sysroot", tc.sysroot)
 
@@ -252,13 +252,19 @@ func (tcs *toolchainSet) getToolchain(tgtType string) toolchain {
 func (tcs *toolchainSet) parseConfig(config *bobConfig) {
 	props := config.Properties
 
-	if props.GetBool("toolchain_clang") {
-		tcs.host = newToolchainClangNative(config)
+	if props.GetBool("target_toolchain_clang") {
 		tcs.target = newToolchainClangCross(config)
-	} else if props.GetBool("toolchain_gnu") {
-		tcs.host = newToolchainGnuNative(config)
+	} else if props.GetBool("target_toolchain_gnu") {
 		tcs.target = newToolchainGnuCross(config)
 	} else {
-		panic(errors.New("no usable compiler toolchain configured"))
+		panic(errors.New("no usable target compiler toolchain configured"))
+	}
+
+	if props.GetBool("host_toolchain_clang") {
+		tcs.host = newToolchainClangNative(config)
+	} else if props.GetBool("host_toolchain_gnu") {
+		tcs.host = newToolchainGnuNative(config)
+	} else {
+		panic(errors.New("no usable host compiler toolchain configured"))
 	}
 }

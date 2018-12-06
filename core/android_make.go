@@ -258,7 +258,7 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 		text += "\tcp $< $@\n\n"
 	}
 
-	if getConfig(ctx).Properties.GetBool("toolchain_clang") {
+	if getConfig(ctx).Properties.GetBool("target_toolchain_clang") {
 		text += "LOCAL_CLANG := true\n"
 	} else {
 		text += "LOCAL_CLANG := false\n"
