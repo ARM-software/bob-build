@@ -32,14 +32,14 @@ satisfy all the options passed to it within a single invocation, and all other
 options will be reset to their default values:
 
 ```bash
-$BUILDDIR/config ANDROID=y TOOLCHAIN_CLANG=y ALLOW_HOST_EXPLORE=n
+$BUILDDIR/config ANDROID=y TARGET_TOOLCHAIN_CLANG=y ALLOW_HOST_EXPLORE=n
 ```
 
 If incompatible options are requested, an error will be printed and the config
 file will not be written:
 ```bash
-$BUILDDIR/config TOOLCHAIN_CLANG=y TOOLCHAIN_GNU=y
-ERROR: TOOLCHAIN_CLANG=y was ignored or overridden. Value is n
+$BUILDDIR/config TARGET_TOOLCHAIN_CLANG=y TARGET_TOOLCHAIN_GNU=y
+ERROR: TARGET_TOOLCHAIN_CLANG=y was ignored or overridden. Value is n
 ```
 
 User-set options are not preserved between invocations - i.e. specifying e.g.
@@ -332,7 +332,7 @@ import config_system
 
 def plugin_exec():
     # Read options using get_config
-    if config_system.get_config("TOOLCHAIN_CLANG")["value"] == "y":
+    if config_system.get_config("TARGET_TOOLCHAIN_CLANG")["value"] == "y":
         ...
     # Write them using set_config
     if find_unit_test_framework():
