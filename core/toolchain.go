@@ -19,7 +19,10 @@ package core
 
 import (
 	"errors"
+	"path/filepath"
 	"fmt"
+	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -28,6 +31,27 @@ type toolchain interface {
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
 	getArchiver() (tool string, flags []string)
+}
+
+func getToolchainBinaryPath(tc toolchain) string {
+	ccBinary, _ := tc.getCCompiler()
+	if !filepath.IsAbs(ccBinary) {
+		path, err := exec.LookPath(ccBinary)
+		if err != nil {
+			panic(err)
+		}
+		ccBinary = path
+	}
+	return filepath.Dir(ccBinary)
+}
+
+func getToolchainInstallDir(tc toolchain) string {
+	return filepath.Dir(getToolchainBinaryPath(tc))
+}
+
+type toolchainGnu interface {
+	toolchain
+	getBinDirs() []string
 }
 
 type toolchainGnuCommon struct {
@@ -63,6 +87,28 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 	return tc.gxxBinary, tc.cflags
 }
 
+func (tc toolchainGnuCommon) getBinDirs() []string {
+	return []string{getToolchainBinaryPath(tc)}
+}
+
+// Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
+// directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
+// 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
+// when passed the --gcc-toolchain option, so add the unprefixed version to the
+// binary search path.
+func (tc toolchainGnuCross) getBinDirs() []string {
+	dirs := tc.toolchainGnuCommon.getBinDirs()
+
+	target := strings.TrimSuffix(tc.prefix, "-")
+
+	unprefixedBinDir := filepath.Join(getToolchainInstallDir(tc), target, "bin")
+	if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
+		dirs = append(dirs, unprefixedBinDir)
+	}
+
+	return dirs
+}
+
 func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 	props := config.Properties
 	tc.arBinary = props.GetString("ar_binary")
@@ -89,7 +135,7 @@ type toolchainClangCommon struct {
 	clangxxBinary string
 
 	// Use the GNU toolchain's 'ar' and 'as'
-	gnu toolchain
+	gnu toolchainGnu
 
 	// Calculated during toolchain initialization:
 	cflags   []string // Flags for both C and C++
@@ -123,17 +169,35 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 	return tc.clangxxBinary, tc.cxxflags
 }
 
-func newToolchainClangCommon(config *bobConfig, gnu toolchain) (tc toolchainClangCommon) {
+func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.clangBinary = props.GetString("clang_binary")
 	tc.clangxxBinary = props.GetString("clangxx_binary")
 	tc.gnu = gnu
+
+	// Tell Clang where the GNU toolchain is installed, so it can use its
+	// headers and libraries, for example, if we are using libstdc++.
+	tc.cflags = append(tc.cflags, "--gcc-toolchain=" + getToolchainInstallDir(tc.gnu))
+
+	// Add the GNU toolchain's binary directories to Clang's binary search
+	// path, so that Clang can find the correct linker. If the GNU toolchain
+	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
+	// be in Clang's search path, so these arguments have no effect.
+	for _, dir := range tc.gnu.getBinDirs() {
+		tc.cflags = append(tc.cflags, "-B" + dir)
+	}
+
 	return
 }
 
 func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 	gnu := newToolchainGnuNative(config)
 	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
+
+	// Combine cflags and cxxflags once here, to avoid appending during
+	// every call to getCXXCompiler().
+	tc.cxxflags = append(tc.cflags, tc.cxxflags...)
+
 	return
 }
 
