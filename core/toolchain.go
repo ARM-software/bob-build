@@ -30,65 +30,37 @@ type toolchain interface {
 	getArchiver() (tool string, flags []string)
 }
 
-type toolchainGnuNative struct {
+type toolchainGnuCommon struct {
 	arBinary  string
 	asBinary  string
 	gccBinary string
 	gxxBinary string
+	cflags    []string // Flags for both C and C++
+}
+
+type toolchainGnuNative struct {
+	toolchainGnuCommon
 }
 
 type toolchainGnuCross struct {
-	toolchainGnuNative
-	prefix      string
-	targetFlags []string
+	toolchainGnuCommon
+	prefix string
 }
 
-func (tc toolchainGnuNative) getArchiver() (tool string, flags []string) {
-	tool = tc.arBinary
-	return
+func (tc toolchainGnuCommon) getArchiver() (string, []string) {
+	return tc.arBinary, []string{}
 }
 
-func (tc toolchainGnuCross) getArchiver() (tool string, flags []string) {
-	nativeTool, nativeFlags := tc.toolchainGnuNative.getArchiver()
-	tool = tc.prefix + nativeTool
-	flags = nativeFlags
-	return
+func (tc toolchainGnuCommon) getAssembler() (string, []string) {
+	return tc.asBinary, []string{}
 }
 
-func (tc toolchainGnuNative) getAssembler() (tool string, flags []string) {
-	tool = tc.asBinary
-	return
+func (tc toolchainGnuCommon) getCCompiler() (string, []string) {
+	return tc.gccBinary, tc.cflags
 }
 
-func (tc toolchainGnuCross) getAssembler() (tool string, flags []string) {
-	nativeTool, nativeFlags := tc.toolchainGnuNative.getAssembler()
-	tool = tc.prefix + nativeTool
-	flags = nativeFlags
-	return
-}
-
-func (tc toolchainGnuNative) getCCompiler() (tool string, flags []string) {
-	tool = tc.gccBinary
-	return
-}
-
-func (tc toolchainGnuCross) getCCompiler() (tool string, flags []string) {
-	nativeTool, nativeFlags := tc.toolchainGnuNative.getCCompiler()
-	tool = tc.prefix + nativeTool
-	flags = append(nativeFlags, tc.targetFlags...)
-	return
-}
-
-func (tc toolchainGnuNative) getCXXCompiler() (tool string, flags []string) {
-	tool = tc.gxxBinary
-	return
-}
-
-func (tc toolchainGnuCross) getCXXCompiler() (tool string, flags []string) {
-	nativeTool, nativeFlags := tc.toolchainGnuNative.getCXXCompiler()
-	tool = tc.prefix + nativeTool
-	flags = append(nativeFlags, tc.targetFlags...)
-	return
+func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
+	return tc.gxxBinary, tc.cflags
 }
 
 func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
@@ -102,9 +74,12 @@ func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 
 func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	props := config.Properties
-	tc.toolchainGnuNative = newToolchainGnuNative(config)
 	tc.prefix = props.GetString("toolchain_prefix")
-	tc.targetFlags = strings.Split(props.GetString("gcc_target_flags"), " ")
+	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("as_binary")
+	tc.gccBinary = tc.prefix + props.GetString("gcc_binary")
+	tc.gxxBinary = tc.prefix + props.GetString("gxx_binary")
+	tc.cflags = strings.Split(props.GetString("gcc_target_flags"), " ")
 	return
 }
 
