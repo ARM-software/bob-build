@@ -108,91 +108,65 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	return
 }
 
-type toolchainClangNative struct {
+type toolchainClangCommon struct {
+	// Options read from the config:
 	clangBinary   string
 	clangxxBinary string
+
 	// Use the GNU toolchain's 'ar' and 'as'
-	gnu toolchainGnuNative
+	gnu toolchain
+
+	// Calculated during toolchain initialization:
+	cflags   []string // Flags for both C and C++
+	cxxflags []string // Flags just for C++
+}
+
+type toolchainClangNative struct {
+	toolchainClangCommon
 }
 
 type toolchainClangCross struct {
-	toolchainClangNative
+	toolchainClangCommon
 	target           string
 	sysroot          string
 	toolchainVersion string
-	// Use the GNU toolchain's 'ar' and 'as'
-	gnu toolchainGnuCross
 }
 
-func (tc toolchainClangNative) getArchiver() (string, []string) {
+func (tc toolchainClangCommon) getArchiver() (string, []string) {
 	return tc.gnu.getArchiver()
 }
 
-func (tc toolchainClangCross) getArchiver() (string, []string) {
-	return tc.gnu.getArchiver()
-}
-
-func (tc toolchainClangNative) getAssembler() (string, []string) {
+func (tc toolchainClangCommon) getAssembler() (string, []string) {
 	return tc.gnu.getAssembler()
 }
 
-func (tc toolchainClangCross) getAssembler() (string, []string) {
-	return tc.gnu.getAssembler()
+func (tc toolchainClangCommon) getCCompiler() (string, []string) {
+	return tc.clangBinary, tc.cflags
 }
 
-func (tc toolchainClangNative) getCCompiler() (string, []string) {
-	return tc.clangBinary, []string{}
+func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
+	return tc.clangxxBinary, tc.cxxflags
 }
 
-func (tc toolchainClangCross) getCCompiler() (tool string, flags []string) {
-	tool, flags = tc.toolchainClangNative.getCCompiler()
-
-	if tc.target != "" {
-		flags = append(flags, "-target", tc.target)
-	}
-	if tc.sysroot != "" {
-		flags = append(flags, "--sysroot", tc.sysroot)
-	}
-
-	return tool, flags
-}
-
-func (tc toolchainClangNative) getCXXCompiler() (string, []string) {
-	return tc.clangxxBinary, []string{}
-}
-
-func (tc toolchainClangCross) getCXXCompiler() (tool string, flags []string) {
-	tool, flags = tc.toolchainClangNative.getCXXCompiler()
-
-	if tc.target != "" {
-		flags = append(flags, "-target", tc.target)
-	}
-	if tc.sysroot != "" {
-		flags = append(flags,
-			"--sysroot", tc.sysroot,
-			"-isystem", fmt.Sprintf("%s/../include/c++/%s",
-				tc.sysroot, tc.toolchainVersion),
-			"-isystem", fmt.Sprintf("%s/../include/c++/%s/%s",
-				tc.sysroot, tc.toolchainVersion,
-				tc.target))
-	}
-
-	return tool, flags
-}
-
-func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
+func newToolchainClangCommon(config *bobConfig, gnu toolchain) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.clangBinary = props.GetString("clang_binary")
 	tc.clangxxBinary = props.GetString("clangxx_binary")
+	tc.gnu = gnu
+	return
+}
 
-	tc.gnu = newToolchainGnuNative(config)
-
+func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
+	gnu := newToolchainGnuNative(config)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
 	return
 }
 
 func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
+	gnu := newToolchainGnuCross(config)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
+
 	props := config.Properties
-	tc.toolchainClangNative = newToolchainClangNative(config)
 	tc.target = props.GetString("clang_target")
 	tc.sysroot = props.GetString("clang_sysroot")
 	tc.toolchainVersion = props.GetString("target_toolchain_version")
@@ -204,9 +178,22 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 		if tc.toolchainVersion == "" {
 			panic(errors.New("TARGET_TOOLCHAIN_VERSION is not set"))
 		}
+		tc.cflags = append(tc.cflags, "--sysroot", tc.sysroot)
+
+		tc.cxxflags = append(tc.cxxflags,
+			"-isystem", fmt.Sprintf("%s/../include/c++/%s",
+				tc.sysroot, tc.toolchainVersion),
+			"-isystem", fmt.Sprintf("%s/../include/c++/%s/%s",
+				tc.sysroot, tc.toolchainVersion,
+				tc.target))
+	}
+	if tc.target != "" {
+		tc.cflags = append(tc.cflags, "-target", tc.target)
 	}
 
-	tc.gnu = newToolchainGnuCross(config)
+	// Combine cflags and cxxflags once here, to avoid appending during
+	// every call to getCXXCompiler().
+	tc.cxxflags = append(tc.cflags, tc.cxxflags...)
 
 	return
 }
