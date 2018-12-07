@@ -36,7 +36,7 @@ build environment that we don't want imposed on Linux builds.
 
 When the code base contains lots of optional behaviour, it's important that:
 
-* users can identify what the options there are and select them
+* users can identify what options there are and select them
 
   Bob's menuconfig is expected to solve this part of the problem,
   negating the need to document all the options somewhere else.
@@ -86,3 +86,23 @@ must match Android's expectation of where it needs to be.
 At the moment Bob provides minimal scripts that projects can call for
 each phase. It's expected that projects will implement their own
 scripts that do project specific things in each phase.
+
+## Supported Android versions
+
+The Android build system changes with each Android release, which can
+break some features in Bob. In general Bob will support the current
+release and the one before that.
+
+| Version | Status |
+|---|---|
+| Nougat | Some features may no longer work |
+| Oreo | Supported |
+| Pie | Supported |
+| Q | In progress |
+| earlier | not supported |
+
+Note that not all Bob features are supported on Android. This includes:
+
+* Aliases
+* Versioned libraries
+* Forwarding libraries
