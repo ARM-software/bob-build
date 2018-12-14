@@ -459,6 +459,9 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 
 		requiredModuleNames := m.getInstallDepPhonyNames(ctx)
 		if len(requiredModuleNames) > 0 {
+			for i, v := range requiredModuleNames {
+				requiredModuleNames[i] = androidModuleName(v)
+			}
 			text += "LOCAL_REQUIRED_MODULES:=" + newlineSeparatedList(requiredModuleNames)
 		}
 	} else {
