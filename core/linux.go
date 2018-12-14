@@ -696,7 +696,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 
 var installRule = pctx.StaticRule("install",
 	blueprint.RuleParams{
-		Command:     "cp --remove-destination --reflink=auto $in $out",
+		Command:     "cp -f $in $out",
 		Description: "$out",
 	})
 
@@ -723,9 +723,7 @@ func (*linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []str
 		rulename := "install"
 		tool := filepath.Join(ctx.ModuleDir(), props.Post_install_tool)
 
-		// The command may or may not modify the output
-		// --reflink=auto should work in either case.
-		cmd := "cp --reflink=auto $in $out ; " + props.Post_install_cmd
+		cmd := "cp $in $out ; " + props.Post_install_cmd
 
 		args["bob_config"] = configPath
 		args["tool"] = tool
