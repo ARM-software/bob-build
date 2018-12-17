@@ -13,5 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .general import init_config, get_config, get_config_list, read_config, set_config, \
-    can_enable, warn_on_selected_depends
+from .general import init_config, get_config, get_config_bool, \
+    get_config_int, get_config_string,  get_config_list, read_config, \
+    set_config, can_enable, warn_on_selected_depends
