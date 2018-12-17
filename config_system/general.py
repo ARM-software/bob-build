@@ -576,6 +576,27 @@ def force_config(key, value, source):
 def get_config(key):
     return configuration['config'][key]
 
+def get_config_bool(key):
+    c = get_config(key)
+    assert c['datatype'] == 'bool', \
+           'Config option %s is not a bool (has type %s)' % (key, c['datatype'])
+    if c['value'] == 'y':
+        return True
+    else:
+        return False
+
+def get_config_int(key):
+    c = get_config(key)
+    assert c['datatype'] == 'int', \
+           'Config option %s is not an int (has type %s)' % (key, c['datatype'])
+    return int(c['value'])
+
+def get_config_string(key):
+    c = get_config(key)
+    assert c['datatype'] == 'string', \
+           'Config option %s is not a string (has type %s)' % (key, c['datatype'])
+    return c['value']
+
 def get_menu_depends(type, value):
     if type in ["config","menuconfig"]:
         return configuration['config'][value].get('depends')

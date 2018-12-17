@@ -20,7 +20,7 @@ import subprocess
 import re
 import tempfile
 
-from config_system import get_config, set_config
+from config_system import get_config_bool, get_config_string, set_config
 
 logger = logging.getLogger(__name__)
 
@@ -72,18 +72,18 @@ def compiler_config():
     '''
     extra_target_ldflags = ''
     extra_host_ldflags = ''
-    host_cxx = get_config('HOST_CXX_BINARY')['value']
+    host_cxx = get_config_string('HOST_CXX_BINARY')
     host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
 
     # No toolchain prefix indicates a native build
-    native_build = get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] == ''
-    if get_config('TARGET_TOOLCHAIN_CLANG')['value'] == 'y':
+    native_build = get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') == ''
+    if get_config_bool('TARGET_TOOLCHAIN_CLANG'):
         if native_build:
             target_libstdcxx_path = host_libstdcxx_path
         else:
-            cross_gcc = which_binary(get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] +
-                get_config('GNU_CC_BINARY')['value'])
-            flags = get_config('TARGET_GNU_FLAGS')['value'].split(" ")
+            cross_gcc = which_binary(get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') +
+                get_config_string('GNU_CC_BINARY'))
+            flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
             flags = list(filter(None, flags))
 
             cross_sysroot = check_output([cross_gcc] + flags + ['-print-sysroot'])
@@ -103,8 +103,8 @@ def compiler_config():
             if crosslib_path != '':
                 extra_target_ldflags += '-L{0} '.format(crosslib_path)
 
-    elif get_config('TARGET_TOOLCHAIN_GNU')['value'] == 'y':
-        flags = get_config('TARGET_GNU_FLAGS')['value'].split(" ")
+    elif get_config_bool('TARGET_TOOLCHAIN_GNU'):
+        flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
         flags = list(filter(None, flags))
         target_libstdcxx_path = check_output([host_cxx] + flags + ['-print-file-name=libstdc++.so'])
 
@@ -123,9 +123,8 @@ def compiler_config():
             if target_libstdcxx_dir not in ld_paths:
                 extra_target_ldflags += '-Wl,--enable-new-dtags -Wl,-rpath,{0} '.format(target_libstdcxx_dir)
 
-    builder_android = get_config('BUILDER_ANDROID')['value'] == 'y'
-    if not builder_android:
-        cross_ld = which_binary(get_config('TARGET_GNU_TOOLCHAIN_PREFIX')['value'] + 'ld')
+    if not get_config_bool('BUILDER_ANDROID'):
+        cross_ld = which_binary(get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') + 'ld')
         if cross_ld:
             cross_ld_version = check_output([cross_ld, '-version'])
             if cross_ld_version.count('gold') == 1:
@@ -150,16 +149,16 @@ def pkg_config():
     alphanumeric letters replaced by '_'.
     Where no package information exists the default configuration value will be used.
     '''
-    if get_config('PKG_CONFIG')['value'] == 'y':
-        pkg_config_path = get_config('PKG_CONFIG_PATH')['value']
+    if get_config_bool('PKG_CONFIG'):
+        pkg_config_path = get_config_string('PKG_CONFIG_PATH')
         if pkg_config_path != '':
             os.putenv('PKG_CONFIG_PATH', pkg_config_path)
 
-        pkg_config_sys_root = get_config('PKG_CONFIG_SYSROOT_DIR')['value']
+        pkg_config_sys_root = get_config_string('PKG_CONFIG_SYSROOT_DIR')
         if pkg_config_sys_root != '':
             os.putenv('PKG_CONFIG_SYSROOT_DIR', pkg_config_sys_root)
 
-        pkg_config_packages = get_config('PKG_CONFIG_PACKAGES')['value']
+        pkg_config_packages = get_config_string('PKG_CONFIG_PACKAGES')
 
         pkg_config_packages_list = pkg_config_packages.split(',')
 
@@ -188,6 +187,6 @@ def pkg_config():
 
 
 def plugin_exec():
-    if get_config('ALLOW_HOST_EXPLORE')['value'] == 'y':
+    if get_config_bool('ALLOW_HOST_EXPLORE'):
         compiler_config()
         pkg_config()
