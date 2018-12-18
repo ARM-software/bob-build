@@ -74,6 +74,7 @@ def compiler_config():
     extra_host_ldflags = ''
     host_cxx = get_config_string('HOST_CXX_BINARY')
     host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
+    target_libstdcxx_path = ""
 
     # No toolchain prefix indicates a native build
     native_build = get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') == ''
