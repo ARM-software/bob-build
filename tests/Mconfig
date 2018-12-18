@@ -29,7 +29,7 @@ endchoice
 
 ## Select toolchain for Bob
 choice
-	prompt "Toolchain"
+	prompt "Target toolchain"
 	default TARGET_TOOLCHAIN_CLANG if ANDROID
 	default TARGET_TOOLCHAIN_GNU
 
@@ -38,6 +38,9 @@ config TARGET_TOOLCHAIN_GNU
 
 config TARGET_TOOLCHAIN_CLANG
 	bool "Clang"
+
+config TARGET_TOOLCHAIN_ARM
+	bool "ARM"
 
 endchoice
 
@@ -74,6 +77,30 @@ config GNU_CC_BINARY
 config GNU_CXX_BINARY
 	string
 	default "g++"
+
+config ARM_CC_BINARY
+	string
+	default "armclang"
+
+config ARM_CXX_BINARY
+	string
+	default "armclang"
+
+config ARM_LD_BINARY
+	string
+	default "armlink"
+
+config ARM_AS_BINARY
+	string
+	default "armasm"
+
+config ARM_AR_BINARY
+	string
+	default "armar"
+
+config TARGET_ARM_FLAGS
+	string
+	default ""
 
 config TARGET_GNU_FLAGS
 	string
@@ -172,14 +199,22 @@ config HOST_TOOLCHAIN_GNU
 	bool "GNU"
 	help
 		Build with GNU toolchain.
+
+config HOST_TOOLCHAIN_ARM
+	bool "ARM"
+	help
+		Build with ARM toolchain.
+
 endchoice
 
 config HOST_CC_BINARY
 	string
 	default CLANG_CC_BINARY if HOST_TOOLCHAIN_CLANG
 	default GNU_CC_BINARY if HOST_TOOLCHAIN_GNU
+	default ARM_CC_BINARY if HOST_TOOLCHAIN_ARM
 
 config HOST_CXX_BINARY
 	string
 	default CLANG_CXX_BINARY if HOST_TOOLCHAIN_CLANG
 	default GNU_CXX_BINARY if HOST_TOOLCHAIN_GNU
+	default ARM_CXX_BINARY if HOST_TOOLCHAIN_ARM

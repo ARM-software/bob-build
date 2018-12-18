@@ -91,6 +91,30 @@ func (tc toolchainGnuCommon) getBinDirs() []string {
 	return []string{getToolchainBinaryPath(tc)}
 }
 
+type toolchainArm struct {
+	arBinary  string
+	asBinary  string
+	ccBinary  string
+	cxxBinary string
+	cflags    []string // Flags for both C and C++
+}
+
+func (tc toolchainArm) getAssembler() (string, []string) {
+	return tc.asBinary, []string{}
+}
+
+func (tc toolchainArm) getCCompiler() (string, []string) {
+	return tc.ccBinary, tc.cflags
+}
+
+func (tc toolchainArm) getCXXCompiler() (string, []string) {
+	return tc.cxxBinary, tc.cflags
+}
+
+func (tc toolchainArm) getArchiver() (string, []string) {
+	return tc.arBinary, []string{}
+}
+
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
 // directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
 // 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
@@ -126,6 +150,25 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
+	return
+}
+
+func newToolchainArmCross(config *bobConfig) (tc toolchainArm) {
+	props := config.Properties
+	tc.arBinary = props.GetString("arm_ar_binary")
+	tc.asBinary = props.GetString("arm_as_binary")
+	tc.ccBinary = props.GetString("arm_cc_binary")
+	tc.cxxBinary = props.GetString("arm_cxx_binary")
+	tc.cflags = strings.Split(props.GetString("target_arm_flags"), " ")
+	return
+}
+
+func newToolchainArmNative(config *bobConfig) (tc toolchainArm) {
+	props := config.Properties
+	tc.arBinary = props.GetString("arm_ar_binary")
+	tc.asBinary = props.GetString("arm_as_binary")
+	tc.ccBinary = props.GetString("arm_cc_binary")
+	tc.cxxBinary = props.GetString("arm_cxx_binary")
 	return
 }
 
@@ -256,6 +299,8 @@ func (tcs *toolchainSet) parseConfig(config *bobConfig) {
 		tcs.target = newToolchainClangCross(config)
 	} else if props.GetBool("target_toolchain_gnu") {
 		tcs.target = newToolchainGnuCross(config)
+	} else if props.GetBool("target_toolchain_arm") {
+		tcs.target = newToolchainArmCross(config)
 	} else {
 		panic(errors.New("no usable target compiler toolchain configured"))
 	}
@@ -264,6 +309,8 @@ func (tcs *toolchainSet) parseConfig(config *bobConfig) {
 		tcs.host = newToolchainClangNative(config)
 	} else if props.GetBool("host_toolchain_gnu") {
 		tcs.host = newToolchainGnuNative(config)
+	} else if props.GetBool("host_toolchain_arm") {
+		tcs.host = newToolchainArmNative(config)
 	} else {
 		panic(errors.New("no usable host compiler toolchain configured"))
 	}
