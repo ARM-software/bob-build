@@ -50,11 +50,6 @@ config TARGET_GNU_TOOLCHAIN_PREFIX
 config PKG_CONFIG
 	bool "PKG_CONFIG"
 
-config TARGET_GNU_TOOLCHAIN_VERSION
-	string "Version reported by the underlying GNU cross-compiler"
-	depends on TARGET_TOOLCHAIN_CLANG
-	default "4.9.1"
-
 config CLANG_CC_BINARY
 	string
 	default "clang"

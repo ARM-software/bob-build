@@ -89,8 +89,6 @@ def compiler_config():
 
             cross_sysroot = check_output([cross_gcc] + flags + ['-print-sysroot'])
             set_config('TARGET_SYSROOT', cross_sysroot)
-            cross_version = check_output([cross_gcc] + flags + ['-dumpversion'])
-            set_config('TARGET_GNU_TOOLCHAIN_VERSION', cross_version)
             target_libstdcxx_path = check_output([cross_gcc] + flags + ['-print-file-name=libstdc++.so'])
             crt_path = os.path.split(check_output([cross_gcc] + flags + ['-print-file-name=crt1.o']))[0]
             if crt_path != '':
