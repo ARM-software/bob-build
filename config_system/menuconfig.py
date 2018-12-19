@@ -316,8 +316,8 @@ def draw_main_menu(stdscr, window, menu, menu_bar):
 
         tmp_x = x
         remaining_width = max_width
-        for part in menu[menu_pos].get_styled_text(is_selected):
-            if len(part.text) > 0:
+        for part in menu[menu_pos].get_styled_text(is_selected, max_width):
+            if len(part.text) > 0 and remaining_width > 0:
                 window.addstr(y, tmp_x, part.text[:remaining_width], attr[part.style])
                 tmp_x += len(part.text)
                 remaining_width -= len(part.text)

@@ -658,6 +658,8 @@ class Menu(object):
         return self[self.selection]
 
 def display_value(value, datatype):
+    if datatype == "int":
+        return str(value)
     if datatype != "bool":
         return value
     if value == 'y':
@@ -681,10 +683,14 @@ class MenuItem(object):
         self.value = value
 
     # Return a list of StyledText objects
-    def get_styled_text(self, is_selected):
+    def get_styled_text(self, is_selected, max_width):
         text_parts = []
         if self.type == "config":
             config = get_config(self.value)
+
+            indent = config.get("depends_indent") or 0;
+            # Display "(new)" next to menu options that have no previously selected value
+            new_text = " (new)" if config.get('is_new') else ""
 
             show_value = display_value(config['value'], config['datatype'])
             if len(config['selected_by']) > 0:
@@ -693,7 +699,12 @@ class MenuItem(object):
                 text_parts.append(StyledText("-"))
             elif 'choice_group' in config or config['datatype'] != "bool":
                 text_parts.append(StyledText("("))
-                text_parts.append(StyledText("%s" % show_value))
+                trim_to = max_width - len(config['title']) - indent - len(new_text) - 3
+                trim_to = max(trim_to, 8) # we want to display something
+                if trim_to >= len(show_value):
+                    text_parts.append(StyledText("%s" % show_value))
+                else:
+                    text_parts.append(StyledText("%s..." % show_value[:(trim_to - 3)]))
                 text_parts.append(StyledText(")"))
             else:
                 text_parts.append(StyledText("["))
@@ -702,10 +713,6 @@ class MenuItem(object):
 
             if config['is_user_set']:
                 text_parts[1].style = 'option_set_by_user'
-
-            indent = config.get("depends_indent") or 0;
-            # Display "(new)" next to menu options that have no previously selected value
-            new_text = " (new)" if config.get('is_new') else ""
 
             text_parts.append(StyledText(" %s%s%s" % ("  " * (indent), config['title'], new_text)))
         elif self.type == "menu":
@@ -717,8 +724,15 @@ class MenuItem(object):
             if config['value'] == 'n':
                 # Submenu is empty
                 is_menu_enabled = '-'
+
             text_parts.append(StyledText("["))
-            text_parts.append(StyledText("%s" % display_value(config['value'], config['datatype'])))
+            show_value = display_value(config['value'], config['datatype'])
+            trim_to = max_width - len(config['title']) - 5
+            trim_to = max(trim_to, 8) # we want to display something
+            if trim_to >= len(show_value):
+                text_parts.append(StyledText("%s" % show_value))
+            else:
+                text_parts.append(StyledText("%s..." % show_value[:(trim_to - 5)]))
             text_parts.append(StyledText("]"))
             text_parts.append(StyledText(" %s ---%s" % (config['title'], is_menu_enabled)))
 
