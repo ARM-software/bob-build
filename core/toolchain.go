@@ -24,6 +24,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/ARM-software/bob-build/utils"
 )
 
 type toolchain interface {
@@ -52,6 +54,7 @@ func getToolchainInstallDir(tc toolchain) string {
 type toolchainGnu interface {
 	toolchain
 	getBinDirs() []string
+	getStdCxxHeaderDirs() []string
 }
 
 type toolchainGnuCommon struct {
@@ -89,6 +92,44 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
 	return []string{getToolchainBinaryPath(tc)}
+}
+
+// The libstdc++ headers shipped with GCC toolchains are stored, relative to
+// the `prefix-gcc` binary's location, in `../$ARCH/include/c++/$VERSION` and
+// `../$ARCH/include/c++/$VERSION/$ARCH`. This function returns $ARCH. This is
+// generally the same as the compiler prefix, but because the prefix can
+// contain the path to the compiler as well, we instead obtain it by trying the
+// `-print-multiarch` and `-dumpmachine` options.
+func (tc toolchainGnuCommon) getTargetTripleHeaderSubdir() string {
+	ccBinary, flags := tc.getCCompiler()
+	cmd := exec.Command(ccBinary, append(flags, "-print-multiarch")...)
+	bytes, err := cmd.Output()
+	if err == nil {
+		target := strings.TrimSpace(string(bytes))
+		if len(target) > 0 {
+			return target
+		}
+	}
+
+	// Some toolchains will output nothing for -print-multiarch, so try
+	// -dumpmachine if it didn't work (-dumpmachine works for most
+	// toolchains, but will ignore options like '-m32').
+	cmd = exec.Command(ccBinary, append(flags, "-dumpmachine")...)
+	bytes, err = cmd.Output()
+	if err != nil {
+		panic(fmt.Errorf("Couldn't get arch directory for compiler %s: %v", ccBinary, err))
+	}
+	return strings.TrimSpace(string(bytes))
+}
+
+func (tc toolchainGnuCommon) getVersion() string {
+	ccBinary, _ := tc.getCCompiler()
+	cmd := exec.Command(ccBinary, "-dumpversion")
+	bytes, err := cmd.Output()
+	if err != nil {
+		panic(fmt.Errorf("Couldn't get version for compiler %s: %v", ccBinary, err))
+	}
+	return strings.TrimSpace(string(bytes))
 }
 
 type toolchainArm struct {
@@ -131,6 +172,24 @@ func (tc toolchainGnuCross) getBinDirs() []string {
 	}
 
 	return dirs
+}
+
+func (tc toolchainGnuNative) getStdCxxHeaderDirs() []string {
+	installDir := getToolchainInstallDir(tc)
+	triple := tc.getTargetTripleHeaderSubdir()
+	return []string{
+		filepath.Join(installDir, "include", "c++", tc.getVersion()),
+		filepath.Join(installDir, "include", "c++", tc.getVersion(), triple),
+	}
+}
+
+func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
+	installDir := getToolchainInstallDir(tc)
+	triple := tc.getTargetTripleHeaderSubdir()
+	return []string{
+		filepath.Join(installDir, triple, "include", "c++", tc.getVersion()),
+		filepath.Join(installDir, triple, "include", "c++", tc.getVersion(), triple),
+	}
 }
 
 func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
@@ -177,7 +236,8 @@ type toolchainClangCommon struct {
 	clangBinary   string
 	clangxxBinary string
 
-	// Use the GNU toolchain's 'ar' and 'as'
+	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
+	// headers if required
 	gnu toolchainGnu
 
 	// Calculated during toolchain initialization:
@@ -191,9 +251,7 @@ type toolchainClangNative struct {
 
 type toolchainClangCross struct {
 	toolchainClangCommon
-	target           string
-	sysroot          string
-	toolchainVersion string
+	target string
 }
 
 func (tc toolchainClangCommon) getArchiver() (string, []string) {
@@ -226,9 +284,7 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainC
 	// path, so that Clang can find the correct linker. If the GNU toolchain
 	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
 	// be in Clang's search path, so these arguments have no effect.
-	for _, dir := range tc.gnu.getBinDirs() {
-		tc.cflags = append(tc.cflags, "-B"+dir)
-	}
+	tc.cflags = append(tc.cflags, utils.PrefixAll(tc.gnu.getBinDirs(), "-B")...)
 
 	return
 }
@@ -250,24 +306,16 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 
 	props := config.Properties
 	tc.target = props.GetString("target_clang_triple")
-	tc.sysroot = props.GetString("target_sysroot")
-	tc.toolchainVersion = props.GetString("target_gnu_toolchain_version")
+	sysroot := props.GetString("target_sysroot")
 
-	if tc.sysroot != "" {
+	if sysroot != "" {
 		if tc.target == "" {
 			panic(errors.New("TARGET_CLANG_TRIPLE is not set"))
 		}
-		if tc.toolchainVersion == "" {
-			panic(errors.New("TARGET_GNU_TOOLCHAIN_VERSION is not set"))
-		}
-		tc.cflags = append(tc.cflags, "--sysroot", tc.sysroot)
+		tc.cflags = append(tc.cflags, "--sysroot", sysroot)
 
 		tc.cxxflags = append(tc.cxxflags,
-			"-isystem", fmt.Sprintf("%s/../include/c++/%s",
-				tc.sysroot, tc.toolchainVersion),
-			"-isystem", fmt.Sprintf("%s/../include/c++/%s/%s",
-				tc.sysroot, tc.toolchainVersion,
-				tc.target))
+			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	}
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
