@@ -16,6 +16,7 @@
 # limitations under the License.
 
 set -e
+trap 'echo "*** Unexpected error ***"' ERR
 
 ORIG_PWD="$(pwd)"
 
@@ -44,5 +45,15 @@ done
 
 # Move to the working directory
 cd "${WORKDIR}"
-"${BOB_DIR}/config_system/update_config.py" -d "${SRCDIR}/Mconfig" ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} -o "${BUILDDIR}/${CONFIGNAME}.tmp" "${ARG_TARGET[@]}"
+exit_status=0
+
+"${BOB_DIR}/config_system/update_config.py" -d "${SRCDIR}/Mconfig" ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} -o "${BUILDDIR}/${CONFIGNAME}.tmp" "${ARG_TARGET[@]}" || exit_status=$?
+
+# when warnings/errors occurred we still want to sync settings
 rsync -I -c "${BUILDDIR}/${CONFIGNAME}.tmp" "${BUILDDIR}/${CONFIGNAME}"
+
+if [ "$exit_status" -eq "1" ]; then # warnings occurred
+    exit 0
+else
+    exit $exit_status
+fi

@@ -103,4 +103,10 @@ for plugin in args.plugin:
 write_config(args.output)
 
 issues = counter.errors() + counter.criticals()
-sys.exit(0 if issues == 0 else 1)
+warnings = counter.warnings()
+if issues > 1:
+    sys.exit(2)
+elif warnings > 0:
+    sys.exit(1)
+else:
+    sys.exit(0)
