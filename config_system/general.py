@@ -461,7 +461,7 @@ def set_config(key, value, is_user_set = True):
         elif config[key]['datatype'] == 'int':
             # Must convert to an integer
             try:
-                int(value)
+                value = int(value)
             except ValueError:
                 logger.warn("Ignoring integer configuration option %s with non-integer value '%s'" % (key, value))
                 return
@@ -477,14 +477,15 @@ def set_config(key, value, is_user_set = True):
         else:
             config[key]['requested_value'] = value
 
-    if value == 'n' and len(config[key]['selected_by']) > 0:
-        # Option is forced, so cannot be turned off
-        return
-    if value == 'y' and not can_enable(config[key].get('depends')):
-        # Option is unavailable, so cannot be turned on. However if the
-        # option is selected by another we force it on regardless
-        if len(config[key]['selected_by']) == 0:
+    if config[key]['datatype'] == 'bool':
+        if value == 'n' and len(config[key]['selected_by']) > 0:
+            # Option is forced, so cannot be turned off
             return
+        if value == 'y' and not can_enable(config[key].get('depends')):
+            # Option is unavailable, so cannot be turned on. However if the
+            # option is selected by another we force it on regardless
+            if len(config[key]['selected_by']) == 0:
+                return
 
     config[key]['value'] = value
     if is_user_set:
@@ -769,26 +770,46 @@ class MenuItem(object):
             config = get_config(self.value)
             return config['datatype'] in ["string","int","hex"]
         return False
-    def set_bool(self, new_value):
+    def set(self):
+        """Sets a boolean option to true"""
         if self.type in ["config", "menuconfig"]:
             config = get_config(self.value)
-            if len(config['selected_by']) > 0:  # menuconfig shouldn't mark set by user if option can't be changed
+            if len(config['selected_by']) > 0:
+                # menuconfig shouldn't mark set by user if option can't be changed
                 return
 
             if config['datatype'] == 'bool':
-                set_config(self.value, new_value)
+                set_config(self.value, 'y')
+    def clear(self):
+        """Sets a boolean option to false"""
+        if self.type in ["config", "menuconfig"]:
+            config = get_config(self.value)
+            if len(config['selected_by']) > 0:
+                # menuconfig shouldn't mark set by user if option can't be changed
+                return
+
+            if config['datatype'] == 'bool':
+                set_config(self.value, 'n')
     def toggle(self):
         if self.type in ["config","menuconfig"]:
             config = get_config(self.value)
             if config['datatype'] != 'bool':
                 pass # Ignore
             elif config['value'] == 'y':
-                self.set_bool('n')
+                self.clear()
             else:
-                self.set_bool('y')
+                self.set()
     def get_value(self):
-        return get_config(self.value)['value']
+        """Always return a string representation"""
+        value = get_config(self.value)['value']
+        if get_config(self.value)['datatype'] == 'int':
+            value = str(value)
+        return value
     def set_value(self, new_value):
+        """
+        set_value operates on any kind of option. new_value will always be a
+        string, and set_config will do the appropriate conversions.
+        """
         set_config(self.value, new_value)
     def can_enable(self):
         if self.type == "config":
@@ -806,7 +827,7 @@ class MenuItem(object):
         # Choice menus can use select
         if (self.type in ["config","menuconfig"] and
                 "choice_group" in get_config(self.value)):
-            self.set_bool('y')
+            self.set()
             return True
         return False
     def get_help(self):
