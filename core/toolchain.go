@@ -35,26 +35,54 @@ type toolchain interface {
 	getArchiver() (tool string, flags []string)
 }
 
-func getToolchainBinaryPath(tc toolchain) string {
-	ccBinary, _ := tc.getCCompiler()
-	if !filepath.IsAbs(ccBinary) {
-		path, err := exec.LookPath(ccBinary)
+func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
+	firstDir := filepath.Clean(filepath.Dir(firstHit))
+	path := os.Getenv("PATH")
+	foundFirstHit := false
+	for _, dir := range filepath.SplitList(path) {
+		if foundFirstHit {
+			if fname := filepath.Join(dir, toolUnqualified); utils.IsExecutable(fname) {
+				return fname, nil
+			}
+		} else if filepath.Clean(dir) == firstDir {
+			foundFirstHit = true
+		}
+	}
+	return "", &exec.Error{toolUnqualified, exec.ErrNotFound}
+}
+
+func getToolPath(toolUnqualified string) (toolPath string) {
+	if filepath.IsAbs(toolUnqualified) {
+		toolPath = toolUnqualified
+		toolUnqualified = filepath.Base(toolUnqualified)
+	} else {
+		path, err := exec.LookPath(toolUnqualified)
 		if err != nil {
 			panic(err)
 		}
-		ccBinary = path
+		toolPath = path
 	}
-	return filepath.Dir(ccBinary)
-}
 
-func getToolchainInstallDir(tc toolchain) string {
-	return filepath.Dir(getToolchainBinaryPath(tc))
+	// If the target is a ccache symlink, try the lookup again, but
+	// ignoring the directory in PATH that the symlink was found in.
+	if fi, err := os.Lstat(toolPath); err == nil && (fi.Mode()&os.ModeSymlink != 0) {
+		linkTarget, err := os.Readlink(toolPath)
+		if err == nil && filepath.Base(linkTarget) == "ccache" {
+			toolPath, err = lookPathSecond(toolUnqualified, toolPath)
+			if err != nil {
+				panic(fmt.Errorf("%s is a ccache symlink, and could not find the actual binary",
+					toolPath))
+			}
+		}
+	}
+	return
 }
 
 type toolchainGnu interface {
 	toolchain
 	getBinDirs() []string
 	getStdCxxHeaderDirs() []string
+	getInstallDir() string
 }
 
 type toolchainGnuCommon struct {
@@ -63,6 +91,7 @@ type toolchainGnuCommon struct {
 	gccBinary string
 	gxxBinary string
 	cflags    []string // Flags for both C and C++
+	binDir    string
 }
 
 type toolchainGnuNative struct {
@@ -91,7 +120,7 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 }
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
-	return []string{getToolchainBinaryPath(tc)}
+	return []string{tc.binDir}
 }
 
 // The libstdc++ headers shipped with GCC toolchains are stored, relative to
@@ -132,6 +161,10 @@ func (tc toolchainGnuCommon) getVersion() string {
 	return strings.TrimSpace(string(bytes))
 }
 
+func (tc toolchainGnuCommon) getInstallDir() string {
+	return filepath.Dir(tc.binDir)
+}
+
 type toolchainArm struct {
 	arBinary  string
 	asBinary  string
@@ -166,7 +199,7 @@ func (tc toolchainGnuCross) getBinDirs() []string {
 
 	target := strings.TrimSuffix(tc.prefix, "-")
 
-	unprefixedBinDir := filepath.Join(getToolchainInstallDir(tc), target, "bin")
+	unprefixedBinDir := filepath.Join(tc.getInstallDir(), target, "bin")
 	if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
 		dirs = append(dirs, unprefixedBinDir)
 	}
@@ -175,7 +208,7 @@ func (tc toolchainGnuCross) getBinDirs() []string {
 }
 
 func (tc toolchainGnuNative) getStdCxxHeaderDirs() []string {
-	installDir := getToolchainInstallDir(tc)
+	installDir := tc.getInstallDir()
 	triple := tc.getTargetTripleHeaderSubdir()
 	return []string{
 		filepath.Join(installDir, "include", "c++", tc.getVersion()),
@@ -184,7 +217,7 @@ func (tc toolchainGnuNative) getStdCxxHeaderDirs() []string {
 }
 
 func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
-	installDir := getToolchainInstallDir(tc)
+	installDir := tc.getInstallDir()
 	triple := tc.getTargetTripleHeaderSubdir()
 	return []string{
 		filepath.Join(installDir, triple, "include", "c++", tc.getVersion()),
@@ -198,6 +231,7 @@ func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 	tc.asBinary = props.GetString("as_binary")
 	tc.gccBinary = props.GetString("gnu_cc_binary")
 	tc.gxxBinary = props.GetString("gnu_cxx_binary")
+	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
 
@@ -209,6 +243,7 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
+	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
 
@@ -278,7 +313,7 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainC
 
 	// Tell Clang where the GNU toolchain is installed, so it can use its
 	// headers and libraries, for example, if we are using libstdc++.
-	tc.cflags = append(tc.cflags, "--gcc-toolchain="+getToolchainInstallDir(tc.gnu))
+	tc.cflags = append(tc.cflags, "--gcc-toolchain="+tc.gnu.getInstallDir())
 
 	// Add the GNU toolchain's binary directories to Clang's binary search
 	// path, so that Clang can find the correct linker. If the GNU toolchain
