@@ -578,9 +578,9 @@ def main(stdscr):
                 prompt(stdscr, window, selection.get_help())
             menu_bar.selection = 0
         elif c == ord('y'):
-            selection.set_bool('y')
+            selection.set()
         elif c == ord('n'):
-            selection.set_bool('n')
+            selection.clear()
         elif c == ord(' '):
             selection.toggle()
         elif  c == ord('r'):
