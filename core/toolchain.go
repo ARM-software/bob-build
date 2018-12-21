@@ -295,7 +295,7 @@ func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 
 	// Combine cflags and cxxflags once here, to avoid appending during
 	// every call to getCXXCompiler().
-	tc.cxxflags = append(tc.cflags, tc.cxxflags...)
+	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
 	return
 }
@@ -323,7 +323,7 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 
 	// Combine cflags and cxxflags once here, to avoid appending during
 	// every call to getCXXCompiler().
-	tc.cxxflags = append(tc.cflags, tc.cxxflags...)
+	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
 	return
 }

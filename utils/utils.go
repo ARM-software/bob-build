@@ -190,3 +190,24 @@ func Trim(args []string) []string {
 	}
 	return out
 }
+
+// Join multiple lists of strings. This replaces appending multiple arrays
+// together before calling strings.Join().
+func Join(lists ...[]string) (joined string) {
+	const sep = " "
+	first := true
+
+	for _, list := range lists {
+		listJoined := strings.Join(list, sep)
+		if len(listJoined) > 0 {
+			if !first {
+				joined += sep
+			} else {
+				first = false
+			}
+			joined += listJoined
+		}
+	}
+
+	return
+}
