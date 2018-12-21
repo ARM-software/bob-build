@@ -178,3 +178,20 @@ func Test_Trim(t *testing.T) {
 	assertArraysEqual(t, Trim([]string{"", " hello ", "world", "	"}),
 		[]string{"hello", "world"})
 }
+
+func Test_Join(t *testing.T) {
+	assertTrue(t,
+		Join() == "",
+		"Empty join should yield an empty string")
+	assertTrue(t,
+		Join([]string{"Hello", "world"}) == "Hello world",
+		"Didn't concatenate two words")
+
+	// Here, there's a 3rd space before "spaces", because strings.Join()
+	// adds one for the empty string, but utils.Join() doesn't.
+	assertTrue(t,
+		Join([]string{"this is", " surrounded by "},
+			[]string{"", "spaces"}, []string{}) ==
+			"this is  surrounded by   spaces",
+		"Surrounding space not handled")
+}

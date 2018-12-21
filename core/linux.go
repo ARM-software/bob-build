@@ -272,10 +272,10 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 	cc, cctargetflags := tc.getCCompiler()
 	cxx, cxxtargetflags := tc.getCXXCompiler()
 
-	ctx.Variable(pctx, "asflags", strings.Join(append(astargetflags, l.Properties.Asflags...), " "))
-	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
-	ctx.Variable(pctx, "conlyflags", strings.Join(append(cctargetflags, l.Properties.Conlyflags...), " "))
-	ctx.Variable(pctx, "cxxflags", strings.Join(append(cxxtargetflags, l.Properties.Cxxflags...), " "))
+	ctx.Variable(pctx, "asflags", utils.Join(astargetflags, l.Properties.Asflags))
+	ctx.Variable(pctx, "cflags", utils.Join(cflagsList))
+	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags, l.Properties.Conlyflags))
+	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags, l.Properties.Cxxflags))
 
 	var objectFiles []string
 	for _, source := range srcs {
@@ -526,12 +526,12 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 	args := map[string]string{
 		"build_wrapper":     buildWrapper,
 		"compiler":          compiler,
-		"ldflags":           strings.Join(append(cctargetflags, ldflags...), " "),
+		"ldflags":           utils.Join(cctargetflags, ldflags),
 		"shared_libs_dir":   l.getSharedLibraryDir(),
-		"shared_libs_flags": strings.Join(sharedLibFlags, " "),
-		"static_libs":       strings.Join(l.GetStaticLibs(ctx), " "),
-		"ldlibs":            strings.Join(l.Properties.Ldlibs, " "),
-		"whole_static_libs": strings.Join(l.GetWholeStaticLibs(ctx), " "),
+		"shared_libs_flags": utils.Join(sharedLibFlags),
+		"static_libs":       utils.Join(l.GetStaticLibs(ctx)),
+		"ldlibs":            utils.Join(l.Properties.Ldlibs),
+		"whole_static_libs": utils.Join(l.GetWholeStaticLibs(ctx)),
 	}
 	return args
 }
