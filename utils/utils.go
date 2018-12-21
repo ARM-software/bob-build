@@ -18,6 +18,7 @@
 package utils
 
 import (
+	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -210,4 +211,12 @@ func Join(lists ...[]string) (joined string) {
 	}
 
 	return
+}
+
+// IsExecutable returns true if the given file exists and is executable
+func IsExecutable(fname string) bool {
+	if fi, err := os.Stat(fname); !os.IsNotExist(err) && (fi.Mode()&0111 != 0) {
+		return true
+	}
+	return false
 }
