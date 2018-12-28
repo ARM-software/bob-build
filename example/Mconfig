@@ -39,6 +39,9 @@ config TARGET_TOOLCHAIN_GNU
 config TARGET_TOOLCHAIN_CLANG
 	bool "Clang"
 
+config TARGET_TOOLCHAIN_ARMCLANG
+	bool "Arm Compiler 6"
+
 endchoice
 
 ## Toolchain prefix needed for Bob (for gcc)
@@ -81,6 +84,30 @@ config AR_BINARY
 config AS_BINARY
 	string
 	default "as"
+
+config ARMCLANG_CC_BINARY
+	string
+	default "armclang"
+
+config ARMCLANG_CXX_BINARY
+	string
+	default "armclang"
+
+config ARMCLANG_LD_BINARY
+	string
+	default "armlink"
+
+config ARMCLANG_AS_BINARY
+	string
+	default "armasm"
+
+config ARMCLANG_AR_BINARY
+	string
+	default "armar"
+
+config TARGET_ARMCLANG_FLAGS
+	string
+	default ""
 
 # Filled in by host_explore.py during the configuration step
 config EXTRA_HOST_LDFLAGS
@@ -135,6 +162,12 @@ config HOST_TOOLCHAIN_GNU
 	bool "GNU"
 	help
 		Build with GNU toolchain.
+
+config HOST_TOOLCHAIN_ARMCLANG
+	bool "Arm Compiler 6"
+	help
+		Build with the Arm Compiler.
+
 endchoice
 
 config HOST_CC_BINARY
