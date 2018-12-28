@@ -39,8 +39,8 @@ config TARGET_TOOLCHAIN_GNU
 config TARGET_TOOLCHAIN_CLANG
 	bool "Clang"
 
-config TARGET_TOOLCHAIN_ARM
-	bool "ARM"
+config TARGET_TOOLCHAIN_ARMCLANG
+	bool "Arm Compiler 6"
 
 endchoice
 
@@ -73,30 +73,6 @@ config GNU_CXX_BINARY
 	string
 	default "g++"
 
-config ARM_CC_BINARY
-	string
-	default "armclang"
-
-config ARM_CXX_BINARY
-	string
-	default "armclang"
-
-config ARM_LD_BINARY
-	string
-	default "armlink"
-
-config ARM_AS_BINARY
-	string
-	default "armasm"
-
-config ARM_AR_BINARY
-	string
-	default "armar"
-
-config TARGET_ARM_FLAGS
-	string
-	default ""
-
 config TARGET_GNU_FLAGS
 	string
 	default ""
@@ -108,6 +84,30 @@ config AR_BINARY
 config AS_BINARY
 	string
 	default "as"
+
+config ARMCLANG_CC_BINARY
+	string
+	default "armclang"
+
+config ARMCLANG_CXX_BINARY
+	string
+	default "armclang"
+
+config ARMCLANG_LD_BINARY
+	string
+	default "armlink"
+
+config ARMCLANG_AS_BINARY
+	string
+	default "armasm"
+
+config ARMCLANG_AR_BINARY
+	string
+	default "armar"
+
+config TARGET_ARMCLANG_FLAGS
+	string
+	default ""
 
 # Filled in by host_explore.py during the configuration step
 config EXTRA_HOST_LDFLAGS
@@ -195,10 +195,10 @@ config HOST_TOOLCHAIN_GNU
 	help
 		Build with GNU toolchain.
 
-config HOST_TOOLCHAIN_ARM
-	bool "ARM"
+config HOST_TOOLCHAIN_ARMCLANG
+	bool "Arm Compiler 6"
 	help
-		Build with ARM toolchain.
+		Build with the Arm Compiler.
 
 endchoice
 
@@ -206,10 +206,10 @@ config HOST_CC_BINARY
 	string
 	default CLANG_CC_BINARY if HOST_TOOLCHAIN_CLANG
 	default GNU_CC_BINARY if HOST_TOOLCHAIN_GNU
-	default ARM_CC_BINARY if HOST_TOOLCHAIN_ARM
+	default ARMCLANG_CC_BINARY if HOST_TOOLCHAIN_ARMCLANG
 
 config HOST_CXX_BINARY
 	string
 	default CLANG_CXX_BINARY if HOST_TOOLCHAIN_CLANG
 	default GNU_CXX_BINARY if HOST_TOOLCHAIN_GNU
-	default ARM_CXX_BINARY if HOST_TOOLCHAIN_ARM
+	default ARMCLANG_CXX_BINARY if HOST_TOOLCHAIN_ARMCLANG
