@@ -17,10 +17,11 @@
 
 from __future__ import print_function
 
+import hashlib
 import json
-import os.path
-import sys
 import logging
+import os
+import sys
 
 # The config system is in the directory above, so add it to the python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -56,8 +57,7 @@ def generate_config_json(database_fname, config_fname, ignore_missing):
             sys.stderr.write("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
             sys.exit(1)
 
-    return json.dumps({"Features": features, "Properties": properties},
-                      sort_keys=True, indent=4, separators=(',', ': '))
+    return features, properties
 
 
 # Write 'text' to file 'fname' only if the content will change.
@@ -73,6 +73,11 @@ def write_if_different(fname, text):
         with open(fname, "w") as fp:
             fp.write(text)
 
+def hash_env():
+    m = hashlib.sha256()
+    for k in sorted(os.environ.keys()):
+        m.update(k + "=" + os.environ[k] + "\n")
+    return m.hexdigest()
 
 def main():
     import argparse
@@ -93,7 +98,11 @@ def main():
         print("Error: No such file: %s" % args.config)
         sys.exit(1)
 
-    text = generate_config_json(args.database, args.config, args.ignore_missing)
+    features, properties = generate_config_json(args.database, args.config, args.ignore_missing)
+    properties["__bob_env_hash__"] = hash_env()
+
+    text = json.dumps({"Features": features, "Properties": properties},
+                      sort_keys=True, indent=4, separators=(',', ': '))
     write_if_different(args.output, text)
 
 

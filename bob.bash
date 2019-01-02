@@ -27,7 +27,10 @@ source "${BOOTSTRAP}"
 # Switch to the working directory
 cd "${WORKDIR}"
 
-# Generate config.go from Mconfig
+# Convert Mconfig into Go-readable JSON. Because this is run at every rebuild
+# (rather than every bootstrap or re-configuration), this also adds a hash of
+# the environment into the config, so that Bob is rerun and the Ninja is
+# updated if a relevant environment variable is changed.
 python "${BOB_DIR}/scripts/generate_config_json.py" --database "${SRCDIR}/Mconfig" --output "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS} "${BUILDDIR}/${CONFIGNAME}"
 
 # Source the pathtools script - we need bob_realpath for CCACHE_BASEDIR.
