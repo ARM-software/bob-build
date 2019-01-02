@@ -562,24 +562,21 @@ func (l *library) Implicits(ctx blueprint.ModuleContext) []string {
 	return implicits
 }
 
-// Return the parallelism that the current build environment can support
-func getParallelism() int {
-	// This environment variable is used to indicate available
-	// parallelism in a certain build farm. It needs to be used in
-	// preference to the detected number of CPUs
-	if str, ok := os.LookupEnv("MPDTI_BUILD_PARALLELISM"); ok {
+// Get the size of the link pool, to limit the number of concurrent link jobs,
+// as these are often memory-intensive. This can be overridden with an
+// environment variable.
+func getLinkParallelism() int {
+	if str, ok := os.LookupEnv("BOB_LINK_PARALLELISM"); ok {
 		if p, err := strconv.Atoi(str); err == nil {
 			return p
 		}
 	}
-	return runtime.NumCPU()
+	return (runtime.NumCPU() / 5) + 1
 }
-
-var parallelism = getParallelism()
 
 var linkPoolParams = blueprint.PoolParams{
 	Comment: "Limit the parallelization of linking, which is memory intensive",
-	Depth:   (getParallelism() / 5) + 1,
+	Depth:   getLinkParallelism(),
 }
 
 var linkPool = pctx.StaticPool("link", linkPoolParams)
