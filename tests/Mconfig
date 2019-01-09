@@ -1,4 +1,4 @@
-# Copyright 2016-2018 Arm Limited.
+# Copyright 2016-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,75 +49,34 @@ config TARGET_GNU_TOOLCHAIN_PREFIX
 	string
 	default ""
 
-## Various tools need to be defined for Bob
-config PKG_CONFIG
-	bool "PKG_CONFIG"
-
-config CLANG_CC_BINARY
+config TARGET_GNU_FLAGS
 	string
-	default "clang"
-
-config CLANG_CXX_BINARY
-	string
-	default "clang++"
+	default ""
 
 config TARGET_CLANG_TRIPLE
 	string
 	default "x86_64-linux-gnu"
 
-config GNU_CC_BINARY
-	string
-	default "gcc"
+source "bob/mconfig/toolchain.Mconfig"
 
-config GNU_CXX_BINARY
-	string
-	default "g++"
+config PKG_CONFIG
+	bool "Enable use of pkg-config"
+	help
+		When enabled, pkg-config is used to retrieve information
+		about the package(s) declared in PKG_CONFIG_PACKAGES.
+		PKG_CONFIG_PACKAGES contains a comma separated list of the packages.
+		For each package, pkg-config will be called to obtain
+		the cflags, linker paths and libraries. These will be assigned
+		to XXX_CFLAGS, XXX_LDFLAGS and XXX_LIBS respectively, where
+		XXX is the uppercase package name with any non alphanumeric letters
+		replaced by '_'.
 
-config TARGET_GNU_FLAGS
-	string
-	default ""
+		PKG_CONFIG_PATH and PKG_CONFIG_SYSROOT_DIR need to be setup
+		appropriately for pkg-config to use the information for the
+		target system.
 
-config AR_BINARY
-	string
-	default "ar"
-
-config AS_BINARY
-	string
-	default "as"
-
-config ARMCLANG_CC_BINARY
-	string
-	default "armclang"
-
-config ARMCLANG_CXX_BINARY
-	string
-	default "armclang"
-
-config ARMCLANG_LD_BINARY
-	string
-	default "armlink"
-
-config ARMCLANG_AS_BINARY
-	string
-	default "armasm"
-
-config ARMCLANG_AR_BINARY
-	string
-	default "armar"
-
-config TARGET_ARMCLANG_FLAGS
-	string
-	default ""
-
-# Filled in by host_explore.py during the configuration step
-config EXTRA_HOST_LDFLAGS
-	string "Extra Host Linker options"
-
-config EXTRA_TARGET_LDFLAGS
-	string "Extra Target Linker options"
-
-config EXTRA_LD_LIBRARY_PATH
-	string "Extra LD_LIBRARY_PATH Entries"
+		Where no package information exists the default configuration
+		value will be used.
 
 ## Bob needs sysroot for clang
 config TARGET_SYSROOT
@@ -161,16 +120,6 @@ config ALWAYS_ENABLED_FEATURE
 	bool
 	default y
 
-config TARGET_CC_BINARY
-	string
-	default CLANG_CC_BINARY if TARGET_TOOLCHAIN_CLANG
-	default GNU_CC_BINARY if TARGET_TOOLCHAIN_GNU
-
-config TARGET_CXX_BINARY
-	string
-	default CLANG_CXX_BINARY if TARGET_TOOLCHAIN_CLANG
-	default GNU_CXX_BINARY if TARGET_TOOLCHAIN_GNU
-
 choice
 	prompt "Host toolchain"
 	default HOST_TOOLCHAIN_CLANG if TARGET_TOOLCHAIN_CLANG
@@ -201,15 +150,3 @@ config HOST_TOOLCHAIN_ARMCLANG
 		Build with the Arm Compiler.
 
 endchoice
-
-config HOST_CC_BINARY
-	string
-	default CLANG_CC_BINARY if HOST_TOOLCHAIN_CLANG
-	default GNU_CC_BINARY if HOST_TOOLCHAIN_GNU
-	default ARMCLANG_CC_BINARY if HOST_TOOLCHAIN_ARMCLANG
-
-config HOST_CXX_BINARY
-	string
-	default CLANG_CXX_BINARY if HOST_TOOLCHAIN_CLANG
-	default GNU_CXX_BINARY if HOST_TOOLCHAIN_GNU
-	default ARMCLANG_CXX_BINARY if HOST_TOOLCHAIN_ARMCLANG
