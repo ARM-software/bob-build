@@ -34,7 +34,9 @@ order to use Bob. It contains the following files:
 |Android.mk.blueprint     | Template Android makefile |
 |generate_android_inc.bash| Android script |
 
-If you want to make this build, just add a `hello_world.cpp`.
+If you want to make this build, just add a `hello_world.cpp`, and, if
+necessary, update the path in any `source` statements in `example/Mconfig` to
+reflect the location of Bob inside the example project.
 
 ## Bootstrap scripts
 

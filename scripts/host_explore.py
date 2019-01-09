@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,7 +72,13 @@ def compiler_config():
     '''
     extra_target_ldflags = ''
     extra_host_ldflags = ''
-    host_cxx = get_config_string('HOST_CXX_BINARY')
+    if get_config_bool('HOST_TOOLCHAIN_GNU'):
+        host_cxx = get_config_string('GNU_CXX_BINARY')
+    elif get_config_bool('HOST_TOOLCHAIN_CLANG'):
+        host_cxx = get_config_string('CLANG_CXX_BINARY')
+    elif get_config_bool('HOST_TOOLCHAIN_ARMCLANG'):
+        host_cxx = get_config_string('ARMCLANG_CXX_BINARY')
+
     host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
     target_libstdcxx_path = ""
 
