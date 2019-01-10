@@ -48,7 +48,7 @@ func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
 			foundFirstHit = true
 		}
 	}
-	return "", &exec.Error{toolUnqualified, exec.ErrNotFound}
+	return "", &exec.Error{Name: toolUnqualified, Err: exec.ErrNotFound}
 }
 
 func getToolPath(toolUnqualified string) (toolPath string) {
