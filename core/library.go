@@ -200,7 +200,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 			buildWrapper = strings.Replace(buildWrapper, "${"+k+"}", v, -1)
 		}
 
-		return buildWrapper, append(l.Build_wrapper_deps, files...)
+		return buildWrapper, utils.NewStringSlice(l.Build_wrapper_deps, files)
 	}
 
 	return "", []string{}
@@ -832,7 +832,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 		mainBuild.ResolvedStaticLibs = sortedStaticLibs
 	}
 
-	alreadyAddedStaticLibsDependencies := append(mainBuild.Static_libs, mainBuild.Export_static_libs...)
+	alreadyAddedStaticLibsDependencies := utils.NewStringSlice(mainBuild.Static_libs, mainBuild.Export_static_libs)
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, alreadyAddedStaticLibsDependencies)
 
 	mctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)

@@ -363,7 +363,7 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext) []inout {
 	var io inout
 	g := getBackend(ctx)
 	io.srcIn = m.generateCommon.Properties.GetSrcs(ctx)
-	io.genIn = append(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx)...)
+	io.genIn = utils.NewStringSlice(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx))
 	io.out = m.outputs(g)
 	if m.Properties.Depfile != "" {
 		io.depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), m.Properties.Depfile)
@@ -449,7 +449,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
 
 		inouts = append(inouts, inout{ins, empty, outs, depfile, implicitSrcs})
 	}
-	for _, src := range append(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx)...) {
+	for _, src := range utils.NewStringSlice(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx)) {
 		ins := []string{src}
 		outs := []string{}
 		depfile := ""

@@ -18,6 +18,7 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 	"unicode"
 )
@@ -47,6 +48,7 @@ func Test_IsSource(t *testing.T) {
 func assertArraysEqual(t *testing.T, test []string, correct []string) {
 	if len(test) != len(correct) {
 		t.Errorf("Length mismatch: %d != %d", len(test), len(correct))
+		return
 	}
 
 	for i := range test {
@@ -194,4 +196,65 @@ func Test_Join(t *testing.T) {
 			[]string{"", "spaces"}, []string{}) ==
 			"this is  surrounded by   spaces",
 		"Surrounding space not handled")
+}
+
+func Test_NewStringSlice(t *testing.T) {
+	// Check problematicAppendExample to understand more what issue we faced.
+	// arrA has capacity of exactly the number of elements it's created with
+	arrA := []string{"1", "2", "3", "4"} // A = [1 2 3 4] (cap 4)
+
+	// Append one element - the capacity is doubled to cope with future expansion
+	arrA = append(arrA, "5") // A = [1 2 3 4 5] (cap 8)
+
+	arrB := NewStringSlice(arrA, []string{"B"})
+	// A = [1 2 3 4 5]
+	// B = [1 2 3 4 5 B]
+
+	// arrC := append(arrA, "C") <-- problematic usage
+	// A = [1 2 3 4 5]
+	// B = [1 2 3 4 5 C] // this could be an issue if someone isn't careful
+	// C = [1 2 3 4 5 C]
+
+	arrC := NewStringSlice(arrA, []string{"C"})
+	// A = [1 2 3 4 5]
+	// B = [1 2 3 4 5 B] // as expected
+	// C = [1 2 3 4 5 C]
+	fmt.Printf("A = %v\n", arrA)
+	// B = [1 2 3 4 5 C]
+	fmt.Printf("B = %v\n", arrB)
+	// C = [1 2 3 4 5 C]
+	fmt.Printf("C = %v\n", arrC)
+	assertArraysEqual(t, arrC, []string{"1", "2", "3", "4", "5", "C"})
+	assertArraysEqual(t, arrB, []string{"1", "2", "3", "4", "5", "B"})
+}
+
+// Below example code with problematic append() call, this is why we have utils.NewStringSlice
+func problematicAppendExample(t *testing.T) {
+	// arrA has capacity of exactly the number of elements it's created with
+	arrA := []string{"1", "2", "3", "4"}
+
+	fmt.Println("----")
+	// A = [1 2 3 4] (cap 4)
+	fmt.Printf("A = %v (cap %d)\n", arrA, cap(arrA))
+
+	// Append one element - the capacity is doubled to cope with future expansion
+	arrA = append(arrA, "5")
+	// A = [1 2 3 4 5] (cap 8)
+	fmt.Printf("A = %v (cap %d)\n", arrA, cap(arrA))
+
+	arrB := append(arrA, "B")
+	fmt.Println("----")
+	// A = [1 2 3 4 5]
+	fmt.Printf("A = %v\n", arrA)
+	// B = [1 2 3 4 5 B]
+	fmt.Printf("B = %v\n", arrB)
+
+	arrC := append(arrA, "C")
+	fmt.Println("----")
+	// A = [1 2 3 4 5]
+	fmt.Printf("A = %v\n", arrA)
+	// B = [1 2 3 4 5 C]
+	fmt.Printf("B = %v\n", arrB)
+	// C = [1 2 3 4 5 C]
+	fmt.Printf("C = %v\n", arrC)
 }

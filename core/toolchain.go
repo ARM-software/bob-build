@@ -131,7 +131,7 @@ func (tc toolchainGnuCommon) getBinDirs() []string {
 // `-print-multiarch` and `-dumpmachine` options.
 func (tc toolchainGnuCommon) getTargetTripleHeaderSubdir() string {
 	ccBinary, flags := tc.getCCompiler()
-	cmd := exec.Command(ccBinary, append(flags, "-print-multiarch")...)
+	cmd := exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-print-multiarch"})...)
 	bytes, err := cmd.Output()
 	if err == nil {
 		target := strings.TrimSpace(string(bytes))
@@ -143,7 +143,7 @@ func (tc toolchainGnuCommon) getTargetTripleHeaderSubdir() string {
 	// Some toolchains will output nothing for -print-multiarch, so try
 	// -dumpmachine if it didn't work (-dumpmachine works for most
 	// toolchains, but will ignore options like '-m32').
-	cmd = exec.Command(ccBinary, append(flags, "-dumpmachine")...)
+	cmd = exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-dumpmachine"})...)
 	bytes, err = cmd.Output()
 	if err != nil {
 		panic(fmt.Errorf("Couldn't get arch directory for compiler %s: %v", ccBinary, err))
