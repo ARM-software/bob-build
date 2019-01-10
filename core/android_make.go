@@ -213,8 +213,7 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	includes = append(includes, m.Properties.Include_dirs...)
 	includes = append(includes, m.Properties.Export_include_dirs...)
 
-	exportIncludeDirs := m.Properties.Export_include_dirs
-	exportIncludeDirs = append(exportIncludeDirs, utils.PrefixDirs(m.Properties.Export_local_include_dirs, "$(LOCAL_PATH)")...)
+	exportIncludeDirs := utils.NewStringSlice(m.Properties.Export_include_dirs, utils.PrefixDirs(m.Properties.Export_local_include_dirs, "$(LOCAL_PATH)"))
 
 	// Handle generated headers
 	if len(m.Properties.Generated_headers) > 0 {
@@ -263,11 +262,11 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	} else {
 		text += "LOCAL_CLANG := false\n"
 	}
-	srcs := append(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials...)
+	srcs := utils.NewStringSlice(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials)
 	text += "LOCAL_SRC_FILES := " + strings.Join(srcs, " ") + "\n"
 
 	text += "LOCAL_C_INCLUDES := " + strings.Join(includes, " ") + "\n"
-	cflagsList := append(m.Properties.Cflags, m.Properties.Export_cflags...)
+	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
 	_, exportedCflags := m.GetExportedVariables(ctx)
 	cflagsList = append(cflagsList, exportedCflags...)
 	text += "LOCAL_CFLAGS := " + strings.Join(utils.Filter(cflagsList, moduleCompileFlags), " ") + "\n"
@@ -275,8 +274,8 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	text += "LOCAL_CONLYFLAGS := " + strings.Join(utils.Filter(m.Properties.Conlyflags, moduleCompileFlags), " ") + "\n"
 
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
-	text += specifyCompilerStandard("LOCAL_C_STD", append(cflagsList, m.Properties.Conlyflags...))
-	text += specifyCompilerStandard("LOCAL_CPP_STD", append(cflagsList, m.Properties.Cxxflags...))
+	text += specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags))
+	text += specifyCompilerStandard("LOCAL_CPP_STD", utils.NewStringSlice(cflagsList, m.Properties.Cxxflags))
 
 	// Check for android libraries in ldlibs, and add to
 	// shared, header or static libs instead of ldlibs.
@@ -778,8 +777,7 @@ func (g *androidMkGenerator) generateCommonActions(m *generateCommon, ctx bluepr
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
-		inArr := append(utils.PrefixDirs(inout.srcIn, g.sourcePrefix()), inout.genIn...)
-		ins := strings.Join(inArr, " ")
+		ins := utils.Join(utils.PrefixDirs(inout.srcIn, g.sourcePrefix()), inout.genIn)
 
 		// Make does not cleanly support multiple out-files
 		// To handle that, we output the rule only on the first file, and let every other output

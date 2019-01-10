@@ -54,7 +54,7 @@ func pathToLibFlag(path string) string {
 func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 	installDeps []string, optional bool) {
 
-	deps := append(p.outputs(getBackend(ctx)), installDeps...)
+	deps := utils.NewStringSlice(p.outputs(getBackend(ctx)), installDeps)
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
@@ -151,7 +151,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		ctx.Build(pctx,
 			blueprint.BuildParams{
 				Rule:      rule,
-				Inputs:    append(inout.srcIn, inout.genIn...),
+				Inputs:    utils.NewStringSlice(inout.srcIn, inout.genIn),
 				Outputs:   inout.out,
 				Implicits: implicits,
 				Args:      args,
@@ -263,7 +263,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
 	includeDirs = append(includeDirs, gendirs...)
 	includeFlags := utils.PrefixAll(includeDirs, "-I")
-	cflagsList := append(l.Properties.Cflags, includeFlags...)
+	cflagsList := utils.NewStringSlice(l.Properties.Cflags, includeFlags)
 	cflagsList = append(cflagsList, l.Properties.Export_cflags...)
 	cflagsList = append(cflagsList, exportedCflags...)
 
@@ -320,7 +320,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 				Outputs:   []string{output},
 				Inputs:    []string{source},
 				Args:      args,
-				OrderOnly: append(orderOnly, buildWrapperDeps...),
+				OrderOnly: utils.NewStringSlice(orderOnly, buildWrapperDeps),
 				Optional:  true,
 			})
 		objectFiles = append(objectFiles, output)
@@ -556,7 +556,7 @@ func (b *binary) getLibArgs(ctx blueprint.ModuleContext) map[string]string {
 
 // Returns the implicit dependencies for a library
 func (l *library) Implicits(ctx blueprint.ModuleContext) []string {
-	implicits := append(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx)...)
+	implicits := utils.NewStringSlice(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
 	implicits = append(implicits, l.getSharedLibLinkPaths(ctx)...)
 
 	return implicits
@@ -824,8 +824,8 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 		blueprint.BuildParams{
 			Rule:      kbuildRule,
 			Outputs:   []string{builtModule},
-			Inputs:    append(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials...),
-			Implicits: append(m.extraSymbolsFiles(ctx), args["copy_with_deps"]),
+			Inputs:    utils.NewStringSlice(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials),
+			Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["copy_with_deps"]}),
 			Optional:  false,
 			Args:      args,
 		})

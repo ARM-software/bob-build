@@ -129,7 +129,8 @@ func AppendUnique(destination []string, source []string) []string {
 		return destination
 	}
 
-	output := destination
+	output := make([]string, len(destination))
+	copy(output, destination)
 
 	for _, value := range source {
 		output = AppendIfUnique(output, value)
@@ -219,4 +220,21 @@ func IsExecutable(fname string) bool {
 		return true
 	}
 	return false
+}
+
+// NewStringSlice initialises a new slice from the input lists, which are concatenated.
+// The in-built append function modifies the slice buffer of the existing slice.
+// This means that using append has side-effect on the first list.
+// The purpose of this function is to avoid those side-effects.
+func NewStringSlice(lists ...[]string) []string {
+	// Checkout utils test for exmaple why this is different to append()
+	sumSize := 0
+	for _, list := range lists {
+		sumSize += len(list)
+	}
+	allLists := make([]string, 0, sumSize)
+	for _, list := range lists {
+		allLists = append(allLists, list...)
+	}
+	return allLists
 }
