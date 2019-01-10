@@ -18,6 +18,7 @@
 package core
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -33,7 +34,14 @@ func setupTestConfig(m map[string]string) *configProperties {
 }
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, msg string) {
-	t.Helper() // To indicate the function is a helper and we're not interested in line numbers coming from it.
+	// Indicate that the function is a helper and we're not
+	// interested in line numbers coming from it. This isn't
+	// present before Go 1.9, so call t.Helper()
+	// using reflection in case it doesn't exist.
+	if method := reflect.ValueOf(&t).MethodByName("Helper"); method.IsValid() {
+		method.Call([]reflect.Value{})
+	}
+
 	if a != b {
 		t.Errorf("%s (%s != %s)", msg, a, b)
 	}
