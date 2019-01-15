@@ -16,6 +16,7 @@ before_install:
   - export -f travis_time_finish
   - sudo apt-get update
   - sudo apt-get install -y rsync python-ply
+  - git fetch origin master # Needed by check-signoff
 
 install:
   - bash .travis/install-ninja.sh
@@ -37,4 +38,5 @@ script:
   - echo "GOPATH        =${GOPATH}"
   - echo "BOB_ROOT      =${BOB_ROOT}"
   - echo "BOB_WORKSPACE =${BOB_WORKSPACE}"
+  - bash .travis/checks/run-checks.sh
   - bash .travis/run_all_tests.sh
