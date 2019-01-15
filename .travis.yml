@@ -27,14 +27,11 @@ before_script:
   - mkdir -p ~/bob_workspace/src/github.com/ARM-software/
   - ln -s "$(pwd)/blueprint/" ~/bob_workspace/src/github.com/google/blueprint
   - ln -s "$(pwd)"            ~/bob_workspace/src/github.com/ARM-software/bob-build
-
-script:
   - export GOROOT=$(go env GOROOT)
   - export BOB_ROOT=$(pwd)
   - export BOB_WORKSPACE=~/bob_workspace
   - export GOPATH=${BOB_WORKSPACE}
-  - echo "GOROOT        =${GOROOT}"
-  - echo "GOPATH        =${GOPATH}"
-  - echo "BOB_ROOT      =${BOB_ROOT}"
-  - echo "BOB_WORKSPACE =${BOB_WORKSPACE}"
+
+script:
+  - bash .travis/checks/run-checks.sh
   - bash .travis/run_all_tests.sh
