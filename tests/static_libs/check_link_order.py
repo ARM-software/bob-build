@@ -26,6 +26,8 @@
 #      /       /
 #     g       e
 
+from __future__ import print_function
+
 import os
 import argparse
 import subprocess
@@ -72,13 +74,13 @@ if not compile_obj:
         if lib in deps:
             for dep in deps[lib]:
                 if dep not in libs[idx+1:]:
-                    print "Error: " + dep + " not after " + lib
+                    print("Error:", dep, "not after", lib)
                     error = True
 
     # Check every library is listed
     for lib in deps:
         if lib not in libs:
-            print "Error: " + lib + " missing"
+            print("Error:", lib, "missing")
             error = True
 
 cmd = [args.cmd] + args.args

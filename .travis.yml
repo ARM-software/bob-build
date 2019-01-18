@@ -1,9 +1,13 @@
 language: go
 
-go:
-  - "1.8"
-  - "1.9"
-  - "1.10"
+matrix:
+  include:
+  - go: "1.8"
+    env: PYTHON_SUFFIX=2.7
+  - go: "1.9"
+    env: PYTHON_SUFFIX=3
+  - go: "1.10"
+    env: PYTHON_SUFFIX=2.7
 
 cache:
   directories:
@@ -15,7 +19,7 @@ before_install:
   - export -f travis_time_start
   - export -f travis_time_finish
   - sudo apt-get update
-  - sudo apt-get install -y rsync python-ply
+  - sudo apt-get install -y rsync python-ply python3 python3-ply
 
 install:
   - bash .travis/install-ninja.sh

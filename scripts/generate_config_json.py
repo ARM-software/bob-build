@@ -76,7 +76,7 @@ def write_if_different(fname, text):
 def hash_env():
     m = hashlib.sha256()
     for k in sorted(os.environ.keys()):
-        m.update(k + "=" + os.environ[k] + "\n")
+        m.update((k + "=" + os.environ[k] + "\n").encode())
     return m.hexdigest()
 
 def main():
