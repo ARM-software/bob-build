@@ -9,7 +9,7 @@ SCRIPT_HASH=$(sha1sum ${BASH_SOURCE[0]} | awk '{print $1}')
 
 cd ~
 if [[ -d ninjabin && "$SCRIPT_HASH" == "$(cat ninjabin/script_hash)" ]]; then
-  exit 0
+    exit 0
 fi
 
 # Please remember Travis HOME is clean each build we only store ninjabin in cache
