@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import distutils.spawn
 import os
 import sys
 import logging
@@ -24,27 +25,11 @@ from config_system import get_config_bool, get_config_string, set_config
 
 logger = logging.getLogger(__name__)
 
-def which_binary(executable, path=None):
-    '''
-    Emulates 'which', trying to locate a binary 'executable' in the 'path',
-    or environment '$PATH', if none is given.
-    '''
-
-    if not executable.startswith('/'):
-        if path is None:
-            path = os.environ['PATH']
-        paths = path.split(os.pathsep)
-        for p in paths:
-            f = os.path.join(p, executable)
-            if os.path.isfile(f) and os.access(f, os.X_OK):
-                return f
-        logger.error("Executable (%s) not found in path (%s)", executable, path)
-    else:
-        if os.path.isfile(executable) and os.access(executable, os.X_OK):
-            return executable
+def which_binary(executable):
+    full_path = distutils.spawn.find_executable(executable)
+    if not full_path:
         logger.error("Executable (%s) not found", executable)
-
-    return None
+    return full_path
 
 def check_output(command, dir=None):
     '''
@@ -52,14 +37,21 @@ def check_output(command, dir=None):
     and returns the output. If the executable wasn't found, returns an empty string.
     The 'command' needs to be an array of arguments.
     '''
-    executable = which_binary(command[0])
+
+    # FileNotFoundError does not exist on Python 2
+    try:
+        fileNotFoundError = FileNotFoundError
+    except NameError:
+        fileNotFoundError = None
+
     output = ''
-    if executable:
-        try:
-            output = subprocess.check_output(command, cwd=dir).strip()
-            output = output.decode(sys.getdefaultencoding())
-        except (OSError, subprocess.CalledProcessError) as e:
-            logger.warning("Problem executing command: %s" % str(e))
+    try:
+        output = subprocess.check_output(command, cwd=dir).strip()
+        output = output.decode(sys.getdefaultencoding())
+    except (OSError, fileNotFoundError) as e:
+        logger.error(str(e))
+    except subprocess.CalledProcessError as e:
+        logger.warning("Problem executing command: %s" % str(e))
 
     return output
 
