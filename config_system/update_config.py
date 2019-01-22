@@ -104,7 +104,7 @@ write_config(args.output)
 
 issues = counter.errors() + counter.criticals()
 warnings = counter.warnings()
-if issues > 1:
+if issues > 0:
     sys.exit(2)
 elif warnings > 0:
     sys.exit(1)
