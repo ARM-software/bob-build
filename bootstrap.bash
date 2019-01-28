@@ -104,10 +104,12 @@ if [ ${SRCDIR:0:1} != '/' ]; then
     ln -sf "${WORKDIR}/${BOB_DIR}/menuconfig.bash" "${BUILDDIR}/menuconfig"
     ln -sf "${WORKDIR}/${BOB_DIR}/bob.bash" "${BUILDDIR}/bob"
     ln -sf "${WORKDIR}/${BOB_DIR}/bob_graph.bash" "${BUILDDIR}/bob_graph"
+    ln -sf "${WORKDIR}/${BOB_DIR}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
 else
     # Use absolute symlinks
     ln -sf "${BOB_DIR_ABS}/config.bash" "${BUILDDIR}/config"
     ln -sf "${BOB_DIR_ABS}/menuconfig.bash" "${BUILDDIR}/menuconfig"
     ln -sf "${BOB_DIR_ABS}/bob.bash" "${BUILDDIR}/bob"
     ln -sf "${BOB_DIR_ABS}/bob_graph.bash" "${BUILDDIR}/bob_graph"
+    ln -sf "${BOB_DIR_ABS}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
 fi

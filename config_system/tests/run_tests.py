@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright 2018 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
@@ -152,8 +152,8 @@ def main():
 
     print("")
     print("%d tests run, %d failed" % (tests_run, tests_failed))
-    if tests_failed == 0:
-        print("All tests passed!")
+    if tests_failed > 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

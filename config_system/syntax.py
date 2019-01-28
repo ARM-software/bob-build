@@ -208,7 +208,9 @@ def p_mainmenu_stmt_first(p):
 def p_dummy(p):
     """dummy :
              | DUMMY
-             """
+             | TAB
+             | SPACE
+             | COMMENT"""
     p[0] = {}
 
 
@@ -393,7 +395,7 @@ def p_helptext(p):
 
 
 def p_error(p):
-    report_error("Parse error", p, ParseError)
+    report_error("Parse error on token: {}".format(str(p)), p, ParseError)
 
 
 parser = yacc.yacc(debug=False, write_tables=False)

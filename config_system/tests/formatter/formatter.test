@@ -1,0 +1,69 @@
+# Some comment that need to be parsed!
+
+source "foo"
+
+config MODE
+	bool "Mode"
+	default n
+
+
+choice
+	prompt "Choose"
+	default OPTION_A
+
+config OPTION_A
+	bool "A"
+
+config OPTION_B
+	bool "B"
+	depends on MODE
+
+config OPTION_C
+	bool "C"
+	depends on MODE
+
+endchoice
+choice
+    int 365 if HOW_MUCH_DAYS_IN_YEAR || !WEEKS && DAYS
+    default BUILDER_BUILD if DROID
+	prompt "Choice 1" if ALA_MA_KOTA
+	default DEFAULT_OPTION
+
+config FIRST_OPTION
+	default y if SOME_VALUE >= 9 if SOME_VALUE
+	bool "First option"
+
+config DEFAULT_OPTION
+	default y if SOME_PARAM && SUN_IS_SHINING
+	bool "Default option"
+
+config THIRD_OPTION
+    default y if (XYZ || ABC) && !ALA_MA_KOTA
+	bool "Third option"
+
+endchoice
+
+choice
+	prompt "Choice 2"
+	default BAZ
+
+config FOO
+	bool "Foo"
+	select FIRST_OPTION
+	depends on FOOBAR
+	help
+	    text written in multiple paragraphs
+
+	    is still displayed as multiple paragraphs
+
+config BAR
+	bool "Bar"
+
+config BAZ
+	bool "Baz"
+
+endchoice
+
+config FOOBAR
+	bool "Foobar"
+	default y
