@@ -22,4 +22,18 @@ fold_start 'run_go_tests.sh'
 fold_end
 ####################
 
+####################
+fold_start 'run_tests.sh'
+    bash ${BOB_ROOT}/.travis/run_tests.sh
+    check_result $? "Check run_tests: "
+fold_end
+####################
+
+####################
+fold_start 'run_formatter_tests.sh'
+    bash ${BOB_ROOT}/.travis/run_formatter_tests.sh
+    check_result $? "Check run_formatter_tests: "
+fold_end
+####################
+
 exit $STATUS_CODE

@@ -17,6 +17,9 @@ import ply.lex as lex
 import re
 
 
+verbose_flag = False
+
+
 class TokenizeError(Exception):
     pass
 
@@ -30,6 +33,7 @@ tokens = (
     "DEPENDS",
     "DUMMY",
     "EOL",
+    "TAB",
     "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
     "HELP", "HELPTEXT",
     "HEX",
@@ -47,6 +51,8 @@ tokens = (
     "TRISTATE",
     "VISIBLE",
     "WORD",
+    "COMMENT",
+    "SPACE",
 )
 
 states = (
@@ -76,21 +82,36 @@ commands = (
 
 params = ("if", "on")
 
+
 help_indent = 0
 
 
 def t_newline(t):
     r"\n+"
     t.lexer.lineno += len(t.value)
+    t.type = "EOL"
+    return t if verbose_flag else None
 
 
 def t_ANY_comment(t):
-    r"[ \t]*\#.*"
-    pass
+    r"[ ]*\#.*[\n|\Z]"
+    t.lexer.lineno += 1
+    t.lexer.lexpos -= 1
+    t.type = "COMMENT"
+    t.value = t.value[:-1]
+    return t if verbose_flag else None
 
 
-def t_blank(t):
-    r"[ \t]+"
+def t_tab(t):
+    r"\t+"
+    t.type = "TAB"
+    return t if verbose_flag else None
+
+
+def t_space(t):
+    r"[ ]+"
+    t.type = "SPACE"
+    return t if verbose_flag else None
 
 
 def t_commandhelp(t):
@@ -127,9 +148,10 @@ t_PARAM_GREATER = r">"
 t_PARAM_GREATER_EQUAL = r">="
 
 
-def t_PARAM_blank(t):
+def t_PARAM_space(t):
     r"[ \t]+"
-    pass
+    t.type = "SPACE"
+    return t if verbose_flag else None
 
 
 def t_PARAM_word(t):
@@ -177,7 +199,7 @@ def t_HELP_text(t):
     elif indent < help_indent:
         report_error("Unexpected indent in help text", t)
     indent -= help_indent
-    t.value = (" " * indent) + text.strip() + "\n"
+    t.value = '{}'.format(m.group(1) if verbose_flag else "") + text.strip() + "\n"
     t.type = "HELPTEXT"
 
     t.lexer.lineno += 1
@@ -223,8 +245,10 @@ def report_error(msg, t, err_type=TokenizeError):
     raise err_type()
 
 
-def create_mconfig_lexer(fname):
+def create_mconfig_lexer(fname, verbose=False):
     lexer = lex.lex()
+    global verbose_flag
+    verbose_flag = verbose
     lexer.lineno = 1
     lexer.fname = fname
     return lexer

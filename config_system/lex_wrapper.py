@@ -19,10 +19,11 @@ from . import lex
 
 
 class LexWrapper:
-    def __init__(self, ignore_missing):
+    def __init__(self, ignore_missing, verbose=False):
         self.lexers = []
         self.root_dir = None
         self.ignore_missing = ignore_missing
+        self.verbose = verbose
 
     def source(self, fname):
         if self.root_dir is None:
@@ -37,7 +38,7 @@ class LexWrapper:
         with open(fname, "rt") as fp:
             file_contents = fp.read()
 
-        lexer = lex.create_mconfig_lexer(fname)
+        lexer = lex.create_mconfig_lexer(fname, verbose=self.verbose)
 
         self.push_lexer(lexer)
         self.input(file_contents)
@@ -67,3 +68,8 @@ class LexWrapper:
             t = self.token()
 
         return t
+
+    def iterate_tokens(self):
+        """Generator method to yield tokens"""
+        while True:
+            yield self.current_lexer().token()
