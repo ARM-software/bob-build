@@ -24,6 +24,12 @@ bob_binary {
     add_to_alias: ["bob_test_aliases"],
 }
 
+bob_static_library {
+    name: "libwidgetb",
+    srcs: ["widgetb.c"],
+    host_supported: true,
+}
+
 bob_binary {
     name: "widgetb",
     srcs: ["widgetb.c"],
@@ -33,6 +39,16 @@ bob_alias {
     name: "bob_test_aliases",
 
     srcs: [
+        "libwidgetb:host",
         "widgetb",
+    ],
+}
+
+bob_alias {
+    name: "bob_test_aliases_all_variants",
+
+    srcs: [
+        "libwidgetb:host",
+        "libwidgetb:target",
     ],
 }

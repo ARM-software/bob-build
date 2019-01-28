@@ -679,7 +679,12 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 					return
 				}
 			}
-			srcs = append(srcs, ctx.OtherModuleName(p))
+			name := ctx.OtherModuleName(p)
+			if lib, ok := p.(phonyInterface); ok {
+				name = lib.shortName()
+			}
+
+			srcs = append(srcs, name)
 		})
 
 	ctx.Build(pctx,
