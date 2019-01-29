@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -189,12 +189,38 @@ bob_binary {
         "generate_source_single_dependend",
         "generate_source_single_dependend_nested",
     ],
+    generated_headers: [
+        "generate_source_single",
+    ],
     srcs: ["main.cpp"],
+}
+
+bob_generate_source {
+    name: "gen_sources_and_headers",
+    srcs: [
+        "lib.c.txt",
+        "lib.h.txt",
+    ],
+    out: [
+        "foo/src/foo.c",
+        "foo/foo.h",
+    ],
+    export_gen_include_dirs: ["."],
+    tool: "gen.sh",
+    cmd: "${tool} ${gen_dir} ${in}"
+}
+
+bob_binary {
+    name: "bin_gen_sources_and_headers",
+    generated_headers: ["gen_sources_and_headers"],
+    generated_sources: ["gen_sources_and_headers"],
+    srcs: ["main.c"],
 }
 
 bob_alias {
     name: "bob_test_generate_source",
     srcs: [
         "validate_link_generate_sources",
+        "bin_gen_sources_and_headers",
     ],
 }
