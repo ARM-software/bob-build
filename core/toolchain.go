@@ -298,17 +298,9 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 
 	props := config.Properties
 	tc.target = props.GetString("target_clang_triple")
-	sysroot := props.GetString("target_sysroot")
 
-	if sysroot != "" {
-		if tc.target == "" {
-			panic(errors.New("TARGET_CLANG_TRIPLE is not set"))
-		}
-		tc.cflags = append(tc.cflags, "--sysroot", sysroot)
-
-		tc.cxxflags = append(tc.cxxflags,
-			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
-	}
+	tc.cxxflags = append(tc.cxxflags,
+		utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
 	}
