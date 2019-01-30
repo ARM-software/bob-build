@@ -301,14 +301,17 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	g := getBackend(ctx)
 
 	tc := g.getToolchain(m.Properties.Target)
+	arBinary, _ := tc.getArchiver()
+	asBinary, astargetflags := tc.getAssembler()
 	cc, cctargetflags := tc.getCCompiler()
 	cxx, cxxtargetflags := tc.getCXXCompiler()
-	arBinary, _ := tc.getArchiver()
 
 	props := &m.Properties.flagArgsBuild
 
 	args := map[string]string{
 		"ar":                arBinary,
+		"as":                asBinary,
+		"asflags":           strings.Join(astargetflags, " "),
 		"bob_config":        filepath.Join(g.buildDir(), configName),
 		"bob_config_opts":   configOpts,
 		"cc":                cc,
