@@ -164,6 +164,17 @@ config HOST_CLANG_TRIPLE
 # config TARGET_CLANG_TRIPLE
 #	string "Clang target"
 
+# Bob also cannot know the superproject's desired STL implementation, so the
+# superproject must also define the following:
+
+# config HOST_STL_LIBRARY
+# 	string "Host STL implementation"
+# 	default "stdc++"
+#
+# config TARGET_STL_LIBRARY
+# 	string "Target STL implementation"
+# 	default "stdc++"
+
 ### Toolchain configuration options ###
 
 config HOST_CLANG_USE_GNU_LIBS
@@ -182,3 +193,30 @@ config TARGET_CLANG_USE_GNU_LIBS
 	help
 		Detect the location of the configured GNU toolchain's `crt1.o`,
 		`libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+
+# This is a workaround for `depends on` not supporting the comparison operator.
+config HOST_STL_LIBSTDCXX
+	bool
+	default y if HOST_STL_LIBRARY="stdc++"
+	default n
+
+config TARGET_STL_LIBSTDCXX
+	bool
+	default y if TARGET_STL_LIBRARY="stdc++"
+	default n
+
+config HOST_CLANG_USE_GNU_STL
+	bool "Detect the GNU toolchain's libstdc++ implementation for Clang"
+	depends on HOST_TOOLCHAIN_CLANG && HOST_STL_LIBSTDCXX
+	default n
+	help
+		Detect the location of the configured GNU toolchain's
+		STL implementation, and pass this to Clang.
+
+config TARGET_CLANG_USE_GNU_STL
+	bool "Detect the GNU toolchain's libstdc++ implementation for Clang"
+	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBSTDCXX
+	default y if TARGET_CLANG_TRIPLE != ""
+	help
+		Detect the location of the configured GNU toolchain's
+		STL implementation, and pass this to Clang.
