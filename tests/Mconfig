@@ -78,11 +78,6 @@ config PKG_CONFIG
 		Where no package information exists the default configuration
 		value will be used.
 
-## Bob needs sysroot for clang
-config TARGET_SYSROOT
-	string
-	default ""
-
 ## Include this to allow us to test Bob host exploration if needed
 config ALLOW_HOST_EXPLORE
 	bool

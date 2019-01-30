@@ -344,7 +344,6 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		"shared_libs_dir":   g.sharedLibsDir(m.Properties.GenerateProps.Target),
 		"src_dir":           g.sourcePrefix(),
 		"srcs_generated":    "",
-		"sysroot":           getConfig(ctx).Properties.GetString("target_sysroot"),
 	}
 
 	args["build_wrapper"], _ = props.getBuildWrapperAndDeps(ctx)
