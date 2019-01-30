@@ -349,7 +349,7 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 		build = def.build()
 		tgtType = def.getTarget()
 	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		build = &gsc.Properties.flagArgsBuild
+		build = &gsc.Properties.FlagArgsBuild
 		tgtType = gsc.Properties.Target
 	} else {
 		return
