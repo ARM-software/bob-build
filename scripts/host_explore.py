@@ -17,6 +17,7 @@ import distutils.spawn
 import os
 import sys
 import logging
+import shlex
 import subprocess
 import re
 import tempfile
@@ -50,31 +51,40 @@ def check_output(command, dir=None):
     return output
 
 
+def gnu_toolchain_is_cross_compiler(tgtType):
+    prefix = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX")
+    # If the prefix ends with the path separator, it is being used as
+    # alternative to adding the compiler to $PATH, and isn't specifying a
+    # cross-compilation prefix.
+    if prefix and not prefix.endswith(os.sep):
+        return True
+    return False
+
+
 def get_cxx_compiler(tgtType):
     """Parse the config options prefixed by `tgtType` and determine the name of
     the compiler for that target type, as well as whether it is a cross
     compiler.
     """
+    args = []
     cross_compiler = False
 
     if get_config_bool(tgtType + "_TOOLCHAIN_GNU"):
-        prefix = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX")
-        # If the prefix ends with the path separator, it is being used as
-        # alternative to adding the compiler to $PATH, and isn't specifying a
-        # cross-compilation prefix.
-        if prefix and not prefix.endswith(os.sep):
-            cross_compiler = True
-        cxx = prefix + get_config_string("GNU_CXX_BINARY")
+        args = shlex.split(get_config_string(tgtType + "_GNU_FLAGS"))
+        cxx = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX") + get_config_string("GNU_CXX_BINARY")
+        cross_compiler = gnu_toolchain_is_cross_compiler(tgtType)
     elif get_config_bool(tgtType + "_TOOLCHAIN_CLANG"):
-        if get_config_string(tgtType + "_CLANG_TRIPLE"):
-            cross_compiler = True
+        # To use the *_CLANG_TRIPLE option to decide whether this is a
+        # cross-compiler would require discovering what target triples are
+        # runnable on the host. Instead, just ask the GNU toolchain.
+        cross_compiler = gnu_toolchain_is_cross_compiler(tgtType)
         cxx = get_config_string("CLANG_CXX_BINARY")
     elif get_config_bool(tgtType + "_TOOLCHAIN_ARMCLANG"):
         if tgtType != "HOST":
             cross_compiler = True
         cxx = get_config_string("ARMCLANG_CXX_BINARY")
 
-    return cxx, cross_compiler
+    return cxx, args, cross_compiler
 
 
 def stl_rpath_ldflags(tgtType):
@@ -82,12 +92,18 @@ def stl_rpath_ldflags(tgtType):
     C++ STL library to the linker rpath so it can be found when the binary is
     executed.
     """
-    cxx, cross_compiler = get_cxx_compiler(tgtType)
+
+    stl_library = get_config_string(tgtType + "_STL_LIBRARY")
+    if not stl_library:
+        return []
+
+    cxx, args, cross_compiler = get_cxx_compiler(tgtType)
 
     if cross_compiler:
         return []
 
-    stl_path = check_output([cxx, "-print-file-name=libstdc++.so"])
+    stl_lib = "lib{}.so".format(stl_library)
+    stl_path = check_output([cxx] + args + ["-print-file-name=" + stl_lib])
     stl_dir = os.path.dirname(stl_path)
     ld_library_path = os.getenv("LD_LIBRARY_PATH", default="")
     ld_paths = ld_library_path.split(os.pathsep)
@@ -159,7 +175,6 @@ def pkg_config():
             libs = check_output(['pkg-config', pkg, '--libs-only-l'])
             if libs != '':
                 set_config(pkg_config_libs, libs)
-
 
 
 def plugin_exec():

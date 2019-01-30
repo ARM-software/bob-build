@@ -259,6 +259,7 @@ type toolchainClangCommon struct {
 	clangBinary   string
 	clangxxBinary string
 	useGnuLibs    bool
+	useGnuStl     bool
 
 	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
 	// headers if required
@@ -304,6 +305,7 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgtType string
 	tc.clangBinary = props.GetString("clang_cc_binary")
 	tc.clangxxBinary = props.GetString("clang_cxx_binary")
 	tc.useGnuLibs = props.GetBool(tgtType + "_clang_use_gnu_libs")
+	tc.useGnuStl = props.GetBool(tgtType + "_clang_use_gnu_stl")
 	tc.gnu = gnu
 
 	// Tell Clang where the GNU toolchain is installed, so it can use its
@@ -343,9 +345,6 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 	props := config.Properties
 	tc.target = props.GetString("target_clang_triple")
 
-	tc.cxxflags = append(tc.cxxflags,
-		utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
-
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
@@ -355,6 +354,11 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 		dirs := append(getFileNameDir(tc.gnu, "libgcc.a"),
 			getFileNameDir(tc.gnu, "libgcc_s.so")...)
 		tc.ldflags = append(tc.ldflags, utils.PrefixAll(dirs, "-L")...)
+	}
+
+	if tc.useGnuStl {
+		tc.cxxflags = append(tc.cxxflags,
+			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during

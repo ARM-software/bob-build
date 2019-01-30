@@ -114,3 +114,23 @@ config HOST_TOOLCHAIN_ARMCLANG
 		Build with the Arm Compiler.
 
 endchoice
+
+config HOST_STL_LIBRARY
+	string "Host STL implementation"
+	default ""
+	help
+		This is the C++ Standard Template Library being linked against,
+		without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
+		`c++` for `libc++`. Specifying it here allows it to be added to
+		the library's run-time lookup path, in case the toolchain is
+		installed in a non-standard location.
+
+config TARGET_STL_LIBRARY
+	string "Target STL implementation"
+	default ""
+	help
+		This is the C++ Standard Template Library being linked against,
+		without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
+		`c++` for `libc++`. Specifying it here allows it to be added to
+		the library's run-time lookup path, in case the toolchain is
+		installed in a non-standard location.
