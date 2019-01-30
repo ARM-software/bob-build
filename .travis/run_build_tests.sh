@@ -6,4 +6,6 @@ cd ${BOB_ROOT}/tests/
 rm -rf build-test # Cleanup test directory
 BUILDDIR=build-test ./bootstrap
 cd build-test
-./config && ./buildme
+# Test by explicitly requesting the `bob_tests` alias, which should include all
+# test cases, including alias tests, which can't just set `build_by_default`.
+./config && ./buildme bob_tests

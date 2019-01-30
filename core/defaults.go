@@ -18,6 +18,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/google/blueprint"
 )
 
@@ -64,6 +66,13 @@ func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 		mctx.AddDependency(mctx.Module(), defaultDepTag, l.defaults()...)
 	}
 	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		mctx.AddDependency(mctx.Module(), defaultDepTag, gsc.Properties.Flag_defaults...)
+		if len(gsc.Properties.Flag_defaults) > 0 {
+			tgtType := gsc.Properties.Target
+			if !(tgtType == tgtTypeHost || tgtType == tgtTypeTarget) {
+				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
+					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgtType))
+			}
+			mctx.AddDependency(mctx.Module(), defaultDepTag, gsc.Properties.Flag_defaults...)
+		}
 	}
 }

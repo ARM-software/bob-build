@@ -40,7 +40,7 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	if target, ok := mctx.Module().(defaultable); ok {
 		build = target.build()
 	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		build = &gsc.Properties.flagArgsBuild
+		build = &gsc.Properties.FlagArgsBuild
 	} else {
 		// Not defaultable.
 		return
