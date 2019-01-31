@@ -16,8 +16,13 @@
  */
 
 bob_binary {
-    name: "bob_test_cflags",
-    static_libs: ["bob_test_cflags1"],
+    name: "export_cflags_binary",
+    static_libs: ["export_cflags_lib"],
     cflags: ["-DBAR=3"],
     srcs: ["src/bob_test_cflags2.c"],
+}
+
+bob_alias {
+    name: "bob_test_export_cflags",
+    srcs: ["export_cflags_binary"],
 }

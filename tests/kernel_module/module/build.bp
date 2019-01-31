@@ -16,6 +16,6 @@ bob_kernel_module {
 }
 
 bob_alias {
-    name: "bob_test_kernel_modules",
+    name: "bob_test_kernel_module",
     srcs: ["test_module"],
 }

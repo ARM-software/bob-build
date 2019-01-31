@@ -28,3 +28,8 @@ bob_shared_library {
         enabled: false,
     },
 }
+
+bob_alias {
+    name: "bob_test_forwarding_libs",
+    srcs: ["forwarding_user"],
+}

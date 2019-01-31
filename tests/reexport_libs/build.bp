@@ -16,7 +16,7 @@
  */
 
 bob_alias {
-    name: "bob_test_reexport_lib",
+    name: "bob_test_reexport_libs",
     srcs: [
         "test_no_reexport",
 

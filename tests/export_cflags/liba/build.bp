@@ -16,7 +16,7 @@
  */
 
 bob_static_library {
-    name: "bob_test_cflags1",
+    name: "export_cflags_lib",
     export_cflags: ["-DFOO=2"],
     export_local_include_dirs: [
         "include",
