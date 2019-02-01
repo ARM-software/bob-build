@@ -144,3 +144,20 @@ endmenu
 
 # config TARGET_CLANG_TRIPLE
 #	string "Clang target"
+
+config HOST_CLANG_USE_GNU_LIBS
+	bool "Detect the GNU toolchain's internal library locations for Clang"
+	depends on HOST_TOOLCHAIN_CLANG
+	default n
+	help
+		Detect the location of the configured GNU toolchain's `crt1.o`,
+		`libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+
+config TARGET_CLANG_USE_GNU_LIBS
+	bool "Detect the GNU toolchain's internal library locations for Clang"
+	depends on TARGET_TOOLCHAIN_CLANG
+	default y if TARGET_CLANG_TRIPLE != ""
+	default n
+	help
+		Detect the location of the configured GNU toolchain's `crt1.o`,
+		`libgcc.a` and `libgcc_s.so`, and pass these to Clang.
