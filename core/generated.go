@@ -324,13 +324,14 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	asBinary, astargetflags := tc.getAssembler()
 	cc, cctargetflags := tc.getCCompiler()
 	cxx, cxxtargetflags := tc.getCXXCompiler()
+	linker, ldflags := tc.getLinker()
 
 	props := &m.Properties.FlagArgsBuild
 
 	args := map[string]string{
 		"ar":                arBinary,
 		"as":                asBinary,
-		"asflags":           strings.Join(astargetflags, " "),
+		"asflags":           utils.Join(astargetflags, props.Asflags),
 		"bob_config":        filepath.Join(g.buildDir(), configName),
 		"bob_config_opts":   configOpts,
 		"cc":                cc,
@@ -338,6 +339,8 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		"conlyflags":        strings.Join(append(cctargetflags, props.Conlyflags...), " "),
 		"cxx":               cxx,
 		"cxxflags":          strings.Join(append(cxxtargetflags, props.Cxxflags...), " "),
+		"ldflags":           utils.Join(ldflags, props.Ldflags),
+		"linker":            linker,
 		"gen_dir":           g.sourceOutputDir(m),
 		"headers_generated": "",
 		"module_dir":        filepath.Join(g.sourcePrefix(), ctx.ModuleDir()),

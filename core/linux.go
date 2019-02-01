@@ -520,13 +520,13 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 	sharedLibFlags := l.getSharedLibFlags(ctx)
 
 	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
-	compiler, cctargetflags := tc.getCXXCompiler()
+	linker, tcLdflags := tc.getLinker()
 	buildWrapper, _ := l.Properties.Build.getBuildWrapperAndDeps(ctx)
 
 	args := map[string]string{
 		"build_wrapper":     buildWrapper,
-		"compiler":          compiler,
-		"ldflags":           utils.Join(cctargetflags, ldflags),
+		"ldflags":           utils.Join(tcLdflags, ldflags),
+		"linker":            linker,
 		"shared_libs_dir":   l.getSharedLibraryDir(),
 		"shared_libs_flags": utils.Join(sharedLibFlags),
 		"static_libs":       utils.Join(l.GetStaticLibs(ctx)),
@@ -583,12 +583,12 @@ var linkPool = pctx.StaticPool("link", linkPoolParams)
 
 var sharedLibraryRule = pctx.StaticRule("shared_library",
 	blueprint.RuleParams{
-		Command: "$build_wrapper $compiler -shared $in -o $out $ldflags " +
+		Command: "$build_wrapper $linker -shared $in -o $out $ldflags " +
 			"-Wl,--whole-archive  $whole_static_libs -Wl,--no-whole-archive $static_libs " +
 			"-Wl,-rpath-link,$shared_libs_dir -L$shared_libs_dir $shared_libs_flags $ldlibs",
 		Description: "$out",
 		Pool:        linkPool,
-	}, "build_wrapper", "compiler", "ldflags", "ldlibs", "shared_libs_dir", "shared_libs_flags",
+	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir", "shared_libs_flags",
 	"static_libs", "whole_static_libs")
 
 var symlinkRule = pctx.StaticRule("symlink",
@@ -639,11 +639,11 @@ func (g *linuxGenerator) binaryOutputDir(m *binary) string {
 
 var executableRule = pctx.StaticRule("executable",
 	blueprint.RuleParams{
-		Command: "$build_wrapper $compiler $in -o $out $ldflags $static_libs " +
+		Command: "$build_wrapper $linker $in -o $out $ldflags $static_libs " +
 			"-Wl,-rpath-link,$shared_libs_dir -L$shared_libs_dir $shared_libs_flags $ldlibs",
 		Description: "$out",
 		Pool:        linkPool,
-	}, "build_wrapper", "compiler", "ldflags", "ldlibs", "shared_libs_dir", "shared_libs_flags",
+	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir", "shared_libs_flags",
 	"static_libs", "whole_static_libs")
 
 func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
