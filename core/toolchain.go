@@ -79,6 +79,30 @@ func getToolPath(toolUnqualified string) (toolPath string) {
 	return
 }
 
+// Run the compiler with the -print-file-name option, and return the directory
+// name of the result, or an empty list if a non-existent directory was
+// returned or an error occurred.
+func getFileNameDir(tc toolchain, basename string) (dirs []string) {
+	ccBinary, flags := tc.getCCompiler()
+
+	cmd := exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-print-file-name=" + basename})...)
+	bytes, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("Error: Couldn't get path for %s: %v\n", basename, err)
+		return
+	}
+
+	fname := strings.TrimSpace(string(bytes))
+	if _, err := os.Stat(fname); os.IsNotExist(err) {
+		fmt.Printf("Error: Path returned for %s (%s) does not exist.\n", basename, fname)
+		return
+	}
+
+	dirs = append(dirs, filepath.Dir(fname))
+
+	return
+}
+
 type toolchainGnu interface {
 	toolchain
 	getBinDirs() []string
@@ -234,6 +258,7 @@ type toolchainClangCommon struct {
 	// Options read from the config:
 	clangBinary   string
 	clangxxBinary string
+	useGnuLibs    bool
 
 	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
 	// headers if required
@@ -274,10 +299,11 @@ func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
 	return tc.clangxxBinary, tc.ldflags
 }
 
-func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainClangCommon) {
+func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgtType string) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.clangBinary = props.GetString("clang_cc_binary")
 	tc.clangxxBinary = props.GetString("clang_cxx_binary")
+	tc.useGnuLibs = props.GetBool(tgtType + "_clang_use_gnu_libs")
 	tc.gnu = gnu
 
 	// Tell Clang where the GNU toolchain is installed, so it can use its
@@ -290,14 +316,18 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainC
 	// path, so that Clang can find the correct linker. If the GNU toolchain
 	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
 	// be in Clang's search path, so these arguments have no effect.
-	tc.ldflags = append(tc.ldflags, utils.PrefixAll(tc.gnu.getBinDirs(), "-B")...)
+	binDirs := tc.gnu.getBinDirs()
+	if tc.useGnuLibs {
+		binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
+	}
+	tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
 
 	return
 }
 
 func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 	gnu := newToolchainGnuNative(config)
-	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu, tgtTypeHost)
 
 	// Combine cflags and cxxflags once here, to avoid appending during
 	// every call to getCXXCompiler().
@@ -308,16 +338,23 @@ func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 
 func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 	gnu := newToolchainGnuCross(config)
-	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu, tgtTypeTarget)
 
 	props := config.Properties
 	tc.target = props.GetString("target_clang_triple")
 
 	tc.cxxflags = append(tc.cxxflags,
 		utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
+
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
+	}
+
+	if tc.useGnuLibs {
+		dirs := append(getFileNameDir(tc.gnu, "libgcc.a"),
+			getFileNameDir(tc.gnu, "libgcc_s.so")...)
+		tc.ldflags = append(tc.ldflags, utils.PrefixAll(dirs, "-L")...)
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during

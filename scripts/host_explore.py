@@ -74,35 +74,6 @@ def compiler_config():
     host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
     target_libstdcxx_path = ""
 
-    # No toolchain prefix indicates a native build
-    native_build = get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') == ''
-    if get_config_bool('TARGET_TOOLCHAIN_CLANG'):
-        if native_build:
-            target_libstdcxx_path = host_libstdcxx_path
-        else:
-            cross_gcc = which_binary(get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') +
-                get_config_string('GNU_CC_BINARY'))
-            flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
-            flags = list(filter(None, flags))
-
-            target_libstdcxx_path = check_output([cross_gcc] + flags + ['-print-file-name=libstdc++.so'])
-            crt_path = os.path.split(check_output([cross_gcc] + flags + ['-print-file-name=crt1.o']))[0]
-            if crt_path != '':
-                extra_target_ldflags += '-B{0} '.format(crt_path)
-
-            libgcc_static_path = os.path.split(check_output([cross_gcc] + flags + ['-print-file-name=libgcc.a']))[0]
-            if libgcc_static_path != '':
-                extra_target_ldflags += '-B{0} -L{0} '.format(libgcc_static_path)
-
-            crosslib_path = os.path.split(check_output([cross_gcc] + flags + ['-print-file-name=libgcc_s.so']))[0]
-            if crosslib_path != '':
-                extra_target_ldflags += '-L{0} '.format(crosslib_path)
-
-    elif get_config_bool('TARGET_TOOLCHAIN_GNU'):
-        flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
-        flags = list(filter(None, flags))
-        target_libstdcxx_path = check_output([host_cxx] + flags + ['-print-file-name=libstdc++.so'])
-
     host_libstdcxx_dir = os.path.split(host_libstdcxx_path)[0]
     ld_library_path = os.getenv('LD_LIBRARY_PATH','')
     ld_paths = ld_library_path.split(":")
@@ -112,7 +83,15 @@ def compiler_config():
             set_config('EXTRA_LD_LIBRARY_PATH', host_libstdcxx_dir)
 
     # In native builds we require the addition of rpath to the executable if not in load library path
-    if native_build:
+    # No toolchain prefix indicates a native build
+    if not get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX'):
+        if get_config_bool('TARGET_TOOLCHAIN_CLANG'):
+            target_libstdcxx_path = host_libstdcxx_path
+        elif get_config_bool('TARGET_TOOLCHAIN_GNU'):
+            flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
+            flags = list(filter(None, flags))
+            target_libstdcxx_path = check_output([host_cxx] + flags + ['-print-file-name=libstdc++.so'])
+
         target_libstdcxx_dir = os.path.split(target_libstdcxx_path)[0]
         if len(target_libstdcxx_dir) > 0:
             if target_libstdcxx_dir not in ld_paths:
