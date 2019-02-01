@@ -33,6 +33,7 @@ type toolchain interface {
 	getAssembler() (tool string, flags []string)
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
+	getLinker() (tool string, flags []string)
 }
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
@@ -91,6 +92,7 @@ type toolchainGnuCommon struct {
 	gccBinary string
 	gxxBinary string
 	cflags    []string // Flags for both C and C++
+	ldflags   []string // Linker flags, including anything required for C++
 	binDir    string
 }
 
@@ -117,6 +119,10 @@ func (tc toolchainGnuCommon) getCCompiler() (string, []string) {
 
 func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 	return tc.gxxBinary, tc.cflags
+}
+
+func (tc toolchainGnuCommon) getLinker() (tool string, flags []string) {
+	return tc.gxxBinary, tc.ldflags
 }
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
@@ -219,6 +225,7 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
+	tc.ldflags = utils.NewStringSlice(tc.cflags)
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
@@ -235,6 +242,7 @@ type toolchainClangCommon struct {
 	// Calculated during toolchain initialization:
 	cflags   []string // Flags for both C and C++
 	cxxflags []string // Flags just for C++
+	ldflags  []string // Linker flags, including anything required for C++
 }
 
 type toolchainClangNative struct {
@@ -262,6 +270,10 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 	return tc.clangxxBinary, tc.cxxflags
 }
 
+func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
+	return tc.clangxxBinary, tc.ldflags
+}
+
 func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.clangBinary = props.GetString("clang_cc_binary")
@@ -270,13 +282,15 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu) (tc toolchainC
 
 	// Tell Clang where the GNU toolchain is installed, so it can use its
 	// headers and libraries, for example, if we are using libstdc++.
-	tc.cflags = append(tc.cflags, "--gcc-toolchain="+tc.gnu.getInstallDir())
+	gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
+	tc.cflags = append(tc.cflags, gnuInstallArg)
+	tc.ldflags = append(tc.ldflags, gnuInstallArg)
 
 	// Add the GNU toolchain's binary directories to Clang's binary search
 	// path, so that Clang can find the correct linker. If the GNU toolchain
 	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
 	// be in Clang's search path, so these arguments have no effect.
-	tc.cflags = append(tc.cflags, utils.PrefixAll(tc.gnu.getBinDirs(), "-B")...)
+	tc.ldflags = append(tc.ldflags, utils.PrefixAll(tc.gnu.getBinDirs(), "-B")...)
 
 	return
 }
@@ -303,6 +317,7 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 		utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
+		tc.ldflags = append(tc.ldflags, "-target", tc.target)
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during
@@ -333,6 +348,10 @@ func (tc toolchainArmClang) getCCompiler() (string, []string) {
 }
 
 func (tc toolchainArmClang) getCXXCompiler() (string, []string) {
+	return tc.cxxBinary, tc.cflags
+}
+
+func (tc toolchainArmClang) getLinker() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
