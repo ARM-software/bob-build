@@ -24,3 +24,11 @@
 # CTAGS
 tags
 TAGS
+
+# VSCode
+.history/
+.vscode
+highlight.css
+
+# PyCharm
+.idea/
