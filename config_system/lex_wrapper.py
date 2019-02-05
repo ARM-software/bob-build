@@ -17,6 +17,7 @@ import os
 
 from . import lex
 
+
 class LexWrapper:
     def __init__(self, ignore_missing):
         self.lexers = []
@@ -31,7 +32,7 @@ class LexWrapper:
             fname = os.path.join(self.root_dir, fname)
 
         if not os.path.exists(fname) and self.ignore_missing:
-           return
+            return
 
         with open(fname, "rt") as fp:
             file_contents = fp.read()

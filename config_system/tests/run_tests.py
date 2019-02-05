@@ -29,6 +29,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 BOB_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
 sys.path.append(BOB_DIR)
 
+
 def runtest(name):
     from config_system import general
     print("Running %s" % name)
@@ -37,7 +38,7 @@ def runtest(name):
     tests_failed = 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = name[:-5]+".config"
+    config_file = name[:-5] + ".config"
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
@@ -57,7 +58,7 @@ def runtest(name):
                 actual_value = general.get_config(key).get("value")
                 if actual_value != value:
                     print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
-                            % (name, line_number, key, actual_value, value))
+                          % (name, line_number, key, actual_value, value))
                     tests_failed += 1
             elif action == "SET":
                 general.set_config(key, value)
@@ -66,8 +67,9 @@ def runtest(name):
 
     return tests_run, tests_failed
 
+
 def exe_conf_and_read_result(name):
-    if os.system("conf --olddefconfig "+name):
+    if os.system("conf --olddefconfig " + name):
         raise Exception("Failed to run 'conf': is it in your path?")
 
     config = {}
@@ -78,6 +80,7 @@ def exe_conf_and_read_result(name):
                 config[m.group(1)] = m.group(2)
     return config
 
+
 def runkconftest(name):
     print("Running %s" % name)
 
@@ -85,12 +88,12 @@ def runkconftest(name):
     tests_failed = 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = name[:-5]+".config"
+    config_file = name[:-5] + ".config"
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
 
-    shutil.copyfile(config_file,".config")
+    shutil.copyfile(config_file, ".config")
     config = exe_conf_and_read_result(name)
     need_rerun = False
 
@@ -108,13 +111,13 @@ def runkconftest(name):
                     config = exe_conf_and_read_result(name)
                     need_rerun = False
                 tests_run += 1
-                actual_value = config.get(key,"n")
+                actual_value = config.get(key, "n")
                 if actual_value != value:
                     print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
-                            % (name, line_number, key, actual_value, value))
+                          % (name, line_number, key, actual_value, value))
                     tests_failed += 1
             elif action == "SET":
-                with open(".config","a") as f:
+                with open(".config", "a") as f:
                     f.write("CONFIG_%s=%s\n" % (key, value))
                 need_rerun = True
             else:
@@ -125,9 +128,10 @@ def runkconftest(name):
 
     return tests_run, tests_failed
 
+
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--kconf', dest="use_kconf",action='store_true',default=False,
+    parser.add_argument("--kconf", dest="use_kconf", action="store_true", default=False,
                         help="Run using the kernel's configuration system."
                              "'conf' must be in the path")
     parser.add_argument("-C", "--directory", type=str, default=TEST_DIR)
@@ -150,6 +154,7 @@ def main():
     print("%d tests run, %d failed" % (tests_run, tests_failed))
     if tests_failed == 0:
         print("All tests passed!")
+
 
 if __name__ == "__main__":
     main()
