@@ -29,6 +29,7 @@ import config_system
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
+
 # This script will read the config file and output a json file containing the
 # types and values of all config options, which will be read by Bob.
 
@@ -73,11 +74,17 @@ def write_if_different(fname, text):
         with open(fname, "w") as fp:
             fp.write(text)
 
+
 def hash_env():
     m = hashlib.sha256()
     for k in sorted(os.environ.keys()):
-        m.update((k + "=" + os.environ[k] + "\n").encode())
+        val = os.environ[k]
+        # When Python 2 is used make sure that utf-8 encoding is used to prevent non-ASCII errors
+        if hasattr(os.environ[k], 'decode'):
+            val = val.decode('utf-8')
+        m.update(u"{}={}\n".format(k, val).encode('utf-8'))
     return m.hexdigest()
+
 
 def main():
     import argparse
