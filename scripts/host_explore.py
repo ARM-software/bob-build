@@ -49,63 +49,71 @@ def check_output(command, dir=None):
 
     return output
 
+
+def get_cxx_compiler(tgtType):
+    """Parse the config options prefixed by `tgtType` and determine the name of
+    the compiler for that target type, as well as whether it is a cross
+    compiler.
+    """
+    cross_compiler = False
+
+    if get_config_bool(tgtType + "_TOOLCHAIN_GNU"):
+        prefix = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX")
+        # If the prefix ends with the path separator, it is being used as
+        # alternative to adding the compiler to $PATH, and isn't specifying a
+        # cross-compilation prefix.
+        if prefix and not prefix.endswith(os.sep):
+            cross_compiler = True
+        cxx = prefix + get_config_string("GNU_CXX_BINARY")
+    elif get_config_bool(tgtType + "_TOOLCHAIN_CLANG"):
+        if get_config_string(tgtType + "_CLANG_TRIPLE"):
+            cross_compiler = True
+        cxx = get_config_string("CLANG_CXX_BINARY")
+    elif get_config_bool(tgtType + "_TOOLCHAIN_ARMCLANG"):
+        if tgtType != "HOST":
+            cross_compiler = True
+        cxx = get_config_string("ARMCLANG_CXX_BINARY")
+
+    return cxx, cross_compiler
+
+
+def stl_rpath_ldflags(tgtType):
+    """If the toolchain is generating code that can run on the host, add the
+    C++ STL library to the linker rpath so it can be found when the binary is
+    executed.
+    """
+    cxx, cross_compiler = get_cxx_compiler(tgtType)
+
+    if cross_compiler:
+        return []
+
+    stl_path = check_output([cxx, "-print-file-name=libstdc++.so"])
+    stl_dir = os.path.dirname(stl_path)
+    ld_library_path = os.getenv("LD_LIBRARY_PATH", default="")
+    ld_paths = ld_library_path.split(os.pathsep)
+    if stl_dir and stl_dir not in ld_paths:
+        return ["-Wl,--enable-new-dtags", "-Wl,-rpath,{}".format(stl_dir)]
+    return []
+
+
+def force_bfd_ldflags(tgtType):
+    if get_config_bool("BUILDER_ANDROID"):
+        return []
+
+    ld = which_binary(get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX") + "ld")
+    if ld:
+        ld_version = check_output([ld, "-version"])
+        if ld_version.count("gold") == 1:
+            return ["-fuse-ld=bfd"]
+    return []
+
+
 def compiler_config():
-    '''
-    Adds runtime-dependant entries by analyzing user-configured flags.
-    This is mainly required to allow some configuration-specific flags that are
-    impossible or hard to express in Blueprint, because of the need to, say, run
-    a binary and get the output from it.
-    '''
-    extra_target_ldflags = ''
-    extra_host_ldflags = ''
-    if get_config_bool('HOST_TOOLCHAIN_GNU'):
-        host_cxx = get_config_string('GNU_CXX_BINARY')
-    elif get_config_bool('HOST_TOOLCHAIN_CLANG'):
-        host_cxx = get_config_string('CLANG_CXX_BINARY')
-    elif get_config_bool('HOST_TOOLCHAIN_ARMCLANG'):
-        host_cxx = get_config_string('ARMCLANG_CXX_BINARY')
+    host_ldflags = stl_rpath_ldflags("HOST") + force_bfd_ldflags("HOST")
+    target_ldflags = stl_rpath_ldflags("TARGET") + force_bfd_ldflags("TARGET")
 
-    host_libstdcxx_path = check_output([host_cxx, '-print-file-name=libstdc++.so'])
-    target_libstdcxx_path = ""
-
-    host_libstdcxx_dir = os.path.split(host_libstdcxx_path)[0]
-    ld_library_path = os.getenv('LD_LIBRARY_PATH','')
-    ld_paths = ld_library_path.split(":")
-    if len(host_libstdcxx_dir) > 0:
-        if host_libstdcxx_dir not in ld_paths:
-            extra_host_ldflags += '-Wl,--enable-new-dtags -Wl,-rpath,{0} '.format(host_libstdcxx_dir)
-            set_config('EXTRA_LD_LIBRARY_PATH', host_libstdcxx_dir)
-
-    # In native builds we require the addition of rpath to the executable if not in load library path
-    # No toolchain prefix indicates a native build
-    if not get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX'):
-        if get_config_bool('TARGET_TOOLCHAIN_CLANG'):
-            target_libstdcxx_path = host_libstdcxx_path
-        elif get_config_bool('TARGET_TOOLCHAIN_GNU'):
-            flags = get_config_string('TARGET_GNU_FLAGS').split(" ")
-            flags = list(filter(None, flags))
-            target_libstdcxx_path = check_output([host_cxx] + flags + ['-print-file-name=libstdc++.so'])
-
-        target_libstdcxx_dir = os.path.split(target_libstdcxx_path)[0]
-        if len(target_libstdcxx_dir) > 0:
-            if target_libstdcxx_dir not in ld_paths:
-                extra_target_ldflags += '-Wl,--enable-new-dtags -Wl,-rpath,{0} '.format(target_libstdcxx_dir)
-
-    if not get_config_bool('BUILDER_ANDROID'):
-        cross_ld = which_binary(get_config_string('TARGET_GNU_TOOLCHAIN_PREFIX') + 'ld')
-        if cross_ld:
-            cross_ld_version = check_output([cross_ld, '-version'])
-            if cross_ld_version.count('gold') == 1:
-                extra_target_ldflags += '-fuse-ld=bfd '
-
-        host_ld = which_binary('ld')
-        if host_ld:
-            ld_version = check_output([host_ld, '-version'])
-            if ld_version.count('gold') == 1:
-                extra_host_ldflags += '-fuse-ld=bfd '
-
-        set_config('EXTRA_TARGET_LDFLAGS', extra_target_ldflags)
-    set_config('EXTRA_HOST_LDFLAGS', extra_host_ldflags)
+    set_config("EXTRA_HOST_LDFLAGS", " ".join(host_ldflags))
+    set_config("EXTRA_TARGET_LDFLAGS", " ".join(target_ldflags))
 
 
 def pkg_config():
