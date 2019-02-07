@@ -38,17 +38,11 @@ def check_output(command, dir=None):
     The 'command' needs to be an array of arguments.
     '''
 
-    # FileNotFoundError does not exist on Python 2
-    try:
-        fileNotFoundError = FileNotFoundError
-    except NameError:
-        fileNotFoundError = None
-
     output = ''
     try:
         output = subprocess.check_output(command, cwd=dir).strip()
         output = output.decode(sys.getdefaultencoding())
-    except (OSError, fileNotFoundError) as e:
+    except OSError as e:
         logger.error(str(e))
     except subprocess.CalledProcessError as e:
         logger.warning("Problem executing command: %s" % str(e))
