@@ -2,6 +2,7 @@
 set -eE
 trap "echo '<------------- run_build_tests.sh failed'" ERR
 
+export TEST_NON_ASCII_IN_ENV_HASH='ó'
 cd ${BOB_ROOT}/tests/
 rm -rf build-test # Cleanup test directory
 BUILDDIR=build-test ./bootstrap
