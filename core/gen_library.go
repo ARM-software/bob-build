@@ -90,3 +90,8 @@ func (m *generateLibrary) getSplittableProps() *SplittableProps {
 func (m *generateLibrary) topLevelProperties() []interface{} {
 	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateLibraryProps)
 }
+
+// Support singleOutputModule interface
+func (m *generateLibrary) outputName() string {
+	return m.Name()
+}

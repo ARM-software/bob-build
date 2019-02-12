@@ -47,6 +47,9 @@ func pathToLibFlag(path string) string {
 	_, base := filepath.Split(path)
 	ext := filepath.Ext(base)
 	base = strings.TrimSuffix(base, ext)
+	if !strings.HasPrefix(base, "lib") {
+		panic(errors.New("Shared library name must start with 'lib' prefix"))
+	}
 	base = strings.TrimPrefix(base, "lib")
 	return "-l" + base
 }
@@ -83,21 +86,26 @@ var copyRule = pctx.StaticRule("copy",
 		Description: "$out",
 	})
 
-type targetableModule interface {
+type singleOutputModule interface {
 	blueprint.Module
+	outputName() string
+}
+
+type targetableModule interface {
+	singleOutputModule
 	getTarget() string
 }
 
 // Where to put generated shared libraries to simplify linking
 // As long as the module is targetable, we can infer the library path
 func getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join("$BuildDir", t.getTarget(), "shared", t.Name()+".so")
+	return filepath.Join("$BuildDir", t.getTarget(), "shared", t.outputName()+".so")
 }
 
 // Where to put generated binaries in order to make sure generated binaries
 // are available in the same directory as compiled binaries
 func getBinaryPath(t targetableModule) string {
-	return filepath.Join("$BuildDir", t.getTarget(), "executable", t.Name())
+	return filepath.Join("$BuildDir", t.getTarget(), "executable", t.outputName())
 }
 
 // Generate the build actions for a generateSource module and populates the outputs.
@@ -480,7 +488,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 						flags = append(flags, "-Wl,--no-as-needed")
 					}
 				}
-				flags = append(flags, pathToLibFlag(sl.Name()))
+				flags = append(flags, pathToLibFlag(sl.outputName()))
 				if b.isForwardingSharedLibrary() {
 					if useNoAsNeeded {
 						flags = append(flags, "-Wl,--as-needed")
@@ -488,7 +496,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 					flags = append(flags, "-Wl,--no-copy-dt-needed-entries")
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
-				flags = append(flags, pathToLibFlag(sl.Name()))
+				flags = append(flags, pathToLibFlag(sl.outputName()))
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a shared library"))
 			}
