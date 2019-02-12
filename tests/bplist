@@ -14,6 +14,7 @@
 ./generate_libs/build.bp
 ./generate_source/build.bp
 ./kernel_module/module/build.bp
+./output/build.bp
 ./properties/build.bp
 ./reexport_libs/build.bp
 ./resources/build.bp

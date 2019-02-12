@@ -1,0 +1,58 @@
+/*
+ * Copyright 2019 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_static_library {
+    name: "lib_st_output",
+    srcs: ["libst/libst.c"],
+    out: "static_output",
+}
+
+bob_shared_library {
+    name: "lib_sh_output",
+    srcs: ["libsh/libsh.c"],
+    out: "libshared_output",
+}
+
+bob_binary {
+    name: "binary_output",
+    out: "bob_output",
+    srcs: ["out.c"],
+    shared_libs: ["lib_sh_output"],
+    static_libs: ["lib_st_output"],
+}
+
+bob_generate_source {
+    name: "verify_output",
+    module_deps: [
+        "binary_output",
+        "lib_sh_output",
+        "lib_st_output",
+    ],
+    out: ["generated_output"],
+    tool: "verify.py",
+    cmd: "python ${tool} --out='${binary_output_out}' --expected='bob_output' && " +
+        "python ${tool} --out='${lib_sh_output_out}' --expected='libshared_output.so' && " +
+        "python ${tool} --out='${lib_st_output_out}' --expected='static_output.a' && " +
+        "cp ${binary_output_out} ${out}",
+}
+
+bob_alias {
+    name: "bob_test_output",
+    srcs: [
+        "verify_output",
+    ],
+}
