@@ -551,6 +551,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("default_deps", defaultDepsMutator).Parallel()
 	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
 	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()
