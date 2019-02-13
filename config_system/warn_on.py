@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,8 @@ logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
 parser = argparse.ArgumentParser()
 parser.add_argument("config", help="Path to the configuration file (*.config)")
 parser.add_argument("-d", "--database", help="Path to the configuration database (Mconfig)", required=True)
-parser.add_argument("-w", "--warning", action="store", help="Config options to warn about if selected", nargs="+", required=True)
+parser.add_argument("-w", "--warning", action="append", default=[], required=True,
+                    help="Config options to warn about if selected")
 parser.add_argument("--ignore-missing", dest="ignore_missing", action="store_true", default=False,
                     help="Ignore missing database files included with 'source'")
 args = parser.parse_args()
