@@ -1,6 +1,6 @@
 # Ignore default build directory
 build/
-Android.mk
+/Android.mk
 
 # Bob symlink created for Bob tests
 bob

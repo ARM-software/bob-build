@@ -691,6 +691,8 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			// The GeneratedStaticLibrary is expected to be self
 			// contained, so no pulling in of other static or shared
 			// libraries.
+		} else if _, ok := dep.(*externalLib); ok {
+			// External libary dependencies are not handled.
 		} else {
 			panic(fmt.Sprintf("%s is not a staticLibrary", dep.Name()))
 		}

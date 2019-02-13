@@ -7,6 +7,7 @@
 ./export_cflags/libb/build.bp
 ./export_include_dirs/liba/build.bp
 ./export_include_dirs/libb/build.bp
+./external_libs/build.bp
 ./flag_defaults/build.bp
 ./forwarding_libs/forwarding/build.bp
 ./forwarding_libs/forwarding_impl/build.bp
