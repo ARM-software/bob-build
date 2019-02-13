@@ -435,11 +435,6 @@ func (l *library) checkField(cond bool, fieldName string) {
 }
 
 func (m *staticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	props := m.Properties
-	m.checkField(len(props.Shared_libs) == 0, "shared_libs")
-	m.checkField(len(props.Static_libs) == 0, "static_libs")
-	m.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
-
 	if isEnabled(m) {
 		getBackend(ctx).staticActions(m, ctx)
 	}
@@ -506,12 +501,6 @@ func (m *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]
 }
 
 func (m *sharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	props := m.Properties
-	m.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
-	m.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
-	m.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
-	m.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
-
 	if isEnabled(m) {
 		getBackend(ctx).sharedActions(m, ctx)
 	}
@@ -534,18 +523,6 @@ func (m *binary) filesToInstall(ctx blueprint.ModuleContext) []string {
 }
 
 func (m *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	props := m.Properties
-	m.checkField(len(props.Export_cflags) == 0, "export_cflags")
-	m.checkField(len(props.Export_include_dirs) == 0, "export_include_dirs")
-	m.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
-	m.checkField(len(props.Export_local_include_dirs) == 0, "export_local_include_dirs")
-	m.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
-	m.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
-	m.checkField(len(props.Reexport_libs) == 0, "reexport_libs")
-	m.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
-	m.checkField(len(props.Whole_static_libs) == 0, "whole_static_libs")
-	m.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
-
 	if isEnabled(m) {
 		getBackend(ctx).binaryActions(m, ctx)
 	}
@@ -583,6 +560,35 @@ func getBinaryOrSharedLib(m blueprint.Module) (*library, bool) {
 	}
 
 	return nil, false
+}
+
+func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
+	m := mctx.Module()
+	if b, ok := m.(*binary); ok {
+		props := b.Properties
+		b.checkField(len(props.Export_cflags) == 0, "export_cflags")
+		b.checkField(len(props.Export_include_dirs) == 0, "export_include_dirs")
+		b.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
+		b.checkField(len(props.Export_local_include_dirs) == 0, "export_local_include_dirs")
+		b.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
+		b.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
+		b.checkField(len(props.Reexport_libs) == 0, "reexport_libs")
+		b.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
+		b.checkField(len(props.Whole_static_libs) == 0, "whole_static_libs")
+		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
+	} else if sl, ok := m.(*sharedLibrary); ok {
+		props := sl.Properties
+		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
+		sl.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
+		sl.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
+		sl.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
+	} else if sl, ok := m.(*staticLibrary); ok {
+		props := sl.Properties
+		sl.checkField(len(props.Shared_libs) == 0, "shared_libs")
+		sl.checkField(len(props.Static_libs) == 0, "static_libs")
+		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
+	}
+
 }
 
 // Traverse the dependency tree, following all StaticDepTag and WholeStaticDepTag links.
