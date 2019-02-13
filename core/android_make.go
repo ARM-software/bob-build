@@ -123,9 +123,6 @@ var androidSharedLibs = [...]string{
 	"libui",
 	"libutils"}
 
-var androidStaticLibs = [...]string{
-	"libarect"}
-
 var androidHeaderLibs = [...]string{
 	"libcutils_headers",
 	"libgui_headers",
@@ -153,12 +150,6 @@ func noAndroidLdlibs(s string) bool {
 	for _, lib := range androidHeaderLibs {
 		if s[2:] == lib[3:] {
 			// Don't include android header lib
-			return false
-		}
-	}
-	for _, lib := range androidStaticLibs {
-		if s[2:] == lib[3:] {
-			// Don't include android static lib
 			return false
 		}
 	}
@@ -283,7 +274,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	// includes and build the right things.
 	localAndroidSharedLibs := []string{}
 	localAndroidHeaderLibs := []string{}
-	localAndroidStaticLibs := []string{}
 	if len(m.Properties.Ldlibs) > 0 {
 		// The following code is similar to filter, but we are
 		// transforming the entries at the same time.
@@ -301,12 +291,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 			for _, lib2 := range androidHeaderLibs {
 				if lib[2:] == lib2[3:] {
 					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
-					break
-				}
-			}
-			for _, lib2 := range androidStaticLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidStaticLibs = append(localAndroidStaticLibs, lib2)
 					break
 				}
 			}
@@ -328,12 +312,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 			for _, lib2 := range androidHeaderLibs {
 				if lib[2:] == lib2[3:] {
 					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
-					break
-				}
-			}
-			for _, lib2 := range androidStaticLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidStaticLibs = append(localAndroidStaticLibs, lib2)
 					break
 				}
 			}
@@ -370,10 +348,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 
 	if len(localAndroidHeaderLibs) > 0 {
 		text += "LOCAL_HEADER_LIBRARIES := " + strings.Join(localAndroidHeaderLibs, " ") + "\n"
-	}
-
-	if len(localAndroidStaticLibs) > 0 {
-		text += "LOCAL_STATIC_LIBRARIES += " + strings.Join(localAndroidStaticLibs, " ") + "\n"
 	}
 
 	// Can't see a way to wrap a particular library in -Wl in link flags on android, so specify
@@ -909,6 +883,15 @@ func enabledAndRequired(m blueprint.Module) bool {
 	return true
 }
 
+func generatesAndroidIncFile(m blueprint.Module) bool {
+	if _, ok := m.(*defaults); ok {
+		return false
+	} else if _, ok := m.(*externalLib); ok {
+		return false
+	}
+	return true
+}
+
 func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) {
 
 	var order androidMkFileSlice
@@ -918,13 +901,11 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 			deps := []string{}
 			ctx.VisitDepsDepthFirst(m, func(child blueprint.Module) {
 				childdi, ok := child.(androidNaming)
-				_, isDefaults := child.(*defaults)
-				if ok && !isDefaults && enabledAndRequired(m) {
+				if ok && generatesAndroidIncFile(child) && enabledAndRequired(m) {
 					deps = append(deps, childdi.altShortName())
 				}
 			})
-			_, isDefaults := di.(*defaults)
-			if !isDefaults {
+			if generatesAndroidIncFile(m) {
 				order = append(order, androidMkFile{di.altShortName(), deps})
 			}
 		}
@@ -952,7 +933,9 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 
 			panic(fmt.Errorf("unmet or circular dependency. %d remaining.\n%s", len(order), deps))
 		}
+
 		text += "include $(BOB_ANDROIDMK_DIR)/" + order[lowindex].Name + ".inc\n"
+
 		for i := range order {
 			newdeps := []string{}
 			for _, dep := range order[i].Deps {

@@ -39,6 +39,7 @@ bootstrap_go_package {
         "core/build_structs.go",
         "core/config_props.go",
         "core/defaults.go",
+        "core/external_library.go",
         "core/feature.go",
         "core/gen_binary.go",
         "core/gen_library.go",

@@ -1,0 +1,18 @@
+bob_external_static_library {
+    name: "libbob_test_external_static",
+}
+
+bob_binary {
+    name: "use_external_libs",
+    srcs: ["use_external_libs.c"],
+    static_libs: ["libbob_test_external_static"],
+    enabled: false,
+    android: {
+        enabled: true,
+    },
+}
+
+bob_alias {
+    name: "bob_test_external_libs",
+    srcs: ["use_external_libs"],
+}
