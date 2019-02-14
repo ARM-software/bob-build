@@ -21,6 +21,7 @@ import multiprocessing
 import os
 import subprocess
 import sys
+import shutil
 
 import copy_with_deps
 import kernel_config_parser
@@ -70,12 +71,16 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_args, extra_cflag
     # Copy the output of the kernel build to the directory that Bob expects
     built_kmod = os.path.join(module_dir, module_ko)
     built_symvers = os.path.join(module_dir, "Module.symvers")
-    cmd = ["cp", "--reflink=auto", built_kmod, built_symvers, output_dir]
-    try:
-        subprocess.check_call(cmd)
-    except subprocess.CalledProcessError as e:
-        logger.error("Command failed: %s", str(e.cmd))
-        sys.exit(e.returncode)
+    built_files = [built_kmod, built_symvers]
+    for built_file in built_files:
+        try:
+            shutil.copy(built_file, output_dir)
+        except (OSError, IOError) as e:
+            msg = "Copy file from input path: {}\n" \
+                  "to output path: {}" \
+                  "finished with error: {}"
+            logger.error(msg.format(built_file, output_dir, e))
+            sys.exit(1)
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
