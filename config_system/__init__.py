@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,4 +15,4 @@
 
 from .general import init_config, get_config, get_config_bool, \
     get_config_int, get_config_string,  get_config_list, read_config, \
-    set_config, can_enable, warn_on_selected_depends
+    set_config, can_enable, get_options_selecting, get_options_depending_on

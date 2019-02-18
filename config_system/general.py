@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -260,19 +260,24 @@ def write_config(config_filename):
                         configuration['menu'][i_symbol]['title'])
     logger.info("Written configuration to '%s'" % config_filename)
 
-def warn_on_selected_depends(warning_items):
-    for i in sorted(configuration['order']):
-        (i_type, i_symbol) = configuration['order'][i]
-        if i_type in ["config","menuconfig"]:
-            c = get_config(i_symbol)
-            if can_enable(c.get('depends')) or len(c['selected_by']) > 0:
-                if c['datatype'] == "bool":
-                    if c['value'] == 'y':
-                        for param in warning_items:
-                            if check_depends(c.get('depends'), param):
-                                logger.warn("%s depends on %s" % (i_symbol, param))
-                            elif i_symbol == param:
-                                logger.warn("%s is selected" % (i_symbol))
+
+def get_options_selecting(selected):
+    """Return the options which select `selected`"""
+    opt = get_config(selected)
+    return opt.get("selected_by", [])
+
+
+def get_options_depending_on(dependent):
+    """Return the options which depend on `dependent`"""
+    opt = get_config(dependent)
+    rdeps = opt.get("rdepends", [])
+    enabled_options = []
+    for rdep in rdeps:
+        rdep_val = get_config(rdep)
+        if rdep_val["datatype"] == "bool" and get_config_bool(rdep):
+            enabled_options.append(rdep)
+    return enabled_options
+
 
 def set_initial_values():
     "Set all configuration objects to their default value"
