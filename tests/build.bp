@@ -34,6 +34,7 @@ bob_alias {
         "bob_test_properties",
         "bob_test_reexport_libs",
         "bob_test_resources",
+        "bob_test_shared_libs",
         "bob_test_static_libs",
         "bob_test_templates",
         "bob_test_transform_source",
