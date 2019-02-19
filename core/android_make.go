@@ -464,9 +464,14 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 			text += "LOCAL_REQUIRED_MODULES:=" + newlineSeparatedList(requiredModuleNames)
 		}
 	} else {
-		if m.Properties.TargetType == tgtTypeTarget {
-			// Only disable installation of target libraries.
-			// Host libraries need to be installed to be used by the build.
+		// Only disable installation on the target, because host
+		// libraries need to be installed to be used by the build.
+		//
+		// Target shared libraries do not need an explicit installation
+		// location, but cannot be uninstallable, or the multilib paths
+		// will conflict, resulting in the same location being used for
+		// both 32 and 64-bit versions.
+		if m.Properties.TargetType == tgtTypeTarget && binType != binTypeShared {
 			text += "LOCAL_UNINSTALLABLE_MODULE:=true\n"
 		}
 	}

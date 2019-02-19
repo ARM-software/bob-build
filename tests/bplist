@@ -18,6 +18,7 @@
 ./properties/build.bp
 ./reexport_libs/build.bp
 ./resources/build.bp
+./shared_libs/build.bp
 ./static_libs/build.bp
 ./templates/build.bp
 ./transform_source/build.bp

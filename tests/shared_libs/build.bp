@@ -1,0 +1,77 @@
+bob_shared_library {
+    name: "libsharedtest_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_installed"],
+    host: {
+        install_group: "IG_host_libs",
+    },
+    target: {
+        install_group: "IG_libs",
+    },
+    host_supported: true,
+    target_supported: true,
+}
+
+bob_shared_library {
+    name: "libsharedtest_not_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_not_installed"],
+    host_supported: true,
+    target_supported: true,
+}
+
+// Test that we can link to a shared library, whether it has an install group
+// or not.
+bob_binary {
+    name: "sharedtest",
+    srcs: ["main.c"],
+    shared_libs: [
+        "libsharedtest_installed",
+        "libsharedtest_not_installed",
+    ],
+    host_supported: true,
+    target_supported: true,
+}
+
+// Ensure that the host version of `sharedtest` is actually built, and that it
+// can be run successfully, which checks there are no library path issues.
+bob_generate_source {
+    name: "use_sharedtest_host",
+    host_bin: "sharedtest:host",
+    cmd: "${host_bin} ${out}",
+    out: ["use_sharedtest_host_main.c"],
+}
+
+bob_binary {
+    name: "use_sharedtest_host_gen_source",
+    generated_sources: ["use_sharedtest_host"],
+}
+
+bob_alias {
+    name: "bob_test_shared_libs",
+    srcs: [
+        "sharedtest:host",
+        "sharedtest:target",
+        "use_sharedtest_host_gen_source",
+    ],
+}
+
+bob_install_group {
+    name: "IG_host_libs",
+    android: {
+        install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
+    },
+    linux: {
+        install_path: "install/hostlib",
+    },
+}
+
+bob_install_group {
+    name: "IG_libs",
+    android: {
+        install_path: "$(TARGET_OUT_VENDOR)/lib",
+    },
+    linux: {
+        install_path: "install/lib",
+    },
+}
