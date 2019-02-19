@@ -34,25 +34,21 @@ def runtest(name):
     from config_system import general
     print("Running %s" % name)
 
-    tests_run = 0
-    tests_failed = 0
+    tests_run, tests_failed = 0, 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = name[:-5] + ".config"
+    config_file = os.path.splitext(name)[0] + '.config'
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
     general.read_config(name, config_file, False)
 
     with open(name) as f:
-        line_number = 0
-        for line in f:
-            line_number += 1
+        for line_number, line in enumerate(f):
             m = re.match("# (ASSERT|SET): (\S+)=(.+)", line)
-            if m is None:
+            if not m:
                 continue
-            action = m.group(1)
-            (key, value) = (m.group(2), m.group(3))
+            action, key, value = m.groups()
             if action == "ASSERT":
                 tests_run += 1
                 actual_value = general.get_config(key).get("value")
@@ -76,19 +72,19 @@ def exe_conf_and_read_result(name):
     with open(".config") as f:
         for line in f:
             m = re.match("CONFIG_(\S+)=(\S+)", line)
-            if m is not None:
-                config[m.group(1)] = m.group(2)
+            if not m:
+                continue
+            config[m.group(1)] = m.group(2)
     return config
 
 
 def runkconftest(name):
     print("Running %s" % name)
 
-    tests_run = 0
-    tests_failed = 0
+    tests_run, tests_failed = 0, 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = name[:-5] + ".config"
+    config_file = os.path.splitext(name)[0] + '.config'
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
@@ -98,14 +94,11 @@ def runkconftest(name):
     need_rerun = False
 
     with open(name) as f:
-        line_number = 0
-        for line in f:
-            line_number += 1
+        for line_number, line in enumerate(f):
             m = re.match("# (ASSERT|SET): (\S+)=(.+)", line)
-            if m is None:
+            if not m:
                 continue
-            action = m.group(1)
-            (key, value) = (m.group(2), m.group(3))
+            action, key, value = m.groups()
             if action == "ASSERT":
                 if need_rerun:
                     config = exe_conf_and_read_result(name)
@@ -139,14 +132,11 @@ def main():
 
     os.chdir(args.directory)
 
-    tests_run = 0
-    tests_failed = 0
+    tests_run, tests_failed = 0, 0
     tests = glob.glob("*.test")
+    test_runner = runkconftest if args.use_kconf else runtest
     for test in tests:
-        if args.use_kconf:
-            (run, failed) = runkconftest(test)
-        else:
-            (run, failed) = runtest(test)
+        run, failed = test_runner(test)
         tests_run += run
         tests_failed += failed
 
