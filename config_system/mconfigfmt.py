@@ -24,22 +24,20 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from config_system.lex_wrapper import LexWrapper
 
 
-def perform_formatting(file_list_path, output=None):
+def perform_formatting(file_path, output):
     """Call LexWrapper class to call PLY lexer facade, then get back outcome with formatting principles
-    :param file_list_path: Input file path list
-    :param output (optional) output file path
+    :param file_path: Input file path
+    :param output: handle to file/stdout or file path (only if original file in use)
     """
-    for file_path in file_list_path:
-        wrapper = LexWrapper(ignore_missing=False, verbose=True)
-        wrapper.source(file_path)
-        dump(output or file_path, wrapper)
-
-
-def dump(file_path, wrapper):
-    """General function for dumping the output into file from given path"""
-    with open(file_path, "w") as f:
-        for token in wrapper.iterate_tokens():
-            f.write(handle_formatting(token))
+    wrapper = LexWrapper(ignore_missing=False, verbose=True)
+    wrapper.source(file_path)
+    rewrite = isinstance(output, str)  # If string supplied -> assume file path
+    if rewrite:
+        output = open(output, "w")
+    for token in wrapper.iterate_tokens():
+        output.write(handle_formatting(token))
+    if rewrite:
+        output.close()
 
 
 def handle_formatting(token):
@@ -76,10 +74,20 @@ def main():
     Input file need to be present and output file should not be present
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.HelpFormatter)
-    parser.add_argument('input', nargs='+',
+    parser.add_argument("input", nargs="+",
                         help="Input file with configuration database (Mconfig) to fix.")
+    parser.add_argument("--write", "-w", default=False, action="store_true",
+                        help="Write formatted output to original file")
+    parser.add_argument("-o", "--output", help="Output file path")
     args = parser.parse_args()
-    perform_formatting(args.input)
+
+    output_handle = open(args.output, "w") if args.output else sys.stdout
+    for input_path in args.input:
+        formatting_output = output_handle
+        if args.write:
+            formatting_output = input_path
+        perform_formatting(input_path, formatting_output)
+    output_handle.close()
 
 
 if __name__ == "__main__":

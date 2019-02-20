@@ -28,10 +28,10 @@ def run_fix_test(name, expected_output):
     """ Test function to verify difference between two file contents"""
     from config_system import mconfigfmt
     print("Running %s" % name)
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
     tests_run = 0
     tests_failed = 0
-    mconfigfmt.perform_formatting([name], output=tmp_file.name)
+    mconfigfmt.perform_formatting(name, tmp_file.file)
     with open(tmp_file.name) as test_out, open(expected_output) as exp_out:
         out_lines, exp_lines = exp_out.readlines(), test_out.readlines()
     if any(out_lines[i] != exp_lines[i] for i in range(len(exp_lines))):
