@@ -16,9 +16,10 @@
 import logging
 from logging.handlers import BufferingHandler
 
+
 # Like MemoryHandler, but only flush on close
 class InfBufferHandler(BufferingHandler):
-    __slots__ = ('target', 'buffer')
+    __slots__ = "target", "buffer"
 
     def __init__(self, capacity, target):
         super(BufferingHandler, self).__init__(capacity)
@@ -39,36 +40,37 @@ class InfBufferHandler(BufferingHandler):
         self.target = None
         self.buffer = []
 
+
 # Count the number of each error type
 class ErrorCounterHandler(logging.Handler):
-    __slots__ = ('counts')
+    __slots__ = "counts"
 
     def __init__(self, *args, **kwargs):
         super(ErrorCounterHandler, self).__init__(*args, **kwargs)
         self.counts = {
-            'NOTSETS': 0,
-            'DEBUG': 0,
-            'INFO': 0,
-            'WARNING': 0,
-            'ERROR': 0,
-            'CRITICAL': 0,
+            "NOTSETS": 0,
+            "DEBUG": 0,
+            "INFO": 0,
+            "WARNING": 0,
+            "ERROR": 0,
+            "CRITICAL": 0,
         }
 
     def emit(self, record):
-        l = record.levelname
-        self.counts[l] += 1
+        lvl = record.levelname
+        self.counts[lvl] += 1
 
     def debugs(self):
-        return self.counts['DEBUG']
+        return self.counts["DEBUG"]
 
     def infos(self):
-        return self.counts['INFO']
+        return self.counts["INFO"]
 
     def warnings(self):
-        return self.counts['WARNING']
+        return self.counts["WARNING"]
 
     def errors(self):
-        return self.counts['ERROR']
+        return self.counts["ERROR"]
 
     def criticals(self):
-        return self.counts['CRITICAL']
+        return self.counts["CRITICAL"]
