@@ -24,8 +24,8 @@ config OPTION_C
 
 endchoice
 choice
-    int 365 if HOW_MUCH_DAYS_IN_YEAR || !WEEKS && DAYS
-    default BUILDER_BUILD if DROID
+	int 365 if HOW_MUCH_DAYS_IN_YEAR || !WEEKS && DAYS
+	default BUILDER_BUILD if DROID
 	prompt "Choice 1" if ALA_MA_KOTA
 	default DEFAULT_OPTION
 
@@ -38,7 +38,7 @@ config DEFAULT_OPTION
 	bool "Default option"
 
 config THIRD_OPTION
-    default y if (XYZ || ABC) && !ALA_MA_KOTA
+	default y if (XYZ || ABC) && !ALA_MA_KOTA
 	bool "Third option"
 
 endchoice

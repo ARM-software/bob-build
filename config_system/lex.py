@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import ply.lex as lex
-import re
 
 
 verbose_flag = False
@@ -33,7 +32,6 @@ tokens = (
     "DEPENDS",
     "DUMMY",
     "EOL",
-    "TAB",
     "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
     "HELP", "HELPTEXT",
     "HEX",
@@ -94,7 +92,7 @@ def t_newline(t):
 
 
 def t_ANY_comment(t):
-    r"[ ]*\#.*[\n|\Z]"
+    r"[ \t]*\#.*[\n|\Z]"
     t.lexer.lineno += 1
     t.lexer.lexpos -= 1
     t.type = "COMMENT"
@@ -102,16 +100,10 @@ def t_ANY_comment(t):
     return t if verbose_flag else None
 
 
-def t_tab(t):
-    r"\t+"
-    t.type = "TAB"
-    return t if verbose_flag else None
-
-
 def t_space(t):
-    r"[ ]+"
+    r"[\t ]+"
     t.type = "SPACE"
-    return t if verbose_flag else None
+    return None
 
 
 def t_commandhelp(t):
@@ -187,30 +179,28 @@ def t_PARAM_newline(t):
 
 
 def t_HELP_text(t):
-    r"[ \t]+.+\n"
+    r"(?P<indent>[ \t]+)(?P<text>.+)\n"
     global help_indent
 
-    m = re.match("([ \t]+)(.+)", t.value)
-    indent = len(m.group(1).expandtabs())
-    text = m.group(2)
+    m = t.lexer.lexmatch
+    indent = len(m.group("indent").expandtabs())
+    text = m.group("text")
 
     if help_indent == 0:
         help_indent = indent
     elif indent < help_indent:
         report_error("Unexpected indent in help text", t)
     indent -= help_indent
-    t.value = '{}'.format(m.group(1) if verbose_flag else "") + text.strip() + "\n"
     t.type = "HELPTEXT"
-
+    t.value = text
     t.lexer.lineno += 1
     return t
 
 
 def t_HELP_blankline(t):
     r"[ \t]*\n"
-    t.value = "\n"
+    t.value = ""
     t.type = "HELPTEXT"
-
     t.lexer.lineno += 1
     return t
 
