@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -208,7 +208,6 @@ def p_mainmenu_stmt_first(p):
 def p_dummy(p):
     """dummy :
              | DUMMY
-             | TAB
              | SPACE
              | COMMENT"""
     p[0] = {}
@@ -391,7 +390,7 @@ def p_helptext(p):
     if len(p) == 1:
         p[0] = ""
     else:
-        p[0] = p[1] + p[2]
+        p[0] = p[1] + "\n" + p[2]
 
 
 def p_error(p):

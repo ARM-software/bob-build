@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import re
 import sys
 import argparse
 
@@ -37,44 +36,38 @@ def perform_formatting(file_list_path, output=None):
 
 
 def dump(file_path, wrapper):
-    """General method for dumping the output into file from given path"""
-    line, lines = [], []
-    for token in wrapper.iterate_tokens():
-        if not token:
-            break
-        if token.type == "HELPTEXT" and len(token.value) > 1:
-            line.append(handle_help_format(token))
-            continue
-        if "\n" not in str(token.value):
-            line.append(handle_formatting(token))
-            continue
-        line.append(token.value)
-        str_line = "".join(line)
-        lines.append(str_line[:-1].rstrip(' ') + str_line[-1])
-        line = []
+    """General function for dumping the output into file from given path"""
     with open(file_path, "w") as f:
-        f.writelines(lines)
+        for token in wrapper.iterate_tokens():
+            f.write(handle_formatting(token))
 
 
 def handle_formatting(token):
-    """Handle formatting for various types of tokens"""
-    if isinstance(token.value, int):
-        return str(token.value)
-    elif token.type == "QUOTED_STRING":
-        return '"{}"'.format(token.value)
-    return "{}".format(token.value)
+    """Function which applies additional formatting to token value
+    :return: Token value with changes to value if needed"""
+    dec_map = {
+        "BOOL": "\t{}".format,
+        "INT": "\t{}".format,
+        "STRING": "\t{}".format,
+        "DEFAULT": "\t{}".format,
+        "DEPENDS": "\t{}".format,
+        "HELP": "\t{}".format,
+        "SELECT": "\t{}".format,
+        "PROMPT": "\t{}".format,
+        "VISIBLE": "\t{}".format,
+        "HELPTEXT": format_helptext,
+        "QUOTED_STRING": '"{}"'.format,
+    }
+    handler = dec_map.get(token.type, str)
+    return handler(token.value)
 
 
-def handle_help_format(token):
-    """Workaround for indentation requirement"""
-    help_ind = "  "
-    indent, text = re.search(r"(\s+)(.+\n)", token.value).groups()
-    # replace unfolded spaces to tabs
-    indent = indent.replace("    ", "\t")
-    if not indent.endswith(help_ind) or indent.count(' ') != len(help_ind):
-        # replace last tab as 2 spaces and invalid amount of spaces
-        indent = indent[:-1].rstrip(" ") + help_ind
-    return "".join([indent, text])
+def format_helptext(value):
+    """Handle formatting for HELPTEXT field.
+    Apply formatting only for token with value otherwise supply with newline"""
+    if not value:
+        return "\n"
+    return "\t  {}\n".format(value)
 
 
 def main():

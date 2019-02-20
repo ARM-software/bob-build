@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,4 +72,7 @@ class LexWrapper:
     def iterate_tokens(self):
         """Generator method to yield tokens"""
         while True:
-            yield self.current_lexer().token()
+            tok = self.current_lexer().token()
+            if not tok:
+                break
+            yield tok
