@@ -512,6 +512,7 @@ func Main() {
 	ctx.RegisterModuleType("bob_static_library", passConfig(staticLibraryFactory, config))
 	ctx.RegisterModuleType("bob_shared_library", passConfig(sharedLibraryFactory, config))
 	ctx.RegisterModuleType("bob_defaults", passConfig(defaultsFactory, config))
+	ctx.RegisterModuleType("bob_external_shared_library", passConfig(externalLibFactory, config))
 	ctx.RegisterModuleType("bob_external_static_library", passConfig(externalLibFactory, config))
 	ctx.RegisterModuleType("bob_generate_source", passConfig(generateSourceFactory, config))
 	ctx.RegisterModuleType("bob_transform_source", passConfig(transformSourceFactory, config))

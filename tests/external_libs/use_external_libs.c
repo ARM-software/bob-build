@@ -1,5 +1,6 @@
-int external_static(void);
+#include "external_static.h"
+#include "external_shared.h"
 
 int main(void) {
-    return external_static();
+    return external_static() + external_shared();
 }
