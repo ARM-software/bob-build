@@ -2,10 +2,15 @@ bob_external_static_library {
     name: "libbob_test_external_static",
 }
 
+bob_external_shared_library {
+    name: "libbob_test_external_shared",
+}
+
 bob_binary {
     name: "use_external_libs",
     srcs: ["use_external_libs.c"],
     static_libs: ["libbob_test_external_static"],
+    shared_libs: ["libbob_test_external_shared"],
     enabled: false,
     android: {
         enabled: true,

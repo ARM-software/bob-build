@@ -110,19 +110,6 @@ func moduleLinkFlags(s string) bool {
 }
 
 // If we see any of there libraries in LDLIBS as -lxxx, we'll replace them with the android library object
-var androidSharedLibs = [...]string{
-	"libbinder",
-	"libc++",
-	"libcutils",
-	"libgui",
-	"libhardware",
-	"libion",
-	"liblog",
-	"libnativewindow",
-	"libsync",
-	"libui",
-	"libutils"}
-
 var androidHeaderLibs = [...]string{
 	"libcutils_headers",
 	"libgui_headers",
@@ -140,12 +127,6 @@ func noAndroidLdlibs(s string) bool {
 	// LOCAL_SHARED_LIBS, LOCAL_HEADER_LIBS or LOCAL_STATIC_LIBS.
 	if strings.HasPrefix(s, "android.") {
 		return false
-	}
-	for _, lib := range androidSharedLibs {
-		if s[2:] == lib[3:] {
-			// Don't include android shared lib
-			return false
-		}
 	}
 	for _, lib := range androidHeaderLibs {
 		if s[2:] == lib[3:] {
@@ -282,12 +263,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 				localAndroidSharedLibs = append(localAndroidSharedLibs, lib)
 				continue
 			}
-			for _, lib2 := range androidSharedLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidSharedLibs = append(localAndroidSharedLibs, lib2)
-					break
-				}
-			}
 			for _, lib2 := range androidHeaderLibs {
 				if lib[2:] == lib2[3:] {
 					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
@@ -303,12 +278,6 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 		// The following code is similar to filter, but we are
 		// transforming the entries at the same time.
 		for _, lib := range m.Properties.Export_ldlibs {
-			for _, lib2 := range androidSharedLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidSharedLibs = append(localAndroidSharedLibs, lib2)
-					break
-				}
-			}
 			for _, lib2 := range androidHeaderLibs {
 				if lib[2:] == lib2[3:] {
 					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
@@ -318,12 +287,16 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 		}
 	}
 
-	// convert Shared_libs, Resolved_static_libs, Whole_static_libs to
-	// Android module names rather than Bob module names
+	// convert Shared_libs, Export_shared_libs, Resolved_static_libs, and
+	// Whole_static_libs to Android module names rather than Bob module
+	// names
 	sharedLibs := []string{}
 	staticLibs := []string{}
 	wholeStaticLibs := []string{}
 	for _, mod := range m.Properties.Shared_libs {
+		sharedLibs = append(sharedLibs, androidModuleName(mod))
+	}
+	for _, mod := range m.Properties.Export_shared_libs {
 		sharedLibs = append(sharedLibs, androidModuleName(mod))
 	}
 	for _, mod := range m.Properties.ResolvedStaticLibs {
@@ -364,6 +337,8 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 				}
 			} else if _, ok := p.(*generateSharedLibrary); ok {
 				// Generated forwarding lib not supported
+			} else if _, ok := p.(*externalLib); ok {
+				// External libraries are never forwarding libraries
 			} else {
 				panic(errors.New(ctx.OtherModuleName(p) + " is not a shared library"))
 			}
