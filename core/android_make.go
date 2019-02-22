@@ -249,20 +249,14 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	text += specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags))
 	text += specifyCompilerStandard("LOCAL_CPP_STD", utils.NewStringSlice(cflagsList, m.Properties.Cxxflags))
 
-	// Check for android libraries in ldlibs, and add to
-	// shared, header or static libs instead of ldlibs.
-	// This means android will add the appropriate
+	// Check for android libraries in ldlibs, and add to header libs
+	// instead of ldlibs. This means android will add the appropriate
 	// includes and build the right things.
-	localAndroidSharedLibs := []string{}
 	localAndroidHeaderLibs := []string{}
 	if len(m.Properties.Ldlibs) > 0 {
 		// The following code is similar to filter, but we are
 		// transforming the entries at the same time.
 		for _, lib := range m.Properties.Ldlibs {
-			if strings.HasPrefix(lib, "android.") {
-				localAndroidSharedLibs = append(localAndroidSharedLibs, lib)
-				continue
-			}
 			for _, lib2 := range androidHeaderLibs {
 				if lib[2:] == lib2[3:] {
 					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
@@ -306,9 +300,7 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 		wholeStaticLibs = append(wholeStaticLibs, androidModuleName(mod))
 	}
 
-	text += "LOCAL_SHARED_LIBRARIES := " + strings.Join(localAndroidSharedLibs, " ") + " " +
-		strings.Join(sharedLibs, " ") +
-		" liblog libc++\n"
+	text += "LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog", "libc++"), " ") + "\n"
 	text += "LOCAL_STATIC_LIBRARIES := " + strings.Join(staticLibs, " ") + "\n"
 	text += "LOCAL_WHOLE_STATIC_LIBRARIES := " + strings.Join(wholeStaticLibs, " ") + "\n"
 
