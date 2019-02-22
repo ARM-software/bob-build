@@ -109,34 +109,6 @@ func moduleLinkFlags(s string) bool {
 	return !machineSpecificFlag(s)
 }
 
-// If we see any of there libraries in LDLIBS as -lxxx, we'll replace them with the android library object
-var androidHeaderLibs = [...]string{
-	"libcutils_headers",
-	"libgui_headers",
-	"libhardware_headers",
-	"liblog_headers",
-	"libnativebase_headers",
-	"libsystem_headers",
-	"libui_headers"}
-
-func noAndroidLdlibs(s string) bool {
-	// An android module should have a way to add android libraries to its LOCAL_SHARED_LIBRARIES,
-	// LOCAL_HEADER_LIBRARIES and LOCAL_STATIC_LIBRARIES. The way we do this is via ldlibs, if a
-	// module has a definition in ldlibs which doesn't pass this predicate, it is this kind of
-	// library. In this case, module is removed from LOCAL_LDLIBS and instead added to either,
-	// LOCAL_SHARED_LIBS, LOCAL_HEADER_LIBS or LOCAL_STATIC_LIBS.
-	if strings.HasPrefix(s, "android.") {
-		return false
-	}
-	for _, lib := range androidHeaderLibs {
-		if s[2:] == lib[3:] {
-			// Don't include android header lib
-			return false
-		}
-	}
-	return true
-}
-
 var (
 	classes = []string{
 		"STATIC_LIBRARIES",
@@ -249,56 +221,15 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	text += specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags))
 	text += specifyCompilerStandard("LOCAL_CPP_STD", utils.NewStringSlice(cflagsList, m.Properties.Cxxflags))
 
-	// Check for android libraries in ldlibs, and add to header libs
-	// instead of ldlibs. This means android will add the appropriate
-	// includes and build the right things.
-	localAndroidHeaderLibs := []string{}
-	if len(m.Properties.Ldlibs) > 0 {
-		// The following code is similar to filter, but we are
-		// transforming the entries at the same time.
-		for _, lib := range m.Properties.Ldlibs {
-			for _, lib2 := range androidHeaderLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
-					break
-				}
-			}
-		}
-		// Filter out the android libs from ldlibs
-		m.Properties.Ldlibs = utils.Filter(m.Properties.Ldlibs, noAndroidLdlibs)
-	}
-	// Similar processing of export ldlibs to ldlibs.
-	if len(m.Properties.Export_ldlibs) > 0 {
-		// The following code is similar to filter, but we are
-		// transforming the entries at the same time.
-		for _, lib := range m.Properties.Export_ldlibs {
-			for _, lib2 := range androidHeaderLibs {
-				if lib[2:] == lib2[3:] {
-					localAndroidHeaderLibs = append(localAndroidHeaderLibs, lib2)
-					break
-				}
-			}
-		}
-	}
-
 	// convert Shared_libs, Export_shared_libs, Resolved_static_libs, and
 	// Whole_static_libs to Android module names rather than Bob module
 	// names
-	sharedLibs := []string{}
-	staticLibs := []string{}
-	wholeStaticLibs := []string{}
-	for _, mod := range m.Properties.Shared_libs {
-		sharedLibs = append(sharedLibs, androidModuleName(mod))
-	}
-	for _, mod := range m.Properties.Export_shared_libs {
-		sharedLibs = append(sharedLibs, androidModuleName(mod))
-	}
-	for _, mod := range m.Properties.ResolvedStaticLibs {
-		staticLibs = append(staticLibs, androidModuleName(mod))
-	}
-	for _, mod := range m.Properties.Whole_static_libs {
-		wholeStaticLibs = append(wholeStaticLibs, androidModuleName(mod))
-	}
+	sharedLibs := append(androidModuleNames(m.Properties.Shared_libs),
+		androidModuleNames(m.Properties.Export_shared_libs)...)
+	staticLibs := androidModuleNames(m.Properties.ResolvedStaticLibs)
+	wholeStaticLibs := androidModuleNames(m.Properties.Whole_static_libs)
+	exportHeaderLibs := androidModuleNames(m.Properties.Export_header_libs)
+	headerLibs := append(androidModuleNames(m.Properties.Header_libs), exportHeaderLibs...)
 
 	text += "LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog", "libc++"), " ") + "\n"
 	text += "LOCAL_STATIC_LIBRARIES := " + strings.Join(staticLibs, " ") + "\n"
@@ -311,8 +242,11 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 		text += "LOCAL_PROPRIETARY_MODULE := true\n"
 	}
 
-	if len(localAndroidHeaderLibs) > 0 {
-		text += "LOCAL_HEADER_LIBRARIES := " + strings.Join(localAndroidHeaderLibs, " ") + "\n"
+	if len(headerLibs) > 0 {
+		text += "LOCAL_HEADER_LIBRARIES := " + strings.Join(headerLibs, " ") + "\n"
+	}
+	if len(exportHeaderLibs) > 0 {
+		text += "LOCAL_EXPORT_HEADER_LIBRARY_HEADERS := " + strings.Join(headerLibs, " ") + "\n"
 	}
 
 	// Can't see a way to wrap a particular library in -Wl in link flags on android, so specify
@@ -1038,6 +972,13 @@ func androidModuleName(name string) string {
 	androidModuleMapLock.RLock()
 	defer androidModuleMapLock.RUnlock()
 	return androidModuleNameMap[name]
+}
+
+func androidModuleNames(names []string) (androidNames []string) {
+	for _, name := range names {
+		androidNames = append(androidNames, androidModuleName(name))
+	}
+	return
 }
 
 func mapAndroidNames(ctx blueprint.BottomUpMutatorContext) {

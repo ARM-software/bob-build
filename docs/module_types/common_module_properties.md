@@ -125,6 +125,15 @@ Flags used for assembly compilation.
 Flags used for linking. Unlike `ldlibs`, `ldflags` is added to the _start_ of
 the linker command-line.
 
+---
+### **bob_module.header_libs** (optional)
+The list of header libraries whose include directories this library should import.
+
+---
+### **bob_module.export_header_libs** (optional)
+On static and shared libraries, the list of header libraries whose include
+directories this library should both import and export to its users.
+
 ----
 ### **bob_module.static_libs** (optional)
 The list of static lib modules that this library depends on.

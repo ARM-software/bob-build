@@ -1,5 +1,3 @@
-#define FUNCNAME external_##TYPE
-
-int FUNCNAME(void) {
+int FUNC_NAME(void) {
     return 23456;
 }

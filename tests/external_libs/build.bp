@@ -6,11 +6,35 @@ bob_external_shared_library {
     name: "libbob_test_external_shared",
 }
 
+bob_external_header_library {
+    name: "libbob_test_external_header",
+}
+
+bob_static_library {
+    name: "reexport_external_header",
+    srcs: ["use_external_header.c"],
+    export_header_libs: ["libbob_test_external_header"],
+}
+
+bob_binary {
+    name: "use_external_header",
+    srcs: ["use_external_header.c"],
+    header_libs: ["libbob_test_external_header"],
+    cflags: ["-DDEFINE_MAIN"],
+    enabled: false,
+    android: {
+        enabled: true,
+    },
+}
+
 bob_binary {
     name: "use_external_libs",
     srcs: ["use_external_libs.c"],
-    static_libs: ["libbob_test_external_static"],
     shared_libs: ["libbob_test_external_shared"],
+    static_libs: [
+        "libbob_test_external_static",
+        "reexport_external_header",
+    ],
     enabled: false,
     android: {
         enabled: true,
@@ -19,5 +43,8 @@ bob_binary {
 
 bob_alias {
     name: "bob_test_external_libs",
-    srcs: ["use_external_libs"],
+    srcs: [
+        "use_external_libs",
+        "use_external_header",
+    ],
 }
