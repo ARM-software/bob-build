@@ -91,6 +91,13 @@ type BuildProps struct {
 	// from dependent libraries
 	Whole_static_libs []string
 
+	// List of libraries to import headers from, but not link to
+	Header_libs []string
+
+	// List of libraries that users of the current library should import
+	// headers from, but not link to
+	Export_header_libs []string
+
 	// Linker flags required to link to the necessary system libraries
 	Ldlibs []string
 	// Same as ldlibs, but specified on static libraries and
@@ -647,6 +654,10 @@ func propagateOtherExportedProperties(l *library, depLib *staticLibrary) {
 		}
 	}
 	props.Ldflags = append(props.Ldflags, depLib.Properties.Export_ldflags...)
+
+	// Header libraries are *not* propagated here, because they are currently
+	// only supported on Android, which will automatically re-export them just
+	// by adding them to LOCAL_EXPORT_HEADER_LIBRARY_HEADERS.
 }
 
 func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {

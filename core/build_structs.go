@@ -293,6 +293,7 @@ func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 }
 
 var wholeStaticDepTag = dependencyTag{name: "whole_static"}
+var headerDepTag = dependencyTag{name: "header"}
 var staticDepTag = dependencyTag{name: "static"}
 var sharedDepTag = dependencyTag{name: "shared"}
 var flagDepTag = dependencyTag{name: "reexport"}
@@ -323,6 +324,9 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		mctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
 		mctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
 		mctx.AddVariationDependencies(nil, staticDepTag, build.Export_static_libs...)
+
+		mctx.AddVariationDependencies(nil, headerDepTag, build.Header_libs...)
+		mctx.AddVariationDependencies(nil, headerDepTag, build.Export_header_libs...)
 
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Export_shared_libs...)
@@ -512,6 +516,7 @@ func Main() {
 	ctx.RegisterModuleType("bob_static_library", passConfig(staticLibraryFactory, config))
 	ctx.RegisterModuleType("bob_shared_library", passConfig(sharedLibraryFactory, config))
 	ctx.RegisterModuleType("bob_defaults", passConfig(defaultsFactory, config))
+	ctx.RegisterModuleType("bob_external_header_library", passConfig(externalLibFactory, config))
 	ctx.RegisterModuleType("bob_external_shared_library", passConfig(externalLibFactory, config))
 	ctx.RegisterModuleType("bob_external_static_library", passConfig(externalLibFactory, config))
 	ctx.RegisterModuleType("bob_generate_source", passConfig(generateSourceFactory, config))
