@@ -28,6 +28,12 @@ def config_options_in_menu(data, menu):
     return output
 
 def check_depends(depends, value):
+    """Check if the config identified in value is a simple dependency listed in the depends expression.
+    A simple expression consists of just && and || boolean operators.
+    If the expression uses any other operator, return False.
+
+    This is used by the menu_parse below to indent dependent configs.
+    """
     if depends == None:
         return False
     if type(depends) == tuple:
@@ -37,11 +43,8 @@ def check_depends(depends, value):
         elif depends[0] == 'or':
             return (check_depends(depends[1], value) and
                     check_depends(depends[2], value))
-        elif depends[0] == 'not':
-            # We only consider positive dependencies
+        else:
             return False
-        raise Exception("Unexpected depend list: %s" % depends)
-
     return depends == value
 
 def value_of(depends):
