@@ -1,0 +1,38 @@
+# This test checks 'depends on' statements using operators other than '&&' and '||'
+# Description of dependencies checks verification:
+# - Configuration which depends on some configurations and string
+# - Configuration which depends on integer value
+
+config STRING_OPTION
+    string "String to compare in a depends clause"
+    default "no"
+
+config INT_OPTION
+    int
+    default 21
+
+config OPTION
+    bool "An option in the menu"
+    default y
+
+config OPTION2
+    bool "An option in the menu"
+    default y
+
+config DEPEND_ON_STR
+    bool "User-settable option depending on a string"
+    depends on OPTION && OPTION2 && STRING_OPTION="yes"
+    default y
+
+config DEPEND_ON_INT
+    bool
+    depends on INT_OPTION = 42 && INT_OPTION >= 41 && INT_OPTION <= 44
+    default y
+
+# ASSERT: STRING_OPTION=no
+# ASSERT: DEPEND_ON_STR=n
+# ASSERT: DEPEND_ON_INT=n
+# SET: STRING_OPTION=yes
+# SET: INT_OPTION=42
+# ASSERT: DEPEND_ON_STR=y
+# ASSERT: DEPEND_ON_INT=y
