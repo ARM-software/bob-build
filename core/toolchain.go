@@ -117,6 +117,7 @@ type toolchainGnuCommon struct {
 	gxxBinary string
 	cflags    []string // Flags for both C and C++
 	ldflags   []string // Linker flags, including anything required for C++
+	asflags   []string // Flags for ASM
 	binDir    string
 }
 
@@ -134,7 +135,7 @@ func (tc toolchainGnuCommon) getArchiver() (string, []string) {
 }
 
 func (tc toolchainGnuCommon) getAssembler() (string, []string) {
-	return tc.asBinary, []string{}
+	return tc.asBinary, tc.asflags
 }
 
 func (tc toolchainGnuCommon) getCCompiler() (string, []string) {
@@ -248,6 +249,7 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
+	tc.asflags = strings.Split(props.GetString("target_gnu_flags"), " ")
 	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
 	tc.ldflags = utils.NewStringSlice(tc.cflags)
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
