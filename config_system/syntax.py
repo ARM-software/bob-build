@@ -208,7 +208,6 @@ def p_mainmenu_stmt_first(p):
 def p_dummy(p):
     """dummy :
              | DUMMY
-             | SPACE
              | COMMENT"""
     p[0] = {}
 

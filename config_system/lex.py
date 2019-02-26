@@ -50,7 +50,6 @@ tokens = (
     "VISIBLE",
     "WORD",
     "COMMENT",
-    "SPACE",
 )
 
 states = (
@@ -102,7 +101,6 @@ def t_ANY_comment(t):
 
 def t_space(t):
     r"[\t ]+"
-    t.type = "SPACE"
     return None
 
 
@@ -142,8 +140,7 @@ t_PARAM_GREATER_EQUAL = r">="
 
 def t_PARAM_space(t):
     r"[ \t]+"
-    t.type = "SPACE"
-    return t if verbose_flag else None
+    return None
 
 
 def t_PARAM_word(t):
