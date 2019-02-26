@@ -34,30 +34,59 @@ def perform_formatting(file_path, output):
     rewrite = isinstance(output, str)  # If string supplied -> assume file path
     if rewrite:
         output = open(output, "w")
+    prev_token_type = None
     for token in wrapper.iterate_tokens():
-        output.write(handle_formatting(token))
+        output.write(handle_formatting(prev_token_type, token))
+        prev_token_type = token.type
     if rewrite:
         output.close()
 
 
-def handle_formatting(token):
+# Sets grouping tokens into types
+set_config_props = {"BOOL", "INT", "STRING", "PROMPT",
+                    "DEFAULT", "DEPENDS", "SELECT",
+                    "VISIBLE", "HELP"}
+set_binary_ops = {"ANDAND", "OROR",
+                  "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL"}
+set_unary_ops = {"NOT"}
+set_identifiers = {"NUMBER", "QUOTED_STRING", "WORD"}
+set_keywords = {"IF", "ON"}
+set_lparen = {"LBRACKET"}
+
+# Sets identifying how to handle whitespace
+set_indent = set_config_props
+set_no_space_after = set_unary_ops | set_lparen
+set_space_before = set_binary_ops | set_unary_ops | set_identifiers | set_keywords | set_lparen
+
+
+def handle_formatting(prev_type, token):
     """Function which applies additional formatting to token value
     :return: Token value with changes to value if needed"""
+    # The decision map handlers take care of basic reformatting of token
+    # values if needed
     dec_map = {
-        "BOOL": "\t{}".format,
-        "INT": "\t{}".format,
-        "STRING": "\t{}".format,
-        "DEFAULT": "\t{}".format,
-        "DEPENDS": "\t{}".format,
-        "HELP": "\t{}".format,
-        "SELECT": "\t{}".format,
-        "PROMPT": "\t{}".format,
-        "VISIBLE": "\t{}".format,
         "HELPTEXT": format_helptext,
         "QUOTED_STRING": '"{}"'.format,
     }
     handler = dec_map.get(token.type, str)
-    return handler(token.value)
+
+    # space takes care of indent and formatting within expressions,
+    # and will prefix the result of handler.
+    if token.type in set_indent:
+        space = "\t"
+    elif (token.type == "RBRACKET" or
+          prev_type in set_no_space_after):
+        # No spaces before )
+        # No spaces after ( and !
+        space = ""
+    elif token.type in set_space_before:
+        # Generally we want a single space before each operator and identifier,
+        # Consider 'if' and 'on' to be operators to handle them at the same time
+        space = " "
+    else:
+        space = ""
+
+    return space + handler(token.value)
 
 
 def format_helptext(value):

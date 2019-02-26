@@ -38,7 +38,7 @@ config DEFAULT_OPTION
 	bool "Default option"
 
 config THIRD_OPTION
-	default y if (XYZ || ABC) && !ALA_MA_KOTA
+	default y if ((XYZ || ABC) && (FOO || !BAR)) && !ALA_MA_KOTA
 	bool "Third option"
 
 endchoice
