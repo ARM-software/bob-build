@@ -17,10 +17,8 @@ import distutils.spawn
 import os
 import sys
 import logging
-import shlex
 import subprocess
 import re
-import tempfile
 
 from config_system import get_config_bool, get_config_string, set_config
 
@@ -31,6 +29,7 @@ def which_binary(executable):
     if not full_path:
         logger.error("Executable (%s) not found", executable)
     return full_path
+
 
 def check_output(command, dir=None):
     '''
@@ -51,67 +50,6 @@ def check_output(command, dir=None):
     return output
 
 
-def gnu_toolchain_is_cross_compiler(tgtType):
-    prefix = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX")
-    # If the prefix ends with the path separator, it is being used as
-    # alternative to adding the compiler to $PATH, and isn't specifying a
-    # cross-compilation prefix.
-    if prefix and not prefix.endswith(os.sep):
-        return True
-    return False
-
-
-def get_cxx_compiler(tgtType):
-    """Parse the config options prefixed by `tgtType` and determine the name of
-    the compiler for that target type, as well as whether it is a cross
-    compiler.
-    """
-    args = []
-    cross_compiler = False
-
-    if get_config_bool(tgtType + "_TOOLCHAIN_GNU"):
-        args = shlex.split(get_config_string(tgtType + "_GNU_FLAGS"))
-        cxx = get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX") + get_config_string("GNU_CXX_BINARY")
-        cross_compiler = gnu_toolchain_is_cross_compiler(tgtType)
-    elif get_config_bool(tgtType + "_TOOLCHAIN_CLANG"):
-        # To use the *_CLANG_TRIPLE option to decide whether this is a
-        # cross-compiler would require discovering what target triples are
-        # runnable on the host. Instead, just ask the GNU toolchain.
-        cross_compiler = gnu_toolchain_is_cross_compiler(tgtType)
-        cxx = get_config_string("CLANG_CXX_BINARY")
-    elif get_config_bool(tgtType + "_TOOLCHAIN_ARMCLANG"):
-        if tgtType != "HOST":
-            cross_compiler = True
-        cxx = get_config_string("ARMCLANG_CXX_BINARY")
-
-    return cxx, args, cross_compiler
-
-
-def stl_rpath_ldflags(tgtType):
-    """If the toolchain is generating code that can run on the host, add the
-    C++ STL library to the linker rpath so it can be found when the binary is
-    executed.
-    """
-
-    stl_library = get_config_string(tgtType + "_STL_LIBRARY")
-    if not stl_library:
-        return []
-
-    cxx, args, cross_compiler = get_cxx_compiler(tgtType)
-
-    if cross_compiler:
-        return []
-
-    stl_lib = "lib{}.so".format(stl_library)
-    stl_path = check_output([cxx] + args + ["-print-file-name=" + stl_lib])
-    stl_dir = os.path.dirname(stl_path)
-    ld_library_path = os.getenv("LD_LIBRARY_PATH", default="")
-    ld_paths = ld_library_path.split(os.pathsep)
-    if stl_dir and stl_dir not in ld_paths:
-        return ["-Wl,--enable-new-dtags", "-Wl,-rpath,{}".format(stl_dir)]
-    return []
-
-
 def force_bfd_ldflags(tgtType):
     if get_config_bool("BUILDER_ANDROID"):
         return []
@@ -125,8 +63,8 @@ def force_bfd_ldflags(tgtType):
 
 
 def compiler_config():
-    host_ldflags = stl_rpath_ldflags("HOST") + force_bfd_ldflags("HOST")
-    target_ldflags = stl_rpath_ldflags("TARGET") + force_bfd_ldflags("TARGET")
+    host_ldflags = force_bfd_ldflags("HOST")
+    target_ldflags = force_bfd_ldflags("TARGET")
 
     set_config("EXTRA_HOST_LDFLAGS", " ".join(host_ldflags))
     set_config("EXTRA_TARGET_LDFLAGS", " ".join(target_ldflags))
