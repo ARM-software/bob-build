@@ -32,8 +32,9 @@ def run_fix_test(name, expected_output):
     tests_run = 0
     tests_failed = 0
     mconfigfmt.perform_formatting(name, tmp_file.file)
+    tmp_file.close()
     with open(tmp_file.name) as test_out, open(expected_output) as exp_out:
-        out_lines, exp_lines = exp_out.readlines(), test_out.readlines()
+        out_lines, exp_lines = test_out.readlines(), exp_out.readlines()
     if any(out_lines[i] != exp_lines[i] for i in range(len(exp_lines))):
         tests_failed += 1
     tests_run += 1
