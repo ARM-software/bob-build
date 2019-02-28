@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,4 +48,4 @@ export CCACHE_SLOPPINESS=file_macro,time_macros
 BUILDDIR="${BUILDDIR}" SKIP_NINJA=true ${BOB_DIR}/blueprint/blueprint.bash
 
 # Do the actual build
-ninja -f "${BUILDDIR}/build.ninja" -w dupbuild=err "$@"
+"${NINJA}" -f "${BUILDDIR}/build.ninja" -w dupbuild=err "$@"

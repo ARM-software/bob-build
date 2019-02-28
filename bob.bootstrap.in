@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# If the NINJA variable is set, use it as the Ninja binary. Otherwise, default
+# to `ninja`. Do this in the bootstrap template so that it can be easily
+# accessed from multiple places - most scripts will already need to source this
+# file.
+[[ -z $NINJA ]] && export NINJA=ninja
 
 export WORKDIR="@@WorkDir@@"
 export SRCDIR="@@SrcDir@@"
