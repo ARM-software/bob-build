@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,13 @@ PATH_TO_PROJ="$1"
 BUILDDIR=$(readlink -f "$2")
 GOROOT="$3"
 
+source "${PATH_TO_PROJ}/bob/pathtools.bash"
+
 if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/bob.config" ] ; then
+    # The Ninja path is relative to the root of the Android tree, but Bob is
+    # run from the project directory.
+    NINJA=`relative_path "${PATH_TO_PROJ}" "${NINJA}"`
+
     cd "${PATH_TO_PROJ}"
 
     # The following would setup to use Androids prebuilt go. We don't
