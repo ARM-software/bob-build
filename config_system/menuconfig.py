@@ -674,7 +674,7 @@ if __name__ == "__main__":
                 mod = importlib.import_module(name)
                 mod.plugin_exec()
             except ImportError as err:
-                logger.error(err)
+                logger.error("Could not import %s plugin: %s" % (name, err))
             except Exception as err:
                 logger.warning("Problem encountered in %s plugin: %s" % (name, repr(err)))
                 import traceback
