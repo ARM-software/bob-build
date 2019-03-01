@@ -19,7 +19,7 @@
 # using Android paths only.
 
 # This script should be called like:
-# $PATH_TO_PROJ/generate_android_inc.bash $PATH_TO_PROJ $BUILDDIR $GOROOT
+# $PATH_TO_PROJ/generate_android_inc.bash $PATH_TO_PROJ $BUILDDIR $GOROOT $CONFIGNAME
 
 # This script is invoked by Android.mk in a $(shell) expression, so its
 # standard output is buffered. Swap stdout and stderr so that the output of
@@ -28,13 +28,15 @@ exec 3>&2 2>&1 1>&3-
 
 set -e
 
+BOB_DIR=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 PATH_TO_PROJ="$1"
 BUILDDIR=$(readlink -f "$2")
 GOROOT="$3"
+CONFIGNAME="$4"
 
-source "${PATH_TO_PROJ}/bob/pathtools.bash"
+source "${BOB_DIR}/pathtools.bash"
 
-if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/bob.config" ] ; then
+if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
     # The Ninja path is relative to the root of the Android tree, but Bob is
     # run from the project directory.
     NINJA=`relative_path "${PATH_TO_PROJ}" "${NINJA}"`
@@ -62,7 +64,7 @@ if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/bob.config" ] ; then
     # rather through Android.mk
     md5sum "$BUILDDIR"/*.inc | md5sum - >&2
 else
-    echo "${BUILDDIR}/buildme and ${BUILDDIR}/bob.config don't exist!"
+    echo "${BUILDDIR}/buildme and ${BUILDDIR}/${CONFIGNAME} don't exist!"
     exit 1
 fi
 

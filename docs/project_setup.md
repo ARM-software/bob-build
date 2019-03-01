@@ -32,7 +32,6 @@ order to use Bob. It contains the following files:
 |build.bp                 | Root build description |
 |buildme.bash             | Build script |
 |Android.mk.blueprint     | Template Android makefile |
-|generate_android_inc.bash| Android script |
 
 If you want to make this build, just add a `hello_world.cpp`, and, if
 necessary, update the path in any `source` statements in `example/Mconfig` to
@@ -113,7 +112,7 @@ On Android the output directory is determined by the project name.
 * Update `PROJ_NAME` to be a short string that is unique in the
   Android makefile namespace.
 
-* Update `SRCDIR`, `TOPNAME`, `BLUEPRINT_LIST_FILE`, `CONFIG_NAME`,
+* Update `SRCDIR`, `TOPNAME`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
   `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` as done for Linux.
 
 ## Blueprint file list (bplist)
@@ -168,8 +167,3 @@ Android build system. This should not require modification.
 Note: when building for Android your project must be within the
 Android tree. Generally you can't use a symlink from the Android tree
 to your project (though you can use `bindfs` or `mount --bind`).
-
-## generate_android_inc.bash
-
-This script is called by the makefile template to cause the Bob
-makefile fragments to be generated. This should not require modification.

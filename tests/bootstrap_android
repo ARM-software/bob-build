@@ -85,24 +85,28 @@ create_link .. "${SCRIPT_DIR}/${BOB_DIR}"
 
 PROJ_DIR="$(dirname $0)"
 
+### Variables required for Bob and Android.mk bootstrap ###
+
 # This must match the path derived from LOCAL_MODULE and LOCAL_MODULE_CLASS
 # in Android.mk.blueprint.
 ANDROIDMK_DIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}_intermediates"
-
-TMP_ANDROID_MK="$(mktemp)"
-sed -e "s#@@BOB_GOROOT@@#$GOROOT#" \
-    -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
-    "${PROJ_DIR}/Android.mk.blueprint" > "$TMP_ANDROID_MK"
-rsync --checksum "$TMP_ANDROID_MK" "${PROJ_DIR}/Android.mk"
-rm -f "$TMP_ANDROID_MK"
-
-# Bootstrap Bob
 export BUILDDIR="${ANDROIDMK_DIR}"
 export TOPNAME="build.bp"
 export CONFIGNAME="bob.config"
 export SRCDIR="${PROJ_DIR}"
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 
+# Write the Android.mk
+TMP_ANDROID_MK="$(mktemp)"
+sed -e "s#@@BOB_GOROOT@@#$GOROOT#" \
+    -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
+    -e "s#@@BOB_DIR@@#$BOB_DIR#" \
+    -e "s#@@CONFIGNAME@@#$CONFIGNAME#" \
+    "${PROJ_DIR}/Android.mk.blueprint" > "$TMP_ANDROID_MK"
+rsync --checksum "$TMP_ANDROID_MK" "${PROJ_DIR}/Android.mk"
+rm -f "$TMP_ANDROID_MK"
+
+# Bootstrap Bob
 "${PROJ_DIR}/${BOB_DIR}/bootstrap_androidmk.bash"
 
 

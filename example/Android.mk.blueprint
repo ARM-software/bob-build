@@ -39,7 +39,7 @@ include $(BUILD_SYSTEM)/ninja_config.mk
 
 # It is important to have the ./ before the output directory, due to kati ignoring
 # any shell command that begins with "out/"
-BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/generate_android_inc.bash" "$(LOCAL_PATH)" "./$(BOB_ANDROIDMK_DIR)" "$(BOB_$(PROJ)_GOROOT)"
+BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/@@BOB_DIR@@/scripts/generate_android_inc.bash" "$(LOCAL_PATH)" "./$(BOB_ANDROIDMK_DIR)" "$(BOB_$(PROJ)_GOROOT)" "@@CONFIGNAME@@"
 
 $(info Running '$(BOB_GEN_CMD)')
 
