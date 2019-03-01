@@ -44,7 +44,7 @@ def check_output(command, dir=None):
         output = subprocess.check_output(command, cwd=dir).strip()
         output = output.decode(sys.getdefaultencoding())
     except OSError as e:
-        logger.error(str(e))
+        logger.error("%s executing '%s'" % (str(e), command[0]))
     except subprocess.CalledProcessError as e:
         logger.warning("Problem executing command: %s" % str(e))
 
