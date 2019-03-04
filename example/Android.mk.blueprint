@@ -31,15 +31,12 @@ BOB_ANDROIDMK_DIR:=$(local-generated-sources-dir)
 
 BOB_$(PROJ)_DIR:=$(LOCAL_PATH)
 
-# Soong clears the GOROOT environment, so store the root we want to use
-BOB_$(PROJ)_GOROOT:=@@BOB_GOROOT@@
-
 # Get the location of the Ninja binary.
 include $(BUILD_SYSTEM)/ninja_config.mk
 
 # It is important to have the ./ before the output directory, due to kati ignoring
 # any shell command that begins with "out/"
-BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/@@BOB_DIR@@/scripts/generate_android_inc.bash" "$(LOCAL_PATH)" "./$(BOB_ANDROIDMK_DIR)" "$(BOB_$(PROJ)_GOROOT)" "@@CONFIGNAME@@"
+BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/@@BOB_DIR@@/scripts/generate_android_inc.bash" "$(LOCAL_PATH)" "./$(BOB_ANDROIDMK_DIR)" "@@CONFIGNAME@@"
 
 $(info Running '$(BOB_GEN_CMD)')
 

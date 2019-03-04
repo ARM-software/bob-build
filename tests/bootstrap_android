@@ -98,8 +98,7 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 
 # Write the Android.mk
 TMP_ANDROID_MK="$(mktemp)"
-sed -e "s#@@BOB_GOROOT@@#$GOROOT#" \
-    -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
+sed -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
     -e "s#@@BOB_DIR@@#$BOB_DIR#" \
     -e "s#@@CONFIGNAME@@#$CONFIGNAME#" \
     "${PROJ_DIR}/Android.mk.blueprint" > "$TMP_ANDROID_MK"
