@@ -27,12 +27,12 @@
 exec 3>&2 2>&1 1>&3-
 
 set -e
+trap 'echo "*** Unexpected error in $0 ***"' ERR
 
 BOB_DIR=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 PATH_TO_PROJ="$1"
 BUILDDIR=$(readlink -f "$2")
-GOROOT="$3"
-CONFIGNAME="$4"
+CONFIGNAME="$3"
 
 source "${BOB_DIR}/pathtools.bash"
 
@@ -43,15 +43,8 @@ if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
 
     cd "${PATH_TO_PROJ}"
 
-    # The following would setup to use Androids prebuilt go. We don't
-    # do this because we depend on Go 1.8 but still run on Android N
-    # (which has an older version).
-    #export GOPATH="${ANDROID_BUILD_TOP}"
-    #export GOROOT="${GOPATH}/prebuilts/go/linux-x86"
-    #export PATH="${GOROOT}/bin:${PATH}"
-
-    # Use GOROOT recorded during setup_android call
-    export GOROOT
+    # Use the Go shipped with Android:
+    export GOROOT="${TOP}/prebuilts/go/linux-x86/"
 
     "$BUILDDIR/buildme"
 
