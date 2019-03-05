@@ -231,7 +231,7 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 	exportHeaderLibs := androidModuleNames(m.Properties.Export_header_libs)
 	headerLibs := append(androidModuleNames(m.Properties.Header_libs), exportHeaderLibs...)
 
-	text += "LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog", "libc++"), " ") + "\n"
+	text += "LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog"), " ") + "\n"
 	text += "LOCAL_STATIC_LIBRARIES := " + strings.Join(staticLibs, " ") + "\n"
 	text += "LOCAL_WHOLE_STATIC_LIBRARIES := " + strings.Join(wholeStaticLibs, " ") + "\n"
 
