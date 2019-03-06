@@ -40,7 +40,7 @@ BOB_GEN_CMD:="$(BOB_$(PROJ)_DIR)/@@BOB_DIR@@/scripts/generate_android_inc.bash" 
 
 $(info Running '$(BOB_GEN_CMD)')
 
-BOB_GEN_RESULT:=$(shell NINJA=$(NINJA) $(BOB_GEN_CMD))
+BOB_GEN_RESULT:=$(shell NINJA=$(NINJA) PLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION) $(BOB_GEN_CMD))
 BOB_GEN_RET_VAL:=$(lastword $(BOB_GEN_RESULT))
 
 # The preferred solution here would be to do:

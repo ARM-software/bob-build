@@ -43,8 +43,8 @@ if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
 
     cd "${PATH_TO_PROJ}"
 
-    # Use the Go shipped with Android:
-    export GOROOT="${TOP}/prebuilts/go/linux-x86/"
+    # Use the Go shipped with Android on P and later, where it's recent enough (> 1.9).
+    [[ $PLATFORM_SDK_VERSION -ge 28 ]] && export GOROOT="${TOP}/prebuilts/go/linux-x86/"
 
     "$BUILDDIR/buildme"
 
