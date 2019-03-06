@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import distutils.spawn
 import os
 import sys
 import logging
@@ -23,12 +22,6 @@ import re
 from config_system import get_config_bool, get_config_string, set_config
 
 logger = logging.getLogger(__name__)
-
-def which_binary(executable):
-    full_path = distutils.spawn.find_executable(executable)
-    if not full_path:
-        logger.error("Executable (%s) not found", executable)
-    return full_path
 
 
 def check_output(command, dir=None):
@@ -48,26 +41,6 @@ def check_output(command, dir=None):
         logger.warning("Problem executing command: %s" % str(e))
 
     return output
-
-
-def force_bfd_ldflags(tgtType):
-    if get_config_bool("BUILDER_ANDROID"):
-        return []
-
-    ld = which_binary(get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX") + "ld")
-    if ld:
-        ld_version = check_output([ld, "-version"])
-        if ld_version.count("gold") == 1:
-            return ["-fuse-ld=bfd"]
-    return []
-
-
-def compiler_config():
-    host_ldflags = force_bfd_ldflags("HOST")
-    target_ldflags = force_bfd_ldflags("TARGET")
-
-    set_config("EXTRA_HOST_LDFLAGS", " ".join(host_ldflags))
-    set_config("EXTRA_TARGET_LDFLAGS", " ".join(target_ldflags))
 
 
 def pkg_config():
@@ -117,5 +90,4 @@ def pkg_config():
 
 def plugin_exec():
     if get_config_bool('ALLOW_HOST_EXPLORE'):
-        compiler_config()
         pkg_config()

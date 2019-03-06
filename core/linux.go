@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -470,8 +470,10 @@ func (l *library) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []str
 }
 
 func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string) {
-	// With forwarding shared library we do not have to use --no-as-needed for dependencies because it is already set
+	// With forwarding shared library we do not have to use
+	// --no-as-needed for dependencies because it is already set
 	useNoAsNeeded := !l.build().isForwardingSharedLibrary()
+	hasForwardingLib := false
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
@@ -479,6 +481,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 			if sl, ok := m.(*sharedLibrary); ok {
 				b := sl.build()
 				if b.isForwardingSharedLibrary() {
+					hasForwardingLib = true
 					flags = append(flags, "-Wl,--copy-dt-needed-entries")
 					if useNoAsNeeded {
 						flags = append(flags, "-Wl,--no-as-needed")
@@ -497,6 +500,11 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a shared library"))
 			}
 		})
+
+	if hasForwardingLib {
+		flags = append(flags, "-fuse-ld=bfd")
+	}
+
 	return
 }
 

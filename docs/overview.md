@@ -105,4 +105,3 @@ Note that not all Bob features are supported on Android. This includes:
 
 * Aliases
 * Versioned libraries
-* Forwarding libraries
