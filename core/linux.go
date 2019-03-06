@@ -355,10 +355,6 @@ func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
 }
 
 // Returns the whole static dependencies for a library.
-// Note that this is transitive, so it includes both the static library and all
-// its whole static dependencies.
-// While this is a break with the design idea of not having transitive dependencies,
-// this is done due to the fact that merging two static libraries are not that easy.
 func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	g := getBackend(ctx)
 	libs := []string{}
