@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -138,11 +138,17 @@ type BuildProps struct {
 	// Files in the source directory that the wrapper depends on.
 	Build_wrapper_deps []string
 
-	// This is a shared library that pulls in another shared library which will resolve symbols that
-	// the binary needs. Only valid on bob_shared_library.
+	// This is a shared library that pulls in one or more shared
+	// libraries to resolve symbols that the binary needs. This is
+	// useful where a named library is the standard library to link
+	// against, but the implementation may exist in another
+	// library.
 	//
-	// Currently we need to link this with -Wl,--copy-dt-needed-entries,
-	// but this makes the binary depend on the forwarded library too
+	// Only valid on bob_shared_library.
+	//
+	// Currently we need to link with -Wl,--copy-dt-needed-entries.
+	// This makes the binary depend on the implementation library, and
+	// requires the BFD linker.
 	Forwarding_shlib *bool
 
 	InstallableProps

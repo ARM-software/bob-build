@@ -230,15 +230,18 @@ Files that the wrapper depends on.
 
 ----
 ### **bob_module.forwarding_shlib** (optional)
-This is a shared library that pulls in another shared
-library which will resolve symbols that the binary needs.
+This is a shared library that pulls in one or more shared libraries to
+resolve symbols that the binary needs. This is useful where a named
+library is the standard library to link against, but the
+implementation may exist in another library.
+
 Only valid on `bob_shared_library`.
 
-Currently we need to link this with
-`-Wl,--copy-dt-needed-entries`, but this makes the
-binary depend on the forwarded library too.
+Currently we need to link with `-Wl,--copy-dt-needed-entries`. This
+makes the binary depend on the implementation library, and requires
+the BFD linker.
 
-This is not supported on Android.
+This isn't guaranteed to work on Android.
 
 ----
 ### **bob_module.install_group** (optional)

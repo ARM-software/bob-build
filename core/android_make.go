@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -270,7 +270,7 @@ func (m *library) GenerateBuildAction(binType int, ctx blueprint.ModuleContext) 
 			}
 		})
 	if hasForwardingLib {
-		copydtneeded = "-Wl,--copy-dt-needed-entries"
+		copydtneeded = "-fuse-ld=bfd -Wl,--copy-dt-needed-entries"
 	}
 
 	// Handle installation
