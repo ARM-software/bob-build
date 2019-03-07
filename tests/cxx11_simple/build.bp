@@ -18,8 +18,4 @@
 bob_binary {
     name: "bob_test_cxx11simple",
     srcs: ["simple.cpp"],
-    linux: {
-        // Android should figure out required target LDFLAGS
-        ldflags: ["{{.extra_target_ldflags}}"],
-    },
 }
