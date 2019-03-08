@@ -67,6 +67,7 @@ def handle_formatting(prev_type, token):
     dec_map = {
         "HELPTEXT": format_helptext,
         "QUOTED_STRING": '"{}"'.format,
+        "COMMENT": lambda value: value.rstrip(),
     }
     handler = dec_map.get(token.type, str)
 

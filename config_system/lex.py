@@ -91,11 +91,13 @@ def t_newline(t):
 
 
 def t_ANY_comment(t):
-    r"[ \t]*\#.*[\n|\Z]"
+    r"[ \t]*\#.*\n"
     t.lexer.lineno += 1
+
+    # Backtrack on newlines so that an EOL token is generated.
     t.lexer.lexpos -= 1
+
     t.type = "COMMENT"
-    t.value = t.value[:-1]
     return t if verbose_flag else None
 
 

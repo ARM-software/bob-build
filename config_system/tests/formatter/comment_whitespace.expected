@@ -1,0 +1,9 @@
+# This is a normal comment
+
+config TEST # Comment following some code
+	bool    # This aligns with the previous line
+	default y
+
+# More trailing whitespace
+    # This comment is indented, but currently should not be moved.
+    # It also finishes right before the end of file.
