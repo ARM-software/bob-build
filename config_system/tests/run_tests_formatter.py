@@ -14,6 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from __future__ import print_function
+
 import os
 import sys
 import tempfile
@@ -37,8 +40,14 @@ def run_test(name, expected_output):
 
     with open(tmp_file.name) as test_out, open(expected_output) as exp_out:
         out_lines, exp_lines = test_out.readlines(), exp_out.readlines()
-    if any(out_lines[i] != exp_lines[i] for i in range(len(exp_lines))):
-        passed = False
+
+    for i in range(len(exp_lines)):
+        if out_lines[i] != exp_lines[i]:
+            print("Error: Line {} differs! Expected:".format(i + 1))
+            print("   ", repr(exp_lines[i]))
+            print("...but got:")
+            print("   ", repr(out_lines[i]))
+            passed = False
 
     os.remove(tmp_file.name)
 
