@@ -18,9 +18,6 @@
 # This script sets up the environment to be able to build the project
 # using Android paths only.
 
-# This script should be called like:
-# $PATH_TO_PROJ/generate_android_inc.bash $PATH_TO_PROJ $BUILDDIR $GOROOT $CONFIGNAME
-
 # This script is invoked by Android.mk in a $(shell) expression, so its
 # standard output is buffered. Swap stdout and stderr so that the output of
 # this is visible.
@@ -30,9 +27,21 @@ set -e
 trap 'echo "*** Unexpected error in $0 ***"' ERR
 
 BOB_DIR=$(dirname $(dirname "${BASH_SOURCE[0]}"))
-PATH_TO_PROJ="$1"
-BUILDDIR=$(readlink -f "$2")
-CONFIGNAME="$3"
+
+while getopts "c:o:s:v:" opt; do
+    case $opt in
+        c) CONFIGNAME="$OPTARG";;
+        o) BUILDDIR=`readlink -f "$OPTARG"`;;
+        s) PATH_TO_PROJ="$OPTARG";;
+        v) PLATFORM_SDK_VERSION="$OPTARG";;
+    esac
+done
+
+if [[ -z $BUILDDIR || -z $CONFIGNAME || -z $PATH_TO_PROJ || -z $PLATFORM_SDK_VERSION ]]; then
+    echo "Error: Missing argument to $0"
+    echo "Usage: $0 -c CONFIGNAME -o BUILDDIR -s PATH_TO_PROJ -v PLATFORM_SDK_VERSION"
+    exit 1
+fi
 
 source "${BOB_DIR}/pathtools.bash"
 
