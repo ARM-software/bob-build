@@ -2,9 +2,9 @@ language: go
 
 matrix:
   include:
-  - go: "1.9"
-    env: PYTHON_SUFFIX=2.7
   - go: "1.10"
+    env: PYTHON_SUFFIX=2.7
+  - go: "1.11"
     env: PYTHON_SUFFIX=3
   - go: "1.12"
     env: PYTHON_SUFFIX=2.7
