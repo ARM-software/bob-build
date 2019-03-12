@@ -21,7 +21,7 @@ do the heavy lifting. As such it has similarities with
 ## Requirements
 
 To use Bob you will need:
--  golang (>=1.8)
+-  golang (>=1.10)
 -  ninja-build (>=1.8)
 -  python
 -  python-ply

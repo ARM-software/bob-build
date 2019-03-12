@@ -104,43 +104,6 @@ func (f *Features) Init(availableFeatures []string, list ...interface{}) {
 
 }
 
-// Some Go versions (e.g. 1.8) ignore the 'Anonymous' property, and require
-// that the name is empty to create an anonymous field. This is fixed in 1.10,
-// but 1.10 now errors if the name is empty. So for coalesceTypes() to create
-// anonymous fields, we need to find out what this version's behavior is.
-func isEmptyNameRequiredForAnonymousField() bool {
-	// Try creating a new type which contains an embedded struct. If the
-	// struct's 'Anonymous' property is dropped when we create an instance
-	// of it, we need to use an empty 'Name' field instead.
-	type TestEmbeddedStruct struct {
-		prop1 string
-		prop2 bool
-	}
-	fields := []reflect.StructField{
-		{
-			Name:      "TestEmbeddedStruct",
-			Type:      reflect.TypeOf(TestEmbeddedStruct{}),
-			Anonymous: true,
-		},
-	}
-	newType := reflect.StructOf(fields)
-	if newType.Field(0).Anonymous != true { // 'Anonymous' was ignored because the name wasn't empty.
-		// Now make sure using an empty name actually works.
-		defer func() {
-			if r := recover(); r != nil {
-				panic(fmt.Errorf("Couldn't create a struct with anonymous fields: %v", r))
-			}
-		}()
-		fields[0].Name = ""
-		reflect.StructOf(fields)
-		return true
-	} else {
-		return false
-	}
-}
-
-var emptyNameRequiredForAnonymousField = isEmptyNameRequiredForAnonymousField()
-
 // coalesceTypes will squash multiple types to new type. This has different result
 // than Go composition of structs.
 //
@@ -189,9 +152,6 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 		for i := 0; i < elementType.NumField(); i++ {
 			field := elementType.Field(i)
 			fieldName := field.Name
-			if emptyNameRequiredForAnonymousField && field.Anonymous {
-				field.Name = ""
-			}
 			if _, ok := fieldsKeys[fieldName]; ok {
 				panic(fmt.Sprintf("Name collision: '%v'\n", fieldName))
 			} else {
