@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +28,18 @@ from config_system.general import enforce_dependent_values, get_config, init_con
     read_config_file, read_profile_file, set_config_if_prompt, write_config
 from config_system import log_handlers
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.WARNING)
+
+# Add counting Handler
 counter = log_handlers.ErrorCounterHandler()
-logging.getLogger().addHandler(counter) # root logger
+root_logger.addHandler(counter)
+
+# Add StreamHandler with color Formatter
+stream = logging.StreamHandler()
+formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s", stream.stream.isatty())
+stream.setFormatter(formatter)
+root_logger.addHandler(stream)
 
 logger = logging.getLogger(__name__)
 
