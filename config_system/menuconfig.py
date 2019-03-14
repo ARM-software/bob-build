@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -622,10 +622,9 @@ if __name__ == "__main__":
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.WARNING)
 
-    formatter = logging.Formatter("%(levelname)s: %(message)s")
-
     # The eventual destination is stdout with the above formatting
     errHandler = logging.StreamHandler(sys.stderr)
+    formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s", errHandler.stream.isatty())
     errHandler.setFormatter(formatter)
 
     # Setup a buffer to store messages
