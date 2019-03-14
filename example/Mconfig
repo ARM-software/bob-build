@@ -44,9 +44,9 @@ config TARGET_TOOLCHAIN_ARMCLANG
 
 endchoice
 
-## Toolchain prefix needed for Bob (for gcc)
-config TARGET_GNU_TOOLCHAIN_PREFIX
-	string
+## Toolchain prefixes needed for Bob
+config TARGET_GNU_PREFIX
+	string "GNU cross-compiler prefix"
 	default ""
 
 config TARGET_GNU_FLAGS

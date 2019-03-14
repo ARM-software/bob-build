@@ -119,12 +119,28 @@ endmenu
 ### Toolchain target options ###
 # The host options are not yet read by `toolchain.go`, so are empty, and
 # exist so that `host_explore.py` can be agnostic to the target type when
-# doing e.g. `get_config_string(tgtType + "_GNU_TOOLCHAIN_PREFIX")`. They are
+# doing e.g. `get_config_string(tgtType + "_GNU_PREFIX")`. They are
 # defined here, rather than in the superproject, because even when they are
 # fully supported, they will be empty most of the time.
 
-config HOST_GNU_TOOLCHAIN_PREFIX
-	string
+config HOST_GNU_PREFIX
+	string "GNU compiler prefix"
+	default ""
+
+config HOST_CLANG_PREFIX
+	string "Clang compiler prefix"
+	default ""
+
+config HOST_ARMCLANG_PREFIX
+	string "Arm Compiler 6 prefix"
+	default ""
+
+config TARGET_CLANG_PREFIX
+	string "Clang cross-compiler prefix"
+	default ""
+
+config TARGET_ARMCLANG_PREFIX
+	string "Arm Compiler 6 cross-compiler prefix"
 	default ""
 
 config HOST_GNU_FLAGS
@@ -138,8 +154,9 @@ config HOST_CLANG_TRIPLE
 # The target equivalents, despite being only used by Bob, must be defined by
 # the superproject so that it can add any desired defaults, etc:
 
-# config TARGET_GNU_TOOLCHAIN_PREFIX
+# config TARGET_GNU_PREFIX
 #	string "Cross-compiler prefix"
+#	default ""
 
 # config TARGET_GNU_FLAGS
 #	string
