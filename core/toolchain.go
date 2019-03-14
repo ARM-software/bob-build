@@ -115,6 +115,7 @@ type toolchainGnuCommon struct {
 	asBinary  string
 	gccBinary string
 	gxxBinary string
+	prefix    string
 	cflags    []string // Flags for both C and C++
 	ldflags   []string // Linker flags, including anything required for C++
 	binDir    string
@@ -126,7 +127,6 @@ type toolchainGnuNative struct {
 
 type toolchainGnuCross struct {
 	toolchainGnuCommon
-	prefix string
 }
 
 func (tc toolchainGnuCommon) getArchiver() (string, []string) {
@@ -203,9 +203,9 @@ func (tc toolchainGnuCommon) getInstallDir() string {
 func (tc toolchainGnuCross) getBinDirs() []string {
 	dirs := tc.toolchainGnuCommon.getBinDirs()
 
-	target := strings.TrimSuffix(tc.prefix, "-")
+	triple := tc.getTargetTripleHeaderSubdir()
 
-	unprefixedBinDir := filepath.Join(tc.getInstallDir(), target, "bin")
+	unprefixedBinDir := filepath.Join(tc.getInstallDir(), triple, "bin")
 	if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
 		dirs = append(dirs, unprefixedBinDir)
 	}
@@ -233,22 +233,23 @@ func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
 
 func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 	props := config.Properties
-	tc.arBinary = props.GetString("ar_binary")
-	tc.asBinary = props.GetString("as_binary")
-	tc.gccBinary = props.GetString("gnu_cc_binary")
-	tc.gxxBinary = props.GetString("gnu_cxx_binary")
+	tc.prefix = props.GetString(tgtTypeHost + "_gnu_prefix")
+	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("as_binary")
+	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
+	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
 
 func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	props := config.Properties
-	tc.prefix = props.GetString("target_gnu_toolchain_prefix")
+	tc.prefix = props.GetString(tgtTypeTarget + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
-	tc.cflags = strings.Split(props.GetString("target_gnu_flags"), " ")
+	tc.cflags = strings.Split(props.GetString(tgtTypeTarget+"_gnu_flags"), " ")
 	tc.ldflags = utils.NewStringSlice(tc.cflags)
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
@@ -258,6 +259,7 @@ type toolchainClangCommon struct {
 	// Options read from the config:
 	clangBinary   string
 	clangxxBinary string
+	prefix        string
 	useGnuLibs    bool
 	useGnuStl     bool
 
@@ -302,8 +304,9 @@ func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
 
 func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgtType string) (tc toolchainClangCommon) {
 	props := config.Properties
-	tc.clangBinary = props.GetString("clang_cc_binary")
-	tc.clangxxBinary = props.GetString("clang_cxx_binary")
+	tc.prefix = props.GetString(tgtType + "_clang_prefix")
+	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
+	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
 	tc.useGnuLibs = props.GetBool(tgtType + "_clang_use_gnu_libs")
 	tc.useGnuStl = props.GetBool(tgtType + "_clang_use_gnu_stl")
 	tc.gnu = gnu
@@ -373,6 +376,7 @@ type toolchainArmClang struct {
 	asBinary  string
 	ccBinary  string
 	cxxBinary string
+	prefix    string
 	cflags    []string // Flags for both C and C++
 }
 
@@ -398,20 +402,22 @@ func (tc toolchainArmClang) getLinker() (string, []string) {
 
 func newToolchainArmClangNative(config *bobConfig) (tc toolchainArmClang) {
 	props := config.Properties
-	tc.arBinary = props.GetString("armclang_ar_binary")
-	tc.asBinary = props.GetString("armclang_as_binary")
-	tc.ccBinary = props.GetString("armclang_cc_binary")
+	tc.prefix = props.GetString(tgtTypeHost + "_armclang_prefix")
+	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
+	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
 	tc.cxxBinary = props.GetString("armclang_cxx_binary")
 	return
 }
 
 func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClang) {
 	props := config.Properties
-	tc.arBinary = props.GetString("armclang_ar_binary")
-	tc.asBinary = props.GetString("armclang_as_binary")
-	tc.ccBinary = props.GetString("armclang_cc_binary")
-	tc.cxxBinary = props.GetString("armclang_cxx_binary")
-	tc.cflags = strings.Split(props.GetString("target_armclang_flags"), " ")
+	tc.prefix = props.GetString(tgtTypeTarget + "_gnu_prefix")
+	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
+	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
+	tc.cxxBinary = tc.prefix + props.GetString("armclang_cxx_binary")
+	tc.cflags = strings.Split(props.GetString(tgtTypeTarget+"_armclang_flags"), " ")
 	return
 }
 
