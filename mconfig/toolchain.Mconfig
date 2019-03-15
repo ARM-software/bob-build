@@ -21,26 +21,26 @@ config GNU_CC_BINARY
 	string "GNU C compiler binary"
 	default "gcc"
 	help
-		The name of the C compiler when the GNU toolchain is used.
+	  The name of the C compiler when the GNU toolchain is used.
 
 config GNU_CXX_BINARY
 	string "GNU C++ compiler binary"
 	default "g++"
 	help
-		The name of the C++ compiler when the GNU toolchain is used.
+	  The name of the C++ compiler when the GNU toolchain is used.
 
 config AR_BINARY
 	string "GNU and Clang Archiver binary"
 	default "ar"
 	help
-		The name of the archiver used to create static libraries.
+	  The name of the archiver used to create static libraries.
 
 config AS_BINARY
 	string "GNU and Clang Assembler binary"
 	default "as"
 	help
-		The name of the assembly compiler used to compile
-		hand-written assembly code.
+	  The name of the assembly compiler used to compile
+	  hand-written assembly code.
 
 ###################################
 
@@ -48,13 +48,13 @@ config CLANG_CC_BINARY
 	string "Clang C compiler binary"
 	default "clang"
 	help
-		The name of the C compiler when Clang toolchain is used.
+	  The name of the C compiler when Clang toolchain is used.
 
 config CLANG_CXX_BINARY
 	string "Clang C++ compiler binary"
 	default "clang++"
 	help
-		The name of the C++ compiler when Clang toolchain is used.
+	  The name of the C++ compiler when Clang toolchain is used.
 
 ###################################
 
@@ -62,57 +62,57 @@ config ARMCLANG_CC_BINARY
 	string "Armclang C compiler binary"
 	default "armclang"
 	help
-		The name of the C compiler when the Arm Compiler is used.
+	  The name of the C compiler when the Arm Compiler is used.
 
 config ARMCLANG_CXX_BINARY
 	string "Armclang C++ compiler binary"
 	default "armclang"
 	help
-		The name of the C++ compiler when the Arm Compiler is used.
+	  The name of the C++ compiler when the Arm Compiler is used.
 
 config ARMCLANG_LD_BINARY
 	string
 	default "armlink"
 	help
-		The name of the linker when the Arm Compiler is used.
+	  The name of the linker when the Arm Compiler is used.
 
 config ARMCLANG_AS_BINARY
 	string "Armclang assembler binary"
 	default "armasm"
 	help
-		The name of the assembly compiler used to compile
-		hand-written assembly code when the Arm Compiler is used.
+	  The name of the assembly compiler used to compile
+	  hand-written assembly code when the Arm Compiler is used.
 
 config ARMCLANG_AR_BINARY
 	string "Armclang archiver"
 	default "armar"
 	help
-		The name of the archiver used to create static libraries when
-		the Arm Compiler is used.
+	  The name of the archiver used to create static libraries when
+	  the Arm Compiler is used.
 
 config TARGET_ARMCLANG_FLAGS
 	string
 	default ""
 	help
-		Extra flags passed to the compiler when building for the
-		potentially cross-compiled target with the Arm Compiler.
+	  Extra flags passed to the compiler when building for the
+	  potentially cross-compiled target with the Arm Compiler.
 
 endmenu
 
 menu "Host explore options"
 	help
-		Options set by the host exploration script during
-		configuration. In most cases, do not set the values here; if
-		ALLOW_HOST_EXPLORE is enabled, they will be overwritten.
+	  Options set by the host exploration script during
+	  configuration. In most cases, do not set the values here; if
+	  ALLOW_HOST_EXPLORE is enabled, they will be overwritten.
 
 config EXTRA_LD_LIBRARY_PATH
 	string "Extra LD_LIBRARY_PATH entries"
 	help
-		Library path that needs to be used to execute a binary
-		compiled by the host linker.
+	  Library path that needs to be used to execute a binary
+	  compiled by the host linker.
 
-		This value is determined automatically when ALLOW_HOST_EXPLORE
-		is enabled (any value set manually will be overwritten).
+	  This value is determined automatically when ALLOW_HOST_EXPLORE
+	  is enabled (any value set manually will be overwritten).
 
 endmenu
 
@@ -166,8 +166,8 @@ config HOST_CLANG_USE_GNU_LIBS
 	depends on HOST_TOOLCHAIN_CLANG
 	default n
 	help
-		Detect the location of the configured GNU toolchain's `crt1.o`,
-		`libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+	  Detect the location of the configured GNU toolchain's `crt1.o`,
+	  `libgcc.a` and `libgcc_s.so`, and pass these to Clang.
 
 config TARGET_CLANG_USE_GNU_LIBS
 	bool "Detect the GNU toolchain's internal library locations for Clang"
@@ -175,21 +175,21 @@ config TARGET_CLANG_USE_GNU_LIBS
 	default y if TARGET_CLANG_TRIPLE != ""
 	default n
 	help
-		Detect the location of the configured GNU toolchain's `crt1.o`,
-		`libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+	  Detect the location of the configured GNU toolchain's `crt1.o`,
+	  `libgcc.a` and `libgcc_s.so`, and pass these to Clang.
 
 config HOST_CLANG_USE_GNU_STL
 	bool "Detect the GNU toolchain's libstdc++ implementation for Clang"
-	depends on HOST_TOOLCHAIN_CLANG && HOST_STL_LIBRARY="stdc++"
+	depends on HOST_TOOLCHAIN_CLANG && HOST_STL_LIBRARY = "stdc++"
 	default n
 	help
-		Detect the location of the configured GNU toolchain's
-		STL implementation, and pass this to Clang.
+	  Detect the location of the configured GNU toolchain's
+	  STL implementation, and pass this to Clang.
 
 config TARGET_CLANG_USE_GNU_STL
 	bool "Detect the GNU toolchain's libstdc++ implementation for Clang"
-	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBRARY="stdc++"
+	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBRARY = "stdc++"
 	default y if TARGET_CLANG_TRIPLE != ""
 	help
-		Detect the location of the configured GNU toolchain's
-		STL implementation, and pass this to Clang.
+	  Detect the location of the configured GNU toolchain's
+	  STL implementation, and pass this to Clang.

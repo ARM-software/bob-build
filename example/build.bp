@@ -12,7 +12,7 @@ bob_defaults {
 
 bob_install_group {
     name: "bin",
-    install_path: "out/bin"
+    install_path: "out/bin",
 }
 
 bob_binary {
