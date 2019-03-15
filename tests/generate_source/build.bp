@@ -207,7 +207,7 @@ bob_generate_source {
     ],
     export_gen_include_dirs: ["."],
     tool: "gen.sh",
-    cmd: "${tool} ${gen_dir} ${in}"
+    cmd: "${tool} ${gen_dir} ${in}",
 }
 
 bob_binary {

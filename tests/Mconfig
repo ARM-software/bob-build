@@ -62,21 +62,21 @@ source "bob/mconfig/toolchain.Mconfig"
 config PKG_CONFIG
 	bool "Enable use of pkg-config"
 	help
-		When enabled, pkg-config is used to retrieve information
-		about the package(s) declared in PKG_CONFIG_PACKAGES.
-		PKG_CONFIG_PACKAGES contains a comma separated list of the packages.
-		For each package, pkg-config will be called to obtain
-		the cflags, linker paths and libraries. These will be assigned
-		to XXX_CFLAGS, XXX_LDFLAGS and XXX_LIBS respectively, where
-		XXX is the uppercase package name with any non alphanumeric letters
-		replaced by '_'.
+	  When enabled, pkg-config is used to retrieve information
+	  about the package(s) declared in PKG_CONFIG_PACKAGES.
+	  PKG_CONFIG_PACKAGES contains a comma separated list of the packages.
+	  For each package, pkg-config will be called to obtain
+	  the cflags, linker paths and libraries. These will be assigned
+	  to XXX_CFLAGS, XXX_LDFLAGS and XXX_LIBS respectively, where
+	  XXX is the uppercase package name with any non alphanumeric letters
+	  replaced by '_'.
 
-		PKG_CONFIG_PATH and PKG_CONFIG_SYSROOT_DIR need to be setup
-		appropriately for pkg-config to use the information for the
-		target system.
+	  PKG_CONFIG_PATH and PKG_CONFIG_SYSROOT_DIR need to be setup
+	  appropriately for pkg-config to use the information for the
+	  target system.
 
-		Where no package information exists the default configuration
-		value will be used.
+	  Where no package information exists the default configuration
+	  value will be used.
 
 ## Include this to allow us to test Bob host exploration if needed
 config ALLOW_HOST_EXPLORE
@@ -120,29 +120,29 @@ choice
 	default HOST_TOOLCHAIN_CLANG if TARGET_TOOLCHAIN_CLANG
 	default HOST_TOOLCHAIN_GNU
 	help
-		A few different compilers are supported. They are classed by
-		toolchain which allows a limited amount of flexibility to
-		accommodate similar compilers.
+	  A few different compilers are supported. They are classed by
+	  toolchain which allows a limited amount of flexibility to
+	  accommodate similar compilers.
 
-		Select the compiler toolchain to be used when compiling for the host.
+	  Select the compiler toolchain to be used when compiling for the host.
 
 config HOST_TOOLCHAIN_CLANG
 	bool "Clang"
 	help
-		Build with Clang toolchain.
+	  Build with Clang toolchain.
 
-		Linux support is still experimental, and requires the GNU
-		assembler (as) and GNU archiver (ar)
+	  Linux support is still experimental, and requires the GNU
+	  assembler (as) and GNU archiver (ar)
 
 config HOST_TOOLCHAIN_GNU
 	bool "GNU"
 	help
-		Build with GNU toolchain.
+	  Build with GNU toolchain.
 
 config HOST_TOOLCHAIN_ARMCLANG
 	bool "Arm Compiler 6"
 	help
-		Build with the Arm Compiler.
+	  Build with the Arm Compiler.
 
 endchoice
 
@@ -150,18 +150,18 @@ config HOST_STL_LIBRARY
 	string "Host STL implementation"
 	default ""
 	help
-		This is the C++ Standard Template Library being linked against,
-		without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
-		`c++` for `libc++`. Specifying it here allows it to be added to
-		the library's run-time lookup path, in case the toolchain is
-		installed in a non-standard location.
+	  This is the C++ Standard Template Library being linked against,
+	  without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
+	  `c++` for `libc++`. Specifying it here allows it to be added to
+	  the library's run-time lookup path, in case the toolchain is
+	  installed in a non-standard location.
 
 config TARGET_STL_LIBRARY
 	string "Target STL implementation"
 	default ""
 	help
-		This is the C++ Standard Template Library being linked against,
-		without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
-		`c++` for `libc++`. Specifying it here allows it to be added to
-		the library's run-time lookup path, in case the toolchain is
-		installed in a non-standard location.
+	  This is the C++ Standard Template Library being linked against,
+	  without the `lib` prefix, e.g. `stdc++` for `libstdc++`, or
+	  `c++` for `libc++`. Specifying it here allows it to be added to
+	  the library's run-time lookup path, in case the toolchain is
+	  installed in a non-standard location.
