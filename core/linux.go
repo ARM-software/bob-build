@@ -69,15 +69,15 @@ func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 }
 
 func (g *linuxGenerator) sourcePrefix() string {
-	return "$SrcDir"
+	return "${SrcDir}"
 }
 
 func (g *linuxGenerator) buildDir() string {
-	return "$BuildDir"
+	return "${BuildDir}"
 }
 
 func (g *linuxGenerator) sourceOutputDir(m *generateCommon) string {
-	return filepath.Join("$BuildDir", "gen", m.Name())
+	return filepath.Join("${BuildDir}", "gen", m.Name())
 }
 
 var copyRule = pctx.StaticRule("copy",
@@ -99,13 +99,13 @@ type targetableModule interface {
 // Where to put generated shared libraries to simplify linking
 // As long as the module is targetable, we can infer the library path
 func getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join("$BuildDir", t.getTarget(), "shared", t.outputName()+".so")
+	return filepath.Join("${BuildDir}", t.getTarget(), "shared", t.outputName()+".so")
 }
 
 // Where to put generated binaries in order to make sure generated binaries
 // are available in the same directory as compiled binaries
 func getBinaryPath(t targetableModule) string {
-	return filepath.Join("$BuildDir", t.getTarget(), "executable", t.outputName())
+	return filepath.Join("${BuildDir}", t.getTarget(), "executable", t.outputName())
 }
 
 // Generate the build actions for a generateSource module and populates the outputs.
@@ -316,11 +316,14 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 		buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
 		args["build_wrapper"] = buildWrapper
 
-		sourceWithoutBuildDir := source
-		if buildDir := g.buildDir(); strings.HasPrefix(sourceWithoutBuildDir, buildDir) {
-			sourceWithoutBuildDir = sourceWithoutBuildDir[len(buildDir):]
+		var sourceWithoutPrefix string
+		if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
+			sourceWithoutPrefix = source[len(buildDir):]
+		} else {
+			sourceWithoutPrefix = source
+			source = filepath.Join(g.sourcePrefix(), source)
 		}
-		var output = l.ObjDir() + sourceWithoutBuildDir + ".o"
+		output := l.ObjDir() + sourceWithoutPrefix + ".o"
 
 		ctx.Build(pctx,
 			blueprint.BuildParams{
@@ -714,7 +717,7 @@ var installRule = pctx.StaticRule("install",
 		Description: "$out",
 	})
 
-func (*linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []string {
+func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []string {
 	ins := m.(installable)
 
 	installPath, ok := getInstallGroupPath(ctx)
@@ -735,7 +738,7 @@ func (*linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []str
 	deps := []string{}
 	if props.Post_install_cmd != "" {
 		rulename := "install"
-		tool := filepath.Join(ctx.ModuleDir(), props.Post_install_tool)
+		tool := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), props.Post_install_tool)
 
 		cmd := "cp $in $out ; " + props.Post_install_cmd
 
@@ -753,8 +756,16 @@ func (*linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []str
 		deps = append(deps, tool)
 	}
 
+	// Check if this is a resource
+	_, isResource := ins.(*resource)
+
 	for _, src := range ins.filesToInstall(ctx) {
 		dest := filepath.Join(installPath, filepath.Base(src))
+		// Resources always come from the source directory.
+		// All other module types install files from the build directory.
+		if isResource {
+			src = filepath.Join(g.sourcePrefix(), src)
+		}
 
 		ctx.Build(pctx,
 			blueprint.BuildParams{
@@ -821,6 +832,7 @@ func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
 var kbuildRule = pctx.StaticRule("kbuild",
 	blueprint.RuleParams{
 		Command: "python $kmod_build -o $out --depfile $out.d " +
+			"--common-root ${SrcDir} " +
 			"--module-dir $output_module_dir $extra_includes " +
 			"--sources $in $kbuild_extra_symbols " +
 			"--kernel $kernel_dir --cross-compile '$kernel_compiler' " +
@@ -836,12 +848,13 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	builtModule := filepath.Join(g.kernelModOutputDir(m), m.Name()+".ko")
 
 	args := m.generateKbuildArgs(ctx)
+	prefixedSources := utils.PrefixDirs(m.Properties.GetSrcs(ctx), g.sourcePrefix())
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      kbuildRule,
 			Outputs:   []string{builtModule},
-			Inputs:    utils.NewStringSlice(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials),
+			Inputs:    utils.NewStringSlice(prefixedSources, m.Properties.Build.SourceProps.Specials),
 			Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["copy_with_deps"]}),
 			Optional:  false,
 			Args:      args,

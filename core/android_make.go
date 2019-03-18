@@ -652,7 +652,7 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
-		ins := utils.Join(utils.PrefixDirs(inout.srcIn, g.sourcePrefix()), inout.genIn)
+		ins := utils.Join(inout.srcIn, inout.genIn)
 
 		// Make does not cleanly support multiple out-files
 		// To handle that, we output the rule only on the first file, and let every other output
