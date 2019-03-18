@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,7 +93,7 @@ if __name__ == "__main__":
                         help="Kernel module source files")
     parser.add_argument("--depfile", "-d", metavar="DEPFILE", required=True,
                         help="Dependency file to generate")
-    parser.add_argument("--common-root", "-r", default=None,
+    parser.add_argument("--common-root", "-r", required=True,
                         help="Common root directory that can be stripped from source paths")
     parser.add_argument("--module-dir", "-m",
                         help="Module output directory in kernel build")
@@ -147,11 +147,14 @@ if __name__ == "__main__":
 
     search_path.extend([str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths])
     kconfig = os.path.join(abs_kdir, "linux", "kconfig.h")
-    for src_rel in args.sources:
-        if args.common_root:
-            dest = os.path.join(output_dir, os.path.relpath(src_rel, args.common_root))
-        else:
-            dest = os.path.join(output_dir, src_rel)
+    root = os.path.abspath(args.common_root)
+    for src in args.sources:
+        src_rel = os.path.relpath(os.path.abspath(src), root)
+        if src_rel.startswith("../"):
+            logger.error("Source path: %s doesn't share common root directory: %s", src, args.common_root)
+            sys.exit(1)
+
+        dest = os.path.join(output_dir, src_rel)
         deps.extend(copy_with_deps.copy_with_deps(src_rel, dest, search_path, [kconfig]))
 
     deps = sorted(set(deps))

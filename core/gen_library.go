@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/utils"
 )
 
 // Support generation of static and shared libraries
@@ -62,7 +64,7 @@ func getLibraryGeneratedPath(m generateLibraryInterface, g generatorBackend) str
 func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext) []inout {
 	var io inout
 	g := getBackend(ctx)
-	io.srcIn = m.getSources(ctx)
+	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
 	io.genIn = getGeneratedFiles(ctx)
 	io.out = m.outputs(g)
 	return []inout{io}

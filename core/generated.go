@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -386,7 +386,7 @@ func (m *generateCommon) getAliasList() []string {
 func (m *generateSource) Inouts(ctx blueprint.ModuleContext) []inout {
 	var io inout
 	g := getBackend(ctx)
-	io.srcIn = m.generateCommon.Properties.GetSrcs(ctx)
+	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
 	io.genIn = utils.NewStringSlice(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx))
 	io.out = m.outputs(g)
 	if m.Properties.Depfile != "" {
@@ -450,8 +450,8 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
 	// empty, and the other has a single element.
 	empty := []string{}
 
-	for _, src := range m.generateCommon.Properties.GetSrcs(ctx) {
-		ins := []string{src}
+	for _, src := range m.getSources(ctx) {
+		ins := []string{filepath.Join(g.sourcePrefix(), src)}
 		outs := []string{}
 		depfile := ""
 		implicitSrcs := []string{}
