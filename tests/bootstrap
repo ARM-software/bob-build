@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is expected to be called from within the bob/tests directory
-#
 # This script is always using a relative path to SRCDIR, so BUILDDIR
-# and SRCDIR should be moved together (i.e. BUILDDIR is not
+# and SRCDIR should be moved together (i.e. BUILDDIR location is not
 # independent of SRCDIR).
 
+BASENAME=$(basename $0)
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-if [ "$SCRIPT_DIR" != "." ]; then
-	echo "SCRIPT_DIR:$SCRIPT_DIR"
-	echo "bootstrap needs to be run inside tests directory"
-	exit 1
-fi
+
+function usage() {
+    cat <<EOF
+$BASENAME
+
+Bootstraps an output directory for Bob tests. This script allows
+working directory and build output directory to be independently
+set.
+
+Usage:
+ source_dir/$BASENAME -o path
+
+Options
+  -o DIR  Output directory. Defaults to build.
+  -h      Help text
+
+The working directory is set to match the current working directory.
+
+The build output directory is set to the directory specified by the -o
+option.
+
+The source directory is inferred from the location of $BASENAME, and
+cannot be independently changed.
+
+EOF
+}
 
 source "${SCRIPT_DIR}/bootstrap_utils.sh"
+
+PARAMS=$(getopt -o "o:h" --name ${BASENAME} -- "$@")
+
+eval set -- "$PARAMS"
+unset PARAMS
+
+while true ; do
+    case $1 in
+        -o)
+            BUILDDIR=$2
+            shift 2
+            ;;
+        -h)
+            usage
+            exit
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Unrecognized option $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 # Select a BUILDDIR if not provided one
 if [[ -z "$BUILDDIR" ]]; then
@@ -43,15 +90,15 @@ create_link .. "${SCRIPT_DIR}/bob"
 # Bootstrap Bob
 export CONFIGNAME="bob.config"
 export TOPNAME="build.bp"
-export SRCDIR="."
+export SRCDIR="${SCRIPT_DIR}"
 export BUILDDIR
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 
-${SCRIPT_DIR}/bob/bootstrap_linux.bash
+"${SCRIPT_DIR}/bob/bootstrap_linux.bash"
 
 # Pick up some info that bob has worked out
 BOOTSTRAP=".bob.bootstrap"
-source ${BUILDDIR}/${BOOTSTRAP}
+source "${BUILDDIR}/${BOOTSTRAP}"
 
 # Setup the buildme script to just run bob
 ln -sf "bob" "${BUILDDIR}/buildme"

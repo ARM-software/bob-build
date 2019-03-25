@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,11 @@
 # SRCDIR - Path to base of source tree. This can be relative to PWD or absolute.
 # BUILDDIR - Build output directory. This can be relative to PWD or absolute.
 # CONFIGNAME - Name of the configuration file.
+# BLUEPRINT_LIST_FILE - Path to file listing all Blueprint input files.
+#                       This can be relative to PWD or absolute.
 # BOB_CONFIG_OPTS - Configuration options to be used when calling the
 #                   configuration system.
+# BOB_CONFIG_PLUGINS - Configuration system plugins to use
 # TOPNAME - Name used for Bob Blueprint files.
 
 # The location that this script is called from determines the working
@@ -60,14 +63,19 @@ if [[ -z "$BOB_CONFIG_PLUGINS" ]]; then
   export BOB_CONFIG_PLUGINS=""
 fi
 
-# Create the build directory
-mkdir -p "$BUILDDIR"
+if [ "${BUILDDIR}" = "." ] ; then
+    WORKDIR=.
+else
+    # Create the build directory
+    mkdir -p "$BUILDDIR"
 
-# Relative path from build directory to working directory
-WORKDIR=$(relative_path "${BUILDDIR}" $(pwd))
+    # Relative path from build directory to working directory
+    WORKDIR=$(relative_path "${BUILDDIR}" $(pwd))
+fi
 
-# Calculate Bob directory relative to working directory and absolute
+# Calculate Bob directory relative to working directory, build directory and absolute
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
+BOB_DIR_FROM_BUILD="$(relative_path $(bob_realpath "${BUILDDIR}") "${SCRIPT_DIR}")"
 BOB_DIR_ABS="$(bob_realpath "${SCRIPT_DIR}")"
 
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
@@ -100,11 +108,11 @@ rsync -c "${BUILDDIR}/.bob.bootstrap.tmp" "${BUILDDIR}/.bob.bootstrap"
 
 if [ ${SRCDIR:0:1} != '/' ]; then
     # Use relative symlinks
-    ln -sf "${WORKDIR}/${BOB_DIR}/config.bash" "${BUILDDIR}/config"
-    ln -sf "${WORKDIR}/${BOB_DIR}/menuconfig.bash" "${BUILDDIR}/menuconfig"
-    ln -sf "${WORKDIR}/${BOB_DIR}/bob.bash" "${BUILDDIR}/bob"
-    ln -sf "${WORKDIR}/${BOB_DIR}/bob_graph.bash" "${BUILDDIR}/bob_graph"
-    ln -sf "${WORKDIR}/${BOB_DIR}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
+    ln -sf "${BOB_DIR_FROM_BUILD}/config.bash" "${BUILDDIR}/config"
+    ln -sf "${BOB_DIR_FROM_BUILD}/menuconfig.bash" "${BUILDDIR}/menuconfig"
+    ln -sf "${BOB_DIR_FROM_BUILD}/bob.bash" "${BUILDDIR}/bob"
+    ln -sf "${BOB_DIR_FROM_BUILD}/bob_graph.bash" "${BUILDDIR}/bob_graph"
+    ln -sf "${BOB_DIR_FROM_BUILD}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
 else
     # Use absolute symlinks
     ln -sf "${BOB_DIR_ABS}/config.bash" "${BUILDDIR}/config"
