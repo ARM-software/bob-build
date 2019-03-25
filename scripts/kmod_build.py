@@ -120,10 +120,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # The build is run in $KDIR, rather than the usual build workdir, so
+    # parameters need to be absolute so they are accessible with a different CWD.
     output_dir = os.path.dirname(args.output)
     abs_output_dir = os.path.abspath(output_dir)
     abs_kdir = os.path.abspath(args.kernel)
     search_path = [os.path.abspath(d) for d in args.include_dir]
+
+    # Don't abspath cross_compile if it's just a prefix for something already
+    # inside $PATH (i.e. it doesn't contain a directory part):
+    cross_compile = args.cross_compile
+    if os.path.dirname(args.cross_compile):
+        cross_compile = os.path.abspath(cross_compile)
 
     # Prepend EXTRA_CFLAGS with modified include paths
     includes = ["-I" + s for s in search_path]
@@ -156,8 +164,8 @@ if __name__ == "__main__":
     make_args = args.make_args
     make_args.extend(args.kbuild_options)
     make_args.append("ARCH="+arch)
-    if args.cross_compile is not None:
-        make_args.append("CROSS_COMPILE="+args.cross_compile)
+    if cross_compile:
+        make_args.append("CROSS_COMPILE="+cross_compile)
     if args.extra_symbols is not None:
         extra_symbols = [os.path.abspath(d) for d in args.extra_symbols]
         make_args.append("KBUILD_EXTRA_SYMBOLS="+" ".join(extra_symbols))
