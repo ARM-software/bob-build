@@ -373,7 +373,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 	return
 }
 
-func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (exportedIncludes, exportedCflags []string) {
+func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalIncludes, expIncludes, expCflags []string) {
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
@@ -390,19 +390,14 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (exportedInc
 
 			switch lib := dep.(type) {
 			case *staticLibrary:
-				// Static libraries dependencies are in reversed order
-				// so prepend to match the specified order
-				exportedIncludes = append(exportedIncludes, lib.Properties.Export_include_dirs...)
-				exportedIncludes = append(exportedIncludes, lib.Properties.Export_local_include_dirs...)
-				exportedCflags = append(exportedCflags, lib.Properties.Export_cflags...)
+				expLocalIncludes = append(expLocalIncludes, lib.Properties.Export_local_include_dirs...)
+				expIncludes = append(expIncludes, lib.Properties.Export_include_dirs...)
+				expCflags = append(expCflags, lib.Properties.Export_cflags...)
 
 			case *sharedLibrary:
-				exportedIncludes = append(exportedIncludes,
-					lib.Properties.Export_local_include_dirs...)
-				exportedIncludes = append(exportedIncludes,
-					lib.Properties.Export_include_dirs...)
-				exportedCflags = append(exportedCflags,
-					lib.Properties.Export_cflags...)
+				expLocalIncludes = append(expLocalIncludes, lib.Properties.Export_local_include_dirs...)
+				expIncludes = append(expIncludes, lib.Properties.Export_include_dirs...)
+				expCflags = append(expCflags, lib.Properties.Export_cflags...)
 			}
 		}
 	})

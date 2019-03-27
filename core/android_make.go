@@ -212,7 +212,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 
 	sb.WriteString("LOCAL_C_INCLUDES := " + strings.Join(includes, " ") + "\n")
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
-	_, exportedCflags := m.GetExportedVariables(ctx)
+	_, _, exportedCflags := m.GetExportedVariables(ctx)
 	cflagsList = append(cflagsList, exportedCflags...)
 	sb.WriteString("LOCAL_CFLAGS := " + strings.Join(utils.Filter(cflagsList, moduleCompileFlags), " ") + "\n")
 	sb.WriteString("LOCAL_CPPFLAGS := " + strings.Join(utils.Filter(m.Properties.Cxxflags, moduleCompileFlags), " ") + "\n")

@@ -256,17 +256,23 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 	g := getBackend(ctx)
 	srcs := l.GetSrcs(ctx)
 
-	exportedIncludes, exportedCflags := l.GetExportedVariables(ctx)
+	expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
 	// There are 2 sets of include dirs - "global" and "local".
 	// Local acts on the root source directory.
 
 	// The order we want is  local_include_dirs, export_local_include_dirs,
 	//                       include_dirs, export_include_dirs
-	includeDirs := l.Properties.Local_include_dirs
-	includeDirs = append(includeDirs, l.Properties.Export_local_include_dirs...)
-	includeDirs = append(includeDirs, l.Properties.Include_dirs...)
+	localIncludeDirs := utils.NewStringSlice(l.Properties.Local_include_dirs,
+		l.Properties.Export_local_include_dirs)
+
+	// Prefix all local includes with SrcDir
+	localIncludeDirs = utils.PrefixDirs(localIncludeDirs, "${SrcDir}")
+	expLocalIncludes = utils.PrefixDirs(expLocalIncludes, "${SrcDir}")
+
+	includeDirs := append(localIncludeDirs, l.Properties.Include_dirs...)
 	includeDirs = append(includeDirs, l.Properties.Export_include_dirs...)
-	includeDirs = append(includeDirs, exportedIncludes...)
+	includeDirs = append(includeDirs, expLocalIncludes...)
+	includeDirs = append(includeDirs, expIncludes...)
 
 	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
 	includeDirs = append(includeDirs, gendirs...)
