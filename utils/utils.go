@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,7 +195,8 @@ func Trim(args []string) []string {
 
 // Join multiple lists of strings. This replaces appending multiple arrays
 // together before calling strings.Join().
-func Join(lists ...[]string) (joined string) {
+func Join(lists ...[]string) string {
+	var sb strings.Builder
 	const sep = " "
 	first := true
 
@@ -203,15 +204,15 @@ func Join(lists ...[]string) (joined string) {
 		listJoined := strings.Join(list, sep)
 		if len(listJoined) > 0 {
 			if !first {
-				joined += sep
+				sb.WriteString(sep)
 			} else {
 				first = false
 			}
-			joined += listJoined
+			sb.WriteString(listJoined)
 		}
 	}
 
-	return
+	return sb.String()
 }
 
 // IsExecutable returns true if the given file exists and is executable
