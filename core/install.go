@@ -241,7 +241,7 @@ func (m *resource) outputs(g generatorBackend) []string {
 }
 
 func (m *resource) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return m.Properties.SourceProps.GetSrcs(ctx)
+	return m.Properties.SourceProps.getSources(ctx)
 }
 
 func (m *resource) getInstallableProps() *InstallableProps {

@@ -157,7 +157,7 @@ func glob(ctx blueprint.ModuleContext, globs []string, excludes []string) []stri
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) GetSrcs(ctx blueprint.ModuleContext) []string {
+func (s *SourceProps) getSources(ctx blueprint.ModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 

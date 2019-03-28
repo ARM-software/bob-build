@@ -343,7 +343,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 // Returns all the source files for a C/C++ library. This includes any sources that are generated.
 func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
 	g := getBackend(ctx)
-	srcs := l.Properties.GetSrcs(ctx)
+	srcs := l.Properties.getSources(ctx)
 	srcs = append(srcs, l.Properties.Build.SourceProps.Specials...)
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
@@ -848,7 +848,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	builtModule := filepath.Join(g.kernelModOutputDir(m), m.Name()+".ko")
 
 	args := m.generateKbuildArgs(ctx)
-	prefixedSources := utils.PrefixDirs(m.Properties.GetSrcs(ctx), g.sourcePrefix())
+	prefixedSources := utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix())
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
