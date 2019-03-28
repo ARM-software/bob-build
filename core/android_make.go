@@ -73,7 +73,7 @@ func writeIfChanged(filename string, sb *strings.Builder) {
 	}
 }
 
-func androidMkWriteString(sb *strings.Builder, ctx blueprint.ModuleContext, name string) {
+func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.Builder) {
 	filename := filepath.Join(builddir, name+".inc")
 	writeIfChanged(filename, sb)
 }
@@ -365,27 +365,27 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 	}
 	sb.WriteString("\ninclude $(" + rulePrefix[m.Properties.TargetType] + ruleSuffix[binType] + ")\n")
 
-	androidMkWriteString(sb, ctx, m.altShortName())
+	androidMkWriteString(ctx, m.altShortName(), sb)
 }
 
 func (g *androidMkGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		m.GenerateBuildAction(&sb, binTypeStatic, ctx)
+		sb := &strings.Builder{}
+		m.GenerateBuildAction(sb, binTypeStatic, ctx)
 	}
 }
 
 func (g *androidMkGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		m.GenerateBuildAction(&sb, binTypeShared, ctx)
+		sb := &strings.Builder{}
+		m.GenerateBuildAction(sb, binTypeShared, ctx)
 	}
 }
 
 func (g *androidMkGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		m.GenerateBuildAction(&sb, binTypeExecutable, ctx)
+		sb := &strings.Builder{}
+		m.GenerateBuildAction(sb, binTypeExecutable, ctx)
 	}
 }
 
@@ -402,9 +402,9 @@ func (*androidMkGenerator) declareAlias(sb *strings.Builder, name string, srcs [
 }
 
 func (g *androidMkGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
-	var sb strings.Builder
-	g.declareAlias(&sb, m.Name(), m.Properties.Srcs)
-	androidMkWriteString(&sb, ctx, m.Name())
+	sb := &strings.Builder{}
+	g.declareAlias(sb, m.Name(), m.Properties.Srcs)
+	androidMkWriteString(ctx, m.Name(), sb)
 }
 
 func pathToModuleName(path string) string {
@@ -420,11 +420,11 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 	if !enabledAndRequired(m) {
 		return
 	}
-	var sb strings.Builder
+	sb := &strings.Builder{}
 
 	installGroupPath, ok := getInstallGroupPath(ctx)
 	if !ok {
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		androidMkWriteString(ctx, m.altShortName(), sb)
 		return
 	}
 
@@ -446,9 +446,9 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("\ninclude $(BUILD_PREBUILT)\n")
 	}
 
-	g.declareAlias(&sb, m.Name(), requiredModuleNames)
+	g.declareAlias(sb, m.Name(), requiredModuleNames)
 
-	androidMkWriteString(&sb, ctx, m.altShortName())
+	androidMkWriteString(ctx, m.altShortName(), sb)
 }
 
 func (g *androidMkGenerator) sourcePrefix() string {
@@ -692,62 +692,62 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 
 func (g *androidMkGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext, inouts []inout) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		g.generateCommonActions(&sb, &m.generateCommon, ctx, inouts)
-		installGeneratedFiles(&sb, m, ctx, m.generateCommon.Properties.Tags)
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		sb := &strings.Builder{}
+		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
+		installGeneratedFiles(sb, m, ctx, m.generateCommon.Properties.Tags)
+		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
 func (g *androidMkGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext, inouts []inout) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		g.generateCommonActions(&sb, &m.generateCommon, ctx, inouts)
-		installGeneratedFiles(&sb, m, ctx, m.generateCommon.Properties.Tags)
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		sb := &strings.Builder{}
+		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
+		installGeneratedFiles(sb, m, ctx, m.generateCommon.Properties.Tags)
+		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
 func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext, inouts []inout) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		g.generateCommonActions(&sb, &m.generateCommon, ctx, inouts)
+		sb := &strings.Builder{}
+		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
 		includeDirs := utils.PrefixDirs(m.generateCommon.Properties.Export_gen_include_dirs, g.sourceOutputDir(&m.generateCommon))
-		declarePrebuiltStaticLib(&sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		declarePrebuiltStaticLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
 			strings.Join(includeDirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
 func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext, inouts []inout) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		g.generateCommonActions(&sb, &m.generateCommon, ctx, inouts)
+		sb := &strings.Builder{}
+		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
 		includeDirs := utils.PrefixDirs(m.generateCommon.Properties.Export_gen_include_dirs, g.sourceOutputDir(&m.generateCommon))
-		declarePrebuiltSharedLib(&sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		declarePrebuiltSharedLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
 			strings.Join(includeDirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
 func (g *androidMkGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext, inouts []inout) {
 	if enabledAndRequired(m) {
-		var sb strings.Builder
-		g.generateCommonActions(&sb, &m.generateCommon, ctx, inouts)
+		sb := &strings.Builder{}
+		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		declarePrebuiltBinary(&sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		declarePrebuiltBinary(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
-		androidMkWriteString(&sb, ctx, m.altShortName())
+		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
@@ -792,7 +792,7 @@ func generatesAndroidIncFile(m blueprint.Module) bool {
 }
 
 func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) {
-	var sb strings.Builder
+	sb := &strings.Builder{}
 	var order androidMkFileSlice
 	ctx.VisitAllModules(func(m blueprint.Module) {
 		di, ok := m.(androidNaming)
@@ -845,7 +845,7 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 		}
 		order = append(order[:lowindex], order[lowindex+1:]...)
 	}
-	writeIfChanged(filepath.Join(builddir, "Android.inc"), &sb)
+	writeIfChanged(filepath.Join(builddir, "Android.inc"), sb)
 }
 
 func (g *androidMkGenerator) moduleOutputDir(moduleName string) string {
@@ -891,7 +891,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	if !enabledAndRequired(m) {
 		return
 	}
-	var sb strings.Builder
+	sb := &strings.Builder{}
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 	sb.WriteString("LOCAL_MODULE := " + m.altShortName() + "\n")
 	sb.WriteString("LOCAL_MODULE_CLASS := KERNEL_MODULES\n")
@@ -952,7 +952,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	// of the module.
 	sb.WriteString(fmt.Sprintf("\n$(dir $(LOCAL_BUILT_MODULE))/Module.symvers: $(LOCAL_BUILT_MODULE)\n"))
 
-	androidMkWriteString(&sb, ctx, m.altShortName())
+	androidMkWriteString(ctx, m.altShortName(), sb)
 }
 
 func androidMkOrdererFactory() blueprint.Singleton {
