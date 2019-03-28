@@ -207,7 +207,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 	} else {
 		sb.WriteString("LOCAL_CLANG := false\n")
 	}
-	srcs := utils.NewStringSlice(m.Properties.GetSrcs(ctx), m.Properties.Build.SourceProps.Specials)
+	srcs := utils.NewStringSlice(m.Properties.getSources(ctx), m.Properties.Build.SourceProps.Specials)
 	sb.WriteString("LOCAL_SRC_FILES := " + strings.Join(srcs, " ") + "\n")
 
 	sb.WriteString("LOCAL_C_INCLUDES := " + strings.Join(includes, " ") + "\n")
@@ -898,7 +898,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	sb.WriteString("LOCAL_CLANG := false\n")
 	sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(m.Properties.Tags, " ") + "\n\n")
 
-	sources := m.Properties.GetSrcs(ctx)
+	sources := m.Properties.getSources(ctx)
 
 	sb.WriteString("LOCAL_SRC_FILES :=" + newlineSeparatedList(sources))
 

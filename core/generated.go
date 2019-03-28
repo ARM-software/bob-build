@@ -372,7 +372,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 }
 
 func (m *generateCommon) getSources(ctx blueprint.ModuleContext) []string {
-	return m.Properties.GetSrcs(ctx)
+	return m.Properties.getSources(ctx)
 }
 
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext) {
