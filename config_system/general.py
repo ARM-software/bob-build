@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import re
 import logging
 
@@ -156,11 +157,19 @@ def enforce_dependent_values(auto_fix=False):
         elif c['datatype'] == 'int':
             set_config_internal(i, 0)
 
+__mconfig_dir = ""
+def get_mconfig_dir():
+    """
+    Retrieve the path to the input option database.
+    """
+    return __mconfig_dir
+
 def init_config(options_filename, ignore_missing=False):
     from . import lex
     from . import lex_wrapper
     from . import syntax
 
+    global __mconfig_dir
     global configuration
     global menu_data
     try:
@@ -173,6 +182,7 @@ def init_config(options_filename, ignore_missing=False):
     except syntax.ParseError as e:
         logger.debug("Parse error")
         exit(1)
+    __mconfig_dir = os.path.dirname(options_filename)
     menu_data = menu_parse(configuration)
 
     set_initial_values()
