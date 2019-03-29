@@ -19,7 +19,7 @@ import logging
 import subprocess
 import re
 
-from config_system import get_config_bool, get_config_string, set_config
+from config_system import get_config_bool, get_config_string, set_config, get_mconfig_dir
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,14 @@ def pkg_config():
     Where no package information exists the default configuration value will be used.
     '''
     if get_config_bool('PKG_CONFIG'):
+        cmd = ['pkg-config']
+        pkg_config_flags = get_config_string('PKG_CONFIG_FLAGS')
+        pkg_config_flags = pkg_config_flags.replace("%MCONFIGDIR%", get_mconfig_dir())
+        cmd.extend(pkg_config_flags.split(' '))
+
         pkg_config_path = get_config_string('PKG_CONFIG_PATH')
         if pkg_config_path != '':
+            pkg_config_path = pkg_config_path.replace("%MCONFIGDIR%", get_mconfig_dir())
             os.putenv('PKG_CONFIG_PATH', pkg_config_path)
 
         pkg_config_sys_root = get_config_string('PKG_CONFIG_SYSROOT_DIR')
@@ -75,15 +81,15 @@ def pkg_config():
             pkg_config_ldflags = "%s%s" % (pkg_uc_alnum, '_LDFLAGS' )
             pkg_config_libs = "%s%s" % (pkg_uc_alnum, '_LDLIBS' )
 
-            cflags = check_output(['pkg-config', pkg, '--cflags'])
+            cflags = check_output(cmd + [pkg, '--cflags'])
             if cflags != '':
                 set_config(pkg_config_cflags, cflags)
 
-            ldflags = check_output(['pkg-config', pkg, '--libs-only-L'])
+            ldflags = check_output(cmd + [pkg, '--libs-only-L'])
             if ldflags != '':
                 set_config(pkg_config_ldflags, ldflags)
 
-            libs = check_output(['pkg-config', pkg, '--libs-only-l'])
+            libs = check_output(cmd + [pkg, '--libs-only-l'])
             if libs != '':
                 set_config(pkg_config_libs, libs)
 

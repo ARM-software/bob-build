@@ -15,4 +15,5 @@
 
 from .general import init_config, get_config, get_config_bool, \
     get_config_int, get_config_string,  get_config_list, read_config, \
-    set_config, can_enable, get_options_selecting, get_options_depending_on
+    set_config, can_enable, get_options_selecting, get_options_depending_on, \
+    get_mconfig_dir
