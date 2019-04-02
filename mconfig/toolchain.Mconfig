@@ -189,7 +189,7 @@ config HOST_CLANG_USE_GNU_LIBS
 config TARGET_CLANG_USE_GNU_LIBS
 	bool "Detect the GNU toolchain's internal library locations for Clang"
 	depends on TARGET_TOOLCHAIN_CLANG
-	default y if TARGET_CLANG_TRIPLE != ""
+	default y if TARGET_CLANG_TRIPLE != "" && !ANDROID
 	default n
 	help
 	  Detect the location of the configured GNU toolchain's `crt1.o`,
@@ -206,7 +206,8 @@ config HOST_CLANG_USE_GNU_STL
 config TARGET_CLANG_USE_GNU_STL
 	bool "Detect the GNU toolchain's libstdc++ implementation for Clang"
 	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBRARY = "stdc++"
-	default y if TARGET_CLANG_TRIPLE != ""
+	default y if TARGET_CLANG_TRIPLE != "" && !ANDROID
+	default n
 	help
 	  Detect the location of the configured GNU toolchain's
 	  STL implementation, and pass this to Clang.
