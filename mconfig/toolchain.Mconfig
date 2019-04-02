@@ -211,3 +211,21 @@ config TARGET_CLANG_USE_GNU_STL
 	help
 	  Detect the location of the configured GNU toolchain's
 	  STL implementation, and pass this to Clang.
+
+config HOST_CLANG_STANDALONE
+	bool "Host Clang standalone"
+	depends on HOST_TOOLCHAIN_CLANG
+	default y if ANDROID
+	help
+	  Clang has been configured so that it doesn't need to
+	  reference other toolchains to find things like startup
+	  libraries or the linker.
+
+config TARGET_CLANG_STANDALONE
+	bool "Target Clang standalone"
+	depends on TARGET_TOOLCHAIN_CLANG
+	default y if ANDROID
+	help
+	  Clang has been configured so that it doesn't need to
+	  reference other toolchains to find things like startup
+	  libraries or the linker.

@@ -59,7 +59,7 @@ func getToolPath(toolUnqualified string) (toolPath string) {
 	} else {
 		path, err := exec.LookPath(toolUnqualified)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("Error: Couldn't get tool from path %s: %v", toolUnqualified, err))
 		}
 		toolPath = path
 	}
@@ -111,14 +111,15 @@ type toolchainGnu interface {
 }
 
 type toolchainGnuCommon struct {
-	arBinary  string
-	asBinary  string
-	gccBinary string
-	gxxBinary string
-	prefix    string
-	cflags    []string // Flags for both C and C++
-	ldflags   []string // Linker flags, including anything required for C++
-	binDir    string
+	arBinary       string
+	asBinary       string
+	gccBinary      string
+	gxxBinary      string
+	prefix         string
+	cflags         []string // Flags for both C and C++
+	ldflags        []string // Linker flags, including anything required for C++
+	binDir         string
+	checkedBinPath bool
 }
 
 type toolchainGnuNative struct {
@@ -149,8 +150,20 @@ func (tc toolchainGnuCommon) getLinker() (tool string, flags []string) {
 	return tc.gxxBinary, tc.ldflags
 }
 
-func (tc toolchainGnuCommon) getBinDirs() []string {
-	return []string{tc.binDir}
+func (tc toolchainGnuCommon) getBinDir() string {
+	if !tc.checkedBinPath {
+		tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
+		tc.checkedBinPath = true
+	}
+	return tc.binDir
+}
+
+func (tc toolchainGnuCommon) getBinDirs() (dirs []string) {
+	binDir := tc.getBinDir()
+	if binDir != "" {
+		dirs = append(dirs, binDir)
+	}
+	return
 }
 
 // The libstdc++ headers shipped with GCC toolchains are stored, relative to
@@ -192,7 +205,7 @@ func (tc toolchainGnuCommon) getVersion() string {
 }
 
 func (tc toolchainGnuCommon) getInstallDir() string {
-	return filepath.Dir(tc.binDir)
+	return filepath.Dir(tc.getBinDir())
 }
 
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
@@ -202,14 +215,15 @@ func (tc toolchainGnuCommon) getInstallDir() string {
 // binary search path.
 func (tc toolchainGnuCross) getBinDirs() []string {
 	dirs := tc.toolchainGnuCommon.getBinDirs()
+	installDir := tc.getInstallDir()
+	if installDir != "" {
+		triple := tc.getTargetTripleHeaderSubdir()
 
-	triple := tc.getTargetTripleHeaderSubdir()
-
-	unprefixedBinDir := filepath.Join(tc.getInstallDir(), triple, "bin")
-	if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
-		dirs = append(dirs, unprefixedBinDir)
+		unprefixedBinDir := filepath.Join(installDir, triple, "bin")
+		if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
+			dirs = append(dirs, unprefixedBinDir)
+		}
 	}
-
 	return dirs
 }
 
@@ -238,7 +252,6 @@ func newToolchainGnuCommon(config *bobConfig, tgtType string) (tc toolchainGnuCo
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
-	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
 
@@ -309,21 +322,24 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgtType string
 	tc.useGnuStl = props.GetBool(tgtType + "_clang_use_gnu_stl")
 	tc.gnu = gnu
 
-	// Tell Clang where the GNU toolchain is installed, so it can use its
-	// headers and libraries, for example, if we are using libstdc++.
-	gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
-	tc.cflags = append(tc.cflags, gnuInstallArg)
-	tc.ldflags = append(tc.ldflags, gnuInstallArg)
-
-	// Add the GNU toolchain's binary directories to Clang's binary search
-	// path, so that Clang can find the correct linker. If the GNU toolchain
-	// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
-	// be in Clang's search path, so these arguments have no effect.
-	binDirs := tc.gnu.getBinDirs()
-	if tc.useGnuLibs {
-		binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
+	if tc.useGnuLibs || tc.useGnuStl {
+		// Tell Clang where the GNU toolchain is installed, so it can use its
+		// headers and libraries, for example, if we are using libstdc++.
+		gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
+		tc.cflags = append(tc.cflags, gnuInstallArg)
+		tc.ldflags = append(tc.ldflags, gnuInstallArg)
 	}
-	tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
+	if !props.GetBool(tgtType + "_clang_standalone") {
+		// Add the GNU toolchain's binary directories to Clang's binary search
+		// path, so that Clang can find the correct linker. If the GNU toolchain
+		// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
+		// be in Clang's search path, so these arguments have no effect.
+		binDirs := tc.gnu.getBinDirs()
+		if tc.useGnuLibs {
+			binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
+		}
+		tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
+	}
 
 	return
 }
