@@ -155,7 +155,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         dest = os.path.join(output_dir, src_rel)
-        deps.extend(copy_with_deps.copy_with_deps(src_rel, dest, search_path, [kconfig]))
+        deps.extend(copy_with_deps.copy_with_deps(src, dest, search_path, [kconfig]))
 
     deps = sorted(set(deps))
 

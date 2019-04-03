@@ -101,18 +101,17 @@ def copy_if_newer(src, dest):
 
     shutil.copy(src, dest)
 
-def copy_with_deps(src_rel, dest, search_path, includes):
+def copy_with_deps(src, dest, search_path, includes):
     deps = []
 
-    if os.path.isabs(src_rel):
-        logging.error("%s is not a relative path", src_rel)
-        sys.exit(1)
+    if not os.path.isabs(src):
+        src = os.path.abspath(src)
 
-    ext = os.path.splitext(src_rel)[1]
+    ext = os.path.splitext(src)[1]
     if ext in {".c", ".cpp", ".cxx"}:
-        deps = get_includes(os.path.abspath(src_rel), search_path, [], extra_includes=includes)
+        deps = get_includes(src, search_path, [], extra_includes=includes)
 
-    copy_if_newer(src_rel, dest)
+    copy_if_newer(src, dest)
 
     return deps
 
