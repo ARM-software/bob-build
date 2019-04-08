@@ -167,7 +167,7 @@ type BuildProps struct {
 	// Compiler prefix for kernel build
 	Kernel_compiler string
 
-	TargetType string `blueprint:"mutated"`
+	TargetType tgtType `blueprint:"mutated"`
 }
 
 // A Build represents the whole tree of properties for a 'library' object,
@@ -265,7 +265,7 @@ func (l *library) features() *Features {
 	return &l.Properties.Features
 }
 
-func (l *library) getTarget() string {
+func (l *library) getTarget() tgtType {
 	return l.Properties.TargetType
 }
 
@@ -285,12 +285,12 @@ func (l *library) getAliasList() []string {
 	return l.Properties.getAliasList()
 }
 
-func (l *library) supportedVariants() (tgtTypes []string) {
+func (l *library) supportedVariants() (tgts []tgtType) {
 	if l.Properties.isHostSupported() {
-		tgtTypes = append(tgtTypes, tgtTypeHost)
+		tgts = append(tgts, tgtTypeHost)
 	}
 	if l.Properties.isTargetSupported() {
-		tgtTypes = append(tgtTypes, tgtTypeTarget)
+		tgts = append(tgts, tgtTypeTarget)
 	}
 	return
 }
@@ -300,7 +300,7 @@ func (l *library) disable() {
 	l.Properties.Enabled = &f
 }
 
-func (l *library) setVariant(tgt string) {
+func (l *library) setVariant(tgt tgtType) {
 	l.Properties.TargetType = tgt
 }
 
@@ -321,7 +321,7 @@ func (l *library) altName() string {
 
 func (l *library) altShortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.altName() + "__" + l.Properties.TargetType
+		return l.altName() + "__" + string(l.Properties.TargetType)
 	}
 	return l.altName()
 }
@@ -331,7 +331,7 @@ func (l *library) altShortName() string {
 // disambiguate.
 func (l *library) shortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.Name() + "__" + l.Properties.TargetType
+		return l.Name() + "__" + string(l.Properties.TargetType)
 	}
 	return l.Name()
 }

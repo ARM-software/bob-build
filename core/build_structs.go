@@ -100,7 +100,7 @@ type generatorBackend interface {
 	// Backend specific info for module types
 	buildDir() string
 	sourcePrefix() string
-	sharedLibsDir(targetType string) string
+	sharedLibsDir(tgt tgtType) string
 	sourceOutputDir(m *generateCommon) string
 	binaryOutputDir(m *binary) string
 	staticLibOutputDir(m *staticLibrary) string
@@ -111,7 +111,7 @@ type generatorBackend interface {
 	init(*blueprint.Context, *bobConfig)
 
 	// Access to backend configuration
-	getToolchain(tgtType string) toolchain
+	getToolchain(tgt tgtType) toolchain
 }
 
 // The bobConfig type is stored against the Blueprint context, and allows us to
@@ -206,9 +206,12 @@ func dependencySingletonFactory() blueprint.Singleton {
 	return &dependencySingleton{}
 }
 
+type tgtType string
+
 const (
-	tgtTypeHost   string = "host"
-	tgtTypeTarget string = "target"
+	tgtTypeHost    tgtType = "host"
+	tgtTypeTarget  tgtType = "target"
+	tgtTypeUnknown tgtType = ""
 )
 
 func stripEmptyComponentsRecursive(propsVal reflect.Value) {
@@ -262,8 +265,8 @@ const splitterMutatorName string = "library"
 func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
-	hostVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: tgtTypeHost}}
-	targetVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: tgtTypeTarget}}
+	hostVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
+	targetVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeTarget)}}
 
 	for _, dep := range deps {
 		var variations []blueprint.Variation
@@ -304,7 +307,7 @@ var kernelModuleDepTag = dependencyTag{name: "kernel_module"}
 type targetable interface {
 	build() *Build
 	features() *Features
-	getTarget() string
+	getTarget() tgtType
 }
 
 func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
@@ -347,23 +350,23 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 // after the libraries have been split.
 func targetMutator(mctx blueprint.TopDownMutatorContext) {
 	var build *Build
-	var tgtType string
+	var tgt tgtType
 
 	if def, ok := mctx.Module().(targetable); ok {
 		build = def.build()
-		tgtType = def.getTarget()
+		tgt = def.getTarget()
 	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		build = &gsc.Properties.FlagArgsBuild
-		tgtType = gsc.Properties.Target
+		tgt = gsc.Properties.Target
 	} else {
 		return
 	}
 
 	//print(mctx.ModuleName() + " is targetable\n")
 	var src *TargetSpecific
-	if tgtType == tgtTypeHost {
+	if tgt == tgtTypeHost {
 		src = &build.Host
-	} else if tgtType == tgtTypeTarget {
+	} else if tgt == tgtTypeTarget {
 		src = &build.Target
 	} else {
 		// This is fine - it can happen if the target is the default

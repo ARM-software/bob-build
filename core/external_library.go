@@ -36,9 +36,9 @@ func (m *externalLib) shortName() string    { return m.Name() }
 func (m *externalLib) outputs(g generatorBackend) []string { return []string{} }
 
 // Implement the splittable interface so "normal" libraries can depend on external ones.
-func (m *externalLib) supportedVariants() []string          { return []string{tgtTypeHost, tgtTypeTarget} }
+func (m *externalLib) supportedVariants() []tgtType         { return []tgtType{tgtTypeHost, tgtTypeTarget} }
 func (m *externalLib) disable()                             {}
-func (m *externalLib) setVariant(string)                    {}
+func (m *externalLib) setVariant(tgtType)                   {}
 func (m *externalLib) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
 // External libraries have no actions - they are already built.
