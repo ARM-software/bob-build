@@ -31,10 +31,12 @@ import (
 	"github.com/ARM-software/bob-build/utils"
 )
 
+type binType int
+
 const (
-	binTypeStatic     = iota
-	binTypeShared     = iota
-	binTypeExecutable = iota
+	binTypeStatic     binType = binType(0)
+	binTypeShared     binType = binType(1)
+	binTypeExecutable binType = binType(2)
 )
 
 type androidMkGenerator struct {
@@ -117,7 +119,7 @@ var (
 		"EXECUTABLES",
 	}
 
-	rulePrefix = map[string]string{
+	rulePrefix = map[tgtType]string{
 		tgtTypeTarget: "BUILD_",
 		tgtTypeHost:   "BUILD_HOST_",
 	}
@@ -141,14 +143,14 @@ func specifyCompilerStandard(varname string, flags []string) string {
 	return line
 }
 
-func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blueprint.ModuleContext) {
+func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx blueprint.ModuleContext) {
 	if m.Properties.Build_wrapper != nil {
 		panic(errors.New("build_wrapper not supported on Android"))
 	}
 
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 	sb.WriteString("LOCAL_MODULE:=" + m.altName() + "\n")
-	sb.WriteString("LOCAL_MODULE_CLASS:=" + classes[binType] + "\n\n")
+	sb.WriteString("LOCAL_MODULE_CLASS:=" + classes[bt] + "\n\n")
 
 	// The order we want is  local_include_dirs, export_local_include_dirs,
 	//                       include_dirs, export_include_dirs
@@ -282,8 +284,9 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 	// also do multilib target binaries to allow creation of test
 	// binaries in both modes.
 	// All test binaries will be installable.
-	isMultiLib := (m.Properties.TargetType == tgtTypeTarget) &&
-		((binType == binTypeShared) || (binType == binTypeStatic) || ok)
+	tgt := m.Properties.TargetType
+	isMultiLib := (tgt == tgtTypeTarget) &&
+		((bt == binTypeShared) || (bt == binTypeStatic) || ok)
 
 	if ok {
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + m.Properties.Relative_install_path + "\n")
@@ -308,7 +311,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 			sb.WriteString("LOCAL_POST_INSTALL_CMD=" + cmd + "\n")
 		}
 
-		if binType == binTypeExecutable {
+		if bt == binTypeExecutable {
 			if isMultiLib {
 				// For executables we need to be clear about where to
 				// install both 32 and 64 bit versions of the
@@ -321,7 +324,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 				// specify LOCAL_UNSTRIPPED_PATH too
 				sb.WriteString("LOCAL_MODULE_PATH:=" + installGroupPath + "\n")
 
-				if m.Properties.TargetType == tgtTypeTarget {
+				if tgt == tgtTypeTarget {
 					// Unstripped executables only generated for target
 					sb.WriteString("LOCAL_UNSTRIPPED_PATH:=$(TARGET_OUT_EXECUTABLES_UNSTRIPPED)\n")
 				}
@@ -347,7 +350,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 		// location, but cannot be uninstallable, or the multilib paths
 		// will conflict, resulting in the same location being used for
 		// both 32 and 64-bit versions.
-		if m.Properties.TargetType == tgtTypeTarget && binType != binTypeShared {
+		if tgt == tgtTypeTarget && bt != binTypeShared {
 			sb.WriteString("LOCAL_UNINSTALLABLE_MODULE:=true\n")
 		}
 	}
@@ -358,12 +361,12 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, binType int, ctx blue
 	}
 	sb.WriteString("LOCAL_LDFLAGS:=" + strings.Join(utils.Filter(m.Properties.Ldflags, moduleLinkFlags), " ") + copydtneeded + "\n")
 
-	if m.Properties.TargetType == tgtTypeTarget {
+	if tgt == tgtTypeTarget {
 		sb.WriteString("LOCAL_LDLIBS := " + strings.Join(m.Properties.Ldlibs, " ") + "\n")
 	} else {
 		sb.WriteString("LOCAL_LDLIBS_$(HOST_OS) := " + strings.Join(m.Properties.Ldlibs, " ") + "\n")
 	}
-	sb.WriteString("\ninclude $(" + rulePrefix[m.Properties.TargetType] + ruleSuffix[binType] + ")\n")
+	sb.WriteString("\ninclude $(" + rulePrefix[tgt] + ruleSuffix[bt] + ")\n")
 
 	androidMkWriteString(ctx, m.altShortName(), sb)
 }
@@ -864,8 +867,8 @@ func (g *androidMkGenerator) sharedLibOutputDir(m *sharedLibrary) string {
 	return g.moduleOutputDir(m.altName())
 }
 
-func (g *androidMkGenerator) sharedLibsDir(tgtType string) string {
-	if tgtType != tgtTypeHost {
+func (g *androidMkGenerator) sharedLibsDir(tgt tgtType) string {
+	if tgt != tgtTypeHost {
 		return "$(TARGET_OUT_SHARED_LIBRARIES)"
 	}
 	return "$(HOST_OUT_SHARED_LIBRARIES)"

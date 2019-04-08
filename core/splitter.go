@@ -35,13 +35,13 @@ type SplittableProps struct {
 // the different variants by the splitterMutator
 type splittable interface {
 	// Retrieve all the different variations to create
-	supportedVariants() []string
+	supportedVariants() []tgtType
 
 	// Disables the module is no variations supported
 	disable()
 
 	// Set the particular variant
-	setVariant(string)
+	setVariant(tgtType)
 
 	// Get the properties related to which variants are available
 	getSplittableProps() *SplittableProps
@@ -104,10 +104,18 @@ func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
 	})
 }
 
+func tgtToString(tgts []tgtType) []string {
+	variants := make([]string, len(tgts))
+	for i, v := range tgts {
+		variants[i] = string(v)
+	}
+	return variants
+}
+
 // Creates all the supported variants of splittable modules, including defaults.
 func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
 	if s, ok := mctx.Module().(splittable); ok {
-		variants := s.supportedVariants()
+		variants := tgtToString(s.supportedVariants())
 		if len(variants) == 0 {
 			s.disable()
 		} else {
@@ -117,7 +125,7 @@ func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
 				if !ok {
 					panic(errors.New("newly created variation is not splittable - should not happen"))
 				}
-				newsplit.setVariant(v)
+				newsplit.setVariant(tgtType(v))
 			}
 		}
 	}

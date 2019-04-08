@@ -27,15 +27,15 @@ type defaults struct {
 	library
 }
 
-func (m *defaults) supportedVariants() []string {
-	return []string{tgtTypeHost, tgtTypeTarget}
+func (m *defaults) supportedVariants() []tgtType {
+	return []tgtType{tgtTypeHost, tgtTypeTarget}
 }
 
 func (m *defaults) disable() {
 	panic("disable() called on Default")
 }
 
-func (m *defaults) setVariant(variant string) {
+func (m *defaults) setVariant(variant tgtType) {
 	m.library.setVariant(variant)
 }
 
@@ -67,10 +67,10 @@ func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
-			tgtType := gsc.Properties.Target
-			if !(tgtType == tgtTypeHost || tgtType == tgtTypeTarget) {
+			tgt := gsc.Properties.Target
+			if !(tgt == tgtTypeHost || tgt == tgtTypeTarget) {
 				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
-					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgtType))
+					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
 			}
 			mctx.AddDependency(mctx.Module(), defaultDepTag, gsc.Properties.Flag_defaults...)
 		}

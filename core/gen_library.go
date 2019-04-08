@@ -72,8 +72,8 @@ func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext) []inout {
 
 //// Support Splittable
 
-func (m *generateLibrary) supportedVariants() []string {
-	return []string{m.generateCommon.Properties.Target}
+func (m *generateLibrary) supportedVariants() []tgtType {
+	return []tgtType{m.generateCommon.Properties.Target}
 }
 
 func (m *generateLibrary) disable() {
@@ -81,7 +81,7 @@ func (m *generateLibrary) disable() {
 	panic("disable() called on GenerateLibrary")
 }
 
-func (m *generateLibrary) setVariant(variant string) {
+func (m *generateLibrary) setVariant(variant tgtType) {
 	// No need to actually track this, as a single target is always supported
 }
 

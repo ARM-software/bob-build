@@ -109,7 +109,7 @@ type GenerateProps struct {
 	Flag_defaults []string
 
 	// The target type - must be either "host" or "target"
-	Target string
+	Target tgtType
 }
 
 type generateCommon struct {
@@ -175,7 +175,7 @@ func (m *generateCommon) features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *generateCommon) getTarget() string {
+func (m *generateCommon) getTarget() tgtType {
 	return m.Properties.Target
 }
 
@@ -187,15 +187,15 @@ func (m *generateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
 }
 
-func (m *generateCommon) supportedVariants() []string {
-	return []string{m.Properties.Target}
+func (m *generateCommon) supportedVariants() []tgtType {
+	return []tgtType{m.Properties.Target}
 }
 
 func (m *generateCommon) disable() {
 	*m.Properties.Enabled = false
 }
 
-func (m *generateCommon) setVariant(variant string) {
+func (m *generateCommon) setVariant(variant tgtType) {
 	if variant != m.Properties.Target {
 		panic(fmt.Errorf("Variant mismatch: %s != %s", variant, m.Properties.Target))
 	}
@@ -271,10 +271,10 @@ func (m *generateSource) topLevelProperties() []interface{} {
 
 // Returns the tool binary for a generateSource module. This is different from the "tool"
 // in that it used to depend on a bob_binary module
-func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, string) {
+func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtType) {
 	g := getBackend(ctx)
 	toolBin := ""
-	toolTarget := ""
+	toolTarget := tgtTypeUnknown
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
@@ -316,7 +316,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 	return
 }
 
-func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, string) {
+func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, tgtType) {
 	g := getBackend(ctx)
 
 	tc := g.getToolchain(m.Properties.Target)

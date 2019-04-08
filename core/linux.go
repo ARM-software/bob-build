@@ -93,19 +93,19 @@ type singleOutputModule interface {
 
 type targetableModule interface {
 	singleOutputModule
-	getTarget() string
+	getTarget() tgtType
 }
 
 // Where to put generated shared libraries to simplify linking
 // As long as the module is targetable, we can infer the library path
 func getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", t.getTarget(), "shared", t.outputName()+".so")
+	return filepath.Join("${BuildDir}", string(t.getTarget()), "shared", t.outputName()+".so")
 }
 
 // Where to put generated binaries in order to make sure generated binaries
 // are available in the same directory as compiled binaries
 func getBinaryPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", t.getTarget(), "executable", t.outputName())
+	return filepath.Join("${BuildDir}", string(t.getTarget()), "executable", t.outputName())
 }
 
 // Generate the build actions for a generateSource module and populates the outputs.
@@ -115,7 +115,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 	ldLibraryPath := ""
 	if _, ok := args["host_bin"]; ok {
-		ldLibraryPath += "LD_LIBRARY_PATH=" + filepath.Join("${BuildDir}", hostTarget, "shared") + ":$$LD_LIBRARY_PATH "
+		ldLibraryPath += "LD_LIBRARY_PATH=" + filepath.Join("${BuildDir}", string(hostTarget), "shared") + ":$$LD_LIBRARY_PATH "
 	}
 	utils.StripUnusedArgs(args, cmd)
 	args["depfile"] = ""
@@ -248,7 +248,7 @@ var cxxRule = pctx.StaticRule("cxx",
 	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper")
 
 func (l *library) ObjDir() string {
-	return filepath.Join("${BuildDir}", l.Properties.TargetType, "objects", l.Name()) + string(os.PathSeparator)
+	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.Name()) + string(os.PathSeparator)
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
@@ -401,7 +401,7 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 }
 
 func (g *linuxGenerator) staticLibOutputDir(m *staticLibrary) string {
-	return filepath.Join("${BuildDir}", m.Properties.TargetType, "static")
+	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "static")
 }
 
 // The rule for building a static library
@@ -518,15 +518,15 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 }
 
 func (l *library) getSharedLibraryDir() string {
-	return filepath.Join("${BuildDir}", l.Properties.TargetType, "shared")
+	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "shared")
 }
 
 func (g *linuxGenerator) sharedLibOutputDir(m *sharedLibrary) string {
 	return m.library.getSharedLibraryDir()
 }
 
-func (g *linuxGenerator) sharedLibsDir(targetType string) string {
-	return filepath.Join("${BuildDir}", targetType, "shared")
+func (g *linuxGenerator) sharedLibsDir(tgt tgtType) string {
+	return filepath.Join("${BuildDir}", string(tgt), "shared")
 }
 
 func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]string {
@@ -655,7 +655,7 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 }
 
 func (g *linuxGenerator) binaryOutputDir(m *binary) string {
-	return filepath.Join("${BuildDir}", m.Properties.TargetType, "executable")
+	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "executable")
 }
 
 var executableRule = pctx.StaticRule("executable",
