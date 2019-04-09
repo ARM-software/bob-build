@@ -82,6 +82,13 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_args, extra_cflag
             logger.error(msg.format(built_file, output_dir, e))
             sys.exit(1)
 
+
+def get_tool_abspath(tool):
+    if tool and os.path.dirname(tool):
+        return os.path.abspath(tool)
+    return None
+
+
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
@@ -103,8 +110,14 @@ if __name__ == "__main__":
     group = parser.add_argument_group("Kernel options")
     group.add_argument("--kernel", "-k", metavar="KDIR", required=True,
                        help="Kernel directory")
-    group.add_argument("--cross-compile", "-c", default=None,
+    group.add_argument("--cc", default=None,
+                       help="Target C compiler")
+    group.add_argument("--hostcc", default=None,
+                       help="Host C compiler")
+    group.add_argument("--cross-compile", default=None,
                        help="Kernel CROSS_COMPILE")
+    group.add_argument("--clang-triple", default=None,
+                       help="Kernel CLANG_TRIPLE")
     group.add_argument("--kbuild-options", nargs="+", default=[],
                        help="Kernel config options to enable, that get added to EXTRA_CFLAGS too")
     group.add_argument("--extra-cflags", default="",
@@ -127,11 +140,11 @@ if __name__ == "__main__":
     abs_kdir = os.path.abspath(args.kernel)
     search_path = [os.path.abspath(d) for d in args.include_dir]
 
-    # Don't abspath cross_compile if it's just a prefix for something already
+    # Don't abspath toolset if it's just a prefix for something already
     # inside $PATH (i.e. it doesn't contain a directory part):
-    cross_compile = args.cross_compile
-    if os.path.dirname(args.cross_compile):
-        cross_compile = os.path.abspath(cross_compile)
+    cross_compile = get_tool_abspath(args.cross_compile)
+    target_cc = get_tool_abspath(args.cc)
+    host_cc = get_tool_abspath(args.hostcc)
 
     # Prepend EXTRA_CFLAGS with modified include paths
     includes = ["-I" + s for s in search_path]
@@ -167,8 +180,16 @@ if __name__ == "__main__":
     make_args = args.make_args
     make_args.extend(args.kbuild_options)
     make_args.append("ARCH="+arch)
+
+    # CROSS_COMPILE is still required with CC=clang
     if cross_compile:
         make_args.append("CROSS_COMPILE="+cross_compile)
+    if target_cc:
+        make_args.append("CC="+target_cc)
+    if host_cc:
+        make_args.append("HOSTCC="+host_cc)
+    if args.clang_triple:
+        make_args.append("CLANG_TRIPLE="+args.clang_triple)
     if args.extra_symbols is not None:
         extra_symbols = [os.path.abspath(d) for d in args.extra_symbols]
         make_args.append("KBUILD_EXTRA_SYMBOLS="+" ".join(extra_symbols))
