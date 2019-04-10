@@ -18,6 +18,9 @@ result_ok() {
 }
 
 result_skip() {
+    local MSG=$1
+
+    echo -n "$MSG"
     echo -e "\e[33;1mSKIP\e[0m"
 }
 
@@ -32,8 +35,6 @@ check_result() {
     echo -n "$MSG"
     if [ $RESULT -eq 0 ]; then
         result_ok
-    elif [ $RESULT -eq 100 ]; then
-        result_skip
     else
         STATUS_CODE=1
         result_fail

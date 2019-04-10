@@ -27,6 +27,14 @@ source "${BOOTSTRAP}"
 # Switch to the working directory
 cd "${WORKDIR}"
 
+# Get Bob bootstrap version
+source "${BOB_DIR}/bob.bootstrap.version"
+
+if [[ "${BOB_BOOTSTRAP_VERSION}" != "${BOB_VERSION}" ]]; then
+    echo "This build directory must be re-bootstrapped. Bob has changed since this output directory was bootstrapped." >&2
+    exit 1
+fi
+
 # Convert Mconfig into Go-readable JSON. Because this is run at every rebuild
 # (rather than every bootstrap or re-configuration), this also adds a hash of
 # the environment into the config, so that Bob is rerun and the Ninja is
