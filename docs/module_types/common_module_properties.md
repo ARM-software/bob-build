@@ -212,8 +212,12 @@ to modules linking with the current library.
 
 ----
 ### **bob_module.build_wrapper** (optional)
-Wrapper for all build commands (object file
-compilation **and** linking). This can be used, for example, to enable `ccache`:
+Wrapper for all build commands (object file compilation **and**
+linking). If the first word looks like a relative path (it doesn't
+start with '/' but contains '/' characters), it is assumed that the
+script is in the project directory.
+
+This can be used, for example, to enable `ccache`:
 
 ```bp
 bob_defaults {

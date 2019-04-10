@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -395,6 +395,17 @@ func pathMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
+type buildWrapperProcessor interface {
+	processBuildWrapper(blueprint.BaseModuleContext)
+}
+
+// Prefixes build_wrapper with source path if necessary
+func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
+	if p, ok := mctx.Module().(buildWrapperProcessor); ok {
+		p.processBuildWrapper(mctx)
+	}
+}
+
 func collectReexportDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
@@ -564,6 +575,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
+	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()

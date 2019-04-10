@@ -170,6 +170,28 @@ type BuildProps struct {
 	TargetType tgtType `blueprint:"mutated"`
 }
 
+func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
+	if b.Build_wrapper != nil {
+		// The build wrapper may be a local tool, in which case we
+		// need to prefix it with ${SrcDir}. It can also be a tool in
+		// PATH like ccache.
+		//
+		// We want to avoid doing this repeatedly, so try do it in an
+		// early mutator
+		*b.Build_wrapper = strings.TrimSpace(*b.Build_wrapper)
+		firstWord := strings.SplitN(*b.Build_wrapper, " ", 1)[0]
+
+		// If the first character is '/' this is an absolute path, so no need to do anything
+		if firstWord[0] != '/' {
+			// Otherwise if the first word contains '/' this is a local path
+			if strings.ContainsAny(firstWord, "/") {
+				prefix := getBackend(ctx).sourcePrefix() + "/"
+				*b.Build_wrapper = prefix + *b.Build_wrapper
+			}
+		}
+	}
+}
+
 // A Build represents the whole tree of properties for a 'library' object,
 // including its host and target-specific properties
 type Build struct {
@@ -407,6 +429,12 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 
 func (l *library) processPaths(ctx blueprint.BaseModuleContext) {
 	l.Properties.Build.processPaths(ctx)
+}
+
+func (l *library) processBuildWrapper(ctx blueprint.BaseModuleContext) {
+	l.Properties.Build.BuildProps.processBuildWrapper(ctx)
+	l.Properties.Build.Host.processBuildWrapper(ctx)
+	l.Properties.Build.Target.processBuildWrapper(ctx)
 }
 
 func getLibrary(i interface{}) (*library, bool) {
