@@ -81,6 +81,8 @@ BOB_DIR_ABS="$(bob_realpath "${SCRIPT_DIR}")"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
 
+source "${BOB_DIR}/bob.bootstrap.version"
+
 # Bootstrap blueprint.
 "${BLUEPRINTDIR}/bootstrap.bash"
 
@@ -103,6 +105,7 @@ sed -e "s|@@WorkDir@@|${WORKDIR}|" \
     -e "s|@@ConfigName@@|${CONFIGNAME}|" \
     -e "s|@@BobConfigOpts@@|${BOB_CONFIG_OPTS}|" \
     -e "s|@@BobConfigPluginOpts@@|${BOB_CONFIG_PLUGIN_OPTS}|" \
+    -e "s|@@BobBootstrapVersion@@|${BOB_VERSION}|" \
     "${BOB_DIR}/bob.bootstrap.in" > "${BUILDDIR}/.bob.bootstrap.tmp"
 rsync -c "${BUILDDIR}/.bob.bootstrap.tmp" "${BUILDDIR}/.bob.bootstrap"
 

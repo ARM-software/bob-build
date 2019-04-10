@@ -1,5 +1,8 @@
 language: go
 
+git:
+  depth: false
+
 matrix:
   include:
   - go: "1.10"
@@ -35,6 +38,9 @@ before_script:
   - export BOB_ROOT=$(pwd)
   - export BOB_WORKSPACE=~/bob_workspace
   - export GOPATH=${BOB_WORKSPACE}
+  - export TRAVIS_COMMIT
+  - export TRAVIS_COMMIT_RANGE
+  - export TRAVIS_BUILD_DIR
 
 script:
   - bash .travis/checks/run-checks.sh
