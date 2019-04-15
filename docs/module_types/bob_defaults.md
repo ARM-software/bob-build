@@ -78,9 +78,12 @@ bob_defaults {
     kbuild_options: ["CONFIG_MY_OPTION=y"],
     extra_symbols: ["bob_kernel_module.name"],
     make_args: ["--ignore-errors"],
-    kernel_dir: "/kernes/linux/",
-    kernel_compiler: "prefix",
-    // ^^ kernel module related stuff
+    kernel_dir: "/kernel/linux/",
+    kernel_cross_compile: "prefix",
+    kernel_cc: "target",
+    kernel_hostcc: "host",
+    kernel_clang_triple: "triple",
+    // ^^ kernel module building related stuff
 
     install_group: "bob_install_group.name",
     install_deps: ["bob_resource.name"],

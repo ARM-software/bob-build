@@ -165,7 +165,13 @@ type BuildProps struct {
 	// Kernel directory location
 	Kernel_dir string
 	// Compiler prefix for kernel build
-	Kernel_compiler string
+	Kernel_cross_compile string
+	// Kernel target compiler
+	Kernel_cc string
+	// Kernel host compiler
+	Kernel_hostcc string
+	// Target triple when using clang as the compiler
+	Kernel_clang_triple string
 
 	TargetType tgtType `blueprint:"mutated"`
 }
