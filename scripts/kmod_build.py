@@ -84,9 +84,13 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_args, extra_cflag
 
 
 def get_tool_abspath(tool):
+    """Get absolute path to tool if argument contains a path otherwise assume it's a $PATH tool
+    :param tool: path to tool or $PATH prefix
+    :return: Absolute path or tool
+    """
     if tool and os.path.dirname(tool):
         return os.path.abspath(tool)
-    return None
+    return tool
 
 
 if __name__ == "__main__":
@@ -140,8 +144,6 @@ if __name__ == "__main__":
     abs_kdir = os.path.abspath(args.kernel)
     search_path = [os.path.abspath(d) for d in args.include_dir]
 
-    # Don't abspath toolset if it's just a prefix for something already
-    # inside $PATH (i.e. it doesn't contain a directory part):
     cross_compile = get_tool_abspath(args.cross_compile)
     target_cc = get_tool_abspath(args.cc)
     host_cc = get_tool_abspath(args.hostcc)

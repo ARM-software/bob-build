@@ -50,7 +50,10 @@ bob_kernel_module {
     extra_symbols: ["bob_kernel_module.name"],
     make_args: ["SOME_MAKE_VARIABLE=3"],
     kernel_dir: "{{.kernel_dir}}",
-    kernel_compiler: "{{.kernel_prefix}}",
+    kernel_cross_compile: "{{.kernel_prefix}}",
+    kernel_cc: "{{.kernel_cc}}",
+    kernel_hostcc: "{{.kernel_hostcc}}",
+    kernel_clang_triple: "{{.kernel_clang_triple}}",
 
     install_group: "bob_install_group.name",
     install_deps: ["bob_resource.name"],
@@ -82,5 +85,17 @@ Arguments to pass to kernel make invocation.
 Kernel directory location.
 
 ----
-### **bob_kernel_module.kernel_compiler** (optional)
+### **bob_kernel_module.kernel_cross_compile** (optional)
 Compiler prefix for kernel build.
+
+----
+### **bob_kernel_module.kernel_cc** (optional)
+Kernel target compiler.
+
+----
+### **bob_kernel_module.kernel_hostcc** (optional)
+Kernel host compiler.
+
+----
+### **bob_kernel_module.kernel_clang_triple** (optional)
+Target triple when using clang as the compiler.

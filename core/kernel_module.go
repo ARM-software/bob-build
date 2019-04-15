@@ -118,7 +118,6 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 	var extraIncludePaths []string
 
 	g := getBackend(ctx)
-	props := getConfig(ctx).Properties
 
 	extraCflags := m.build().BuildProps.Cflags
 
@@ -140,21 +139,19 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 		kbuildOptions = "--kbuild-options " + strings.Join(m.build().Kbuild_options, " ")
 	}
 
-	hostToolchain := ""
-	if props.GetBool("host_toolchain_clang") {
-		tc := g.getToolchain(tgtTypeHost)
-		tool, _ := tc.getCCompiler()
-		hostToolchain = "--hostcc " + tool
+	hostToolchain := m.Properties.Build.Kernel_hostcc
+	if hostToolchain != "" {
+		hostToolchain = "--hostcc " + hostToolchain
 	}
 
-	clangTripleParam := ""
-	kernelToolchainParam := props.GetString("kernel_cc")
-	if kernelToolchainParam != "" {
-		kernelToolchainParam = "--cc " + kernelToolchainParam
+	kernelToolchain := m.Properties.Build.Kernel_cc
+	if kernelToolchain != "" {
+		kernelToolchain = "--cc " + kernelToolchain
 	}
-	if strings.Contains(kernelToolchainParam, "clang") {
-		// Clang Triple parameter is only being set when kernel_cc reports clang as a kernel toolset
-		clangTripleParam = "--clang-triple " + props.GetString("kernel_clang_triple")
+
+	clangTriple := m.Properties.Build.Kernel_clang_triple
+	if clangTriple != "" {
+		clangTriple = "--clang-triple " + clangTriple
 	}
 
 	return map[string]string{
@@ -163,13 +160,13 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 		"extra_cflags":         strings.Join(extraCflags, " "),
 		"kbuild_extra_symbols": extraSymbols,
 		"kernel_dir":           kdir,
-		"kernel_compiler":      m.Properties.Build.Kernel_compiler,
+		"kernel_cross_compile": m.Properties.Build.Kernel_cross_compile,
 		"kbuild_options":       kbuildOptions,
 		"make_args":            strings.Join(m.Properties.Build.Make_args, " "),
 		"output_module_dir":    filepath.Join(m.outputDir(g), ctx.ModuleDir()),
-		"cc_flag":              kernelToolchainParam,
+		"cc_flag":              kernelToolchain,
 		"hostcc_flag":          hostToolchain,
-		"clang_triple_flag":    clangTripleParam,
+		"clang_triple_flag":    clangTriple,
 	}
 }
 
