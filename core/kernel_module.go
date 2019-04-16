@@ -121,8 +121,13 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 
 	extraCflags := m.build().BuildProps.Cflags
 
-	for _, includeDir := range m.build().BuildProps.Include_dirs {
+	for _, includeDir := range m.build().BuildProps.Local_include_dirs {
 		includeDir = "-I" + filepath.Join(g.sourcePrefix(), includeDir)
+		extraIncludePaths = append(extraIncludePaths, includeDir)
+	}
+
+	for _, includeDir := range m.build().BuildProps.Include_dirs {
+		includeDir = "-I" + includeDir
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 

@@ -187,28 +187,27 @@ Value to use on Android for `LOCAL_MODULE_OWNER`
 
 ----
 ### **bob_module.include_dirs** (optional)
-The list of include dirs to use that is relative
-to the source directory.
+A list of include directories to use. These are expected to be system
+headers, and will usually be an absolute path. On Android these can be
+relative to `$ANDROID_TOP`.
 
 ----
 ### **bob_module.local_include_dirs** (optional)
-The list of include dirs to use that is relative to the
-build.bp file.
-
-Include directories are added with the `local_include_dirs`
-parameter. The paths added are relative to the directory
-of the `build.bp` file. This can be used for generated headers
-or if there are system headers not on the normal include path.
-
-----
-### **bob_module.export_local_include_dirs** (optional)
-Include dirs (relative to module directory) to be
-exported to modules linking with the current library.
+A list of include directories to use. These are relative to the
+`build.bp` containing the module definition, and expected to be within
+the source heirarchy.
 
 ----
 ### **bob_module.export_include_dirs** (optional)
-Include dirs (path relative to root) to be exported
-to modules linking with the current library.
+A list of include directories, similar to `include_dirs`. These
+directories also get added to the include paths of any module that
+links to the current library.
+
+----
+### **bob_module.export_local_include_dirs** (optional)
+A list of include directories to use, similar to
+`local_include_dirs`. These directories also get added to the include
+paths of any module that links to the current library.
 
 ----
 ### **bob_module.build_wrapper** (optional)
