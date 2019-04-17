@@ -268,11 +268,12 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 
 type toolchainClangCommon struct {
 	// Options read from the config:
-	clangBinary   string
-	clangxxBinary string
-	prefix        string
-	useGnuLibs    bool
-	useGnuStl     bool
+	clangBinary    string
+	clangxxBinary  string
+	prefix         string
+	useGnuLibs     bool
+	useGnuStl      bool
+	useGnuBinutils bool
 
 	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
 	// headers if required
@@ -320,7 +321,10 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgt tgtType) (
 	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
 	tc.useGnuLibs = props.GetBool(string(tgt) + "_clang_use_gnu_libs")
 	tc.useGnuStl = props.GetBool(string(tgt) + "_clang_use_gnu_stl")
+	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")
 	tc.gnu = gnu
+
+	binDirs := []string{}
 
 	if tc.useGnuLibs || tc.useGnuStl {
 		// Tell Clang where the GNU toolchain is installed, so it can use its
@@ -329,17 +333,18 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgt tgtType) (
 		tc.cflags = append(tc.cflags, gnuInstallArg)
 		tc.ldflags = append(tc.ldflags, gnuInstallArg)
 	}
-	if !props.GetBool(string(tgt) + "_clang_standalone") {
+	if tc.useGnuLibs {
+		binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
+	}
+	if tc.useGnuBinutils {
 		// Add the GNU toolchain's binary directories to Clang's binary search
 		// path, so that Clang can find the correct linker. If the GNU toolchain
 		// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
 		// be in Clang's search path, so these arguments have no effect.
-		binDirs := tc.gnu.getBinDirs()
-		if tc.useGnuLibs {
-			binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
-		}
-		tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
+		binDirs = append(binDirs, tc.gnu.getBinDirs()...)
 	}
+
+	tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
 
 	return
 }
