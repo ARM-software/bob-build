@@ -212,20 +212,18 @@ config TARGET_CLANG_USE_GNU_STL
 	  Detect the location of the configured GNU toolchain's
 	  STL implementation, and pass this to Clang.
 
-config HOST_CLANG_STANDALONE
-	bool "Host Clang standalone"
+config HOST_CLANG_USE_GNU_BINUTILS
+	bool "Pass the GNU toolchain's binutils location to Clang"
 	depends on HOST_TOOLCHAIN_CLANG
-	default y if ANDROID
+	default y if !ANDROID
 	help
-	  Clang has been configured so that it doesn't need to
-	  reference other toolchains to find things like startup
-	  libraries or the linker.
+	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
+	  search path, allowing it to use the linker and assembler.
 
-config TARGET_CLANG_STANDALONE
-	bool "Target Clang standalone"
+config TARGET_CLANG_USE_GNU_BINUTILS
+	bool "Pass the GNU toolchain's binutils location to Clang"
 	depends on TARGET_TOOLCHAIN_CLANG
-	default y if ANDROID
+	default y if !ANDROID
 	help
-	  Clang has been configured so that it doesn't need to
-	  reference other toolchains to find things like startup
-	  libraries or the linker.
+	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
+	  search path, allowing it to use the linker and assembler.
