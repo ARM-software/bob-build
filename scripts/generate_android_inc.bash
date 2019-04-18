@@ -19,9 +19,11 @@
 # using Android paths only.
 
 # This script is invoked by Android.mk in a $(shell) expression, so its
-# standard output is buffered. Swap stdout and stderr so that the output of
-# this is visible.
-exec 3>&2 2>&1 1>&3-
+# standard output is buffered. Create a new file descriptor, 9, which refers to
+# stdout, and is used to control the buffered output that Android.mk sees.
+# Redirect all other output (stdout *and* stderr) from this script to stderr,
+# so that it is seen by the user when running `make`.
+exec 9>&1 1>&2
 
 set -e
 trap 'echo "*** Unexpected error in $0 ***"' ERR
@@ -64,10 +66,10 @@ if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
     # To do that, call md5sum is output after the build of the Android file
     # has finished. This script would normally not be called manually, but
     # rather through Android.mk
-    md5sum "$BUILDDIR"/*.inc | md5sum - >&2
+    md5sum "$BUILDDIR"/*.inc | md5sum - >&9
 else
     echo "${BUILDDIR}/buildme and ${BUILDDIR}/${CONFIGNAME} don't exist!"
     exit 1
 fi
 
-echo "Success" >&2
+echo "Success" >&9
