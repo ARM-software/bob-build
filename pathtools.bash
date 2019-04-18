@@ -55,6 +55,8 @@ fi
 # This is a simple implementation. We rely on readlink to sort out symlink issues for us.
 # If there are fewer path elements in the absolute version, return that instead.
 function relative_path() {
+    [[ -e $1 ]] || { echo "relative_path: Source path '$1' does not exist" >&2; return 1; }
+    [[ -e $2 ]] || { echo "relative_path: Target path '$2' does not exist" >&2; return 1; }
     SRC_ABS=$(bob_realpath $1)
     TGT_ABS=$(bob_realpath $2)
 

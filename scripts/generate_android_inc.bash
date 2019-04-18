@@ -47,15 +47,24 @@ fi
 
 source "${BOB_DIR}/pathtools.bash"
 
-if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
+if ! [[ -x ${BUILDDIR}/buildme ]]; then
+    echo "${BUILDDIR}/buildme does not exist!"
+    exit 1
+elif ! [[ -f "${BUILDDIR}/${CONFIGNAME}" ]]; then
+    echo "${BUILDDIR}/${CONFIGNAME} does not exist!"
+    exit 1
+elif [[ -z $NINJA ]]; then
+    echo "\$NINJA not set!"
+    exit 1
+else
     # The Ninja path is relative to the root of the Android tree, but Bob is
     # run from the project directory.
     NINJA=`relative_path "${PATH_TO_PROJ}" "${NINJA}"`
 
-    cd "${PATH_TO_PROJ}"
-
     # Use the Go shipped with Android on P and later, where it's recent enough (>= 1.10).
-    [[ $PLATFORM_SDK_VERSION -ge 28 ]] && export GOROOT="${TOP}/prebuilts/go/linux-x86/"
+    [[ $PLATFORM_SDK_VERSION -ge 28 ]] && export GOROOT=`bob_realpath prebuilts/go/linux-x86/`
+
+    cd "${PATH_TO_PROJ}"
 
     "$BUILDDIR/buildme"
 
@@ -67,9 +76,6 @@ if [ -x "${BUILDDIR}/buildme" -a -f "${BUILDDIR}/${CONFIGNAME}" ] ; then
     # has finished. This script would normally not be called manually, but
     # rather through Android.mk
     md5sum "$BUILDDIR"/*.inc | md5sum - >&9
-else
-    echo "${BUILDDIR}/buildme and ${BUILDDIR}/${CONFIGNAME} don't exist!"
-    exit 1
 fi
 
 echo "Success" >&9
