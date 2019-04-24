@@ -143,8 +143,18 @@ func glob(ctx blueprint.ModuleContext, globs []string, excludes []string) []stri
 
 	for _, file := range globs {
 		if strings.ContainsAny(file, "*?[") {
+			// Globs need to be calculated relative to the source
+			// directory (not the working directory), so add it
+			// here, and remove it afterwards.
+			file = filepath.Join(srcdir, file)
 			matches, _ := ctx.GlobWithDeps(file, excludes)
-			files = append(files, matches...)
+			for _, match := range matches {
+				rel, err := filepath.Rel(srcdir, match)
+				if err != nil {
+					panic(err)
+				}
+				files = append(files, rel)
+			}
 		} else if !utils.Contains(excludes, file) {
 			files = append(files, file)
 		}

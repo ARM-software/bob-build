@@ -74,16 +74,19 @@ while true ; do
     esac
 done
 
-if [ -z "$OUT" ]; then
-    echo "Error: \$OUT not set: Did you run 'lunch'?"
-    exit 1
-fi
+[[ -n ${OUT} ]] || { echo "\$OUT is not set - did you run 'lunch'?"; exit 1; }
+[[ -n ${ANDROID_BUILD_TOP} ]] || { echo "\$ANDROID_BUILD_TOP is not set - did you run 'lunch'?"; exit 1; }
 
 # The tests need a symlink in the source directory to the parent bob
 # directory, as Blueprint won't accept ..
 create_link .. "${SCRIPT_DIR}/${BOB_DIR}"
 
-PROJ_DIR="$(dirname $0)"
+source "${SCRIPT_DIR}/${BOB_DIR}/pathtools.bash"
+
+PROJ_DIR=$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")
+
+# Change to the working directory
+cd "${ANDROID_BUILD_TOP}"
 
 ### Variables required for Bob and Android.mk bootstrap ###
 
