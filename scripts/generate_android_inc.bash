@@ -57,14 +57,8 @@ elif [[ -z $NINJA ]]; then
     echo "\$NINJA not set!"
     exit 1
 else
-    # The Ninja path is relative to the root of the Android tree, but Bob is
-    # run from the project directory.
-    NINJA=`relative_path "${PATH_TO_PROJ}" "${NINJA}"`
-
     # Use the Go shipped with Android on P and later, where it's recent enough (>= 1.10).
-    [[ $PLATFORM_SDK_VERSION -ge 28 ]] && export GOROOT=`bob_realpath prebuilts/go/linux-x86/`
-
-    cd "${PATH_TO_PROJ}"
+    [[ ${PLATFORM_SDK_VERSION} -ge 28 ]] && export GOROOT=prebuilts/go/linux-x86/
 
     "$BUILDDIR/buildme"
 

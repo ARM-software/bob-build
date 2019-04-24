@@ -924,7 +924,6 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 
 	args := m.generateKbuildArgs(ctx)
 	args["sources"] = "$(addprefix $(LOCAL_PATH)/,$(LOCAL_SRC_FILES))"
-	args["kmod_build"] = "$(LOCAL_PATH)/" + args["kmod_build"]
 	args["local_path"] = "$(LOCAL_PATH)"
 
 	// Create a target-specific variable declaration for each required parameter.
