@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .general import init_config, get_config, get_config_bool, \
-    get_config_int, get_config_string,  get_config_list, read_config, \
+from .general import init_config, format_dependency_list, get_config, \
+    get_config_bool, get_config_int, get_config_string, get_config_list, read_config, \
     set_config, can_enable, get_options_selecting, get_options_depending_on, \
     get_mconfig_dir

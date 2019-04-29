@@ -32,3 +32,6 @@ highlight.css
 
 # PyCharm
 .idea/
+
+# pytest
+.cache/

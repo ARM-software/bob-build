@@ -128,6 +128,33 @@ def dependency_list(depends):
 
     return [depends]
 
+
+def format_dependency_list(depends, skip_parens=False):
+    assert depends, "Empty dependency list"
+
+    OPERATOR_FORMAT_MAP = {
+        "and": "&&",
+        "or": "||",
+    }
+
+    if type(depends) == tuple:
+        if len(depends) == 3:
+            left = format_dependency_list(depends[1])
+            right = format_dependency_list(depends[2])
+
+            operator = OPERATOR_FORMAT_MAP.get(depends[0], depends[0])
+            expr = left + " " + operator + " " + right
+            return expr if skip_parens else "(" + expr + ")"
+        elif depends[0] == "not":
+            return "!" + format_dependency_list(depends[1])
+        elif depends[0] == 'string':
+            return '"' + depends[1] + '"'
+        elif depends[0] == 'number':
+            return str(depends[1])
+    elif type(depends) == str:
+        return depends + "[=" + str(get_config(depends)["value"]) + "]"
+
+
 def enforce_dependent_values(auto_fix=False):
     """
     Check that values are consistently set, specifically with respect
