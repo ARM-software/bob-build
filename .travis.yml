@@ -22,7 +22,10 @@ before_install:
   - export -f travis_time_start
   - export -f travis_time_finish
   - sudo apt-get update
-  - sudo apt-get install -y rsync python-ply python3 python3-ply
+  - |
+    sudo apt-get install -y rsync python3 \
+     python-ply  python-pytest  python-pytest-catchlog  python-mock  python-pytest-mock \
+    python3-ply python3-pytest python3-pytest-catchlog python3-mock python3-pytest-mock
 
 install:
   - bash .travis/install-ninja.sh

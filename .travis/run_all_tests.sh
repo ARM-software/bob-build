@@ -44,6 +44,15 @@ fold_start 'run_formatter_tests.sh'
 fold_end
 ####################
 
+####################
+fold_start 'pytest config_system'
+    # The newer command `pytest` is not available on Ubuntu 16.04, which the
+    # Travis environment uses, so invoke the older `py.test` here.
+    py.test-${PYTHON_SUFFIX} ${BOB_ROOT}/config_system
+    check_result $? "Check pytest config_system: "
+fold_end
+####################
+
 # This test is issued only if build test passed previously
 ####################
 

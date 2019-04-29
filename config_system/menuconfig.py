@@ -691,12 +691,12 @@ def main():
     issues = counter.errors() + counter.criticals()
     warnings = counter.warnings()
     if issues > 0:
-        sys.exit(2)
+        return 2
     elif warnings > 0:
-        sys.exit(1)
+        return 1
     else:
-        sys.exit(0)
+        return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

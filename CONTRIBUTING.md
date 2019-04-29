@@ -75,7 +75,16 @@ Bob has three kinds of tests:
 
   ```bash
   ./config_system/tests/run_tests.py
+  ./config_system/tests/run_tests_formatter.py
+  pytest ./config_system
   ```
+
+  These tests require the `pytest`, `pytest-catchlog`, `pytest-mock` and `mock`
+  Python packages.
+
+  Note: Do not run `pytest` in the top-level `bob-build` directory; it will
+  fail during test discovery because of the recursive symlink inside the main
+  Bob `tests` directory.
 
 If your contribution is a bugfix, please consider adding a new test to prevent
 future regressions.
