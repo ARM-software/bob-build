@@ -890,6 +890,17 @@ func (g *androidMkGenerator) includeDepFile(target string, depfile string) (text
 	return
 }
 
+const prebuiltMake = "prebuilts/build-tools/linux-x86/bin/make"
+
+var makeCommandArgs = getMakeCommandArgs()
+
+func getMakeCommandArgs() (args []string) {
+	if utils.IsExecutable(prebuiltMake) {
+		args = []string{"--make-command", prebuiltMake}
+	}
+	return
+}
+
 func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
@@ -925,6 +936,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	args := m.generateKbuildArgs(ctx)
 	args["sources"] = "$(addprefix $(LOCAL_PATH)/,$(LOCAL_SRC_FILES))"
 	args["local_path"] = "$(LOCAL_PATH)"
+	args["make_command_args"] = strings.Join(makeCommandArgs, " ")
 
 	// Create a target-specific variable declaration for each required parameter.
 	for _, key := range utils.SortedKeys(args) {
@@ -936,7 +948,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 		args["kmod_build"] + " " +
 		strings.Join(m.extraSymbolsFiles(ctx), " ") + "\n")
 	sb.WriteString("\tmkdir -p \"$(@D)\"\n")
-	cmd := "python $(kmod_build) --output $@ --depfile $@.d " +
+	cmd := "python $(kmod_build) --output $@ --depfile $@.d $(make_command_args) " +
 		"--common-root $(local_path) " +
 		"--module-dir \"$(output_module_dir)\" $(extra_includes) " +
 		"--sources $(sources) $(kbuild_extra_symbols) " +
