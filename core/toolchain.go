@@ -268,6 +268,8 @@ func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 
 type toolchainClangCommon struct {
 	// Options read from the config:
+	arBinary       string
+	asBinary       string
 	clangBinary    string
 	clangxxBinary  string
 	prefix         string
@@ -295,11 +297,17 @@ type toolchainClangCross struct {
 }
 
 func (tc toolchainClangCommon) getArchiver() (string, []string) {
-	return tc.gnu.getArchiver()
+	if tc.useGnuBinutils {
+		return tc.gnu.getArchiver()
+	}
+	return tc.arBinary, []string{}
 }
 
 func (tc toolchainClangCommon) getAssembler() (string, []string) {
-	return tc.gnu.getAssembler()
+	if tc.useGnuBinutils {
+		return tc.gnu.getAssembler()
+	}
+	return tc.asBinary, []string{}
 }
 
 func (tc toolchainClangCommon) getCCompiler() (string, []string) {
@@ -314,15 +322,28 @@ func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
 	return tc.clangxxBinary, tc.ldflags
 }
 
-func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgt tgtType) (tc toolchainClangCommon) {
+func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
+
+	// This assumes arBinary and asBinary are either in the path, or the same directory as clang.
+	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU toolchain.
+	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("as_binary")
+
 	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
 	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
 	tc.useGnuLibs = props.GetBool(string(tgt) + "_clang_use_gnu_libs")
 	tc.useGnuStl = props.GetBool(string(tgt) + "_clang_use_gnu_stl")
 	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")
-	tc.gnu = gnu
+
+	if tc.useGnuBinutils || tc.useGnuStl || tc.useGnuLibs {
+		if tgt == tgtTypeHost {
+			tc.gnu = newToolchainGnuNative(config)
+		} else {
+			tc.gnu = newToolchainGnuCross(config)
+		}
+	}
 
 	binDirs := []string{}
 
@@ -350,8 +371,7 @@ func newToolchainClangCommon(config *bobConfig, gnu toolchainGnu, tgt tgtType) (
 }
 
 func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
-	gnu := newToolchainGnuNative(config)
-	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu, tgtTypeHost)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeHost)
 
 	// Combine cflags and cxxflags once here, to avoid appending during
 	// every call to getCXXCompiler().
@@ -361,8 +381,7 @@ func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 }
 
 func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
-	gnu := newToolchainGnuCross(config)
-	tc.toolchainClangCommon = newToolchainClangCommon(config, gnu, tgtTypeTarget)
+	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeTarget)
 
 	props := config.Properties
 	tc.target = props.GetString("target_clang_triple")
