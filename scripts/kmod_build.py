@@ -55,12 +55,12 @@ def kbuild_to_cflag(option):
 
     return cflag
 
-def build_module(output_dir, module_ko, kdir, module_dir, make_args, extra_cflags):
+def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_args, extra_cflags):
     """
     Invoke an out of tree kernel build.
     """
     # Invoke the kernel build system
-    cmd = ["make", "-C", kdir, "M="+module_dir, "EXTRA_CFLAGS="+extra_cflags]
+    cmd = [make_command, "-C", kdir, "M="+module_dir, "EXTRA_CFLAGS="+extra_cflags]
     cmd.extend(make_args)
     try:
         subprocess.check_call(cmd)
@@ -110,6 +110,8 @@ if __name__ == "__main__":
                         help="Module output directory in kernel build")
     parser.add_argument("--jobs", "-j", metavar="N", default=None, type=int,
                         help="Allow N jobs at once")
+    parser.add_argument("--make-command", "-M", default="make",
+                        help="Path to `make` command")
 
     group = parser.add_argument_group("Kernel options")
     group.add_argument("--kernel", "-k", metavar="KDIR", required=True,
@@ -147,6 +149,7 @@ if __name__ == "__main__":
     cross_compile = get_tool_abspath(args.cross_compile)
     target_cc = get_tool_abspath(args.cc)
     host_cc = get_tool_abspath(args.hostcc)
+    make_command = get_tool_abspath(args.make_command)
 
     # Prepend EXTRA_CFLAGS with modified include paths
     includes = ["-I" + s for s in search_path]
@@ -208,4 +211,4 @@ if __name__ == "__main__":
 
     module_ko = os.path.basename(args.output)
     abs_module_dir = os.path.abspath(args.module_dir)
-    build_module(output_dir, module_ko, abs_kdir, abs_module_dir, make_args, extra_cflags)
+    build_module(output_dir, module_ko, abs_kdir, abs_module_dir, make_command, make_args, extra_cflags)
