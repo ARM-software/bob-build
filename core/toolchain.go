@@ -111,15 +111,14 @@ type toolchainGnu interface {
 }
 
 type toolchainGnuCommon struct {
-	arBinary       string
-	asBinary       string
-	gccBinary      string
-	gxxBinary      string
-	prefix         string
-	cflags         []string // Flags for both C and C++
-	ldflags        []string // Linker flags, including anything required for C++
-	binDir         string
-	checkedBinPath bool
+	arBinary  string
+	asBinary  string
+	gccBinary string
+	gxxBinary string
+	prefix    string
+	cflags    []string // Flags for both C and C++
+	ldflags   []string // Linker flags, including anything required for C++
+	binDir    string
 }
 
 type toolchainGnuNative struct {
@@ -150,20 +149,8 @@ func (tc toolchainGnuCommon) getLinker() (tool string, flags []string) {
 	return tc.gxxBinary, tc.ldflags
 }
 
-func (tc toolchainGnuCommon) getBinDir() string {
-	if !tc.checkedBinPath {
-		tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
-		tc.checkedBinPath = true
-	}
-	return tc.binDir
-}
-
-func (tc toolchainGnuCommon) getBinDirs() (dirs []string) {
-	binDir := tc.getBinDir()
-	if binDir != "" {
-		dirs = append(dirs, binDir)
-	}
-	return
+func (tc toolchainGnuCommon) getBinDirs() []string {
+	return []string{tc.binDir}
 }
 
 // The libstdc++ headers shipped with GCC toolchains are stored, relative to
@@ -205,7 +192,7 @@ func (tc toolchainGnuCommon) getVersion() string {
 }
 
 func (tc toolchainGnuCommon) getInstallDir() string {
-	return filepath.Dir(tc.getBinDir())
+	return filepath.Dir(tc.binDir)
 }
 
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
@@ -215,14 +202,11 @@ func (tc toolchainGnuCommon) getInstallDir() string {
 // binary search path.
 func (tc toolchainGnuCross) getBinDirs() []string {
 	dirs := tc.toolchainGnuCommon.getBinDirs()
-	installDir := tc.getInstallDir()
-	if installDir != "" {
-		triple := tc.getTargetTripleHeaderSubdir()
+	triple := tc.getTargetTripleHeaderSubdir()
 
-		unprefixedBinDir := filepath.Join(installDir, triple, "bin")
-		if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
-			dirs = append(dirs, unprefixedBinDir)
-		}
+	unprefixedBinDir := filepath.Join(tc.getInstallDir(), triple, "bin")
+	if fi, err := os.Stat(unprefixedBinDir); !os.IsNotExist(err) && fi.IsDir() {
+		dirs = append(dirs, unprefixedBinDir)
 	}
 	return dirs
 }
@@ -252,6 +236,7 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
+	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 	return
 }
 
