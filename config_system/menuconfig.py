@@ -517,7 +517,7 @@ def search(stdscr, window):
     prompt(stdscr, window, results)
 
 
-def main(stdscr):
+def gui_main(stdscr):
     (height, width) = stdscr.getmaxyx()
 
     init_attr()
@@ -618,7 +618,25 @@ def main(stdscr):
     return False
 
 
-if __name__ == "__main__":
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config", help="Path to the input configuration file (*.config)")
+    parser.add_argument("-o", "--output",
+                        help="Path to the output file")
+    parser.add_argument("-d", "--database", default="Mconfig",
+                        help="Path to the configuration database (Mconfig)")
+    parser.add_argument("--debug", action="store_true", dest="debug",
+                        help="Enable debug logging")
+    parser.add_argument("-p", "--plugin", action="append",
+                        help="Post configuration plugin to execute",
+                        default=[])
+    parser.add_argument("--ignore-missing", dest="ignore_missing", action="store_true", default=False,
+                        help="Ignore missing database files included with 'source'")
+    parser.add_argument("args", nargs="*")
+    return parser.parse_args()
+
+
+def main():
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.WARNING)
 
@@ -635,21 +653,7 @@ if __name__ == "__main__":
     counter = log_handlers.ErrorCounterHandler()
     root_logger.addHandler(counter)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config", help="Path to the input configuration file (*.config)")
-    parser.add_argument("-o", "--output",
-                        help="Path to the output file")
-    parser.add_argument("-d", "--database", default="Mconfig",
-                        help="Path to the configuration database (Mconfig)")
-    parser.add_argument("--debug", action="store_true", dest="debug",
-                        help="Enable debug logging")
-    parser.add_argument("-p", "--plugin", action="append",
-                        help="Post configuration plugin to execute",
-                        default=[])
-    parser.add_argument("--ignore-missing", dest="ignore_missing", action="store_true", default=False,
-                        help="Ignore missing database files included with 'source'")
-    parser.add_argument("args", nargs="*")
-    args = parser.parse_args()
+    args = parse_args()
 
     if args.output is None:
         args.output = args.config
@@ -660,7 +664,7 @@ if __name__ == "__main__":
 
     menustack.append(general.get_root_menu())
 
-    if curses.wrapper(main):
+    if curses.wrapper(gui_main):
         general.enforce_dependent_values()
         for plugin in args.plugin:
             path, name = os.path.split(plugin)
@@ -692,3 +696,7 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
