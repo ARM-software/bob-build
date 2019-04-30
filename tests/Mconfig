@@ -16,14 +16,23 @@
 ## Need to select the BUILDER_ for Bob
 choice
 	prompt "Builder"
-	default BUILDER_ANDROID if ANDROID
-	default BUILDER_LINUX
+	default BUILDER_ANDROID_MAKE if ANDROID
+	default BUILDER_NINJA
+	help
+	  Bob supports generating output for different build systems.
 
-config BUILDER_LINUX
-	bool "Linux"
+	  Select the desired build system.
 
-config BUILDER_ANDROID
-	bool "Android"
+config BUILDER_NINJA
+	bool "Ninja"
+	help
+	  Generate build.ninja output to use with ninja.
+
+config BUILDER_ANDROID_MAKE
+	bool "Android make"
+	depends on ANDROID
+	help
+	  Generate Android.mk fragments for use with Android make.
 
 endchoice
 

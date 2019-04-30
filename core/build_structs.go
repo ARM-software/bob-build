@@ -613,9 +613,9 @@ func Main() {
 		ctx.RegisterSingletonType("config_singleton", dependencySingletonFactory)
 	}
 
-	if config.Properties.GetBool("builder_linux") {
+	if config.Properties.GetBool("builder_ninja") {
 		config.Generator = &linuxGenerator{}
-	} else if config.Properties.GetBool("builder_android") {
+	} else if config.Properties.GetBool("builder_android_make") {
 		config.Generator = &androidMkGenerator{}
 	} else {
 		panic(errors.New("unknown builder backend"))
