@@ -23,13 +23,13 @@ import tempfile
 
 # Get file directory path
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-BOB_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
-sys.path.append(BOB_DIR)
+CFG_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(CFG_DIR)
+import mconfigfmt
 
 
 def run_test(name, expected_output):
     """ Test function to verify difference between two file contents"""
-    from config_system import mconfigfmt
 
     passed = True
 

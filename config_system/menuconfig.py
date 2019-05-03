@@ -23,10 +23,7 @@ import logging
 import os
 import sys
 
-# This script is actually within our package, so add the package to the python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config_system import general
-from config_system import log_handlers
+from config_system import general, log_handlers
 
 logger = logging.getLogger(__name__)
 

@@ -24,7 +24,17 @@ if os.path.isfile("build/make/core/envsetup.mk"):
     if os.path.isdir("external/ply/ply"):
         sys.path.insert(0, "external/ply/ply")
 
-from .general import init_config, format_dependency_list, get_config, \
-    get_config_bool, get_config_int, get_config_string, get_config_list, read_config, \
-    set_config, can_enable, get_options_selecting, get_options_depending_on, \
-    get_mconfig_dir
+from config_system.general import \
+    can_enable, \
+    format_dependency_list, \
+    get_config, \
+    get_config_bool, \
+    get_config_int, \
+    get_config_list, \
+    get_config_string, \
+    get_mconfig_dir, \
+    get_options_depending_on, \
+    get_options_selecting, \
+    init_config, \
+    read_config, \
+    set_config

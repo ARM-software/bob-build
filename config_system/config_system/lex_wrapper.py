@@ -15,7 +15,7 @@
 
 import os
 
-from . import lex
+from config_system import lex
 
 
 class LexWrapper:

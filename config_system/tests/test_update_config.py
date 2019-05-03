@@ -23,7 +23,7 @@ import sys
 import tempfile
 
 from config_system import general
-from config_system import update_config
+import update_config
 
 
 ignored_option_testdata = [
@@ -126,7 +126,7 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
     mconfig_fname = tmpdir.join("Mconfig")
     mconfig_fname.write(mconfig, "wt")
 
-    mocker.patch("config_system.update_config.parse_args", new=lambda: argparse.Namespace(
+    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
         output=str(config_fname),
         database=str(mconfig_fname),
         plugin=[],

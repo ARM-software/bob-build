@@ -192,9 +192,7 @@ def get_mconfig_dir():
     return __mconfig_dir
 
 def init_config(options_filename, ignore_missing=False):
-    from . import lex
-    from . import lex_wrapper
-    from . import syntax
+    from config_system import lex, lex_wrapper, syntax
 
     global __mconfig_dir
     global configuration
