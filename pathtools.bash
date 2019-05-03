@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,16 +61,18 @@ function relative_path() {
     TGT_ABS=$(bob_realpath $2)
 
     BACK=
-    # ${TGT_ABS#SRC_ABS} removes the SRC_ABS from TGT_ABS
-    if [ "${TGT_ABS#${SRC_ABS}}" != "${TGT_ABS}" ]; then
+    if [[ ${TGT_ABS} == ${SRC_ABS} ]]; then
+        RESULT=.
+
+    elif [[ ${TGT_ABS} == ${SRC_ABS}/* ]]; then
         # SRC_ABS is a parent of TGT_ABS
 
         RESULT=${TGT_ABS#${SRC_ABS}/}
 
-    elif [ "${SRC_ABS#${TGT_ABS}}" != "${SRC_ABS}" ]; then
+    elif [[ ${SRC_ABS} == ${TGT_ABS}/* ]]; then
         # TGT_ABS is a parent of SRC_ABS
 
-        while [ "${TGT_ABS}" != "${SRC_ABS}" ]; do
+        while [[ ${TGT_ABS} != ${SRC_ABS} ]]; do
             SRC_ABS=$(dirname ${SRC_ABS})
             BACK="../${BACK}"
         done
@@ -80,9 +82,7 @@ function relative_path() {
     else
         CMN_PFX=${SRC_ABS}
 
-        # ${TGT_ABS#CMN_PFX} removes the CMN_PFX from TGT_ABS
-        # When we have the correct prefix, the condition will fail
-        while [ "${TGT_ABS#${CMN_PFX}}" = "${TGT_ABS}" ]; do
+        while [[ ${TGT_ABS} != ${CMN_PFX}/* ]]; do
             CMN_PFX=$(dirname ${CMN_PFX})
             BACK="../${BACK}"
         done
