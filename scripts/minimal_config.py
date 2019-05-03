@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,10 @@ import sys
 import logging
 
 # The config system is in the directory above, so add it to the python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BOB_DIR = os.path.dirname(SCRIPT_DIR)
+CFG_DIR = os.path.join(BOB_DIR, "config_system")
+sys.path.append(CFG_DIR)
 import config_system
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,12 @@ from argparse import ArgumentParser
 
 # This script is actually within our package, so add the package to the python path
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-BOB_DIR = os.path.dirname(os.path.dirname(TEST_DIR))
-sys.path.append(BOB_DIR)
+CFG_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(CFG_DIR)
+from config_system import general
 
 
 def runtest(name):
-    from config_system import general
     print("Running %s" % name)
 
     tests_run, tests_failed = 0, 0

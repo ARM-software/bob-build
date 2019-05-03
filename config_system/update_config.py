@@ -22,12 +22,9 @@ import os
 import re
 import sys
 
-# This script is actually within our package, so add the package to the python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config_system.general import can_enable, enforce_dependent_values, \
-    get_config, init_config, read_config_file, read_profile_file, \
-    set_config_if_prompt, write_config, format_dependency_list
 from config_system import log_handlers
+from config_system.general import enforce_dependent_values, get_config, init_config, \
+    read_profile_file, set_config_if_prompt, write_config, can_enable, format_dependency_list
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.WARNING)

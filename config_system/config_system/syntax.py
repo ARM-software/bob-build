@@ -15,7 +15,7 @@
 
 import ply.yacc as yacc
 
-from .lex import tokens, report_error
+from config_system.lex import tokens, report_error
 
 
 class ParseError(Exception):
