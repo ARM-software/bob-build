@@ -9,6 +9,13 @@ fold_start 'setup_python'
 fold_end 'setup_python'
 
 ####################
+fold_start 'relative_path_tests.sh'
+    bash ${BOB_ROOT}/tests/relative_path_tests.sh
+    check_result $? "Check relative_path_tests: "
+fold_end
+####################
+
+####################
 fold_start 'run_build_tests.sh'
     bash ${BOB_ROOT}/.travis/run_build_tests.sh
     build_result=$?
