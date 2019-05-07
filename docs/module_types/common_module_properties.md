@@ -229,7 +229,10 @@ bob_defaults {
 
 ----
 ### **bob_module.build_wrapper_deps** (optional)
-Files that the wrapper depends on.
+Files that the build wrapper depends on.
+
+These dependenencies are relative to the base source directory (not
+the directory in which the module is defined).
 
 ----
 ### **bob_module.forwarding_shlib** (optional)

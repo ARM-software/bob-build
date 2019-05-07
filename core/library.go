@@ -192,10 +192,13 @@ func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 			// Otherwise if the first word contains '/' this is a local path
 			if strings.ContainsAny(firstWord, "/") {
 				prefix := getBackend(ctx).sourcePrefix() + "/"
-				*b.Build_wrapper = prefix + *b.Build_wrapper
+				*b.Build_wrapper = filepath.Join(prefix, *b.Build_wrapper)
 			}
 		}
 	}
+
+	// Build wrapper dependencies are relative to the root of the source tree
+	b.Build_wrapper_deps = utils.PrefixDirs(b.Build_wrapper_deps, getBackend(ctx).sourcePrefix())
 }
 
 // A Build represents the whole tree of properties for a 'library' object,
