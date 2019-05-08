@@ -62,6 +62,7 @@ for sha in git_shas:
     if not isSignedOff(message):
         print(ccolors.FAIL + "Commit: {} isn't Signed-off-by".format(sha) + ccolors.ENDC)
         status_code=1
-    print(ccolors.GREEN + "Commit: {} is ok".format(sha) + ccolors.ENDC)
+    else:
+        print(ccolors.GREEN + "Commit: {} is ok".format(sha) + ccolors.ENDC)
 
 sys.exit(status_code)
