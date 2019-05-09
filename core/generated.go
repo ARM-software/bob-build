@@ -34,6 +34,7 @@ var (
 	generatedHeaderTag = dependencyTag{name: "generated_headers"}
 	generatedSourceTag = dependencyTag{name: "generated_sources"}
 	generatedDepTag    = dependencyTag{name: "generated_dep"}
+	encapsulatesTag    = dependencyTag{name: "source_encapsulation"}
 	hostToolBinTag     = dependencyTag{name: "host_tool_bin"}
 )
 
@@ -100,6 +101,11 @@ type GenerateProps struct {
 
 	// Used to indicate that the console should be used.
 	Console bool
+
+	// A list of source modules that this bob_generated_source will encapsulate.
+	// When this module is used with generated_headers, the named modules' export_gen_include_dirs will be forwarded.
+	// When this module is used with generated_sources, the named modules' outputs will be supplied as sources.
+	Encapsulates []string
 
 	// Additional include paths to add for modules that use generate_headers.
 	// This will be defined relative to the module-specific build directory
@@ -299,7 +305,8 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 	g := getBackend(ctx)
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == generatedDepTag
+			depTag := ctx.OtherModuleDependencyTag(m)
+			return depTag == generatedDepTag || depTag == encapsulatesTag
 		},
 		func(m blueprint.Module) {
 			gen, ok := m.(dependentInterface)
@@ -594,5 +601,35 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 			gsc.Properties.Module_deps...)
 		parseAndAddVariationDeps(mctx, generatedSourceTag,
 			gsc.Properties.Module_srcs...)
+		parseAndAddVariationDeps(mctx, encapsulatesTag,
+			gsc.Properties.Encapsulates...)
 	}
+}
+
+func encapsulatesMutator(mctx blueprint.TopDownMutatorContext) {
+	mainModule := mctx.Module()
+	if e, ok := mainModule.(enableable); ok {
+		if !isEnabled(e) {
+			return // Not enabled, so don't add dependencies
+		}
+	}
+
+	mainGenProp, ok := getGenerateCommon(mainModule)
+	if !ok {
+		return
+	}
+
+	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
+			return false
+		}
+		childProp, ok := getGenerateCommon(child)
+		if !ok {
+			panic(errors.New(child.Name() + " does not support being encapsulated"))
+		}
+
+		mainGenProp.Properties.Export_gen_include_dirs = utils.AppendUnique(mainGenProp.Properties.Export_gen_include_dirs,
+			childProp.Properties.Export_gen_include_dirs)
+		return true
+	})
 }

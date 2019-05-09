@@ -409,7 +409,7 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 		if ctx.OtherModuleDependencyTag(dep) == wholeStaticDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == staticDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == sharedDepTag ||
-			ctx.OtherModuleDependencyTag(dep) == flagDepTag {
+			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag {
 
 			if _, ok := visited[dep.Name()]; ok {
 				// VisitDirectDeps will visit a module once for each
