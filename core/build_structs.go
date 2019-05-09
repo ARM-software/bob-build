@@ -309,7 +309,7 @@ var wholeStaticDepTag = dependencyTag{name: "whole_static"}
 var headerDepTag = dependencyTag{name: "header"}
 var staticDepTag = dependencyTag{name: "static"}
 var sharedDepTag = dependencyTag{name: "shared"}
-var flagDepTag = dependencyTag{name: "reexport"}
+var reexportLibsTag = dependencyTag{name: "reexport_libs"}
 var kernelModuleDepTag = dependencyTag{name: "kernel_module"}
 
 // The targetable interface allows target-specific properties to be
@@ -416,7 +416,7 @@ func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func collectReexportDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
+func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
@@ -459,7 +459,7 @@ func collectReexportDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
 	})
 }
 
-func applyReexportDependenciesMutator(mctx blueprint.BottomUpMutatorContext) {
+func applyReexportLibsDependenciesMutator(mctx blueprint.BottomUpMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
@@ -471,7 +471,7 @@ func applyReexportDependenciesMutator(mctx blueprint.BottomUpMutatorContext) {
 	var build *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
 		build = buildProps.build()
-		mctx.AddVariationDependencies(nil, flagDepTag, build.ResolvedReexportedLibs...)
+		mctx.AddVariationDependencies(nil, reexportLibsTag, build.ResolvedReexportedLibs...)
 	}
 }
 
@@ -606,8 +606,9 @@ func Main() {
 
 		ctx.RegisterTopDownMutator("find_required_modules", findRequiredModulesMutator).Parallel()
 
-		ctx.RegisterTopDownMutator("collect_reexport_dependencies", collectReexportDependenciesMutator).Parallel()
-		ctx.RegisterBottomUpMutator("apply_reexport_dependencies", applyReexportDependenciesMutator).Parallel()
+		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies", collectReexportLibsDependenciesMutator).Parallel()
+		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies", applyReexportLibsDependenciesMutator).Parallel()
+		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
 
 		// Depend on the config file
 		ctx.RegisterSingletonType("config_singleton", dependencySingletonFactory)

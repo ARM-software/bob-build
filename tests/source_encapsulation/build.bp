@@ -1,0 +1,129 @@
+/*
+ * Copyright 2019 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//////////////////////////////////////////////////////////////
+//      Graph representation for both cases
+//
+//               3
+//              / .
+//             /   .
+//            /     .
+//           2       4
+//          /         \
+//         1           5
+//
+// Explanation:
+// 3 - root node both for simple and complex case:
+//  a) for simple case it includes via encapsulates header3
+//  b) for complex case header4 is copied into header3
+//////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////
+// Simple case
+bob_generate_source {
+    name: "encapsulation_source1",
+
+    srcs: ["srcs/header1.h"],
+    out: ["header1.h"],
+
+    cmd: "cp ${in} ${out}",
+    export_gen_include_dirs: ["."],
+}
+
+bob_generate_source {
+    name: "encapsulation_source2",
+
+    srcs: ["srcs/header2.h"],
+    out: ["header2.h"],
+
+    cmd: "cp ${in} ${out}",
+    export_gen_include_dirs: ["."],
+    encapsulates: ["encapsulation_source1"],
+}
+
+bob_generate_source {
+    name: "encapsulation_source3",
+
+    srcs: ["srcs/header3.h"],
+    out: ["header3.h"],
+
+    cmd: "cp ${in} ${out}",
+    export_gen_include_dirs: ["."],
+    encapsulates: ["encapsulation_source2"],
+}
+
+// Simple case
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+// Complex case
+bob_generate_source {
+    name: "encapsulation_source5",
+
+    srcs: ["srcs/header5.h"],
+    out: ["header5.h"],
+
+    cmd: "cp ${in} ${out}",
+}
+
+bob_generate_source {
+    name: "encapsulation_source4",
+
+    srcs: ["srcs/header4.h"],
+    out: ["header4.h"],
+
+    cmd: "cp ${in} ${out}",
+    export_gen_include_dirs: ["."],
+    encapsulates: ["encapsulation_source5"],
+}
+
+bob_generate_source {
+    name: "encapsulation_source3_complex",
+    module_deps: ["encapsulation_source4"],
+
+    srcs: ["srcs/header3.h"],
+    out: ["header3.h"],
+
+    cmd: "cat ${in} ${encapsulation_source4_out} >> ${out}",
+    export_gen_include_dirs: ["."],
+    encapsulates: ["encapsulation_source2"],
+}
+
+// Complex case
+//////////////////////////////////////////////////////////////
+
+bob_binary {
+    name: "validate_source_encapsulation_simple",
+    generated_headers: ["encapsulation_source3"],
+    srcs: ["simple.c"],
+}
+
+bob_binary {
+    name: "validate_source_encapsulation_complex",
+    generated_headers: ["encapsulation_source3_complex"],
+    build_wrapper: "source_encapsulation/check_includes.py",
+    srcs: ["complex.c"],
+}
+
+bob_alias {
+    name: "bob_test_source_encapsulation",
+    srcs: [
+        "validate_source_encapsulation_simple",
+        "validate_source_encapsulation_complex",
+    ],
+}
