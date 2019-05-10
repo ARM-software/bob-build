@@ -20,7 +20,7 @@ result_ok() {
 result_skip() {
     local MSG=$1
 
-    echo -n "$MSG"
+    echo -n "$MSG "
     echo -e "\e[33;1mSKIP\e[0m"
 }
 
@@ -32,7 +32,7 @@ check_result() {
     local RESULT=$1
     local MSG=$2
 
-    echo -n "$MSG"
+    echo -n "$MSG "
     if [ $RESULT -eq 0 ]; then
         result_ok
     else
