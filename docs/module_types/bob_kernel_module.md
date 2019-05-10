@@ -82,7 +82,8 @@ Arguments to pass to kernel make invocation.
 
 ----
 ### **bob_kernel_module.kernel_dir** (optional)
-Kernel directory location.
+Kernel directory location. This must either be absolute or relative to
+the top level source directory.
 
 ----
 ### **bob_kernel_module.kernel_cross_compile** (optional)

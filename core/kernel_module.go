@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -133,6 +133,9 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 
 	kmodBuild := filepath.Join(bobdir, "scripts", "kmod_build.py")
 	kdir := m.Properties.Build.Kernel_dir
+	if !filepath.IsAbs(kdir) {
+		kdir = filepath.Join(g.sourcePrefix(), kdir)
+	}
 
 	extraSymbols := ""
 	if len(m.extraSymbolsFiles(ctx)) > 0 {
