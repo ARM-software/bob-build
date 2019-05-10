@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,16 +21,19 @@ bob_static_library {
         "include",
     ],
     android: {
-        // Non-local include dirs are relative to the project root, which on
-        // Android, is the root of the Android tree, not the project using Bob.
-        // So $(LOCAL_PATH) needs to be included here.
+        // export_include_dirs are absolute. On Android, it may also
+        // be the root of the Android tree. So $(LOCAL_PATH) needs to be
+        // included here to test absolute path.
         export_include_dirs: [
             "$(LOCAL_PATH)/export_include_dirs/liba/include2",
         ],
     },
     linux: {
-        export_include_dirs: [
-            "export_include_dirs/liba/include2",
+        // include2 is intended to test export_include_dirs, but on
+        // linux this must be an absolute directory. This leaves
+        // export_include_dirs untested on Linux
+        export_local_include_dirs: [
+            "include2",
         ],
     },
     srcs: ["src/bob_test_liba.c"],
