@@ -82,6 +82,12 @@ test_relpath "a/b/c" "x/y/z" "../../../x/y/z"
 test_relpath "a/b" "a/b2/c"  "../b2/c"
 test_relpath "a/b2/c" "a/b"  "../../b"
 
+# Check the special case where the common root is `/`
+test_relpath "/usr" "/bin" "../bin"
+test_relpath "/usr/local/bin" "/bin/bash" "../../../bin/bash"
+test_relpath "/" "/usr/include/stdio.h" "usr/include/stdio.h"
+test_relpath "/bin" "/" ".."
+
 # Cleanup
 rm -rf a x
 

@@ -50,6 +50,16 @@ else
     }
 fi
 
+function path_is_parent() {
+    local parent="$1" subpath="$2"
+    if [[ ${parent} == / ]]; then
+        return 0
+    elif [[ ${subpath} == ${parent}/* ]]; then
+        return 0
+    fi
+    return 1
+}
+
 # Return a path that references $2 from $1
 # $1 and $2 must exist
 # This is a simple implementation. We rely on readlink to sort out symlink issues for us.
@@ -57,19 +67,22 @@ fi
 function relative_path() {
     [[ -e $1 ]] || { echo "relative_path: Source path '$1' does not exist" >&2; return 1; }
     [[ -e $2 ]] || { echo "relative_path: Target path '$2' does not exist" >&2; return 1; }
-    SRC_ABS=$(bob_realpath $1)
-    TGT_ABS=$(bob_realpath $2)
+    local SRC_ABS=$(bob_realpath "${1}")
+    local TGT_ABS=$(bob_realpath "${2}")
+    local BACK= RESULT= CMN_PFX=
 
-    BACK=
     if [[ ${TGT_ABS} == ${SRC_ABS} ]]; then
         RESULT=.
 
-    elif [[ ${TGT_ABS} == ${SRC_ABS}/* ]]; then
+    elif path_is_parent "${SRC_ABS}" "${TGT_ABS}"; then
         # SRC_ABS is a parent of TGT_ABS
+
+        # Remove the trailing slash from the prefix if it has one
+        SRC_ABS=${SRC_ABS%/}
 
         RESULT=${TGT_ABS#${SRC_ABS}/}
 
-    elif [[ ${SRC_ABS} == ${TGT_ABS}/* ]]; then
+    elif path_is_parent "${TGT_ABS}" "${SRC_ABS}"; then
         # TGT_ABS is a parent of SRC_ABS
 
         while [[ ${TGT_ABS} != ${SRC_ABS} ]]; do
@@ -82,10 +95,13 @@ function relative_path() {
     else
         CMN_PFX=${SRC_ABS}
 
-        while [[ ${TGT_ABS} != ${CMN_PFX}/* ]]; do
+        while ! path_is_parent "${CMN_PFX}" "${TGT_ABS}"; do
             CMN_PFX=$(dirname ${CMN_PFX})
             BACK="../${BACK}"
         done
+
+        # Remove the trailing slash from the prefix if it has one
+        CMN_PFX=${CMN_PFX%/}
 
         RESULT=${BACK}${TGT_ABS#${CMN_PFX}/}
     fi
