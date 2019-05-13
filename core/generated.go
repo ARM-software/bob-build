@@ -376,7 +376,9 @@ func (m *generateCommon) getSources(ctx blueprint.ModuleContext) []string {
 }
 
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext) {
+	g := getBackend(ctx)
 	m.Properties.SourceProps.processPaths(ctx)
+	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
 }
 
 func (m *generateCommon) getAliasList() []string {
