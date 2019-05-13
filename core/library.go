@@ -384,9 +384,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 					return
 				}
 
-				includeDirs = append(includeDirs,
-					utils.PrefixDirs(gs.Properties.Export_gen_include_dirs,
-						g.sourceOutputDir(gs))...)
+				includeDirs = append(includeDirs, gs.Properties.Export_gen_include_dirs...)
 				// Generated headers are "order-only". That means that a source file does not need to rebuild
 				// if a generated header changes, just that it must be built after a generated header.
 				// The source file _will_ be rebuilt if it uses the header (since that is registered in the
