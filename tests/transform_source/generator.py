@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function
 import argparse
 import os
 
@@ -51,5 +51,4 @@ if os.path.splitext(output_base_name)[1] != ".cpp":
 
 without_extension = os.path.splitext(output_base_name)[0]
 with open(args.output, 'w') as outfile:
-    print("Output: " + without_extension)
     outfile.write("void output_%s(){}\n" % without_extension)
