@@ -29,3 +29,9 @@ mkdir ${build_dir}
 cd ${build_dir}
 ../tests/bootstrap -o .
 ./config && ./buildme bob_tests
+
+# A re-bootstrapped build directory with a different working directory
+# should still work. Re-use the last directory
+cd "${BOB_ROOT}"
+tests/bootstrap -o ${build_dir}
+${build_dir}/buildme bob_tests

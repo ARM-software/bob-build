@@ -73,6 +73,16 @@ else
     WORKDIR=$(relative_path "${BUILDDIR}" $(pwd))
 fi
 
+BOOTSTRAP_GLOBFILE="${BUILDDIR}/.bootstrap/build-globs.ninja"
+if [ -f "${BOOTSTRAP_GLOBFILE}" ]; then
+    PREV_DIR=$(sed -n -e "s/^g.bootstrap.buildDir = \(.*\)/\1/p" "${BOOTSTRAP_GLOBFILE}")
+    if [ "${PREV_DIR}" != "${BUILDDIR}" ] ; then
+        # BOOTSTRAP_GLOBFILE is invalid if BUILDDIR has changed
+        # Invalidate it so that the bootstrap builder can be built
+        cat /dev/null > "${BOOTSTRAP_GLOBFILE}"
+    fi
+fi
+
 # Calculate Bob directory relative to working directory, build directory and absolute
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
 BOB_DIR_FROM_BUILD="$(relative_path $(bob_realpath "${BUILDDIR}") "${SCRIPT_DIR}")"
