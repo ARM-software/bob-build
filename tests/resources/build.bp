@@ -32,7 +32,7 @@ bob_install_group {
 
 bob_resource {
     name: "bob_test_resources",
-    srcs: ["main.c"],
+    srcs: ["*.c"],
     install_group: "install_group_test",
     android: {
         relative_install_path: "x",
