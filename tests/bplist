@@ -14,6 +14,7 @@
 ./forwarding_libs/forwarding_user/build.bp
 ./generate_libs/build.bp
 ./generate_source/build.bp
+./globs/build.bp
 ./kernel_module/module/build.bp
 ./output/build.bp
 ./properties/build.bp
