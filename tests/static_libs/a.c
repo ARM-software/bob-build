@@ -1,4 +1,4 @@
-#include "b.h"
+#include "a.h"
 
 int do_a(int x)
 {

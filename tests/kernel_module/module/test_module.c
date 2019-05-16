@@ -1,4 +1,6 @@
-void test_function(void)
+#include "header.h"
+
+int test_function(void)
 {
-    return;
+    return KERNEL_THING;
 }

@@ -1,0 +1,1 @@
+#define KERNEL_THING 1

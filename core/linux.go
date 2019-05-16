@@ -19,6 +19,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -118,7 +119,6 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		ldLibraryPath += "LD_LIBRARY_PATH=" + filepath.Join("${BuildDir}", string(hostTarget), "shared") + ":$$LD_LIBRARY_PATH "
 	}
 	utils.StripUnusedArgs(args, cmd)
-	args["depfile"] = ""
 
 	var pool blueprint.Pool
 	if m.Properties.Console {
@@ -138,10 +138,9 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 			// the output.
 			Restat:      true,
 			Pool:        pool,
-			Depfile:     "$depfile",
 			Description: "$out",
 		},
-		utils.SortedKeys(args)...)
+		append(utils.SortedKeys(args), "depfile")...)
 
 	for _, inout := range inouts {
 		if _, ok := args["headers_generated"]; ok {
@@ -153,18 +152,27 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
-		args["depfile"] = inout.depfile
 		implicits = append(implicits, inout.implicitSrcs...)
 
-		ctx.Build(pctx,
-			blueprint.BuildParams{
-				Rule:      rule,
-				Inputs:    utils.NewStringSlice(inout.srcIn, inout.genIn),
-				Outputs:   inout.out,
-				Implicits: implicits,
-				Args:      args,
-				Optional:  true,
-			})
+		buildparams := blueprint.BuildParams{
+			Rule:      rule,
+			Inputs:    utils.NewStringSlice(inout.srcIn, inout.genIn),
+			Outputs:   inout.out,
+			Implicits: implicits,
+			Args:      args,
+			Optional:  true,
+		}
+
+		if inout.depfile != "" {
+			if len(inout.out) > 1 {
+				panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", ctx.ModuleName()))
+			}
+
+			buildparams.Depfile = inout.depfile
+			buildparams.Deps = blueprint.DepsGCC
+		}
+
+		ctx.Build(pctx, buildparams)
 	}
 }
 
@@ -227,25 +235,25 @@ var asRule = pctx.StaticRule("as",
 	blueprint.RuleParams{
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
-		Command:     "$build_wrapper $ascompiler $asflags $in -MD $out.d -o $out",
+		Command:     "$build_wrapper $ascompiler $asflags $in -MD $depfile -o $out",
 		Description: "$out",
-	}, "ascompiler", "asflags", "build_wrapper")
+	}, "ascompiler", "asflags", "build_wrapper", "depfile")
 
 var ccRule = pctx.StaticRule("cc",
 	blueprint.RuleParams{
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
-		Command:     "$build_wrapper $ccompiler -c $cflags $conlyflags -MMD -MF $out.d $in -o $out",
+		Command:     "$build_wrapper $ccompiler -c $cflags $conlyflags -MMD -MF $depfile $in -o $out",
 		Description: "$out",
-	}, "ccompiler", "cflags", "conlyflags", "build_wrapper")
+	}, "ccompiler", "cflags", "conlyflags", "build_wrapper", "depfile")
 
 var cxxRule = pctx.StaticRule("cxx",
 	blueprint.RuleParams{
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
-		Command:     "$build_wrapper $cxxcompiler -c $cflags $cxxflags -MMD -MF $out.d $in -o $out",
+		Command:     "$build_wrapper $cxxcompiler -c $cflags $cxxflags -MMD -MF $depfile $in -o $out",
 		Description: "$out",
-	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper")
+	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper", "depfile")
 
 func (l *library) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.Name()) + string(os.PathSeparator)
@@ -837,7 +845,7 @@ func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
 
 var kbuildRule = pctx.StaticRule("kbuild",
 	blueprint.RuleParams{
-		Command: "python $kmod_build -o $out --depfile $out.d " +
+		Command: "python $kmod_build -o $out --depfile $depfile " +
 			"--common-root ${SrcDir} " +
 			"--module-dir $output_module_dir $extra_includes " +
 			"--sources $in $kbuild_extra_symbols " +
@@ -848,7 +856,7 @@ var kbuildRule = pctx.StaticRule("kbuild",
 		Deps:        blueprint.DepsGCC,
 		Pool:        blueprint.Console,
 		Description: "$out",
-	}, "kmod_build", "extra_includes", "extra_cflags", "kbuild_extra_symbols", "kernel_dir", "kernel_cross_compile",
+	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kbuild_extra_symbols", "kernel_dir", "kernel_cross_compile",
 	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
 
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
