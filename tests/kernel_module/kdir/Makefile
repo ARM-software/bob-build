@@ -9,12 +9,17 @@ MODULES :=
 
 include $(M)/Kbuild
 MODULES += $(addprefix $(M)/,$(obj-m:.o=.ko))
+DEPFILES += $(addprefix $(M)/,$(obj-m:.o=.d))
+CPPFLAGS := -Iinclude -MMD -MP
+CFLAGS := -fPIC
 
 all: $(MODULES)
 
 $(M)/%.ko: $(M)/%.o
-	$(CROSS_COMPILE)gcc -shared $< -o $@
-	echo > $(M)/Module.symvers
+	@$(CROSS_COMPILE)gcc -shared $< -o $@
+	@echo > $(M)/Module.symvers
 
 %.o: %.c
-	$(CROSS_COMPILE)gcc -c -o $@ -fPIC $<
+	@$(CROSS_COMPILE)gcc -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+
+-include $(DEPFILES)
