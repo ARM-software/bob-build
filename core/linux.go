@@ -491,6 +491,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 	// --no-as-needed for dependencies because it is already set
 	useNoAsNeeded := !l.build().isForwardingSharedLibrary()
 	hasForwardingLib := false
+	libPaths := []string{}
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
@@ -511,8 +512,16 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 					}
 					flags = append(flags, "-Wl,--no-copy-dt-needed-entries")
 				}
+				if installPath, ok := sl.Properties.InstallableProps.getInstallGroupPath(); ok {
+					installPath = filepath.Join(installPath, sl.Properties.InstallableProps.Relative_install_path)
+					libPaths = utils.AppendIfUnique(libPaths, installPath)
+				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
 				flags = append(flags, pathToLibFlag(sl.outputName()))
+				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallGroupPath(); ok {
+					installPath = filepath.Join(installPath, sl.generateCommon.Properties.InstallableProps.Relative_install_path)
+					libPaths = utils.AppendIfUnique(libPaths, installPath)
+				}
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a shared library"))
 			}
@@ -520,6 +529,16 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 
 	if hasForwardingLib {
 		flags = append(flags, "-fuse-ld=bfd")
+	}
+
+	if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
+		for _, path := range libPaths {
+			out, err := filepath.Rel(installPath, path)
+			if err != nil {
+				panic(fmt.Errorf("Could not find relative path for: %s due to: %e", path, err))
+			}
+			flags = append(flags, "-Wl,-rpath='$$ORIGIN/"+out+"'")
+		}
 	}
 
 	return
@@ -734,7 +753,7 @@ var installRule = pctx.StaticRule("install",
 func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []string {
 	ins := m.(installable)
 
-	installPath, ok := getInstallGroupPath(ctx)
+	installPath, ok := ins.getInstallableProps().getInstallGroupPath()
 	if !ok {
 		return []string{}
 	}

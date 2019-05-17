@@ -277,7 +277,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 	}
 
 	// Handle installation
-	installGroupPath, ok := getInstallGroupPath(ctx)
+	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
 
 	// Only setup multilib for target modules.
 	// Normally this should only apply to target libraries, but we
@@ -425,7 +425,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 	}
 	sb := &strings.Builder{}
 
-	installGroupPath, ok := getInstallGroupPath(ctx)
+	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
 	if !ok {
 		androidMkWriteString(ctx, m.altShortName(), sb)
 		return
@@ -607,7 +607,7 @@ func declarePrebuiltBinary(sb *strings.Builder, moduleName, path string, target 
 
 func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.ModuleContext, tags []string) {
 	/* Install generated files one by one, if required */
-	installGroupPath, ok := getInstallGroupPath(ctx)
+	installGroupPath, ok := m.getInstallableProps().getInstallGroupPath()
 
 	if !ok {
 		return
@@ -919,7 +919,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	// Now the build rules (i.e. what would be done by an 'include
 	// $(BUILD_KERNEL_MODULE)', if there was one).
 	sb.WriteString("TARGET_OUT_$(LOCAL_MODULE_CLASS) := $(TARGET_OUT)/lib/modules\n")
-	installGroupPath, ok := getInstallGroupPath(ctx)
+	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
 	if ok {
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.Properties.Relative_install_path + "\n")
