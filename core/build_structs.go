@@ -609,6 +609,7 @@ func Main() {
 		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies", collectReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies", applyReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
+		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
 
 		// Depend on the config file
 		ctx.RegisterSingletonType("config_singleton", dependencySingletonFactory)

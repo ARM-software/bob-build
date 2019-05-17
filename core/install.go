@@ -87,6 +87,15 @@ type InstallableProps struct {
 	Post_install_tool string
 	// Command to execute on file(s) after they are installed
 	Post_install_cmd string
+	// The path retrieved from the install group so we don't need to walk dependencies to get it
+	Install_path *string `blueprint:"mutated"`
+}
+
+func (props *InstallableProps) getInstallGroupPath() (string, bool) {
+	if props.Install_path == nil {
+		return "", false
+	}
+	return *props.Install_path, true
 }
 
 func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
@@ -168,37 +177,6 @@ type resource struct {
 	}
 }
 
-func getInstallGroupPath(ctx blueprint.ModuleContext) (string, bool) {
-	var installGroupPath *string
-
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == installGroupTag
-		},
-		func(m blueprint.Module) {
-			insg, ok := m.(*installGroup)
-			if !ok {
-				panic(fmt.Sprintf("install_group dependency of %s not an install group",
-					ctx.ModuleName()))
-			}
-			if installGroupPath != nil {
-				panic(fmt.Sprintf("Multiple install group dependencies for %s",
-					ctx.ModuleName()))
-			}
-			installGroupPath = &insg.Properties.Install_path
-		})
-
-	if installGroupPath == nil {
-		return "", false
-	}
-
-	if *installGroupPath == "" {
-		panic(fmt.Sprintf("Module %s has empty install path", ctx.ModuleName()))
-	}
-
-	return *installGroupPath, true
-}
-
 func (m *resource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getBackend(ctx).resourceActions(m, ctx)
@@ -272,3 +250,31 @@ func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 
 var installGroupTag = dependencyTag{name: "install_group"}
 var installDepTag = dependencyTag{name: "install_dep"}
+
+func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
+	var installGroupPath *string
+	ins, ok := mctx.Module().(installable)
+	if !ok {
+		return
+	}
+
+	mctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == installGroupTag },
+		func(m blueprint.Module) {
+			insg, ok := m.(*installGroup)
+			if !ok {
+				panic(fmt.Sprintf("install_group dependency of %s not an install group", mctx.ModuleName()))
+			}
+			if installGroupPath != nil {
+				panic(fmt.Sprintf("Multiple install group dependencies for %s", mctx.ModuleName()))
+			}
+			installGroupPath = &insg.Properties.Install_path
+		})
+	if installGroupPath != nil {
+		if *installGroupPath == "" {
+			panic(fmt.Sprintf("Module %s has empty install path", mctx.ModuleName()))
+		}
+		props := ins.getInstallableProps()
+		props.Install_path = installGroupPath
+	}
+}
