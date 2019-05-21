@@ -16,8 +16,8 @@ fold_end
 ####################
 
 ####################
-fold_start 'run_build_tests.sh'
-    bash ${BOB_ROOT}/.travis/run_build_tests.sh
+fold_start 'build_tests.sh'
+    bash ${BOB_ROOT}/tests/build_tests.sh
     build_result=$?
     check_result ${build_result} "Build tests:"
 fold_end
