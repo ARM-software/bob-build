@@ -7,6 +7,7 @@ Bob
 - [Build definitions](build_defs.md)
 - [Initial project setup](project_setup.md)
 - [Features](features.md)
+- [User Guide](user_guide/index.md)
 
 ## Reference info
 - [Common module properties](module_types/common_module_properties.md)
