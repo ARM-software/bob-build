@@ -6,3 +6,4 @@ a number of use cases and show how to handle them using Bob.
 
 - [Compiling Code](libraries_1.md)
 - [Advanced Libraries](libraries_2.md)
+- [Code Generation](code_generation.md)
