@@ -198,15 +198,6 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
 
-// configProvider allows the retrieval of configuration
-type configProvider interface {
-	Config() interface{}
-}
-
-func getConfig(ctx configProvider) *bobConfig {
-	return ctx.Config().(*bobConfig)
-}
-
 type dependencySingleton struct{}
 
 func (m *dependencySingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
@@ -476,16 +467,6 @@ func applyReexportLibsDependenciesMutator(mctx blueprint.BottomUpMutatorContext)
 	}
 }
 
-// Create a closure passing the config to a module factory so that the module
-// factories can access the config.
-type factoryWithConfig func(*bobConfig) (blueprint.Module, []interface{})
-
-func passConfig(mf factoryWithConfig, config *bobConfig) blueprint.ModuleFactory {
-	return func() (blueprint.Module, []interface{}) {
-		return mf(config)
-	}
-}
-
 func findRequiredModulesMutator(ctx blueprint.TopDownMutatorContext) {
 	// Non-enableable module types are aliases and defaults. All
 	// dependencies of an alias should be required. Ignore defaults,
@@ -525,6 +506,31 @@ func findRequiredModulesMutator(ctx blueprint.TopDownMutatorContext) {
 	})
 }
 
+type factoryWithConfig func(*bobConfig) (blueprint.Module, []interface{})
+
+func registerModuleTypes(register func(string, factoryWithConfig)) {
+	register("bob_binary", binaryFactory)
+	register("bob_static_library", staticLibraryFactory)
+	register("bob_shared_library", sharedLibraryFactory)
+
+	register("bob_defaults", defaultsFactory)
+
+	register("bob_external_header_library", externalLibFactory)
+	register("bob_external_shared_library", externalLibFactory)
+	register("bob_external_static_library", externalLibFactory)
+
+	register("bob_generate_source", generateSourceFactory)
+	register("bob_transform_source", transformSourceFactory)
+	register("bob_generate_static_library", genStaticLibFactory)
+	register("bob_generate_shared_library", genSharedLibFactory)
+	register("bob_generate_binary", genBinaryFactory)
+
+	register("bob_alias", aliasFactory)
+	register("bob_kernel_module", kernelModuleFactory)
+	register("bob_resource", resourceFactory)
+	register("bob_install_group", installGroupFactory)
+}
+
 // Main is the entry point for the bob primary builder.
 //
 // It loads the configuration from config.json, registers the module type
@@ -537,22 +543,15 @@ func Main() {
 	config.Properties = loadConfig(jsonPath)
 
 	var ctx = blueprint.NewContext()
-	ctx.RegisterModuleType("bob_binary", passConfig(binaryFactory, config))
-	ctx.RegisterModuleType("bob_static_library", passConfig(staticLibraryFactory, config))
-	ctx.RegisterModuleType("bob_shared_library", passConfig(sharedLibraryFactory, config))
-	ctx.RegisterModuleType("bob_defaults", passConfig(defaultsFactory, config))
-	ctx.RegisterModuleType("bob_external_header_library", passConfig(externalLibFactory, config))
-	ctx.RegisterModuleType("bob_external_shared_library", passConfig(externalLibFactory, config))
-	ctx.RegisterModuleType("bob_external_static_library", passConfig(externalLibFactory, config))
-	ctx.RegisterModuleType("bob_generate_source", passConfig(generateSourceFactory, config))
-	ctx.RegisterModuleType("bob_transform_source", passConfig(transformSourceFactory, config))
-	ctx.RegisterModuleType("bob_generate_static_library", passConfig(genStaticLibFactory, config))
-	ctx.RegisterModuleType("bob_generate_shared_library", passConfig(genSharedLibFactory, config))
-	ctx.RegisterModuleType("bob_generate_binary", passConfig(genBinaryFactory, config))
-	ctx.RegisterModuleType("bob_alias", passConfig(aliasFactory, config))
-	ctx.RegisterModuleType("bob_kernel_module", passConfig(kernelModuleFactory, config))
-	ctx.RegisterModuleType("bob_resource", passConfig(resourceFactory, config))
-	ctx.RegisterModuleType("bob_install_group", passConfig(installGroupFactory, config))
+
+	registerModuleTypes(func(name string, mf factoryWithConfig) {
+		// Create a closure passing the config to a module factory so
+		// that the module factories can access the config.
+		factory := func() (blueprint.Module, []interface{}) {
+			return mf(config)
+		}
+		ctx.RegisterModuleType(name, factory)
+	})
 
 	// Note that the order of mutators are important, since the
 	// contents of each module will be rewritten. The following
