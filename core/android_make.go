@@ -647,14 +647,13 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 
 	for _, inout := range inouts {
 		if _, ok := args["headers_generated"]; ok {
-			headers := utils.Filter(utils.IsHeader, inout.out)
+			headers := utils.Filter(utils.IsHeader, inout.out, inout.implicitOuts)
 			args["header_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(utils.IsSource, inout.out)
+			sources := utils.Filter(utils.IsSource, inout.out, inout.implicitOuts)
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
-
 		ins := utils.Join(inout.srcIn, inout.genIn)
 
 		// Make does not cleanly support multiple out-files
@@ -681,7 +680,7 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 		}
 		sb.WriteString(outputsVarName(m) + " += " + outs + "\n")
 
-		for _, out := range inout.out[1:] {
+		for _, out := range append(inout.out[1:], inout.implicitOuts...) {
 			sb.WriteString(out + ": " + outs + "\n")
 			sb.WriteString(outputsVarName(m) + " += " + out + "\n")
 		}

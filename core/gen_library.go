@@ -67,6 +67,7 @@ func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext) []inout {
 	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
 	io.genIn = getGeneratedFiles(ctx)
 	io.out = m.outputs(g)
+	io.implicitOuts = m.implicitOutputs(g)
 	return []inout{io}
 }
 
@@ -96,4 +97,10 @@ func (m *generateLibrary) topLevelProperties() []interface{} {
 // Support singleOutputModule interface
 func (m *generateLibrary) outputName() string {
 	return m.Name()
+}
+
+//// Support DependentInterface
+
+func (m *generateLibrary) implicitOutputs(g generatorBackend) []string {
+	return utils.PrefixDirs(m.Properties.Headers, m.outputDir(g))
 }

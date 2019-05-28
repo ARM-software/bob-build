@@ -58,7 +58,7 @@ func pathToLibFlag(path string) string {
 func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 	installDeps []string, optional bool) {
 
-	deps := utils.NewStringSlice(p.outputs(getBackend(ctx)), installDeps)
+	deps := utils.NewStringSlice(p.outputs(getBackend(ctx)), p.implicitOutputs(getBackend(ctx)), installDeps)
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
@@ -155,12 +155,13 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		implicits = append(implicits, inout.implicitSrcs...)
 
 		buildparams := blueprint.BuildParams{
-			Rule:      rule,
-			Inputs:    utils.NewStringSlice(inout.srcIn, inout.genIn),
-			Outputs:   inout.out,
-			Implicits: implicits,
-			Args:      args,
-			Optional:  true,
+			Rule:            rule,
+			Inputs:          utils.NewStringSlice(inout.srcIn, inout.genIn),
+			Outputs:         inout.out,
+			ImplicitOutputs: inout.implicitOuts,
+			Implicits:       implicits,
+			Args:            args,
+			Optional:        true,
 		}
 
 		if inout.depfile != "" {
