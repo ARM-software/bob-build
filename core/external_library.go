@@ -22,6 +22,7 @@ import (
 )
 
 type externalLib struct {
+	moduleBase
 	blueprint.SimpleName
 }
 

@@ -119,6 +119,7 @@ type GenerateProps struct {
 }
 
 type generateCommon struct {
+	moduleBase
 	blueprint.SimpleName
 	Properties struct {
 		GenerateProps

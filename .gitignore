@@ -35,3 +35,8 @@ highlight.css
 
 # pytest
 .cache/
+
+# Ignore Android.bp files - these should not be committed directly, because
+# they should be symlinks to build.bp files which can be deleted to allow using
+# the Android.mk backend
+Android.bp

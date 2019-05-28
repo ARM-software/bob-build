@@ -48,6 +48,7 @@ type AliasProps struct {
 
 // Type representing each bob_alias module
 type alias struct {
+	moduleBase
 	blueprint.SimpleName
 	Properties struct {
 		AliasProps

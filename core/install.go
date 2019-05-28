@@ -129,6 +129,7 @@ type InstallGroupProps struct {
 }
 
 type installGroup struct {
+	moduleBase
 	blueprint.SimpleName
 	Properties struct {
 		InstallGroupProps
@@ -170,6 +171,7 @@ type ResourceProps struct {
 }
 
 type resource struct {
+	moduleBase
 	blueprint.SimpleName
 	Properties struct {
 		ResourceProps

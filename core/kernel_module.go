@@ -26,6 +26,7 @@ import (
 )
 
 type kernelModule struct {
+	moduleBase
 	blueprint.SimpleName
 	Properties struct {
 		Features
@@ -180,7 +181,7 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[strin
 
 func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		ctx.Config().(*bobConfig).Generator.kernelModuleActions(m, ctx)
+		getBackend(ctx).kernelModuleActions(m, ctx)
 	}
 }
 
