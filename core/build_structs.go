@@ -46,6 +46,7 @@ var (
 type phonyInterface interface {
 	// A list of the outputs to be built when shortName is specified as the target
 	outputs(g generatorBackend) []string
+	implicitOutputs(g generatorBackend) []string
 
 	// The name of the target that can be used
 	shortName() string

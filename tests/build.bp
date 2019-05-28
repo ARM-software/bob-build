@@ -31,6 +31,7 @@ bob_alias {
         "bob_test_generate_libs",
         "bob_test_generate_source",
         "bob_test_globs",
+        "bob_test_implicit_outs",
         "bob_test_kernel_module",
         "bob_test_output",
         "bob_test_properties",

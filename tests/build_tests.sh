@@ -145,6 +145,13 @@ SRC=tests/resources/main.c
 UPDATE=(${build_dir}/work/bob/linux/y/main.c)
 check_dep_updates "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
+# implicit output
+SRC=tests/implicit_outs/input.in
+UPDATE=(${build_dir}/target/executable/build_implicit_out
+        ${build_dir}/target/executable/include_implicit_header)
+check_dep_updates "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+
 # Clean up
 rm -rf "${TEST_DIRS[@]}"
 popd &> /dev/null

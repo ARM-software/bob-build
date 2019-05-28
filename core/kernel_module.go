@@ -81,6 +81,10 @@ func (m *kernelModule) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName()+".ko")}
 }
 
+func (m *kernelModule) implicitOutputs(g generatorBackend) []string {
+	return []string{}
+}
+
 func (m *kernelModule) filesToInstall(ctx blueprint.ModuleContext) []string {
 	return m.outputs(getBackend(ctx))
 }

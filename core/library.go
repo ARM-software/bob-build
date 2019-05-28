@@ -346,6 +346,10 @@ func (l *library) outputName() string {
 	return l.SimpleName.Name()
 }
 
+func (l *library) implicitOutputs(g generatorBackend) []string {
+	return []string{}
+}
+
 func (l *library) altName() string {
 	return l.outputName()
 }

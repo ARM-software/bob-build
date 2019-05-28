@@ -33,7 +33,8 @@ func (m *externalLib) altShortName() string { return m.altName() }
 func (m *externalLib) shortName() string    { return m.Name() }
 
 // External libraries have no outputs - they are already built.
-func (m *externalLib) outputs(g generatorBackend) []string { return []string{} }
+func (m *externalLib) outputs(g generatorBackend) []string         { return []string{} }
+func (m *externalLib) implicitOutputs(g generatorBackend) []string { return []string{} }
 
 // Implement the splittable interface so "normal" libraries can depend on external ones.
 func (m *externalLib) supportedVariants() []tgtType         { return []tgtType{tgtTypeHost, tgtTypeTarget} }

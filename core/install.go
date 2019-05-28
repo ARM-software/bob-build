@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -215,6 +215,10 @@ func (m *resource) getEnableableProps() *EnableableProps {
 // directory) - they only copy source files to the installation dir. This
 // method exists to implement PhonyInterface.
 func (m *resource) outputs(g generatorBackend) []string {
+	return []string{}
+}
+
+func (m *resource) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
