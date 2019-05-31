@@ -116,8 +116,10 @@ bob_binary {
 bob_binary {
     name: "validate_source_encapsulation_complex",
     generated_headers: ["encapsulation_source3_complex"],
-    build_wrapper: "source_encapsulation/check_includes.py",
     srcs: ["complex.c"],
+    linux: {
+        build_wrapper: "source_encapsulation/check_includes.py",
+    },
 }
 
 bob_alias {
