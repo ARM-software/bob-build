@@ -23,6 +23,7 @@ import sys
 import os
 import re
 
+
 class Configs:
     _configs = dict()
 
@@ -32,8 +33,8 @@ class Configs:
 
     # Record a new config
     def append(self, config, file, line):
-        self._configs[config] = { 'file': file,
-                                  'line': line }
+        self._configs[config] = {'file': file,
+                                 'line': line}
 
     # Return a list of all configs
     def keys(self):
@@ -48,6 +49,7 @@ class Configs:
         print("%s,%s,%d,%s,%d,%s" % (config, file, line, self._configs[config]['file'],
                                      self._configs[config]['line'], type))
 
+
 # Find files matching pattern under the directory top
 # Returns a list of filenames (which include top as prefix)
 def find_files(top, pattern):
@@ -56,6 +58,7 @@ def find_files(top, pattern):
         for filename in fnmatch.filter(filenames, pattern):
             matches.append(os.path.join(root, filename))
     return matches
+
 
 # b is in the same subtree as a
 #
@@ -66,6 +69,7 @@ def same_subtree(a, b):
     dirb = os.path.dirname(b)
 
     return dirb.startswith(dira)
+
 
 # Collect all definitions in all Mconfigs
 # Returns a dictionary with each config as key
@@ -83,11 +87,13 @@ def get_config_definitions(mconfigs):
                 if m:
                     key = m.group(1)
                     if key in configs:
-                        sys.stderr.write("Error %s already defined in %s. Also in %s\n" % (key, configs.file(key), mconfig))
+                        msg = "Error %s already defined in %s. Also in %s\n"
+                        sys.stderr.write(msg % (key, configs.file(key), mconfig))
                     else:
                         configs.append(key, mconfig, lineno)
 
     return configs
+
 
 # Look for all occurences of defined configs in Mconfig files.
 def check_mconfig_refs(mconfigs, configs):
@@ -107,13 +113,14 @@ def check_mconfig_refs(mconfigs, configs):
                     if not same_subtree(configs.file(key), mconfig):
                         configs.print_issue('Mconfig', key, mconfig, lineno)
 
+
 # Look for all occurences of defined configs in Blueprint files.
 # In blueprint the reference can only occur in a feature or a template
 def check_blueprint_refs(blueprints, configs):
     keyre = str.join('|', configs.keys())
     keyre = keyre.lower()
     re_featureref = re.compile(r"[ \t]*(" + keyre + ")[ \t]*:")
-    re_templateref = re.compile(r"\{\{(?:.+ *)?\.(" + keyre + ")\}\}")
+    re_templateref = re.compile(r"{{(?:.+ *)?\.(" + keyre + ")}}")
     for blueprint in blueprints:
         with open(blueprint, 'r') as f:
             lineno = 0
@@ -135,23 +142,26 @@ def check_blueprint_refs(blueprints, configs):
                     if not same_subtree(configs.file(key), blueprint):
                         configs.print_issue('bp template', key, blueprint, lineno)
 
+
 def main():
     summary = \
-    """
-    Detect usage of config variables outside of the tree they are
-    defined in.  This script can be used to help detect potential
-    issues if subtrees can be excluded.
-    """
+        """
+        Detect usage of config variables outside of the tree they are
+        defined in.  This script can be used to help detect potential
+        issues if subtrees can be excluded.
+        """
     epilog = \
-    """
-    The output is comma separated text of with a header row describing
-    the fields. The header row starts with '#' to allow sorting.
-    """
+        """
+        The output is comma separated text of with a header row describing
+        the fields. The header row starts with '#' to allow sorting.
+        """
 
     parser = argparse.ArgumentParser(description=summary, epilog=epilog)
-    parser.add_argument('path', nargs='?',  default=os.getcwd(), help="Directory to scan")
-    parser.add_argument('--nom', default=False, action='store_true', help="Don't check Mconfig files")
-    parser.add_argument('--nob', default=False, action='store_true', help="Don't check Blueprint files")
+    parser.add_argument('path', nargs='?', default=os.getcwd(), help="Directory to scan")
+    parser.add_argument('--nom', default=False, action='store_true',
+                        help="Don't check Mconfig files")
+    parser.add_argument('--nob', default=False, action='store_true',
+                        help="Don't check Blueprint files")
 
     args = parser.parse_args()
 
@@ -177,6 +187,7 @@ def main():
 
         # Check bps for where configs are referenced
         check_blueprint_refs(blueprints, defs)
+
 
 if __name__ == "__main__":
     main()
