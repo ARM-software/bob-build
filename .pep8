@@ -1,0 +1,5 @@
+[pep8]
+count = True
+max-line-length = 100
+format = pylint
+exclude = test_update_config.py
