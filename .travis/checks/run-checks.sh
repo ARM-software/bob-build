@@ -16,6 +16,15 @@ fold_start 'Check:gofmt'
 fold_end
 ####################
 
+
+####################
+fold_start 'Check:pep8'
+    bash .travis/checks/check-pep8.sh
+    check_result $? "pep8:"
+fold_end
+####################
+
+
 ####################
 fold_start 'Check:signoff'
     git log  --pretty=oneline | head -n 10 # Very useful for debug we should keep this
