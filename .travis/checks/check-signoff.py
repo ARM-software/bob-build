@@ -3,8 +3,8 @@
 from __future__ import print_function
 
 import os
-import sys
 import subprocess
+import sys
 
 GREEN = '\033[32;1m'
 WARNING = '\033[33;1m'
@@ -101,6 +101,7 @@ def main():
             print(GREEN + "Commit: {} is ok".format(sha) + ENDC)
 
         return status_code
+
 
 if __name__ == "__main__":
     sys.exit(main())
