@@ -97,5 +97,6 @@ class ColorFormatter(logging.Formatter):
         paint = self.colors.get(log_msg.levelname)
         if paint and self.enabled:
             log_msg = deepcopy(log_msg)
-            log_msg.levelname = ColorFormatter.color_fmt.format(paint) + log_msg.levelname + ColorFormatter.reset
+            log_msg.levelname = ColorFormatter.color_fmt.format(paint) + \
+                log_msg.levelname + ColorFormatter.reset
         return logging.Formatter.format(self, log_msg)

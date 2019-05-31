@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import re
-import logging
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 def config_options_in_menu(data, menu):
     output = {}
@@ -28,14 +29,16 @@ def config_options_in_menu(data, menu):
             output[k] = configs[k]
     return output
 
+
 def check_depends(depends, value):
-    """Check if the config identified in value is a simple dependency listed in the depends expression.
+    """Check if the config identified in value is a simple dependency
+    listed in the depends expression.
     A simple expression consists of just && and || boolean operators.
     If the expression uses any other operator, return False.
 
     This is used by the menu_parse below to indent dependent configs.
     """
-    if depends == None:
+    if depends is None:
         return False
     if type(depends) == tuple:
         if depends[0] == 'and':
@@ -48,8 +51,9 @@ def check_depends(depends, value):
             return False
     return depends == value
 
+
 def value_of(depends):
-    if depends == None:
+    if depends is None:
         return "y"
     if type(depends) == tuple:
         if len(depends) == 3:
@@ -101,11 +105,13 @@ def value_of(depends):
             raise Exception("Unexpected depend list: " + str(depends))
     return configuration['config'][depends]['value']
 
+
 def can_enable(depends):
     value = value_of(depends)
     if value == 'y':
         return True
     return False
+
 
 def is_visible(cond):
     value = value_of(cond)
@@ -113,11 +119,12 @@ def is_visible(cond):
         return False
     return True
 
+
 def dependency_list(depends):
-    if depends == None:
+    if depends is None:
         return []
     if type(depends) == tuple:
-        if depends[0] in ['and','or','=','!=','<','<=','>','>=']:
+        if depends[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=']:
             return dependency_list(depends[1]) + dependency_list(depends[2])
         elif depends[0] == "not":
             return dependency_list(depends[1])
@@ -129,13 +136,14 @@ def dependency_list(depends):
     return [depends]
 
 
+OPERATOR_FORMAT_MAP = {
+    "and": "&&",
+    "or": "||",
+}
+
+
 def format_dependency_list(depends, skip_parens=False):
     assert depends, "Empty dependency list"
-
-    OPERATOR_FORMAT_MAP = {
-        "and": "&&",
-        "or": "||",
-    }
 
     if type(depends) == tuple:
         if len(depends) == 3:
@@ -173,8 +181,8 @@ def enforce_dependent_values(auto_fix=False):
         if can_enable(c.get('depends')):
             continue
         if c['datatype'] == 'bool' and c['value'] == 'y':
-            logger.warn("unmet direct dependencies: "+
-                    "%s depends on %s" % (i,c['depends']))
+            logger.warn("unmet direct dependencies: " +
+                        "%s depends on %s" % (i, c['depends']))
             if auto_fix:
                 set_config_internal(i, 'n')
             else:
@@ -184,12 +192,16 @@ def enforce_dependent_values(auto_fix=False):
         elif c['datatype'] == 'int':
             set_config_internal(i, 0)
 
+
 __mconfig_dir = ""
+
+
 def get_mconfig_dir():
     """
     Retrieve the path to the input option database.
     """
     return __mconfig_dir
+
 
 def init_config(options_filename, ignore_missing=False):
     from config_system import lex, lex_wrapper, syntax
@@ -212,15 +224,16 @@ def init_config(options_filename, ignore_missing=False):
 
     set_initial_values()
 
+
 def read_profile_file(profile_filename):
     try:
         with open(profile_filename, "rt") as f:
             for line in f:
                 line = line.strip()
                 if line == "":
-                    continue # Ignore blank lines
+                    continue  # Ignore blank lines
                 elif line.startswith("#"):
-                    continue # ignore comment
+                    continue  # ignore comment
                 else:
                     m = re.match(r"([^=]+)=(\"?)(.*)\2", line)
                     if m:
@@ -229,9 +242,10 @@ def read_profile_file(profile_filename):
                             value = re.sub(r"\\(.)", r"\1", value)
                         set_config_if_prompt(key, value, True)
                     else:
-                        raise Exception("Couldn't parse ",line)
+                        raise Exception("Couldn't parse ", line)
     except IOError as e:
         logger.warn("Failed to load non-existing \"%s\" profile" % profile_filename)
+
 
 def read_config_file(config_filename):
     try:
@@ -239,7 +253,7 @@ def read_config_file(config_filename):
             for line in f:
                 line = line.strip()
                 if line == "":
-                    continue # Ignore blank lines
+                    continue  # Ignore blank lines
                 elif line.startswith("#"):
                     m = re.match(r"^#\s*CONFIG_([^=]+) is not set", line)
                     if m:
@@ -248,9 +262,9 @@ def read_config_file(config_filename):
                         set_config_if_prompt(key, value, ("[by user]" in line))
                     # else ignore comment
                 else:
-                    line = line.split("#", 1) # Strip comment from line eg. "xyz # comment"
+                    line = line.split("#", 1)  # Strip comment from line eg. "xyz # comment"
                     comment = line[1] if len(line) > 1 else ""
-                    line = line[0].rstrip() # Remove extra space before comment
+                    line = line[0].rstrip()  # Remove extra space before comment
                     m = re.match(r"CONFIG_([^=]+)=(\"?)(.*)\2", line)
                     if m:
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
@@ -258,21 +272,23 @@ def read_config_file(config_filename):
                             value = re.sub(r"\\(.)", r"\1", value)
                         set_config_if_prompt(key, value, ("by user" in comment))
                     else:
-                        raise Exception("Couldn't parse ",line)
+                        raise Exception("Couldn't parse ", line)
     except IOError as e:
         logger.warn("Failed to load non-existing \"%s\" configuration" % config_filename)
+
 
 def read_config(options_filename, config_filename, ignore_missing):
     init_config(options_filename, ignore_missing)
     read_config_file(config_filename)
     enforce_dependent_values(True)
 
+
 def write_config(config_filename):
     enforce_dependent_values()
     with open(config_filename, "wt") as f:
         for i in sorted(configuration['order']):
             (i_type, i_symbol) = configuration['order'][i]
-            if i_type in ["config","menuconfig"]:
+            if i_type in ["config", "menuconfig"]:
                 c = get_config(i_symbol)
                 mark_set_by_user = " # set by user"
                 if not can_enable(c.get('depends')):
@@ -280,9 +296,9 @@ def write_config(config_filename):
                     continue
                 elif c['datatype'] == "bool":
                     if c['value'] == 'y':
-                        f.write("CONFIG_%s=y" % (i_symbol))
+                        f.write("CONFIG_%s=y" % i_symbol)
                     else:
-                        f.write("# CONFIG_%s is not set" % (i_symbol))
+                        f.write("# CONFIG_%s is not set" % i_symbol)
                         mark_set_by_user = " [by user]"
                 elif c['datatype'] == "string":
                     quoted_str = re.sub(r'(["\\])', r'\\\1', c['value'])
@@ -332,38 +348,39 @@ def set_initial_values():
             config[k]['value'] = ''
 
         for i in dependency_list(config[k].get("depends")):
-            config[i].setdefault('rdepends',[]).append(k)
+            config[i].setdefault('rdepends', []).append(k)
 
         if "default_cond" in config[k]:
             for j in config[k]['default_cond']:
                 for i in dependency_list(j['cond']):
-                    config[i].setdefault('rdefault',[]).append(k)
+                    config[i].setdefault('rdefault', []).append(k)
                 if config[k]['datatype'] == "string":
-                    if j['word'] != None:
-                        config[j['word']].setdefault('rdefault',[]).append(k)
+                    if j['word'] is not None:
+                        config[j['word']].setdefault('rdefault', []).append(k)
 
         if "default" in config[k]:
             if config[k]['datatype'] == "string":
-                if config[k]['word'] != None:
-                    config[config[k]['word']].setdefault('rdefault',[]).append(k)
+                if config[k]['word'] is not None:
+                    config[config[k]['word']].setdefault('rdefault', []).append(k)
 
         if "select_if" in config[k]:
             for j in config[k]['select_if']:
                 for i in dependency_list(j[1]):
-                    config[i].setdefault('rselect_if',[]).append(k)
+                    config[i].setdefault('rselect_if', []).append(k)
 
     # Check for dependency cycles
     for k in config:
-        if k in config[k].get('rdepends',[]):
+        if k in config[k].get('rdepends', []):
             logger.error("%s depends on itself" % k)
             config[k]['rdepends'].remove(k)
-        if k in config[k].get('rdefault',[]):
+        if k in config[k].get('rdefault', []):
             logger.error("The default value of %s depends on itself" % k)
             config[k]['rdefault'].remove(k)
 
     # Set values using defaults and taking into account dependencies
     for k in config:
         update_defaults(k)
+
 
 def update_choice_default(c):
     """Update a choice group to select the best default"""
@@ -375,11 +392,11 @@ def update_choice_default(c):
         higher priority"""
 
         config = get_config(k)
-        rank = 5;
+        rank = 5
 
         if not can_enable(config.get('depends')):
             # Lowest rank - cannot be enabled
-            return (6, config['position'])
+            return 6, config['position']
 
         if len(config.get("selected_by")) > 0:
             rank = 1
@@ -387,19 +404,19 @@ def update_choice_default(c):
             if k == r:
                 rank = 2
         else:
-            for i in config.get("default_cond",[]):
+            for i in config.get("default_cond", []):
                 if can_enable(i['cond']) and i['val'] == 'y':
                     rank = 3
                     break
             else:
-                if config.get("default","n") == "y":
+                if config.get("default", "n") == "y":
                     rank = 4
 
-        return (rank, config['position'])
+        return rank, config['position']
 
     selection = choice_group.get("selected")
     requested = choice_group.get("requested_value")
-    s_rank = (100,0) # Higher than any other
+    s_rank = (100, 0)  # Higher than any other
     if selection is not None:
         s_rank = choice_rank(selection, requested)
 
@@ -415,6 +432,7 @@ def update_choice_default(c):
 
     if selection != choice_group.get("selected"):
         set_config_internal(selection, 'y')
+
 
 def update_defaults(k):
     """Set a configuration option to the correct default value if it hasn't
@@ -434,7 +452,7 @@ def update_defaults(k):
     if "default_cond" in c:
         for i in c['default_cond']:
             if can_enable(i['cond']):
-                if (c['datatype'] == "string" and i['word'] != None):
+                if c['datatype'] == "string" and i['word'] is not None:
                     found_config = config[i['word']]
                     set_config_internal(k, found_config['value'])
                 else:
@@ -443,7 +461,7 @@ def update_defaults(k):
 
     # None of the conditioned defaults match
     if "default" in c:
-        if (c['datatype'] == "string" and c['word'] != None):
+        if c['datatype'] == "string" and c['word'] is not None:
             found_config = config[c['word']]
             set_config_internal(k, found_config['value'])
         else:
@@ -458,23 +476,26 @@ def update_defaults(k):
     elif c['datatype'] == "int":
         set_config_internal(k, 0)
 
-def set_config_if_prompt(key, value, is_user_set = True):
+
+def set_config_if_prompt(key, value, is_user_set=True):
     config = configuration['config']
-    logger.debug("Trying to set %s %s" % (key,value))
+    logger.debug("Trying to set %s %s" % (key, value))
     if key not in config:
         logger.warn("Ignoring unknown configuration option %s" % key)
         return
     config[key]['is_new'] = False
     logger.debug(config[key])
     if 'title' in config[key]:
-        logger.debug("Setting %s : %s " % (key,value))
+        logger.debug("Setting %s : %s " % (key, value))
         set_config(key, value, is_user_set)
+
 
 def set_config_internal(key, value):
     # Internally most calls to set_config are not (directly) the result of the
     # user specifying the value, so this helper function avoids the need to
     # explictly set is_user_set=False on every call
-    set_config(key, value, is_user_set = False)
+    set_config(key, value, is_user_set=False)
+
 
 def set_config_selectifs(key):
     config = configuration['config']
@@ -487,7 +508,8 @@ def set_config_selectifs(key):
                 # No longer forced, so turn off if previously forced
                 force_config(k[0], 'n', key)
 
-def set_config(key, value, is_user_set = True):
+
+def set_config(key, value, is_user_set=True):
     config = configuration['config']
     if key not in config:
         logger.warn("Ignoring unknown configuration option %s" % key)
@@ -499,14 +521,16 @@ def set_config(key, value, is_user_set = True):
             # Must be y or n
             if value not in ['y', 'n']:
                 logger.warn("Ignoring boolean configuration option %s with non-boolean value '%s'. "
-                             "Please use 'y' or 'n'" % (key, value))
+                            "Please use 'y' or 'n'" % (key, value))
                 return
         elif config[key]['datatype'] == 'int':
             # Must convert to an integer
             try:
                 value = int(value)
             except ValueError:
-                logger.warn("Ignoring integer configuration option %s with non-integer value '%s'" % (key, value))
+                logger.warn(
+                    "Ignoring integer configuration option %s with non-integer value '%s'" % (
+                        key, value))
                 return
 
     # Record user specified value even if it is (currently) impossible
@@ -542,7 +566,7 @@ def set_config(key, value, is_user_set = True):
             # Member of a choice group - unset all other items
             for k in configuration['choice'][group]['configs']:
                 if k != key:
-                    set_config(k, 'n', is_user_set = is_user_set)
+                    set_config(k, 'n', is_user_set=is_user_set)
                     if get_config(k)['value'] == 'y':
                         # Failed to turn the other option off, so set this to n
                         config[key]['value'] = 'n'
@@ -593,6 +617,7 @@ def set_config(key, value, is_user_set = True):
         for k in config[key]['rselect_if']:
             set_config_selectifs(k)
 
+
 # For 'select' options
 def force_config(key, value, source):
     config = configuration['config']
@@ -617,48 +642,56 @@ def force_config(key, value, source):
     else:
         update_defaults(key)
 
+
 def get_config(key):
     return configuration['config'][key]
+
 
 def get_config_bool(key):
     c = get_config(key)
     assert c['datatype'] == 'bool', \
-           'Config option %s is not a bool (has type %s)' % (key, c['datatype'])
+        'Config option %s is not a bool (has type %s)' % (key, c['datatype'])
     if c['value'] == 'y':
         return True
     else:
         return False
 
+
 def get_config_int(key):
     c = get_config(key)
     assert c['datatype'] == 'int', \
-           'Config option %s is not an int (has type %s)' % (key, c['datatype'])
+        'Config option %s is not an int (has type %s)' % (key, c['datatype'])
     return int(c['value'])
+
 
 def get_config_string(key):
     c = get_config(key)
     assert c['datatype'] == 'string', \
-           'Config option %s is not a string (has type %s)' % (key, c['datatype'])
+        'Config option %s is not a string (has type %s)' % (key, c['datatype'])
     return c['value']
 
+
 def get_menu_depends(type, value):
-    if type in ["config","menuconfig"]:
+    if type in ["config", "menuconfig"]:
         return configuration['config'][value].get('depends')
     elif type in ["choice"]:
         return configuration['choice'][value].get('depends')
     elif type in ["menu"]:
         return configuration['menu'][value].get('depends')
 
+
 def get_menu_visible(type, value):
-    if type in ["config","menuconfig"]:
+    if type in ["config", "menuconfig"]:
         return configuration['config'][value].get('visible_cond')
     elif type in ["choice"]:
         return configuration['choice'][value].get('visible_cond')
     elif type in ["menu"]:
         return configuration['menu'][value].get('visible_cond')
 
+
 def get_config_list():
     return configuration['config'].keys()
+
 
 def get_menu_title(number):
     if number in configuration['menu']:
@@ -669,8 +702,12 @@ def get_menu_title(number):
             return configuration['choice'][number]['title']
     return 'Configuration'
 
+
 def get_title_bar():
-    return "Configuration System" if ('title_bar' not in configuration) else configuration['title_bar']
+    if 'title_bar' in configuration:
+        return configuration['title_bar']
+    return "Configuration System"
+
 
 class Menu(object):
     def __init__(self, menu_number):
@@ -686,20 +723,23 @@ class Menu(object):
         elif menu_number in configuration['choice']:
             # Find currently selected entry
             while self.items[self.selection].get_value() != 'y':
-                if self.selection < len(self.items)-1:
+                if self.selection < len(self.items) - 1:
                     self.selection += 1
                 else:
                     break
 
         while not self.items[self.selection].can_enable():
-            if self.selection < len(self.items)-1:
+            if self.selection < len(self.items) - 1:
                 self.selection += 1
             else:
                 break
+
     def __getitem__(self, key):
         return self.items[key]
+
     def get_selection(self):
         return self[self.selection]
+
 
 def display_value(value, datatype):
     if datatype == "int":
@@ -710,16 +750,20 @@ def display_value(value, datatype):
         return '*'
     return ' '
 
+
 def get_default_style():
-    return 'window' # default style
+    return 'window'  # default style
+
 
 class StyledText(object):
     def __init__(self):
         self.style = get_default_style()
         self.text = ""
+
     def __init__(self, text):
         self.style = get_default_style()
         self.text = text
+
 
 class MenuItem(object):
     def __init__(self, type, value):
@@ -732,7 +776,7 @@ class MenuItem(object):
         if self.type == "config":
             config = get_config(self.value)
 
-            indent = config.get("depends_indent") or 0;
+            indent = config.get("depends_indent") or 0
             # Display "(new)" next to menu options that have no previously selected value
             new_text = " (new)" if config.get('is_new') else ""
 
@@ -744,7 +788,7 @@ class MenuItem(object):
             elif 'choice_group' in config or config['datatype'] != "bool":
                 text_parts.append(StyledText("("))
                 trim_to = max_width - len(config['title']) - indent - len(new_text) - 3
-                trim_to = max(trim_to, 8) # we want to display something
+                trim_to = max(trim_to, 8)  # we want to display something
                 if trim_to >= len(show_value):
                     text_parts.append(StyledText("%s" % show_value))
                 else:
@@ -772,7 +816,7 @@ class MenuItem(object):
             text_parts.append(StyledText("["))
             show_value = display_value(config['value'], config['datatype'])
             trim_to = max_width - len(config['title']) - 5
-            trim_to = max(trim_to, 8) # we want to display something
+            trim_to = max(trim_to, 8)  # we want to display something
             if trim_to >= len(show_value):
                 text_parts.append(StyledText("%s" % show_value))
             else:
@@ -803,16 +847,19 @@ class MenuItem(object):
             return Menu(self.value)
         else:
             raise Exception("Not a menu!")
+
     def is_menu(self):
         if self.type == "menuconfig" and get_config(self.value)['value'] == "n":
             # Prevent entry to a menuconfig that is disabled
             return False
-        return self.type in ["menu","menuconfig","choice"]
+        return self.type in ["menu", "menuconfig", "choice"]
+
     def needs_inputbox(self):
         if self.type == "config":
             config = get_config(self.value)
-            return config['datatype'] in ["string","int","hex"]
+            return config['datatype'] in ["string", "int", "hex"]
         return False
+
     def set(self):
         """Sets a boolean option to true"""
         if self.type in ["config", "menuconfig"]:
@@ -823,6 +870,7 @@ class MenuItem(object):
 
             if config['datatype'] == 'bool':
                 set_config(self.value, 'y')
+
     def clear(self):
         """Sets a boolean option to false"""
         if self.type in ["config", "menuconfig"]:
@@ -833,27 +881,31 @@ class MenuItem(object):
 
             if config['datatype'] == 'bool':
                 set_config(self.value, 'n')
+
     def toggle(self):
-        if self.type in ["config","menuconfig"]:
+        if self.type in ["config", "menuconfig"]:
             config = get_config(self.value)
             if config['datatype'] != 'bool':
-                pass # Ignore
+                pass  # Ignore
             elif config['value'] == 'y':
                 self.clear()
             else:
                 self.set()
+
     def get_value(self):
         """Always return a string representation"""
         value = get_config(self.value)['value']
         if get_config(self.value)['datatype'] == 'int':
             value = str(value)
         return value
+
     def set_value(self, new_value):
         """
         set_value operates on any kind of option. new_value will always be a
         string, and set_config will do the appropriate conversions.
         """
         set_config(self.value, new_value)
+
     def can_enable(self):
         if self.type == "config":
             config = get_config(self.value)
@@ -864,19 +916,22 @@ class MenuItem(object):
                     if k != self.value and len(get_config(k)['selected_by']) > 0:
                         return False
         return can_enable(get_menu_depends(self.type, self.value))
+
     def is_visible(self):
         return is_visible(get_menu_visible(self.type, self.value))
+
     def select(self):
         # Choice menus can use select
-        if (self.type in ["config","menuconfig"] and
+        if (self.type in ["config", "menuconfig"] and
                 "choice_group" in get_config(self.value)):
             self.set()
             return True
         return False
+
     def get_help(self):
-        if self.type in ["config","menuconfig"]:
+        if self.type in ["config", "menuconfig"]:
             config = get_config(self.value)
-            text = self.value+": "+config['title']+"\n\n"
+            text = self.value + ": " + config['title'] + "\n\n"
             if "help" in config:
                 text += config['help']
             else:
@@ -884,7 +939,7 @@ class MenuItem(object):
             return text
         elif self.type in ["choice"]:
             choice = configuration['choice'][self.value]
-            text = choice['title']+"\n\n"
+            text = choice['title'] + "\n\n"
             if "help" in choice:
                 text += choice['help']
             else:
@@ -894,8 +949,10 @@ class MenuItem(object):
             if 'help' in configuration['menu'][self.value]:
                 return configuration['menu'][self.value]['help']
         return "No help available"
+
     def get_title(self):
         return get_config(self.value).get('title')
+
     def reset(self):
         if self.type not in ["config", "menuconfig"]:
             return
@@ -910,18 +967,21 @@ class MenuItem(object):
             group = config['choice_group']
             for k in configuration['choice'][group]['configs']:
                 choice_config = get_config(k)
-                choice_config['is_user_set'] = False # We need to set it to False because update_defaults will ignore otherwise
-            configuration['choice'][group].pop('requested_value', None) # pop if available
+                # We need to set it to False because update_defaults will ignore otherwise
+                choice_config['is_user_set'] = False
+            configuration['choice'][group].pop('requested_value', None)  # pop if available
         else:
-            config.pop('requested_value', None) # pop if available
+            config.pop('requested_value', None)  # pop if available
 
-        config['is_user_set'] = False # We need to set it to False because update_defaults will ignore if user set
+        # We need to set it to False because update_defaults will ignore if user set
+        config['is_user_set'] = False
         update_defaults(self.value)
         logging.info("After reset: %s" % self.get_value())
 
 
 def get_root_menu():
     return Menu(None)
+
 
 def menu_parse(data):
     menus = {None: []}
@@ -962,7 +1022,7 @@ def menu_parse(data):
             menus[inmenu].append(MenuItem('config', i_symbol))
 
             depends_stack.append(i_symbol)
-        elif i_type =="menuconfig":
+        elif i_type == "menuconfig":
             config = data['config'][i_symbol]
             inmenu = config.get('inmenu')
 
@@ -990,5 +1050,5 @@ def menu_parse(data):
 
             menus[inmenu].append(MenuItem('choice', i_symbol))
         else:
-            raise Exception("Unexpected item: ",data['order'][i])
+            raise Exception("Unexpected item: ", data['order'][i])
     return menus

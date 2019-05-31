@@ -27,8 +27,11 @@ from config_system import general, log_handlers
 
 logger = logging.getLogger(__name__)
 
-mainwindow_help_text = "Use arrow keys to navigate the menu. <Enter> selects submenus. Pressing <Y> enables option, " \
-                       "<N> disables. Press <Esc><Esc> to exit, <?> for Help, </> for Search, <r> to Reset option to default value"
+mainwindow_help_text = (
+    "Use arrow keys to navigate the menu. <Enter> selects submenus. Pressing <Y> enables option, "
+    "<N> disables. Press <Esc><Esc> to exit, <?> for Help, </> for Search, <r> to Reset option to "
+    "default value"
+)
 # Character "@" will be replaced with " " and set appropriate color
 legend_help_text = "Legend: [*] - enabled, [ ] - disabled, [@] - set by user"
 
@@ -129,7 +132,7 @@ def window_border(window, title, menu_bar):
 
     lit_border(window, h, w, bar=menu_bar)
 
-    if title == None:
+    if title is None:
         return
 
     title = " " + title + " "
@@ -155,7 +158,7 @@ def wrap_text(window, text, y, x, w, max_y=None, y_offset=0):
             next_text = text[b + 1:]
             text = text[:b]
 
-        if window and ypos >= y and (max_y == None or ypos < max_y):
+        if window and ypos >= y and (max_y is None or ypos < max_y):
             window.addstr(ypos, x, text)
 
         ypos += 1
@@ -206,7 +209,7 @@ def draw_background(stdscr):
 
 def fit_window(stdscr, win_h, win_w):
     (height, width) = stdscr.getmaxyx()
-    if win_h == None:
+    if win_h is None:
         (win_h, win_w) = (height - 4, width - 5)
     else:
         if win_h > height - 4:
@@ -217,7 +220,7 @@ def fit_window(stdscr, win_h, win_w):
     y = int((height - win_h) / 2)
     x = int((width - win_w) / 2)
 
-    return (win_h, win_w, y, x)
+    return win_h, win_w, y, x
 
 
 def draw_window(stdscr, window, title, menu_bar, win_h=None, win_w=None):
@@ -249,7 +252,8 @@ def draw_legend(window, y, x, width):
     for text_line in legend.splitlines():
         position = text_line.find("@")
         if position != -1:
-            window.addch(legend_draw_start, x + position, " ", attr["option_set_by_user"])  # override char
+            # override char
+            window.addch(legend_draw_start, x + position, " ", attr["option_set_by_user"])
         legend_draw_start += 1
     return y
 
@@ -356,26 +360,24 @@ def draw_prompt(stdscr, window, menu_bar, prompt, input_box=None, title=None,
     # Calculate the number of lines needed
     text_height = wrap_text(None, prompt, 4, x_padding, text_width)
 
-    if input_box != None:
+    if input_box is not None:
         text_height += 3
         text_box_width = min(max(70, len(input_box) + 3), width - 8)
         if text_box_width < len(input_box) + 3:
             trim_amt = len(input_box) + 3 - text_box_width
             if trim_amt > cursor_pos - 10:
                 trim_amt = max(cursor_pos - 10, 0)
-                input_box = input_box[trim_amt:trim_amt + text_box_width - 2]
+                input_box = input_box[trim_amt: trim_amt + text_box_width - 2]
             else:
                 input_box = input_box[trim_amt:]
             cursor_pos -= trim_amt
         win_w = max(win_w, text_box_width + 4)
 
-    (win_h, win_w) = draw_window(stdscr, window, title, menu_bar,
-                                 text_height, win_w)
+    (win_h, win_w) = draw_window(stdscr, window, title, menu_bar, text_height, win_w)
 
-    wrap_text(window, prompt, 1, x_padding, text_width, max_y=win_h - 3,
-              y_offset=scroll_pos)
+    wrap_text(window, prompt, 1, x_padding, text_width, max_y=win_h - 3, y_offset=scroll_pos)
 
-    if input_box != None:
+    if input_box is not None:
         lit_border(window, 3, text_box_width, win_h - 6, 2)
         window.addstr(win_h - 5, 3, input_box)
         window.move(win_h - 5, 3 + cursor_pos)
@@ -389,8 +391,7 @@ def prompt(stdscr, window, text, options=["OK"]):
     scroll_pos = 0
 
     while True:
-        (max_scroll, page_size) = draw_prompt(stdscr, window, menu_bar, text,
-                                              scroll_pos=scroll_pos)
+        (max_scroll, page_size) = draw_prompt(stdscr, window, menu_bar, text, scroll_pos=scroll_pos)
         window.move(*menu_bar.selection_pos)
 
         stdscr.noutrefresh()
@@ -451,7 +452,7 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
                 value = value[:cursor_pos] + value[cursor_pos + 1:]
         elif c == curses.KEY_DC:
             value = value[:cursor_pos] + value[cursor_pos + 1:]
-        elif c < 256 and c >= 32:
+        elif 32 <= c < 256:
             value = value[:cursor_pos] + chr(c) + value[cursor_pos:]
             cursor_pos += 1
         elif c == curses.KEY_LEFT:
@@ -467,8 +468,8 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
 
 
 def item_inputbox(stdscr, window, menu_item):
-    (success, value) = inputbox(stdscr, window,
-                                value=menu_item.get_value(), title=menu_item.get_title())
+    (success, value) = inputbox(stdscr, window, value=menu_item.get_value(),
+                                title=menu_item.get_title())
     if success:
         menu_item.set_value(value)
 
@@ -484,8 +485,8 @@ def get_menu_location(value):
 
 
 def search(stdscr, window):
-    (success, string) = inputbox(stdscr, window,
-                                 title="Search", prompt="Enter substring to search for")
+    (success, string) = inputbox(stdscr, window, title="Search",
+                                 prompt="Enter substring to search for")
     if not success:
         return
     string = string.lower()
@@ -493,8 +494,8 @@ def search(stdscr, window):
     for i in general.get_config_list():
         config = general.get_config(i)
         if (string in i.lower() or
-                string in (config.get("title") or "").lower()
-                or string in (config.get("help") or "").lower()):
+                string in (config.get("title") or "").lower() or
+                string in (config.get("help") or "").lower()):
             results += "Symbol: %s [=%s]\n" % (i, config["value"])
             results += "Type  : %s\n" % (config["datatype"],)
             if "title" in config:
@@ -618,16 +619,13 @@ def gui_main(stdscr):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="Path to the input configuration file (*.config)")
-    parser.add_argument("-o", "--output",
-                        help="Path to the output file")
+    parser.add_argument("-o", "--output", help="Path to the output file")
     parser.add_argument("-d", "--database", default="Mconfig",
                         help="Path to the configuration database (Mconfig)")
-    parser.add_argument("--debug", action="store_true", dest="debug",
-                        help="Enable debug logging")
+    parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debug logging")
     parser.add_argument("-p", "--plugin", action="append",
-                        help="Post configuration plugin to execute",
-                        default=[])
-    parser.add_argument("--ignore-missing", dest="ignore_missing", action="store_true", default=False,
+                        help="Post configuration plugin to execute", default=[])
+    parser.add_argument("--ignore-missing", action="store_true", default=False,
                         help="Ignore missing database files included with 'source'")
     parser.add_argument("args", nargs="*")
     return parser.parse_args()
@@ -639,7 +637,8 @@ def main():
 
     # The eventual destination is stdout with the above formatting
     errHandler = logging.StreamHandler(sys.stderr)
-    formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s", errHandler.stream.isatty())
+    formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s",
+                                            errHandler.stream.isatty())
     errHandler.setFormatter(formatter)
 
     # Setup a buffer to store messages

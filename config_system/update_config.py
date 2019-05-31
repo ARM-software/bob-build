@@ -41,8 +41,9 @@ root_logger.addHandler(stream)
 
 logger = logging.getLogger(__name__)
 
-
 CONFIG_ARG_RE = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
+
+
 def parse_config_arg(arg):
     """ Parse a KEY=VALUE command-line argument """
     m = CONFIG_ARG_RE.match(arg)
@@ -91,8 +92,8 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
     # Check this *after* dependencies. This allows users to investigate why an
     # option with unmet dependencies wasn't enabled, even if it isn't user-settable.
     if not opt.get("title"):
-        logger.error("%s=%s was ignored; it has no title, so is not user-settable (%s has no unmet dependencies)",
-                     key, requested_value, key)
+        logger.error("%s=%s was ignored; it has no title, so is not user-settable "
+                     "(%s has no unmet dependencies)", key, requested_value, key)
         return
 
     logger.error("%s=%s was ignored or overriden. Value is '%s' %s %s",

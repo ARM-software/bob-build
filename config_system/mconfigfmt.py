@@ -21,7 +21,7 @@ from config_system.lex_wrapper import LexWrapper
 
 
 def perform_formatting(file_path, output):
-    """Call LexWrapper class to call PLY lexer facade, then get back outcome with formatting principles
+    """Call LexWrapper class to call PLY lexer facade, then get back outcome with formatting rules
     :param file_path: Input file path
     :param output: handle to file/stdout or file path (only if original file in use)
     """

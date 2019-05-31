@@ -28,7 +28,7 @@ from argparse import ArgumentParser
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 CFG_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(CFG_DIR)
-from config_system import general
+from config_system import general  # nopep8: E402 module level import not at top of file
 
 
 def runtest(name):
@@ -45,7 +45,7 @@ def runtest(name):
 
     with open(name) as f:
         for line_number, line in enumerate(f):
-            m = re.match("# (ASSERT|SET): (\S+)=(.+)", line)
+            m = re.match(r"# (ASSERT|SET): (\S+)=(.+)", line)
             if not m:
                 continue
             action, key, value = m.groups()
@@ -71,7 +71,7 @@ def exe_conf_and_read_result(name):
     config = {}
     with open(".config") as f:
         for line in f:
-            m = re.match("CONFIG_(\S+)=(\S+)", line)
+            m = re.match(r"CONFIG_(\S+)=(\S+)", line)
             if not m:
                 continue
             config[m.group(1)] = m.group(2)
@@ -95,7 +95,7 @@ def runkconftest(name):
 
     with open(name) as f:
         for line_number, line in enumerate(f):
-            m = re.match("# (ASSERT|SET): (\S+)=(.+)", line)
+            m = re.match(r"# (ASSERT|SET): (\S+)=(.+)", line)
             if not m:
                 continue
             action, key, value = m.groups()

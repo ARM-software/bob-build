@@ -25,7 +25,7 @@ import tempfile
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 CFG_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(CFG_DIR)
-import mconfigfmt
+import mconfigfmt  # nopep8: E402 module level import not at top of file
 
 
 def run_test(name, expected_output):
