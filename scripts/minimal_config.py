@@ -27,10 +27,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BOB_DIR = os.path.dirname(SCRIPT_DIR)
 CFG_DIR = os.path.join(BOB_DIR, "config_system")
 sys.path.append(CFG_DIR)
-import config_system
+import config_system  # nopep8: E402 module level import not at top of file
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)
 logger = logging.getLogger(__name__)
+
 
 # This script will read the config file and output a minimal json file
 # containing just the user settable options.
@@ -56,7 +57,8 @@ def generate_config_json(database_fname, config_fname, ignore_missing):
             elif datatype == "string":
                 configs[key] = value
             else:
-                logger.critical("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
+                msg = "Invalid config type: %s (with value '%s')\n"
+                logger.critical(msg % (datatype, str(value)))
                 sys.exit(1)
 
     return json.dumps(configs,

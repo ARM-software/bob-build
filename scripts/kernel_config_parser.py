@@ -37,8 +37,8 @@ def option_enabled(kdir, option):
                     except ValueError:
                         pass
         except IOError as e:
-            logger.warning("Failed to open the kernel config file in %s: Couldn't check for option %s",
-                            config_file, option)
+            msg = "Failed to open the kernel config file in %s: Couldn't check for option %s"
+            logger.warning(msg, config_file, option)
         g_kernel_configs[kdir] = config
 
     return g_kernel_configs[kdir].get(option) == 'y'

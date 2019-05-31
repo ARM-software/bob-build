@@ -38,6 +38,7 @@ kernel_search_paths = [
     "{kdir}/include/uapi"
 ]
 
+
 def kbuild_to_cflag(option):
     parts = option.split("=", 1)
 
@@ -48,19 +49,20 @@ def kbuild_to_cflag(option):
 
     if value in ['m', 'y']:
         cflag = str.format("-D{}=1", key)
-    elif value =='n':
+    elif value == 'n':
         cflag = str.format("-U{}", key)
     else:
         cflag = str.format("-D{}={}", key, value)
 
     return cflag
 
+
 def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_args, extra_cflags):
     """
     Invoke an out of tree kernel build.
     """
     # Invoke the kernel build system
-    cmd = [make_command, "-C", kdir, "M="+module_dir, "EXTRA_CFLAGS="+extra_cflags]
+    cmd = [make_command, "-C", kdir, "M=" + module_dir, "EXTRA_CFLAGS=" + extra_cflags]
     cmd.extend(make_args)
     try:
         subprocess.check_call(cmd)
@@ -96,8 +98,9 @@ def get_tool_abspath(tool):
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
-    parser = argparse.ArgumentParser(description="Encapsulate an out-of-tree kernel module build, "
-                                     "where the build does not modify the source directory")
+    cli_description = "Encapsulate an out-of-tree kernel module build, " \
+                      "where the build does not modify the source directory"
+    parser = argparse.ArgumentParser(description=cli_description)
     parser.add_argument("--output", "-o", required=True,
                         help="Kernel module to build (including output path)")
     parser.add_argument("--sources", "-s", metavar="FILE", nargs="+", required=True,
@@ -169,7 +172,8 @@ if __name__ == "__main__":
     for src in args.sources:
         src_rel = os.path.relpath(os.path.abspath(src), root)
         if src_rel.startswith("../"):
-            logger.error("Source path: %s doesn't share common root directory: %s", src, args.common_root)
+            msg = "Source path: %s doesn't share common root directory: %s"
+            logger.error(msg, src, args.common_root)
             sys.exit(1)
 
         dest = os.path.join(output_dir, src_rel)
@@ -184,31 +188,32 @@ if __name__ == "__main__":
 
     make_args = args.make_args
     make_args.extend(args.kbuild_options)
-    make_args.append("ARCH="+arch)
+    make_args.append("ARCH=" + arch)
 
     # CROSS_COMPILE is still required with CC=clang
     if cross_compile:
-        make_args.append("CROSS_COMPILE="+cross_compile)
+        make_args.append("CROSS_COMPILE=" + cross_compile)
     if target_cc:
-        make_args.append("CC="+target_cc)
+        make_args.append("CC=" + target_cc)
     if host_cc:
-        make_args.append("HOSTCC="+host_cc)
+        make_args.append("HOSTCC=" + host_cc)
     if args.clang_triple:
-        make_args.append("CLANG_TRIPLE="+args.clang_triple)
+        make_args.append("CLANG_TRIPLE=" + args.clang_triple)
     if args.extra_symbols is not None:
         extra_symbols = [os.path.abspath(d) for d in args.extra_symbols]
-        make_args.append("KBUILD_EXTRA_SYMBOLS="+" ".join(extra_symbols))
+        make_args.append("KBUILD_EXTRA_SYMBOLS=" + " ".join(extra_symbols))
 
     if args.jobs:
-        make_args.append("-j"+str(args.jobs))
+        make_args.append("-j" + str(args.jobs))
     else:
         # If the following env var is set, we are running in a build
         # farm where we should avoid increasing thread
         # count. Therefore leave make to run with a single core.
         # If not, build kernel modules with the number of CPUs we have.
         if os.getenv("MPDTI_BUILD_PARALLELISM") is None:
-            make_args.append("-j"+str(multiprocessing.cpu_count()))
+            make_args.append("-j" + str(multiprocessing.cpu_count()))
 
     module_ko = os.path.basename(args.output)
     abs_module_dir = os.path.abspath(args.module_dir)
-    build_module(output_dir, module_ko, abs_kdir, abs_module_dir, make_command, make_args, extra_cflags)
+    build_module(output_dir, module_ko, abs_kdir, abs_module_dir,
+                 make_command, make_args, extra_cflags)

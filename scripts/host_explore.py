@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 def check_output(command, dir=None):
-    '''
+    """
     Executes the command, while making sure the executable is found in the $PATH,
     and returns the output. If the executable wasn't found, returns an empty string.
     The 'command' needs to be an array of arguments.
-    '''
+    """
 
     output = ''
     try:
@@ -44,14 +44,14 @@ def check_output(command, dir=None):
 
 
 def pkg_config():
-    '''
+    """
     If package configuration is enabled, then for each library in PKG_CONFIG_PACKAGES, the
     pkg-config utility will be invoked to populate configuration variables.
     The cflags, linker paths and libraries will be assigned to XXX_CFLAGS, XXX_LDFLAGS
     and XXX_LIBS respectively, where XXX is the uppercase package name with any non
     alphanumeric letters replaced by '_'.
     Where no package information exists the default configuration value will be used.
-    '''
+    """
     if get_config_bool('PKG_CONFIG'):
         cmd = ['pkg-config']
         pkg_config_flags = get_config_string('PKG_CONFIG_FLAGS')
@@ -73,13 +73,14 @@ def pkg_config():
 
         for pkg in pkg_config_packages_list:
             pkg = pkg.strip()
-            if pkg == '': continue
+            if pkg == '':
+                continue
             # convert library name to upper case alpha numeric
             pkg_uc_alnum = re.sub('[^a-zA-Z0-9_]', '_', pkg.upper())
 
-            pkg_config_cflags = "%s%s" % (pkg_uc_alnum, '_CFLAGS' )
-            pkg_config_ldflags = "%s%s" % (pkg_uc_alnum, '_LDFLAGS' )
-            pkg_config_libs = "%s%s" % (pkg_uc_alnum, '_LDLIBS' )
+            pkg_config_cflags = "%s%s" % (pkg_uc_alnum, '_CFLAGS')
+            pkg_config_ldflags = "%s%s" % (pkg_uc_alnum, '_LDFLAGS')
+            pkg_config_libs = "%s%s" % (pkg_uc_alnum, '_LDLIBS')
 
             cflags = check_output(cmd + [pkg, '--cflags'])
             if cflags != '':

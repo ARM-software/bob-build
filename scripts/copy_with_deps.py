@@ -26,6 +26,7 @@ import sys
 RE_INCLUDE = re.compile(r'^\s*#include ["<](.*)[">]')
 cached_deps = dict()
 
+
 def get_include_statements(fname):
     # This reads kernel sources which could contain non-ascii
     # characters, so force utf-8.
@@ -41,12 +42,14 @@ def get_include_statements(fname):
             ret += [m.groups()[0]]
     return ret
 
+
 def search_for_include(include, search_path):
     for d in search_path:
         test_path = os.path.join(d, include)
         if os.path.isfile(test_path):
             return test_path
     return None
+
 
 def get_includes(fname, search_path, visited, extra_includes=[]):
     global cached_deps
@@ -71,10 +74,12 @@ def get_includes(fname, search_path, visited, extra_includes=[]):
     cached_deps[fname] = ret
     return ret
 
+
 def write_depfile(depfile, target_name, deps):
     with open(depfile, "wt") as fp:
         fp.write("%s: \\\n    " % target_name)
         fp.write(" \\\n    ".join(deps) + "\n")
+
 
 def parse_args():
     ap = argparse.ArgumentParser()
@@ -85,6 +90,7 @@ def parse_args():
     ap.add_argument("--include-dir", "-I", metavar="INCLUDE_DIR", action="append", default=[])
     ap.add_argument("source", nargs="+")
     return ap.parse_args()
+
 
 def copy_if_newer(src, dest):
     try:
@@ -101,6 +107,7 @@ def copy_if_newer(src, dest):
 
     shutil.copy(src, dest)
 
+
 def copy_with_deps(src, dest, search_path, includes):
     deps = []
 
@@ -114,6 +121,7 @@ def copy_with_deps(src, dest, search_path, includes):
     copy_if_newer(src, dest)
 
     return deps
+
 
 def main(args):
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
@@ -132,6 +140,7 @@ def main(args):
     deps = sorted(set(deps))
 
     write_depfile(args.depfile, args.target_name, deps)
+
 
 if __name__ == "__main__":
     main()

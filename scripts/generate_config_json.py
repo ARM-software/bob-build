@@ -23,12 +23,13 @@ import logging
 import os
 import sys
 
-# The config system is in the directory above, inside package config system, so add it to the python path
+# The config system is in the directory above, inside package config system,
+# so add it to the python path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BOB_DIR = os.path.dirname(SCRIPT_DIR)
 CFG_DIR = os.path.join(BOB_DIR, "config_system")
 sys.path.append(CFG_DIR)
-import config_system
+import config_system  # nopep8: E402 module level import not at top of file
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
