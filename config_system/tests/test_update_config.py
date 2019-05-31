@@ -15,16 +15,9 @@
 
 import argparse
 import logging
-import os
 import pytest
-import pytest_catchlog
-import pytest_mock
-import sys
-import tempfile
 
-from config_system import general
 import update_config
-
 
 ignored_option_testdata = [
     # Attempt to set a non-user-settable option
