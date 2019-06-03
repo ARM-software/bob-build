@@ -28,8 +28,8 @@
 
 from __future__ import print_function
 
-import os
 import argparse
+import os
 import subprocess
 
 parser = argparse.ArgumentParser()
@@ -41,16 +41,16 @@ args = parser.parse_args()
 # These are the dependencies that need to be satisfied
 # Include the dependencies implicit in the ordering specified by top level static_libs
 deps = {
-    "sl_libc.a" : ["sl_libd.a", "sl_libe.a", "sl_libf.a"],
-    "sl_libd.a" : ["sl_libg.a", "sl_libh.a"],
-    "sl_libf.a" : ["sl_libg.a"],
-    "sl_libh.a" : ["sl_libe.a"],
+    "sl_libc.a": ["sl_libd.a", "sl_libe.a", "sl_libf.a"],
+    "sl_libd.a": ["sl_libg.a", "sl_libh.a"],
+    "sl_libf.a": ["sl_libg.a"],
+    "sl_libh.a": ["sl_libe.a"],
 
     # Implicit dependencies in export_static_libs are not followed
-    #"sl_libe.a" : ["sl_libf.a"],
-    #"sl_libg.a" : ["sl_libh.a"],
-    "sl_libe.a" : [],
-    "sl_libg.a" : [],
+    # "sl_libe.a" : ["sl_libf.a"],
+    # "sl_libg.a" : ["sl_libh.a"],
+    "sl_libe.a": [],
+    "sl_libg.a": [],
 }
 
 libs = []
