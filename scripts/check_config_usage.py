@@ -19,9 +19,9 @@ from __future__ import print_function
 
 import argparse
 import fnmatch
-import sys
 import os
 import re
+import sys
 
 
 class Configs:
@@ -95,10 +95,10 @@ def get_config_definitions(mconfigs):
     return configs
 
 
-# Look for all occurences of defined configs in Mconfig files.
+# Look for all occurrences of defined configs in Mconfig files.
 def check_mconfig_refs(mconfigs, configs):
     keyre = str.join('|', configs.keys())
-    re_configs = re.compile(r"(" + keyre + ")")
+    re_configs = re.compile(r"\b(" + keyre + ")\b")
     for mconfig in mconfigs:
         with open(mconfig, 'r') as f:
             lineno = 0
@@ -114,7 +114,7 @@ def check_mconfig_refs(mconfigs, configs):
                         configs.print_issue('Mconfig', key, mconfig, lineno)
 
 
-# Look for all occurences of defined configs in Blueprint files.
+# Look for all occurrences of defined configs in Blueprint files.
 # In blueprint the reference can only occur in a feature or a template
 def check_blueprint_refs(blueprints, configs):
     keyre = str.join('|', configs.keys())
