@@ -28,11 +28,39 @@ function die {
 # ${VAR:-} will substitute an empty string if the variable is unset, which
 # stops `set -u` complaining before `die` is invoked.
 [[ -z ${SRCDIR:-} ]] && die "\$SRCDIR not set"
+[[ -z ${SRCDIR:-} ]] && die "\$SRCDIR not set"
+[[ -z ${PROJ_NAME:-} ]] && die "\$PROJ_NAME not set"
+[[ -z ${OUT:-} ]] && die "\$OUT not set - did you run envsetup.sh and lunch?"
+
 [[ -e ${SRCDIR}/Android.mk ]] && die "${SRCDIR}/Android.mk conflicts with Android.bp. Please remove!"
+
+source "${BOB_DIR}/pathtools.bash"
+
+# TODO: Generate the config file based on the command-line arguments
+BUILDDIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}-config"
+mkdir -p "${BUILDDIR}"
+CONFIG_JSON="${BUILDDIR}/config.json"
+SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
+SOONG_CONFIG_GO_FROM_BOB=$(relative_path "${BOB_DIR}" "${SOONG_CONFIG_GO}")
+
+# Create a Go file containing the path to the config file, which will be
+# compiled into the Soong plugin. This is required because the module factories
+# do not have access to the Soong context when they are called, even though the
+# config file must be loaded before then.
+TMP_GO_CONFIG=$(mktemp)
+sed -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
+    "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"
+rsync --checksum "${TMP_GO_CONFIG}" "${SOONG_CONFIG_GO}"
+rm -f "${TMP_GO_CONFIG}"
 
 # Set up Bob's Android.bp
 pushd "${BOB_DIR}" >&/dev/null
-ln -fs Android.bp.in Android.bp
+TMP_ANDROID_BP=$(mktemp)
+sed -e "s#@@PROJ_NAME@@#${PROJ_NAME}#" \
+    -e "s#@@SOONG_CONFIG_GO@@#${SOONG_CONFIG_GO_FROM_BOB}#" \
+    Android.bp.in > "${TMP_ANDROID_BP}"
+rsync --checksum "${TMP_ANDROID_BP}" Android.bp
+rm -f "${TMP_ANDROID_BP}"
 popd >&/dev/null
 
 # Create an `Android.bp` symlink for every `build.bp` present in the source

@@ -49,8 +49,6 @@ func soongGetConfig() *bobConfig {
 		// TODO: This should not be hard-coded. We should probably get
 		// the config path from the build dir, possibly using different
 		// files depending on the product.
-		jsonPath := "external/bob-build/tests/config.json"
-
 		onceLoadedConfig = &bobConfig{}
 		onceLoadedConfig.Properties = loadConfig(jsonPath)
 		// TODO: This should be chosen based on the config, but hard-code it for now.

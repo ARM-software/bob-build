@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,27 +16,11 @@
  */
 
 /*
- * This file is included when Bob is being run as a standalone binary, i.e. for
- * the Ninja and Android Make generators.
+ * This file is included when Bob is being run as a Soong plugin.
  */
 
 package core
 
-import (
-	"path/filepath"
-)
-
 var (
-	jsonPath = filepath.Join(builddir, "config.json")
+	jsonPath = "@@CONFIG_JSON@@"
 )
-
-type moduleBase struct{}
-
-// configProvider allows the retrieval of configuration
-type configProvider interface {
-	Config() interface{}
-}
-
-func getConfig(ctx configProvider) *bobConfig {
-	return ctx.Config().(*bobConfig)
-}

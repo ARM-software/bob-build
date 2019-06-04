@@ -39,7 +39,6 @@ var (
 	configName = os.Getenv("CONFIGNAME")
 	configOpts = os.Getenv("BOB_CONFIG_OPTS")
 	configPath = filepath.Join(builddir, configName)
-	jsonPath   = filepath.Join(builddir, "config.json")
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
