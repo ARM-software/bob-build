@@ -22,5 +22,6 @@ SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 BOB_DIR="${SCRIPT_DIR}/.."
 
 export SRCDIR="${SCRIPT_DIR}"
+export PROJ_NAME="bob-tests"
 
 "${BOB_DIR}/bootstrap_soong.bash"
