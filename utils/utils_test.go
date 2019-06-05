@@ -108,11 +108,15 @@ func Test_Contains(t *testing.T) {
 }
 
 func Test_Filter(t *testing.T) {
+	testFilter := func(elem string) bool { return unicode.IsUpper(rune(elem[0])) }
 	in := []string{"Alpha", "beta", "Gamma", "Delta", "epsilon"}
-	filtered := Filter(in, func(elem string) bool {
-		return unicode.IsUpper(rune(elem[0]))
-	})
+	filtered := Filter(testFilter, in)
 	assertArraysEqual(t, filtered, []string{"Alpha", "Gamma", "Delta"})
+
+	in2 := []string{"chi", "psi", "Omega"}
+	filtered = Filter(testFilter, in, in2)
+	assertArraysEqual(t, filtered, []string{"Alpha", "Gamma", "Delta", "Omega"})
+
 }
 
 func Test_Difference(t *testing.T) {

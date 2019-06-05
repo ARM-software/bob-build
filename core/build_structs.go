@@ -234,7 +234,7 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 		case reflect.Slice:
 			if field.Type().Elem().Kind() == reflect.String {
 				list := field.Interface().([]string)
-				list = utils.Filter(list, emptyStrFilter)
+				list = utils.Filter(emptyStrFilter, list)
 				field.Set(reflect.ValueOf(list))
 			}
 

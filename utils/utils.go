@@ -96,10 +96,12 @@ func Contains(list []string, x string) bool {
 	return false
 }
 
-func Filter(ss []string, predicate func(string) bool) (ret []string) {
-	for _, s := range ss {
-		if predicate(s) {
-			ret = append(ret, s)
+func Filter(predicate func(string) bool, lists ...[]string) (ret []string) {
+	for _, list := range lists {
+		for _, s := range list {
+			if predicate(s) {
+				ret = append(ret, s)
+			}
 		}
 	}
 	return

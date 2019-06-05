@@ -134,7 +134,7 @@ var (
 func specifyCompilerStandard(varname string, flags []string) string {
 	// Look for the flag setting compiler standard
 	line := ""
-	stdList := utils.Filter(flags, compilerStandard)
+	stdList := utils.Filter(compilerStandard, flags)
 	if len(stdList) > 0 {
 		// Use last definition only
 		std := strings.TrimPrefix(stdList[len(stdList)-1], "-std=")
@@ -216,9 +216,9 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
 	_, _, exportedCflags := m.GetExportedVariables(ctx)
 	cflagsList = append(cflagsList, exportedCflags...)
-	sb.WriteString("LOCAL_CFLAGS := " + strings.Join(utils.Filter(cflagsList, moduleCompileFlags), " ") + "\n")
-	sb.WriteString("LOCAL_CPPFLAGS := " + strings.Join(utils.Filter(m.Properties.Cxxflags, moduleCompileFlags), " ") + "\n")
-	sb.WriteString("LOCAL_CONLYFLAGS := " + strings.Join(utils.Filter(m.Properties.Conlyflags, moduleCompileFlags), " ") + "\n")
+	sb.WriteString("LOCAL_CFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, cflagsList), " ") + "\n")
+	sb.WriteString("LOCAL_CPPFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, m.Properties.Cxxflags), " ") + "\n")
+	sb.WriteString("LOCAL_CONLYFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, m.Properties.Conlyflags), " ") + "\n")
 
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
 	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags)))
@@ -357,9 +357,9 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 
 	if isMultiLib {
 		sb.WriteString("LOCAL_MULTILIB:=both\n")
-		sb.WriteString("LOCAL_LDFLAGS_32:=" + strings.Join(utils.Filter(m.Properties.Ldflags, moduleLinkFlags), " ") + copydtneeded + "\n")
+		sb.WriteString("LOCAL_LDFLAGS_32:=" + strings.Join(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), " ") + copydtneeded + "\n")
 	}
-	sb.WriteString("LOCAL_LDFLAGS:=" + strings.Join(utils.Filter(m.Properties.Ldflags, moduleLinkFlags), " ") + copydtneeded + "\n")
+	sb.WriteString("LOCAL_LDFLAGS:=" + strings.Join(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), " ") + copydtneeded + "\n")
 
 	if tgt == tgtTypeTarget {
 		sb.WriteString("LOCAL_LDLIBS := " + strings.Join(m.Properties.Ldlibs, " ") + "\n")
@@ -647,11 +647,11 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 
 	for _, inout := range inouts {
 		if _, ok := args["headers_generated"]; ok {
-			headers := utils.Filter(inout.out, utils.IsHeader)
+			headers := utils.Filter(utils.IsHeader, inout.out)
 			args["header_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(inout.out, utils.IsSource)
+			sources := utils.Filter(utils.IsSource, inout.out)
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
