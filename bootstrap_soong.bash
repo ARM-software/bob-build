@@ -33,12 +33,24 @@ function die {
 [[ -z ${OUT:-} ]] && die "\$OUT not set - did you run envsetup.sh and lunch?"
 
 [[ -e ${SRCDIR}/Android.mk ]] && die "${SRCDIR}/Android.mk conflicts with Android.bp. Please remove!"
+[[ -f "build/make/core/envsetup.mk" ]] || die "Working dir must be the root of an Android build tree"
+
+# The following variables are optional - give them empty default values.
+BOB_CONFIG_OPTS="${BOB_CONFIG_OPTS-}"
+BOB_CONFIG_PLUGINS="${BOB_CONFIG_PLUGINS-}"
 
 source "${BOB_DIR}/pathtools.bash"
+source "${BOB_DIR}/bootstrap/utils.bash"
 
 # TODO: Generate the config file based on the command-line arguments
 BUILDDIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}-config"
 mkdir -p "${BUILDDIR}"
+
+WORKDIR="$(pwd)" write_bootstrap
+
+# Create symlinks to the config system wrapper scripts
+create_config_symlinks "$(relative_path "${BUILDDIR}" "${BOB_DIR}")" "${BUILDDIR}"
+
 CONFIG_JSON="${BUILDDIR}/config.json"
 SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
 SOONG_CONFIG_GO_FROM_BOB=$(relative_path "${BOB_DIR}" "${SOONG_CONFIG_GO}")

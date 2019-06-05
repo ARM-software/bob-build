@@ -18,10 +18,22 @@
 set -eu
 trap 'echo "*** Unexpected error in $0 ***"' ERR
 
+[[ -z ${ANDROID_BUILD_TOP:-} ]] && { echo "$0: \$ANDROID_BUILD_TOP is not set - did you run 'lunch'?"; exit 1; }
+
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 BOB_DIR="${SCRIPT_DIR}/.."
 
-export SRCDIR="${SCRIPT_DIR}"
+source "${BOB_DIR}/pathtools.bash"
+
+export SRCDIR="$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")"
+export BOB_DIR="$(relative_path "${ANDROID_BUILD_TOP}" "${BOB_DIR}")"
+
+# Change to the working directory
+cd "${ANDROID_BUILD_TOP}"
+
 export PROJ_NAME="bob-tests"
+export CONFIGNAME="bob.config"
+export TOPNAME="build.bp"
+export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 
 "${BOB_DIR}/bootstrap_soong.bash"
