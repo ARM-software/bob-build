@@ -144,11 +144,11 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 	for _, inout := range inouts {
 		if _, ok := args["headers_generated"]; ok {
-			headers := utils.Filter(inout.out, utils.IsHeader)
+			headers := utils.Filter(utils.IsHeader, inout.out)
 			args["headers_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(inout.out, utils.IsSource)
+			sources := utils.Filter(utils.IsSource, inout.out)
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
