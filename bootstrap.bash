@@ -33,6 +33,7 @@ set -e
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
 source "${SCRIPT_DIR}/pathtools.bash"
+source "${SCRIPT_DIR}/bootstrap/utils.bash"
 
 # Use defaults where we can. Generally the caller should set these.
 if [ -z "${SRCDIR}" ] ; then
@@ -83,54 +84,24 @@ if [ -f "${BOOTSTRAP_GLOBFILE}" ]; then
     fi
 fi
 
-# Calculate Bob directory relative to working directory, build directory and absolute
+# Calculate Bob directory relative to the working directory.
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
-BOB_DIR_FROM_BUILD="$(relative_path $(bob_realpath "${BUILDDIR}") "${SCRIPT_DIR}")"
-BOB_DIR_ABS="$(bob_realpath "${SCRIPT_DIR}")"
 
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
 
-source "${BOB_DIR}/bob.bootstrap.version"
-
 # Bootstrap blueprint.
 "${BLUEPRINTDIR}/bootstrap.bash"
 
-# Always use the host_explore config plugin
-BOB_CONFIG_PLUGIN_OPTS="-p ${BOB_DIR}/scripts/host_explore"
-
-# Add any other plugins requested by the caller
-for i in $BOB_CONFIG_PLUGINS; do
-    BOB_CONFIG_PLUGIN_OPTS="$BOB_CONFIG_PLUGIN_OPTS -p $i"
-done
-
 # Configure Bob in the build directory
-sed -e "s|@@WorkDir@@|${WORKDIR}|" \
-    -e "s|@@BuildDir@@|${BUILDDIR}|" \
-    -e "s|@@SrcDir@@|${SRCDIR}|" \
-    -e "s|@@BobDir@@|${BOB_DIR}|" \
-    -e "s|@@PrebuiltOS@@|${PREBUILTOS}|" \
-    -e "s|@@TopName@@|${TOPNAME}|" \
-    -e "s|@@ListFile@@|${BLUEPRINT_LIST_FILE}|" \
-    -e "s|@@ConfigName@@|${CONFIGNAME}|" \
-    -e "s|@@BobConfigOpts@@|${BOB_CONFIG_OPTS}|" \
-    -e "s|@@BobConfigPluginOpts@@|${BOB_CONFIG_PLUGIN_OPTS}|" \
-    -e "s|@@BobBootstrapVersion@@|${BOB_VERSION}|" \
-    "${BOB_DIR}/bob.bootstrap.in" > "${BUILDDIR}/.bob.bootstrap.tmp"
-rsync -c "${BUILDDIR}/.bob.bootstrap.tmp" "${BUILDDIR}/.bob.bootstrap"
+write_bootstrap
 
 if [ ${SRCDIR:0:1} != '/' ]; then
     # Use relative symlinks
-    ln -sf "${BOB_DIR_FROM_BUILD}/config.bash" "${BUILDDIR}/config"
-    ln -sf "${BOB_DIR_FROM_BUILD}/menuconfig.bash" "${BUILDDIR}/menuconfig"
-    ln -sf "${BOB_DIR_FROM_BUILD}/bob.bash" "${BUILDDIR}/bob"
-    ln -sf "${BOB_DIR_FROM_BUILD}/bob_graph.bash" "${BUILDDIR}/bob_graph"
-    ln -sf "${BOB_DIR_FROM_BUILD}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
+    BOB_DIR_FROM_BUILD="$(relative_path $(bob_realpath "${BUILDDIR}") "${SCRIPT_DIR}")"
 else
     # Use absolute symlinks
-    ln -sf "${BOB_DIR_ABS}/config.bash" "${BUILDDIR}/config"
-    ln -sf "${BOB_DIR_ABS}/menuconfig.bash" "${BUILDDIR}/menuconfig"
-    ln -sf "${BOB_DIR_ABS}/bob.bash" "${BUILDDIR}/bob"
-    ln -sf "${BOB_DIR_ABS}/bob_graph.bash" "${BUILDDIR}/bob_graph"
-    ln -sf "${BOB_DIR_ABS}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
+    BOB_DIR_FROM_BUILD="$(bob_realpath "${SCRIPT_DIR}")"
 fi
+create_config_symlinks "${BOB_DIR_FROM_BUILD}" "${BUILDDIR}"
+create_bob_symlinks "${BOB_DIR_FROM_BUILD}" "${BUILDDIR}"
