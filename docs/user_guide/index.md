@@ -11,3 +11,4 @@ a number of use cases and show how to handle them using Bob.
 - [Build Output](build_output.md)
 - [Building Particular Targets](aliases.md)
 - [Build Wrappers](wrappers.md)
+- [Forwarding Libraries](forwarding.md)
