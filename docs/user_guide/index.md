@@ -10,3 +10,4 @@ a number of use cases and show how to handle them using Bob.
 - [Kernel Modules](kernel_modules.md)
 - [Build Output](build_output.md)
 - [Building Particular Targets](aliases.md)
+- [Build Wrappers](wrappers.md)
