@@ -9,3 +9,4 @@ a number of use cases and show how to handle them using Bob.
 - [Code Generation](code_generation.md)
 - [Kernel Modules](kernel_modules.md)
 - [Build Output](build_output.md)
+- [Building Particular Targets](aliases.md)
