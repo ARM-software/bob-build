@@ -11,5 +11,6 @@ a number of use cases and show how to handle them using Bob.
 - [Build Output](build_output.md)
 - [Building Particular Targets](aliases.md)
 - [Build Wrappers](wrappers.md)
+- [Shared Library Versioning](versioning.md)
 - [Forwarding Libraries](forwarding.md)
 - [Android Specifics](android.md)
