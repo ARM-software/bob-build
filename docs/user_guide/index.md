@@ -14,3 +14,4 @@ a number of use cases and show how to handle them using Bob.
 - [Shared Library Versioning](versioning.md)
 - [Forwarding Libraries](forwarding.md)
 - [Android Specifics](android.md)
+- [Using Libraries not Compiled by Bob](libraries_3.md)
