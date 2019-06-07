@@ -12,3 +12,4 @@ a number of use cases and show how to handle them using Bob.
 - [Building Particular Targets](aliases.md)
 - [Build Wrappers](wrappers.md)
 - [Forwarding Libraries](forwarding.md)
+- [Android Specifics](android.md)
