@@ -30,4 +30,27 @@ bob_binary {
 
 The build wrapper is not limited to these two binaries. Arbitrary
 scripts can be used, as long as they supply the output expected of the
-compiler.
+compiler. If the script needs something to run first (probably a
+`bob_generate_source`), this dependency can be specified with
+`generated_deps`. The build wrapper is not expected to change what
+the compiler would output, so these dependencies are order-only. This
+means that the dependency will be up-to date when compilation is done,
+but will not cause recompilation when it changes.
+
+```
+bob_generate_source {
+    name: "wrapcc_config",
+    outs: ["wrapcc_config.json"],
+
+    tool: "wrapcc_config.py",
+    cmd: "${tool}",
+}
+
+bob_binary {
+    name: "less",
+    srcs: ["less.c"],
+
+    build_wrapper: "wrapcc.py",
+    generated_deps: ["wrapcc_config"],
+}
+```
