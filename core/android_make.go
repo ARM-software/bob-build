@@ -210,7 +210,16 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 		sb.WriteString("LOCAL_CLANG := false\n")
 	}
 	srcs := utils.NewStringSlice(m.Properties.getSources(ctx), m.Properties.Build.SourceProps.Specials)
+
+	// Remove sources which are not used in Android (e.g custom sources)
+	nonCompiledDeps := utils.Filter(utils.IsNotCompilableSource, srcs)
+	srcs = utils.Filter(utils.IsCompilableSource, srcs)
+
 	sb.WriteString("LOCAL_SRC_FILES := " + strings.Join(srcs, " ") + "\n")
+
+	if len(nonCompiledDeps) > 0 {
+		sb.WriteString("LOCAL_ADDITIONAL_DEPENDENCIES := " + strings.Join(utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)"), " ") + "\n")
+	}
 
 	sb.WriteString("LOCAL_C_INCLUDES := " + strings.Join(includes, " ") + "\n")
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
@@ -662,7 +671,7 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 			args["header_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(utils.IsSource, inout.out, inout.implicitOuts)
+			sources := utils.Filter(utils.IsNotHeader, inout.out, inout.implicitOuts)
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 		ins := utils.Join(inout.srcIn, inout.genIn)

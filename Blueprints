@@ -49,6 +49,7 @@ bootstrap_go_package {
         "core/graphviz.go",
         "core/install.go",
         "core/kernel_module.go",
+        "core/late_template.go",
         "core/library.go",
         "core/properties.go",
         "core/splitter.go",

@@ -148,7 +148,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 			args["headers_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(utils.IsSource, inout.out)
+			sources := utils.Filter(utils.IsNotHeader, inout.out)
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
@@ -261,7 +261,7 @@ func (l *library) ObjDir() string {
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
-func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
+func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	g := getBackend(ctx)
 	srcs := l.GetSrcs(ctx)
 
@@ -300,7 +300,9 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags, l.Properties.Conlyflags))
 	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags, l.Properties.Cxxflags))
 
-	var objectFiles []string
+	objectFiles := []string{}
+	nonCompiledDeps := []string{}
+
 	for _, source := range srcs {
 		var rule blueprint.Rule
 		args := make(map[string]string)
@@ -325,7 +327,8 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 			args["cxxflags"] = "$cxxflags"
 			rule = cxxRule
 		default:
-			panic(errors.New("Files with extension '" + path.Ext(source) + "' not supported"))
+			nonCompiledDeps = append(nonCompiledDeps, filepath.Join(g.sourcePrefix(), source))
+			continue
 		}
 
 		buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
@@ -352,7 +355,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) []string {
 		objectFiles = append(objectFiles, output)
 	}
 
-	return objectFiles
+	return objectFiles, nonCompiledDeps
 }
 
 // Returns all the source files for a C/C++ library. This includes any sources that are generated.
@@ -456,11 +459,15 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 		args["whole_static_libs"] = strings.Join(wholeStaticLibs, " ")
 	}
 
+	// The archiver rules do not allow adding arguments that the user can
+	// set, so does not support nonCompiledDeps
+	objectFiles, _ := m.library.CompileObjs(ctx)
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      rule,
 			Outputs:   m.outputs(g),
-			Inputs:    m.library.CompileObjs(ctx),
+			Inputs:    objectFiles,
 			Implicits: wholeStaticLibs,
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
@@ -648,7 +655,7 @@ var symlinkRule = pctx.StaticRule("symlink",
 	}, "target")
 
 func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
-	objectFiles := m.CompileObjs(ctx)
+	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
 
 	_, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
@@ -674,7 +681,7 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 			Rule:      sharedLibraryRule,
 			Outputs:   m.outputs(g),
 			Inputs:    objectFiles,
-			Implicits: m.library.Implicits(ctx),
+			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
 			Args:      m.getLibArgs(ctx),
@@ -697,7 +704,7 @@ var executableRule = pctx.StaticRule("executable",
 	"static_libs", "whole_static_libs")
 
 func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
-	objectFiles := m.CompileObjs(ctx)
+	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
 
@@ -708,7 +715,7 @@ func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 			Rule:      executableRule,
 			Outputs:   m.outputs(g),
 			Inputs:    objectFiles,
-			Implicits: m.library.Implicits(ctx),
+			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
 			Args:      m.getLibArgs(ctx),

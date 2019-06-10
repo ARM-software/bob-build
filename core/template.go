@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,6 +87,10 @@ func regReplaceString(rule string, input string, replace string) string {
 	return re.ReplaceAllString(input, replace)
 }
 
+func matchSrcs(input string) string {
+	return "{{match_srcs " + input + "}}"
+}
+
 // ApplyTemplate writes configuration values (from properties) into the string
 // properties in props. This is done recursively.
 func ApplyTemplate(props interface{}, properties *configProperties) {
@@ -96,6 +100,7 @@ func ApplyTemplate(props interface{}, properties *configProperties) {
 	funcmap["split"] = strings.Split
 	funcmap["match"] = regMatch
 	funcmap["replace"] = regReplaceString
+	funcmap["match_srcs"] = matchSrcs
 	propsVal := reflect.Indirect(reflect.ValueOf(props))
 
 	applyTemplateRecursive(propsVal, properties, stringvalues, funcmap)

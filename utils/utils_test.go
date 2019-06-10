@@ -30,9 +30,32 @@ func Test_IsHeader(t *testing.T) {
 	assert.False(t, IsHeader("bla.bin"), "bla.bin")
 }
 
-func Test_IsSource(t *testing.T) {
-	assert.True(t, IsSource("bla.c"), "bla.hpp")
-	assert.False(t, IsSource("bla.h"), "bla.bin")
+func Test_IsNotHeader(t *testing.T) {
+	assert.True(t, IsNotHeader("bla.c"), "bla.c")
+	assert.False(t, IsNotHeader("bla.h"), "bla.h")
+}
+
+func Test_IsCompilableSource(t *testing.T) {
+	assert.True(t, IsCompilableSource("bla.c"), "bla.c")
+	assert.False(t, IsCompilableSource("bla.bbq"), "bla.bbq")
+}
+
+func Test_IsNotCompilableSource(t *testing.T) {
+	assert.True(t, IsNotCompilableSource("bla.txt"), "bla.txt")
+	assert.False(t, IsNotCompilableSource("bla.S"), "bla.S")
+}
+
+func assertArraysEqual(t *testing.T, test []string, correct []string) {
+	if len(test) != len(correct) {
+		t.Errorf("Length mismatch: %d != %d", len(test), len(correct))
+		return
+	}
+
+	for i := range test {
+		if test[i] != correct[i] {
+			t.Errorf("Bad prefix for index %d: '%s' != '%s'", i, test[i], correct[i])
+		}
+	}
 }
 
 func Test_PrefixAll(t *testing.T) {
