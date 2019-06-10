@@ -26,7 +26,8 @@ import (
 )
 
 var (
-	headerRegexp = regexp.MustCompile(`\.(h|hpp|inc)$`)
+	headerRegexp        = regexp.MustCompile(`\.(h|hpp|inc)$`)
+	compileSourceRegexp = regexp.MustCompile(`\.(c|s|cpp|cc|S)$`)
 )
 
 // Does the input string look like it is a header file?
@@ -35,8 +36,18 @@ func IsHeader(s string) bool {
 }
 
 // Does the input string look like it is a source file?
-func IsSource(s string) bool {
+func IsNotHeader(s string) bool {
 	return !headerRegexp.MatchString(s)
+}
+
+// IsCompilableSource checks if filename extension is a compiled one
+func IsCompilableSource(s string) bool {
+	return compileSourceRegexp.MatchString(s)
+}
+
+// IsNotCompilableSource checks if filename extension isn't a compiled one
+func IsNotCompilableSource(s string) bool {
+	return !compileSourceRegexp.MatchString(s)
 }
 
 // Prefixes a string to every item in a list

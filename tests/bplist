@@ -17,6 +17,7 @@
 ./globs/build.bp
 ./implicit_outs/build.bp
 ./kernel_module/module/build.bp
+./match_source/build.bp
 ./output/build.bp
 ./properties/build.bp
 ./reexport_libs/build.bp

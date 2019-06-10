@@ -138,7 +138,7 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
-func glob(ctx blueprint.ModuleContext, globs []string, excludes []string) []string {
+func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	for _, file := range globs {
@@ -167,7 +167,7 @@ func glob(ctx blueprint.ModuleContext, globs []string, excludes []string) []stri
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) getSources(ctx blueprint.ModuleContext) []string {
+func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 
@@ -610,6 +610,7 @@ func Main() {
 		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies", applyReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
 		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
+		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
 
 		// Depend on the config file
 		ctx.RegisterSingletonType("config_singleton", dependencySingletonFactory)
