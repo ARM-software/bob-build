@@ -138,3 +138,82 @@ bob_shared_library {
 Here the executable `less` uses dynamic linking. The `shared_libs`
 property lists the `bob_shared_library` modules that need to be
 dynamically linked.
+
+## Host and Target Libraries
+
+In the simplest build setup the machine doing the compilation is
+expected to run the output of the compiler. This is known as a native
+build.
+
+In some situations, rather than running on the build machine, you want
+the output to run on another device (for example a phone). This is
+known as cross compiling. Cross-compilation is commonly used when
+bringing up a platform. It's also used if the platform isn't powerful
+enough to compile code.
+
+Bob supports cross compilation. The machine doing the build is known
+as the host platform. The machine that will run the output is known as
+the target platform.
+
+When defining libraries and executables in build definitions, host and
+target-specific definitions can be used.
+
+```
+bob_binary {
+    name: "less",
+    srcs: [
+        "src/less.c",
+        "src/helper.c",
+    ],
+    cflags: [
+        "-Wall",
+        "-pedantic",
+        "-DDEBUG=1",
+    ],
+    local_include_dirs: ["include"],
+    ldflags: ["-pthread"],
+    ldlibs: ["-lncurses"],
+
+    host: {
+        local_include_dirs: ["include/host"],
+        cflags: ["-DHOST=1"],
+    },
+    target: {
+        local_include_dirs: ["include/target"],
+        cflags: ["-DTARGET=1"],
+    },
+    host_supported: true,
+    target_supported: true,
+}
+```
+
+Properties within the `host` section are only applied to host builds of
+`less`. Similarly properties in the `target` section are only applied to
+target builds.
+
+The `host_supported` and `target_supported` properties indicate
+whether the library supports being built for host and target
+respectively. If not specified, `target_supported` defaults to `true`
+and `host_supported` defaults to `false`.
+
+Bob doesn't prescribe what happens in a native build. We suggest that
+in a native build the machine is the `target`.
+
+### GNU Automake Convention
+
+The Automake naming convention for cross compiling is different to
+Bob's, and is based around the Canadian cross compile use case. This
+is where you want to cross compile a cross compiler: you are building
+a compiler on machine A, to run on machine B and generate code for
+machine C.
+
+Automake refers to the machine doing the build as the build platform, the
+machine that will run the resultant compiler as the host platform, and
+the machine that the compiler creates output for as the target
+architecture.
+
+|Automake configure option|Automake description|Bob platform|
+|---|---|---|
+|--build|Build platform|host|
+|--host|Host platform|target|
+|--target|Target architecture|n/a. If required this is a configuration option.|
