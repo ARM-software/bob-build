@@ -48,6 +48,12 @@ config BUILDER_ANDROID_MAKE
 	help
 	  Generate Android.mk fragments for use with Android make.
 
+config BUILDER_SOONG
+	bool "Soong plugin (EXPERIMENTAL)"
+	depends on ANDROID
+	help
+	  Integrate into Android's build system by operating as a Soong plugin.
+
 endchoice
 
 menu "Toolchain Options"
