@@ -46,12 +46,12 @@ var (
 // factory is actually called.
 func soongGetConfig() *bobConfig {
 	loadConfigOnce.Do(func() {
-		// TODO: This should not be hard-coded. We should probably get
-		// the config path from the build dir, possibly using different
-		// files depending on the product.
 		onceLoadedConfig = &bobConfig{}
 		onceLoadedConfig.Properties = loadConfig(jsonPath)
-		// TODO: This should be chosen based on the config, but hard-code it for now.
+
+		if !onceLoadedConfig.Properties.GetBool("builder_soong") {
+			panic("Build bootstrapped for Soong, but Soong builder has not been enabled")
+		}
 		onceLoadedConfig.Generator = &soongGenerator{}
 	})
 	return onceLoadedConfig
