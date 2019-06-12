@@ -16,7 +16,6 @@ fold_start 'Check:gofmt'
 fold_end
 ####################
 
-
 ####################
 fold_start 'Check:pep8'
     bash .travis/checks/check-pep8.sh
@@ -24,6 +23,12 @@ fold_start 'Check:pep8'
 fold_end
 ####################
 
+####################
+fold_start 'Check:copyright'
+    bash .travis/checks/check-copyright.sh
+    check_result $? "copyright:"
+fold_end
+####################
 
 ####################
 fold_start 'Check:signoff'
