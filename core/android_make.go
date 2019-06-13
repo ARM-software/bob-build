@@ -237,19 +237,30 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 	sb.WriteString("LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog"), " ") + "\n")
 	sb.WriteString("LOCAL_STATIC_LIBRARIES := " + strings.Join(staticLibs, " ") + "\n")
 	sb.WriteString("LOCAL_WHOLE_STATIC_LIBRARIES := " + strings.Join(wholeStaticLibs, " ") + "\n")
+	sb.WriteString("LOCAL_HEADER_LIBRARIES := " + strings.Join(headerLibs, " ") + "\n")
+
+	reexportShared := []string{}
+	reexportStatic := []string{}
+	reexportHeaders := exportHeaderLibs
+	for _, lib := range androidModuleNames(m.Properties.Reexport_libs) {
+		if utils.Contains(sharedLibs, lib) {
+			reexportShared = append(reexportShared, lib)
+		} else if utils.Contains(staticLibs, lib) {
+			reexportStatic = append(reexportStatic, lib)
+		} else if utils.Contains(headerLibs, lib) {
+			reexportHeaders = append(reexportHeaders, lib)
+		}
+	}
+
+	sb.WriteString("LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := " + strings.Join(reexportShared, " ") + "\n")
+	sb.WriteString("LOCAL_EXPORT_STATIC_LIBRARY_HEADERS := " + strings.Join(reexportStatic, " ") + "\n")
+	sb.WriteString("LOCAL_EXPORT_HEADER_LIBRARY_HEADERS := " + strings.Join(reexportHeaders, " ") + "\n")
 
 	sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(m.Properties.Tags, " ") + "\n")
 	sb.WriteString("LOCAL_EXPORT_C_INCLUDE_DIRS := " + strings.Join(exportIncludeDirs, " ") + "\n")
 	if m.Properties.Owner != "" {
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
-	}
-
-	if len(headerLibs) > 0 {
-		sb.WriteString("LOCAL_HEADER_LIBRARIES := " + strings.Join(headerLibs, " ") + "\n")
-	}
-	if len(exportHeaderLibs) > 0 {
-		sb.WriteString("LOCAL_EXPORT_HEADER_LIBRARY_HEADERS := " + strings.Join(headerLibs, " ") + "\n")
 	}
 
 	// Can't see a way to wrap a particular library in -Wl in link flags on android, so specify

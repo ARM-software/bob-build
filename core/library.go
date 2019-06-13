@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -461,17 +460,6 @@ func (l *library) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 	l.Properties.Build.Target.processBuildWrapper(ctx)
 }
 
-func getLibrary(i interface{}) (*library, bool) {
-	v := reflect.Indirect(reflect.ValueOf(i))
-	field := v.FieldByName("library")
-	ok := false
-	var l *library
-	if field.IsValid() {
-		l, ok = field.Addr().Interface().(*library)
-	}
-	return l, ok
-}
-
 type staticLibrary struct {
 	library
 }
@@ -622,6 +610,16 @@ func getBinaryOrSharedLib(m blueprint.Module) (*library, bool) {
 	return nil, false
 }
 
+func getLibrary(m blueprint.Module) (*library, bool) {
+	if bsl, ok := getBinaryOrSharedLib(m); ok {
+		return bsl, true
+	} else if sl, ok := m.(*staticLibrary); ok {
+		return &sl.library, true
+	}
+
+	return nil, false
+}
+
 func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 	m := mctx.Module()
 	if b, ok := m.(*binary); ok {
@@ -648,7 +646,24 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		sl.checkField(len(props.Static_libs) == 0, "static_libs")
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	}
+}
 
+// Check that each module only reexports libraries that it is actually using.
+func checkReexportLibsMutator(ctx blueprint.TopDownMutatorContext) {
+	if l, ok := getLibrary(ctx.Module()); ok {
+		for _, lib := range l.Properties.Reexport_libs {
+			if !utils.ListsContain(lib,
+				l.Properties.Shared_libs,
+				l.Properties.Static_libs,
+				l.Properties.Header_libs,
+				l.Properties.Whole_static_libs,
+				l.Properties.Export_shared_libs,
+				l.Properties.Export_static_libs,
+				l.Properties.Export_header_libs) {
+				panic(fmt.Errorf("%s reexports unused library %s", ctx.ModuleName(), lib))
+			}
+		}
+	}
 }
 
 // Traverse the dependency tree, following all StaticDepTag and WholeStaticDepTag links.

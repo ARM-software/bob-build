@@ -96,6 +96,15 @@ func Contains(list []string, x string) bool {
 	return false
 }
 
+func ListsContain(x string, lists ...[]string) bool {
+	for _, list := range lists {
+		if Contains(list, x) {
+			return true
+		}
+	}
+	return false
+}
+
 func Filter(predicate func(string) bool, lists ...[]string) (ret []string) {
 	for _, list := range lists {
 		for _, s := range list {

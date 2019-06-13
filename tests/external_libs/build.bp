@@ -41,10 +41,49 @@ bob_binary {
     },
 }
 
+// Attempt to use the external shared library using a "proxy" static library.
+// This checks that exported header paths are getting correctly propagated.
+
+bob_static_library {
+    name: "libbob_test_external_shared_proxy",
+    export_shared_libs: ["libbob_test_external_shared"],
+    // export_shared_libs just makes the final link use `-l$LIBNAME` - to
+    // propagate the include paths, we also need reexport_libs.
+    reexport_libs: ["libbob_test_external_shared"],
+    enabled: false,
+    android: {
+        enabled: true,
+    },
+}
+
+bob_static_library {
+    name: "use_external_lib_proxy",
+    srcs: ["use_external_shared_via_proxy.c"],
+    export_static_libs: ["libbob_test_external_shared_proxy"],
+    enabled: false,
+    android: {
+        enabled: true,
+    },
+}
+
+// This binary isn't required for the actual test - it just ensures that the
+// above library is included in the default build.
+bob_binary {
+    name: "use_external_lib_proxy_user",
+    srcs: ["external_lib.c"],
+    cflags: ["-DFUNC_NAME=main"],
+    static_libs: ["use_external_lib_proxy"],
+    enabled: false,
+    android: {
+        enabled: true,
+    },
+}
+
 bob_alias {
     name: "bob_test_external_libs",
     srcs: [
         "use_external_libs",
         "use_external_header",
+        "use_external_lib_proxy_user",
     ],
 }
