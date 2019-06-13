@@ -250,6 +250,15 @@ the BFD linker.
 This isn't guaranteed to work on Android.
 
 ----
+### **bob_module.add_lib_dirs_to_rpath** (optional)
+If true, the module's shared libraries' directories will be added to
+its DT_RUNPATH entry. This allows the libraries to be found at runtime
+without setting LD_LIBRARY_PATH or putting them in a standard system
+location like `/usr/`."
+
+**Default value:** false
+
+----
 ### **bob_module.install_group** (optional)
 Module specifying an installation directory.
 

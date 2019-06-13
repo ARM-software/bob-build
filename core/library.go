@@ -138,6 +138,10 @@ type BuildProps struct {
 	// Files in the source directory that the wrapper depends on.
 	Build_wrapper_deps []string
 
+	// Adds DT_RPATH symbol to binaries and shared libraries so that they can find
+	// their dependencies at runtime.
+	Add_lib_dirs_to_rpath *bool
+
 	// This is a shared library that pulls in one or more shared
 	// libraries to resolve symbols that the binary needs. This is
 	// useful where a named library is the standard library to link
@@ -231,6 +235,13 @@ func (l *Build) isForwardingSharedLibrary() bool {
 		return false
 	}
 	return *l.Forwarding_shlib
+}
+
+func (l *Build) isRpathWanted() bool {
+	if l.Add_lib_dirs_to_rpath == nil {
+		return false
+	}
+	return *l.Add_lib_dirs_to_rpath
 }
 
 func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {

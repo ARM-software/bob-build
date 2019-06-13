@@ -62,7 +62,9 @@ bob_shared_library {
 
     build_wrapper: "ccache",
     build_wrapper_deps: ["config.py"],
+
     forwarding_shlib: true,
+    add_lib_dirs_to_rpath: true,
 
     install_group: "bob_install_group.name",
     install_deps: ["bob_resource.name"],

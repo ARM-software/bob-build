@@ -531,17 +531,18 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 	if hasForwardingLib {
 		flags = append(flags, "-fuse-ld=bfd")
 	}
-
-	if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
-		for _, path := range libPaths {
-			out, err := filepath.Rel(installPath, path)
-			if err != nil {
-				panic(fmt.Errorf("Could not find relative path for: %s due to: %e", path, err))
+	if l.Properties.isRpathWanted() {
+		if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
+			flags = append(flags, "-Wl,--enable-new-dtags")
+			for _, path := range libPaths {
+				out, err := filepath.Rel(installPath, path)
+				if err != nil {
+					panic(fmt.Errorf("Could not find relative path for: %s due to: %e", path, err))
+				}
+				flags = append(flags, "-Wl,-rpath='$$ORIGIN/"+out+"'")
 			}
-			flags = append(flags, "-Wl,-rpath='$$ORIGIN/"+out+"'")
 		}
 	}
-
 	return
 }
 
