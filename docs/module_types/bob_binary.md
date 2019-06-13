@@ -55,6 +55,8 @@ bob_binary {
     build_wrapper: "ccache",
     build_wrapper_deps: ["config.py"],
 
+    add_lib_dirs_to_rpath: true,
+
     install_group: "bob_install_group.name",
     install_deps: ["module_name"],
     relative_install_path: "unit/objects",
