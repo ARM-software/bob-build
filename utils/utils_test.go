@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,6 +105,13 @@ func Test_Contains(t *testing.T) {
 	assertFalse(t, Contains([]string{}, "anything"), "empty list")
 	assertFalse(t, Contains([]string{}, ""), "empty strings")
 	assertTrue(t, Contains([]string{""}, ""), "empty strings")
+}
+
+func Test_ListsContain(t *testing.T) {
+	assertTrue(t, ListsContain("y", []string{"a", "b"}, []string{"x", "y"}), "multiple lists")
+	assertFalse(t, ListsContain("not present", []string{}, []string{""}), "empty list")
+	assertFalse(t, ListsContain("not present"), "no lists")
+	assertTrue(t, ListsContain("", []string{"hello", "", "world"}), "empty search term")
 }
 
 func Test_Filter(t *testing.T) {
