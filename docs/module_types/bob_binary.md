@@ -53,7 +53,6 @@ bob_binary {
     local_include_dirs: ["include/"],
 
     build_wrapper: "ccache",
-    build_wrapper_deps: ["config.py"],
 
     add_lib_dirs_to_rpath: true,
 

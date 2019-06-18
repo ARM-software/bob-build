@@ -61,7 +61,6 @@ bob_shared_library {
     export_include_dirs: ["include/"],
 
     build_wrapper: "ccache",
-    build_wrapper_deps: ["config.py"],
 
     forwarding_shlib: true,
     add_lib_dirs_to_rpath: true,

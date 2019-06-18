@@ -134,8 +134,6 @@ type BuildProps struct {
 
 	// Wrapper for all build commands (object file compilation *and* linking)
 	Build_wrapper *string
-	// Files in the source directory that the wrapper depends on.
-	Build_wrapper_deps []string
 
 	// Adds DT_RPATH symbol to binaries and shared libraries so that they can find
 	// their dependencies at runtime.
@@ -199,9 +197,6 @@ func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 			}
 		}
 	}
-
-	// Build wrapper dependencies are relative to the root of the source tree
-	b.Build_wrapper_deps = utils.PrefixDirs(b.Build_wrapper_deps, getBackend(ctx).sourcePrefix())
 }
 
 // A Build represents the whole tree of properties for a 'library' object,
@@ -254,7 +249,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 			buildWrapper = strings.Replace(buildWrapper, "${"+k+"}", v, -1)
 		}
 
-		return buildWrapper, utils.NewStringSlice(l.Build_wrapper_deps, files)
+		return buildWrapper, files
 	}
 
 	return "", []string{}
