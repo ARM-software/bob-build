@@ -71,7 +71,6 @@ bob_defaults {
     export_include_dirs: ["include/"],
 
     build_wrapper: "ccache",
-    build_wrapper_deps: ["config.py"],
     forwarding_shlib: true,
 
     // kernel module related stuff

@@ -228,13 +228,6 @@ bob_defaults {
 ```
 
 ----
-### **bob_module.build_wrapper_deps** (optional)
-Files that the build wrapper depends on.
-
-These dependenencies are relative to the base source directory (not
-the directory in which the module is defined).
-
-----
 ### **bob_module.forwarding_shlib** (optional)
 This is a shared library that pulls in one or more shared libraries to
 resolve symbols that the binary needs. This is useful where a named

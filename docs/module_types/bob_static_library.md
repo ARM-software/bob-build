@@ -75,7 +75,6 @@ bob_static_library {
     export_include_dirs: ["include/"],
 
     build_wrapper: "ccache",
-    build_wrapper_deps: ["config.py"],
 
     install_group: "bob_install_group.name",
     install_deps: ["bob_resource.name"],
