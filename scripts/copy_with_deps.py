@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,7 +123,7 @@ def copy_with_deps(src, dest, search_path, includes):
     return deps
 
 
-def main(args):
+def main():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
     args = parse_args()

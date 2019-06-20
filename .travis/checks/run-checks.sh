@@ -24,6 +24,13 @@ fold_end
 ####################
 
 ####################
+fold_start 'Check:pylint'
+    bash .travis/checks/check-pylint.sh
+    check_result $? "pylint:"
+fold_end
+####################
+
+####################
 fold_start 'Check:copyright'
     bash .travis/checks/check-copyright.sh
     check_result $? "copyright:"
