@@ -21,41 +21,18 @@ import (
 	"fmt"
 	"testing"
 	"unicode"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func assertTrue(t *testing.T, cond bool, msg string) {
-	if !cond {
-		t.Errorf("%s: Condition is not true", msg)
-	}
-}
-
-func assertFalse(t *testing.T, cond bool, msg string) {
-	if cond {
-		t.Errorf("%s: Condition is not true", msg)
-	}
-}
-
 func Test_IsHeader(t *testing.T) {
-	assertTrue(t, IsHeader("bla.hpp"), "bla.hpp")
-	assertFalse(t, IsHeader("bla.bin"), "bla.bin")
+	assert.True(t, IsHeader("bla.hpp"), "bla.hpp")
+	assert.False(t, IsHeader("bla.bin"), "bla.bin")
 }
 
 func Test_IsSource(t *testing.T) {
-	assertTrue(t, IsSource("bla.c"), "bla.hpp")
-	assertFalse(t, IsSource("bla.h"), "bla.bin")
-}
-
-func assertArraysEqual(t *testing.T, test []string, correct []string) {
-	if len(test) != len(correct) {
-		t.Errorf("Length mismatch: %d != %d", len(test), len(correct))
-		return
-	}
-
-	for i := range test {
-		if test[i] != correct[i] {
-			t.Errorf("Bad prefix for index %d: '%s' != '%s'", i, test[i], correct[i])
-		}
-	}
+	assert.True(t, IsSource("bla.c"), "bla.hpp")
+	assert.False(t, IsSource("bla.h"), "bla.bin")
 }
 
 func Test_PrefixAll(t *testing.T) {
@@ -66,7 +43,8 @@ func Test_PrefixAll(t *testing.T) {
 	in := []string{"abc def", ";1234	;''"}
 	prefix := "!>@@\""
 	correct := []string{"!>@@\"abc def", "!>@@\";1234	;''"}
-	assertArraysEqual(t, PrefixAll(in, prefix), correct)
+
+	assert.Equal(t, PrefixAll(in, prefix), correct)
 }
 
 func Test_PrefixDirs(t *testing.T) {
@@ -77,7 +55,8 @@ func Test_PrefixDirs(t *testing.T) {
 	in := []string{"src/foo.c", "include/bar.h"}
 	prefix := "$(LOCAL_PATH)"
 	correct := []string{"$(LOCAL_PATH)/src/foo.c", "$(LOCAL_PATH)/include/bar.h"}
-	assertArraysEqual(t, PrefixDirs(in, prefix), correct)
+
+	assert.Equal(t, PrefixDirs(in, prefix), correct)
 }
 
 func Test_SortedKeys(t *testing.T) {
@@ -86,7 +65,7 @@ func Test_SortedKeys(t *testing.T) {
 		"aardvark": "insects",
 		"./a.out":  "bits",
 	}
-	assertArraysEqual(t, SortedKeys(in), []string{"./a.out", "Zebra", "aardvark"})
+	assert.Equal(t, SortedKeys(in), []string{"./a.out", "Zebra", "aardvark"})
 }
 
 func Test_SortedKeysBoolMap(t *testing.T) {
@@ -94,35 +73,36 @@ func Test_SortedKeysBoolMap(t *testing.T) {
 		"Alphabetic characters should appear after numbers": true,
 		"2 + 2 = 5": false,
 	}
-	assertArraysEqual(t, SortedKeysBoolMap(in),
-		[]string{"2 + 2 = 5",
-			"Alphabetic characters should appear after numbers"})
+	correct := []string{"2 + 2 = 5", "Alphabetic characters should appear after numbers"}
+	out := SortedKeysBoolMap(in)
+
+	assert.Equal(t, out, correct)
 }
 
 func Test_Contains(t *testing.T) {
-	assertFalse(t, Contains([]string{"a", "b", "c"}, "yellow"), "alphabet")
-	assertTrue(t, Contains([]string{"a", "b", "c"}, "c"), "alphabet")
-	assertFalse(t, Contains([]string{}, "anything"), "empty list")
-	assertFalse(t, Contains([]string{}, ""), "empty strings")
-	assertTrue(t, Contains([]string{""}, ""), "empty strings")
+	assert.Falsef(t, Contains([]string{"a", "b", "c"}, "yellow"), "alphabet")
+	assert.Truef(t, Contains([]string{"a", "b", "c"}, "c"), "alphabet")
+	assert.Falsef(t, Contains([]string{}, "anything"), "empty list")
+	assert.Falsef(t, Contains([]string{}, ""), "empty strings")
+	assert.Truef(t, Contains([]string{""}, ""), "empty strings")
 }
 
 func Test_ListsContain(t *testing.T) {
-	assertTrue(t, ListsContain("y", []string{"a", "b"}, []string{"x", "y"}), "multiple lists")
-	assertFalse(t, ListsContain("not present", []string{}, []string{""}), "empty list")
-	assertFalse(t, ListsContain("not present"), "no lists")
-	assertTrue(t, ListsContain("", []string{"hello", "", "world"}), "empty search term")
+	assert.Truef(t, ListsContain("y", []string{"a", "b"}, []string{"x", "y"}), "multiple lists")
+	assert.Falsef(t, ListsContain("not present", []string{}, []string{""}), "empty list")
+	assert.Falsef(t, ListsContain("not present"), "no lists")
+	assert.Truef(t, ListsContain("", []string{"hello", "", "world"}), "empty search term")
 }
 
 func Test_Filter(t *testing.T) {
 	testFilter := func(elem string) bool { return unicode.IsUpper(rune(elem[0])) }
 	in := []string{"Alpha", "beta", "Gamma", "Delta", "epsilon"}
 	filtered := Filter(testFilter, in)
-	assertArraysEqual(t, filtered, []string{"Alpha", "Gamma", "Delta"})
+	assert.Equal(t, filtered, []string{"Alpha", "Gamma", "Delta"})
 
 	in2 := []string{"chi", "psi", "Omega"}
 	filtered = Filter(testFilter, in, in2)
-	assertArraysEqual(t, filtered, []string{"Alpha", "Gamma", "Delta", "Omega"})
+	assert.Equal(t, filtered, []string{"Alpha", "Gamma", "Delta", "Omega"})
 
 }
 
@@ -130,47 +110,47 @@ func Test_Difference(t *testing.T) {
 	in := []string{"1", "1", "2", "3", "5", "8", "13", "21"}
 	sub := []string{"2", "8", "21"}
 	correct := []string{"1", "1", "3", "5", "13"}
-	assertArraysEqual(t, Difference(in, sub), correct)
+	assert.Equal(t, Difference(in, sub), correct)
 }
 
 func Test_AppendUnique(t *testing.T) {
 	// AppendIfUnique is tested via AppendUnique.
-	assertArraysEqual(t,
+	assert.Equal(t,
 		AppendUnique([]string{},
 			[]string{"test"}),
 		[]string{"test"})
-	assertArraysEqual(t,
+	assert.Equal(t,
 		AppendUnique([]string{"ab", "cd"},
 			[]string{"", "", "ef"}),
 		[]string{"ab", "cd", "", "ef"})
-	assertArraysEqual(t,
+	assert.Equal(t,
 		AppendUnique([]string{"ab", "cd"},
 			[]string{"cd", "ab"}),
 		[]string{"ab", "cd"})
 }
 
 func Test_Find(t *testing.T) {
-	assertTrue(t, Find([]string{"abc", "abcde"}, "abcd") == -1, "Incorrect index")
-	assertTrue(t, Find([]string{"abc", "abcde"}, "abcde") == 1, "Incorrect index")
+	assert.Truef(t, Find([]string{"abc", "abcde"}, "abcd") == -1, "Incorrect index")
+	assert.Truef(t, Find([]string{"abc", "abcde"}, "abcde") == 1, "Incorrect index")
 }
 
 func Test_Remove(t *testing.T) {
-	assertArraysEqual(t, Remove([]string{"abc", "abcde"}, "abcd"),
+	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abcd"),
 		[]string{"abc", "abcde"})
-	assertArraysEqual(t, Remove([]string{"abc", "abcde"}, "abcde"),
+	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abcde"),
 		[]string{"abc"})
-	assertArraysEqual(t, Remove([]string{"abc", "abcde"}, "abc"),
+	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abc"),
 		[]string{"abcde"})
 }
 
 func Test_Reversed(t *testing.T) {
-	assertArraysEqual(t, Reversed([]string{}),
+	assert.Equal(t, Reversed([]string{}),
 		[]string{})
-	assertArraysEqual(t, Reversed([]string{""}),
+	assert.Equal(t, Reversed([]string{""}),
 		[]string{""})
-	assertArraysEqual(t, Reversed([]string{"123", "234"}),
+	assert.Equal(t, Reversed([]string{"123", "234"}),
 		[]string{"234", "123"})
-	assertArraysEqual(t, Reversed([]string{"", "234", "..<>"}),
+	assert.Equal(t, Reversed([]string{"", "234", "..<>"}),
 		[]string{"..<>", "234", ""})
 }
 
@@ -184,25 +164,25 @@ func Test_StripUnusedArgs(t *testing.T) {
 		"out":      "source.o",
 	}
 	StripUnusedArgs(args, "${compiler} -o ${out} ${in} ${args}")
-	assertArraysEqual(t, SortedKeys(args), []string{"args", "compiler", "in", "out"})
+	assert.Equal(t, SortedKeys(args), []string{"args", "compiler", "in", "out"})
 }
 
 func Test_Trim(t *testing.T) {
-	assertArraysEqual(t, Trim([]string{"", " hello ", "world", "	"}),
+	assert.Equal(t, Trim([]string{"", " hello ", "world", "	"}),
 		[]string{"hello", "world"})
 }
 
 func Test_Join(t *testing.T) {
-	assertTrue(t,
+	assert.Truef(t,
 		Join() == "",
 		"Empty join should yield an empty string")
-	assertTrue(t,
+	assert.Truef(t,
 		Join([]string{"Hello", "world"}) == "Hello world",
 		"Didn't concatenate two words")
 
 	// Here, there's a 3rd space before "spaces", because strings.Join()
 	// adds one for the empty string, but utils.Join() doesn't.
-	assertTrue(t,
+	assert.Truef(t,
 		Join([]string{"this is", " surrounded by "},
 			[]string{"", "spaces"}, []string{}) ==
 			"this is  surrounded by   spaces",
@@ -235,8 +215,8 @@ func Test_NewStringSlice(t *testing.T) {
 	fmt.Printf("B = %v\n", arrB)
 	// C = [1 2 3 4 5 C]
 	fmt.Printf("C = %v\n", arrC)
-	assertArraysEqual(t, arrC, []string{"1", "2", "3", "4", "5", "C"})
-	assertArraysEqual(t, arrB, []string{"1", "2", "3", "4", "5", "B"})
+	assert.Equal(t, arrC, []string{"1", "2", "3", "4", "5", "C"})
+	assert.Equal(t, arrB, []string{"1", "2", "3", "4", "5", "B"})
 }
 
 // Below example code with problematic append() call, this is why we have utils.NewStringSlice
