@@ -45,6 +45,7 @@ before_script:
   - export TRAVIS_COMMIT
   - export TRAVIS_COMMIT_RANGE
   - export TRAVIS_BUILD_DIR
+  - go get github.com/stretchr/testify
 
 script:
   - bash .travis/checks/run-checks.sh
