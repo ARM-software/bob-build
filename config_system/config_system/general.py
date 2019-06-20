@@ -756,10 +756,6 @@ def get_default_style():
 
 
 class StyledText(object):
-    def __init__(self):
-        self.style = get_default_style()
-        self.text = ""
-
     def __init__(self, text):
         self.style = get_default_style()
         self.text = text

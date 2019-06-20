@@ -23,7 +23,7 @@ class InfBufferHandler(BufferingHandler):
     __slots__ = "target", "buffer"
 
     def __init__(self, capacity, target):
-        super(BufferingHandler, self).__init__(capacity)
+        super(InfBufferHandler, self).__init__(capacity)
         self.setLevel(logging.NOTSET)
         self.target = target
         self.buffer = []
