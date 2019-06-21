@@ -35,11 +35,11 @@ if [[ "${BOB_BOOTSTRAP_VERSION}" != "${BOB_VERSION}" ]]; then
     exit 1
 fi
 
-# Convert Mconfig into Go-readable JSON. Because this is run at every rebuild
-# (rather than every bootstrap or re-configuration), this also adds a hash of
-# the environment into the config, so that Bob is rerun and the Ninja is
-# updated if a relevant environment variable is changed.
-python "${BOB_DIR}/scripts/generate_config_json.py" --database "${SRCDIR}/Mconfig" --output "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS} "${BUILDDIR}/${CONFIGNAME}"
+# Refresh the configuration. This means that options changed or added since the
+# last build will be chosen from their defaults automatically, so that users
+# don't have to reconfigure manually if the config database changes.
+python "${BOB_DIR}/config_system/update_config.py" \
+    --database "${SRCDIR}/Mconfig" --config "${BUILDDIR}/${CONFIGNAME}" ${BOB_CONFIG_OPTS}
 
 # Source the pathtools script - we need bob_realpath for CCACHE_BASEDIR.
 source "${BOB_DIR}/pathtools.bash"

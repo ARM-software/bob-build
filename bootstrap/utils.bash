@@ -22,6 +22,8 @@ function write_bootstrap() {
         BOB_CONFIG_PLUGIN_OPTS="${BOB_CONFIG_PLUGIN_OPTS} -p ${i}"
     done
 
+    BOB_CONFIG_PLUGIN_OPTS="${BOB_CONFIG_PLUGIN_OPTS} -p ${BOB_DIR}/scripts/generate_config_json"
+
     source "${BOB_DIR}/bob.bootstrap.version"
 
     sed -e "s|@@WorkDir@@|${WORKDIR}|" \

@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # This script will read the config file and output a minimal json file
 # containing just the user settable options.
 
-def generate_config_json(database_fname, config_fname, ignore_missing):
+def config_to_json(database_fname, config_fname, ignore_missing):
     config_system.read_config(database_fname, config_fname, ignore_missing)
     config_list = config_system.get_config_list()
 
@@ -61,22 +61,7 @@ def generate_config_json(database_fname, config_fname, ignore_missing):
                 logger.critical(msg % (datatype, str(value)))
                 sys.exit(1)
 
-    return json.dumps(configs,
-                      sort_keys=True, indent=4, separators=(',', ': '))
-
-
-# Write 'text' to file 'fname' only if the content will change.
-def write_if_different(fname, text):
-    same_content = False
-    if os.path.isfile(fname):
-        with open(fname, "r+") as fp:
-            original = fp.read()
-            same_content = text == original
-
-    if not same_content:
-        logger.info("Writing config JSON to %s" % fname)
-        with open(fname, "w") as fp:
-            fp.write(text)
+    return configs
 
 
 def main():
@@ -98,8 +83,9 @@ def main():
         logger.error("No such file: %s" % args.config)
         sys.exit(1)
 
-    text = generate_config_json(args.database, args.config, args.ignore_missing)
-    write_if_different(args.output, text)
+    json_config = config_to_json(args.database, args.config, args.ignore_missing)
+    with config_system.utils.open_and_write_if_changed(args.output) as fp:
+        json.dump(json_config, fp, sort_keys=True, indent=4, separators=(',', ': '))
 
 
 if __name__ == "__main__":

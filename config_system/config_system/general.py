@@ -17,6 +17,9 @@ import logging
 import os
 import re
 
+from config_system import utils
+
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -203,12 +206,16 @@ def get_mconfig_dir():
     return __mconfig_dir
 
 
-def init_config(options_filename, ignore_missing=False):
+def init_config(options_filename, _config_filename, ignore_missing=False):
     from config_system import lex, lex_wrapper, syntax
 
     global __mconfig_dir
+    global config_filename
     global configuration
     global menu_data
+
+    config_filename = _config_filename
+
     try:
         lexer = lex_wrapper.LexWrapper(ignore_missing)
         lexer.source(options_filename)
@@ -278,14 +285,14 @@ def read_config_file(config_filename):
 
 
 def read_config(options_filename, config_filename, ignore_missing):
-    init_config(options_filename, ignore_missing)
+    init_config(options_filename, config_filename, ignore_missing)
     read_config_file(config_filename)
     enforce_dependent_values(True)
 
 
 def write_config(config_filename):
     enforce_dependent_values()
-    with open(config_filename, "wt") as f:
+    with utils.open_and_write_if_changed(config_filename) as f:
         for i in sorted(configuration['order']):
             (i_type, i_symbol) = configuration['order'][i]
             if i_type in ["config", "menuconfig"]:
