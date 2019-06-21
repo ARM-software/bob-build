@@ -619,7 +619,6 @@ def gui_main(stdscr):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="Path to the input configuration file (*.config)")
-    parser.add_argument("-o", "--output", help="Path to the output file")
     parser.add_argument("-d", "--database", default="Mconfig",
                         help="Path to the configuration database (Mconfig)")
     parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debug logging")
@@ -627,7 +626,6 @@ def parse_args():
                         help="Post configuration plugin to execute", default=[])
     parser.add_argument("--ignore-missing", action="store_true", default=False,
                         help="Ignore missing database files included with 'source'")
-    parser.add_argument("args", nargs="*")
     return parser.parse_args()
 
 
@@ -651,8 +649,6 @@ def main():
 
     args = parse_args()
 
-    if args.output is None:
-        args.output = args.config
     if args.debug:
         root_logger.setLevel(logging.DEBUG)  # Update root logger
 
@@ -679,7 +675,7 @@ def main():
                 import traceback
                 traceback.print_tb(sys.exc_info()[2])
 
-        general.write_config(args.output)
+        general.write_config(args.config)
 
     # Flush all log messages on exit
     msgBuffer.close()

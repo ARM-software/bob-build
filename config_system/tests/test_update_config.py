@@ -120,8 +120,9 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
     mconfig_fname.write(mconfig, "wt")
 
     mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
-        output=str(config_fname),
+        config=str(config_fname),
         database=str(mconfig_fname),
+        new=False,
         plugin=[],
         ignore_missing=False,
         args=args,

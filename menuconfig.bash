@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,9 @@ source "${BOOTSTRAP}"
 cd "${WORKDIR}"
 exit_status=0
 
-"${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} -o "${BUILDDIR}/${CONFIGNAME}.tmp" "${BUILDDIR}/${CONFIGNAME}" || exit_status=$?
-
-# when warnings/errors occurred we still want to sync settings
-rsync -I -c "${BUILDDIR}/${CONFIGNAME}.tmp" "${BUILDDIR}/${CONFIGNAME}"
+"${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" \
+    ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
+    "${BUILDDIR}/${CONFIGNAME}" || exit_status=$?
 
 if [ "$exit_status" -eq "1" ]; then # warnings occurred
     exit 0

@@ -24,7 +24,8 @@ import sys
 
 from config_system import log_handlers
 from config_system.general import enforce_dependent_values, get_config, init_config, \
-    read_profile_file, set_config_if_prompt, write_config, can_enable, format_dependency_list
+    read_config, read_profile_file, set_config_if_prompt, write_config, \
+    can_enable, format_dependency_list
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.WARNING)
@@ -117,10 +118,12 @@ def check_values_as_requested(args):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--output', required=True,
-                        help='Path to the output file')
+    parser.add_argument("-c", "--config", required=True,
+                        help="Path to the configuration file (*.config)")
     parser.add_argument('-d', '--database', default="Mconfig",
                         help='Path to the configuration database (Mconfig)')
+    parser.add_argument("-n", "--new", action="store_true", default=False,
+                        help="Create the configuration instead of resetting to default values")
     parser.add_argument('-p', '--plugin', action='append',
                         help='Post configuration plugin to execute',
                         default=[])
@@ -133,7 +136,10 @@ def parse_args():
 def main():
     args = parse_args()
 
-    init_config(args.database, args.ignore_missing)
+    if args.new:
+        init_config(args.database, args.config, args.ignore_missing)
+    else:
+        read_config(args.database, args.config, args.ignore_missing)
 
     files = []
     setters = []
@@ -166,7 +172,7 @@ def main():
             import traceback
             traceback.print_tb(sys.exc_info()[2])
 
-    write_config(args.output)
+    write_config(args.config)
 
     issues = counter.errors() + counter.criticals()
     warnings = counter.warnings()
