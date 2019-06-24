@@ -1,4 +1,4 @@
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +54,9 @@ def get_arch(kdir):
         if option_enabled(kdir, "CONFIG_" + arch.upper()):
             return arch
 
-    if option_enabled(kdir, "CONFIG_X86_32"):
+    if option_enabled(kdir, "CONFIG_UML"):
+        return "um"
+    elif option_enabled(kdir, "CONFIG_X86_32"):
         return "i386"
     elif option_enabled(kdir, "CONFIG_X86_64"):
         return "x86_64"
