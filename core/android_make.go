@@ -736,9 +736,8 @@ func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blue
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		includeDirs := utils.PrefixDirs(m.generateCommon.Properties.Export_gen_include_dirs, g.sourceOutputDir(&m.generateCommon))
 		declarePrebuiltStaticLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
-			strings.Join(includeDirs, " "),
+			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
 		androidMkWriteString(ctx, m.altShortName(), sb)
@@ -751,9 +750,8 @@ func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blue
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		includeDirs := utils.PrefixDirs(m.generateCommon.Properties.Export_gen_include_dirs, g.sourceOutputDir(&m.generateCommon))
 		declarePrebuiltSharedLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
-			strings.Join(includeDirs, " "),
+			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
 		androidMkWriteString(ctx, m.altShortName(), sb)
