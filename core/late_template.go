@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/pathtools"
 )
 
 var matchSourcesRegex = regexp.MustCompile(`\{\{match_srcs\s+(.+?)\}\}`)
@@ -37,7 +38,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string) 
 		}
 		matchedSources := []string{}
 		for _, src := range s.getSources(ctx) {
-			matched, err := filepath.Match("*/"+match[1], src)
+			matched, err := pathtools.Match("**/"+match[1], src)
 			if err != nil {
 				panic("Error during matching filepath pattern")
 			}
