@@ -1,0 +1,5 @@
+// This file is going to be prepended to main.c to test {{match_srcs}}
+int exported_function(void)
+{
+	return 42;
+}
