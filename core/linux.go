@@ -755,7 +755,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 
 var installRule = pctx.StaticRule("install",
 	blueprint.RuleParams{
-		Command:     "cp -f $in $out",
+		Command:     "rm -f $out; cp $in $out",
 		Description: "$out",
 	})
 
@@ -782,7 +782,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		rulename := "install"
 		tool := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), props.Post_install_tool)
 
-		cmd := "cp $in $out ; " + props.Post_install_cmd
+		cmd := "rm -f $out; cp $in $out ; " + props.Post_install_cmd
 
 		args["bob_config"] = configPath
 		args["tool"] = tool
