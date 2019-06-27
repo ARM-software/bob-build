@@ -15,30 +15,40 @@
  * limitations under the License.
  */
 
-bob_binary {
-    name: "match_source_bin",
-    srcs: [
-        "main.c",
-        "data.txt",
-    ],
-    ldflags: ["-Wl,-dynamic-list,{{match_srcs \"*.txt\"}}"],
-}
-
+// Test that we can refer to specific files in the srcs list of a
+// bob_generate_source via {{match_srcs}}
+//
+// This concatentates 2 files to produce a C file which is only valid
+//if both parts are present.
 bob_generate_source {
     name: "match_source_gen",
     srcs: [
         "main.c",
-        "custom.txt",
+        "function_def.txt",
     ],
-    out: ["custom_src_gen"],
-    cmd: "cat {{match_srcs \"custom.txt\"}} {{match_srcs \"main.c\"}} > $out",
-    build_by_default: true,
+    out: ["main.c"],
+    cmd: "cat {{match_srcs \"function_def.txt\"}} {{match_srcs \"main.c\"}} > $out",
+}
+
+// Test that we can refer to specific files in the srcs list of a
+// bob_binary via {{match_srcs}}. The test case is to pass a filename
+// to the linker.
+//
+// Also compile the output of match_source_gen, which checks that it
+// worked as expected.
+bob_binary {
+    name: "match_source_bin",
+    srcs: [
+        "source.c",
+        "exports.txt",
+    ],
+    generated_sources: ["match_source_gen"],
+    ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
 }
 
 bob_alias {
     name: "bob_test_match_source",
     srcs: [
         "match_source_bin",
-        "match_source_gen",
     ],
 }
