@@ -57,15 +57,29 @@ Features must not have the same name as any Bob module property.
 ## Templated parameters
 This feature allows for string replacements, using
 [Go's built-in template system](https://golang.org/pkg/text/template/).
-For example:
 
-`{{.param}}` - will be replaced with the value of `param` in the
-config. If `param` is a boolean value, `1` will be used for true
-and `0` for false.
+Configuration values are provided to the Go templates as data (as a
+map), and can be accessed by using keys, so `{{.param}}` will be
+replaced with the value of `param` from the config. If `param` is a
+boolean value, `1` will be used for true and `0` for false.
 
-`{{toUpper .param}}` - an upper-case variant of the parameter
+A few custom functions are implemented by Bob:
 
-And lot more. [Check Go template package.](https://golang.org/pkg/text/template/)
+`{{to_upper .param}}` - return the parameter as upper case
+
+`{{to_lower .param}}` - return the parameter as lower case
+
+`{{split .param sep}}` - separate the parameter into an array on each occurence of `sep`
+
+`{{reg_match regexp .param}}` - test if the parameter matches a regular expression
+
+`{{reg_replace regexp .param replace_re}}` - regular expression replacement on parameter
+
+`{{match_srcs file_glob}}` - expand to matching files in the module's
+                             `srcs` property (only valid in `ldflags`,
+                             `cmd` and `args`)
+
+Go templates natively support more. [Check Go template package.](https://golang.org/pkg/text/template/)
 
 #### Example
 This example shows an enum-like config option, `COLOR`, which is chosen based on

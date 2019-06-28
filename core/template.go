@@ -82,7 +82,7 @@ func regMatch(rule string, input string) bool {
 	return match
 }
 
-func regReplaceString(rule string, input string, replace string) string {
+func regReplace(rule string, input string, replace string) string {
 	re := regexp.MustCompile(rule)
 	return re.ReplaceAllString(input, replace)
 }
@@ -96,10 +96,11 @@ func matchSrcs(input string) string {
 func ApplyTemplate(props interface{}, properties *configProperties) {
 	stringvalues := properties.StringMap()
 	funcmap := make(map[string]interface{})
-	funcmap["toUpper"] = strings.ToUpper
+	funcmap["to_upper"] = strings.ToUpper
+	funcmap["to_lower"] = strings.ToLower
 	funcmap["split"] = strings.Split
-	funcmap["match"] = regMatch
-	funcmap["replace"] = regReplaceString
+	funcmap["reg_match"] = regMatch
+	funcmap["reg_replace"] = regReplace
 	funcmap["match_srcs"] = matchSrcs
 	propsVal := reflect.Indirect(reflect.ValueOf(props))
 

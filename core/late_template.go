@@ -54,20 +54,18 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string) 
 	return arg
 }
 
-// This mutator applies match result for required glob or filename from sources list.
-// It searches through build properties:
+// This mutator handles {{match_srcs}}. It returns the result of the
+// input glob when applied to the modules source list. Because it
+// needs access to the source list, this runs much later than other
+// templates.
+//
+// This template is only applied in specific properties where we've
+// seen sensible use-cases:
 // - Build Props:
-//  - Cflags
-//  - Conlyflags
-//  - Cxxflags
-//  - Asflags
 //  - Ldflags
-//  - Make_args
-//  - Post_install_cmd
 // - Generated Common:
 //  - Args
 //  - Cmd
-//  - Post_install_cmd
 func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
 	module := mctx.Module()
 	matchSrcsString := "{{match_srcs "
@@ -83,13 +81,13 @@ func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
 	var sourceProps *SourceProps
 	if gsc, ok := getGenerateCommon(module); ok {
 		propArr = []*[]string{&gsc.Properties.Args}
-		propStr = []*string{&gsc.Properties.Cmd, &gsc.Properties.Post_install_cmd}
+		propStr = []*string{&gsc.Properties.Cmd}
 		sourceProps = &gsc.Properties.SourceProps
 	} else if buildProps, ok := module.(moduleWithBuildProps); ok {
 		b := buildProps.build()
-		propArr = []*[]string{&b.Cflags, &b.Conlyflags, &b.Cxxflags, &b.Asflags, &b.Ldflags, &b.Make_args}
-		errorArrays = []*[]string{&b.Export_ldflags, &b.Export_cflags}
-		propStr = []*string{&b.Post_install_cmd}
+		propArr = []*[]string{&b.Ldflags}
+		errorArrays = []*[]string{&b.Export_ldflags}
+		propStr = []*string{}
 		sourceProps = &b.SourceProps
 	}
 	for _, prop := range propArr {

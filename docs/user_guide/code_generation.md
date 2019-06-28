@@ -129,8 +129,10 @@ outputs `${tool} -i ${in} ${out}`; for multiple inputs _and_ multiple
 outputs `${tool} -i ${in} -o ${out}` can work, as long as the tool is
 taught to parse the command line appropriately.
 
-Commands that use specific flags to identify a particular input/output
-are not well catered for.
+Commands that use specific flags to identify a particular output are
+not well catered for. For inputs, the template `{{match_srcs
+\"file.txt\"}}` can be used to name a particular file from the
+module's `src` list.
 
 The `${in}` variable contains all source files from `srcs` and
 `generated_sources`. The `${out}` variable contains all the outputs
