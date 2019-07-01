@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,7 +97,7 @@ func (f *Features) Init(availableFeatures []string, list ...interface{}) {
 	f.BlueprintEmbed = instancePtr.Interface()
 
 	instance := reflect.Indirect(instancePtr)
-	for i, _ := range availableFeatures {
+	for i := range availableFeatures {
 		propsInFeature := instance.Field(i).Addr().Interface().(*singleFeature)
 		propsInFeature.BlueprintEmbed = reflect.New(propsType).Interface()
 	}

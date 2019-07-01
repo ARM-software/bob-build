@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,6 +97,8 @@ fi
 if [ $UNBIND -eq 0 ]; then
     bind "${BOB_PATH}/blueprint" "${OUTPUT_PATH}/src/github.com/google/blueprint"
     bind "${BOB_PATH}" "${OUTPUT_PATH}/src/github.com/ARM-software/bob-build"
+
+    GOPATH=${OUTPUT_PATH} go get github.com/stretchr/testify
 
     echo "Go-compatible workspace created at ${OUTPUT_PATH}"
 else
