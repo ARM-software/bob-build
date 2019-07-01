@@ -26,7 +26,7 @@ type externalLib struct {
 	blueprint.SimpleName
 }
 
-func (l *externalLib) topLevelProperties() []interface{} { return []interface{}{} }
+func (m *externalLib) topLevelProperties() []interface{} { return []interface{}{} }
 
 func (m *externalLib) outputName() string   { return m.Name() }
 func (m *externalLib) altName() string      { return m.outputName() }
