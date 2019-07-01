@@ -53,7 +53,6 @@ create_config_symlinks "$(relative_path "${BUILDDIR}" "${BOB_DIR}")" "${BUILDDIR
 
 CONFIG_JSON="${BUILDDIR}/config.json"
 SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
-SOONG_CONFIG_GO_FROM_BOB=$(relative_path "${BOB_DIR}" "${SOONG_CONFIG_GO}")
 
 # Create a Go file containing the path to the config file, which will be
 # compiled into the Soong plugin. This is required because the module factories
@@ -64,6 +63,8 @@ sed -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
     "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"
 rsync --checksum "${TMP_GO_CONFIG}" "${SOONG_CONFIG_GO}"
 rm -f "${TMP_GO_CONFIG}"
+
+SOONG_CONFIG_GO_FROM_BOB=$(relative_path "${BOB_DIR}" "${SOONG_CONFIG_GO}")
 
 # Set up Bob's Android.bp
 pushd "${BOB_DIR}" >&/dev/null
