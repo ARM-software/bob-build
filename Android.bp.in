@@ -52,10 +52,6 @@ bootstrap_go_package {
         "core/linux.go",
         "@@SOONG_CONFIG_GO@@",
     ],
-    testSrcs: [
-        "core/feature_test.go",
-        "core/template_test.go",
-    ],
     pkgPath: "github.com/ARM-software/bob-build/core",
 }
 
@@ -67,9 +63,6 @@ bootstrap_go_package {
     srcs: [
         "graph/graph.go",
     ],
-    testSrcs: [
-        "graph/graph_test.go"
-    ],
     pkgPath: "github.com/ARM-software/bob-build/graph",
 }
 
@@ -77,9 +70,6 @@ bootstrap_go_package {
     name: "bob-utils-@@PROJ_NAME@@",
     srcs: [
         "utils/utils.go",
-    ],
-    testSrcs: [
-        "utils/utils_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/utils",
 }
