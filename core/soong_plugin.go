@@ -95,7 +95,28 @@ func (g *soongGenerator) kernelModOutputDir(m *kernelModule) string  { return ""
 
 func (g *soongGenerator) init(*blueprint.Context, *bobConfig) {}
 
+func templateApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
+	templateApplier(m, getConfig(ctx), ctx)
+}
+
+func featureApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
+	featureApplier(m, getConfig(ctx), ctx)
+}
+
+// Bob modules that need Soong to run LoadHooks need to implement this
+// interface.
+type soongLoadHookProvider interface {
+	soongLoadHook(android.LoadHookContext, blueprint.Module)
+}
+
+func (gs *generateSource) soongLoadHook(ctx android.LoadHookContext, m blueprint.Module) {
+	// Flatten features and expand templates
+	featureApplierHook(ctx, m)
+	templateApplierHook(ctx, m)
+}
+
 func soongRegisterModule(name string, mf factoryWithConfig) {
+
 	// Create a closure adapting Bob's module factories to the format Soong uses.
 	factory := func() android.Module {
 		bpModule, properties := mf(soongGetConfig())
@@ -105,6 +126,12 @@ func soongRegisterModule(name string, mf factoryWithConfig) {
 
 		for _, property := range properties {
 			soongModule.AddProperties(property)
+		}
+
+		if h, ok := bpModule.(soongLoadHookProvider); ok {
+			android.AddLoadHook(bpModule, func(ctx android.LoadHookContext) {
+				h.soongLoadHook(ctx, bpModule)
+			})
 		}
 
 		return soongModule
