@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,15 +90,15 @@ type featurable interface {
 	features() *Features
 }
 
-func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	if m, ok := mctx.Module().(featurable); ok {
-		cfgProps := getConfig(mctx).Properties
+func templateApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleContext) {
+	if m, ok := module.(featurable); ok {
+		cfgProps := cfg.Properties
 
 		// TemplateApplier mutator is run before TargetApplier, so we
 		// need to apply templates with the core set, as well as
 		// host-specific and target-specific sets (where applicable).
 		props := append([]interface{}{}, m.topLevelProperties()...)
-		if m, ok := mctx.Module().(moduleWithBuildProps); ok {
+		if m, ok := module.(moduleWithBuildProps); ok {
 			props = append(props, &m.build().Host.BuildProps)
 			props = append(props, &m.build().Target.BuildProps)
 		}
@@ -108,6 +108,11 @@ func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	}
 }
 
+// Mutator to apply templates in standalone Bob
+func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
+	templateApplier(mctx.Module(), getConfig(mctx), mctx)
+}
+
 // Used to map a set of properties to destination properties
 type propmap struct {
 	dst []interface{}
@@ -115,16 +120,16 @@ type propmap struct {
 }
 
 // Applies feature specific properties within each module
-func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	if m, ok := mctx.Module().(featurable); ok {
-		cfgProps := getConfig(mctx).Properties
+func featureApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleContext) {
+	if m, ok := module.(featurable); ok {
+		cfgProps := cfg.Properties
 
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where
 		// supported, the host-specific and target-specific set.
 		var props = []propmap{propmap{m.topLevelProperties(), m.features()}}
 
-		if m, ok := mctx.Module().(moduleWithBuildProps); ok {
+		if m, ok := module.(moduleWithBuildProps); ok {
 			var tgtprops = []propmap{
 				propmap{[]interface{}{&m.build().Host.BuildProps}, &m.build().Host.Features},
 				propmap{[]interface{}{&m.build().Target.BuildProps}, &m.build().Target.Features},
@@ -140,11 +145,16 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 			err := prop.src.AppendProps(prop.dst, cfgProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+					ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
 					panic(err)
 				}
 			}
 		}
 	}
+}
+
+// Mutator to apply features in standalone Bob
+func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
+	featureApplier(mctx.Module(), getConfig(mctx), mctx)
 }
