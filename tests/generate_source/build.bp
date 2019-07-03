@@ -33,19 +33,6 @@ bob_generate_source {
 }
 
 bob_generate_source {
-    name: "generate_source_not_unique_in",
-    srcs: [
-        "before_generate.in",
-        "before_generate.in",
-        "before_generate.in",
-    ],
-    out: ["not_unique_in.cpp"],
-
-    tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${out}",
-}
-
-bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
         "before_generate.in",
@@ -176,7 +163,6 @@ bob_binary {
     name: "validate_link_generate_sources",
     generated_sources: [
         "generate_source_single",
-        "generate_source_not_unique_in",
         "generate_source_multiple_in",
         "generate_source_multiple_out",
         "generate_source_multiple_in_out",

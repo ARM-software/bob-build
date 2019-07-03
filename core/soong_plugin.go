@@ -31,6 +31,7 @@ import (
 	"sync"
 
 	"android/soong/android"
+
 	"github.com/google/blueprint"
 )
 
@@ -119,12 +120,6 @@ func featureApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
 // interface.
 type soongLoadHookProvider interface {
 	soongLoadHook(android.LoadHookContext)
-}
-
-func (gs *generateSource) soongLoadHook(ctx android.LoadHookContext) {
-	// Flatten features and expand templates
-	featureApplierHook(ctx, gs)
-	templateApplierHook(ctx, gs)
 }
 
 func soongRegisterModule(name string, mf factoryWithConfig) {
