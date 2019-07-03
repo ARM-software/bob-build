@@ -34,6 +34,10 @@ import (
 	"github.com/google/blueprint"
 )
 
+const (
+	bobModuleSuffix = "__bob_module_type"
+)
+
 var (
 	loadConfigOnce   sync.Once
 	onceLoadedConfig *bobConfig
@@ -63,10 +67,18 @@ func getConfig(interface{}) *bobConfig {
 }
 
 type moduleBase struct {
+	blueprint.SimpleName
 	android.ModuleBase
 }
 
 func (m *moduleBase) GenerateAndroidBuildActions(ctx android.ModuleContext) {}
+
+// All Bob module types need a Name() function so that the Bob module
+// names do not conflict with the names of the soong modules we will
+// be creating.
+func (m *moduleBase) Name() string {
+	return m.SimpleName.Name() + bobModuleSuffix
+}
 
 type soongGenerator struct {
 	toolchainSet

@@ -121,7 +121,6 @@ type GenerateProps struct {
 
 type generateCommon struct {
 	moduleBase
-	blueprint.SimpleName
 	Properties struct {
 		GenerateProps
 		Features
@@ -158,11 +157,11 @@ func (m *generateCommon) outputDir(g generatorBackend) string {
 }
 
 func (m *generateCommon) shortName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 func (m *generateCommon) altName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 func (m *generateCommon) altShortName() string {

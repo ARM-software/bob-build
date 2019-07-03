@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +49,6 @@ type AliasProps struct {
 // Type representing each bob_alias module
 type alias struct {
 	moduleBase
-	blueprint.SimpleName
 	Properties struct {
 		AliasProps
 		Features

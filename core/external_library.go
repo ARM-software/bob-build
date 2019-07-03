@@ -23,15 +23,14 @@ import (
 
 type externalLib struct {
 	moduleBase
-	blueprint.SimpleName
 }
 
 func (m *externalLib) topLevelProperties() []interface{} { return []interface{}{} }
 
-func (m *externalLib) outputName() string   { return m.Name() }
+func (m *externalLib) outputName() string   { return m.SimpleName.Name() }
 func (m *externalLib) altName() string      { return m.outputName() }
 func (m *externalLib) altShortName() string { return m.altName() }
-func (m *externalLib) shortName() string    { return m.Name() }
+func (m *externalLib) shortName() string    { return m.SimpleName.Name() }
 
 // External libraries have no outputs - they are already built.
 func (m *externalLib) outputs(g generatorBackend) []string         { return []string{} }

@@ -24,13 +24,17 @@ package core
 
 import (
 	"path/filepath"
+
+	"github.com/google/blueprint"
 )
 
 var (
 	jsonPath = filepath.Join(builddir, "config.json")
 )
 
-type moduleBase struct{}
+type moduleBase struct {
+	blueprint.SimpleName
+}
 
 // configProvider allows the retrieval of configuration
 type configProvider interface {
