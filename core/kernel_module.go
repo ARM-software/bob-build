@@ -27,7 +27,6 @@ import (
 
 type kernelModule struct {
 	moduleBase
-	blueprint.SimpleName
 	Properties struct {
 		Features
 		Build
@@ -67,7 +66,7 @@ func (m *kernelModule) altShortName() string {
 }
 
 func (m *kernelModule) shortName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 func (m *kernelModule) getEnableableProps() *EnableableProps {

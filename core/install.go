@@ -130,7 +130,6 @@ type InstallGroupProps struct {
 
 type installGroup struct {
 	moduleBase
-	blueprint.SimpleName
 	Properties struct {
 		InstallGroupProps
 		Features
@@ -172,7 +171,6 @@ type ResourceProps struct {
 
 type resource struct {
 	moduleBase
-	blueprint.SimpleName
 	Properties struct {
 		ResourceProps
 		Features
@@ -198,11 +196,11 @@ func (m *resource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
 
 func (m *resource) shortName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 func (m *resource) altName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 func (m *resource) altShortName() string {

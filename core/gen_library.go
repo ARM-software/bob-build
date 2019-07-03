@@ -96,7 +96,7 @@ func (m *generateLibrary) topLevelProperties() []interface{} {
 
 // Support singleOutputModule interface
 func (m *generateLibrary) outputName() string {
-	return m.Name()
+	return m.SimpleName.Name()
 }
 
 //// Support DependentInterface

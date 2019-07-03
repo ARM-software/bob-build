@@ -277,7 +277,6 @@ func (l *Build) processPaths(ctx blueprint.BaseModuleContext) {
 // library is a base class for modules which are generated from sets of object files
 type library struct {
 	moduleBase
-	blueprint.SimpleName
 
 	Properties struct {
 		Features
@@ -373,9 +372,9 @@ func (l *library) altShortName() string {
 // disambiguate.
 func (l *library) shortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.Name() + "__" + string(l.Properties.TargetType)
+		return l.SimpleName.Name() + "__" + string(l.Properties.TargetType)
 	}
-	return l.Name()
+	return l.SimpleName.Name()
 }
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
