@@ -1,5 +1,4 @@
 void output_single();
-void output_not_unique_in();
 void output_multiple_in();
 void output_multiple_out();
 void output_multiple_out2();
@@ -17,7 +16,6 @@ void output_deps2();
 void validate_link()
 {
 	output_single();
-	output_not_unique_in();
 	output_multiple_in();
 	output_multiple_out();
 	output_multiple_out2();

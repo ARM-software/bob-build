@@ -25,6 +25,7 @@ bootstrap_go_package {
         "bob-graph-@@PROJ_NAME@@",
         "bob-utils-@@PROJ_NAME@@",
         "soong-android",
+        "soong-genrule",
     ],
     srcs: [
         "core/android_make.go",
@@ -46,6 +47,7 @@ bootstrap_go_package {
         "core/library.go",
         "core/module.go",
         "core/properties.go",
+        "core/soong_gen.go",
         "core/soong_plugin.go",
         "core/splitter.go",
         "core/template.go",

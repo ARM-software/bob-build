@@ -26,7 +26,7 @@ bob_generate_source {
         "main.c",
         "function_def.txt",
     ],
-    out: ["main.c"],
+    out: ["gen_main.c"],
     cmd: "cat {{match_srcs \"function_def.txt\"}} {{match_srcs \"main.c\"}} > $out",
 }
 
