@@ -451,7 +451,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		return
 	}
 
-	filesToInstall := m.filesToInstall(ctx)
+	filesToInstall := m.filesToInstall(ctx, g)
 	requiredModuleNames := m.getInstallDepPhonyNames(ctx)
 
 	for _, file := range filesToInstall {
@@ -633,7 +633,7 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 		return
 	}
 	sb.WriteString("\n")
-	filesToInstall := m.filesToInstall(ctx)
+	filesToInstall := m.filesToInstall(ctx, getBackend(ctx))
 
 	for _, file := range filesToInstall {
 		moduleName := pathToModuleName(file)

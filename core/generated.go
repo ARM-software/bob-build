@@ -274,8 +274,9 @@ func (m *generateSource) implicitOutputs(g generatorBackend) []string {
 
 func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		inouts := m.Inouts(ctx)
-		getBackend(ctx).generateSourceActions(m, ctx, inouts)
+		g := getBackend(ctx)
+		inouts := m.Inouts(ctx, g)
+		g.generateSourceActions(m, ctx, inouts)
 	}
 }
 
@@ -387,13 +388,12 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	return cmd, args, dependents, hostTarget
 }
 
-func (m *generateCommon) getSources(ctx blueprint.ModuleContext) []string {
+func (m *generateCommon) getSources(ctx commonModuleContext) []string {
 	return m.Properties.getSources(ctx)
 }
 
-func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext) {
-	g := getBackend(ctx)
-	m.Properties.SourceProps.processPaths(ctx)
+func (m *generateCommon) processPaths(ctx commonModuleContext, g generatorBackend) {
+	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
 }
 
@@ -401,11 +401,10 @@ func (m *generateCommon) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
-func (m *generateSource) Inouts(ctx blueprint.ModuleContext) []inout {
+func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	g := getBackend(ctx)
 	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
-	io.genIn = utils.NewStringSlice(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx))
+	io.genIn = utils.NewStringSlice(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx, g))
 	io.out = m.outputs(g)
 	if m.Properties.Depfile != "" {
 		io.depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), m.Properties.Depfile)
@@ -416,9 +415,8 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext) []inout {
 	return []inout{io}
 }
 
-func (m *generateSource) filesToInstall(ctx blueprint.ModuleContext) []string {
+func (m *generateSource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
-	g := getBackend(ctx)
 	return m.outputs(g)
 }
 
@@ -453,12 +451,13 @@ func (m *transformSource) implicitOutputs(g generatorBackend) []string {
 
 func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		inouts := m.Inouts(ctx)
+		g := getBackend(ctx)
+		inouts := m.Inouts(ctx, g)
 		for _, inout := range inouts {
 			m.outs = append(m.outs, inout.out...)
 			m.implicitOuts = append(m.implicitOuts, inout.implicitOuts...)
 		}
-		getBackend(ctx).transformSourceActions(m, ctx, inouts)
+		g.transformSourceActions(m, ctx, inouts)
 	}
 }
 
@@ -466,9 +465,8 @@ func (m *transformSource) topLevelProperties() []interface{} {
 	return append(m.generateCommon.topLevelProperties(), &m.Properties.TransformSourceProps)
 }
 
-func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
+func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var inouts []inout
-	g := getBackend(ctx)
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
 	// For a transform source every input file is expected to be
@@ -508,7 +506,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
 
 		inouts = append(inouts, inout{ins, empty, outs, depfile, implicitSrcs, implicitOuts})
 	}
-	for _, src := range utils.NewStringSlice(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx)) {
+	for _, src := range utils.NewStringSlice(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx, g)) {
 		ins := []string{src}
 		outs := []string{}
 		depfile := ""
@@ -542,9 +540,8 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext) []inout {
 	return inouts
 }
 
-func (m *transformSource) filesToInstall(ctx blueprint.ModuleContext) []string {
+func (m *transformSource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
-	g := getBackend(ctx)
 	return m.outputs(g)
 }
 
@@ -587,9 +584,8 @@ func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{})
 // the current module. The current module can be generated or a library, and the
 // dependencies can be anything implementing DependentInterface (so "generated"
 // is a misnomer, because this includes libraries, too).
-func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
+func getGeneratedFiles(ctx blueprint.ModuleContext, g generatorBackend) []string {
 	var srcs []string
-	g := getBackend(ctx)
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
 		func(m blueprint.Module) {

@@ -85,8 +85,8 @@ func (m *kernelModule) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *kernelModule) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return m.outputs(getBackend(ctx))
+func (m *kernelModule) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return m.outputs(g)
 }
 
 func (m *kernelModule) getInstallableProps() *InstallableProps {
@@ -97,8 +97,8 @@ func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []st
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, kernelModuleDepTag)
 }
 
-func (m *kernelModule) processPaths(ctx blueprint.BaseModuleContext) {
-	m.Properties.Build.processPaths(ctx)
+func (m *kernelModule) processPaths(ctx commonModuleContext, g generatorBackend) {
+	m.Properties.Build.processPaths(ctx, g)
 }
 
 func (m *kernelModule) extraSymbolsFiles(ctx blueprint.ModuleContext) (files []string) {

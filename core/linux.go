@@ -801,7 +801,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	// Check if this is a resource
 	_, isResource := ins.(*resource)
 
-	for _, src := range ins.filesToInstall(ctx) {
+	for _, src := range ins.filesToInstall(ctx, g) {
 		dest := filepath.Join(installPath, filepath.Base(src))
 		// Resources always come from the source directory.
 		// All other module types install files from the build directory.

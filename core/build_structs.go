@@ -138,7 +138,7 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
-func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []string {
+func glob(ctx commonModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	for _, file := range globs {
@@ -167,12 +167,11 @@ func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
+func (s *SourceProps) getSources(ctx commonModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 
-func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
-	g := getBackend(ctx)
+func (s *SourceProps) processPaths(ctx commonModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
 	var special = map[string]string{
 		"${bob_config}": filepath.Join(g.buildDir(), configName),
@@ -386,13 +385,13 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 }
 
 type pathProcessor interface {
-	processPaths(blueprint.BaseModuleContext)
+	processPaths(commonModuleContext, generatorBackend)
 }
 
 // Adds module paths to appropriate properties.
 func pathMutator(mctx blueprint.BottomUpMutatorContext) {
 	if p, ok := mctx.Module().(pathProcessor); ok {
-		p.processPaths(mctx)
+		p.processPaths(mctx, getBackend(mctx))
 	}
 }
 

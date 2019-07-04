@@ -40,16 +40,17 @@ func (m *generateStaticLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateStaticLibrary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return []string{getLibraryGeneratedPath(m, getBackend(ctx))}
+func (m *generateStaticLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return []string{getLibraryGeneratedPath(m, g)}
 }
 
 //// Support blueprint.Module
 
 func (m *generateStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		inouts := inouts(m, ctx)
-		getBackend(ctx).genStaticActions(m, ctx, inouts)
+		g := getBackend(ctx)
+		inouts := inouts(m, ctx, g)
+		g.genStaticActions(m, ctx, inouts)
 	}
 }
 

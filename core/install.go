@@ -155,7 +155,7 @@ type symlinkInstaller interface {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx blueprint.ModuleContext) []string
+	filesToInstall(ctx commonModuleContext, g generatorBackend) []string
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -222,7 +222,7 @@ func (m *resource) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *resource) filesToInstall(ctx blueprint.ModuleContext) []string {
+func (m *resource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
 	return m.Properties.SourceProps.getSources(ctx)
 }
 
@@ -230,8 +230,8 @@ func (m *resource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *resource) processPaths(ctx blueprint.BaseModuleContext) {
-	m.Properties.SourceProps.processPaths(ctx)
+func (m *resource) processPaths(ctx commonModuleContext, g generatorBackend) {
+	m.Properties.SourceProps.processPaths(ctx, g)
 }
 
 func (m *resource) getAliasList() []string {
