@@ -40,16 +40,17 @@ func (m *generateBinary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateBinary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return []string{getLibraryGeneratedPath(m, getBackend(ctx))}
+func (m *generateBinary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return []string{getLibraryGeneratedPath(m, g)}
 }
 
 //// Support blueprint.Module
 
 func (m *generateBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		inouts := inouts(m, ctx)
-		getBackend(ctx).genBinaryActions(m, ctx, inouts)
+		g := getBackend(ctx)
+		inouts := inouts(m, ctx, g)
+		g.genBinaryActions(m, ctx, inouts)
 	}
 }
 

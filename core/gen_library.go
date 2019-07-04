@@ -48,7 +48,7 @@ type generateLibraryInterface interface {
 	dependentInterface
 
 	libExtension() string
-	getSources(ctx blueprint.ModuleContext) []string
+	getSources(ctx commonModuleContext) []string
 }
 
 //// Local functions
@@ -61,11 +61,10 @@ func getLibraryGeneratedPath(m generateLibraryInterface, g generatorBackend) str
 // Map sources to outputs. This is primarily to support
 // transformSource, so here we return a single element associating all
 // inputs with all outputs
-func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext) []inout {
+func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	g := getBackend(ctx)
 	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
-	io.genIn = getGeneratedFiles(ctx)
+	io.genIn = getGeneratedFiles(ctx, g)
 	io.out = m.outputs(g)
 	io.implicitOuts = m.implicitOutputs(g)
 	return []inout{io}

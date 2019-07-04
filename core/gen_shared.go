@@ -40,16 +40,17 @@ func (m *generateSharedLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateSharedLibrary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return []string{getLibraryGeneratedPath(m, getBackend(ctx))}
+func (m *generateSharedLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return []string{getLibraryGeneratedPath(m, g)}
 }
 
 //// Support blueprint.Module
 
 func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		inouts := inouts(m, ctx)
-		getBackend(ctx).genSharedActions(m, ctx, inouts)
+		g := getBackend(ctx)
+		inouts := inouts(m, ctx, g)
+		g.genSharedActions(m, ctx, inouts)
 	}
 }
 

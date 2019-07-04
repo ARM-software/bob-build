@@ -256,20 +256,20 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 }
 
 // Add module paths to srcs, exclude_srcs, local_include_dirs and export_local_include_dirs
-func (l *Build) processPaths(ctx blueprint.BaseModuleContext) {
+func (l *Build) processPaths(ctx commonModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
-	l.SourceProps.processPaths(ctx)
+	l.SourceProps.processPaths(ctx, g)
 	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)
 	l.Export_local_include_dirs = utils.PrefixDirs(l.Export_local_include_dirs, prefix)
 
 	// When prefixPaths is called we have collapsed features, but not
 	// targets, so we also need to expand paths in host and target
 	// specific properties as well.
-	l.Host.SourceProps.processPaths(ctx)
+	l.Host.SourceProps.processPaths(ctx, g)
 	l.Host.Local_include_dirs = utils.PrefixDirs(l.Host.Local_include_dirs, prefix)
 	l.Host.Export_local_include_dirs = utils.PrefixDirs(l.Host.Export_local_include_dirs, prefix)
 
-	l.Target.SourceProps.processPaths(ctx)
+	l.Target.SourceProps.processPaths(ctx, g)
 	l.Target.Local_include_dirs = utils.PrefixDirs(l.Target.Local_include_dirs, prefix)
 	l.Target.Export_local_include_dirs = utils.PrefixDirs(l.Target.Export_local_include_dirs, prefix)
 }
@@ -444,8 +444,8 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	return
 }
 
-func (l *library) processPaths(ctx blueprint.BaseModuleContext) {
-	l.Properties.Build.processPaths(ctx)
+func (l *library) processPaths(ctx commonModuleContext, g generatorBackend) {
+	l.Properties.Build.processPaths(ctx, g)
 }
 
 func (l *library) processBuildWrapper(ctx blueprint.BaseModuleContext) {
@@ -466,8 +466,8 @@ func (m *staticLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName()+".a")}
 }
 
-func (m *staticLibrary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return m.outputs(getBackend(ctx))
+func (m *staticLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return m.outputs(g)
 }
 
 func (l *library) checkField(cond bool, fieldName string) {
@@ -518,8 +518,8 @@ func (m *sharedLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
 }
 
-func (m *sharedLibrary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return m.outputs(getBackend(ctx))
+func (m *sharedLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return m.outputs(g)
 }
 
 func (m *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
@@ -560,8 +560,8 @@ func (m *binary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName())}
 }
 
-func (m *binary) filesToInstall(ctx blueprint.ModuleContext) []string {
-	return m.outputs(getBackend(ctx))
+func (m *binary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+	return m.outputs(g)
 }
 
 func (m *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
