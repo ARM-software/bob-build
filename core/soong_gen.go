@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"android/soong/android"
@@ -191,4 +192,116 @@ func (gb *generateBinary) soongLoadHook(ctx android.LoadHookContext) {
 
 	name := gb.SimpleName.Name()
 	gb.genLoadHook(ctx, []string{name}, "")
+}
+
+var (
+	// Use raw string literal backtick to avoid having to escape the
+	// backslash in the regular expressions
+	varRegexp = regexp.MustCompile(`\$[0-9]+`)
+	dotRegexp = regexp.MustCompile(`\.{2,}`)
+	extRegexp = regexp.MustCompile(`^\.`)
+)
+
+// Bob's module type allows the output file name to be specified using
+// a regular expression replace, whereas Soong only allows you to
+// specify the a new extension for the output.
+//
+// Look for an extension Bob's replacement string, and just use that. The
+// replacement output filename won't be precisely as specified. If we
+// want to maintain Bob behaviour we will need our own module type
+// based on gensrcs.
+func soongOutputExtension(re string) string {
+	// We have a regular expression which might look like one of
+	//  $1.ext
+	//  $1.$2.ext
+	//  $1.infix.$2.ext
+	//  dir/$1.ext
+	//
+	// Drop the directory, match parts, and first '.', so we just end
+	// up with `ext` or `infix.ext`. This should be good enough to keep
+	// the files unique, and hopefully won't upset anything.
+	// Drop directory
+	dirChr := strings.LastIndex(re, "/")
+	if dirChr > -1 {
+		re = re[dirChr+1:]
+	}
+	// Remove capture group references, $[0-9]+
+	re = varRegexp.ReplaceAllLiteralString(re, "")
+	// With the capture group references removed, eliminate '.' which
+	// are now adjacent by replacing .. with .
+	// Note that this could cause breakage if we actually have '..'
+	// (parent dir) in the replacement string, but that shouldn't be
+	// happening.
+	re = dotRegexp.ReplaceAllLiteralString(re, ".")
+	// Trim initial '.'
+	return extRegexp.ReplaceAllLiteralString(re, "")
+}
+
+func (ts *transformSource) soongLoadHook(ctx android.LoadHookContext) {
+	// Flatten features and expand templates.
+	featureApplierHook(ctx, ts)
+	templateApplierHook(ctx, ts)
+
+	// bob_transform_source maps best to gensrcs
+	//
+	// Setup a gensrcs property struct as if blueprint had read it
+	// Only include the fields that we expect to use
+	transformProps := struct {
+		Name             *string
+		Srcs             []string
+		Exclude_srcs     []string
+		Output_extension *string
+		Depfile          *bool
+
+		Tool_files []string
+		Tools      []string
+		Cmd        *string
+
+		Export_include_dirs []string
+
+		Owner       *string
+		Proprietary *bool
+
+		Enabled *bool
+	}{}
+
+	transformProps.Name = proptools.StringPtr(ts.SimpleName.Name())
+	transformProps.Srcs = ts.generateCommon.Properties.Srcs
+	transformProps.Exclude_srcs = ts.generateCommon.Properties.Exclude_srcs
+	transformProps.Export_include_dirs = ts.generateCommon.Properties.Export_gen_include_dirs
+	transformProps.Enabled = ts.generateCommon.Properties.Enabled
+
+	// Only set Tool_files or Tool if the Bob property is not ""
+	// otherwise Soong will report a missing dependency
+	if ts.generateCommon.Properties.Tool != "" {
+		transformProps.Tool_files = []string{ts.generateCommon.Properties.Tool}
+	}
+	if ts.generateCommon.Properties.Host_bin != "" {
+		transformProps.Tools = []string{ts.generateCommon.Properties.Host_bin}
+	}
+
+	// Bob's specified filename will be ignored. Soong will report an
+	// error if $(depfile) is not used in the command
+	transformProps.Depfile = proptools.BoolPtr(ts.Properties.Out.Depfile != "")
+
+	if len(ts.Properties.Out.Replace) > 1 {
+		panic(fmt.Errorf("Multiple outputs not supported in bob_transform_source on soong, %s", ctx.ModuleName()))
+	}
+	transformProps.Output_extension =
+		proptools.StringPtr(soongOutputExtension(ts.Properties.Out.Replace[0]))
+
+	// Replace ${args} immediately
+	cmd := strings.Replace(ts.generateCommon.Properties.Cmd, "${args}",
+		strings.Join(ts.generateCommon.Properties.Args, " "), -1)
+
+	cmd2, err := expandBobVariables(cmd, ts.generateCommon.Properties.Tool,
+		ts.generateCommon.Properties.Host_bin)
+	if err != nil {
+		panic(fmt.Errorf("%s property cmd %s", ctx.ModuleName(), err.Error()))
+	}
+	transformProps.Cmd = proptools.StringPtr(cmd2)
+
+	// The ModuleDir for the new module will be inherited from the
+	// current module via the LoadHookContext
+	ctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenSrcsFactory), &transformProps)
 }
