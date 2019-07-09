@@ -1,0 +1,12 @@
+bob_static_library {
+    name: "bob_test_simple_static_lib",
+    srcs: ["helper.c"],
+    cflags: ["-DLIB_FLAG=1"],
+}
+
+bob_binary {
+    name: "bob_test_simple_binary",
+    static_libs: ["bob_test_simple_static_lib"],
+    srcs: ["main.c"],
+    cflags: ["-DBIN_FLAG=1"],
+}
