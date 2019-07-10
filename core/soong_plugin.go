@@ -118,13 +118,13 @@ func featureApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
 // Bob modules that need Soong to run LoadHooks need to implement this
 // interface.
 type soongLoadHookProvider interface {
-	soongLoadHook(android.LoadHookContext, blueprint.Module)
+	soongLoadHook(android.LoadHookContext)
 }
 
-func (gs *generateSource) soongLoadHook(ctx android.LoadHookContext, m blueprint.Module) {
+func (gs *generateSource) soongLoadHook(ctx android.LoadHookContext) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, m)
-	templateApplierHook(ctx, m)
+	featureApplierHook(ctx, gs)
+	templateApplierHook(ctx, gs)
 }
 
 func soongRegisterModule(name string, mf factoryWithConfig) {
@@ -141,9 +141,7 @@ func soongRegisterModule(name string, mf factoryWithConfig) {
 		}
 
 		if h, ok := bpModule.(soongLoadHookProvider); ok {
-			android.AddLoadHook(bpModule, func(ctx android.LoadHookContext) {
-				h.soongLoadHook(ctx, bpModule)
-			})
+			android.AddLoadHook(bpModule, h.soongLoadHook)
 		}
 
 		return soongModule
