@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source .travis/utils.sh
 STATUS_CODE=0 # reset
 

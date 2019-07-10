@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eE
-trap "echo '<------------- run_build_tests.sh failed'" ERR
+trap "echo '<------------- $(basename ${0}) failed'" ERR
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
-BOB_ROOT=$(dirname "${SCRIPT_DIR}")
+BOB_ROOT="${SCRIPT_DIR}/.."
 
 export TEST_NON_ASCII_IN_ENV_HASH='ó'
 
@@ -19,7 +19,7 @@ rm -rf "${TEST_DIRS[@]}"
 
 # Build with working directory in source directory
 build_dir=build-in-src
-pushd "${BOB_ROOT}/tests" &> /dev/null
+pushd "tests" &> /dev/null
 ./bootstrap -o ${build_dir}
 ${build_dir}/config && ${build_dir}/buildme bob_tests
 popd &> /dev/null

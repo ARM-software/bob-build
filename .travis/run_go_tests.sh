@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eE
-trap "echo '<------------- run_go_tests.sh failed'" ERR
+trap "echo '<------------- $(basename ${0}) failed'" ERR
 
 cd ${BOB_WORKSPACE}/src/github.com/ARM-software/bob-build/
 NAMESPACE="github.com/ARM-software/bob-build"
