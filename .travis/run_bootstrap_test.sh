@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
 set -eE
-trap "echo '<------------- run_bootstrap_test.sh failed'" ERR
+trap "echo '<------------- $(basename ${0}) failed'" ERR
 
-# Make sure that commands are executed in the right directory
-cd ${TRAVIS_BUILD_DIR}
+SCRIPT_DIR=$(dirname $0)
+BOB_ROOT="${SCRIPT_DIR}/.."
 
-PARENT=$(git merge-base origin/master ${TRAVIS_COMMIT})
+COMMIT=$(git rev-parse HEAD)
+PARENT=$(git merge-base origin/master ${COMMIT})
 
 # Check if version update file was changed and if not verify Bob build
-if [[ $(git diff --name-only ${PARENT} ${TRAVIS_COMMIT} | grep "bob.bootstrap.version") ]]; then
-    echo "Bob version file has change between parent and current commit. Skipping verification step"
+if git diff --name-only ${PARENT} ${COMMIT} | grep -q "bob.bootstrap.version" ; then
+    echo "Bob version file has changed between parent and current commit. Skipping verification step"
 else
     build_dir=bootstrap_test
     git checkout ${PARENT}
-    cd ${BOB_ROOT}/tests
+    cd "${BOB_ROOT}/tests"
     rm -rf ${build_dir} # Cleanup test directory
     ./bootstrap -o ${build_dir}
     ${build_dir}/config && ${build_dir}/buildme bob_tests
 
-    git checkout ${TRAVIS_COMMIT}
+    # Wait for filesystems with low timestamp resolution
+    sleep 1
+
+    git checkout ${COMMIT}
     rm ${build_dir}/build.ninja
     ${build_dir}/buildme bob_tests
 fi

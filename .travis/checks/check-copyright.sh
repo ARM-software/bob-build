@@ -3,12 +3,11 @@
 BOB_ROOT=$(dirname ${0})/../..
 cd "${BOB_ROOT}"
 COPYRIGHT="copyright\s+[0-9,\s-]+"
-CHECKED_COMMIT=${TRAVIS_COMMIT:-HEAD}
-PARENT=$(git merge-base origin/master ${CHECKED_COMMIT})
+PARENT=$(git merge-base origin/master HEAD)
 
 exit=0
 # Skip copyright verification when commit has revert in the title
-for commit in $(git log --pretty="%H"  ${PARENT}..${CHECKED_COMMIT}); do
+for commit in $(git log --pretty="%H"  ${PARENT}..HEAD); do
     title=$(git log --oneline -1 ${commit})
     echo $title
     if echo $title | grep -iq "revert"; then

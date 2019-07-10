@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Version of ninja to build -- can be any git revision
 VERSION="v1.8.0"

@@ -1,4 +1,4 @@
-#!/bin/bash
+# This script must be sourced
 
 # Travis doesn't support multiple languages. So to support multiple Python
 # versions, use an environment variable to select the version to be used, then
@@ -14,7 +14,7 @@ if [[ -n $PYTHON_SUFFIX ]]; then
     chmod +x $PYTHON_WRAPPER
 
     export PATH=~/pythonbin:$PATH
-    PYVER=$(python -c 'import sys; print("%d.%d." % (sys.version_info.major, sys.version_info.minor))') || STATUS_CODE=1
+    PYVER=$(python -c 'import sys; print("%d.%d." % (sys.version_info.major, sys.version_info.minor))')
     echo "Check python version"
     if [[ $PYVER != "$PYTHON_SUFFIX."* ]]; then
         echo "Error: Python binary suffix is $PYTHON_SUFFIX, but version reported is $PYVER"

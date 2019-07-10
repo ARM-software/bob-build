@@ -1,10 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source .travis/utils.sh
 STATUS_CODE=0 # reset
 
+# Useful for debug we should keep this
+git log --graph --oneline origin/master...HEAD
+echo "----"
+
 ####################
 fold_start 'Check:go-vet'
-    bash .travis/checks/check-go-vet.sh
+    go vet ./...
     check_result $? "go vet:"
 fold_end
 ####################
@@ -39,8 +43,6 @@ fold_end
 
 ####################
 fold_start 'Check:signoff'
-    git log  --pretty=oneline | head -n 10 # Very useful for debug we should keep this
-    echo "----"
     python3 .travis/checks/check-signoff.py
     check_result $? "signoff:"
 fold_end
