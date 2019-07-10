@@ -3,15 +3,6 @@ language: go
 git:
   depth: false
 
-matrix:
-  include:
-  - go: "1.10"
-    env: PYTHON_SUFFIX=2.7
-  - go: "1.11"
-    env: PYTHON_SUFFIX=3
-  - go: "1.12"
-    env: PYTHON_SUFFIX=2.7
-
 cache:
   directories:
     - $HOME/ninjabin
@@ -44,6 +35,27 @@ before_script:
   - export GOPATH=${BOB_WORKSPACE}
   - go get github.com/stretchr/testify
 
+matrix:
+  include:
+  - go: "1.10"
+    env:
+      - PYTHON_SUFFIX=2.7
+      - DO_COMMIT_CHECKS=0
+      - DO_PYTHON_TESTS=0
+      - DO_GO_TESTS=1
+  - go: "1.11"
+    env:
+      - PYTHON_SUFFIX=3
+      - DO_COMMIT_CHECKS=1
+      - DO_PYTHON_TESTS=1
+      - DO_GO_TESTS=1
+  - go: "1.12"
+    env:
+      - PYTHON_SUFFIX=2.7
+      - DO_COMMIT_CHECKS=0
+      - DO_PYTHON_TESTS=1
+      - DO_GO_TESTS=1
+
 script:
-  - bash .travis/checks/run-checks.sh
-  - bash .travis/run_all_tests.sh
+  - .travis/checks/run-checks.sh
+  - .travis/run_all_tests.sh
