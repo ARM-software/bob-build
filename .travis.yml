@@ -40,7 +40,6 @@ before_script:
   - ln -s "$(pwd)/blueprint/" ~/bob_workspace/src/github.com/google/blueprint
   - ln -s "$(pwd)"            ~/bob_workspace/src/github.com/ARM-software/bob-build
   - export GOROOT=$(go env GOROOT)
-  - export BOB_ROOT=$(pwd)
   - export BOB_WORKSPACE=~/bob_workspace
   - export GOPATH=${BOB_WORKSPACE}
   - go get github.com/stretchr/testify
