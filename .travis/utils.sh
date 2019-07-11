@@ -9,8 +9,17 @@ fold_start() {
 }
 
 fold_end() {
+    local RESULT=$1
     travis_time_finish
     travis_fold end "$FOLD"
+
+    echo -n "$FOLD: "
+    if [ $RESULT -eq 0 ]; then
+        result_ok
+    else
+        STATUS_CODE=1
+        result_fail
+    fi
 }
 
 result_ok() {
@@ -26,17 +35,4 @@ result_skip() {
 
 result_fail() {
     echo -e "\e[31;1mFAIL\e[0m"
-}
-
-check_result() {
-    local RESULT=$1
-    local MSG=$2
-
-    echo -n "$MSG "
-    if [ $RESULT -eq 0 ]; then
-        result_ok
-    else
-        STATUS_CODE=1
-        result_fail
-    fi
 }
