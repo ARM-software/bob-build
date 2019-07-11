@@ -196,25 +196,11 @@ def enforce_dependent_values(auto_fix=False):
             set_config_internal(i, 0)
 
 
-__mconfig_dir = ""
-
-
-def get_mconfig_dir():
-    """
-    Retrieve the path to the input option database.
-    """
-    return __mconfig_dir
-
-
-def init_config(options_filename, _config_filename, ignore_missing=False):
+def init_config(options_filename, ignore_missing=False):
     from config_system import lex, lex_wrapper, syntax
 
-    global __mconfig_dir
-    global config_filename
     global configuration
     global menu_data
-
-    config_filename = _config_filename
 
     try:
         lexer = lex_wrapper.LexWrapper(ignore_missing)
@@ -226,7 +212,6 @@ def init_config(options_filename, _config_filename, ignore_missing=False):
     except syntax.ParseError as e:
         logger.debug("Parse error")
         exit(1)
-    __mconfig_dir = os.path.dirname(options_filename)
     menu_data = menu_parse(configuration)
 
     set_initial_values()
@@ -285,7 +270,7 @@ def read_config_file(config_filename):
 
 
 def read_config(options_filename, config_filename, ignore_missing):
-    init_config(options_filename, config_filename, ignore_missing)
+    init_config(options_filename, ignore_missing)
     read_config_file(config_filename)
     enforce_dependent_values(True)
 

@@ -22,7 +22,7 @@ import os
 import re
 import sys
 
-from config_system import log_handlers
+from config_system import log_handlers, utils
 from config_system.general import enforce_dependent_values, get_config, init_config, \
     read_config, read_profile_file, set_config_if_prompt, write_config, \
     can_enable, format_dependency_list
@@ -130,14 +130,14 @@ def parse_args():
     parser.add_argument('--ignore-missing', action='store_true', default=False,
                         help="Ignore missing database files included with 'source'")
     parser.add_argument('args', nargs="*")
-    return parser.parse_args()
+    return utils.parse_args(parser)
 
 
 def main():
     args = parse_args()
 
     if args.new:
-        init_config(args.database, args.config, args.ignore_missing)
+        init_config(args.database, args.ignore_missing)
     else:
         read_config(args.database, args.config, args.ignore_missing)
 

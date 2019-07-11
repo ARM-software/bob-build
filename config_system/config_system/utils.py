@@ -26,6 +26,9 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+__args = None
+
+
 @contextlib.contextmanager
 def open_and_write_if_changed(fname):
     """Return a file-like object which buffers whatever is written to it. When
@@ -47,3 +50,27 @@ def open_and_write_if_changed(fname):
             logger.debug("Updating {}".format(fname))
             with open(fname, "wt") as fp:
                 fp.write(buf.getvalue())
+
+
+def get_config_dir():
+    """
+    Retrieve the path to the directory containing the configuration file.
+    """
+    return os.path.dirname(__args.config)
+
+
+def get_mconfig_dir():
+    """
+    Retrieve the path to the directory containing the input option database.
+    """
+    return os.path.dirname(__args.database)
+
+
+def parse_args(parser):
+    """
+    Capture input arguments so that we can supply wrapper functions to
+    plugins to retrieve interesting values.
+    """
+    global __args
+    __args = parser.parse_args()
+    return __args

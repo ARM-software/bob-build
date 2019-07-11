@@ -32,9 +32,12 @@ from config_system.general import \
     get_config_int, \
     get_config_list, \
     get_config_string, \
-    get_mconfig_dir, \
     get_options_depending_on, \
     get_options_selecting, \
     init_config, \
     read_config, \
     set_config  # nopep8: E402 module level import not at top of file
+
+from config_system.utils import \
+    get_config_dir, \
+    get_mconfig_dir  # nopep8: E402 module level import not at top of file

@@ -63,7 +63,7 @@ def config_to_json():
 
 
 def plugin_exec():
-    output_dir = os.path.dirname(config_system.general.config_filename)
+    output_dir = config_system.get_config_dir()
     json_filename = os.path.join(output_dir, "config.json")
     json_config = config_to_json()
     with config_system.utils.open_and_write_if_changed(json_filename) as fp:

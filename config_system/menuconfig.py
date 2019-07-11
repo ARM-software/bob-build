@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 
-from config_system import general, log_handlers
+from config_system import general, log_handlers, utils
 
 logger = logging.getLogger(__name__)
 
@@ -626,7 +626,7 @@ def parse_args():
                         help="Post configuration plugin to execute", default=[])
     parser.add_argument("--ignore-missing", action="store_true", default=False,
                         help="Ignore missing database files included with 'source'")
-    return parser.parse_args()
+    return utils.parse_args(parser)
 
 
 def main():
