@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 type defaults struct {
@@ -61,7 +63,7 @@ type defaultable interface {
 	defaults() []string
 }
 
-func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
+func defaultDepsMutator(mctx abstr.BottomUpMutatorContext) {
 	if l, ok := mctx.Module().(defaultable); ok {
 		mctx.AddDependency(mctx.Module(), defaultDepTag, l.defaults()...)
 	}

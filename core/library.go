@@ -614,7 +614,7 @@ func getLibrary(m blueprint.Module) (*library, bool) {
 	return nil, false
 }
 
-func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
+func checkLibraryFieldsMutator(mctx abstr.BottomUpMutatorContext) {
 	m := mctx.Module()
 	if b, ok := m.(*binary); ok {
 		props := b.Properties

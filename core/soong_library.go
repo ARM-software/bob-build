@@ -39,10 +39,6 @@ type ccLibraryCommonProps struct {
 }
 
 func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (bool, *ccLibraryCommonProps) {
-	// Flatten features and expand templates
-	featureApplierMutator(mctx, l)
-	templateApplierMutator(mctx, l)
-
 	if !isEnabled(l) {
 		return false, nil
 	}
