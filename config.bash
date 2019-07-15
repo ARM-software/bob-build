@@ -49,6 +49,7 @@ exit_status=0
 
 "${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
+    -b "${BUILDDIR}/config.json" \
     -c "${BUILDDIR}/${CONFIGNAME}" "${ARG_TARGET[@]}" || exit_status=$?
 
 if [ "$exit_status" -eq "1" ]; then # warnings occurred
