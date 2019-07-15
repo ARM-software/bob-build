@@ -92,7 +92,10 @@ type featurable interface {
 	features() *Features
 }
 
-func templateApplier(module blueprint.Module, cfg *bobConfig, ctx abstr.ModuleContext) {
+func templateApplierMutator(mctx abstr.TopDownMutatorContext) {
+	module := abstr.Module(mctx)
+	cfg := getConfig(mctx)
+
 	if m, ok := module.(featurable); ok {
 		cfgProps := cfg.Properties
 
@@ -117,7 +120,10 @@ type propmap struct {
 }
 
 // Applies feature specific properties within each module
-func featureApplier(module blueprint.Module, cfg *bobConfig, ctx abstr.ModuleContext) {
+func featureApplierMutator(mctx abstr.TopDownMutatorContext) {
+	module := abstr.Module(mctx)
+	cfg := getConfig(mctx)
+
 	if m, ok := module.(featurable); ok {
 		cfgProps := cfg.Properties
 
@@ -142,7 +148,7 @@ func featureApplier(module blueprint.Module, cfg *bobConfig, ctx abstr.ModuleCon
 			err := prop.src.AppendProps(prop.dst, cfgProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-					ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
 					panic(err)
 				}

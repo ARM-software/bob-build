@@ -26,3 +26,25 @@
  */
 
 package abstr
+
+import (
+	"github.com/google/blueprint"
+
+	"android/soong/android"
+)
+
+func TopDownAdaptor(f func(TopDownMutatorContext)) android.AndroidTopDownMutator {
+	return func(mctx android.TopDownMutatorContext) {
+		f(mctx)
+	}
+}
+
+func BottomUpAdaptor(f func(BottomUpMutatorContext)) android.AndroidBottomUpMutator {
+	return func(mctx android.BottomUpMutatorContext) {
+		f(mctx)
+	}
+}
+
+func Module(mctx TopDownMutatorContext) blueprint.Module {
+	return mctx.(android.TopDownMutatorContext).Module()
+}

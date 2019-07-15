@@ -29,6 +29,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
+	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/graph"
 )
 
@@ -40,23 +41,8 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
-// configProvider allows the retrieval of configuration
-type configProvider interface {
-	Config() interface{}
-}
-
-func getConfig(ctx configProvider) *bobConfig {
-	return ctx.Config().(*bobConfig)
-}
-
-// Mutator to apply templates in standalone Bob
-func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	templateApplier(mctx.Module(), getConfig(mctx), mctx)
-}
-
-// Mutator to apply features in standalone Bob
-func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	featureApplier(mctx.Module(), getConfig(mctx), mctx)
+func getConfig(ctx abstr.ModuleContext) *bobConfig {
+	return ctx.(blueprint.BaseModuleContext).Config().(*bobConfig)
 }
 
 // Main is the entry point for the bob primary builder.
@@ -107,11 +93,11 @@ func Main() {
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
 	// The generated depender mutator add dependencies to generated source modules.
-	ctx.RegisterBottomUpMutator("default_deps", defaultDepsMutator).Parallel()
-	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
-	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
-	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
-	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps", abstr.BottomUpAdaptor(defaultDepsMutator)).Parallel()
+	ctx.RegisterTopDownMutator("features_applier", abstr.TopDownAdaptor(featureApplierMutator)).Parallel()
+	ctx.RegisterTopDownMutator("template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
+	ctx.RegisterBottomUpMutator("check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
+	ctx.RegisterBottomUpMutator("strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()

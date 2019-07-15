@@ -160,36 +160,20 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// Flatten features and expand templates
-	featureApplierMutator(mctx, gs)
-	templateApplierMutator(mctx, gs)
-
 	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Depfile)
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// Flatten features and expand templates
-	featureApplierMutator(mctx, gs)
-	templateApplierMutator(mctx, gs)
-
 	name := gs.Name()
 	gs.createGenrule(mctx, []string{name + ".a"}, "")
 }
 
 func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// Flatten features and expand templates
-	featureApplierMutator(mctx, gs)
-	templateApplierMutator(mctx, gs)
-
 	name := gs.Name()
 	gs.createGenrule(mctx, []string{name + ".so"}, "")
 }
 
 func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// Flatten features and expand templates
-	featureApplierMutator(mctx, gb)
-	templateApplierMutator(mctx, gb)
-
 	name := gb.Name()
 	gb.createGenrule(mctx, []string{name}, "")
 }
@@ -238,10 +222,6 @@ func soongOutputExtension(re string) string {
 }
 
 func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// Flatten features and expand templates.
-	featureApplierMutator(mctx, ts)
-	templateApplierMutator(mctx, ts)
-
 	// bob_transform_source maps best to gensrcs
 	//
 	// Setup a gensrcs property struct as if blueprint had read it

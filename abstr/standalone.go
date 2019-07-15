@@ -16,3 +16,23 @@
  */
 
 package abstr
+
+import (
+	"github.com/google/blueprint"
+)
+
+func TopDownAdaptor(f func(TopDownMutatorContext)) blueprint.TopDownMutator {
+	return func(mctx blueprint.TopDownMutatorContext) {
+		f(mctx)
+	}
+}
+
+func BottomUpAdaptor(f func(BottomUpMutatorContext)) blueprint.BottomUpMutator {
+	return func(mctx blueprint.BottomUpMutatorContext) {
+		f(mctx)
+	}
+}
+
+func Module(mctx TopDownMutatorContext) blueprint.Module {
+	return mctx.(blueprint.TopDownMutatorContext).Module()
+}

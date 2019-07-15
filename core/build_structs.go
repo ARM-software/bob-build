@@ -234,7 +234,7 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 	}
 }
 
-func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
+func stripEmptyComponentsMutator(mctx abstr.BottomUpMutatorContext) {
 	f, ok := mctx.Module().(featurable)
 	if !ok {
 		return

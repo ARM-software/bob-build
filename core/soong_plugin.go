@@ -33,6 +33,8 @@ import (
 	"android/soong/android"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 const (
@@ -110,14 +112,6 @@ func (g *soongGenerator) kernelModOutputDir(m *kernelModule) string  { return ""
 
 func (g *soongGenerator) init(*blueprint.Context, *bobConfig) {}
 
-func templateApplierMutator(mctx android.TopDownMutatorContext, m blueprint.Module) {
-	templateApplier(m, getConfig(mctx), mctx)
-}
-
-func featureApplierMutator(mctx android.TopDownMutatorContext, m blueprint.Module) {
-	featureApplier(m, getConfig(mctx), mctx)
-}
-
 // Bob modules that need Soong to run LoadHooks need to implement this
 // interface.
 type soongBuildActionsProvider interface {
@@ -149,8 +143,13 @@ func buildActionsMutator(mctx android.TopDownMutatorContext) {
 }
 
 func registerMutators(ctx android.RegisterMutatorsContext) {
-	ctx.TopDown("bob rename", renameMutator)
-	ctx.TopDown("bob build actions", buildActionsMutator)
+	ctx.BottomUp("bob_default_deps", abstr.BottomUpAdaptor(defaultDepsMutator)).Parallel()
+	ctx.TopDown("bob_features_applier", abstr.TopDownAdaptor(featureApplierMutator)).Parallel()
+	ctx.TopDown("bob_template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
+	ctx.BottomUp("bob_check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
+	ctx.BottomUp("bob_strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
+	ctx.TopDown("bob_rename", renameMutator).Parallel()
+	ctx.TopDown("bob_build_actions", buildActionsMutator).Parallel()
 }
 
 func soongRegisterModule(name string, mf factoryWithConfig) {
