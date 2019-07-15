@@ -4,7 +4,7 @@ STATUS_CODE=0 # reset
 
 ####################
 fold_start 'Setup:python'
-    source .travis/set_python_version.sh
+    set_python_version ${PYTHON_SUFFIX}
 fold_end $?
 
 ####################
