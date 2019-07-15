@@ -18,8 +18,7 @@ import json
 import logging
 import os
 
-import config_system
-import config_system.utils
+from config_system import general, utils
 
 
 logger = logging.getLogger(__name__)
@@ -40,8 +39,8 @@ def config_to_json():
     features = dict()
     properties = dict()
 
-    for key in config_system.get_config_list():
-        c = config_system.get_config(key)
+    for key in general.get_config_list():
+        c = general.get_config(key)
         key = key.lower()
         datatype = c["datatype"]
         value = c["value"]
@@ -62,9 +61,8 @@ def config_to_json():
     return {"Features": features, "Properties": properties}
 
 
-def plugin_exec():
-    output_dir = os.path.dirname(config_system.general.config_filename)
-    json_filename = os.path.join(output_dir, "config.json")
+def write_config(filename):
+    """Write Bob-specific JSON file"""
     json_config = config_to_json()
-    with config_system.utils.open_and_write_if_changed(json_filename) as fp:
+    with utils.open_and_write_if_changed(filename) as fp:
         json.dump(json_config, fp, sort_keys=True, indent=4, separators=(",", ": "))

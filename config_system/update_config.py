@@ -122,6 +122,8 @@ def parse_args():
                         help="Path to the configuration file (*.config)")
     parser.add_argument('-d', '--database', default="Mconfig",
                         help='Path to the configuration database (Mconfig)')
+    parser.add_argument("-b", "--bob-config", default=None,
+                        help="Bob JSON configuration file to write")
     parser.add_argument("-n", "--new", action="store_true", default=False,
                         help="Create the configuration instead of resetting to default values")
     parser.add_argument('-p', '--plugin', action='append',
@@ -137,7 +139,7 @@ def main():
     args = parse_args()
 
     if args.new:
-        init_config(args.database, args.config, args.ignore_missing)
+        init_config(args.database, args.ignore_missing)
     else:
         read_config(args.database, args.config, args.ignore_missing)
 
@@ -173,6 +175,9 @@ def main():
             traceback.print_tb(sys.exc_info()[2])
 
     write_config(args.config)
+    if args.bob_config is not None:
+        import config_system.bob as bob
+        bob.write_config(args.bob_config)
 
     issues = counter.errors() + counter.criticals()
     warnings = counter.warnings()
