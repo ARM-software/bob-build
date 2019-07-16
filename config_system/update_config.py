@@ -22,7 +22,7 @@ import os
 import re
 import sys
 
-from config_system import log_handlers
+from config_system import log_handlers, config_json
 from config_system.general import enforce_dependent_values, get_config, init_config, \
     read_config, read_profile_file, set_config_if_prompt, write_config, \
     can_enable, format_dependency_list
@@ -122,8 +122,8 @@ def parse_args():
                         help="Path to the configuration file (*.config)")
     parser.add_argument('-d', '--database', default="Mconfig",
                         help='Path to the configuration database (Mconfig)')
-    parser.add_argument("-b", "--bob-config", default=None,
-                        help="Bob JSON configuration file to write")
+    parser.add_argument("-j", "--json", default=None,
+                        help="Write JSON configuration file")
     parser.add_argument("-n", "--new", action="store_true", default=False,
                         help="Create the configuration instead of resetting to default values")
     parser.add_argument('-p', '--plugin', action='append',
@@ -175,9 +175,8 @@ def main():
             traceback.print_tb(sys.exc_info()[2])
 
     write_config(args.config)
-    if args.bob_config is not None:
-        import config_system.bob as bob
-        bob.write_config(args.bob_config)
+    if args.json is not None:
+        config_json.write_config(args.json)
 
     issues = counter.errors() + counter.criticals()
     warnings = counter.warnings()

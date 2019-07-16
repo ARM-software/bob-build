@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 
-from config_system import general, log_handlers
+from config_system import general, log_handlers, config_json
 
 logger = logging.getLogger(__name__)
 
@@ -621,8 +621,8 @@ def parse_args():
     parser.add_argument("config", help="Path to the input configuration file (*.config)")
     parser.add_argument("-d", "--database", default="Mconfig",
                         help="Path to the configuration database (Mconfig)")
-    parser.add_argument("-b", "--bob-config", default=None,
-                        help="Bob JSON configuration file to write")
+    parser.add_argument("-j", "--json", default=None,
+                        help="Write JSON configuration file")
     parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debug logging")
     parser.add_argument("-p", "--plugin", action="append",
                         help="Post configuration plugin to execute", default=[])
@@ -678,9 +678,8 @@ def main():
                 traceback.print_tb(sys.exc_info()[2])
 
         general.write_config(args.config)
-        if args.bob_config is not None:
-            import config_system.bob as bob
-            bob.write_config(args.bob_config)
+        if args.json is not None:
+            config_json.write_config(args.json)
 
     # Flush all log messages on exit
     msgBuffer.close()

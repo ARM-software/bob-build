@@ -18,6 +18,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -260,4 +261,11 @@ func NewStringSlice(lists ...[]string) []string {
 		allLists = append(allLists, list...)
 	}
 	return allLists
+}
+
+// Exit the program, printing a message to stderr.
+// Deferred functions will not execute.
+func Exit(exitCode int, err string) {
+	fmt.Fprintf(os.Stderr, err+"\n")
+	os.Exit(exitCode)
 }

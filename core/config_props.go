@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,26 +25,29 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/ARM-software/bob-build/utils"
 )
 
-type configPropertiesJSON struct {
+type configProperties struct {
 	// Map of all available features (e.g. noasserts: { cflags: ["-DNDEBUG]" }),
 	// and whether they are enabled or not.
-	Features map[string]bool
+	features map[string]bool
+
 	// Map of all available properties which can be used in templates. Features are
 	// not automatically included in this by Bob, so should be added explicitly by the
 	// config system if required. These are converted to strings, then made available
 	// for use in templates.
-	Properties map[string]interface{}
-}
+	properties map[string]interface{}
 
-type configProperties struct {
-	configPropertiesJSON
+	// Sorted array of available features
+	featureList []string
+
 	stringMap map[string]string
 }
 
 func (properties configProperties) getProp(name string) interface{} {
-	if elem, ok := properties.Properties[name]; ok {
+	if elem, ok := properties.properties[name]; ok {
 		return elem
 	}
 	panic(fmt.Sprintf("No property found: %s", name))
@@ -66,30 +69,6 @@ func (properties configProperties) GetString(name string) string {
 
 func (properties configProperties) StringMap() map[string]string {
 	return properties.stringMap
-}
-
-func loadConfig(filename string) *configProperties {
-	properties := &configProperties{}
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	d := json.NewDecoder(bytes.NewReader(content))
-
-	// Decode numbers in JSON as json.Numbers instead of float64.
-	// This is actually a string, which is what we want.
-	d.UseNumber()
-	err = d.Decode(&properties.configPropertiesJSON)
-	if err != nil {
-		panic(err)
-	}
-
-	properties.stringMap = make(map[string]string)
-	for key, val := range properties.Properties {
-		properties.stringMap[key] = convertToString(val)
-	}
-
-	return properties
 }
 
 // This function converts a config value into a string, using the following rules:
@@ -137,4 +116,64 @@ func convertToString(thing interface{}) string {
 		panic(fmt.Sprintf("Can't convert type %s to string!", field.Type().String()))
 	}
 	return value
+}
+
+// Identify if the input is a boolean and return its value
+func boolValue(thing interface{}) (value, isBool bool) {
+	field := reflect.ValueOf(thing)
+
+	switch field.Kind() {
+	case reflect.Bool:
+		value = field.Bool()
+		isBool = true
+	default:
+		value = false
+		isBool = false
+	}
+
+	return
+}
+
+func loadConfig(filename string) *configProperties {
+	properties := &configProperties{}
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	d := json.NewDecoder(bytes.NewReader(content))
+
+	// Decode numbers in JSON as json.Numbers instead of float64.
+	// This is actually a string, which is what we want.
+	d.UseNumber()
+	err = d.Decode(&properties.properties)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check for old format of config.json
+	if len(properties.properties) == 2 {
+		_, hasFeatures := properties.properties["Features"]
+		_, hasProperties := properties.properties["Properties"]
+		if hasFeatures && hasProperties {
+			utils.Exit(1, "Old style config.json detected. Please re-configure your build tree.")
+		}
+	}
+
+	properties.stringMap = make(map[string]string)
+	properties.features = make(map[string]bool)
+	for key, val := range properties.properties {
+		// Create a mapping of properties to values that will be used
+		// by templates
+		properties.stringMap[key] = convertToString(val)
+
+		// Identify features and whether they are enabled
+		if v, ok := boolValue(val); ok {
+			properties.features[key] = v
+		}
+	}
+
+	// Calculate the plain list of features once.
+	properties.featureList = utils.SortedKeysBoolMap(properties.features)
+
+	return properties
 }

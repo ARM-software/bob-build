@@ -23,8 +23,6 @@ import (
 	"strings"
 
 	"github.com/google/blueprint/proptools"
-
-	"github.com/ARM-software/bob-build/utils"
 )
 
 // featurePropertyName returns name of feature. Name needs to start from capital letter because
@@ -171,8 +169,8 @@ func (f *Features) AppendProps(dst []interface{}, properties *configProperties) 
 	// featuresData is struct created in Features.Init function
 	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()
 
-	for _, featureKey := range utils.SortedKeysBoolMap(properties.Features) {
-		if properties.Features[featureKey] { // Check the feature is enabled
+	for _, featureKey := range properties.featureList {
+		if properties.features[featureKey] { // Check the feature is enabled
 			// Features are matched like "Feature_name" - feature structure
 			featureFieldName := featurePropertyName(featureKey)
 			featureStruct := featuresData.FieldByName(featureFieldName)

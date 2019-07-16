@@ -124,7 +124,7 @@ type bobConfig struct {
 
 // getAvailableFeatures returns all available features that can be used in .bp
 func (config *bobConfig) getAvailableFeatures() []string {
-	return utils.SortedKeysBoolMap(config.Properties.Features)
+	return config.Properties.featureList
 }
 
 // SourceProps defines module properties that are used to identify the

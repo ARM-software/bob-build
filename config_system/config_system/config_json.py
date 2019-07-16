@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 def config_to_json():
-    features = dict()
     properties = dict()
 
     for key in general.get_config_list():
@@ -35,7 +34,6 @@ def config_to_json():
 
         if datatype == "bool":
             value = True if value == "y" else False
-            features[key] = value
             properties[key] = value
         elif datatype == "int":
             properties[key] = int(value)
@@ -44,11 +42,11 @@ def config_to_json():
         else:
             logger.error("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
 
-    return {"Features": features, "Properties": properties}
+    return properties
 
 
 def write_config(filename):
-    """Write Bob-specific JSON file"""
+    """Write configuration as a JSON file"""
     json_config = config_to_json()
     with utils.open_and_write_if_changed(filename) as fp:
         json.dump(json_config, fp, sort_keys=True, indent=4, separators=(",", ": "))
