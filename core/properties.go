@@ -108,11 +108,6 @@ func templateApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleCo
 	}
 }
 
-// Mutator to apply templates in standalone Bob
-func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	templateApplier(mctx.Module(), getConfig(mctx), mctx)
-}
-
 // Used to map a set of properties to destination properties
 type propmap struct {
 	dst []interface{}
@@ -152,9 +147,4 @@ func featureApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleCon
 			}
 		}
 	}
-}
-
-// Mutator to apply features in standalone Bob
-func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	featureApplier(mctx.Module(), getConfig(mctx), mctx)
 }
