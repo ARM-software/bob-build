@@ -45,19 +45,6 @@ func Test_IsNotCompilableSource(t *testing.T) {
 	assert.False(t, IsNotCompilableSource("bla.S"), "bla.S")
 }
 
-func assertArraysEqual(t *testing.T, test []string, correct []string) {
-	if len(test) != len(correct) {
-		t.Errorf("Length mismatch: %d != %d", len(test), len(correct))
-		return
-	}
-
-	for i := range test {
-		if test[i] != correct[i] {
-			t.Errorf("Bad prefix for index %d: '%s' != '%s'", i, test[i], correct[i])
-		}
-	}
-}
-
 func Test_PrefixAll(t *testing.T) {
 	if len(PrefixAll([]string{}, "myprefix")) != 0 {
 		t.Errorf("Incorrect handling of empty list")
@@ -67,7 +54,7 @@ func Test_PrefixAll(t *testing.T) {
 	prefix := "!>@@\""
 	correct := []string{"!>@@\"abc def", "!>@@\";1234	;''"}
 
-	assert.Equal(t, PrefixAll(in, prefix), correct)
+	assert.Equal(t, correct, PrefixAll(in, prefix))
 }
 
 func Test_PrefixDirs(t *testing.T) {
@@ -79,7 +66,7 @@ func Test_PrefixDirs(t *testing.T) {
 	prefix := "$(LOCAL_PATH)"
 	correct := []string{"$(LOCAL_PATH)/src/foo.c", "$(LOCAL_PATH)/include/bar.h"}
 
-	assert.Equal(t, PrefixDirs(in, prefix), correct)
+	assert.Equal(t, correct, PrefixDirs(in, prefix))
 }
 
 func Test_SortedKeys(t *testing.T) {
@@ -88,7 +75,7 @@ func Test_SortedKeys(t *testing.T) {
 		"aardvark": "insects",
 		"./a.out":  "bits",
 	}
-	assert.Equal(t, SortedKeys(in), []string{"./a.out", "Zebra", "aardvark"})
+	assert.Equal(t, []string{"./a.out", "Zebra", "aardvark"}, SortedKeys(in))
 }
 
 func Test_SortedKeysBoolMap(t *testing.T) {
@@ -99,7 +86,7 @@ func Test_SortedKeysBoolMap(t *testing.T) {
 	correct := []string{"2 + 2 = 5", "Alphabetic characters should appear after numbers"}
 	out := SortedKeysBoolMap(in)
 
-	assert.Equal(t, out, correct)
+	assert.Equal(t, correct, out)
 }
 
 func Test_Contains(t *testing.T) {
@@ -121,11 +108,11 @@ func Test_Filter(t *testing.T) {
 	testFilter := func(elem string) bool { return unicode.IsUpper(rune(elem[0])) }
 	in := []string{"Alpha", "beta", "Gamma", "Delta", "epsilon"}
 	filtered := Filter(testFilter, in)
-	assert.Equal(t, filtered, []string{"Alpha", "Gamma", "Delta"})
+	assert.Equal(t, []string{"Alpha", "Gamma", "Delta"}, filtered)
 
 	in2 := []string{"chi", "psi", "Omega"}
 	filtered = Filter(testFilter, in, in2)
-	assert.Equal(t, filtered, []string{"Alpha", "Gamma", "Delta", "Omega"})
+	assert.Equal(t, []string{"Alpha", "Gamma", "Delta", "Omega"}, filtered)
 
 }
 
@@ -133,23 +120,23 @@ func Test_Difference(t *testing.T) {
 	in := []string{"1", "1", "2", "3", "5", "8", "13", "21"}
 	sub := []string{"2", "8", "21"}
 	correct := []string{"1", "1", "3", "5", "13"}
-	assert.Equal(t, Difference(in, sub), correct)
+	assert.Equal(t, correct, Difference(in, sub))
 }
 
 func Test_AppendUnique(t *testing.T) {
 	// AppendIfUnique is tested via AppendUnique.
 	assert.Equal(t,
+		[]string{"test"},
 		AppendUnique([]string{},
-			[]string{"test"}),
-		[]string{"test"})
+			[]string{"test"}))
 	assert.Equal(t,
+		[]string{"ab", "cd", "", "ef"},
 		AppendUnique([]string{"ab", "cd"},
-			[]string{"", "", "ef"}),
-		[]string{"ab", "cd", "", "ef"})
+			[]string{"", "", "ef"}))
 	assert.Equal(t,
+		[]string{"ab", "cd"},
 		AppendUnique([]string{"ab", "cd"},
-			[]string{"cd", "ab"}),
-		[]string{"ab", "cd"})
+			[]string{"cd", "ab"}))
 }
 
 func Test_Find(t *testing.T) {
@@ -158,23 +145,23 @@ func Test_Find(t *testing.T) {
 }
 
 func Test_Remove(t *testing.T) {
-	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abcd"),
-		[]string{"abc", "abcde"})
-	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abcde"),
-		[]string{"abc"})
-	assert.Equal(t, Remove([]string{"abc", "abcde"}, "abc"),
-		[]string{"abcde"})
+	assert.Equal(t, []string{"abc", "abcde"},
+		Remove([]string{"abc", "abcde"}, "abcd"))
+	assert.Equal(t, []string{"abc"},
+		Remove([]string{"abc", "abcde"}, "abcde"))
+	assert.Equal(t, []string{"abcde"},
+		Remove([]string{"abc", "abcde"}, "abc"))
 }
 
 func Test_Reversed(t *testing.T) {
-	assert.Equal(t, Reversed([]string{}),
-		[]string{})
-	assert.Equal(t, Reversed([]string{""}),
-		[]string{""})
-	assert.Equal(t, Reversed([]string{"123", "234"}),
-		[]string{"234", "123"})
-	assert.Equal(t, Reversed([]string{"", "234", "..<>"}),
-		[]string{"..<>", "234", ""})
+	assert.Equal(t, []string{},
+		Reversed([]string{}))
+	assert.Equal(t, []string{""},
+		Reversed([]string{""}))
+	assert.Equal(t, []string{"234", "123"},
+		Reversed([]string{"123", "234"}))
+	assert.Equal(t, []string{"..<>", "234", ""},
+		Reversed([]string{"", "234", "..<>"}))
 }
 
 func Test_StripUnusedArgs(t *testing.T) {
@@ -187,12 +174,12 @@ func Test_StripUnusedArgs(t *testing.T) {
 		"out":      "source.o",
 	}
 	StripUnusedArgs(args, "${compiler} -o ${out} ${in} ${args}")
-	assert.Equal(t, SortedKeys(args), []string{"args", "compiler", "in", "out"})
+	assert.Equal(t, []string{"args", "compiler", "in", "out"}, SortedKeys(args))
 }
 
 func Test_Trim(t *testing.T) {
-	assert.Equal(t, Trim([]string{"", " hello ", "world", "	"}),
-		[]string{"hello", "world"})
+	assert.Equal(t, []string{"hello", "world"},
+		Trim([]string{"", " hello ", "world", "	"}))
 }
 
 func Test_Join(t *testing.T) {
@@ -238,8 +225,8 @@ func Test_NewStringSlice(t *testing.T) {
 	fmt.Printf("B = %v\n", arrB)
 	// C = [1 2 3 4 5 C]
 	fmt.Printf("C = %v\n", arrC)
-	assert.Equal(t, arrC, []string{"1", "2", "3", "4", "5", "C"})
-	assert.Equal(t, arrB, []string{"1", "2", "3", "4", "5", "B"})
+	assert.Equal(t, []string{"1", "2", "3", "4", "5", "C"}, arrC)
+	assert.Equal(t, []string{"1", "2", "3", "4", "5", "B"}, arrB)
 }
 
 // Below example code with problematic append() call, this is why we have utils.NewStringSlice
