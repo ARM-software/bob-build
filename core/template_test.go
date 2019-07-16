@@ -81,23 +81,23 @@ func TestApplyTemplate(t *testing.T) {
 	ApplyTemplate(&props, config)
 
 	// Check templates are expanded in normal strings
-	assert.Equalf(t, props.StrA, "alpha", "StrA incorrect")
-	assert.Equalf(t, props.StrB, "beta", "StrB incorrect")
-	assert.Equalf(t, props.StrC, "gamma", "StrC incorrect")
+	assert.Equalf(t, "alpha", props.StrA, "StrA incorrect")
+	assert.Equalf(t, "beta", props.StrB, "StrB incorrect")
+	assert.Equalf(t, "gamma", props.StrC, "StrC incorrect")
 
 	// Check 'booleans'. These are actually strings as far as the
 	// template code is concerned
-	assert.Equalf(t, props.B1, "1", "B1 incorrect")
-	assert.Equalf(t, props.B2, "0", "B2 incorrect")
+	assert.Equalf(t, "1", props.B1, "B1 incorrect")
+	assert.Equalf(t, "0", props.B2, "B2 incorrect")
 
 	// Check templates have been expanded in arrays of strings
-	assert.Equalf(t, arr[0], "alpha", "arr[0] incorrect")
-	assert.Equalf(t, arr[1], "beta", "arr[1] incorrect")
-	assert.Equalf(t, arr[2], "gamma", "arr[2] incorrect")
+	assert.Equalf(t, "alpha", arr[0], "arr[0] incorrect")
+	assert.Equalf(t, "beta", arr[1], "arr[1] incorrect")
+	assert.Equalf(t, "gamma", arr[2], "arr[2] incorrect")
 
 	// Check templates have been expanded in pointers to strings
-	assert.Equalf(t, refA, "alpha1", "refA incorrect")
-	assert.Equalf(t, refB, "beta0", "refB incorrect")
+	assert.Equalf(t, "alpha1", refA, "refA incorrect")
+	assert.Equalf(t, "beta0", refB, "refB incorrect")
 }
 
 type testNestedProperties struct {
@@ -149,29 +149,29 @@ func TestApplyTemplateNested(t *testing.T) {
 	ApplyTemplate(&props, config)
 
 	// Check templates are expanded in normal strings
-	assert.Equalf(t, props.A.StrA, "alpha", "A.StrA incorrect")
-	assert.Equalf(t, props.A.StrB, "beta", "A.StrB incorrect")
-	assert.Equalf(t, props.A.StrC, "gamma", "A.StrC incorrect")
-	assert.Equalf(t, props.B.StrA, "gamma", "B.StrA incorrect")
-	assert.Equalf(t, props.B.StrB, "alpha", "B.StrB incorrect")
-	assert.Equalf(t, props.B.StrC, "beta", "B.StrC incorrect")
+	assert.Equalf(t, "alpha", props.A.StrA, "A.StrA incorrect")
+	assert.Equalf(t, "beta", props.A.StrB, "A.StrB incorrect")
+	assert.Equalf(t, "gamma", props.A.StrC, "A.StrC incorrect")
+	assert.Equalf(t, "gamma", props.B.StrA, "B.StrA incorrect")
+	assert.Equalf(t, "alpha", props.B.StrB, "B.StrB incorrect")
+	assert.Equalf(t, "beta", props.B.StrC, "B.StrC incorrect")
 
 	// Check 'booleans'. These are actually strings as far as the
 	// template code is concerned
-	assert.Equalf(t, props.A.B1, "1", "A.B1 incorrect")
-	assert.Equalf(t, props.A.B2, "0", "A.B2 incorrect")
-	assert.Equalf(t, props.B.B1, "0", "B.B1 incorrect")
-	assert.Equalf(t, props.B.B2, "1", "B.B2 incorrect")
+	assert.Equalf(t, "1", props.A.B1, "A.B1 incorrect")
+	assert.Equalf(t, "0", props.A.B2, "A.B2 incorrect")
+	assert.Equalf(t, "0", props.B.B1, "B.B1 incorrect")
+	assert.Equalf(t, "1", props.B.B2, "B.B2 incorrect")
 
 	// Check templates have been expanded in arrays of strings
-	assert.Equalf(t, arr[0], "alpha", "arr[0] incorrect")
-	assert.Equalf(t, arr[1], "beta", "arr[1] incorrect")
-	assert.Equalf(t, arr[2], "gamma", "arr[2] incorrect")
-	assert.Equalf(t, arrB[0], "beta", "arrB[0] incorrect")
-	assert.Equalf(t, arrB[1], "gamma", "arrB[1] incorrect")
-	assert.Equalf(t, arrB[2], "alpha", "arrB[2] incorrect")
+	assert.Equalf(t, "alpha", arr[0], "arr[0] incorrect")
+	assert.Equalf(t, "beta", arr[1], "arr[1] incorrect")
+	assert.Equalf(t, "gamma", arr[2], "arr[2] incorrect")
+	assert.Equalf(t, "beta", arrB[0], "arrB[0] incorrect")
+	assert.Equalf(t, "gamma", arrB[1], "arrB[1] incorrect")
+	assert.Equalf(t, "alpha", arrB[2], "arrB[2] incorrect")
 
 	// Check templates have been expanded in pointers to strings
-	assert.Equalf(t, refA, "alpha1", "refA incorrect")
-	assert.Equalf(t, refB, "beta0", "refB incorrect")
+	assert.Equalf(t, "alpha1", refA, "refA incorrect")
+	assert.Equalf(t, "beta0", refB, "refB incorrect")
 }

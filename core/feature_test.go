@@ -161,18 +161,18 @@ func createTestModuleAndFeatures() (testProps, configProperties) {
 func Test_should_return_expected_default_values_when_using_setup_function(t *testing.T) {
 	module, properties := createTestModuleAndFeatures()
 
-	assert.Equalf(t, properties.features["feature_a"], true, "feature_a should be enabled by default")
-	assert.Equalf(t, properties.features["feature_b"], true, "feature_b should be enabled by default")
-	assert.Equalf(t, properties.features["feature_c"], true, "feature_c should be enabled by default")
-	assert.Equalf(t, properties.features["feature_d"], true, "feature_d should be enabled by default")
+	assert.True(t, properties.features["feature_a"], "feature_a should be enabled by default")
+	assert.True(t, properties.features["feature_b"], "feature_b should be enabled by default")
+	assert.True(t, properties.features["feature_c"], "feature_c should be enabled by default")
+	assert.True(t, properties.features["feature_d"], "feature_d should be enabled by default")
 
-	assert.Equalf(t, module.FieldA, "a", "module.FieldA should be equal to default value")
-	assert.Equalf(t, module.FieldB, "b", "module.FieldB should be equal to default value")
-	assert.Equalf(t, module.FieldC, "c", "module.FieldC should be equal to default value")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD should be equal to default value")
-	assert.Equalf(t, module.FieldE, "e", "module.FieldE should be equal to default value")
-	assert.Equalf(t, module.FieldF, "f", "module.FieldF should be equal to default value")
-	assert.Equalf(t, module.FieldG, "g", "module.FieldG should be equal to default value")
+	assert.Equalf(t, "a", module.FieldA, "module.FieldA should be equal to default value")
+	assert.Equalf(t, "b", module.FieldB, "module.FieldB should be equal to default value")
+	assert.Equalf(t, "c", module.FieldC, "module.FieldC should be equal to default value")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD should be equal to default value")
+	assert.Equalf(t, "e", module.FieldE, "module.FieldE should be equal to default value")
+	assert.Equalf(t, "f", module.FieldF, "module.FieldF should be equal to default value")
+	assert.Equalf(t, "g", module.FieldG, "module.FieldG should be equal to default value")
 }
 
 func Test_should_not_change_when_appending_empty_features(t *testing.T) {
@@ -197,18 +197,18 @@ func Test_should_append_matching_properties_when_one_feature_is_enabled(t *testi
 	properties.features["feature_c"] = false
 	properties.features["feature_d"] = false
 
-	assert.Equalf(t, properties.features["feature_b"], true, "Feature should be enabled")
+	assert.True(t, properties.features["feature_b"], "Feature should be enabled")
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
 	}
 
-	assert.Equalf(t, module.FieldA, "a", "module.FieldA incorrect")
-	assert.Equalf(t, module.FieldB, "bProps_b", "module.FieldB incorrect")
-	assert.Equalf(t, module.FieldC, "c", "module.FieldC incorrect")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD can't be changed") // No feature has this property
-	assert.Equalf(t, module.FieldE, "e", "module.FieldE incorrect")
-	assert.Equalf(t, module.FieldF, "f", "module.FieldF incorrect")
-	assert.Equalf(t, module.FieldG, "g", "module.FieldG incorrect")
+	assert.Equalf(t, "a", module.FieldA, "module.FieldA incorrect")
+	assert.Equalf(t, "bProps_b", module.FieldB, "module.FieldB incorrect")
+	assert.Equalf(t, "c", module.FieldC, "module.FieldC incorrect")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD can't be changed") // No feature has this property
+	assert.Equalf(t, "e", module.FieldE, "module.FieldE incorrect")
+	assert.Equalf(t, "f", module.FieldF, "module.FieldF incorrect")
+	assert.Equalf(t, "g", module.FieldG, "module.FieldG incorrect")
 }
 
 func Test_should_not_modify_when_no_feature_is_enabled(t *testing.T) {
@@ -222,13 +222,13 @@ func Test_should_not_modify_when_no_feature_is_enabled(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equalf(t, module.FieldA, "a", "module.FieldA incorrect")
-	assert.Equalf(t, module.FieldB, "b", "module.FieldB incorrect")
-	assert.Equalf(t, module.FieldC, "c", "module.FieldC incorrect")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD can't be changed") // No feature has this property
-	assert.Equalf(t, module.FieldE, "e", "module.FieldE incorrect")
-	assert.Equalf(t, module.FieldF, "f", "module.FieldF incorrect")
-	assert.Equalf(t, module.FieldG, "g", "module.FieldG incorrect")
+	assert.Equalf(t, "a", module.FieldA, "module.FieldA incorrect")
+	assert.Equalf(t, "b", module.FieldB, "module.FieldB incorrect")
+	assert.Equalf(t, "c", module.FieldC, "module.FieldC incorrect")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD can't be changed") // No feature has this property
+	assert.Equalf(t, "e", module.FieldE, "module.FieldE incorrect")
+	assert.Equalf(t, "f", module.FieldF, "module.FieldF incorrect")
+	assert.Equalf(t, "g", module.FieldG, "module.FieldG incorrect")
 }
 
 func Test_should_append_properties_in_desired_order_when_using_append_props(t *testing.T) {
@@ -241,13 +241,13 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
 	}
-	assert.Equalf(t, module.FieldA, "aProps_a", "module.FieldA incorrect")
-	assert.Equalf(t, module.FieldB, "bProps_b", "module.FieldB incorrect")
-	assert.Equalf(t, module.FieldC, "cProps_c", "module.FieldC incorrect")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD can't be changed") // No feature has this property
-	assert.Equalf(t, module.FieldE, "e", "module.FieldE incorrect")
-	assert.Equalf(t, module.FieldF, "f", "module.FieldF incorrect")
-	assert.Equalf(t, module.FieldG, "gProps_g", "module.FieldG incorrect")
+	assert.Equalf(t, "aProps_a", module.FieldA, "module.FieldA incorrect")
+	assert.Equalf(t, "bProps_b", module.FieldB, "module.FieldB incorrect")
+	assert.Equalf(t, "cProps_c", module.FieldC, "module.FieldC incorrect")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD can't be changed") // No feature has this property
+	assert.Equalf(t, "e", module.FieldE, "module.FieldE incorrect")
+	assert.Equalf(t, "f", module.FieldF, "module.FieldF incorrect")
+	assert.Equalf(t, "gProps_g", module.FieldG, "module.FieldG incorrect")
 
 	properties.features["feature_a"] = false
 	properties.features["feature_b"] = false
@@ -257,13 +257,13 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
 	}
-	assert.Equalf(t, module.FieldA, "aProps_a+D_a", "module.FieldA incorrect")
-	assert.Equalf(t, module.FieldB, "bProps_b+D_b", "module.FieldB incorrect")
-	assert.Equalf(t, module.FieldC, "cProps_c+D_c", "module.FieldC incorrect")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD can't be changed") // No feature has this property
-	assert.Equalf(t, module.FieldE, "e+D_e", "module.FieldE incorrect")
-	assert.Equalf(t, module.FieldF, "f+D_f", "module.FieldF incorrect")
-	assert.Equalf(t, module.FieldG, "gProps_g+D_g", "module.FieldG incorrect")
+	assert.Equalf(t, "aProps_a+D_a", module.FieldA, "module.FieldA incorrect")
+	assert.Equalf(t, "bProps_b+D_b", module.FieldB, "module.FieldB incorrect")
+	assert.Equalf(t, "cProps_c+D_c", module.FieldC, "module.FieldC incorrect")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD can't be changed") // No feature has this property
+	assert.Equalf(t, "e+D_e", module.FieldE, "module.FieldE incorrect")
+	assert.Equalf(t, "f+D_f", module.FieldF, "module.FieldF incorrect")
+	assert.Equalf(t, "gProps_g+D_g", module.FieldG, "module.FieldG incorrect")
 
 	properties.features["feature_a"] = false
 	properties.features["feature_b"] = true
@@ -273,13 +273,13 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
 	}
-	assert.Equalf(t, module.FieldA, "aProps_a+D_a+D_a", "module.FieldA incorrect")
-	assert.Equalf(t, module.FieldB, "bProps_b+D_bProps_b+D_b", "module.FieldB incorrect")
-	assert.Equalf(t, module.FieldC, "cProps_c+D_c+D_c", "module.FieldC incorrect")
-	assert.Equalf(t, module.FieldD, "d", "module.FieldD can't be changed") // No feature has this property
-	assert.Equalf(t, module.FieldE, "e+D_e+D_e", "module.FieldE incorrect")
-	assert.Equalf(t, module.FieldF, "f+D_f+D_f", "module.FieldF incorrect")
-	assert.Equalf(t, module.FieldG, "gProps_g+D_g+D_g", "module.FieldG incorrect")
+	assert.Equalf(t, "aProps_a+D_a+D_a", module.FieldA, "module.FieldA incorrect")
+	assert.Equalf(t, "bProps_b+D_bProps_b+D_b", module.FieldB, "module.FieldB incorrect")
+	assert.Equalf(t, "cProps_c+D_c+D_c", module.FieldC, "module.FieldC incorrect")
+	assert.Equalf(t, "d", module.FieldD, "module.FieldD can't be changed") // No feature has this property
+	assert.Equalf(t, "e+D_e+D_e", module.FieldE, "module.FieldE incorrect")
+	assert.Equalf(t, "f+D_f+D_f", module.FieldF, "module.FieldF incorrect")
+	assert.Equalf(t, "gProps_g+D_g+D_g", module.FieldG, "module.FieldG incorrect")
 }
 
 //  It is important that names start from uppercase, otherwise they aren't exported (when nested)
@@ -335,8 +335,8 @@ func Test_should_append_properties_when_using_nested_destinations(t *testing.T) 
 		panic(err)
 	}
 
-	assert.Equalf(t, module.testSource.Properties.A, "mod_a+value_a", "module.testSource.Properties.A incorrect")
-	assert.Equalf(t, module.testInstall.Properties.B, "mod_b+value_b", "module.testInstall.Properties.B incorrect")
+	assert.Equalf(t, "mod_a+value_a", module.testSource.Properties.A, "module.testSource.Properties.A incorrect")
+	assert.Equalf(t, "mod_b+value_b", module.testInstall.Properties.B, "module.testInstall.Properties.B incorrect")
 }
 
 func Test_should_append_props_when_using_nested_structs(t *testing.T) {
@@ -418,23 +418,23 @@ func Test_should_append_props_when_using_nested_structs(t *testing.T) {
 		panic(err)
 	}
 
-	assert.Equalf(t, module.TestModuleCommon.Properties.A, "mod_TestSourceProps.A+feature.A",
+	assert.Equalf(t, "mod_TestSourceProps.A+feature.A", module.TestModuleCommon.Properties.A,
 		"module.TestModuleCommon.Properties.A incorrect")
-	assert.Equalf(t, module.TestModuleCommon.Properties.B, "mod_TestInstallProps.B+feature.B",
+	assert.Equalf(t, "mod_TestInstallProps.B+feature.B", module.TestModuleCommon.Properties.B,
 		"module.TestModuleCommon.Properties.B incorrect")
-	assert.Equalf(t, *module.TestModuleCommon.Properties.Nested.Bar, true,
+	assert.Equalf(t, true, *module.TestModuleCommon.Properties.Nested.Bar,
 		" module.TestModuleCommon.Properties.Nested.Bar incorrect")
-	assert.Equalf(t, module.TestModuleCommon.Properties.Nested.Foo, "mod_foo+feature.Foo",
+	assert.Equalf(t, "mod_foo+feature.Foo", module.TestModuleCommon.Properties.Nested.Foo,
 		"module.TestModuleCommon.Properties.Nested.Foo incorrect")
-	assert.Equalf(t, module.TestModuleCommon.Properties.TestSourceProps.A, "mod_TestSourceProps.A+feature.A",
+	assert.Equalf(t, "mod_TestSourceProps.A+feature.A", module.TestModuleCommon.Properties.TestSourceProps.A,
 		"module.TestModuleCommon.Properties.TestSourceProps.A incorrect")
-	assert.Equalf(t, module.TestModuleCommon.Properties.TestInstallProps.B, "mod_TestInstallProps.B+feature.B",
+	assert.Equalf(t, "mod_TestInstallProps.B+feature.B", module.TestModuleCommon.Properties.TestInstallProps.B,
 		"module.TestModuleCommon.Properties.TestInstallProps.B incorrect")
 }
 
 func Test_should_not_squash_when_one_structs_passed(t *testing.T) {
 	squashed := coalesceTypes(typesOf(testPropsGroupA{})...)
-	assert.Equalf(t, reflect.TypeOf(testPropsGroupA{}), squashed, "Types should be the same")
+	assert.Equalf(t, squashed, reflect.TypeOf(testPropsGroupA{}), "Types should be the same")
 }
 
 func Test_should_composite_new_type(t *testing.T) {
