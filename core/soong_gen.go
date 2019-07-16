@@ -97,7 +97,7 @@ func expandBobVariables(str, tool, hostBin string) (out string, err error) {
 	return
 }
 
-func (gc *generateCommon) genLoadHook(ctx android.LoadHookContext,
+func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	out []string, depfile string) {
 
 	// Map to Soong's genrule, where a single command produces the
@@ -150,48 +150,48 @@ func (gc *generateCommon) genLoadHook(ctx android.LoadHookContext,
 
 	cmd2, err := expandBobVariables(cmd, gc.Properties.Tool, gc.Properties.Host_bin)
 	if err != nil {
-		panic(fmt.Errorf("%s property cmd %s", ctx.ModuleName(), err.Error()))
+		panic(fmt.Errorf("%s property cmd %s", mctx.ModuleName(), err.Error()))
 	}
 	genProps.Cmd = proptools.StringPtr(cmd2)
 
 	// The ModuleDir for the new module will be inherited from the
-	// current module via the LoadHookContext
-	ctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenRuleFactory), &genProps)
+	// current module via the TopDownMutatorContext
+	mctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenRuleFactory), &genProps)
 }
 
-func (gs *generateSource) soongLoadHook(ctx android.LoadHookContext) {
+func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, gs)
-	templateApplierHook(ctx, gs)
+	featureApplierMutator(mctx, gs)
+	templateApplierMutator(mctx, gs)
 
-	gs.genLoadHook(ctx, gs.Properties.Out, gs.Properties.Depfile)
+	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Depfile)
 }
 
-func (gs *generateStaticLibrary) soongLoadHook(ctx android.LoadHookContext) {
+func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, gs)
-	templateApplierHook(ctx, gs)
+	featureApplierMutator(mctx, gs)
+	templateApplierMutator(mctx, gs)
 
 	name := gs.SimpleName.Name()
-	gs.genLoadHook(ctx, []string{name + ".a"}, "")
+	gs.createGenrule(mctx, []string{name + ".a"}, "")
 }
 
-func (gs *generateSharedLibrary) soongLoadHook(ctx android.LoadHookContext) {
+func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, gs)
-	templateApplierHook(ctx, gs)
+	featureApplierMutator(mctx, gs)
+	templateApplierMutator(mctx, gs)
 
 	name := gs.SimpleName.Name()
-	gs.genLoadHook(ctx, []string{name + ".so"}, "")
+	gs.createGenrule(mctx, []string{name + ".so"}, "")
 }
 
-func (gb *generateBinary) soongLoadHook(ctx android.LoadHookContext) {
+func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, gb)
-	templateApplierHook(ctx, gb)
+	featureApplierMutator(mctx, gb)
+	templateApplierMutator(mctx, gb)
 
 	name := gb.SimpleName.Name()
-	gb.genLoadHook(ctx, []string{name}, "")
+	gb.createGenrule(mctx, []string{name}, "")
 }
 
 var (
@@ -237,10 +237,10 @@ func soongOutputExtension(re string) string {
 	return extRegexp.ReplaceAllLiteralString(re, "")
 }
 
-func (ts *transformSource) soongLoadHook(ctx android.LoadHookContext) {
+func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext) {
 	// Flatten features and expand templates.
-	featureApplierHook(ctx, ts)
-	templateApplierHook(ctx, ts)
+	featureApplierMutator(mctx, ts)
+	templateApplierMutator(mctx, ts)
 
 	// bob_transform_source maps best to gensrcs
 	//
@@ -285,7 +285,7 @@ func (ts *transformSource) soongLoadHook(ctx android.LoadHookContext) {
 	transformProps.Depfile = proptools.BoolPtr(ts.Properties.Out.Depfile != "")
 
 	if len(ts.Properties.Out.Replace) > 1 {
-		panic(fmt.Errorf("Multiple outputs not supported in bob_transform_source on soong, %s", ctx.ModuleName()))
+		panic(fmt.Errorf("Multiple outputs not supported in bob_transform_source on soong, %s", mctx.ModuleName()))
 	}
 	transformProps.Output_extension =
 		proptools.StringPtr(soongOutputExtension(ts.Properties.Out.Replace[0]))
@@ -297,11 +297,11 @@ func (ts *transformSource) soongLoadHook(ctx android.LoadHookContext) {
 	cmd2, err := expandBobVariables(cmd, ts.generateCommon.Properties.Tool,
 		ts.generateCommon.Properties.Host_bin)
 	if err != nil {
-		panic(fmt.Errorf("%s property cmd %s", ctx.ModuleName(), err.Error()))
+		panic(fmt.Errorf("%s property cmd %s", mctx.ModuleName(), err.Error()))
 	}
 	transformProps.Cmd = proptools.StringPtr(cmd2)
 
 	// The ModuleDir for the new module will be inherited from the
-	// current module via the LoadHookContext
-	ctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenSrcsFactory), &transformProps)
+	// current module via the TopDownMutatorContext
+	mctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenSrcsFactory), &transformProps)
 }

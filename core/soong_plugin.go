@@ -108,22 +108,34 @@ func (g *soongGenerator) kernelModOutputDir(m *kernelModule) string  { return ""
 
 func (g *soongGenerator) init(*blueprint.Context, *bobConfig) {}
 
-func templateApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
-	templateApplier(m, getConfig(ctx), ctx)
+func templateApplierMutator(mctx android.TopDownMutatorContext, m blueprint.Module) {
+	templateApplier(m, getConfig(mctx), mctx)
 }
 
-func featureApplierHook(ctx android.LoadHookContext, m blueprint.Module) {
-	featureApplier(m, getConfig(ctx), ctx)
+func featureApplierMutator(mctx android.TopDownMutatorContext, m blueprint.Module) {
+	featureApplier(m, getConfig(mctx), mctx)
 }
 
 // Bob modules that need Soong to run LoadHooks need to implement this
 // interface.
-type soongLoadHookProvider interface {
-	soongLoadHook(android.LoadHookContext)
+type soongBuildActionsProvider interface {
+	soongBuildActions(android.TopDownMutatorContext)
+}
+
+func buildActionsMutator(mctx android.TopDownMutatorContext) {
+	m, ok := mctx.Module().(soongBuildActionsProvider)
+	if !ok {
+		return
+	}
+
+	m.soongBuildActions(mctx)
+}
+
+func registerMutators(ctx android.RegisterMutatorsContext) {
+	ctx.TopDown("bob build actions", buildActionsMutator)
 }
 
 func soongRegisterModule(name string, mf factoryWithConfig) {
-
 	// Create a closure adapting Bob's module factories to the format Soong uses.
 	factory := func() android.Module {
 		bpModule, properties := mf(soongGetConfig())
@@ -135,10 +147,6 @@ func soongRegisterModule(name string, mf factoryWithConfig) {
 			soongModule.AddProperties(property)
 		}
 
-		if h, ok := bpModule.(soongLoadHookProvider); ok {
-			android.AddLoadHook(bpModule, h.soongLoadHook)
-		}
-
 		return soongModule
 	}
 	android.RegisterModuleType(name, factory)
@@ -146,4 +154,6 @@ func soongRegisterModule(name string, mf factoryWithConfig) {
 
 func init() {
 	registerModuleTypes(soongRegisterModule)
+
+	android.PreArchMutators(registerMutators)
 }

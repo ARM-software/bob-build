@@ -38,10 +38,10 @@ type ccLibraryCommonProps struct {
 	Whole_static_libs  []string
 }
 
-func (l *library) libraryCommonLoadHook(ctx android.LoadHookContext) (bool, *ccLibraryCommonProps) {
+func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (bool, *ccLibraryCommonProps) {
 	// Flatten features and expand templates
-	featureApplierHook(ctx, l)
-	templateApplierHook(ctx, l)
+	featureApplierMutator(mctx, l)
+	templateApplierMutator(mctx, l)
 
 	if !isEnabled(l) {
 		return false, nil
@@ -66,20 +66,20 @@ func (l *library) libraryCommonLoadHook(ctx android.LoadHookContext) (bool, *ccL
 	return true, props
 }
 
-func (l *staticLibrary) soongLoadHook(ctx android.LoadHookContext) {
-	enabled, props := l.libraryCommonLoadHook(ctx)
+func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
+	enabled, props := l.setupCcLibraryProps(mctx)
 	if !enabled {
 		return
 	}
 
-	ctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryStaticFactory), props)
+	mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryStaticFactory), props)
 }
 
-func (b *binary) soongLoadHook(ctx android.LoadHookContext) {
-	enabled, props := b.libraryCommonLoadHook(ctx)
+func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
+	enabled, props := b.setupCcLibraryProps(mctx)
 	if !enabled {
 		return
 	}
 
-	ctx.CreateModule(android.ModuleFactoryAdaptor(cc.BinaryFactory), props)
+	mctx.CreateModule(android.ModuleFactoryAdaptor(cc.BinaryFactory), props)
 }
