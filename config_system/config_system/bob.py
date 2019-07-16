@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import hashlib
 import json
 import logging
 import os
@@ -22,17 +21,6 @@ from config_system import general, utils
 
 
 logger = logging.getLogger(__name__)
-
-
-def hash_env():
-    m = hashlib.sha256()
-    for k in sorted(os.environ.keys()):
-        val = os.environ[k]
-        # When Python 2 is used make sure that utf-8 encoding is used to prevent non-ASCII errors
-        if hasattr(os.environ[k], 'decode'):
-            val = val.decode('utf-8')
-        m.update(u"{}={}\n".format(k, val).encode('utf-8'))
-    return m.hexdigest()
 
 
 def config_to_json():
@@ -55,8 +43,6 @@ def config_to_json():
             properties[key] = value
         else:
             logger.error("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
-
-    properties["__bob_env_hash__"] = hash_env()
 
     return {"Features": features, "Properties": properties}
 

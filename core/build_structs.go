@@ -39,6 +39,7 @@ var (
 	configName = os.Getenv("CONFIGNAME")
 	configOpts = os.Getenv("BOB_CONFIG_OPTS")
 	configPath = filepath.Join(builddir, configName)
+	envHash    = filepath.Join(builddir, ".env.hash")
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
@@ -200,6 +201,7 @@ type dependencySingleton struct{}
 
 func (m *dependencySingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
 	ctx.AddNinjaFileDeps(jsonPath)
+	ctx.AddNinjaFileDeps(envHash)
 }
 
 func dependencySingletonFactory() blueprint.Singleton {
