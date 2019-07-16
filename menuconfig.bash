@@ -29,7 +29,7 @@ exit_status=0
 
 "${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
-    -b "${BUILDDIR}/config.json" \
+    -j "${BUILDDIR}/config.json" \
     "${BUILDDIR}/${CONFIGNAME}" || exit_status=$?
 
 if [ "$exit_status" -eq "1" ]; then # warnings occurred

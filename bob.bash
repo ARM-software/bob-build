@@ -40,7 +40,7 @@ fi
 # don't have to reconfigure manually if the config database changes.
 python "${BOB_DIR}/config_system/update_config.py" \
        --database "${SRCDIR}/Mconfig" --config "${BUILDDIR}/${CONFIGNAME}" \
-       --bob-config "${BUILDDIR}/config.json" \
+       --json "${BUILDDIR}/config.json" \
        ${BOB_CONFIG_OPTS}
 
 # Get a hash of the environment so we can detect if we need to

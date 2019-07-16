@@ -122,7 +122,7 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
     mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
         config=str(config_fname),
         database=str(mconfig_fname),
-        bob_config=None,
+        json=None,
         new=False,
         plugin=[],
         ignore_missing=False,
