@@ -43,6 +43,10 @@ python "${BOB_DIR}/config_system/update_config.py" \
        --bob-config "${BUILDDIR}/config.json" \
        ${BOB_CONFIG_OPTS}
 
+# Get a hash of the environment so we can detect if we need to
+# regenerate the build.ninja
+python "${BOB_DIR}/scripts/env_hash.py" "${BUILDDIR}/.env.hash"
+
 # Source the pathtools script - we need bob_realpath for CCACHE_BASEDIR.
 source "${BOB_DIR}/pathtools.bash"
 
