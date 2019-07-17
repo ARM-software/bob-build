@@ -157,11 +157,11 @@ func (m *generateCommon) outputDir(g generatorBackend) string {
 }
 
 func (m *generateCommon) shortName() string {
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *generateCommon) altName() string {
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *generateCommon) altShortName() string {

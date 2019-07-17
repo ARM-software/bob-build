@@ -53,7 +53,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (bool,
 	}
 
 	props := &ccLibraryCommonProps{
-		Name:               proptools.StringPtr(l.SimpleName.Name()),
+		Name:               proptools.StringPtr(l.Name()),
 		Srcs:               utils.Filter(utils.IsCompilableSource, l.Properties.Srcs),
 		Exclude_srcs:       l.Properties.Exclude_srcs,
 		Cflags:             l.Properties.Cflags,
