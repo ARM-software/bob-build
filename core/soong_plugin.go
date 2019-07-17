@@ -68,18 +68,20 @@ func getConfig(interface{}) *bobConfig {
 }
 
 type moduleBase struct {
+	// android.ModuleBase and blueprint.SimpleName both contain `Name`
+	// properties and methods. However, we can't access the one provided by
+	// android.ModuleBase without calling InitAndroidModule(), which would
+	// also add a load of other properties that we don't want. So embed
+	// SimpleName here, and provide a Name() method to choose which one to
+	// delegate to.
 	blueprint.SimpleName
+
 	android.ModuleBase
 }
 
 func (m *moduleBase) GenerateAndroidBuildActions(ctx android.ModuleContext) {}
 
-// All Bob module types need a Name() function so that the Bob module
-// names do not conflict with the names of the soong modules we will
-// be creating.
-func (m *moduleBase) Name() string {
-	return m.SimpleName.Name() + bobModuleSuffix
-}
+func (m *moduleBase) Name() string { return m.SimpleName.Name() }
 
 type soongGenerator struct {
 	toolchainSet
@@ -122,6 +124,21 @@ type soongBuildActionsProvider interface {
 	soongBuildActions(android.TopDownMutatorContext)
 }
 
+// Avoid conflicts with the Soong modules we generate by renaming the Bob
+// modules at the last minute. Calls to `mctx.ModuleName()` will return the
+// new name, but the module's `Name()` method will be unchanged.
+//
+// Unfortunately we can't just do this right before calling CreateModule,
+// because renames are only enacted after each mutator pass. Therefore it is
+// done it its own mutator, before buildActionsMutator.
+func renameMutator(mctx android.TopDownMutatorContext) {
+	if _, ok := mctx.Module().(soongBuildActionsProvider); !ok {
+		return
+	}
+
+	mctx.Rename(mctx.ModuleName() + bobModuleSuffix)
+}
+
 func buildActionsMutator(mctx android.TopDownMutatorContext) {
 	m, ok := mctx.Module().(soongBuildActionsProvider)
 	if !ok {
@@ -132,6 +149,7 @@ func buildActionsMutator(mctx android.TopDownMutatorContext) {
 }
 
 func registerMutators(ctx android.RegisterMutatorsContext) {
+	ctx.TopDown("bob rename", renameMutator)
 	ctx.TopDown("bob build actions", buildActionsMutator)
 }
 

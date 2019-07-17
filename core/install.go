@@ -196,11 +196,11 @@ func (m *resource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
 
 func (m *resource) shortName() string {
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *resource) altName() string {
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *resource) altShortName() string {

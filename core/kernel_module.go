@@ -54,7 +54,7 @@ func (m *kernelModule) outputName() string {
 	if len(m.Properties.Out) > 0 {
 		return m.Properties.Out
 	}
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *kernelModule) altName() string {
@@ -66,7 +66,7 @@ func (m *kernelModule) altShortName() string {
 }
 
 func (m *kernelModule) shortName() string {
-	return m.SimpleName.Name()
+	return m.Name()
 }
 
 func (m *kernelModule) getEnableableProps() *EnableableProps {

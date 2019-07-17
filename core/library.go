@@ -349,7 +349,7 @@ func (l *library) outputName() string {
 	if len(l.Properties.Out) > 0 {
 		return l.Properties.Out
 	}
-	return l.SimpleName.Name()
+	return l.Name()
 }
 
 func (l *library) implicitOutputs(g generatorBackend) []string {
@@ -372,9 +372,9 @@ func (l *library) altShortName() string {
 // disambiguate.
 func (l *library) shortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.SimpleName.Name() + "__" + string(l.Properties.TargetType)
+		return l.Name() + "__" + string(l.Properties.TargetType)
 	}
-	return l.SimpleName.Name()
+	return l.Name()
 }
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {

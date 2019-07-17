@@ -124,7 +124,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Enabled *bool
 	}{}
 
-	genProps.Name = proptools.StringPtr(gc.SimpleName.Name())
+	genProps.Name = proptools.StringPtr(gc.Name())
 	genProps.Srcs = gc.Properties.Srcs
 	genProps.Exclude_srcs = gc.Properties.Exclude_srcs
 	genProps.Out = out
@@ -172,7 +172,7 @@ func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorCo
 	featureApplierMutator(mctx, gs)
 	templateApplierMutator(mctx, gs)
 
-	name := gs.SimpleName.Name()
+	name := gs.Name()
 	gs.createGenrule(mctx, []string{name + ".a"}, "")
 }
 
@@ -181,7 +181,7 @@ func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorCo
 	featureApplierMutator(mctx, gs)
 	templateApplierMutator(mctx, gs)
 
-	name := gs.SimpleName.Name()
+	name := gs.Name()
 	gs.createGenrule(mctx, []string{name + ".so"}, "")
 }
 
@@ -190,7 +190,7 @@ func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) 
 	featureApplierMutator(mctx, gb)
 	templateApplierMutator(mctx, gb)
 
-	name := gb.SimpleName.Name()
+	name := gb.Name()
 	gb.createGenrule(mctx, []string{name}, "")
 }
 
@@ -265,7 +265,7 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		Enabled *bool
 	}{}
 
-	transformProps.Name = proptools.StringPtr(ts.SimpleName.Name())
+	transformProps.Name = proptools.StringPtr(ts.Name())
 	transformProps.Srcs = ts.generateCommon.Properties.Srcs
 	transformProps.Exclude_srcs = ts.generateCommon.Properties.Exclude_srcs
 	transformProps.Export_include_dirs = ts.generateCommon.Properties.Export_gen_include_dirs
