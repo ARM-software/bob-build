@@ -135,7 +135,9 @@ func createTestModuleAndFeatures() (testProps, configProperties) {
 		"feature_d",
 	}
 
-	module.Init(featuresNames,
+	properties := enabledFeatures(featuresNames...)
+
+	module.Init(&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
 		testPropsGroupC{},
@@ -154,7 +156,6 @@ func createTestModuleAndFeatures() (testProps, configProperties) {
 	module.injectData("Feature_d", "FieldE", "+D_e")
 	module.injectData("Feature_d", "FieldF", "+D_f")
 
-	properties := enabledFeatures(featuresNames...)
 	return module, properties
 }
 
@@ -180,7 +181,7 @@ func Test_should_not_change_when_appending_empty_features(t *testing.T) {
 
 	// BlueprintEmbed must be inited! So BlueprintEmbed can't be nil!
 	module.Init( // Just make new Init so we will have "empty structure"
-		properties.featureList,
+		&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
 		testPropsGroupC{},
@@ -318,7 +319,9 @@ func Test_should_append_properties_when_using_nested_destinations(t *testing.T) 
 
 	// We need to init all available features (important)
 	featureNames := []string{"my_feature_a", "my_feature_b"}
-	module.Properties.Init(featureNames, TestSourceProps{}, TestInstallProps{})
+	properties := enabledFeatures(featureNames...)
+
+	module.Properties.Init(&properties, TestSourceProps{}, TestInstallProps{})
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Injecting data to features. This is only for test purpose. Normally this step would be skipped
@@ -330,7 +333,6 @@ func Test_should_append_properties_when_using_nested_destinations(t *testing.T) 
 	dst := []interface{}{&module.testSource.Properties.TestSourceProps,
 		&module.testInstall.Properties.TestInstallProps}
 
-	properties := enabledFeatures(featureNames...)
 	if err := module.Properties.AppendProps(dst, &properties); err != nil {
 		panic(err)
 	}
@@ -376,7 +378,8 @@ func Test_should_append_props_when_using_nested_structs(t *testing.T) {
 
 	// We need to init all available features (important)
 	featureNames := []string{"my_feature"}
-	module.Properties.Init(featureNames, TestDerivedModuleProps{}, TestModuleCommonProps{})
+	properties := enabledFeatures(featureNames...)
+	module.Properties.Init(&properties, TestDerivedModuleProps{}, TestModuleCommonProps{})
 
 	// This is how 'my_feature' struct will look like
 	// My_feature: struct
@@ -413,7 +416,6 @@ func Test_should_append_props_when_using_nested_structs(t *testing.T) {
 	dst := []interface{}{&module.Properties.TestDerivedModuleProps,
 		&module.TestModuleCommon.Properties.TestModuleCommonProps}
 
-	properties := enabledFeatures(featureNames...)
 	if err := module.Properties.AppendProps(dst, &properties); err != nil {
 		panic(err)
 	}
@@ -449,9 +451,8 @@ func Test_should_composite_new_type(t *testing.T) {
 	}
 
 	// We need to init all available features (important)
-	module.Init([]string{
-		"feature_compose",
-	},
+	properties := enabledFeatures("feature_compose")
+	module.Init(&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
 	)

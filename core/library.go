@@ -571,10 +571,9 @@ func (m *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	availableFeatures := config.getAvailableFeatures()
-	l.Properties.Features.Init(availableFeatures, BuildProps{})
-	l.Properties.Build.Host.Features.Init(availableFeatures, BuildProps{})
-	l.Properties.Build.Target.Features.Init(availableFeatures, BuildProps{})
+	l.Properties.Features.Init(config.Properties, BuildProps{})
+	l.Properties.Build.Host.Features.Init(config.Properties, BuildProps{})
+	l.Properties.Build.Target.Features.Init(config.Properties, BuildProps{})
 
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }
