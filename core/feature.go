@@ -75,15 +75,15 @@ func typesOf(list ...interface{}) []reflect.Type {
 // Name of each property in this struct is custom feature name.
 // Blueprint will inflate this structure with data read from .bp files.
 // Only exported properties can be set so property name MUST start from capital letter.
-func (f *Features) Init(availableFeatures []string, list ...interface{}) {
+func (f *Features) Init(properties *configProperties, list ...interface{}) {
 	if len(list) == 0 {
 		panic("List can't be empty")
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
-	fields := make([]reflect.StructField, len(availableFeatures))
+	fields := make([]reflect.StructField, len(properties.featureList))
 
-	for i, featureName := range availableFeatures {
+	for i, featureName := range properties.featureList {
 		fields[i] = reflect.StructField{
 			Name: featurePropertyName(featureName),
 			Type: reflect.TypeOf(singleFeature{}),
@@ -95,7 +95,7 @@ func (f *Features) Init(availableFeatures []string, list ...interface{}) {
 	f.BlueprintEmbed = instancePtr.Interface()
 
 	instance := reflect.Indirect(instancePtr)
-	for i := range availableFeatures {
+	for i := range properties.featureList {
 		propsInFeature := instance.Field(i).Addr().Interface().(*singleFeature)
 		propsInFeature.BlueprintEmbed = reflect.New(propsType).Interface()
 	}

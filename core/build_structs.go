@@ -119,11 +119,6 @@ type bobConfig struct {
 	Properties *configProperties
 }
 
-// getAvailableFeatures returns all available features that can be used in .bp
-func (config *bobConfig) getAvailableFeatures() []string {
-	return config.Properties.featureList
-}
-
 // SourceProps defines module properties that are used to identify the
 // source files associated with a module.
 type SourceProps struct {
