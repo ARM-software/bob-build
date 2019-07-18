@@ -48,3 +48,10 @@ func BottomUpAdaptor(f func(BottomUpMutatorContext)) android.AndroidBottomUpMuta
 func Module(mctx TopDownMutatorContext) blueprint.Module {
 	return mctx.(android.TopDownMutatorContext).Module()
 }
+
+func WalkDeps(mctx TopDownMutatorContext, f func(blueprint.Module, blueprint.Module) bool) {
+	androidFunc := func(dep android.Module, parent android.Module) bool {
+		return f(dep, parent)
+	}
+	mctx.(android.TopDownMutatorContext).WalkDeps(androidFunc)
+}

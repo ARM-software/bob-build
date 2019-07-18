@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,8 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 // SplittableProps are embedded by modules which can be split into multiple variants
@@ -49,15 +51,15 @@ type splittable interface {
 
 // Traverse the core properties of defaults to find out which variations are
 // supported.
-func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
-	sp, ok := mctx.Module().(splittable)
+func supportedVariantsMutator(mctx abstr.TopDownMutatorContext) {
+	sp, ok := abstr.Module(mctx).(splittable)
 	if !ok {
 		return
 	}
 
 	// It's not valid to specify host_supported or target_supported in a
 	// target: {} or host: {} section
-	if moduleWithBuildProps, ok := mctx.Module().(moduleWithBuildProps); ok {
+	if moduleWithBuildProps, ok := abstr.Module(mctx).(moduleWithBuildProps); ok {
 		b := moduleWithBuildProps.build()
 		if b.Host.SplittableProps.Host_supported != nil ||
 			b.Host.SplittableProps.Target_supported != nil ||
@@ -69,13 +71,13 @@ func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
 	}
 
 	// Defaults are always split into both variants
-	if _, isDefaults := mctx.Module().(*defaults); isDefaults {
+	if _, isDefaults := abstr.Module(mctx).(*defaults); isDefaults {
 		return
 	}
 
 	visited := map[string]bool{}
 
-	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*defaults)
 			if !ok {

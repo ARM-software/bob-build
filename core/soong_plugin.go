@@ -148,6 +148,7 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 	ctx.TopDown("bob_template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
 	ctx.BottomUp("bob_check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
 	ctx.BottomUp("bob_strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
+	ctx.TopDown("bob_supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
 	ctx.TopDown("bob_rename", renameMutator).Parallel()
 	ctx.TopDown("bob_build_actions", buildActionsMutator).Parallel()
 }
