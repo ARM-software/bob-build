@@ -36,3 +36,7 @@ func BottomUpAdaptor(f func(BottomUpMutatorContext)) blueprint.BottomUpMutator {
 func Module(mctx TopDownMutatorContext) blueprint.Module {
 	return mctx.(blueprint.TopDownMutatorContext).Module()
 }
+
+func WalkDeps(mctx TopDownMutatorContext, f func(blueprint.Module, blueprint.Module) bool) {
+	mctx.(blueprint.TopDownMutatorContext).WalkDeps(f)
+}
