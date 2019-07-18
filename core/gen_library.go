@@ -22,6 +22,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/utils"
 )
 
@@ -48,7 +49,7 @@ type generateLibraryInterface interface {
 	dependentInterface
 
 	libExtension() string
-	getSources(ctx commonModuleContext) []string
+	getSources(ctx abstr.ModuleContext) []string
 }
 
 //// Local functions

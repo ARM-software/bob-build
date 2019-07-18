@@ -23,6 +23,8 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 type kernelModule struct {
@@ -85,7 +87,7 @@ func (m *kernelModule) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *kernelModule) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *kernelModule) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -97,7 +99,7 @@ func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []st
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, kernelModuleDepTag)
 }
 
-func (m *kernelModule) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (m *kernelModule) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
 }
 

@@ -27,6 +27,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/utils"
 )
 
@@ -388,11 +389,11 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	return cmd, args, dependents, hostTarget
 }
 
-func (m *generateCommon) getSources(ctx commonModuleContext) []string {
+func (m *generateCommon) getSources(ctx abstr.ModuleContext) []string {
 	return m.Properties.getSources(ctx)
 }
 
-func (m *generateCommon) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (m *generateCommon) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
 }
@@ -415,7 +416,7 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 	return []inout{io}
 }
 
-func (m *generateSource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *generateSource) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
 	return m.outputs(g)
 }
@@ -540,7 +541,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 	return inouts
 }
 
-func (m *transformSource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *transformSource) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
 	return m.outputs(g)
 }

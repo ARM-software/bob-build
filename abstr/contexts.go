@@ -20,7 +20,7 @@
 // function uses these types, they can't necessarily call back into
 // Blueprint or Soong
 
-package core
+package abstr
 
 import (
 	"text/scanner"
@@ -29,7 +29,7 @@ import (
 )
 
 // Common functions in blueprint.BaseModuleContext and android.BaseModuleContext
-type commonModuleContext interface {
+type ModuleContext interface {
 	ModuleName() string
 	ModuleDir() string
 
