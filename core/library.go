@@ -25,6 +25,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/graph"
 	"github.com/ARM-software/bob-build/utils"
 )
@@ -256,7 +257,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 }
 
 // Add module paths to srcs, exclude_srcs, local_include_dirs and export_local_include_dirs
-func (l *Build) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (l *Build) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
 	l.SourceProps.processPaths(ctx, g)
 	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)
@@ -444,7 +445,7 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	return
 }
 
-func (l *library) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (l *library) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	l.Properties.Build.processPaths(ctx, g)
 }
 
@@ -466,7 +467,7 @@ func (m *staticLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName()+".a")}
 }
 
-func (m *staticLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *staticLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -518,7 +519,7 @@ func (m *sharedLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
 }
 
-func (m *sharedLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *sharedLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -560,7 +561,7 @@ func (m *binary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName())}
 }
 
-func (m *binary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *binary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 

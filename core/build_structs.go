@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/utils"
 )
 
@@ -136,7 +137,7 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
-func glob(ctx commonModuleContext, globs []string, excludes []string) []string {
+func glob(ctx abstr.ModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	for _, file := range globs {
@@ -165,11 +166,11 @@ func glob(ctx commonModuleContext, globs []string, excludes []string) []string {
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) getSources(ctx commonModuleContext) []string {
+func (s *SourceProps) getSources(ctx abstr.ModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 
-func (s *SourceProps) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (s *SourceProps) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
 	var special = map[string]string{
 		"${bob_config}": filepath.Join(g.buildDir(), configName),
@@ -384,7 +385,7 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 }
 
 type pathProcessor interface {
-	processPaths(commonModuleContext, generatorBackend)
+	processPaths(abstr.ModuleContext, generatorBackend)
 }
 
 // Adds module paths to appropriate properties.

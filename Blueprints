@@ -30,6 +30,7 @@ bootstrap_go_package {
         "blueprint",
         "blueprint-bootstrap",
         "blueprint-pathtools",
+        "bob-abstr",
         "bob-graph",
         "bob-utils",
     ],
@@ -51,7 +52,6 @@ bootstrap_go_package {
         "core/kernel_module.go",
         "core/late_template.go",
         "core/library.go",
-        "core/module.go",
         "core/properties.go",
         "core/splitter.go",
         "core/standalone.go",
@@ -64,6 +64,18 @@ bootstrap_go_package {
         "core/template_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",
+}
+
+bootstrap_go_package {
+    name: "bob-abstr",
+    deps: [
+        "blueprint",
+    ],
+    srcs: [
+        "abstr/contexts.go",
+        "abstr/standalone.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/abstr",
 }
 
 bootstrap_go_package {

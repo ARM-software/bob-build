@@ -22,6 +22,8 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 // Applies default options
@@ -90,7 +92,7 @@ type featurable interface {
 	features() *Features
 }
 
-func templateApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleContext) {
+func templateApplier(module blueprint.Module, cfg *bobConfig, ctx abstr.ModuleContext) {
 	if m, ok := module.(featurable); ok {
 		cfgProps := cfg.Properties
 
@@ -115,7 +117,7 @@ type propmap struct {
 }
 
 // Applies feature specific properties within each module
-func featureApplier(module blueprint.Module, cfg *bobConfig, ctx commonModuleContext) {
+func featureApplier(module blueprint.Module, cfg *bobConfig, ctx abstr.ModuleContext) {
 	if m, ok := module.(featurable); ok {
 		cfgProps := cfg.Properties
 

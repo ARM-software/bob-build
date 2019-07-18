@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 // EnableableProps allow a module to be disabled or only built when explicitly requested
@@ -155,7 +157,7 @@ type symlinkInstaller interface {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx commonModuleContext, g generatorBackend) []string
+	filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -222,7 +224,7 @@ func (m *resource) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *resource) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *resource) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return m.Properties.SourceProps.getSources(ctx)
 }
 
@@ -230,7 +232,7 @@ func (m *resource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *resource) processPaths(ctx commonModuleContext, g generatorBackend) {
+func (m *resource) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 }
 

@@ -19,6 +19,8 @@ package core
 
 import (
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 type generateStaticLibrary struct {
@@ -40,7 +42,7 @@ func (m *generateStaticLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateStaticLibrary) filesToInstall(ctx commonModuleContext, g generatorBackend) []string {
+func (m *generateStaticLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
 	return []string{getLibraryGeneratedPath(m, g)}
 }
 
