@@ -257,7 +257,7 @@ func moduleNamesFromLibList(libList []string) (ret []string) {
 
 const splitterMutatorName string = "library"
 
-func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
+func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
 	hostVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
@@ -305,7 +305,7 @@ type targetable interface {
 	getTarget() tgtType
 }
 
-func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
+func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
@@ -343,14 +343,14 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 
 // Applies target specific properties within each module. Must be done
 // after the libraries have been split.
-func targetMutator(mctx blueprint.TopDownMutatorContext) {
+func targetMutator(mctx abstr.TopDownMutatorContext) {
 	var build *Build
 	var tgt tgtType
 
-	if def, ok := mctx.Module().(targetable); ok {
+	if def, ok := abstr.Module(mctx).(targetable); ok {
 		build = def.build()
 		tgt = def.getTarget()
-	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
+	} else if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
 		build = &gsc.Properties.FlagArgsBuild
 		tgt = gsc.Properties.Target
 	} else {
@@ -401,8 +401,8 @@ func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
-	mainModule := mctx.Module()
+func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
+	mainModule := abstr.Module(mctx)
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so don't add dependencies
@@ -416,7 +416,7 @@ func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext
 		return // We do not want to add dependencies for not targets
 	}
 
-	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+	abstr.WalkDeps(mctx, func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := mctx.OtherModuleDependencyTag(child)
 		if depTag == wholeStaticDepTag || depTag == staticDepTag || depTag == sharedDepTag {
 			var parentBuild *Build
@@ -444,7 +444,7 @@ func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext
 	})
 }
 
-func applyReexportLibsDependenciesMutator(mctx blueprint.BottomUpMutatorContext) {
+func applyReexportLibsDependenciesMutator(mctx abstr.BottomUpMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
@@ -460,12 +460,12 @@ func applyReexportLibsDependenciesMutator(mctx blueprint.BottomUpMutatorContext)
 	}
 }
 
-func findRequiredModulesMutator(ctx blueprint.TopDownMutatorContext) {
+func findRequiredModulesMutator(mctx abstr.TopDownMutatorContext) {
 	// Non-enableable module types are aliases and defaults. All
 	// dependencies of an alias should be required. Ignore defaults,
 	// because they've already been applied and don't generate any build
 	// rules themselves.
-	if e, ok := ctx.Module().(enableable); ok {
+	if e, ok := abstr.Module(mctx).(enableable); ok {
 		// If it's a top-level module (enabled and built by default), mark it as
 		// required, and continue to visit its dependencies. Otherwise, we don't
 		// need its dependencies so return.
@@ -474,13 +474,13 @@ func findRequiredModulesMutator(ctx blueprint.TopDownMutatorContext) {
 		} else {
 			return
 		}
-	} else if _, ok := ctx.Module().(*defaults); ok { // Ignore defaults.
+	} else if _, ok := abstr.Module(mctx).(*defaults); ok { // Ignore defaults.
 		return
-	} else if _, ok := ctx.Module().(*alias); ok { // Ignore aliases.
+	} else if _, ok := abstr.Module(mctx).(*alias); ok { // Ignore aliases.
 		return
 	}
 
-	ctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
 		e, ok := dep.(enableable)
 		if ok {
 			// Stop traversing if we've already visited this while

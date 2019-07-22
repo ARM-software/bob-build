@@ -27,21 +27,21 @@ import (
 )
 
 // Applies default options
-func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
+func defaultApplierMutator(mctx abstr.TopDownMutatorContext) {
 	// This method walks down the dependency list to include all defaults that include other defaults
 	// with the ones further down the tree being applied first.
 	// Walkdeps is a preorder depth-first search - meaning a parent is visited before children, and children
 	// is visited before siblings.
-	_, isDefaults := mctx.Module().(*defaults)
+	_, isDefaults := abstr.Module(mctx).(*defaults)
 	if isDefaults {
 		return
 	}
 
 	var build *Build
 
-	if target, ok := mctx.Module().(defaultable); ok {
+	if target, ok := abstr.Module(mctx).(defaultable); ok {
 		build = target.build()
-	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
+	} else if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
 		build = &gsc.Properties.FlagArgsBuild
 	} else {
 		// Not defaultable.
@@ -50,7 +50,7 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 
 	visited := map[string]bool{}
 
-	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			//print("Visiting " + mctx.OtherModuleName(dep) + " for dependency " + mctx.ModuleName() + "\n")
 			def, ok := dep.(*defaults)

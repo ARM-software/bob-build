@@ -115,7 +115,7 @@ func tgtToString(tgts []tgtType) []string {
 }
 
 // Creates all the supported variants of splittable modules, including defaults.
-func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
+func splitterMutator(mctx abstr.BottomUpMutatorContext) {
 	if s, ok := mctx.Module().(splittable); ok {
 		variants := tgtToString(s.supportedVariants())
 		if len(variants) == 0 {
