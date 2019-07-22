@@ -42,22 +42,13 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 # Until Soong support is complete, remove Android.bp symlinks in directories
 # whose tests require unimplemented features.
 DISABLE_TEST_DIRS=(
-    export_cflags/liba
-    export_cflags/libb
-    export_include_dirs
-    export_include_dirs/liba
-    export_include_dirs/libb
     external_libs
     generate_source
     implicit_outs
     match_source
     output
-    properties
-    reexport_libs
     shared_libs
     source_encapsulation
-    static_libs
-    templates
     transform_source
 )
 
