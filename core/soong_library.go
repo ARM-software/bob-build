@@ -44,7 +44,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (bool,
 	}
 
 	// For now, only build target libraries
-	if !l.Properties.isTargetSupported() {
+	if l.Properties.TargetType != tgtTypeTarget {
 		return false, nil
 	}
 

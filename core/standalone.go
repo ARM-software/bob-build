@@ -101,10 +101,10 @@ func Main() {
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
-	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
-	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
-	ctx.RegisterTopDownMutator("default_applier", defaultApplierMutator).Parallel()
-	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
+	ctx.RegisterBottomUpMutator(splitterMutatorName, abstr.BottomUpAdaptor(splitterMutator)).Parallel()
+	ctx.RegisterTopDownMutator("target", abstr.TopDownAdaptor(targetMutator)).Parallel()
+	ctx.RegisterTopDownMutator("default_applier", abstr.TopDownAdaptor(defaultApplierMutator)).Parallel()
+	ctx.RegisterBottomUpMutator("depender", abstr.BottomUpAdaptor(dependerMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
 
@@ -116,13 +116,16 @@ func Main() {
 
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
 		dependencyGraphHandler := graphMutatorHandler{graph.NewGraph("All")}
-		ctx.RegisterBottomUpMutator("sort_resolved_static_libs", dependencyGraphHandler.ResolveDependencySortMutator) // This can't be parallel
-
-		ctx.RegisterTopDownMutator("find_required_modules", findRequiredModulesMutator).Parallel()
-
-		ctx.RegisterTopDownMutator("check_reexport_libs", checkReexportLibsMutator).Parallel()
-		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies", collectReexportLibsDependenciesMutator).Parallel()
-		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies", applyReexportLibsDependenciesMutator).Parallel()
+		ctx.RegisterBottomUpMutator("sort_resolved_static_libs",
+			abstr.BottomUpAdaptor(dependencyGraphHandler.ResolveDependencySortMutator)) // This can't be parallel
+		ctx.RegisterTopDownMutator("find_required_modules",
+			abstr.TopDownAdaptor(findRequiredModulesMutator)).Parallel()
+		ctx.RegisterTopDownMutator("check_reexport_libs",
+			abstr.TopDownAdaptor(checkReexportLibsMutator)).Parallel()
+		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies",
+			abstr.TopDownAdaptor(collectReexportLibsDependenciesMutator)).Parallel()
+		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies",
+			abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
 		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()

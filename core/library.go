@@ -643,8 +643,8 @@ func checkLibraryFieldsMutator(mctx abstr.BottomUpMutatorContext) {
 }
 
 // Check that each module only reexports libraries that it is actually using.
-func checkReexportLibsMutator(ctx blueprint.TopDownMutatorContext) {
-	if l, ok := getLibrary(ctx.Module()); ok {
+func checkReexportLibsMutator(mctx abstr.TopDownMutatorContext) {
+	if l, ok := getLibrary(abstr.Module(mctx)); ok {
 		for _, lib := range l.Properties.Reexport_libs {
 			if !utils.ListsContain(lib,
 				l.Properties.Shared_libs,
@@ -654,7 +654,7 @@ func checkReexportLibsMutator(ctx blueprint.TopDownMutatorContext) {
 				l.Properties.Export_shared_libs,
 				l.Properties.Export_static_libs,
 				l.Properties.Export_header_libs) {
-				panic(fmt.Errorf("%s reexports unused library %s", ctx.ModuleName(), lib))
+				panic(fmt.Errorf("%s reexports unused library %s", mctx.ModuleName(), lib))
 			}
 		}
 	}
@@ -790,7 +790,7 @@ const (
 	minInt = -maxInt - 1
 )
 
-func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.BottomUpMutatorContext) {
+func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.BottomUpMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
