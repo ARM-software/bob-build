@@ -20,7 +20,7 @@ bob_static_library {
     export_local_include_dirs: [
         "include",
     ],
-    android: {
+    builder_android_make: {
         // export_include_dirs are absolute. On Android, it may also
         // be the root of the Android tree. So $(LOCAL_PATH) needs to be
         // included here to test absolute path.
@@ -28,10 +28,16 @@ bob_static_library {
             "$(LOCAL_PATH)/export_include_dirs/liba/include2",
         ],
     },
-    linux: {
+    builder_ninja: {
         // include2 is intended to test export_include_dirs, but on
         // linux this must be an absolute directory. This leaves
         // export_include_dirs untested on Linux
+        export_local_include_dirs: [
+            "include2",
+        ],
+    },
+    builder_soong: {
+        // Soong does not support exporting absolute include dirs.
         export_local_include_dirs: [
             "include2",
         ],

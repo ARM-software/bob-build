@@ -417,28 +417,21 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
-		if ctx.OtherModuleDependencyTag(dep) == wholeStaticDepTag ||
+		if !(ctx.OtherModuleDependencyTag(dep) == wholeStaticDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == staticDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == sharedDepTag ||
-			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag {
+			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag) {
+			return
+		} else if _, ok := visited[dep.Name()]; ok {
+			// VisitDirectDeps will visit a module once for each
+			// dependency. We've already done this module.
+			return
+		}
 
-			if _, ok := visited[dep.Name()]; ok {
-				// VisitDirectDeps will visit a module once for each
-				// dependency. We've already done this module.
-				return
-			}
-
-			switch lib := dep.(type) {
-			case *staticLibrary:
-				expLocalIncludes = append(expLocalIncludes, lib.Properties.Export_local_include_dirs...)
-				expIncludes = append(expIncludes, lib.Properties.Export_include_dirs...)
-				expCflags = append(expCflags, lib.Properties.Export_cflags...)
-
-			case *sharedLibrary:
-				expLocalIncludes = append(expLocalIncludes, lib.Properties.Export_local_include_dirs...)
-				expIncludes = append(expIncludes, lib.Properties.Export_include_dirs...)
-				expCflags = append(expCflags, lib.Properties.Export_cflags...)
-			}
+		if sl, ok := getLibrary(dep); ok {
+			expLocalIncludes = append(expLocalIncludes, sl.Properties.Export_local_include_dirs...)
+			expIncludes = append(expIncludes, sl.Properties.Export_include_dirs...)
+			expCflags = append(expCflags, sl.Properties.Export_cflags...)
 		}
 	})
 
