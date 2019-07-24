@@ -310,7 +310,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 
 	if ok {
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + m.Properties.Relative_install_path + "\n")
-		if m.Properties.Post_install_cmd != "" {
+		if m.Properties.Post_install_cmd != nil {
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
 			args["bob_config"] = "$(BOB_ANDROIDMK_DIR)/" + configName
@@ -322,7 +322,8 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 			// We can't use target specific variables in make due to
 			// the way LOCAL_POST_INSTALL_CMD is
 			// implemented. Therefore expand all variable use here.
-			cmd := m.Properties.Post_install_cmd
+			cmd := strings.Replace(*m.Properties.Post_install_cmd, "${args}",
+				strings.Join(m.Properties.Post_install_args, " "), -1)
 			for key, value := range args {
 				cmd = strings.Replace(cmd, "${"+key+"}", value, -1)
 			}

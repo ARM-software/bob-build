@@ -778,17 +778,20 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	rule := installRule
 	args := map[string]string{}
 	deps := []string{}
-	if props.Post_install_cmd != "" {
+	if props.Post_install_cmd != nil {
 		rulename := "install"
 
-		cmd := "rm -f $out; cp $in $out ; " + props.Post_install_cmd
+		cmd := "rm -f $out; cp $in $out ; " + *props.Post_install_cmd
+
+		// Expand args immediately
+		cmd = strings.Replace(cmd, "${args}", strings.Join(props.Post_install_args, " "), -1)
 
 		args["bob_config"] = configPath
 		if props.Post_install_tool != nil {
 			args["tool"] = *props.Post_install_tool
 			deps = append(deps, *props.Post_install_tool)
 		}
-		utils.StripUnusedArgs(args, props.Post_install_cmd)
+		utils.StripUnusedArgs(args, cmd)
 
 		rule = ctx.Rule(pctx,
 			rulename,

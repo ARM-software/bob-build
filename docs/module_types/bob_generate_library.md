@@ -58,7 +58,8 @@ bob_generate_shared_library {
     install_deps: ["bob_resource.name"],
     relative_install_path: "unit/objects",
     post_install_tool: "post_install.py",
-    post_install_cmd: "${tool} ${out} ARGS...",
+    post_install_cmd: "${tool} ${args} ${out}",
+    post_install_args: ["arg1", "arg2"],
 }
 ```
 

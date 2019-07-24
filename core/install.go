@@ -89,7 +89,9 @@ type InstallableProps struct {
 	// Script used during post install
 	Post_install_tool *string
 	// Command to execute on file(s) after they are installed
-	Post_install_cmd string
+	Post_install_cmd *string
+	// Arguments to post install command
+	Post_install_args []string
 	// The path retrieved from the install group so we don't need to walk dependencies to get it
 	Install_path *string `blueprint:"mutated"`
 }
