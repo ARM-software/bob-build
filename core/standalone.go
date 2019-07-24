@@ -106,7 +106,7 @@ func Main() {
 	ctx.RegisterTopDownMutator("default_applier", abstr.TopDownAdaptor(defaultApplierMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("depender", abstr.BottomUpAdaptor(dependerMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
-	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
+	ctx.RegisterBottomUpMutator("generated", abstr.BottomUpAdaptor(generatedDependerMutator)).Parallel()
 
 	if handler := initGrapvizHandler(); handler != nil {
 		ctx.RegisterBottomUpMutator("graphviz_output", handler.graphvizMutator)

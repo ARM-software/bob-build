@@ -97,6 +97,16 @@ func expandBobVariables(str, tool, hostBin string) (out string, err error) {
 	return
 }
 
+func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin android.Module) {
+	mctx.VisitDirectDepsWithTag(hostToolBinTag, func(m android.Module) {
+		hostBin = m
+	})
+	if hostBin == nil {
+		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", gc.Properties.Host_bin))
+	}
+	return
+}
+
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	out []string, depfile string) {
 
@@ -136,8 +146,10 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	if gc.Properties.Tool != "" {
 		genProps.Tool_files = []string{gc.Properties.Tool}
 	}
+	hostBinModuleName := ""
 	if gc.Properties.Host_bin != "" {
-		genProps.Tools = []string{gc.Properties.Host_bin}
+		hostBinModuleName = ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
+		genProps.Tools = []string{hostBinModuleName}
 	}
 
 	// Bob's specified filename will be ignored. Soong will report an
@@ -148,7 +160,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	cmd := strings.Replace(gc.Properties.Cmd, "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
 
-	cmd2, err := expandBobVariables(cmd, gc.Properties.Tool, gc.Properties.Host_bin)
+	cmd2, err := expandBobVariables(cmd, gc.Properties.Tool, hostBinModuleName)
 	if err != nil {
 		panic(fmt.Errorf("%s property cmd %s", mctx.ModuleName(), err.Error()))
 	}

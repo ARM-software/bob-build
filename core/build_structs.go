@@ -255,7 +255,7 @@ func moduleNamesFromLibList(libList []string) (ret []string) {
 	return ret
 }
 
-const splitterMutatorName string = "library"
+const splitterMutatorName string = "bob_splitter"
 
 func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {

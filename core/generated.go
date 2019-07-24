@@ -600,7 +600,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext, g generatorBackend) []string
 	return srcs
 }
 
-func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
+func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
 	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
