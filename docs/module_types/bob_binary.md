@@ -60,7 +60,8 @@ bob_binary {
     install_deps: ["module_name"],
     relative_install_path: "unit/objects",
     post_install_tool: "post_install.py",
-    post_install_cmd: "${tool} ${out} ARGS...",
+    post_install_cmd: "${tool} ${args} ${out}",
+    post_install_args: ["arg1", "arg2"],
 
     // features available
 }

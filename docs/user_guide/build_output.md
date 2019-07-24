@@ -83,7 +83,8 @@ bob_shared_library {
     install_group: "IG_libraries",
     relative_install_path: "libdrm",
     post_install_tool: "libdrm_post.py",
-    post_install_cmd: "${tool} ${out}",
+    post_install_cmd: "${tool} ${args} ${out}",
+    post_install_args: ["--strip"],
 
     install_deps: ["formats"],
 }
@@ -97,8 +98,12 @@ gets copied to `install/lib/libdrm/libdrm.so`.
 
 If you need to post-process the binary, use `post_install_cmd`. The
 related `post_install_tool` will add a dependency on a script which
-can be referred to in `post_install_cmd` as `${tool}`. An example
-of post-processing is to strip libraries of debug information.
+can be referred to in `post_install_cmd` as `${tool}`. An example of
+post-processing is to strip libraries of debug information. For any
+library it's advised to just run a single script to cover all post
+install actions. If different actions need to be taken in different
+circumstances, use `post_install_args` to pass the necessary arguments
+to the script (based on enabled features).
 
 When installing libraries and binaries, their dependencies are also
 installed. You can specify additional dependencies with

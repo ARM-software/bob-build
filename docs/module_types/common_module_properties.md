@@ -277,6 +277,12 @@ are substituted into the command:
 - `${tool}` - the tool specified in `bob_module.post_install_tool`.
 - `${out}` - the output file(s) of the current module.
 - `${bob_config}` - the Bob configuration file.
+- `${args}` - arguments from `post_install_args`
+
+### **bob_module.post_install_args** (optional)
+
+Arguments to insert into `post_install_cmd`. This allows arguments to
+added based on features and defaults.
 
 ----
 ### **bob_module.target_supported** (optional)
