@@ -43,6 +43,7 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 # whose tests require unimplemented features.
 DISABLE_TEST_DIRS=(
     external_libs
+    generate_libs
     generate_source
     implicit_outs
     match_source
