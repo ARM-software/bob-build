@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/google/blueprint"
 
@@ -86,11 +87,17 @@ type InstallableProps struct {
 	// Path to install to, relative to the install_group's path
 	Relative_install_path string
 	// Script used during post install
-	Post_install_tool string
+	Post_install_tool *string
 	// Command to execute on file(s) after they are installed
 	Post_install_cmd string
 	// The path retrieved from the install group so we don't need to walk dependencies to get it
 	Install_path *string `blueprint:"mutated"`
+}
+
+func (props *InstallableProps) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+	if props.Post_install_tool != nil {
+		*props.Post_install_tool = filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), *props.Post_install_tool)
+	}
 }
 
 func (props *InstallableProps) getInstallGroupPath() (string, bool) {
@@ -234,6 +241,7 @@ func (m *resource) getInstallableProps() *InstallableProps {
 
 func (m *resource) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
+	m.Properties.InstallableProps.processPaths(ctx, g)
 }
 
 func (m *resource) getAliasList() []string {
