@@ -39,6 +39,7 @@ type ccLibraryCommonProps struct {
 	Local_include_dirs []string
 	Static_libs        []string
 	Whole_static_libs  []string
+	Shared_libs        []string
 	Ldflags            []string
 }
 
@@ -113,6 +114,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLib
 		Local_include_dirs: l.Properties.Local_include_dirs,
 		Static_libs:        ccModuleNames(mctx, l.Properties.ResolvedStaticLibs),
 		Whole_static_libs:  ccModuleNames(mctx, l.Properties.Whole_static_libs),
+		Shared_libs:        ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
 		Ldflags:            l.Properties.Ldflags,
 	}
 
@@ -145,6 +147,35 @@ func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostStaticFactory), commonProps, libProps)
 	case tgtTypeTarget:
 		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetStaticFactory), commonProps, libProps)
+	}
+}
+
+// Create a module which only builds on the device. The closest thing Soong
+// provides will also allow building on the host, which is not quite what we
+// want.
+func libraryTargetSharedFactory() android.Module {
+	module, library := cc.NewLibrary(android.DeviceSupported)
+	library.BuildOnlyShared()
+	return module.Init()
+}
+
+func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
+	if !isEnabled(l) {
+		return
+	}
+
+	commonProps := l.setupCcLibraryProps(mctx)
+
+	libProps := &ccStaticOrSharedProps{
+		// Soong's `export_include_dirs` field is relative to the module dir.
+		Export_include_dirs: l.Properties.Export_local_include_dirs,
+	}
+
+	switch l.Properties.TargetType {
+	case tgtTypeHost:
+		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostSharedFactory), commonProps, libProps)
+	case tgtTypeTarget:
+		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetSharedFactory), commonProps, libProps)
 	}
 }
 
