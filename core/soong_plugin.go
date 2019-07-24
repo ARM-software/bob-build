@@ -150,10 +150,11 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 	ctx.BottomUp("bob_check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
 	ctx.BottomUp("bob_strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
 	ctx.TopDown("bob_supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
-	ctx.BottomUp("bob_splitter", abstr.BottomUpAdaptor(splitterMutator)).Parallel()
+	ctx.BottomUp(splitterMutatorName, abstr.BottomUpAdaptor(splitterMutator)).Parallel()
 	ctx.TopDown("bob_target", abstr.TopDownAdaptor(targetMutator)).Parallel()
 	ctx.TopDown("bob_default_applier", abstr.TopDownAdaptor(defaultApplierMutator)).Parallel()
 	ctx.BottomUp("bob_depender", abstr.BottomUpAdaptor(dependerMutator)).Parallel()
+	ctx.BottomUp("bob_generated", abstr.BottomUpAdaptor(generatedDependerMutator)).Parallel()
 	dependencyGraphHandler := graphMutatorHandler{graph.NewGraph("All")}
 	ctx.BottomUp("bob_sort_resolved_static_libs",
 		abstr.BottomUpAdaptor(dependencyGraphHandler.ResolveDependencySortMutator)) // This can't be parallel
