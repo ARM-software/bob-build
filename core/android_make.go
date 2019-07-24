@@ -314,7 +314,9 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
 			args["bob_config"] = "$(BOB_ANDROIDMK_DIR)/" + configName
-			args["tool"] = filepath.Join("$(LOCAL_PATH)", ctx.ModuleDir(), m.Properties.Post_install_tool)
+			if m.Properties.Post_install_tool != nil {
+				args["tool"] = *m.Properties.Post_install_tool
+			}
 			args["out"] = "$(LOCAL_INSTALLED_MODULE)"
 
 			// We can't use target specific variables in make due to

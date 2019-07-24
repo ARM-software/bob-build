@@ -395,6 +395,7 @@ func (m *generateCommon) getSources(ctx abstr.ModuleContext) []string {
 
 func (m *generateCommon) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
+	m.Properties.InstallableProps.processPaths(ctx, g)
 	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
 }
 

@@ -780,12 +780,14 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	deps := []string{}
 	if props.Post_install_cmd != "" {
 		rulename := "install"
-		tool := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), props.Post_install_tool)
 
 		cmd := "rm -f $out; cp $in $out ; " + props.Post_install_cmd
 
 		args["bob_config"] = configPath
-		args["tool"] = tool
+		if props.Post_install_tool != nil {
+			args["tool"] = *props.Post_install_tool
+			deps = append(deps, *props.Post_install_tool)
+		}
 		utils.StripUnusedArgs(args, props.Post_install_cmd)
 
 		rule = ctx.Rule(pctx,
@@ -795,7 +797,6 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 				Description: "$out",
 			},
 			utils.SortedKeys(args)...)
-		deps = append(deps, tool)
 	}
 
 	// Check if this is a resource
