@@ -232,11 +232,8 @@ def p_config_stmts(p):
 
 
 def p_type(p):
-    """type : TRISTATE
-            | BOOL
-            | BOOLEAN
+    """type : BOOL
             | INT
-            | HEX
             | STRING"""
     p[0] = p[1]
 

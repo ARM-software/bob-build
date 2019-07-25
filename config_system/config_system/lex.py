@@ -27,7 +27,7 @@ class TokenizeError(Exception):
 
 tokens = (
     "ANDAND", "OROR", "NOT",
-    "BOOL", "BOOLEAN",
+    "BOOL",
     "CHOICE", "ENDCHOICE",
     "CONFIG",
     "DEFAULT",
@@ -36,7 +36,6 @@ tokens = (
     "EOL",
     "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
     "HELP", "HELPTEXT",
-    "HEX",
     "IF", "ON",
     "INT",
     "LBRACKET", "RBRACKET",
@@ -48,7 +47,6 @@ tokens = (
     "SELECT",
     "SOURCE",
     "STRING",
-    "TRISTATE",
     "VISIBLE",
     "WORD",
     "COMMENT",
@@ -75,7 +73,6 @@ commands = (
     "select",
     "source",
     "string",
-    "tristate",
     "visible",
 )
 
