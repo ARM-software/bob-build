@@ -15,6 +15,7 @@
 
 import ply.yacc as yacc
 
+from config_system import expr
 from config_system.lex import tokens, report_error
 
 
@@ -131,7 +132,7 @@ def p_menu_options_empty(p):
 
 
 def p_menu_visible(p):
-    "menu_visible : VISIBLE IF expr EOL"
+    "menu_visible : VISIBLE IF condexpr EOL"
     p[0] = {"visible_cond": p[3]}
 
 
@@ -145,7 +146,7 @@ def p_config_stmt(p):
 
 
 def p_choice_stmt_begin(p):
-    "choice_stmt_begin : CHOICE EOL config_options"
+    "choice_stmt_begin : CHOICE EOL choice_options"
     global order_count
     order_count += 1
     p[0] = merge({"id": order_count}, p[3])
@@ -177,16 +178,42 @@ def p_choice_stmt(p):
                 p[0]["config"][k]["depends"] = config["depends"]
 
     for d in config.get("default_cond", []):
+        assert d["expr"][0] == "word", "Expressions not supported in choice default"
         for k in p[0]["config"]:
-            if k == d["val"]:
+            if k == d["expr"][1]:
                 p[0]["config"][k] = merge(p[0]["config"][k],
-                                          {"default_cond": [{"cond": d["cond"], "val": "y"}]})
+                                          {"default_cond": [{"cond": d["cond"], "expr": expr.YES}]})
 
     if "default" in config:
+        assert config["default"][0] == "word", "Expressions not supported in choice default"
         for k in p[0]["config"]:
-            if k == config["default"]:
-                d = {"default": "y"}
+            if k == config["default"][1]:
+                d = {"default": expr.YES}
                 p[0]["config"][k] = merge(p[0]["config"][k], d)
+
+
+def p_choice_options(p):
+    """choice_options : choice_options config_type
+                      | choice_options choice_default
+                      | choice_options config_depends
+                      | choice_options config_help
+                      | choice_options config_prompt
+                      """
+    p[0] = merge(p[1], p[2])
+
+
+def p_choice_options_empty(p):
+    "choice_options :"
+    p[0] = {}
+
+
+def p_choice_default(p):
+    """choice_default : DEFAULT identifier EOL
+                      | DEFAULT identifier IF condexpr EOL
+    """
+    p[0] = {"default": p[2]}
+    if len(p) > 4:
+        p[0] = {"default_cond": [{"cond": p[4], "expr": p[2]}]}
 
 
 def p_source_stmt_first(p):
@@ -269,71 +296,54 @@ def p_config_select(p):
 
 
 def p_config_select_if(p):
-    "config_select : SELECT WORD IF expr EOL"
+    "config_select : SELECT WORD IF condexpr EOL"
     p[0] = {"select_if": [(p[2], p[4])]}
 
 
-def p_config_word_default(p):
-    """config_default : DEFAULT WORD EOL
-                      | DEFAULT WORD IF expr EOL
+def p_config_default(p):
+    """config_default : DEFAULT expr EOL
+                      | DEFAULT expr IF condexpr EOL
     """
-    p[0] = {"default": p[2], "word": p[2]}
+    p[0] = {"default": p[2]}
     if len(p) > 4:
-        p[0] = {"default_cond": [{"cond": p[4], "val": p[2], "word": p[2]}]}
-
-
-def p_config_string_default(p):
-    """config_default : DEFAULT QUOTED_STRING EOL
-                      | DEFAULT QUOTED_STRING IF expr EOL
-    """
-    p[0] = {"default": p[2], "word": None}
-    if len(p) > 4:
-        p[0] = {"default_cond": [{"cond": p[4], "val": p[2], "word": None}]}
-
-
-def p_config_number_default(p):
-    """config_default : DEFAULT NUMBER EOL
-                      | DEFAULT NUMBER IF expr EOL"""
-    p[0] = {"default": p[2], "word": None}
-    if len(p) > 4:
-        p[0] = {"default_cond": [{"cond": p[4], "val": p[2], "word": None}]}
+        p[0] = {"default_cond": [{"cond": p[4], "expr": p[2]}]}
 
 
 def p_config_depends(p):
-    "config_depends : DEPENDS ON expr EOL"
+    "config_depends : DEPENDS ON condexpr EOL"
     p[0] = {"depends": p[3]}
 
 
 def p_config_prompt(p):
     """config_prompt : PROMPT QUOTED_STRING EOL
-                     | PROMPT QUOTED_STRING IF expr EOL"""
+                     | PROMPT QUOTED_STRING IF condexpr EOL"""
     if len(p) > 4:
         p[0] = {"title": p[2], "visible_cond": p[4]}
     else:
         p[0] = {"title": p[2]}
 
 
-def p_expr(p):
-    """expr : expr2
-            | expr OROR expr2"""
+def p_condexpr(p):
+    """condexpr : condexpr2
+                | condexpr OROR condexpr2"""
     if len(p) > 2:
         p[0] = ("or", p[1], p[3])
     else:
         p[0] = p[1]
 
 
-def p_expr2(p):
-    """expr2 : expr3
-             | expr2 ANDAND expr3"""
+def p_condexpr2(p):
+    """condexpr2 : condexpr3
+                 | condexpr2 ANDAND condexpr3"""
     if len(p) > 2:
         p[0] = ("and", p[1], p[3])
     else:
         p[0] = p[1]
 
 
-def p_expr3(p):
-    """expr3 : expr4
-             | expr4 comparison expr4"""
+def p_condexpr3(p):
+    """condexpr3 : condexpr4
+                 | condexpr4 comparison condexpr4"""
     if len(p) > 2:
         p[0] = (p[2], p[1], p[3])
     else:
@@ -350,29 +360,71 @@ def p_comparison(p):
     p[0] = p[1]
 
 
-def p_expr4_word(p):
-    "expr4 : WORD"
-    p[0] = p[1]
-
-
-def p_expr4_string(p):
-    "expr4 : QUOTED_STRING"
-    p[0] = ("string", p[1])
-
-
-def p_expr4_number(p):
-    "expr4 : NUMBER"
-    p[0] = ("number", p[1])
-
-
-def p_expr4_not(p):
-    "expr4 : NOT expr4"
+def p_condexpr4_not(p):
+    "condexpr4 : NOT condexpr4"
     p[0] = ("not", p[2])
 
 
-def p_expr4_brackets(p):
-    "expr4 : LBRACKET expr RBRACKET"
+def p_condexpr4_brackets(p):
+    "condexpr4 : LBRACKET condexpr RBRACKET"
     p[0] = p[2]
+
+
+def p_condexpr4_expr(p):
+    "condexpr4 : expr"
+    p[0] = p[1]
+
+
+def p_expr_op(p):
+    "expr : expr combination expr2"
+    p[0] = (p[2], p[1], p[3])
+
+
+def p_expr_term(p):
+    "expr : expr2"
+    p[0] = p[1]
+
+
+def p_expr2_brackets(p):
+    "expr2 : LBRACKET expr RBRACKET"
+    p[0] = p[2]
+
+
+def p_expr2_term(p):
+    "expr2 : literal_or_identifier"
+    p[0] = p[1]
+
+
+def p_combination(p):
+    """combination : PLUS
+                   | MINUS"""
+    p[0] = p[1]
+
+
+def p_lit_or_ident_string(p):
+    "literal_or_identifier : QUOTED_STRING"
+    p[0] = ("string", p[1])
+
+
+def p_lit_or_ident_number(p):
+    "literal_or_identifier : NUMBER"
+    p[0] = ("number", p[1])
+
+
+def p_lit_or_ident_boolean(p):
+    """literal_or_identifier : YES
+                             | NO"""
+    p[0] = ("boolean", p[1])
+
+
+def p_lit_or_ident_identifier(p):
+    "literal_or_identifier : identifier"
+    p[0] = p[1]
+
+
+def p_identifier(p):
+    "identifier : WORD"
+    p[0] = ("word", p[1])
 
 
 def p_config_help(p):
