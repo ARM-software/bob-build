@@ -34,6 +34,8 @@ type ccLibraryCommonProps struct {
 	Stem               *string
 	Srcs               []string
 	Exclude_srcs       []string
+	Generated_sources  []string
+	Generated_headers  []string
 	Cflags             []string
 	Include_dirs       []string
 	Local_include_dirs []string
@@ -95,6 +97,36 @@ func (l *library) getExportedCflags(mctx android.TopDownMutatorContext) []string
 	return cflags
 }
 
+func (l *library) getGeneratedSources(mctx android.TopDownMutatorContext) (srcs []string) {
+	mctx.VisitDirectDepsWithTag(generatedSourceTag, func(dep android.Module) {
+		switch dep.(type) {
+		case *generateSource:
+		case *transformSource:
+		default:
+			panic(fmt.Errorf("Dependency %s of %s is not a generated source",
+				dep.Name(), l.Name()))
+		}
+
+		srcs = append(srcs, dep.Name())
+	})
+	return
+}
+
+func (l *library) getGeneratedHeaders(mctx android.TopDownMutatorContext) (headers []string) {
+	mctx.VisitDirectDepsWithTag(generatedHeaderTag, func(dep android.Module) {
+		switch dep.(type) {
+		case *generateSource:
+		case *transformSource:
+		default:
+			panic(fmt.Errorf("Dependency %s of %s is not a generated source",
+				dep.Name(), l.Name()))
+		}
+
+		headers = append(headers, dep.Name())
+	})
+	return
+}
+
 func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLibraryCommonProps {
 	if len(l.Properties.Export_include_dirs) > 0 {
 		panic(fmt.Errorf("Module %s exports non-local include dirs %v - this is not supported",
@@ -108,6 +140,8 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLib
 		Name:               proptools.StringPtr(l.shortName()),
 		Stem:               proptools.StringPtr(l.Name()),
 		Srcs:               utils.Filter(utils.IsCompilableSource, l.Properties.Srcs),
+		Generated_sources:  l.getGeneratedSources(mctx),
+		Generated_headers:  l.getGeneratedHeaders(mctx),
 		Exclude_srcs:       l.Properties.Exclude_srcs,
 		Cflags:             cflags,
 		Include_dirs:       l.Properties.Include_dirs,
