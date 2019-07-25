@@ -43,9 +43,10 @@ set_config_props = {"BOOL", "INT", "STRING", "PROMPT",
                     "DEFAULT", "DEPENDS", "SELECT",
                     "VISIBLE", "HELP"}
 set_binary_ops = {"ANDAND", "OROR",
-                  "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL"}
+                  "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
+                  "PLUS", "MINUS"}
 set_unary_ops = {"NOT"}
-set_identifiers = {"NUMBER", "QUOTED_STRING", "WORD"}
+set_identifiers = {"NUMBER", "QUOTED_STRING", "WORD", "YES", "NO"}
 set_keywords = {"IF", "ON"}
 set_lparen = {"LBRACKET"}
 

@@ -42,12 +42,14 @@ tokens = (
     "MENU", "ENDMENU", "MAINMENU",
     "MENUCONFIG",
     "NUMBER",
+    "PLUS", "MINUS",
     "PROMPT",
     "QUOTED_STRING",
     "SELECT",
     "SOURCE",
     "STRING",
     "VISIBLE",
+    "YES", "NO",
     "WORD",
     "COMMENT",
 )
@@ -137,6 +139,8 @@ t_PARAM_LESS = r"<"
 t_PARAM_LESS_EQUAL = r"<="
 t_PARAM_GREATER = r">"
 t_PARAM_GREATER_EQUAL = r">="
+t_PARAM_PLUS = r"\+"
+t_PARAM_MINUS = r"-"
 
 
 def t_PARAM_space(t):
@@ -148,6 +152,10 @@ def t_PARAM_word(t):
     r"[A-Za-z][A-Za-z0-9_]*"
     if t.value in params:
         t.type = t.value.upper()
+    elif t.value == 'y':
+        t.type = "YES"
+    elif t.value == 'n':
+        t.type = "NO"
     else:
         t.type = "WORD"
     return t

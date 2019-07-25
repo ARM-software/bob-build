@@ -17,7 +17,7 @@ import logging
 import os
 import re
 
-from config_system import utils
+from config_system import expr, utils
 
 
 logger = logging.getLogger(__name__)
@@ -43,105 +43,176 @@ def check_depends(depends, value):
     """
     if depends is None:
         return False
-    if type(depends) == tuple:
-        if depends[0] == 'and':
-            return (check_depends(depends[1], value) or
-                    check_depends(depends[2], value))
-        elif depends[0] == 'or':
-            return (check_depends(depends[1], value) and
-                    check_depends(depends[2], value))
-        else:
-            return False
-    return depends == value
+    assert type(depends) == tuple
+    assert len(depends) in [2, 3]
+
+    if depends[0] == 'and':
+        return (check_depends(depends[1], value) or
+                check_depends(depends[2], value))
+    elif depends[0] == 'or':
+        return (check_depends(depends[1], value) and
+                check_depends(depends[2], value))
+    elif depends[0] == 'word':
+        return depends[1] == value
+    return False
 
 
-def value_of(depends):
-    if depends is None:
-        return "y"
-    if type(depends) == tuple:
-        if len(depends) == 3:
-            left = value_of(depends[1])
-            right = value_of(depends[2])
-            if type(left) != type(right):
-                return 'n'
-            elif depends[0] == 'and':
-                if left == 'y' and right == 'y':
-                    return 'y'
-                return 'n'
-            elif depends[0] == 'or':
-                if left == 'y' or right == 'y':
-                    return 'y'
-                return 'n'
-            elif depends[0] == '=':
-                if left == right:
-                    return 'y'
-                return 'n'
-            elif depends[0] == '!=':
-                if left != right:
-                    return 'y'
-                return 'n'
-            elif depends[0] == '>':
-                if left > right:
-                    return 'y'
-                return 'n'
-            elif depends[0] == '>=':
-                if left >= right:
-                    return 'y'
-                return 'n'
-            elif depends[0] == '<':
-                if left < right:
-                    return 'y'
-                return 'n'
-            elif depends[0] == '<=':
-                if left <= right:
-                    return 'y'
-                return 'n'
-        elif depends[0] == 'not':
-            if value_of(depends[1]) == 'y':
-                return 'n'
-            return 'y'
-        elif depends[0] == 'string':
-            return depends[1]
-        elif depends[0] == 'number':
-            return depends[1]
-        else:
-            raise Exception("Unexpected depend list: " + str(depends))
-    return configuration['config'][depends]['value']
+# Operators where the result is not boolean
+ARITH_SET = {"+", "-"}
+
+
+def _expr_value(e):
+    """Evaluate the value of the input expression.
+    This isn't expected to use conditional operators.
+    """
+    assert type(e) == tuple
+    assert len(e) in [2, 3]
+    if len(e) == 3:
+        left = _expr_value(e[1])
+        right = _expr_value(e[2])
+        if type(left) != type(right):
+            raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
+        elif left in ['y', 'n'] or right in ['y', 'n']:
+            raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
+        elif e[0] == '+':
+            return left + right
+        elif e[0] == '-':
+            if type(left) is str:
+                raise TypeError("'-' operator is not valid on strings")
+                return left
+            return left - right
+    elif e[0] == 'string':
+        return e[1]
+    elif e[0] == 'number':
+        return e[1]
+    elif e[0] == 'boolean':
+        return e[1]
+    elif e[0] == 'word':
+        return get_config(e[1])['value']
+
+    raise Exception("Unexpected depend list: " + str(e))
+
+
+def expr_value(e):
+    try:
+        result = _expr_value(e)
+    except TypeError as err:
+        logging.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
+        result = ""
+
+    return result
+
+
+def _condexpr_value(e):
+    """Evaluate the value of the input expression.
+    Note that booleans are propagated as 'y' and 'n'
+    """
+    assert type(e) == tuple
+    assert len(e) in [2, 3]
+
+    if len(e) == 3:
+        if e[0] in ARITH_SET:
+            return _expr_value(e)
+
+        left = _condexpr_value(e[1])
+        right = _condexpr_value(e[2])
+        if type(left) != type(right):
+            # Boolean result expected
+            return 'n'
+        elif e[0] == 'and':
+            if left == 'y' and right == 'y':
+                return 'y'
+            return 'n'
+        elif e[0] == 'or':
+            if left == 'y' or right == 'y':
+                return 'y'
+            return 'n'
+        elif e[0] == '=':
+            if left == right:
+                return 'y'
+            return 'n'
+        elif e[0] == '!=':
+            if left != right:
+                return 'y'
+            return 'n'
+        elif e[0] == '>':
+            if left > right:
+                return 'y'
+            return 'n'
+        elif e[0] == '>=':
+            if left >= right:
+                return 'y'
+            return 'n'
+        elif e[0] == '<':
+            if left < right:
+                return 'y'
+            return 'n'
+        elif e[0] == '<=':
+            if left <= right:
+                return 'y'
+            return 'n'
+    elif e[0] == 'not':
+        if _condexpr_value(e[1]) == 'y':
+            return 'n'
+        return 'y'
+    elif e[0] == 'string':
+        return e[1]
+    elif e[0] == 'number':
+        return e[1]
+    elif e[0] == 'boolean':
+        return e[1]
+    elif e[0] == 'word':
+        return get_config(e[1])['value']
+
+    raise Exception("Unexpected depend list: " + str(e))
+
+
+def condexpr_value(e):
+    if e is None:
+        return 'y'
+    try:
+        result = _condexpr_value(e)
+    except TypeError as err:
+        logging.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
+        result = 'n'
+
+    return result
 
 
 def can_enable(depends):
-    value = value_of(depends)
+    value = condexpr_value(depends)
     if value == 'y':
         return True
     return False
 
 
 def is_visible(cond):
-    value = value_of(cond)
+    value = condexpr_value(cond)
     if value == 'n':
         return False
     return True
 
 
-def dependency_list(expr):
+def dependency_list(e):
     """
     Get the set of config identifiers referred to by an expression. A
     set is returned instead of a list as we don't need duplicates, and
     order doesn't matter.
     """
-    if expr is None:
+    if e is None:
         return set()
-    if type(expr) == tuple:
-        if expr[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=']:
-            return dependency_list(expr[1]) | dependency_list(expr[2])
-        elif expr[0] == "not":
-            return dependency_list(expr[1])
-        elif expr[0] in ["string", "number"]:
-            # Quoted string or number
-            return set()
-        raise Exception("Unexpected depend list: " + str(expr))
+    assert type(e) == tuple
 
-    return {expr}
+    if e[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=', '+', '-']:
+        return dependency_list(e[1]) | dependency_list(e[2])
+    elif e[0] == 'not':
+        return dependency_list(e[1])
+    elif e[0] in ['string', 'number', 'boolean']:
+        # Quoted string, number or boolean
+        return set()
+    elif e[0] == 'word':
+        return {e[1]}
+    raise Exception("Unexpected depend list: " + str(e))
 
 
 OPERATOR_FORMAT_MAP = {
@@ -152,23 +223,25 @@ OPERATOR_FORMAT_MAP = {
 
 def format_dependency_list(depends, skip_parens=False):
     assert depends, "Empty dependency list"
+    assert type(depends) == tuple
 
-    if type(depends) == tuple:
-        if len(depends) == 3:
-            left = format_dependency_list(depends[1])
-            right = format_dependency_list(depends[2])
+    if len(depends) == 3:
+        left = format_dependency_list(depends[1])
+        right = format_dependency_list(depends[2])
 
-            operator = OPERATOR_FORMAT_MAP.get(depends[0], depends[0])
-            expr = left + " " + operator + " " + right
-            return expr if skip_parens else "(" + expr + ")"
-        elif depends[0] == "not":
-            return "!" + format_dependency_list(depends[1])
-        elif depends[0] == 'string':
-            return '"' + depends[1] + '"'
-        elif depends[0] == 'number':
-            return str(depends[1])
-    elif type(depends) == str:
-        return depends + "[=" + str(get_config(depends)["value"]) + "]"
+        operator = OPERATOR_FORMAT_MAP.get(depends[0], depends[0])
+        result = left + " " + operator + " " + right
+        return result if skip_parens else "(" + result + ")"
+    elif depends[0] == 'not':
+        return "!" + format_dependency_list(depends[1])
+    elif depends[0] == 'string':
+        return '"' + depends[1] + '"'
+    elif depends[0] == 'number':
+        return str(depends[1])
+    elif depends[0] == 'boolean':
+        return str(depends[1])
+    elif depends[0] == 'word':
+        return depends[1] + "[=" + str(get_config(depends[1])['value']) + "]"
 
 
 def enforce_dependent_values(auto_fix=False):
@@ -365,14 +438,14 @@ def set_initial_values():
             for j in config[k]['default_cond']:
                 for i in dependency_list(j['cond']):
                     config[i].setdefault('rdefault', []).append(k)
-                if config[k]['datatype'] == "string":
-                    if j['word'] is not None:
-                        config[j['word']].setdefault('rdefault', []).append(k)
+                value_deps = dependency_list(j['expr'])
+                for d in value_deps:
+                    config[d].setdefault('rdefault', []).append(k)
 
         if "default" in config[k]:
-            if config[k]['datatype'] == "string":
-                if config[k]['word'] is not None:
-                    config[config[k]['word']].setdefault('rdefault', []).append(k)
+            value_deps = dependency_list(config[k]['default'])
+            for d in value_deps:
+                config[d].setdefault('rdefault', []).append(k)
 
         if "select_if" in config[k]:
             for j in config[k]['select_if']:
@@ -416,11 +489,12 @@ def update_choice_default(c):
                 rank = 2
         else:
             for i in config.get("default_cond", []):
-                if can_enable(i['cond']) and i['val'] == 'y':
+                if can_enable(i['cond']) and expr_value(i['expr']) == 'y':
                     rank = 3
                     break
             else:
-                if config.get("default", "n") == "y":
+                def_expr = config.get("default", expr.NO)
+                if expr_value(def_expr) == "y":
                     rank = 4
 
         return rank, config['position']
@@ -463,20 +537,12 @@ def update_defaults(k):
     if "default_cond" in c:
         for i in c['default_cond']:
             if can_enable(i['cond']):
-                if c['datatype'] == "string" and i['word'] is not None:
-                    found_config = config[i['word']]
-                    set_config_internal(k, found_config['value'])
-                else:
-                    set_config_internal(k, i['val'])
+                set_config_internal(k, expr_value(i['expr']))
                 return
 
     # None of the conditioned defaults match
     if "default" in c:
-        if c['datatype'] == "string" and c['word'] is not None:
-            found_config = config[c['word']]
-            set_config_internal(k, found_config['value'])
-        else:
-            set_config_internal(k, config[k]['default'])
+        set_config_internal(k, expr_value(c['default']))
         return
 
     # No default - so set bools to 'n'
