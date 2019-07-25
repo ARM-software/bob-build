@@ -123,20 +123,25 @@ def is_visible(cond):
     return True
 
 
-def dependency_list(depends):
-    if depends is None:
-        return []
-    if type(depends) == tuple:
-        if depends[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=']:
-            return dependency_list(depends[1]) + dependency_list(depends[2])
-        elif depends[0] == "not":
-            return dependency_list(depends[1])
-        elif depends[0] in ["string", "number"]:
+def dependency_list(expr):
+    """
+    Get the set of config identifiers referred to by an expression. A
+    set is returned instead of a list as we don't need duplicates, and
+    order doesn't matter.
+    """
+    if expr is None:
+        return set()
+    if type(expr) == tuple:
+        if expr[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=']:
+            return dependency_list(expr[1]) | dependency_list(expr[2])
+        elif expr[0] == "not":
+            return dependency_list(expr[1])
+        elif expr[0] in ["string", "number"]:
             # Quoted string or number
-            return []
-        raise Exception("Unexpected depend list: " + str(depends))
+            return set()
+        raise Exception("Unexpected depend list: " + str(expr))
 
-    return [depends]
+    return {expr}
 
 
 OPERATOR_FORMAT_MAP = {
