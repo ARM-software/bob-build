@@ -44,13 +44,10 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 DISABLE_TEST_DIRS=(
     external_libs
     generate_libs
-    generate_source
     implicit_outs
     match_source
     output
-    shared_libs
     source_encapsulation
-    transform_source
 )
 
 for TEST_DIR in "${DISABLE_TEST_DIRS[@]}"; do

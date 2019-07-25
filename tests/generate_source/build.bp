@@ -201,6 +201,12 @@ bob_binary {
     generated_headers: ["gen_sources_and_headers"],
     generated_sources: ["gen_sources_and_headers"],
     srcs: ["main.c"],
+
+    // The Soong plugin does not currently support using mixed sources and
+    // headers from the same module.
+    builder_soong: {
+        enabled: false,
+    },
 }
 
 bob_generate_source {
@@ -209,7 +215,7 @@ bob_generate_source {
     out: ["output.txt"],
     depfile: "output.d",
     tool: "gen_with_dep.py",
-    cmd: "${tool} -o ${out} -d ${depfile} ${in}"
+    cmd: "${tool} -o ${out} -d ${depfile} ${in}",
 }
 
 bob_alias {
