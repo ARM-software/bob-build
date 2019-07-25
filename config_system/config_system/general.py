@@ -348,6 +348,8 @@ def set_initial_values():
         config[k]['is_new'] = True
         if config[k]['datatype'] == "bool":
             config[k]['value'] = 'n'
+        elif config[k]['datatype'] == "int":
+            config[k]['value'] = 0
         else:
             config[k]['value'] = ''
 
@@ -857,7 +859,7 @@ class MenuItem(object):
     def needs_inputbox(self):
         if self.type == "config":
             config = get_config(self.value)
-            return config['datatype'] in ["string", "int", "hex"]
+            return config['datatype'] in ["string", "int"]
         return False
 
     def set(self):
