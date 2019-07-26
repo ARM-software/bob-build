@@ -66,4 +66,4 @@ endchoice
 
 config FOOBAR
 	bool "Foobar"
-	default y
+	default y if  ( ( 4+3 )-2 )+8=7
