@@ -145,7 +145,7 @@ def t_PARAM_space(t):
 
 
 def t_PARAM_word(t):
-    r"[A-Za-z][A-Za-z0-9_-]*"
+    r"[A-Za-z][A-Za-z0-9_]*"
     if t.value in params:
         t.type = t.value.upper()
     else:
