@@ -28,7 +28,7 @@ from argparse import ArgumentParser
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 CFG_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(CFG_DIR)
-from config_system import general  # nopep8: E402 module level import not at top of file
+import config_system  # nopep8: E402 module level import not at top of file
 
 
 def runtest(name):
@@ -41,7 +41,7 @@ def runtest(name):
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
-    general.read_config(name, config_file, False)
+    config_system.read_config(name, config_file, False)
 
     with open(name) as f:
         for line_number, line in enumerate(f):
@@ -51,13 +51,13 @@ def runtest(name):
             action, key, value = m.groups()
             if action == "ASSERT":
                 tests_run += 1
-                actual_value = general.get_config(key).get("value")
+                actual_value = config_system.get_config(key).get("value")
                 if actual_value != value:
                     print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
                           % (name, line_number, key, actual_value, value))
                     tests_failed += 1
             elif action == "SET":
-                general.set_config(key, value)
+                config_system.set_config(key, value)
             else:
                 raise Exception("Unexpected action %s" % action)
 

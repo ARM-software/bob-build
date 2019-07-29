@@ -27,14 +27,16 @@ if os.path.isfile("build/make/core/envsetup.mk"):
 from config_system.general import \
     can_enable, \
     format_dependency_list, \
-    get_config, \
     get_config_bool, \
     get_config_int, \
-    get_config_list, \
     get_config_string, \
-    get_mconfig_dir, \
     get_options_depending_on, \
     get_options_selecting, \
     init_config, \
     read_config, \
     set_config  # nopep8: E402 module level import not at top of file
+
+from config_system.data import \
+    get_config, \
+    get_config_list, \
+    get_mconfig_dir  # nopep8: E402 module level import not at top of file
