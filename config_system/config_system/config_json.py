@@ -17,7 +17,7 @@ import json
 import logging
 import os
 
-from config_system import general, utils
+from config_system import data, utils
 
 
 logger = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 def config_to_json():
     properties = dict()
 
-    for key in general.get_config_list():
-        c = general.get_config(key)
+    for key in data.get_config_list():
+        c = data.get_config(key)
         key = key.lower()
         datatype = c["datatype"]
         value = c["value"]

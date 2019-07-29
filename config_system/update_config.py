@@ -23,9 +23,10 @@ import re
 import sys
 
 from config_system import log_handlers, config_json
-from config_system.general import enforce_dependent_values, get_config, init_config, \
+from config_system.general import enforce_dependent_values, init_config, \
     read_config, read_profile_file, set_config_if_prompt, write_config, \
     can_enable, format_dependency_list
+from config_system.data import get_config
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.WARNING)
