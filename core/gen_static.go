@@ -42,7 +42,7 @@ func (m *generateStaticLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateStaticLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
+func (m *generateStaticLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return []string{getLibraryGeneratedPath(m, g)}
 }
 
