@@ -258,7 +258,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 
 // Add module paths to srcs, exclude_srcs, local_include_dirs, export_local_include_dirs
 // and post_install_tool
-func (l *Build) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+func (l *Build) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
 	l.SourceProps.processPaths(ctx, g)
 	l.InstallableProps.processPaths(ctx, g)
@@ -440,7 +440,7 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	return
 }
 
-func (l *library) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+func (l *library) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	l.Properties.Build.processPaths(ctx, g)
 }
 
@@ -462,7 +462,7 @@ func (m *staticLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName()+".a")}
 }
 
-func (m *staticLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
+func (m *staticLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -514,7 +514,7 @@ func (m *sharedLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
 }
 
-func (m *sharedLibrary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
+func (m *sharedLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -556,7 +556,7 @@ func (m *binary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName())}
 }
 
-func (m *binary) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
+func (m *binary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 

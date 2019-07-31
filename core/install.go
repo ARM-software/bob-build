@@ -96,7 +96,7 @@ type InstallableProps struct {
 	Install_path *string `blueprint:"mutated"`
 }
 
-func (props *InstallableProps) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+func (props *InstallableProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	if props.Post_install_tool != nil {
 		*props.Post_install_tool = filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), *props.Post_install_tool)
 	}
@@ -166,7 +166,7 @@ type symlinkInstaller interface {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string
+	filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -233,7 +233,7 @@ func (m *resource) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *resource) filesToInstall(ctx abstr.ModuleContext, g generatorBackend) []string {
+func (m *resource) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return m.Properties.SourceProps.getSources(ctx)
 }
 
@@ -241,7 +241,7 @@ func (m *resource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *resource) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+func (m *resource) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 }

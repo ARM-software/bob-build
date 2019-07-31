@@ -30,7 +30,7 @@ import (
 )
 
 // Common functions in blueprint.BaseModuleContext and android.BaseModuleContext
-type ModuleContext interface {
+type BaseModuleContext interface {
 	ModuleName() string
 	ModuleDir() string
 
@@ -48,7 +48,7 @@ type ModuleContext interface {
 
 // Common functions in blueprint.TopDownMutatorContext and android.TopDownMutatorContext
 type TopDownMutatorContext interface {
-	ModuleContext
+	BaseModuleContext
 
 	OtherModuleExists(name string) bool
 	Rename(name string)
@@ -67,7 +67,7 @@ type TopDownMutatorContext interface {
 
 // Common functions in blueprint.BottomUpMutatorContext and android.BottomUpMutatorContext
 type BottomUpMutatorContext interface {
-	ModuleContext
+	BaseModuleContext
 	Module() blueprint.Module
 
 	AddDependency(module blueprint.Module, tag blueprint.DependencyTag, name ...string)

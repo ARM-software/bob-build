@@ -49,7 +49,7 @@ type generateLibraryInterface interface {
 	dependentInterface
 
 	libExtension() string
-	getSources(ctx abstr.ModuleContext) []string
+	getSources(ctx abstr.BaseModuleContext) []string
 }
 
 //// Local functions

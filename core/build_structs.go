@@ -132,7 +132,7 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
-func glob(ctx abstr.ModuleContext, globs []string, excludes []string) []string {
+func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	// Excludes are relative to the source directory.
@@ -164,11 +164,11 @@ func glob(ctx abstr.ModuleContext, globs []string, excludes []string) []string {
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) getSources(ctx abstr.ModuleContext) []string {
+func (s *SourceProps) getSources(ctx abstr.BaseModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 
-func (s *SourceProps) processPaths(ctx abstr.ModuleContext, g generatorBackend) {
+func (s *SourceProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	prefix := ctx.ModuleDir()
 	var special = map[string]string{
 		"${bob_config}": filepath.Join(g.buildDir(), configName),
@@ -383,7 +383,7 @@ func targetMutator(mctx abstr.TopDownMutatorContext) {
 }
 
 type pathProcessor interface {
-	processPaths(abstr.ModuleContext, generatorBackend)
+	processPaths(abstr.BaseModuleContext, generatorBackend)
 }
 
 // Adds module paths to appropriate properties.

@@ -41,7 +41,7 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
-func getConfig(ctx abstr.ModuleContext) *bobConfig {
+func getConfig(ctx abstr.BaseModuleContext) *bobConfig {
 	return ctx.(blueprint.BaseModuleContext).Config().(*bobConfig)
 }
 
