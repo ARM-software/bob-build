@@ -46,7 +46,7 @@ def check_depends(depends, value):
     elif depends[0] == 'or':
         return (check_depends(depends[1], value) and
                 check_depends(depends[2], value))
-    elif depends[0] == 'word':
+    elif depends[0] == 'identifier':
         return depends[1] == value
     return False
 
@@ -81,7 +81,7 @@ def _expr_value(e):
         return e[1]
     elif e[0] == 'boolean':
         return e[1]
-    elif e[0] == 'word':
+    elif e[0] == 'identifier':
         return get_config(e[1])['value']
 
     raise Exception("Unexpected depend list: " + str(e))
@@ -155,7 +155,7 @@ def _condexpr_value(e):
         return e[1]
     elif e[0] == 'boolean':
         return e[1]
-    elif e[0] == 'word':
+    elif e[0] == 'identifier':
         return get_config(e[1])['value']
 
     raise Exception("Unexpected depend list: " + str(e))
@@ -190,7 +190,7 @@ def dependency_list(e):
     elif e[0] in ['string', 'number', 'boolean']:
         # Quoted string, number or boolean
         return set()
-    elif e[0] == 'word':
+    elif e[0] == 'identifier':
         return {e[1]}
     raise Exception("Unexpected depend list: " + str(e))
 
@@ -220,5 +220,5 @@ def format_dependency_list(depends, skip_parens=False):
         return str(depends[1])
     elif depends[0] == 'boolean':
         return str(depends[1])
-    elif depends[0] == 'word':
+    elif depends[0] == 'identifier':
         return depends[1] + "[=" + str(get_config(depends[1])['value']) + "]"

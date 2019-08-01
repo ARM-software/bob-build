@@ -65,7 +65,7 @@ order_count = 0
 
 
 def p_menuconfig_stmt(p):
-    "menuconfig_stmt : MENUCONFIG WORD EOL config_options"
+    "menuconfig_stmt : MENUCONFIG IDENTIFIER EOL config_options"
 
     global order_count
     order_count += 1
@@ -137,7 +137,7 @@ def p_menu_visible(p):
 
 
 def p_config_stmt(p):
-    "config_stmt : CONFIG WORD EOL config_options"
+    "config_stmt : CONFIG IDENTIFIER EOL config_options"
     global order_count
     order_count += 1
     config_options = merge(p[4], {"type": "config", "position": order_count})
@@ -178,14 +178,14 @@ def p_choice_stmt(p):
                 p[0]["config"][k]["depends"] = config["depends"]
 
     for d in config.get("default_cond", []):
-        assert d["expr"][0] == "word", "Expressions not supported in choice default"
+        assert d["expr"][0] == "identifier", "Expressions not supported in choice default"
         for k in p[0]["config"]:
             if k == d["expr"][1]:
                 p[0]["config"][k] = merge(p[0]["config"][k],
                                           {"default_cond": [{"cond": d["cond"], "expr": expr.YES}]})
 
     if "default" in config:
-        assert config["default"][0] == "word", "Expressions not supported in choice default"
+        assert config["default"][0] == "identifier", "Expressions not supported in choice default"
         for k in p[0]["config"]:
             if k == config["default"][1]:
                 d = {"default": expr.YES}
@@ -291,12 +291,12 @@ def p_config_type(p):
 
 
 def p_config_select(p):
-    "config_select : SELECT WORD EOL"
+    "config_select : SELECT IDENTIFIER EOL"
     p[0] = {"select": [p[2]]}
 
 
 def p_config_select_if(p):
-    "config_select : SELECT WORD IF condexpr EOL"
+    "config_select : SELECT IDENTIFIER IF condexpr EOL"
     p[0] = {"select_if": [(p[2], p[4])]}
 
 
@@ -423,8 +423,8 @@ def p_lit_or_ident_identifier(p):
 
 
 def p_identifier(p):
-    "identifier : WORD"
-    p[0] = ("word", p[1])
+    "identifier : IDENTIFIER"
+    p[0] = ("identifier", p[1])
 
 
 def p_config_help(p):

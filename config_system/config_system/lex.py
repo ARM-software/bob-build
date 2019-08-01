@@ -36,6 +36,7 @@ tokens = (
     "EOL",
     "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
     "HELP", "HELPTEXT",
+    "IDENTIFIER",
     "IF", "ON",
     "INT",
     "LBRACKET", "RBRACKET",
@@ -50,7 +51,6 @@ tokens = (
     "STRING",
     "VISIBLE",
     "YES", "NO",
-    "WORD",
     "COMMENT",
 )
 
@@ -148,7 +148,7 @@ def t_PARAM_space(t):
     return None
 
 
-def t_PARAM_word(t):
+def t_PARAM_identifier(t):
     r"[A-Za-z][A-Za-z0-9_]*"
     if t.value in params:
         t.type = t.value.upper()
@@ -157,7 +157,7 @@ def t_PARAM_word(t):
     elif t.value == 'n':
         t.type = "NO"
     else:
-        t.type = "WORD"
+        t.type = "IDENTIFIER"
     return t
 
 
