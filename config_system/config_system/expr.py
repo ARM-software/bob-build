@@ -75,11 +75,7 @@ def _expr_value(e):
                 raise TypeError("'-' operator is not valid on strings")
                 return left
             return left - right
-    elif e[0] == 'string':
-        return e[1]
-    elif e[0] == 'number':
-        return e[1]
-    elif e[0] == 'boolean':
+    elif e[0] in ['string', 'number', 'boolean']:
         return e[1]
     elif e[0] == 'identifier':
         return get_config(e[1])['value']
@@ -149,11 +145,7 @@ def _condexpr_value(e):
         if _condexpr_value(e[1]) == 'y':
             return 'n'
         return 'y'
-    elif e[0] == 'string':
-        return e[1]
-    elif e[0] == 'number':
-        return e[1]
-    elif e[0] == 'boolean':
+    elif e[0] in ['string', 'number', 'boolean']:
         return e[1]
     elif e[0] == 'identifier':
         return get_config(e[1])['value']
