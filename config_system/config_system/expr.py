@@ -23,8 +23,8 @@ logger.addHandler(logging.NullHandler())
 
 
 # Expression tuple for 'y' and 'n'
-YES = ('boolean', 'y')
-NO = ('boolean', 'n')
+YES = ('boolean', True)
+NO = ('boolean', False)
 
 
 def check_depends(depends, value):
@@ -66,7 +66,7 @@ def _expr_value(e):
         right = _expr_value(e[2])
         if type(left) != type(right):
             raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
-        elif left in ['y', 'n'] or right in ['y', 'n']:
+        elif type(left) == bool:
             raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
         elif e[0] == '+':
             return left + right
@@ -95,7 +95,6 @@ def expr_value(e):
 
 def _condexpr_value(e):
     """Evaluate the value of the input expression.
-    Note that booleans are propagated as 'y' and 'n'
     """
     assert type(e) == tuple
     assert len(e) in [2, 3]
@@ -108,43 +107,25 @@ def _condexpr_value(e):
         right = _condexpr_value(e[2])
         if type(left) != type(right):
             # Boolean result expected
-            return 'n'
+            return False
         elif e[0] == 'and':
-            if left == 'y' and right == 'y':
-                return 'y'
-            return 'n'
+            return left and right
         elif e[0] == 'or':
-            if left == 'y' or right == 'y':
-                return 'y'
-            return 'n'
+            return left or right
         elif e[0] == '=':
-            if left == right:
-                return 'y'
-            return 'n'
+            return left == right
         elif e[0] == '!=':
-            if left != right:
-                return 'y'
-            return 'n'
+            return left != right
         elif e[0] == '>':
-            if left > right:
-                return 'y'
-            return 'n'
+            return left > right
         elif e[0] == '>=':
-            if left >= right:
-                return 'y'
-            return 'n'
+            return left >= right
         elif e[0] == '<':
-            if left < right:
-                return 'y'
-            return 'n'
+            return left < right
         elif e[0] == '<=':
-            if left <= right:
-                return 'y'
-            return 'n'
+            return left <= right
     elif e[0] == 'not':
-        if _condexpr_value(e[1]) == 'y':
-            return 'n'
-        return 'y'
+        return not _condexpr_value(e[1])
     elif e[0] in ['string', 'number', 'boolean']:
         return e[1]
     elif e[0] == 'identifier':
@@ -155,12 +136,12 @@ def _condexpr_value(e):
 
 def condexpr_value(e):
     if e is None:
-        return 'y'
+        return True
     try:
         result = _condexpr_value(e)
     except TypeError as err:
         logging.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
-        result = 'n'
+        result = False
 
     return result
 
@@ -211,6 +192,10 @@ def format_dependency_list(depends, skip_parens=False):
     elif depends[0] == 'number':
         return str(depends[1])
     elif depends[0] == 'boolean':
-        return str(depends[1])
+        return 'y' if depends[1] else 'n'
     elif depends[0] == 'identifier':
-        return depends[1] + "[=" + str(get_config(depends[1])['value']) + "]"
+        config = get_config(depends[1])
+        value = config['value']
+        if config['datatype'] == 'bool':
+            value = 'y' if value else 'n'
+        return depends[1] + "[=" + str(value) + "]"

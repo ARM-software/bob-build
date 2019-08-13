@@ -45,17 +45,14 @@ def config_to_json(database_fname, config_fname, ignore_missing):
     for key in config_list:
         c = config_system.get_config(key)
         key = key.lower()
-        datatype = c["datatype"]
-        value = c["value"]
+        datatype = c['datatype']
+        value = c['value']
 
-        if "title" in c and config_system.can_enable(c.get('depends')):
-            if datatype == "bool":
-                value = True if value == "y" else False
+        if 'title' in c and config_system.can_enable(c.get('depends')):
+            if datatype in ['bool', 'string']:
                 configs[key] = value
-            elif datatype == "int":
+            elif datatype == 'int':
                 configs[key] = int(value)
-            elif datatype == "string":
-                configs[key] = value
             else:
                 msg = "Invalid config type: %s (with value '%s')\n"
                 logger.critical(msg % (datatype, str(value)))

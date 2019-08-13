@@ -25,14 +25,14 @@ logger.addHandler(logging.NullHandler())
 
 def can_enable(depends):
     value = expr.condexpr_value(depends)
-    if value == 'y':
+    if value is True:
         return True
     return False
 
 
 def is_visible(cond):
     value = expr.condexpr_value(cond)
-    if value == 'n':
+    if value is False:
         return False
     return True
 
@@ -54,11 +54,11 @@ def enforce_dependent_values(auto_fix=False):
         c = data.get_config(i)
         if can_enable(c.get('depends')):
             continue
-        if c['datatype'] == 'bool' and c['value'] == 'y':
+        if c['datatype'] == 'bool' and c['value'] is True:
             logger.warn("unmet direct dependencies: " +
                         "%s depends on %s" % (i, c['depends']))
             if auto_fix:
-                set_config_internal(i, 'n')
+                set_config_internal(i, False)
             else:
                 raise Exception("Unmet direct dependencies")
         elif c['datatype'] == 'string':
@@ -109,7 +109,7 @@ def read_config_file(config_filename):
                     m = re.match(r"^#\s*CONFIG_([^=]+) is not set", line)
                     if m:
                         key = m.group(1)
-                        value = "n"
+                        value = 'n'
                         set_config_if_prompt(key, value, ("[by user]" in line))
                     # else ignore comment
                 else:
@@ -145,7 +145,7 @@ def write_config(config_filename):
                     # Don't output this option because it cannot be enabled
                     continue
                 elif c['datatype'] == "bool":
-                    if c['value'] == 'y':
+                    if c['value'] is True:
                         f.write("CONFIG_%s=y" % i_symbol)
                     else:
                         f.write("# CONFIG_%s is not set" % i_symbol)
@@ -195,7 +195,7 @@ def set_initial_values():
         c['is_user_set'] = False
         c['is_new'] = True
         if c['datatype'] == "bool":
-            c['value'] = 'n'
+            c['value'] = False
         elif c['datatype'] == "int":
             c['value'] = 0
         else:
@@ -260,12 +260,12 @@ def update_choice_default(c):
                 rank = 2
         else:
             for i in config.get("default_cond", []):
-                if can_enable(i['cond']) and expr.expr_value(i['expr']) == 'y':
+                if can_enable(i['cond']) and expr.expr_value(i['expr']) is True:
                     rank = 3
                     break
             else:
                 def_expr = config.get("default", expr.NO)
-                if expr.expr_value(def_expr) == "y":
+                if expr.expr_value(def_expr) is True:
                     rank = 4
 
         return rank, config['position']
@@ -287,7 +287,7 @@ def update_choice_default(c):
             s_rank = k_rank
 
     if selection != choice_group.get("selected"):
-        set_config_internal(selection, 'y')
+        set_config_internal(selection, True)
 
 
 def update_defaults(k):
@@ -316,7 +316,7 @@ def update_defaults(k):
 
     # No default - so set bools to 'n'
     if c['datatype'] == "bool":
-        set_config_internal(k, 'n')
+        set_config_internal(k, False)
     elif c['datatype'] == "string":
         set_config_internal(k, '')
     elif c['datatype'] == "int":
@@ -324,6 +324,12 @@ def update_defaults(k):
 
 
 def set_config_if_prompt(key, value, is_user_set=True):
+    """
+    Used to set the option value from the command line, and through
+    profile files. Only options that have prompts (indicating they are
+    user-settable) can be set.
+    """
+
     logger.debug("Trying to set %s %s" % (key, value))
     try:
         c = data.get_config(key)
@@ -334,6 +340,8 @@ def set_config_if_prompt(key, value, is_user_set=True):
     logger.debug(c)
     if 'title' in c:
         logger.debug("Setting %s : %s " % (key, value))
+        if c['datatype'] == 'bool':
+            value = True if value == 'y' else False
         set_config(key, value, is_user_set)
 
 
@@ -353,7 +361,7 @@ def set_config_selectifs(key):
                 force_config(k[0], value, key)
             else:
                 # No longer forced, so turn off if previously forced
-                force_config(k[0], 'n', key)
+                force_config(k[0], False, key)
 
 
 def set_config(key, value, is_user_set=True):
@@ -367,9 +375,10 @@ def set_config(key, value, is_user_set=True):
         # Validate user input
         if c['datatype'] == 'bool':
             # Must be y or n
-            if value not in ['y', 'n']:
-                logger.warn("Ignoring boolean configuration option %s with non-boolean value '%s'. "
-                            "Please use 'y' or 'n'" % (key, value))
+            if value not in [True, False]:
+                logger.warn(
+                    "Ignoring boolean configuration option %s with non-boolean value '%s'." % (
+                        key, value))
                 return
         elif c['datatype'] == 'int':
             # Must convert to an integer
@@ -386,17 +395,17 @@ def set_config(key, value, is_user_set=True):
     if is_user_set:
         if "choice_group" in c:
             group = c['choice_group']
-            if value == 'y':
+            if value is True:
                 # Record the selection for this group
                 data.get_choice_group(group)['requested_value'] = key
         else:
             c['requested_value'] = value
 
     if c['datatype'] == 'bool':
-        if value == 'n' and len(c['selected_by']) > 0:
+        if value is False and len(c['selected_by']) > 0:
             # Option is forced, so cannot be turned off
             return
-        if value == 'y' and not can_enable(c.get('depends')):
+        if value is True and not can_enable(c.get('depends')):
             # Option is unavailable, so cannot be turned on. However if the
             # option is selected by another we force it on regardless
             if len(c['selected_by']) == 0:
@@ -410,16 +419,16 @@ def set_config(key, value, is_user_set=True):
         group = c['choice_group']
         cg = data.get_choice_group(group)
 
-        if value == 'y':
+        if value is True:
             # Record the selection for this group
             cg['selected'] = key
             # Member of a choice group - unset all other items
             for k in cg['configs']:
                 if k != key:
-                    set_config(k, 'n', is_user_set=is_user_set)
-                    if data.get_config(k)['value'] == 'y':
+                    set_config(k, False, is_user_set=is_user_set)
+                    if data.get_config(k)['value'] is True:
                         # Failed to turn the other option off, so set this to n
-                        c['value'] = 'n'
+                        c['value'] = False
                         return
         else:
             # Check if this is the last entry in a choice being unset.
@@ -427,12 +436,12 @@ def set_config(key, value, is_user_set=True):
             # set back to 'y' - or if this entry cannot be set, the best default
             # entry in the choice will be picked
             for k in cg['configs']:
-                if k != key and data.get_config(k)['value'] == 'y':
+                if k != key and data.get_config(k)['value'] is True:
                     break
             else:
                 if can_enable(c.get('depends')):
                     cg['selected'] = key
-                    c['value'] = 'y'
+                    c['value'] = True
                 else:
                     # Reset current selection.
                     cg['selected'] = None
@@ -448,8 +457,8 @@ def set_config(key, value, is_user_set=True):
         # Check any reverse dependencies to see if they need updating
         for k in c['rdepends']:
             c2 = data.get_config(k)
-            if c2['value'] == 'y' and not can_enable(c2.get('depends')):
-                set_config_internal(k, 'n')
+            if c2['value'] is True and not can_enable(c2.get('depends')):
+                set_config_internal(k, False)
             elif not c2['is_user_set']:
                 update_defaults(k)
             elif "choice_group" in c2:
@@ -476,7 +485,7 @@ def force_config(key, value, source):
         logger.warn("Ignoring unknown configuration option %s" % key)
         return
 
-    if value == "y":
+    if value is True:
         if source in c['selected_by']:
             return
         c['selected_by'].add(source)
@@ -487,7 +496,7 @@ def force_config(key, value, source):
         return
 
     if len(c['selected_by']) > 0:
-        set_config_internal(key, 'y')
+        set_config_internal(key, True)
     elif 'requested_value' in c:
         set_config(key, c['requested_value'])
     else:
@@ -498,7 +507,7 @@ def get_config_bool(key):
     c = data.get_config(key)
     assert c['datatype'] == 'bool', \
         'Config option %s is not a bool (has type %s)' % (key, c['datatype'])
-    if c['value'] == 'y':
+    if c['value'] is True:
         return True
     else:
         return False
@@ -531,7 +540,7 @@ class Menu(object):
             self.items = [MenuItem("Empty Menu", None)]
         elif data.is_choice_group(menu_number):
             # Find currently selected entry
-            while self.items[self.selection].get_value() != 'y':
+            while self.items[self.selection].get_value() is not True:
                 if self.selection < len(self.items) - 1:
                     self.selection += 1
                 else:
@@ -555,7 +564,7 @@ def display_value(value, datatype):
         return str(value)
     if datatype != "bool":
         return value
-    if value == 'y':
+    if value is True:
         return '*'
     return ' '
 
@@ -614,7 +623,7 @@ class MenuItem(object):
         elif self.type == "menuconfig":
             config = data.get_config(self.value)
             is_menu_enabled = '>'
-            if config['value'] == 'n':
+            if config['value'] is False:
                 # Submenu is empty
                 is_menu_enabled = '-'
 
@@ -635,7 +644,7 @@ class MenuItem(object):
             choice = data.get_choice_group(self.value)
             current_value = ''
             for i in choice['configs']:
-                if data.get_config(i)['value'] == 'y':
+                if data.get_config(i)['value'] is True:
                     current_value = data.get_config(i).get('title')
                     break
             text_parts.append(StyledText("   "))
@@ -654,7 +663,7 @@ class MenuItem(object):
             raise Exception("Not a menu!")
 
     def is_menu(self):
-        if self.type == "menuconfig" and data.get_config(self.value)['value'] == "n":
+        if self.type == "menuconfig" and data.get_config(self.value)['value'] is False:
             # Prevent entry to a menuconfig that is disabled
             return False
         return self.type in ["menu", "menuconfig", "choice"]
@@ -674,7 +683,7 @@ class MenuItem(object):
                 return
 
             if config['datatype'] == 'bool':
-                set_config(self.value, 'y')
+                set_config(self.value, True)
 
     def clear(self):
         """Sets a boolean option to false"""
@@ -685,14 +694,14 @@ class MenuItem(object):
                 return
 
             if config['datatype'] == 'bool':
-                set_config(self.value, 'n')
+                set_config(self.value, False)
 
     def toggle(self):
         if self.type in ["config", "menuconfig"]:
             config = data.get_config(self.value)
             if config['datatype'] != 'bool':
                 pass  # Ignore
-            elif config['value'] == 'y':
+            elif config['value'] is True:
                 self.clear()
             else:
                 self.set()

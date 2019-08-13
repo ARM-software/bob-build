@@ -51,12 +51,19 @@ def runtest(name):
             action, key, value = m.groups()
             if action == "ASSERT":
                 tests_run += 1
-                actual_value = config_system.get_config(key).get("value")
+                config = config_system.get_config(key)
+                actual_value = config.get("value")
+                if config['datatype'] == 'bool':
+                    actual_value = 'y' if actual_value else 'n'
                 if actual_value != value:
                     print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
                           % (name, line_number, key, actual_value, value))
                     tests_failed += 1
             elif action == "SET":
+                if value == 'y':
+                    value = True
+                elif value == 'n':
+                    value = False
                 config_system.set_config(key, value)
             else:
                 raise Exception("Unexpected action %s" % action)

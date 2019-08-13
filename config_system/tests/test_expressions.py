@@ -145,6 +145,20 @@ expr_testdata = [
         "abracadabra", None
     ),
     (
+        {  # string concatenation with 'y' (not a bool)
+            "type": "string",
+            "expr": 'PREFIX+"y"',
+        },
+        "abray", None
+    ),
+    (
+        {  # string concatenation with 'n' (not a bool)
+            "type": "string",
+            "expr": '"n"+SUFFIX',
+        },
+        "ncadabra", None
+    ),
+    (
         {  # string concatenation with parens (for completeness)
             "type": "string",
             "expr": 'PREFIX+(SUFFIX+"boo")',
@@ -187,12 +201,11 @@ expr_testdata = [
         "", "'-' operator is not valid with mixed types"
     ),
     (
-        {  # mixed expression with boolean. Note we can't detect mixed,
-           # so this complains about boolean
+        {  # mixed expression with boolean.
             "type": "string",
             "expr": "PREFIX-TRUE",
         },
-        "", "'-' operator is not valid on booleans"
+        "", "'-' operator is not valid with mixed types"
     ),
 
 ]
@@ -253,247 +266,247 @@ condexpr_testdata = [
         {  # literal AND
             "expr": "y && y",
         },
-        "y", None
+        True, None
     ),
     (
         {  # literal AND
             "expr": "n && y",
         },
-        "n", None
+        False, None
     ),
     (
         {  # literal AND
             "expr": "y && n",
         },
-        "n", None
+        False, None
     ),
     (
         {  # literal AND
             "expr": "n && n",
         },
-        "n", None
+        False, None
     ),
     (
         {  # AND
             "expr": "TRUE && TRUE",
         },
-        "y", None
+        True, None
     ),
     (
         {  # AND
             "expr": "FALSE && TRUE",
         },
-        "n", None
+        False, None
     ),
     (
         {  # AND
             "expr": "TRUE && FALSE",
         },
-        "n", None
+        False, None
     ),
     (
         {  # AND
             "expr": "FALSE && FALSE",
         },
-        "n", None
+        False, None
     ),
     (
         {  # literal OR
             "expr": "y || y",
         },
-        "y", None
+        True, None
     ),
     (
         {  # literal OR
             "expr": "n || y",
         },
-        "y", None
+        True, None
     ),
     (
         {  # literal OR
             "expr": "y || n",
         },
-        "y", None
+        True, None
     ),
     (
         {  # literal OR
             "expr": "n || n",
         },
-        "n", None
+        False, None
     ),
     (
         {  # OR
             "expr": "TRUE || TRUE",
         },
-        "y", None
+        True, None
     ),
     (
         {  # OR
             "expr": "FALSE || TRUE",
         },
-        "y", None
+        True, None
     ),
     (
         {  # OR
             "expr": "TRUE || FALSE",
         },
-        "y", None
+        True, None
     ),
     (
         {  # OR
             "expr": "FALSE || FALSE",
         },
-        "n", None
+        False, None
     ),
     (
         {  # NOT
             "expr": "!TRUE",
         },
-        "n", None
+        False, None
     ),
     (
         {  # NOT
             "expr": "!FALSE",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Greater than
             "expr": "NUMBER_B > 126",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Greater than
             "expr": "NUMBER_B > 127",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Greater than eq
             "expr": "NUMBER_B >= 127",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Greater than eq
             "expr": "NUMBER_B >= 128",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Less than
             "expr": "NUMBER_B < 128",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Less than
             "expr": "NUMBER_B < 127",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Less than eq
             "expr": "NUMBER_B <= 127",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Less than eq
             "expr": "NUMBER_B <= 126",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 127",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 126",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 128",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 127",
         },
-        "n", None
+        False, None
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 126",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 128",
         },
-        "y", None
+        True, None
     ),
     (
         {  # Comparison with numeric expression
             "expr": "NUMBER_B < (121 + NUMBER_A)"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Comparison with string
             "expr": '"abracadabra" = PREFIX+SUFFIX'
         },
-        "y", None
+        True, None
     ),
     (
         {  # Precedence of || vs <
             "expr": "FALSE || NUMBER_B < 128"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Precedence of && vs <
             "expr": "TRUE && NUMBER_B < 128"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Precedence of && vs < vs +
             "expr": "TRUE && NUMBER_B < 121 + NUMBER_A"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Precedence of && vs || - && has higher precedence
             "expr": "FALSE && TRUE || TRUE"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Precedence of && vs || - && has higher precedence
             "expr": "TRUE || FALSE && FALSE"
         },
-        "y", None
+        True, None
     ),
     (
         {  # Parenthesis to give || precedence
             "expr": "FALSE && (TRUE || TRUE)"
         },
-        "n", None
+        False, None
     ),
     (
         {  # Parenthesis to give || precedence
             "expr": "(TRUE || FALSE) && FALSE"
         },
-        "n", None
+        False, None
     ),
 ]
 
