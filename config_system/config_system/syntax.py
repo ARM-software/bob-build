@@ -414,7 +414,10 @@ def p_lit_or_ident_number(p):
 def p_lit_or_ident_boolean(p):
     """literal_or_identifier : YES
                              | NO"""
-    p[0] = ("boolean", p[1])
+    value = False
+    if p[1] == 'y':
+        value = True
+    p[0] = ("boolean", value)
 
 
 def p_lit_or_ident_identifier(p):

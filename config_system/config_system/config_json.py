@@ -33,7 +33,6 @@ def config_to_json():
         value = c["value"]
 
         if datatype == "bool":
-            value = True if value == "y" else False
             properties[key] = value
         elif datatype == "int":
             properties[key] = int(value)

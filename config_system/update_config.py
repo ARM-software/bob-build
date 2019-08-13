@@ -71,10 +71,12 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
         logger.error("unknown configuration option \"%s\"" % key)
         return
 
-    final_value = opt["value"]
+    final_value = opt['value']
 
-    if opt["datatype"] == "int":
+    if opt['datatype'] == 'int':
         final_value = str(final_value)
+    elif opt['datatype'] == 'bool':
+        final_value = 'y' if final_value else 'n'
 
     if final_value == requested_value:
         return
