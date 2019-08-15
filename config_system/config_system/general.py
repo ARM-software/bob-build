@@ -23,18 +23,20 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def can_enable(depends):
-    value = expr.condexpr_value(depends)
-    if value is True:
+def can_enable(config):
+    # If there is no dependency expression, then the config can be enabled
+    e = config.get('depends')
+    if e is None:
         return True
-    return False
+    return expr.condexpr_value(e)
 
 
-def is_visible(cond):
-    value = expr.condexpr_value(cond)
-    if value is False:
-        return False
-    return True
+def is_visible(config):
+    # If there is no visible_cond expression, then the config is visible
+    e = config.get('visible_cond')
+    if e is None:
+        return True
+    return expr.condexpr_value(e)
 
 
 def enforce_dependent_values(auto_fix=False):
@@ -52,7 +54,7 @@ def enforce_dependent_values(auto_fix=False):
     """
     for i in data.get_config_list():
         c = data.get_config(i)
-        if can_enable(c.get('depends')):
+        if can_enable(c):
             continue
         if c['datatype'] == 'bool' and c['value'] is True:
             logger.warn("unmet direct dependencies: " +
@@ -141,7 +143,7 @@ def write_config(config_filename):
             if i_type in ["config", "menuconfig"]:
                 c = data.get_config(i_symbol)
                 mark_set_by_user = " # set by user"
-                if not can_enable(c.get('depends')):
+                if not can_enable(c):
                     # Don't output this option because it cannot be enabled
                     continue
                 elif c['datatype'] == "bool":
@@ -249,7 +251,7 @@ def update_choice_default(c):
         config = data.get_config(k)
         rank = 5
 
-        if not can_enable(config.get('depends')):
+        if not can_enable(config):
             # Lowest rank - cannot be enabled
             return 6, config['position']
 
@@ -260,7 +262,7 @@ def update_choice_default(c):
                 rank = 2
         else:
             for i in config.get("default_cond", []):
-                if can_enable(i['cond']) and expr.expr_value(i['expr']) is True:
+                if expr.condexpr_value(i['cond']) and expr.expr_value(i['expr']) is True:
                     rank = 3
                     break
             else:
@@ -305,7 +307,7 @@ def update_defaults(k):
 
     if "default_cond" in c:
         for i in c['default_cond']:
-            if can_enable(i['cond']):
+            if expr.condexpr_value(i['cond']):
                 set_config_internal(k, expr.expr_value(i['expr']))
                 return
 
@@ -357,7 +359,7 @@ def set_config_selectifs(key):
     value = c['value']
     if "select_if" in c:
         for k in c["select_if"]:
-            if can_enable(k[1]):
+            if expr.condexpr_value(k[1]):
                 force_config(k[0], value, key)
             else:
                 # No longer forced, so turn off if previously forced
@@ -405,7 +407,7 @@ def set_config(key, value, is_user_set=True):
         if value is False and len(c['selected_by']) > 0:
             # Option is forced, so cannot be turned off
             return
-        if value is True and not can_enable(c.get('depends')):
+        if value is True and not can_enable(c):
             # Option is unavailable, so cannot be turned on. However if the
             # option is selected by another we force it on regardless
             if len(c['selected_by']) == 0:
@@ -439,7 +441,7 @@ def set_config(key, value, is_user_set=True):
                 if k != key and data.get_config(k)['value'] is True:
                     break
             else:
-                if can_enable(c.get('depends')):
+                if can_enable(c):
                     cg['selected'] = key
                     c['value'] = True
                 else:
@@ -457,7 +459,7 @@ def set_config(key, value, is_user_set=True):
         # Check any reverse dependencies to see if they need updating
         for k in c['rdepends']:
             c2 = data.get_config(k)
-            if c2['value'] is True and not can_enable(c2.get('depends')):
+            if c2['value'] is True and not can_enable(c2):
                 set_config_internal(k, False)
             elif not c2['is_user_set']:
                 update_defaults(k)
@@ -729,10 +731,10 @@ class MenuItem(object):
                 for k in data.get_choice_group(group)['configs']:
                     if k != self.value and len(data.get_config(k)['selected_by']) > 0:
                         return False
-        return can_enable(data.get_menu_depends(self.type, self.value))
+        return can_enable(data.get_menu_configitem(self.type, self.value))
 
     def is_visible(self):
-        return is_visible(data.get_menu_visible(self.type, self.value))
+        return is_visible(data.get_menu_configitem(self.type, self.value))
 
     def select(self):
         # Choice menus can use select

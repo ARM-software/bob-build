@@ -88,8 +88,8 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
                      key, requested_value, key, later_values[last_idx])
         return
 
-    depends = opt.get("depends")
-    if depends and not can_enable(depends):
+    if not can_enable(opt):
+        depends = opt['depends']
         logger.error("%s=%s was ignored; its dependencies were not met: %s",
                      key, requested_value, format_dependency_list(depends, skip_parens=True))
         return

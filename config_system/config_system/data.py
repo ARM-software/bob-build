@@ -75,22 +75,13 @@ def iter_symbols_menuorder():
         yield configuration['order'][i]
 
 
-def get_menu_depends(type, value):
+def get_menu_configitem(type, value):
     if type in ['config', 'menuconfig']:
-        return configuration['config'][value].get('depends')
+        return get_config(value)
     elif type in ['choice']:
-        return configuration['choice'][value].get('depends')
+        return get_choice_group(value)
     elif type in ['menu']:
-        return configuration['menu'][value].get('depends')
-
-
-def get_menu_visible(type, value):
-    if type in ['config', 'menuconfig']:
-        return configuration['config'][value].get('visible_cond')
-    elif type in ['choice']:
-        return configuration['choice'][value].get('visible_cond')
-    elif type in ['menu']:
-        return configuration['menu'][value].get('visible_cond')
+        return get_menu(value)
 
 
 def get_config_list():
