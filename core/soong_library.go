@@ -204,12 +204,18 @@ func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 		// Soong's `export_include_dirs` field is relative to the module dir.
 		Export_include_dirs: l.Properties.Export_local_include_dirs,
 	}
+	stripProps := &cc.StripProperties{}
+	if l.strip() {
+		stripProps.Strip.All = proptools.BoolPtr(true)
+	}
 
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostSharedFactory), commonProps, libProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostSharedFactory),
+			commonProps, libProps, stripProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetSharedFactory), commonProps, libProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetSharedFactory),
+			commonProps, libProps, stripProps)
 	}
 }
 
@@ -231,12 +237,18 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	}
 
 	commonProps := b.setupCcLibraryProps(mctx)
+	stripProps := &cc.StripProperties{}
+	if l.strip() {
+		stripProps.Strip.All = proptools.BoolPtr(true)
+	}
 
 	switch b.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryHostFactory), commonProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryHostFactory),
+			commonProps, stripProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryTargetFactory), commonProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryTargetFactory),
+			commonProps, stripProps)
 	}
 
 }

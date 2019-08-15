@@ -156,6 +156,7 @@ type BuildProps struct {
 	InstallableProps
 	EnableableProps
 	SplittableProps
+	StripProps
 
 	// Linux kernel config options to emulate. These are passed to Kbuild in
 	// the 'make' command-line, and set in the source code via EXTRA_CFLAGS
@@ -355,6 +356,16 @@ func (l *library) outputName() string {
 	return l.Name()
 }
 
+func (l *library) strip() bool {
+	// Only shared libraries and binaries can be stripped.
+	// Implement this on libraries to simplify use in android_make
+	return false
+}
+
+func (m *library) stripOutputDir(g generatorBackend) string {
+	return filepath.Join(g.buildDir(), string(m.Properties.TargetType), "strip")
+}
+
 func (l *library) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
@@ -514,6 +525,10 @@ func (m *sharedLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
 }
 
+func (l *sharedLibrary) strip() bool {
+	return l.Properties.Strip != nil && *l.Properties.Strip
+}
+
 func (m *sharedLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
@@ -554,6 +569,10 @@ func (m *binary) outputDir(g generatorBackend) string {
 
 func (m *binary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputName())}
+}
+
+func (l *binary) strip() bool {
+	return l.Properties.Strip != nil && *l.Properties.Strip
 }
 
 func (m *binary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {

@@ -267,30 +267,37 @@ func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 var installGroupTag = dependencyTag{name: "install_group"}
 var installDepTag = dependencyTag{name: "install_dep"}
 
-func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
+func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
 	var installGroupPath *string
-	ins, ok := mctx.Module().(installable)
-	if !ok {
-		return
-	}
 
 	mctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == installGroupTag },
+		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == tag },
 		func(m blueprint.Module) {
 			insg, ok := m.(*installGroup)
 			if !ok {
-				panic(fmt.Sprintf("install_group dependency of %s not an install group", mctx.ModuleName()))
+				panic(fmt.Sprintf("%s dependency of %s not an install group",
+					tag.name, mctx.ModuleName()))
 			}
 			if installGroupPath != nil {
-				panic(fmt.Sprintf("Multiple install group dependencies for %s", mctx.ModuleName()))
+				panic(fmt.Sprintf("Multiple %s dependencies for %s",
+					tag.name, mctx.ModuleName()))
 			}
 			installGroupPath = &insg.Properties.Install_path
 		})
-	if installGroupPath != nil {
-		if *installGroupPath == "" {
-			panic(fmt.Sprintf("Module %s has empty install path", mctx.ModuleName()))
+
+	return installGroupPath
+}
+
+func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
+	if ins, ok := mctx.Module().(installable); ok {
+		path := getInstallPath(mctx, installGroupTag)
+		if path != nil {
+			if *path == "" {
+				panic(fmt.Sprintf("Module %s has empty install path", mctx.ModuleName()))
+			}
+
+			props := ins.getInstallableProps()
+			props.Install_path = path
 		}
-		props := ins.getInstallableProps()
-		props.Install_path = installGroupPath
 	}
 }

@@ -287,8 +287,8 @@ libraries there isn't an equivalent entry point.
 
 Bob currently lacks a general way to specify the entrypoints of a
 shared library. Instead use `whole_static_libs` to specify that all
-the symbols in the mentioned static libraries need to be retained in
-the shared library.
+the external symbols in the mentioned static libraries need to be
+retained in the shared library.
 
 ```
 bob_static_library {
@@ -328,3 +328,63 @@ bob_shared_library {
 
 Note: we expect to improve how this is done so that the linker can be
 more aggressive in dead code removal.
+
+## Stripping libraries
+
+Information is normally inserted into libraries to help debug issues
+and produce readable stack traces.
+
+The information can significantly increase the size of the library.
+This primarily affects the storage requirements for the library.
+
+Since this information is not needed during execution you may want to
+remove it from public releases. The `strip` property achieves this.
+
+```
+bob_shared_library {
+    name: "libcompression",
+    srcs: ["file1.c"],
+
+    // RELEASE is a configuration
+    release: {
+        strip: true,
+    },
+}
+```
+
+Stripping all information can hinder debugging issues that occur in
+the field. To mitigate this, the debug information can be kept in a
+separate file which does not need to be released. Use the `debug_info`
+property to indicate that separate debug information is desired. The
+property must reference an install group to indicate where to save the
+debug information. This can be used independently of `strip` to
+separate out the debug information in normal builds. This only affects
+non-Android builds.
+
+```
+bob_install_group {
+    name: "IG_debug",
+    install_path: "install/debug",
+}
+
+bob_shared_library {
+    name: "libcompression",
+    srcs: ["file1.c"],
+    debug_info: "IG_debug",
+
+    // RELEASE is a configuration
+    release: {
+        strip: true,
+    },
+}
+```
+
+Note that if `install_path` of a `bob_install_group` used for debug
+information is empty "", the debug information files are placed
+alongside the library in question.
+
+When `install_path` is set to a directory as normal, GDB will expect
+one of a few layouts, see [GDB documentation](https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html).
+The helper script `scripts/move_debug_files.py` can be used to move
+the debug files into a layout based on build IDs. This may need
+`-Wl,--build-id` to be passed to the linker.

@@ -186,6 +186,16 @@ which builds this module is built for.
 Value to use on Android for `LOCAL_MODULE_OWNER`
 
 ----
+### **bob_module.strip** (optional)
+
+When set, strip symbols and debug information from libraries and
+binaries. This is a separate stage that occurs after linking and
+before post install.
+
+On Android, its infrastructure is used to do the stripping. If not
+enabled, follow Android's default behaviour.
+
+----
 ### **bob_module.include_dirs** (optional)
 A list of include directories to use. These are expected to be system
 headers, and will usually be an absolute path. On Android these can be
@@ -253,7 +263,7 @@ location like `/usr/`."
 
 ----
 ### **bob_module.install_group** (optional)
-Module specifying an installation directory.
+Module name of a `bob_install_group` specifying an installation directory.
 
 ----
 ### **bob_module.install_deps** (optional)
@@ -264,6 +274,13 @@ mentioned here, as well as any generated module.
 ----
 ### **bob_module.relative_install_path** (optional)
 Path to install to, relative to the install_group's path.
+
+----
+### **bob_module.debug_info** (optional)
+
+Module name of a `bob_install_group` specifying an installation
+directory for debug information. If supplied, debug information will
+be placed in a separate file (Linux only).
 
 ----
 ### **bob_module.post_install_tool** (optional)

@@ -64,6 +64,7 @@ bob_defaults {
 
     tags: ["optional"],
     owner: "my_company",
+    strip: true,
 
     include_dirs: ["include/"],
     local_include_dirs: ["include/"],
@@ -87,6 +88,7 @@ bob_defaults {
     install_group: "bob_install_group.name",
     install_deps: ["bob_resource.name"],
     relative_install_path: "unit/objects",
+    debug_info: "bob_install_group.name",
     post_install_tool: "post_install.py",
     post_install_cmd: "${tool} ${args} ${out}",
     post_install_args: ["arg1", "arg2"],

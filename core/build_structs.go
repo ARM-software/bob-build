@@ -342,6 +342,12 @@ func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 		}
 		parseAndAddVariationDeps(mctx, installDepTag, props.Install_deps...)
 	}
+	if strlib, ok := mctx.Module().(stripable); ok {
+		info := strlib.getDebugInfo()
+		if info != nil {
+			mctx.AddDependency(mctx.Module(), debugInfoTag, *info)
+		}
+	}
 }
 
 // Applies target specific properties within each module. Must be done

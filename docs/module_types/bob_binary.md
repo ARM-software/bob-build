@@ -48,6 +48,7 @@ bob_binary {
 
     tags: ["optional"],
     owner: "company_name",
+    strip: true,
 
     include_dirs: ["include/"],
     local_include_dirs: ["include/"],
@@ -59,6 +60,7 @@ bob_binary {
     install_group: "bob_install_group.name",
     install_deps: ["module_name"],
     relative_install_path: "unit/objects",
+    debug_info: "bob_install_group.name",
     post_install_tool: "post_install.py",
     post_install_cmd: "${tool} ${args} ${out}",
     post_install_args: ["arg1", "arg2"],
