@@ -48,7 +48,7 @@ def config_to_json(database_fname, config_fname, ignore_missing):
         datatype = c['datatype']
         value = c['value']
 
-        if 'title' in c and config_system.can_enable(c.get('depends')):
+        if 'title' in c and config_system.can_enable(c):
             if datatype in ['bool', 'string']:
                 configs[key] = value
             elif datatype == 'int':

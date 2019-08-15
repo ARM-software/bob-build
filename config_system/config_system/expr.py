@@ -135,10 +135,13 @@ def _condexpr_value(e):
 
 
 def condexpr_value(e):
-    if e is None:
-        return True
+    assert e is not None
     try:
         result = _condexpr_value(e)
+        if type(result) is not bool:
+            logging.Error("Conditional expression '{}' does not return a boolean '{}'".format(
+                format_dependency_list(e), str(result)))
+            result = False
     except TypeError as err:
         logging.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
         result = False
