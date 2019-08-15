@@ -38,15 +38,14 @@ fi
 # Refresh the configuration. This means that options changed or added since the
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
-update_config_status=0
-python "${BOB_DIR}/config_system/update_config.py" \
-       --database "${SRCDIR}/Mconfig" --config "${BUILDDIR}/${CONFIGNAME}" \
-       --json "${BUILDDIR}/config.json" \
-       ${BOB_CONFIG_OPTS} || update_config_status=$?
+generate_json_status=0
+python "${BOB_DIR}/config_system/generate_config_json.py" \
+       "${BUILDDIR}/${CONFIGNAME}" --database "${SRCDIR}/Mconfig" \
+       --json "${BUILDDIR}/config.json" || generate_json_status=$?
 
 # If the config generated errors, stop the build. An exit status of 1 indicates
 # only warnings, so allow it to continue in this case.
-if [[ "${update_config_status}" -ge 2 ]]; then
+if [[ "${generate_json_status}" -ge 2 ]]; then
     echo "Generation of config.json failed" >&2
     exit 1
 fi
