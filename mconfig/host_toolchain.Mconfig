@@ -72,3 +72,12 @@ config HOST_CLANG_USE_GNU_BINUTILS
 	help
 	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
 	  search path, allowing it to use the linker and assembler.
+
+config HOST_OBJCOPY_BINARY
+	string "Host objcopy"
+	default HOST_GNU_PREFIX + "objcopy" if HOST_TOOLCHAIN_GNU || (HOST_TOOLCHAIN_CLANG && HOST_CLANG_USE_GNU_BINUTILS)
+	default "llvm-objcopy" if HOST_TOOLCHAIN_CLANG
+	default "objcopy"
+	help
+	  The objcopy executable that we can use in post install scripts
+	  to manipulate host libraries and executables.

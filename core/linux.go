@@ -753,6 +753,14 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		})
 }
 
+var stripScript = filepath.Join(bobdir, "scripts", "strip.py")
+var stripRule = pctx.StaticRule("strip",
+	blueprint.RuleParams{
+		Command: stripScript +
+			" $args --objcopy $objcopy -o $out $in",
+		Description: "strip $out",
+	}, "args", "objcopy")
+
 var installRule = pctx.StaticRule("install",
 	blueprint.RuleParams{
 		Command:     "rm -f $out; cp $in $out",
@@ -762,13 +770,13 @@ var installRule = pctx.StaticRule("install",
 func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []string {
 	ins := m.(installable)
 
-	installPath, ok := ins.getInstallableProps().getInstallGroupPath()
+	props := ins.getInstallableProps()
+	installPath, ok := props.getInstallGroupPath()
 	if !ok {
 		return []string{}
 	}
 	installPath = filepath.Join("${BuildDir}", installPath)
 
-	props := ins.getInstallableProps()
 	if props.Relative_install_path != "" {
 		installPath = filepath.Join(installPath, props.Relative_install_path)
 	}
@@ -811,6 +819,48 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		// All other module types install files from the build directory.
 		if isResource {
 			src = filepath.Join(g.sourcePrefix(), src)
+		}
+
+		// Interpose strip target
+		if lib, ok := m.(stripable); ok {
+			debugPath := lib.getDebugPath()
+			separateDebugInfo := debugPath != nil
+			if separateDebugInfo {
+				if *debugPath == "" {
+					// Install next to library by default
+					debugPath = &installPath
+				} else {
+					*debugPath = filepath.Join("${BuildDir}", *debugPath)
+				}
+			}
+
+			if lib.strip() || separateDebugInfo {
+				basename := filepath.Base(src)
+				strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
+				stArgs := []string{}
+				if lib.strip() {
+					stArgs = append(stArgs, "--strip")
+				}
+				if separateDebugInfo {
+					dbgFile := filepath.Join(*debugPath, basename+".dbg")
+					stArgs = append(stArgs, "--debug-file")
+					stArgs = append(stArgs, dbgFile)
+				}
+				stripArgs := map[string]string{
+					"args":    strings.Join(stArgs, " "),
+					"objcopy": g.getToolchain(lib.getTarget()).getObjcopy(),
+				}
+				ctx.Build(pctx,
+					blueprint.BuildParams{
+						Rule:      stripRule,
+						Outputs:   []string{strippedSrc},
+						Inputs:    []string{src},
+						Args:      stripArgs,
+						Implicits: []string{stripScript},
+						Optional:  true,
+					})
+				src = strippedSrc
+			}
 		}
 
 		ctx.Build(pctx,

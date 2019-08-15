@@ -84,3 +84,12 @@ config TARGET_CLANG_USE_GNU_BINUTILS
 	help
 	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
 	  search path, allowing it to use the linker and assembler.
+
+config TARGET_OBJCOPY_BINARY
+	string "Target objcopy"
+	default TARGET_GNU_PREFIX + "objcopy" if TARGET_TOOLCHAIN_GNU || (TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_USE_GNU_BINUTILS)
+	default "llvm-objcopy" if TARGET_TOOLCHAIN_CLANG
+	default "objcopy"
+	help
+	  The objcopy executable that we can use in post install scripts
+	  to manipulate target libraries and executables.

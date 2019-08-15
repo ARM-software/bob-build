@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ type toolchain interface {
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
 	getLinker() (tool string, flags []string)
+	getObjcopy() (tool string)
 }
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
@@ -111,14 +112,15 @@ type toolchainGnu interface {
 }
 
 type toolchainGnuCommon struct {
-	arBinary  string
-	asBinary  string
-	gccBinary string
-	gxxBinary string
-	prefix    string
-	cflags    []string // Flags for both C and C++
-	ldflags   []string // Linker flags, including anything required for C++
-	binDir    string
+	arBinary      string
+	asBinary      string
+	objcopyBinary string
+	gccBinary     string
+	gxxBinary     string
+	prefix        string
+	cflags        []string // Flags for both C and C++
+	ldflags       []string // Linker flags, including anything required for C++
+	binDir        string
 }
 
 type toolchainGnuNative struct {
@@ -147,6 +149,10 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 
 func (tc toolchainGnuCommon) getLinker() (tool string, flags []string) {
 	return tc.gxxBinary, tc.ldflags
+}
+
+func (tc toolchainGnuCommon) getObjcopy() string {
+	return tc.objcopyBinary
 }
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
@@ -234,6 +240,9 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
+
+	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
@@ -255,6 +264,7 @@ type toolchainClangCommon struct {
 	// Options read from the config:
 	arBinary       string
 	asBinary       string
+	objcopyBinary  string
 	clangBinary    string
 	clangxxBinary  string
 	prefix         string
@@ -307,6 +317,10 @@ func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
 	return tc.clangxxBinary, tc.ldflags
 }
 
+func (tc toolchainClangCommon) getObjcopy() string {
+	return tc.objcopyBinary
+}
+
 func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
@@ -315,6 +329,8 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU toolchain.
 	tc.arBinary = tc.prefix + props.GetString("ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
+
+	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 
 	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
 	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
@@ -395,12 +411,13 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 }
 
 type toolchainArmClang struct {
-	arBinary  string
-	asBinary  string
-	ccBinary  string
-	cxxBinary string
-	prefix    string
-	cflags    []string // Flags for both C and C++
+	arBinary      string
+	asBinary      string
+	objcopyBinary string
+	ccBinary      string
+	cxxBinary     string
+	prefix        string
+	cflags        []string // Flags for both C and C++
 }
 
 type toolchainArmClangNative struct {
@@ -431,11 +448,16 @@ func (tc toolchainArmClang) getLinker() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
+func (tc toolchainArmClang) getObjcopy() string {
+	return tc.objcopyBinary
+}
+
 func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArmClang) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
+	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString("armclang_cxx_binary")
 	return

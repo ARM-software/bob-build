@@ -271,6 +271,9 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
 	}
+	if m.strip() {
+		sb.WriteString("LOCAL_STRIP_MODULE := true\n")
+	}
 
 	// Can't see a way to wrap a particular library in -Wl in link flags on android, so specify
 	// -Wl,--copy-dt-needed-entries across the lot

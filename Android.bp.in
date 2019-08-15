@@ -52,6 +52,7 @@ bootstrap_go_package {
         "core/soong_library.go",
         "core/soong_plugin.go",
         "core/splitter.go",
+        "core/strip.go",
         "core/template.go",
         "core/toolchain.go",
         "core/linux.go",
