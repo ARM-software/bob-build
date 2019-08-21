@@ -974,7 +974,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 		"--sources $(sources) $(kbuild_extra_symbols) " +
 		"--kernel \"$(kernel_dir)\" --cross-compile \"$(kernel_cross_compile)\" " +
 		"$(cc_flag) $(hostcc_flag) $(clang_triple_flag) " +
-		"$(kbuild_options) --extra-cflags \"$(extra_cflags)\" $(make_args)"
+		"$(kbuild_options) --extra-cflags=\"$(extra_cflags)\" $(make_args)"
 
 	sb.WriteString("\techo " + cmd + "\n")
 	sb.WriteString("\t" + cmd + "\n")
