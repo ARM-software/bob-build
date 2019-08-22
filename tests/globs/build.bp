@@ -20,7 +20,16 @@ bob_binary {
     srcs: ["**/*.c"],
 }
 
+bob_binary {
+    name: "glob_test_exclude",
+    srcs: ["src/**/*.cpp"],
+    exclude_srcs: ["src/**/exclude_*.cpp"],
+}
+
 bob_alias {
     name: "bob_test_globs",
-    srcs: ["glob_test"],
+    srcs: [
+        "glob_test",
+        "glob_test_exclude",
+    ],
 }

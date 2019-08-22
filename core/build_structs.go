@@ -135,6 +135,9 @@ type SourceProps struct {
 func glob(ctx abstr.ModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
+	// Excludes are relative to the source directory.
+	excludes = utils.PrefixDirs(excludes, srcdir)
+
 	for _, file := range globs {
 		if strings.ContainsAny(file, "*?[") {
 			// Globs need to be calculated relative to the source
