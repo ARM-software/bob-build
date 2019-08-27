@@ -136,6 +136,6 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
         if record.levelno == logging.ERROR:
             errors.append(record.message)
 
-    assert returncode == 2
+    assert returncode != 0
     assert len(errors) == 1
     assert errors[0] == error
