@@ -41,7 +41,7 @@ fi
 generate_json_status=0
 python "${BOB_DIR}/config_system/generate_config_json.py" \
        "${BUILDDIR}/${CONFIGNAME}" --database "${SRCDIR}/Mconfig" \
-       --json "${BUILDDIR}/config.json" || generate_json_status=$?
+       --json "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS} || generate_json_status=$?
 
 # If the config generated errors, stop the build. An exit status of 1 indicates
 # only warnings, so allow it to continue in this case.
