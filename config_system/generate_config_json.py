@@ -51,14 +51,7 @@ def main():
 
     config_system.config_json.write_config(args.json)
 
-    issues = counter.errors() + counter.criticals()
-    warnings = counter.warnings()
-    if issues > 0:
-        return 2
-    elif warnings > 0:
-        return 1
-    else:
-        return 0
+    return counter.errors() + counter.criticals()
 
 
 if __name__ == "__main__":

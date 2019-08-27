@@ -38,17 +38,9 @@ fi
 # Refresh the configuration. This means that options changed or added since the
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
-generate_json_status=0
 python "${BOB_DIR}/config_system/generate_config_json.py" \
        "${BUILDDIR}/${CONFIGNAME}" --database "${SRCDIR}/Mconfig" \
-       --json "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS} || generate_json_status=$?
-
-# If the config generated errors, stop the build. An exit status of 1 indicates
-# only warnings, so allow it to continue in this case.
-if [[ "${generate_json_status}" -ge 2 ]]; then
-    echo "Generation of config.json failed" >&2
-    exit 1
-fi
+       --json "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS}
 
 # Get a hash of the environment so we can detect if we need to
 # regenerate the build.ninja

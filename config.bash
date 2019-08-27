@@ -45,15 +45,8 @@ done
 
 # Move to the working directory
 cd "${WORKDIR}"
-exit_status=0
 
 "${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
     -j "${BUILDDIR}/config.json" \
-    -c "${BUILDDIR}/${CONFIGNAME}" "${ARG_TARGET[@]}" || exit_status=$?
-
-if [ "$exit_status" -eq "1" ]; then # warnings occurred
-    exit 0
-else
-    exit $exit_status
-fi
+    -c "${BUILDDIR}/${CONFIGNAME}" "${ARG_TARGET[@]}"
