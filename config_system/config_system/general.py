@@ -776,10 +776,10 @@ class MenuItem(object):
 
         config = data.get_config(self.value)
         if not config['is_user_set']:
-            logging.info("Option '%s' = %s is default value" % (self.value, self.get_value()))
+            logger.info("Option '%s' = %s is default value" % (self.value, self.get_value()))
             return
 
-        logging.info("Reset option '%s' = %s to default value" % (self.value, self.get_value()))
+        logger.info("Reset option '%s' = %s to default value" % (self.value, self.get_value()))
         if 'choice_group' in config:
             group = config['choice_group']
             cg = data.get_choice_group(group)
@@ -794,7 +794,7 @@ class MenuItem(object):
         # We need to set it to False because update_defaults will ignore if user set
         config['is_user_set'] = False
         update_defaults(self.value)
-        logging.info("After reset: %s" % self.get_value())
+        logger.info("After reset: %s" % self.get_value())
 
 
 def get_root_menu():
