@@ -5,6 +5,36 @@ trap "echo '<------------- $(basename ${0}) failed'" ERR
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 BOB_ROOT="${SCRIPT_DIR}/.."
 
+# File must be present
+function check_installed() {
+    local FILE="${1}"
+
+    [ -f "${FILE}" ] || { echo "${FILE} not installed" ; false; }
+}
+
+# File must be stripped
+function check_stripped() {
+    local FILE="${1}"
+
+    [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
+}
+
+# Do simple checks on the output of each build
+function check_build_output() {
+    local DIR="${1}"
+    shift
+
+    echo "Checking build output under ${DIR}"
+
+    # Check that installed libraries/binaries are present
+    check_installed "${DIR}/install/lib/libstripped_library.so"
+    check_installed "${DIR}/install/bin/stripped_binary"
+
+    # The stripped library must not contain symbols
+    check_stripped "${DIR}/install/lib/libstripped_library.so"
+    check_stripped "${DIR}/install/bin/stripped_binary"
+}
+
 export TEST_NON_ASCII_IN_ENV_HASH='ó'
 
 pushd "${BOB_ROOT}" &> /dev/null
@@ -22,12 +52,14 @@ build_dir=build-in-src
 pushd "tests" &> /dev/null
 ./bootstrap -o ${build_dir}
 ${build_dir}/config && ${build_dir}/buildme bob_tests
+check_build_output "${build_dir}"
 popd &> /dev/null
 
 # Build in an independent working directory
 build_dir=build-indep
 tests/bootstrap -o ${build_dir}
 ${build_dir}/config && ${build_dir}/buildme bob_tests
+check_build_output "${build_dir}"
 
 # Build with the working directory in the output directory
 build_dir=build-in-outp
@@ -36,6 +68,7 @@ pushd ${build_dir} &> /dev/null
 ../tests/bootstrap -o .
 ./config && ./buildme bob_tests
 popd &> /dev/null
+check_build_output "${build_dir}"
 
 # A re-bootstrapped build directory with a different working directory
 # should still work. Re-use the last directory
