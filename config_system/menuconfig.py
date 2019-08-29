@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 
-from config_system import general, log_handlers, config_json
+from config_system import data, general, log_handlers, config_json
 
 logger = logging.getLogger(__name__)
 
@@ -478,7 +478,7 @@ def get_menu_location(value):
     for i in general.menu_data:
         for k in general.menu_data[i]:
             if k.value == value:
-                parent = [general.get_menu_title(i)]
+                parent = [data.get_menu_title(i)]
                 parent += get_menu_location(i)
                 return parent
     return []
@@ -491,8 +491,8 @@ def search(stdscr, window):
         return
     string = string.lower()
     results = ""
-    for i in general.get_config_list():
-        config = general.get_config(i)
+    for i in data.get_config_list():
+        config = data.get_config(i)
         if (string in i.lower() or
                 string in (config.get("title") or "").lower() or
                 string in (config.get("help") or "").lower()):
