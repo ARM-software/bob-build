@@ -143,7 +143,27 @@ func specifyCompilerStandard(varname string, flags []string) string {
 	return line
 }
 
-func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx blueprint.ModuleContext) {
+// This function generates the Android make fragment to build static
+// libraries, shared libraries and executables. It's evolved over time
+// and needs to be refactored to use interfaces better.
+func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx blueprint.ModuleContext) {
+	var bt binType
+	var m library
+
+	switch real := mod.(type) {
+	case *staticLibrary:
+		bt = binTypeStatic
+		m = real.library
+	case *sharedLibrary:
+		bt = binTypeShared
+		m = real.library
+	case *binary:
+		bt = binTypeExecutable
+		m = real.library
+	default:
+		panic(fmt.Errorf("Unexpected module type %T", real))
+	}
+
 	if m.Properties.Build_wrapper != nil {
 		panic(errors.New("build_wrapper not supported on Android"))
 	}
@@ -271,7 +291,7 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
 	}
-	if m.strip() {
+	if strlib, ok := mod.(stripable); ok && strlib.strip() {
 		sb.WriteString("LOCAL_STRIP_MODULE := true\n")
 	}
 
@@ -400,21 +420,21 @@ func (m *library) GenerateBuildAction(sb *strings.Builder, bt binType, ctx bluep
 func (g *androidMkGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		m.GenerateBuildAction(sb, binTypeStatic, ctx)
+		androidLibraryBuildAction(sb, m, ctx)
 	}
 }
 
 func (g *androidMkGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		m.GenerateBuildAction(sb, binTypeShared, ctx)
+		androidLibraryBuildAction(sb, m, ctx)
 	}
 }
 
 func (g *androidMkGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		m.GenerateBuildAction(sb, binTypeExecutable, ctx)
+		androidLibraryBuildAction(sb, m, ctx)
 	}
 }
 

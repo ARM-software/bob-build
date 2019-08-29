@@ -47,12 +47,40 @@ bob_binary {
     generated_sources: ["use_sharedtest_host"],
 }
 
+bob_shared_library {
+    name: "libstripped_library",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=func"],
+    strip: true,
+    host: {
+        install_group: "IG_host_libs",
+    },
+    target: {
+        install_group: "IG_libs",
+    },
+}
+
+bob_binary {
+    name: "stripped_binary",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=main"],
+    shared_libs: ["libstripped_library"],
+    strip: true,
+    host: {
+        install_group: "IG_host_binaries",
+    },
+    target: {
+        install_group: "IG_binaries",
+    },
+}
+
 bob_alias {
     name: "bob_test_shared_libs",
     srcs: [
         "sharedtest:host",
         "sharedtest:target",
         "use_sharedtest_host_gen_source",
+        "stripped_binary",
     ],
 }
 
@@ -62,16 +90,36 @@ bob_install_group {
         install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
     },
     linux: {
-        install_path: "install/hostlib",
+        install_path: "install/host/lib",
     },
 }
 
 bob_install_group {
     name: "IG_libs",
     android: {
-        install_path: "$(TARGET_OUT_VENDOR)/lib",
+        install_path: "$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)",
     },
     linux: {
         install_path: "install/lib",
+    },
+}
+
+bob_install_group {
+    name: "IG_host_binaries",
+    android: {
+        install_path: "$(HOST_OUT_EXECUTABLES)",
+    },
+    linux: {
+        install_path: "install/host/bin",
+    },
+}
+
+bob_install_group {
+    name: "IG_binaries",
+    android: {
+        install_path: "$(TARGET_OUT_VENDOR_EXECUTABLES)",
+    },
+    linux: {
+        install_path: "install/bin",
     },
 }

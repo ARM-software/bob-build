@@ -356,10 +356,16 @@ func (l *library) outputName() string {
 	return l.Name()
 }
 
-func (l *library) strip() bool {
-	// Only shared libraries and binaries can be stripped.
-	// Implement this on libraries to simplify use in android_make
-	return false
+func (l *library) getDebugInfo() *string {
+	return l.Properties.getDebugInfo()
+}
+
+func (l *library) getDebugPath() *string {
+	return l.Properties.getDebugPath()
+}
+
+func (l *library) setDebugPath(path *string) {
+	l.Properties.setDebugPath(path)
 }
 
 func (m *library) stripOutputDir(g generatorBackend) string {

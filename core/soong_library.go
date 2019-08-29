@@ -238,7 +238,7 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	commonProps := b.setupCcLibraryProps(mctx)
 	stripProps := &cc.StripProperties{}
-	if l.strip() {
+	if b.strip() {
 		stripProps.Strip.All = proptools.BoolPtr(true)
 	}
 
