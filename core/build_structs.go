@@ -135,8 +135,9 @@ type SourceProps struct {
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
-	// Excludes are relative to the source directory.
-	excludes = utils.PrefixDirs(excludes, srcdir)
+	// If any globs are used, we need to use an exclude list which is
+	// relative to the source directory.
+	excludesFromSrcDir := utils.PrefixDirs(excludes, srcdir)
 
 	for _, file := range globs {
 		if strings.ContainsAny(file, "*?[") {
@@ -144,7 +145,7 @@ func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []stri
 			// directory (not the working directory), so add it
 			// here, and remove it afterwards.
 			file = filepath.Join(srcdir, file)
-			matches, _ := ctx.GlobWithDeps(file, excludes)
+			matches, _ := ctx.GlobWithDeps(file, excludesFromSrcDir)
 			for _, match := range matches {
 				rel, err := filepath.Rel(srcdir, match)
 				if err != nil {

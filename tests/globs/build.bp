@@ -26,6 +26,17 @@ bob_binary {
     exclude_srcs: ["src/**/exclude_*.cpp"],
 }
 
+bob_binary {
+    name: "test_exclude_srcs",
+    srcs: [
+        "src/inside/a/namespace/main.cpp",
+        "src/inside/a/exclude_this_too.cpp",
+    ],
+    exclude_srcs: [
+        "src/inside/a/exclude_this_too.cpp",
+    ],
+}
+
 bob_alias {
     name: "bob_test_globs",
     srcs: [
