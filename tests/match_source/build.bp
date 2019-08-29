@@ -28,6 +28,9 @@ bob_generate_source {
     ],
     out: ["gen_main.c"],
     cmd: "cat {{match_srcs \"function_def.txt\"}} {{match_srcs \"main.c\"}} > $out",
+    android: {
+        enabled: false,
+    },
 }
 
 // Test that we can refer to specific files in the srcs list of a
@@ -44,6 +47,9 @@ bob_binary {
     ],
     generated_sources: ["match_source_gen"],
     ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
+    android: {
+        enabled: false,
+    },
 }
 
 bob_alias {
