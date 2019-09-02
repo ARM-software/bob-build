@@ -8,6 +8,7 @@ bob_kernel_module {
         "Kbuild",
         "test_module.c",
     ],
+    build_by_default: true,
 }
 
 bob_alias {

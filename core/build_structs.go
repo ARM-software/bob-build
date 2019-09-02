@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	bobdir     = os.Getenv("BOB_DIR")
 	srcdir     = os.Getenv("SRCDIR")
 	builddir   = os.Getenv("BUILDDIR")
 	configName = os.Getenv("CONFIGNAME")
