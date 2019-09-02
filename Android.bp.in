@@ -30,7 +30,6 @@ bootstrap_go_package {
         "soong-genrule",
     ],
     srcs: [
-        "core/android_make.go",
         "core/alias.go",
         "core/build_structs.go",
         "core/config_props.go",
@@ -55,7 +54,6 @@ bootstrap_go_package {
         "core/strip.go",
         "core/template.go",
         "core/toolchain.go",
-        "core/linux.go",
         "@@SOONG_CONFIG_GO@@",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",

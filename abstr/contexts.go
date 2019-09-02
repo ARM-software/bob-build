@@ -46,18 +46,29 @@ type BaseModuleContext interface {
 	AddNinjaFileDeps(deps ...string)
 }
 
+// This interface contains methods common to TopDownMutatorContexts and
+// ModuleContexts, i.e. ones which allow visiting dependencies via Visit*()
+// or WalkDeps() methods.
+type VisitableModuleContext interface {
+	// The actual dependency-visiting methods have different signatures
+	// because android.Module != blueprint.Module, so users must go via the
+	// wrappers provided in this package.
+	visitableModuleContext
+	BaseModuleContext
+
+	OtherModuleName(m blueprint.Module) string
+	OtherModuleErrorf(m blueprint.Module, fmt string, args ...interface{})
+	OtherModuleDependencyTag(m blueprint.Module) blueprint.DependencyTag
+}
+
 // Common functions in blueprint.TopDownMutatorContext and android.TopDownMutatorContext
 type TopDownMutatorContext interface {
-	BaseModuleContext
+	VisitableModuleContext
 
 	OtherModuleExists(name string) bool
 	Rename(name string)
 	// No `Module()` method in top down contexts, because Soong's version
 	// uses android.Module instead of blueprint.Module.
-
-	OtherModuleName(m blueprint.Module) string
-	OtherModuleErrorf(m blueprint.Module, fmt string, args ...interface{})
-	OtherModuleDependencyTag(m blueprint.Module) blueprint.DependencyTag
 
 	CreateModule(blueprint.ModuleFactory, ...interface{})
 
