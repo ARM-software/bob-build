@@ -944,7 +944,7 @@ var kbuildRule = pctx.StaticRule("kbuild",
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
 	builtModule := filepath.Join(g.kernelModOutputDir(m), m.Name()+".ko")
 
-	args := m.generateKbuildArgs(ctx)
+	args := m.generateKbuildArgs(ctx).toDict()
 	prefixedSources := utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix())
 
 	ctx.Build(pctx,

@@ -976,7 +976,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	}
 	sb.WriteString("include $(BUILD_SYSTEM)/base_rules.mk\n\n")
 
-	args := m.generateKbuildArgs(ctx)
+	args := m.generateKbuildArgs(ctx).toDict()
 	args["sources"] = "$(addprefix $(LOCAL_PATH)/,$(LOCAL_SRC_FILES))"
 	args["local_path"] = "$(LOCAL_PATH)"
 	args["make_command_args"] = strings.Join(makeCommandArgs, " ")

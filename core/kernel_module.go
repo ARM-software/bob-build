@@ -120,7 +120,39 @@ func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (file
 	return
 }
 
-func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) map[string]string {
+type kbuildArgs struct {
+	KmodBuild          string
+	ExtraIncludes      string
+	ExtraCflags        string
+	KbuildExtraSymbols string
+	KernelDir          string
+	KernelCrossCompile string
+	KbuildOptions      string
+	MakeArgs           string
+	OutputModuleDir    string
+	CCFlag             string
+	HostCCFlag         string
+	ClangTripleFlag    string
+}
+
+func (a kbuildArgs) toDict() map[string]string {
+	return map[string]string{
+		"kmod_build":           a.KmodBuild,
+		"extra_includes":       a.ExtraIncludes,
+		"extra_cflags":         a.ExtraCflags,
+		"kbuild_extra_symbols": a.KbuildExtraSymbols,
+		"kernel_dir":           a.KernelDir,
+		"kernel_cross_compile": a.KernelCrossCompile,
+		"kbuild_options":       a.KbuildOptions,
+		"make_args":            a.MakeArgs,
+		"output_module_dir":    a.OutputModuleDir,
+		"cc_flag":              a.CCFlag,
+		"hostcc_flag":          a.HostCCFlag,
+		"clang_triple_flag":    a.ClangTripleFlag,
+	}
+}
+
+func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbuildArgs {
 	var extraIncludePaths []string
 
 	g := getBackend(ctx)
@@ -168,19 +200,19 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) map[
 		clangTriple = "--clang-triple " + clangTriple
 	}
 
-	return map[string]string{
-		"kmod_build":           kmodBuild,
-		"extra_includes":       strings.Join(extraIncludePaths, " "),
-		"extra_cflags":         strings.Join(extraCflags, " "),
-		"kbuild_extra_symbols": extraSymbols,
-		"kernel_dir":           kdir,
-		"kernel_cross_compile": m.Properties.Build.Kernel_cross_compile,
-		"kbuild_options":       kbuildOptions,
-		"make_args":            strings.Join(m.Properties.Build.Make_args, " "),
-		"output_module_dir":    filepath.Join(m.outputDir(g), ctx.ModuleDir()),
-		"cc_flag":              kernelToolchain,
-		"hostcc_flag":          hostToolchain,
-		"clang_triple_flag":    clangTriple,
+	return kbuildArgs{
+		KmodBuild:          kmodBuild,
+		ExtraIncludes:      strings.Join(extraIncludePaths, " "),
+		ExtraCflags:        strings.Join(extraCflags, " "),
+		KbuildExtraSymbols: extraSymbols,
+		KernelDir:          kdir,
+		KernelCrossCompile: m.Properties.Build.Kernel_cross_compile,
+		KbuildOptions:      kbuildOptions,
+		MakeArgs:           strings.Join(m.Properties.Build.Make_args, " "),
+		OutputModuleDir:    filepath.Join(m.outputDir(g), ctx.ModuleDir()),
+		CCFlag:             kernelToolchain,
+		HostCCFlag:         hostToolchain,
+		ClangTripleFlag:    clangTriple,
 	}
 }
 
