@@ -60,6 +60,7 @@ SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
 # config file must be loaded before then.
 TMP_GO_CONFIG=$(mktemp)
 sed -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
+    -e "s#@@BOB_DIR@@#${BOB_DIR}#" \
     "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"
 rsync --checksum "${TMP_GO_CONFIG}" "${SOONG_CONFIG_GO}"
 rm -f "${TMP_GO_CONFIG}"

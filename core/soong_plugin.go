@@ -46,6 +46,8 @@ const (
 var (
 	loadConfigOnce   sync.Once
 	onceLoadedConfig *bobConfig
+
+	apctx = android.NewPackageContext("bob-build/core")
 )
 
 // During the build, Soong will do a "test" of each plugin, which loads the
@@ -189,6 +191,12 @@ func soongRegisterModule(name string, mf factoryWithConfig) {
 
 func init() {
 	registerModuleTypes(soongRegisterModule)
+
+	// Some Bob module types generate _other_ module types in order to
+	// execute custom Ninja rules. These should not be added directly to
+	// `build.bp` files, so we do not register the module types here with
+	// `android.RegisterModuleType`. Instead, they are simply created using
+	// `TopDownMutatorContext.CreateModule` when required.
 
 	android.PreArchMutators(registerMutators)
 }

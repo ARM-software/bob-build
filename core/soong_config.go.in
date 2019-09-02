@@ -22,5 +22,6 @@
 package core
 
 var (
+	bobdir   = "@@BOB_DIR@@"
 	jsonPath = "@@CONFIG_JSON@@"
 )

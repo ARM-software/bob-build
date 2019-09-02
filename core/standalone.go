@@ -24,6 +24,7 @@ package core
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 
 	"github.com/google/blueprint"
@@ -34,6 +35,7 @@ import (
 )
 
 var (
+	bobdir   = os.Getenv("BOB_DIR")
 	jsonPath = filepath.Join(builddir, "config.json")
 )
 
