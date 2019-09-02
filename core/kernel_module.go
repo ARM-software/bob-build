@@ -103,10 +103,10 @@ func (m *kernelModule) processPaths(ctx abstr.BaseModuleContext, g generatorBack
 	m.Properties.Build.processPaths(ctx, g)
 }
 
-func (m *kernelModule) extraSymbolsFiles(ctx blueprint.ModuleContext) (files []string) {
+func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (files []string) {
 	g := getBackend(ctx)
 
-	ctx.VisitDirectDepsIf(
+	abstr.VisitDirectDepsIf(ctx,
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
 		func(m blueprint.Module) {
 			if km, ok := m.(*kernelModule); ok {
@@ -120,7 +120,7 @@ func (m *kernelModule) extraSymbolsFiles(ctx blueprint.ModuleContext) (files []s
 	return
 }
 
-func (m *kernelModule) generateKbuildArgs(ctx blueprint.ModuleContext) map[string]string {
+func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) map[string]string {
 	var extraIncludePaths []string
 
 	g := getBackend(ctx)

@@ -75,7 +75,7 @@ type dependencyTag struct {
 	name string
 }
 
-func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
+func getBackend(ctx abstr.BaseModuleContext) generatorBackend {
 	return getConfig(ctx).Generator
 }
 

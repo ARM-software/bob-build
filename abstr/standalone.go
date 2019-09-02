@@ -21,6 +21,11 @@ import (
 	"github.com/google/blueprint"
 )
 
+type visitableModuleContext interface {
+	WalkDeps(func(blueprint.Module, blueprint.Module) bool)
+	VisitDirectDepsIf(func(blueprint.Module) bool, func(blueprint.Module))
+}
+
 func TopDownAdaptor(f func(TopDownMutatorContext)) blueprint.TopDownMutator {
 	return func(mctx blueprint.TopDownMutatorContext) {
 		f(mctx)
@@ -37,6 +42,10 @@ func Module(mctx TopDownMutatorContext) blueprint.Module {
 	return mctx.(blueprint.TopDownMutatorContext).Module()
 }
 
-func WalkDeps(mctx TopDownMutatorContext, f func(blueprint.Module, blueprint.Module) bool) {
-	mctx.(blueprint.TopDownMutatorContext).WalkDeps(f)
+func WalkDeps(mctx VisitableModuleContext, f func(blueprint.Module, blueprint.Module) bool) {
+	mctx.WalkDeps(f)
+}
+
+func VisitDirectDepsIf(mctx VisitableModuleContext, pred func(blueprint.Module) bool, f func(blueprint.Module)) {
+	mctx.VisitDirectDepsIf(pred, f)
 }

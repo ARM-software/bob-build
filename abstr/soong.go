@@ -33,6 +33,11 @@ import (
 	"android/soong/android"
 )
 
+type visitableModuleContext interface {
+	WalkDeps(func(android.Module, android.Module) bool)
+	VisitDirectDepsIf(func(android.Module) bool, func(android.Module))
+}
+
 func TopDownAdaptor(f func(TopDownMutatorContext)) android.AndroidTopDownMutator {
 	return func(mctx android.TopDownMutatorContext) {
 		f(mctx)
@@ -49,9 +54,19 @@ func Module(mctx TopDownMutatorContext) blueprint.Module {
 	return mctx.(android.TopDownMutatorContext).Module()
 }
 
-func WalkDeps(mctx TopDownMutatorContext, f func(blueprint.Module, blueprint.Module) bool) {
+func WalkDeps(mctx VisitableModuleContext, f func(blueprint.Module, blueprint.Module) bool) {
 	androidFunc := func(dep android.Module, parent android.Module) bool {
 		return f(dep, parent)
 	}
-	mctx.(android.TopDownMutatorContext).WalkDeps(androidFunc)
+	mctx.WalkDeps(androidFunc)
+}
+
+func VisitDirectDepsIf(mctx VisitableModuleContext, pred func(blueprint.Module) bool, f func(blueprint.Module)) {
+	androidPred := func(dep android.Module) bool {
+		return pred(dep)
+	}
+	androidFunc := func(dep android.Module) {
+		f(dep)
+	}
+	mctx.VisitDirectDepsIf(androidPred, androidFunc)
 }
