@@ -278,7 +278,7 @@ type toolchainClangCommon struct {
 	clangBinary    string
 	clangxxBinary  string
 	prefix         string
-	useGnuLibs     bool
+	useLibgcc      bool
 	useGnuStl      bool
 	useGnuBinutils bool
 
@@ -351,11 +351,14 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
 	}
 
-	tc.useGnuLibs = props.GetBool(string(tgt) + "_clang_use_gnu_libs")
+	rt := props.GetString(string(tgt) + "_clang_compiler_runtime")
+	useGnuCrt := props.GetBool(string(tgt) + "_clang_use_gnu_crt")
+
 	tc.useGnuStl = props.GetBool(string(tgt) + "_clang_use_gnu_stl")
 	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")
+	tc.useLibgcc = rt == "libgcc"
 
-	if tc.useGnuBinutils || tc.useGnuStl || tc.useGnuLibs {
+	if tc.useGnuBinutils || tc.useGnuStl || useGnuCrt || tc.useLibgcc {
 		if tgt == tgtTypeHost {
 			tc.gnu = newToolchainGnuNative(config)
 		} else {
@@ -363,16 +366,21 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 		}
 	}
 
+	if rt != "" {
+		tc.cflags = append(tc.cflags, "--rtlib="+rt)
+		tc.ldflags = append(tc.ldflags, "--rtlib="+rt)
+	}
+
 	binDirs := []string{}
 
-	if tc.useGnuLibs || tc.useGnuStl {
+	if useGnuCrt || tc.useLibgcc || tc.useGnuStl {
 		// Tell Clang where the GNU toolchain is installed, so it can use its
 		// headers and libraries, for example, if we are using libstdc++.
 		gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
 		tc.cflags = append(tc.cflags, gnuInstallArg)
 		tc.ldflags = append(tc.ldflags, gnuInstallArg)
 	}
-	if tc.useGnuLibs {
+	if useGnuCrt {
 		binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
 	}
 	if tc.useGnuBinutils {
@@ -409,9 +417,9 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
 	}
 
-	if tc.useGnuLibs {
-		dirs := append(getFileNameDir(tc.gnu, "libgcc.a"),
-			getFileNameDir(tc.gnu, "libgcc_s.so")...)
+	if tc.useLibgcc {
+		dirs := utils.AppendUnique(getFileNameDir(tc.gnu, "libgcc.a"),
+			getFileNameDir(tc.gnu, "libgcc_s.so"))
 		tc.ldflags = append(tc.ldflags, utils.PrefixAll(dirs, "-L")...)
 	}
 
