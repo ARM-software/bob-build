@@ -33,7 +33,7 @@ type toolchain interface {
 	getAssembler() (tool string, flags []string)
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
-	getLinker() (tool string, flags []string)
+	getLinker() (tool string, flags, libs []string)
 	getObjcopy() (tool string)
 }
 
@@ -147,8 +147,8 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 	return tc.gxxBinary, tc.cflags
 }
 
-func (tc toolchainGnuCommon) getLinker() (tool string, flags []string) {
-	return tc.gxxBinary, tc.ldflags
+func (tc toolchainGnuCommon) getLinker() (tool string, flags, libs []string) {
+	return tc.gxxBinary, tc.ldflags, []string{}
 }
 
 func (tc toolchainGnuCommon) getObjcopy() string {
@@ -317,8 +317,8 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 	return tc.clangxxBinary, tc.cxxflags
 }
 
-func (tc toolchainClangCommon) getLinker() (tool string, flags []string) {
-	return tc.clangxxBinary, tc.ldflags
+func (tc toolchainClangCommon) getLinker() (tool string, flags, libs []string) {
+	return tc.clangxxBinary, tc.ldflags, []string{}
 }
 
 func (tc toolchainClangCommon) getObjcopy() string {
@@ -448,8 +448,8 @@ func (tc toolchainArmClang) getCXXCompiler() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
-func (tc toolchainArmClang) getLinker() (string, []string) {
-	return tc.cxxBinary, tc.cflags
+func (tc toolchainArmClang) getLinker() (tool string, flags, libs []string) {
+	return tc.cxxBinary, tc.cflags, []string{}
 }
 
 func (tc toolchainArmClang) getObjcopy() string {

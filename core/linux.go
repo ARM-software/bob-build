@@ -577,7 +577,7 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 	sharedLibFlags := l.getSharedLibFlags(ctx)
 
 	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
-	linker, tcLdflags := tc.getLinker()
+	linker, tcLdflags, tcLdlibs := tc.getLinker()
 	buildWrapper, _ := l.Properties.Build.getBuildWrapperAndDeps(ctx)
 
 	args := map[string]string{
@@ -587,7 +587,7 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 		"shared_libs_dir":   l.getSharedLibraryDir(),
 		"shared_libs_flags": utils.Join(sharedLibFlags),
 		"static_libs":       utils.Join(l.GetStaticLibs(ctx)),
-		"ldlibs":            utils.Join(l.Properties.Ldlibs),
+		"ldlibs":            utils.Join(l.Properties.Ldlibs, tcLdlibs),
 		"whole_static_libs": utils.Join(l.GetWholeStaticLibs(ctx)),
 	}
 	return args
