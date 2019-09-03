@@ -76,8 +76,8 @@ When this module is used with generated_sources, the named modules' outputs will
 Generated sources may wish to access the build flags being used for "normal"
 library or executable modules. `flag_defaults` should contain the name of a
 `bob_defaults` module, whose flags will be accessible from this one, by
-allowing extra variables to be used in `bob_generated.cmd`: `ar`, `cc`,
-`cflags`, `conlyflags`, `cxx`, and `cxxflags`.
+allowing extra variables to be used in `bob_generated.cmd`: `ar`, `cc`, `cxx`,
+`asflags`, `cflags`, `conlyflags`, `cxxflags`, `ldflags` and `ldlibs`.
 
 ----
 ### **bob_generated.target** (required)
