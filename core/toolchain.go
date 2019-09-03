@@ -247,6 +247,12 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 
+	sysroot := props.GetString(string(tgt) + "_sysroot")
+	if sysroot != "" {
+		tc.cflags = append(tc.cflags, "--sysroot="+sysroot)
+		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
+	}
+
 	flags := strings.Split(config.Properties.GetString(string(tgt)+"_gnu_flags"), " ")
 	tc.cflags = append(tc.cflags, flags...)
 	tc.ldflags = append(tc.ldflags, flags...)
@@ -338,6 +344,13 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
 	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
+
+	sysroot := props.GetString(string(tgt) + "_sysroot")
+	if sysroot != "" {
+		tc.cflags = append(tc.cflags, "--sysroot="+sysroot)
+		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
+	}
+
 	tc.useGnuLibs = props.GetBool(string(tgt) + "_clang_use_gnu_libs")
 	tc.useGnuStl = props.GetBool(string(tgt) + "_clang_use_gnu_stl")
 	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")

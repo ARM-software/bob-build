@@ -40,6 +40,18 @@ config HOST_CLANG_TRIPLE
 	string
 	default ""
 
+config HOST_SYSROOT
+	string "Host sysroot"
+	default ""
+	help
+	  The path to the host's system root directory. This should
+	  contain include and lib directories, with headers and libraries
+	  for the host system.
+
+	  Generally this is expected to remain empty. The host compiler is
+	  expected to have been compiled with sufficient information to
+	  locate its sysroot.
+
 # Bob also cannot know the superproject's desired STL implementation, so the
 # superproject must also define the following:
 
