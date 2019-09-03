@@ -36,6 +36,14 @@ config TARGET_ARMCLANG_FLAGS
 	  Extra flags passed to the compiler when building for the
 	  potentially cross-compiled target with the Arm Compiler.
 
+config TARGET_SYSROOT
+	string "Target sysroot"
+	default ""
+	help
+	  The path to the target's system root directory. This should
+	  contain include and lib directories, with headers and libraries
+	  for the target system.
+
 # The following, despite being only used by Bob, must be defined by
 # the superproject so that it can add any desired defaults, etc:
 
