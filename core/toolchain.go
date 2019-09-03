@@ -246,6 +246,11 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
+
+	flags := strings.Split(config.Properties.GetString(string(tgt)+"_gnu_flags"), " ")
+	tc.cflags = append(tc.cflags, flags...)
+	tc.ldflags = append(tc.ldflags, flags...)
+
 	return
 }
 
@@ -255,8 +260,7 @@ func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 }
 func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.toolchainGnuCommon = newToolchainGnuCommon(config, tgtTypeTarget)
-	tc.cflags = strings.Split(config.Properties.GetString(string(tgtTypeTarget)+"_gnu_flags"), " ")
-	tc.ldflags = utils.NewStringSlice(tc.cflags)
+
 	return
 }
 
