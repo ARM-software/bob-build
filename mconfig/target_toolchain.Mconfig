@@ -67,14 +67,25 @@ config TARGET_SYSROOT
 
 ### Toolchain configuration options ###
 
-config TARGET_CLANG_USE_GNU_LIBS
+config TARGET_CLANG_COMPILER_RUNTIME
+	string "Target compiler runtime library"
+	depends on TARGET_TOOLCHAIN_CLANG
+	default "libgcc" if TARGET_CLANG_TRIPLE != "" && !ANDROID
+	help
+	  This is the compiler runtime library to link against. This
+	  should either be empty (use the default), "libgcc" or
+	  "compiler-rt".
+
+	  Only set a value if the default compiler runtime selected by
+	  Clang is incorrect for the target.
+
+config TARGET_CLANG_USE_GNU_CRT
 	bool "Target uses GNU startup libraries"
 	depends on TARGET_TOOLCHAIN_CLANG
 	default y if TARGET_CLANG_TRIPLE != "" && !ANDROID
-	default n
 	help
-	  Detect the location of the configured GNU toolchain's `crt1.o`,
-	  `libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+	  Detect the location of the configured GNU toolchain's `crt1.o`
+	  and pass this to Clang.
 
 config TARGET_CLANG_USE_GNU_STL
 	bool "Target uses GNU libstdc++"

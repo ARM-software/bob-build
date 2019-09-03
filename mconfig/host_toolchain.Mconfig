@@ -61,13 +61,23 @@ config HOST_SYSROOT
 
 ### Toolchain configuration options ###
 
-config HOST_CLANG_USE_GNU_LIBS
+config HOST_CLANG_COMPILER_RUNTIME
+	string "Host compiler runtime library"
+	depends on HOST_TOOLCHAIN_CLANG
+	help
+	  This is the compiler runtime library to link against. This
+	  should either be empty (use the default), "libgcc" or
+	  "compiler-rt".
+
+	  Only set a value if the default compiler runtime selected by
+	  Clang is incorrect for the host.
+
+config HOST_CLANG_USE_GNU_CRT
 	bool "Host uses GNU startup libraries"
 	depends on HOST_TOOLCHAIN_CLANG
-	default n
 	help
-	  Detect the location of the configured GNU toolchain's `crt1.o`,
-	  `libgcc.a` and `libgcc_s.so`, and pass these to Clang.
+	  Detect the location of the configured GNU toolchain's `crt1.o`
+	  and pass this to Clang.
 
 config HOST_CLANG_USE_GNU_STL
 	bool "Host uses GNU libstdc++"
