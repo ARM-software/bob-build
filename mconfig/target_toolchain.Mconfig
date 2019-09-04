@@ -58,14 +58,18 @@ config TARGET_SYSROOT
 # config TARGET_CLANG_TRIPLE
 #	string "Target Clang triple"
 
-# Bob also cannot know the superproject's desired STL implementation, so the
-# superproject must also define the following:
-
-# config TARGET_STL_LIBRARY
-# 	string "Target STL implementation"
-# 	default "stdc++"
-
 ### Toolchain configuration options ###
+
+config TARGET_CLANG_STL_LIBRARY
+	string "Target STL implementation"
+	depends on TARGET_TOOLCHAIN_CLANG
+	default ""
+	help
+	  This is the C++ Standard Template Library to link against. This
+	  should either be empty (use the default), "stdc++", or "c++".
+
+	  Only set a value if the default standard library selected by
+	  clang is incorrect for the target.
 
 config TARGET_CLANG_COMPILER_RUNTIME
 	string "Target compiler runtime library"
@@ -87,7 +91,7 @@ config TARGET_CLANG_USE_GNU_CRT
 
 config TARGET_CLANG_USE_GNU_STL
 	bool "Target uses GNU toolchain's STL"
-	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBRARY = "stdc++"
+	depends on TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_STL_LIBRARY = "stdc++"
 	help
 	  Detect the location of the configured GNU toolchain's STL
 	  and pass this to Clang.

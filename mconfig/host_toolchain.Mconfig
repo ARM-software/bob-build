@@ -58,14 +58,18 @@ config HOST_SYSROOT
 	  expected to have been compiled with sufficient information to
 	  locate its sysroot.
 
-# Bob also cannot know the superproject's desired STL implementation, so the
-# superproject must also define the following:
-
-# config HOST_STL_LIBRARY
-# 	string "Host STL implementation"
-# 	default "stdc++"
-
 ### Toolchain configuration options ###
+
+config HOST_CLANG_STL_LIBRARY
+	string "Host STL implementation"
+	depends on HOST_TOOLCHAIN_CLANG
+	default ""
+	help
+	  This is the C++ Standard Template Library to link against. This
+	  should either be empty (use the default), "stdc++", or "c++".
+
+	  Only set a value if the default standard library selected by
+	  clang is incorrect for the host.
 
 config HOST_CLANG_COMPILER_RUNTIME
 	string "Host compiler runtime library"
@@ -87,7 +91,7 @@ config HOST_CLANG_USE_GNU_CRT
 
 config HOST_CLANG_USE_GNU_STL
 	bool "Host uses GNU toolchain's STL"
-	depends on HOST_TOOLCHAIN_CLANG && HOST_STL_LIBRARY = "stdc++"
+	depends on HOST_TOOLCHAIN_CLANG && HOST_CLANG_STL_LIBRARY = "stdc++"
 	help
 	  Detect the location of the configured GNU toolchain's STL
 	  and pass this to Clang.
