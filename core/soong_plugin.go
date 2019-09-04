@@ -28,6 +28,7 @@
 package core
 
 import (
+	"path/filepath"
 	"sync"
 
 	"android/soong/android"
@@ -148,6 +149,7 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 	ctx.TopDown("bob_features_applier", abstr.TopDownAdaptor(featureApplierMutator)).Parallel()
 	ctx.TopDown("bob_template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
 	ctx.BottomUp("bob_check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
+	ctx.BottomUp("bob_process_paths", abstr.BottomUpAdaptor(pathMutator)).Parallel()
 	ctx.BottomUp("bob_strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
 	ctx.TopDown("bob_supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
 	ctx.BottomUp(splitterMutatorName, abstr.BottomUpAdaptor(splitterMutator)).Parallel()
@@ -189,4 +191,19 @@ func init() {
 	registerModuleTypes(soongRegisterModule)
 
 	android.PreArchMutators(registerMutators)
+}
+
+// Some module types generate other Soong modules. For these, the sources must
+// be specified relative to the original module's subdirectory. This helper
+// calculates this, effectively undoing most of the work of the process_paths
+// mutator.
+func relativeToModuleDir(mctx android.BaseModuleContext, paths []string) (srcs []string) {
+	for _, path := range paths {
+		rel, err := filepath.Rel(mctx.ModuleDir(), path)
+		if err != nil {
+			panic(err)
+		}
+		srcs = append(srcs, rel)
+	}
+	return
 }

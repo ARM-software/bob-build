@@ -394,7 +394,7 @@ type pathProcessor interface {
 }
 
 // Adds module paths to appropriate properties.
-func pathMutator(mctx blueprint.BottomUpMutatorContext) {
+func pathMutator(mctx abstr.BottomUpMutatorContext) {
 	if p, ok := mctx.Module().(pathProcessor); ok {
 		p.processPaths(mctx, getBackend(mctx))
 	}

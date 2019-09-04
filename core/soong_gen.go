@@ -135,8 +135,8 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	}{}
 
 	genProps.Name = proptools.StringPtr(gc.Name())
-	genProps.Srcs = gc.Properties.Srcs
-	genProps.Exclude_srcs = gc.Properties.Exclude_srcs
+	genProps.Srcs = relativeToModuleDir(mctx, gc.Properties.Srcs)
+	genProps.Exclude_srcs = relativeToModuleDir(mctx, gc.Properties.Exclude_srcs)
 	genProps.Out = out
 	genProps.Export_include_dirs = gc.Properties.Export_gen_include_dirs
 	genProps.Enabled = gc.Properties.Enabled
@@ -258,8 +258,8 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 	}{}
 
 	transformProps.Name = proptools.StringPtr(ts.Name())
-	transformProps.Srcs = ts.generateCommon.Properties.Srcs
-	transformProps.Exclude_srcs = ts.generateCommon.Properties.Exclude_srcs
+	transformProps.Srcs = relativeToModuleDir(mctx, ts.generateCommon.Properties.Srcs)
+	transformProps.Exclude_srcs = relativeToModuleDir(mctx, ts.generateCommon.Properties.Exclude_srcs)
 	transformProps.Export_include_dirs = ts.generateCommon.Properties.Export_gen_include_dirs
 	transformProps.Enabled = ts.generateCommon.Properties.Enabled
 

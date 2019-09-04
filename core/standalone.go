@@ -98,7 +98,7 @@ func Main() {
 	ctx.RegisterTopDownMutator("template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
-	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
+	ctx.RegisterBottomUpMutator("process_paths", abstr.BottomUpAdaptor(pathMutator)).Parallel()
 	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, abstr.BottomUpAdaptor(splitterMutator)).Parallel()
