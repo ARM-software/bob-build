@@ -357,6 +357,7 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
 	}
 
+	stl := props.GetString(string(tgt) + "_clang_stl_library")
 	rt := props.GetString(string(tgt) + "_clang_compiler_runtime")
 	useGnuCrt := props.GetBool(string(tgt) + "_clang_use_gnu_crt")
 	useGnuStl := props.GetBool(string(tgt) + "_clang_use_gnu_stl")
@@ -370,6 +371,11 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 		} else {
 			tc.gnu = newToolchainGnuCross(config)
 		}
+	}
+
+	if stl != "" {
+		tc.cxxflags = append(tc.cxxflags, "--stdlib=lib"+stl)
+		tc.ldflags = append(tc.ldflags, "--stdlib=lib"+stl)
 	}
 
 	if rt != "" {
