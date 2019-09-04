@@ -278,8 +278,6 @@ type toolchainClangCommon struct {
 	clangBinary    string
 	clangxxBinary  string
 	prefix         string
-	useLibgcc      bool
-	useGnuStl      bool
 	useGnuBinutils bool
 
 	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
@@ -353,12 +351,12 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	rt := props.GetString(string(tgt) + "_clang_compiler_runtime")
 	useGnuCrt := props.GetBool(string(tgt) + "_clang_use_gnu_crt")
+	useGnuStl := props.GetBool(string(tgt) + "_clang_use_gnu_stl")
+	useGnuLibgcc := props.GetBool(string(tgt) + "_clang_use_gnu_libgcc")
 
-	tc.useGnuStl = props.GetBool(string(tgt) + "_clang_use_gnu_stl")
 	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")
-	tc.useLibgcc = rt == "libgcc"
 
-	if tc.useGnuBinutils || tc.useGnuStl || useGnuCrt || tc.useLibgcc {
+	if tc.useGnuBinutils || useGnuStl || useGnuCrt || useGnuLibgcc {
 		if tgt == tgtTypeHost {
 			tc.gnu = newToolchainGnuNative(config)
 		} else {
@@ -373,7 +371,7 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	binDirs := []string{}
 
-	if useGnuCrt || tc.useLibgcc || tc.useGnuStl {
+	if useGnuCrt || useGnuLibgcc || useGnuStl {
 		// Tell Clang where the GNU toolchain is installed, so it can use its
 		// headers and libraries, for example, if we are using libstdc++.
 		gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
@@ -392,6 +390,17 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	}
 
 	tc.ldflags = append(tc.ldflags, utils.PrefixAll(binDirs, "-B")...)
+
+	if useGnuLibgcc {
+		dirs := utils.AppendUnique(getFileNameDir(tc.gnu, "libgcc.a"),
+			getFileNameDir(tc.gnu, "libgcc_s.so"))
+		tc.ldflags = append(tc.ldflags, utils.PrefixAll(dirs, "-L")...)
+	}
+
+	if useGnuStl {
+		tc.cxxflags = append(tc.cxxflags,
+			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
+	}
 
 	return
 }
@@ -415,17 +424,6 @@ func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 	if tc.target != "" {
 		tc.cflags = append(tc.cflags, "-target", tc.target)
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
-	}
-
-	if tc.useLibgcc {
-		dirs := utils.AppendUnique(getFileNameDir(tc.gnu, "libgcc.a"),
-			getFileNameDir(tc.gnu, "libgcc_s.so"))
-		tc.ldflags = append(tc.ldflags, utils.PrefixAll(dirs, "-L")...)
-	}
-
-	if tc.useGnuStl {
-		tc.cxxflags = append(tc.cxxflags,
-			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during

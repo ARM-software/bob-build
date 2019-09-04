@@ -70,7 +70,6 @@ config TARGET_SYSROOT
 config TARGET_CLANG_COMPILER_RUNTIME
 	string "Target compiler runtime library"
 	depends on TARGET_TOOLCHAIN_CLANG
-	default "libgcc" if TARGET_CLANG_TRIPLE != "" && !ANDROID
 	help
 	  This is the compiler runtime library to link against. This
 	  should either be empty (use the default), "libgcc" or
@@ -80,26 +79,29 @@ config TARGET_CLANG_COMPILER_RUNTIME
 	  Clang is incorrect for the target.
 
 config TARGET_CLANG_USE_GNU_CRT
-	bool "Target uses GNU startup libraries"
+	bool "Target uses GNU toolchain's startup libraries"
 	depends on TARGET_TOOLCHAIN_CLANG
-	default y if TARGET_CLANG_TRIPLE != "" && !ANDROID
 	help
 	  Detect the location of the configured GNU toolchain's `crt1.o`
 	  and pass this to Clang.
 
 config TARGET_CLANG_USE_GNU_STL
-	bool "Target uses GNU libstdc++"
+	bool "Target uses GNU toolchain's STL"
 	depends on TARGET_TOOLCHAIN_CLANG && TARGET_STL_LIBRARY = "stdc++"
-	default y if TARGET_CLANG_TRIPLE != "" && !ANDROID
-	default n
 	help
-	  Detect the location of the configured GNU toolchain's
-	  STL implementation, and pass this to Clang.
+	  Detect the location of the configured GNU toolchain's STL
+	  and pass this to Clang.
+
+config TARGET_CLANG_USE_GNU_LIBGCC
+	bool "Target uses GNU toolchain's libgcc"
+	depends on TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_COMPILER_RUNTIME = "libgcc"
+	help
+	  Detect the location of the configured GNU toolchain's `libgcc.a`
+	  and `libgcc_s.so` and pass this to Clang.
 
 config TARGET_CLANG_USE_GNU_BINUTILS
-	bool "Target uses GNU binutils"
+	bool "Target uses GNU toolchain's binutils"
 	depends on TARGET_TOOLCHAIN_CLANG
-	default y if !ANDROID
 	help
 	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
 	  search path, allowing it to use the linker and assembler.
