@@ -139,13 +139,13 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLib
 	props := &ccLibraryCommonProps{
 		Name:               proptools.StringPtr(l.shortName()),
 		Stem:               proptools.StringPtr(l.Name()),
-		Srcs:               utils.Filter(utils.IsCompilableSource, l.Properties.Srcs),
+		Srcs:               relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
 		Generated_sources:  l.getGeneratedSources(mctx),
 		Generated_headers:  l.getGeneratedHeaders(mctx),
-		Exclude_srcs:       l.Properties.Exclude_srcs,
+		Exclude_srcs:       relativeToModuleDir(mctx, l.Properties.Exclude_srcs),
 		Cflags:             cflags,
 		Include_dirs:       l.Properties.Include_dirs,
-		Local_include_dirs: l.Properties.Local_include_dirs,
+		Local_include_dirs: relativeToModuleDir(mctx, l.Properties.Local_include_dirs),
 		Static_libs:        ccModuleNames(mctx, l.Properties.ResolvedStaticLibs),
 		Whole_static_libs:  ccModuleNames(mctx, l.Properties.Whole_static_libs),
 		Shared_libs:        ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
@@ -173,7 +173,7 @@ func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	libProps := &ccStaticOrSharedProps{
 		// Soong's `export_include_dirs` field is relative to the module dir.
-		Export_include_dirs: l.Properties.Export_local_include_dirs,
+		Export_include_dirs: relativeToModuleDir(mctx, l.Properties.Export_local_include_dirs),
 	}
 
 	switch l.Properties.TargetType {
@@ -202,7 +202,7 @@ func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	libProps := &ccStaticOrSharedProps{
 		// Soong's `export_include_dirs` field is relative to the module dir.
-		Export_include_dirs: l.Properties.Export_local_include_dirs,
+		Export_include_dirs: relativeToModuleDir(mctx, l.Properties.Export_local_include_dirs),
 	}
 	stripProps := &cc.StripProperties{}
 	if l.strip() {
