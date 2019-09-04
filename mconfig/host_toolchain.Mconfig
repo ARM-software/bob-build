@@ -73,24 +73,29 @@ config HOST_CLANG_COMPILER_RUNTIME
 	  Clang is incorrect for the host.
 
 config HOST_CLANG_USE_GNU_CRT
-	bool "Host uses GNU startup libraries"
+	bool "Host uses GNU toolchain's startup libraries"
 	depends on HOST_TOOLCHAIN_CLANG
 	help
 	  Detect the location of the configured GNU toolchain's `crt1.o`
 	  and pass this to Clang.
 
 config HOST_CLANG_USE_GNU_STL
-	bool "Host uses GNU libstdc++"
+	bool "Host uses GNU toolchain's STL"
 	depends on HOST_TOOLCHAIN_CLANG && HOST_STL_LIBRARY = "stdc++"
-	default n
 	help
-	  Detect the location of the configured GNU toolchain's
-	  STL implementation, and pass this to Clang.
+	  Detect the location of the configured GNU toolchain's STL
+	  and pass this to Clang.
+
+config HOST_CLANG_USE_GNU_LIBGCC
+	bool "Host uses GNU toolchain's libgcc"
+	depends on HOST_TOOLCHAIN_CLANG && HOST_CLANG_COMPILER_RUNTIME = "libgcc"
+	help
+	  Detect the location of the configured GNU toolchain's `libgcc.a`
+	  and `libgcc_s.so` and pass this to Clang.
 
 config HOST_CLANG_USE_GNU_BINUTILS
-	bool "Host uses GNU binutils"
+	bool "Host uses GNU toolchain's binutils"
 	depends on HOST_TOOLCHAIN_CLANG
-	default y if !ANDROID
 	help
 	  Add the configured GNU toolchain's `bin/` directory to Clang's binary
 	  search path, allowing it to use the linker and assembler.
