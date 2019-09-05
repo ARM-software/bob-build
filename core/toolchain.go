@@ -80,26 +80,40 @@ func getToolPath(toolUnqualified string) (toolPath string) {
 	return
 }
 
-// Run the compiler with the -print-file-name option, and return the directory
-// name of the result, or an empty list if a non-existent directory was
-// returned or an error occurred.
-func getFileNameDir(tc toolchain, basename string) (dirs []string) {
+// Run the compiler with the -print-file-name option, and return the result.
+// Check that the file exists. Return an error if the file can't be located.
+func getFileName(tc toolchain, basename string) (fname string, e error) {
 	ccBinary, flags := tc.getCCompiler()
 
 	cmd := exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-print-file-name=" + basename})...)
 	bytes, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("Error: Couldn't get path for %s: %v\n", basename, err)
+		e = fmt.Errorf("Couldn't get path for %s: %v", basename, err)
 		return
 	}
 
-	fname := strings.TrimSpace(string(bytes))
+	fname = strings.TrimSpace(string(bytes))
+
 	if _, err := os.Stat(fname); os.IsNotExist(err) {
-		fmt.Printf("Error: Path returned for %s (%s) does not exist.\n", basename, fname)
+		e = fmt.Errorf("Path returned for %s (%s) does not exist", basename, fname)
 		return
 	}
 
-	dirs = append(dirs, filepath.Dir(fname))
+	return
+}
+
+// Run the compiler with the -print-file-name option, and return the directory
+// name of the result, or an empty list if a non-existent directory was
+// returned or an error occurred.
+func getFileNameDir(tc toolchain, basename string) (dirs []string) {
+
+	fname, err := getFileName(tc, basename)
+
+	if err == nil {
+		dirs = append(dirs, filepath.Dir(fname))
+	} else {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
 
 	return
 }
@@ -288,6 +302,7 @@ type toolchainClangCommon struct {
 	cflags   []string // Flags for both C and C++
 	cxxflags []string // Flags just for C++
 	ldflags  []string // Linker flags, including anything required for C++
+	ldlibs   []string // Linker libraries
 
 	target string
 }
@@ -323,7 +338,7 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 }
 
 func (tc toolchainClangCommon) getLinker() (tool string, flags, libs []string) {
-	return tc.clangxxBinary, tc.ldflags, []string{}
+	return tc.clangxxBinary, tc.ldflags, tc.ldlibs
 }
 
 func (tc toolchainClangCommon) getObjcopy() string {
@@ -414,6 +429,23 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	if useGnuStl {
 		tc.cxxflags = append(tc.cxxflags,
 			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
+	}
+
+	if rt == "libgcc" {
+		// GCC __atomic__ builtins are provided by GNU libatomic.
+		// Clang supports them via compiler-rt. However clang does not
+		// link against libatomic automatically when libgcc is the
+		// compiler runtime. libatomic is only needed for certain
+		// architectures, so check whether it is present before trying
+		// to link against it.
+		//
+		// libatomic is expected to be in the same dir as libgcc, so
+		// the check of whether it is present must happen after adding
+		// the -L for libgcc (if needed). We expect an error.
+		_, err := getFileName(tc, "libatomic.so")
+		if err != nil {
+			tc.ldlibs = append(tc.ldlibs, "-latomic")
+		}
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during
