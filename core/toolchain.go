@@ -264,9 +264,9 @@ func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
 	tc.toolchainGnuCommon = newToolchainGnuCommon(config, tgtTypeHost)
 	return
 }
+
 func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
 	tc.toolchainGnuCommon = newToolchainGnuCommon(config, tgtTypeTarget)
-
 	return
 }
 
@@ -288,6 +288,8 @@ type toolchainClangCommon struct {
 	cflags   []string // Flags for both C and C++
 	cxxflags []string // Flags just for C++
 	ldflags  []string // Linker flags, including anything required for C++
+
+	target string
 }
 
 type toolchainClangNative struct {
@@ -296,7 +298,6 @@ type toolchainClangNative struct {
 
 type toolchainClangCross struct {
 	toolchainClangCommon
-	target string
 }
 
 func (tc toolchainClangCommon) getArchiver() (string, []string) {
@@ -342,6 +343,13 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
 	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
+
+	tc.target = props.GetString(string(tgt) + "_clang_triple")
+
+	if tc.target != "" {
+		tc.cflags = append(tc.cflags, "-target", tc.target)
+		tc.ldflags = append(tc.ldflags, "-target", tc.target)
+	}
 
 	sysroot := props.GetString(string(tgt) + "_sysroot")
 	if sysroot != "" {
@@ -402,34 +410,20 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 			utils.PrefixAll(tc.gnu.getStdCxxHeaderDirs(), "-isystem ")...)
 	}
 
+	// Combine cflags and cxxflags once here, to avoid appending during
+	// every call to getCXXCompiler().
+	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
+
 	return
 }
 
 func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
 	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeHost)
-
-	// Combine cflags and cxxflags once here, to avoid appending during
-	// every call to getCXXCompiler().
-	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
-
 	return
 }
 
 func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
 	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeTarget)
-
-	props := config.Properties
-	tc.target = props.GetString("target_clang_triple")
-
-	if tc.target != "" {
-		tc.cflags = append(tc.cflags, "-target", tc.target)
-		tc.ldflags = append(tc.ldflags, "-target", tc.target)
-	}
-
-	// Combine cflags and cxxflags once here, to avoid appending during
-	// every call to getCXXCompiler().
-	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
-
 	return
 }
 
@@ -483,6 +477,9 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString("armclang_cxx_binary")
+
+	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
+
 	return
 }
 
@@ -490,9 +487,9 @@ func newToolchainArmClangNative(config *bobConfig) (tc toolchainArmClangNative) 
 	tc.toolchainArmClang = newToolchainArmClangCommon(config, tgtTypeHost)
 	return
 }
+
 func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClangCross) {
 	tc.toolchainArmClang = newToolchainArmClangCommon(config, tgtTypeTarget)
-	tc.cflags = strings.Split(config.Properties.GetString(string(tgtTypeTarget)+"_armclang_flags"), " ")
 	return
 }
 

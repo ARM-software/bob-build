@@ -32,6 +32,12 @@ config HOST_ARMCLANG_PREFIX
 	string "Host Arm Compiler 6 prefix"
 	default ""
 
+config HOST_ARMCLANG_FLAGS
+	string
+	default ""
+	help
+	  Extra flags passed to the compiler when building with the Arm Compiler.
+
 config HOST_GNU_FLAGS
 	string
 	default ""
