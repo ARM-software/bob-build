@@ -32,11 +32,8 @@ import (
 
 var (
 	srcdir     = os.Getenv("SRCDIR")
-	builddir   = os.Getenv("BUILDDIR")
 	configName = os.Getenv("CONFIGNAME")
 	configOpts = os.Getenv("BOB_CONFIG_OPTS")
-	configPath = filepath.Join(builddir, configName)
-	envHash    = filepath.Join(builddir, ".env.hash")
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
@@ -191,17 +188,6 @@ func (s *SourceProps) processPaths(ctx abstr.BaseModuleContext, g generatorBacke
 
 	s.Srcs = utils.PrefixDirs(srcs, prefix)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
-}
-
-type dependencySingleton struct{}
-
-func (m *dependencySingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
-	ctx.AddNinjaFileDeps(jsonPath)
-	ctx.AddNinjaFileDeps(envHash)
-}
-
-func dependencySingletonFactory() blueprint.Singleton {
-	return &dependencySingleton{}
 }
 
 type tgtType string

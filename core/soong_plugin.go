@@ -199,6 +199,9 @@ func init() {
 	// `TopDownMutatorContext.CreateModule` when required.
 
 	android.PreArchMutators(registerMutators)
+
+	// Depend on the configuration
+	apctx.AddNinjaFileDeps(jsonPath)
 }
 
 // Some module types generate other Soong modules. For these, the sources must

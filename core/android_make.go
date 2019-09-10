@@ -76,7 +76,7 @@ func writeIfChanged(filename string, sb *strings.Builder) {
 }
 
 func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.Builder) {
-	filename := filepath.Join(builddir, name+".inc")
+	filename := filepath.Join(getBuildDir(), name+".inc")
 	writeIfChanged(filename, sb)
 }
 
@@ -891,7 +891,7 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 		}
 		order = append(order[:lowindex], order[lowindex+1:]...)
 	}
-	writeIfChanged(filepath.Join(builddir, "Android.inc"), sb)
+	writeIfChanged(filepath.Join(getBuildDir(), "Android.inc"), sb)
 }
 
 func (g *androidMkGenerator) moduleOutputDir(moduleName string) string {

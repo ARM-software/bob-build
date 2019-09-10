@@ -86,8 +86,6 @@ func expandBobVariables(str, tool, hostBin string) (out string, err error) {
 			return "$(depfile)"
 		case "gen_dir":
 			return "$(genDir)"
-		case "bob_config":
-			return configPath
 		case "bob_config_opts":
 			return configOpts
 		default:

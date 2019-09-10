@@ -33,9 +33,11 @@ import (
 )
 
 var (
-	builddirVar = pctx.StaticVariable("BuildDir", builddir)
-	srcdirVar   = pctx.StaticVariable("SrcDir", srcdir)
 	pctx        = blueprint.NewPackageContext("bob")
+	srcdirVar   = pctx.StaticVariable("SrcDir", srcdir)
+	builddirVar = pctx.VariableFunc("BuildDir", func(interface{}) (string, error) {
+		return getBuildDir(), nil
+	})
 )
 
 type linuxGenerator struct {
@@ -794,7 +796,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		// Expand args immediately
 		cmd = strings.Replace(cmd, "${args}", strings.Join(props.Post_install_args, " "), -1)
 
-		args["bob_config"] = configPath
+		args["bob_config"] = filepath.Join(getBuildDir(), configName)
 		if props.Post_install_tool != nil {
 			args["tool"] = *props.Post_install_tool
 			deps = append(deps, *props.Post_install_tool)
