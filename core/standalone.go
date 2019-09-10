@@ -35,8 +35,7 @@ import (
 )
 
 var (
-	bobdir   = os.Getenv("BOB_DIR")
-	jsonPath = filepath.Join(builddir, "config.json")
+	bobdir = os.Getenv("BOB_DIR")
 )
 
 type moduleBase struct {
@@ -47,6 +46,13 @@ func getConfig(ctx abstr.BaseModuleContext) *bobConfig {
 	return ctx.(blueprint.BaseModuleContext).Config().(*bobConfig)
 }
 
+func getBuildDir() string {
+	if bootstrap.BuildDir == "" {
+		panic("bootstrap.BuildDir was not initialized!")
+	}
+	return bootstrap.BuildDir
+}
+
 // Main is the entry point for the bob primary builder.
 //
 // It loads the configuration from config.json, registers the module type
@@ -55,8 +61,12 @@ func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
 	// specified in the config.
+	jsonPath := filepath.Join(getBuildDir(), "config.json")
 	config := &bobConfig{}
 	config.Properties = loadConfig(jsonPath)
+
+	// Depend on the config file
+	pctx.AddNinjaFileDeps(jsonPath, filepath.Join(getBuildDir(), ".env.hash"))
 
 	var ctx = blueprint.NewContext()
 
@@ -132,9 +142,6 @@ func Main() {
 		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
 		ctx.RegisterTopDownMutator("debug_info_mutator", debugInfoMutator).Parallel()
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
-
-		// Depend on the config file
-		ctx.RegisterSingletonType("config_singleton", dependencySingletonFactory)
 	}
 
 	if config.Properties.GetBool("builder_ninja") {
