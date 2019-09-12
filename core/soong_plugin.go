@@ -105,7 +105,7 @@ func (g *soongGenerator) sharedActions(*sharedLibrary, blueprint.ModuleContext) 
 func (g *soongGenerator) staticActions(*staticLibrary, blueprint.ModuleContext)                     {}
 func (g *soongGenerator) transformSourceActions(*transformSource, blueprint.ModuleContext, []inout) {}
 
-func (g *soongGenerator) buildDir() string                           { return "" }
+func (g *soongGenerator) buildDir() string                           { return getBuildDir() }
 func (g *soongGenerator) sourcePrefix() string                       { return "" }
 func (g *soongGenerator) sharedLibsDir(tgt tgtType) string           { return "" }
 func (g *soongGenerator) sourceOutputDir(m *generateCommon) string   { return "" }

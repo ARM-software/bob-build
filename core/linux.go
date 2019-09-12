@@ -796,7 +796,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		// Expand args immediately
 		cmd = strings.Replace(cmd, "${args}", strings.Join(props.Post_install_args, " "), -1)
 
-		args["bob_config"] = filepath.Join(getBuildDir(), configName)
+		args["bob_config"] = filepath.Join(g.buildDir(), configName)
 		if props.Post_install_tool != nil {
 			args["tool"] = *props.Post_install_tool
 			deps = append(deps, *props.Post_install_tool)

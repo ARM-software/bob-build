@@ -18,7 +18,6 @@
 package core
 
 import (
-	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -28,12 +27,6 @@ import (
 
 	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/utils"
-)
-
-var (
-	srcdir     = os.Getenv("SRCDIR")
-	configName = os.Getenv("CONFIGNAME")
-	configOpts = os.Getenv("BOB_CONFIG_OPTS")
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
