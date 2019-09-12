@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -86,6 +87,8 @@ func expandBobVariables(str, tool, hostBin string) (out string, err error) {
 			return "$(depfile)"
 		case "gen_dir":
 			return "$(genDir)"
+		case "bob_config":
+			return filepath.Join(getBuildDir(), configName)
 		case "bob_config_opts":
 			return configOpts
 		default:

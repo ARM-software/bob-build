@@ -39,6 +39,10 @@ type toolchain interface {
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
 	firstDir := filepath.Clean(filepath.Dir(firstHit))
+	// In the Soong plugin, this is the only environment variable reference. The Soong plugin
+	// does not hash the environment, so if it were any other variable, there would be a
+	// missing dependency. Fortunately, Soong itself keeps track of PATH, and will
+	// automatically regenerate the Ninja file when it changes, so accessing it here is safe.
 	path := os.Getenv("PATH")
 	foundFirstHit := false
 	for _, dir := range filepath.SplitList(path) {

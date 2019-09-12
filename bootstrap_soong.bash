@@ -59,8 +59,11 @@ SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
 # do not have access to the Soong context when they are called, even though the
 # config file must be loaded before then.
 TMP_GO_CONFIG=$(mktemp)
-sed -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
+sed -e "s#@@BOB_CONFIG_OPTS@@#${BOB_CONFIG_OPTS}#" \
     -e "s#@@BOB_DIR@@#${BOB_DIR}#" \
+    -e "s#@@BUILDDIR@@#${BUILDDIR}#" \
+    -e "s#@@CONFIGNAME@@#${CONFIGNAME}#" \
+    -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
     "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"
 rsync --checksum "${TMP_GO_CONFIG}" "${SOONG_CONFIG_GO}"
 rm -f "${TMP_GO_CONFIG}"

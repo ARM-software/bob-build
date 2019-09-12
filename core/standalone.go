@@ -35,7 +35,10 @@ import (
 )
 
 var (
-	bobdir = os.Getenv("BOB_DIR")
+	bobdir     = os.Getenv("BOB_DIR")
+	configName = os.Getenv("CONFIGNAME")
+	configOpts = os.Getenv("BOB_CONFIG_OPTS")
+	srcdir     = os.Getenv("SRCDIR")
 )
 
 type moduleBase struct {
