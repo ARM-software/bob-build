@@ -39,6 +39,9 @@ def run(cmd):
         sys.stderr.write("Error: Command %s failed with exit code %d" %
                          (str(cmd), e.returncode))
         sys.exit(e.returncode)
+    except OSError as e:
+        sys.stderr.write("Error: Couldn't execute command '%s': %s" % (' '.join(cmd), e.strerror))
+        sys.exit(1)
 
 
 def create_debug_info(fname, dbg, objcopy):
