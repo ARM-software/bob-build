@@ -80,6 +80,12 @@ func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.
 	writeIfChanged(filename, sb)
 }
 
+func writeListAssignment(sb *strings.Builder, varname string, entries []string) {
+	if len(entries) > 0 {
+		sb.WriteString(varname + " := " + strings.Join(entries, " ") + "\n")
+	}
+}
+
 func newlineSeparatedList(list []string) string {
 	return " \\\n    " + strings.Join(list, " \\\n    ") + "\n"
 }
@@ -186,9 +192,9 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	if len(m.Properties.Generated_headers) > 0 {
 		headerDirs, headerOutputs := m.GetGeneratedHeaders(ctx)
 		includes = append(includes, headerDirs...)
-		headers := strings.Join(headerOutputs, " ")
 
-		sb.WriteString("LOCAL_ADDITIONAL_DEPENDENCIES := " + headers + "\n\n")
+		writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", headerOutputs)
+		sb.WriteString("\n")
 	}
 
 	// Handle generated sources
@@ -235,19 +241,16 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	nonCompiledDeps := utils.Filter(utils.IsNotCompilableSource, srcs)
 	srcs = utils.Filter(utils.IsCompilableSource, srcs)
 
-	sb.WriteString("LOCAL_SRC_FILES := " + strings.Join(srcs, " ") + "\n")
+	writeListAssignment(sb, "LOCAL_SRC_FILES", srcs)
+	writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)"))
+	writeListAssignment(sb, "LOCAL_C_INCLUDES", includes)
 
-	if len(nonCompiledDeps) > 0 {
-		sb.WriteString("LOCAL_ADDITIONAL_DEPENDENCIES := " + strings.Join(utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)"), " ") + "\n")
-	}
-
-	sb.WriteString("LOCAL_C_INCLUDES := " + strings.Join(includes, " ") + "\n")
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
 	_, _, exportedCflags := m.GetExportedVariables(ctx)
 	cflagsList = append(cflagsList, exportedCflags...)
-	sb.WriteString("LOCAL_CFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, cflagsList), " ") + "\n")
-	sb.WriteString("LOCAL_CPPFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, m.Properties.Cxxflags), " ") + "\n")
-	sb.WriteString("LOCAL_CONLYFLAGS := " + strings.Join(utils.Filter(moduleCompileFlags, m.Properties.Conlyflags), " ") + "\n")
+	writeListAssignment(sb, "LOCAL_CFLAGS", utils.Filter(moduleCompileFlags, cflagsList))
+	writeListAssignment(sb, "LOCAL_CPPFLAGS", utils.Filter(moduleCompileFlags, m.Properties.Cxxflags))
+	writeListAssignment(sb, "LOCAL_CONLYFLAGS", utils.Filter(moduleCompileFlags, m.Properties.Conlyflags))
 
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
 	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags)))
@@ -263,10 +266,10 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	exportHeaderLibs := androidModuleNames(m.Properties.Export_header_libs)
 	headerLibs := append(androidModuleNames(m.Properties.Header_libs), exportHeaderLibs...)
 
-	sb.WriteString("LOCAL_SHARED_LIBRARIES := " + strings.Join(append(sharedLibs, "liblog"), " ") + "\n")
-	sb.WriteString("LOCAL_STATIC_LIBRARIES := " + strings.Join(staticLibs, " ") + "\n")
-	sb.WriteString("LOCAL_WHOLE_STATIC_LIBRARIES := " + strings.Join(wholeStaticLibs, " ") + "\n")
-	sb.WriteString("LOCAL_HEADER_LIBRARIES := " + strings.Join(headerLibs, " ") + "\n")
+	writeListAssignment(sb, "LOCAL_SHARED_LIBRARIES", append(sharedLibs, "liblog"))
+	writeListAssignment(sb, "LOCAL_STATIC_LIBRARIES", staticLibs)
+	writeListAssignment(sb, "LOCAL_WHOLE_STATIC_LIBRARIES", wholeStaticLibs)
+	writeListAssignment(sb, "LOCAL_HEADER_LIBRARIES", headerLibs)
 
 	reexportShared := []string{}
 	reexportStatic := []string{}
@@ -281,12 +284,12 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		}
 	}
 
-	sb.WriteString("LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := " + strings.Join(reexportShared, " ") + "\n")
-	sb.WriteString("LOCAL_EXPORT_STATIC_LIBRARY_HEADERS := " + strings.Join(reexportStatic, " ") + "\n")
-	sb.WriteString("LOCAL_EXPORT_HEADER_LIBRARY_HEADERS := " + strings.Join(reexportHeaders, " ") + "\n")
+	writeListAssignment(sb, "LOCAL_EXPORT_SHARED_LIBRARY_HEADERS", reexportShared)
+	writeListAssignment(sb, "LOCAL_EXPORT_STATIC_LIBRARY_HEADERS", reexportStatic)
+	writeListAssignment(sb, "LOCAL_EXPORT_HEADER_LIBRARY_HEADERS", reexportHeaders)
 
-	sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(m.Properties.Tags, " ") + "\n")
-	sb.WriteString("LOCAL_EXPORT_C_INCLUDE_DIRS := " + strings.Join(exportIncludeDirs, " ") + "\n")
+	writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
+	writeListAssignment(sb, "LOCAL_EXPORT_C_INCLUDE_DIRS", exportIncludeDirs)
 	if m.Properties.Owner != "" {
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
@@ -403,14 +406,14 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 
 	if isMultiLib {
 		sb.WriteString("LOCAL_MULTILIB:=both\n")
-		sb.WriteString("LOCAL_LDFLAGS_32:=" + strings.Join(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), " ") + copydtneeded + "\n")
+		writeListAssignment(sb, "LOCAL_LDFLAGS_32", append(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), copydtneeded))
 	}
-	sb.WriteString("LOCAL_LDFLAGS:=" + strings.Join(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), " ") + copydtneeded + "\n")
+	writeListAssignment(sb, "LOCAL_LDFLAGS", append(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), copydtneeded))
 
 	if tgt == tgtTypeTarget {
-		sb.WriteString("LOCAL_LDLIBS := " + strings.Join(m.Properties.Ldlibs, " ") + "\n")
+		writeListAssignment(sb, "LOCAL_LDLIBS", m.Properties.Ldlibs)
 	} else {
-		sb.WriteString("LOCAL_LDLIBS_$(HOST_OS) := " + strings.Join(m.Properties.Ldlibs, " ") + "\n")
+		writeListAssignment(sb, "LOCAL_LDLIBS_$(HOST_OS)", m.Properties.Ldlibs)
 	}
 	sb.WriteString("\ninclude $(" + rulePrefix[tgt] + ruleSuffix[bt] + ")\n")
 
@@ -490,7 +493,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.Properties.Relative_install_path + "\n")
-		sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(m.Properties.Tags, " ") + "\n")
+		writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 		sb.WriteString("LOCAL_SRC_FILES := " + file + "\n")
 		sb.WriteString("\ninclude $(BUILD_PREBUILT)\n")
 	}
@@ -671,7 +674,7 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.getInstallableProps().Relative_install_path + "\n")
-		sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(tags, " ") + "\n")
+		writeListAssignment(sb, "LOCAL_MODULE_TAGS", tags)
 		sb.WriteString("LOCAL_PREBUILT_MODULE_FILE := " + file + "\n\n")
 
 		sb.WriteString("include $(BUILD_PREBUILT)\n")
@@ -953,7 +956,8 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	sb.WriteString("LOCAL_MODULE := " + m.altShortName() + "\n")
 	sb.WriteString("LOCAL_MODULE_CLASS := KERNEL_MODULES\n")
 	sb.WriteString("LOCAL_CLANG := false\n")
-	sb.WriteString("LOCAL_MODULE_TAGS := " + strings.Join(m.Properties.Tags, " ") + "\n\n")
+	writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
+	sb.WriteString("\n")
 
 	sources := m.Properties.getSources(ctx)
 
