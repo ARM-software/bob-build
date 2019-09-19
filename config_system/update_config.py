@@ -182,7 +182,14 @@ def main():
     if args.json is not None:
         config_json.write_config(args.json)
 
-    return counter.errors() + counter.criticals()
+    error_count = counter.errors() + counter.criticals()
+
+    if error_count > 0:
+        os.remove(args.config)
+        if args.json is not None:
+            os.remove(args.json)
+
+    return error_count
 
 
 if __name__ == "__main__":
