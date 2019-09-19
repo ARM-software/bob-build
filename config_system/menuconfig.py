@@ -658,7 +658,9 @@ def main():
 
     menustack.append(general.get_root_menu())
 
-    if curses.wrapper(gui_main):
+    should_save = curses.wrapper(gui_main)
+
+    if should_save:
         general.enforce_dependent_values()
         for plugin in args.plugin:
             path, name = os.path.split(plugin)
@@ -684,7 +686,14 @@ def main():
     # Flush all log messages on exit
     msgBuffer.close()
 
-    return counter.errors() + counter.criticals()
+    error_count = counter.errors() + counter.criticals()
+
+    if should_save and error_count > 0:
+        os.remove(args.config)
+        if args.json is not None:
+            os.remove(args.json)
+
+    return error_count
 
 
 if __name__ == "__main__":
