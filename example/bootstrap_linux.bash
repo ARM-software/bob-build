@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,8 +59,7 @@ export BUILDDIR
 "${BOB_DIR}/bootstrap_linux.bash"
 
 # Pick up some info that bob has worked out
-BOOTSTRAP=".bob.bootstrap"
-source "${BUILDDIR}/${BOOTSTRAP}"
+source "${BUILDDIR}/.bob.bootstrap"
 
 # Setup the build script
 if [ "${SRCDIR:0:1}" != '/' ]; then

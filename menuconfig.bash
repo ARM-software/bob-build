@@ -20,8 +20,7 @@ trap 'echo "*** Unexpected error ***"' ERR
 
 # Move to the build driectory
 cd $(dirname "${BASH_SOURCE[0]}")
-BOOTSTRAP=".bob.bootstrap"
-source "${BOOTSTRAP}"
+source ".bob.bootstrap"
 
 # Move to the working directory
 cd "${WORKDIR}"

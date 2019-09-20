@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,8 +113,7 @@ rm -f "$TMP_ANDROID_MK"
 
 
 # Pick up some info that bob has worked out
-BOOTSTRAP=".bob.bootstrap"
-source "${BUILDDIR}/${BOOTSTRAP}"
+source "${BUILDDIR}/.bob.bootstrap"
 
 # Setup the buildme script to just run bob
 ln -sf "bob" "${BUILDDIR}/buildme"

@@ -97,8 +97,7 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 "${SCRIPT_DIR}/bob/bootstrap_linux.bash"
 
 # Pick up some info that bob has worked out
-BOOTSTRAP=".bob.bootstrap"
-source "${BUILDDIR}/${BOOTSTRAP}"
+source "${BUILDDIR}/.bob.bootstrap"
 
 # Setup the buildme script to just run bob
 ln -sf "bob" "${BUILDDIR}/buildme"

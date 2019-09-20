@@ -22,8 +22,7 @@ ORIG_PWD="$(pwd)"
 
 # Move to the build directory
 cd $(dirname "${BASH_SOURCE[0]}")
-BOOTSTRAP=".bob.bootstrap"
-source "${BOOTSTRAP}"
+source ".bob.bootstrap"
 
 declare -a ARG_TARGET
 
