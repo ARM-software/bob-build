@@ -21,8 +21,7 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # Read settings written by bootstrap.bash
-BOOTSTRAP=".bob.bootstrap"
-source "${BOOTSTRAP}"
+source ".bob.bootstrap"
 
 # Switch to the working directory
 cd "${WORKDIR}"
