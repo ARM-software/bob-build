@@ -719,6 +719,9 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 		sb.WriteString(outs + ": in := " + ins + "\n")
 		sb.WriteString(outs + ": out := " + strings.Join(inout.out, " ") + "\n")
 		sb.WriteString(outs + ": depfile := " + inout.depfile + "\n")
+		if strings.Contains(cmd, "$(LOCAL_PATH)") {
+			sb.WriteString(outs + ": LOCAL_PATH := $(LOCAL_PATH)" + "\n")
+		}
 		sb.WriteString(outs + ": " + ins + " " + strings.Join(inout.implicitSrcs, " ") + "\n")
 		sb.WriteString("\t" + cmd + "\n")
 		if inout.depfile != "" {
