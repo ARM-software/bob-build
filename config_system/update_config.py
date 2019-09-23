@@ -184,10 +184,20 @@ def main():
 
     error_count = counter.errors() + counter.criticals()
 
-    if error_count > 0:
-        os.remove(args.config)
+    error_path = args.config + ".error"
+    if error_count == 0:
+        try:
+            os.remove(error_path)
+        except OSError:
+            pass
+    else:
+        with open(error_path, 'w'):
+            pass
         if args.json is not None:
-            os.remove(args.json)
+            try:
+                os.remove(args.json)
+            except OSError:
+                pass
 
     return error_count
 

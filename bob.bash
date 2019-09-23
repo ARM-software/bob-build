@@ -34,6 +34,12 @@ if [[ "${BOB_BOOTSTRAP_VERSION}" != "${BOB_VERSION}" ]]; then
     exit 1
 fi
 
+# Stop the build if menuconfig.py or update_config.py failed
+if [[ -e "${BUILDDIR}/${CONFIGNAME}.error" ]]; then
+    echo "Configuration errors are present, the build cannot proceed further." >&2
+    exit 1
+fi
+
 # Refresh the configuration. This means that options changed or added since the
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
