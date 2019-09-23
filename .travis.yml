@@ -55,6 +55,12 @@ matrix:
       - DO_COMMIT_CHECKS=0
       - DO_PYTHON_TESTS=1
       - DO_GO_TESTS=1
+  - go: "1.13"
+    env:
+      - PYTHON_SUFFIX=2.7
+      - DO_COMMIT_CHECKS=0
+      - DO_PYTHON_TESTS=0
+      - DO_GO_TESTS=1
 
 script:
   - .travis/checks/run-checks.sh
