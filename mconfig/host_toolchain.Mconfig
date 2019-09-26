@@ -32,6 +32,10 @@ config HOST_ARMCLANG_PREFIX
 	string "Host Arm Compiler 6 prefix"
 	default ""
 
+config HOST_XCODE_PREFIX
+	string "Host Xcode prefix"
+	default ""
+
 config HOST_ARMCLANG_FLAGS
 	string
 	default ""
@@ -43,6 +47,10 @@ config HOST_GNU_FLAGS
 	default ""
 
 config HOST_CLANG_TRIPLE
+	string
+	default ""
+
+config HOST_XCODE_TRIPLE
 	string
 	default ""
 

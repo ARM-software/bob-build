@@ -86,40 +86,40 @@ bob_alias {
 
 bob_install_group {
     name: "IG_host_libs",
-    android: {
+    builder_android_make: {
         install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
     },
-    linux: {
+    builder_ninja: {
         install_path: "install/host/lib",
     },
 }
 
 bob_install_group {
     name: "IG_libs",
-    android: {
+    builder_android_make: {
         install_path: "$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)",
     },
-    linux: {
+    builder_ninja: {
         install_path: "install/lib",
     },
 }
 
 bob_install_group {
     name: "IG_host_binaries",
-    android: {
+    builder_android_make: {
         install_path: "$(HOST_OUT_EXECUTABLES)",
     },
-    linux: {
+    builder_ninja: {
         install_path: "install/host/bin",
     },
 }
 
 bob_install_group {
     name: "IG_binaries",
-    android: {
+    builder_android_make: {
         install_path: "$(TARGET_OUT_VENDOR_EXECUTABLES)",
     },
-    linux: {
+    builder_ninja: {
         install_path: "install/bin",
     },
 }

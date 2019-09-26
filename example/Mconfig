@@ -51,6 +51,7 @@ menu "Toolchain Options"
 choice
 	prompt "Target toolchain"
 	default TARGET_TOOLCHAIN_CLANG if ANDROID
+	default TARGET_TOOLCHAIN_XCODE if OSX
 	default TARGET_TOOLCHAIN_GNU
 	help
 	  A few different compilers are supported. They are classed by
@@ -79,11 +80,21 @@ config TARGET_TOOLCHAIN_ARMCLANG
 
 	  Support is still experimental.
 
+config TARGET_TOOLCHAIN_XCODE
+	bool "Xcode"
+	help
+	  Toolchain for macOS.
+
+	  Support is still experimental.
+
+
+
 endchoice
 
 choice
 	prompt "Host toolchain"
 	default HOST_TOOLCHAIN_CLANG if TARGET_TOOLCHAIN_CLANG
+	default HOST_TOOLCHAIN_XCODE if TARGET_TOOLCHAIN_XCODE
 	default HOST_TOOLCHAIN_GNU
 	help
 	  A few different compilers are supported. They are classed by
@@ -109,6 +120,11 @@ config HOST_TOOLCHAIN_ARMCLANG
 	bool "Arm Compiler 6"
 	help
 	  Build with the Arm Compiler.
+
+config HOST_TOOLCHAIN_XCODE
+	bool "Xcode"
+	help
+	  Build with the Xcode.
 
 endchoice
 
@@ -145,6 +161,15 @@ config TARGET_CLANG_TRIPLE
 	  target system.
 
 	  This should not end with "-".
+
+config TARGET_XCODE_TRIPLE
+	string "Target Xcode triple"
+	depends on TARGET_TOOLCHAIN_XCODE
+	default "x86_64-apple-macosx10.11"
+	help
+	  The target triple passed as the -target argument to the
+	  compilers. For macOS, it can set minimum required OS
+	  version.
 
 # Update this to reflect the path to Bob within the superproject
 source "bob-build/mconfig/target_toolchain.Mconfig"
