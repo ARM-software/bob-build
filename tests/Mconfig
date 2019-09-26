@@ -25,7 +25,16 @@ config LINUX
 config ANDROID
 	bool "Android"
 
+config OSX
+	bool "macOS"
+
 endchoice
+
+config OS
+	string
+	default "android" if ANDROID
+	default "osx" if OSX
+	default "linux"
 
 ## Need to select the BUILDER_ for Bob
 choice
