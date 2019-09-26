@@ -39,6 +39,7 @@ type linker interface {
 	linkWholeArchives([]string) string
 	keepSharedLibraryTransitivity() string
 	dropSharedLibraryTransitivity() string
+	getForwardingLibFlags() string
 }
 
 type defaultLinker struct {
@@ -73,6 +74,10 @@ func (l defaultLinker) keepSharedLibraryTransitivity() string {
 
 func (l defaultLinker) dropSharedLibraryTransitivity() string {
 	return "-Wl,--no-copy-dt-needed-entries"
+}
+
+func (l defaultLinker) getForwardingLibFlags() string {
+	return "-fuse-ld=bfd"
 }
 
 func (l defaultLinker) setRpathLink(path string) string {
@@ -620,6 +625,141 @@ func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClangCross) {
 	return
 }
 
+type toolchainXcode struct {
+	arBinary      string
+	asBinary      string
+	objcopyBinary string
+	ccBinary      string
+	cxxBinary     string
+	linker        linker
+	prefix        string
+	target        string
+
+	cflags  []string
+	ldflags []string
+}
+
+type toolchainXcodeNative struct {
+	toolchainXcode
+}
+
+type toolchainXcodeCross struct {
+	toolchainXcode
+}
+
+func (tc toolchainXcode) getArchiver() (string, []string) {
+	return tc.arBinary, []string{}
+}
+
+func (tc toolchainXcode) getAssembler() (string, []string) {
+	return tc.asBinary, []string{}
+}
+
+func (tc toolchainXcode) getCCompiler() (string, []string) {
+	return tc.ccBinary, tc.cflags
+}
+
+func (tc toolchainXcode) getCXXCompiler() (string, []string) {
+	return tc.cxxBinary, tc.cflags
+}
+
+type xcodeLinker struct {
+	tool  string
+	flags []string
+	libs  []string
+}
+
+func (l xcodeLinker) getTool() string {
+	return l.tool
+}
+
+func (l xcodeLinker) getFlags() []string {
+	return l.flags
+}
+
+func (l xcodeLinker) getLibs() []string {
+	return l.libs
+}
+
+func (l xcodeLinker) keepUnusedDependencies() string {
+	return ""
+}
+
+func (l xcodeLinker) dropUnusedDependencies() string {
+	return ""
+}
+
+func (l xcodeLinker) setRpathLink(path string) string {
+	return ""
+}
+
+func (l xcodeLinker) setRpath(path []string) string {
+	return ""
+}
+
+func (l xcodeLinker) linkWholeArchives(libs []string) string {
+	return utils.Join(libs)
+}
+
+func (l xcodeLinker) keepSharedLibraryTransitivity() string {
+	return ""
+}
+
+func (l xcodeLinker) dropSharedLibraryTransitivity() string {
+	return ""
+}
+
+func (l xcodeLinker) getForwardingLibFlags() string {
+	return ""
+}
+
+func newXcodeLinker(tool string, flags, libs []string) (linker xcodeLinker) {
+	linker.tool = tool
+	linker.flags = flags
+	linker.libs = libs
+	return
+}
+
+func (tc toolchainXcode) getLinker() linker {
+	return tc.linker
+}
+
+func (tc toolchainXcode) getObjcopy() string {
+	return tc.objcopyBinary
+}
+
+func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode) {
+	props := config.Properties
+	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
+	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.asBinary = tc.prefix + props.GetString("as_binary")
+	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+
+	tc.ccBinary = tc.prefix + props.GetString("clang_cc_binary")
+	tc.cxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
+
+	tc.target = props.GetString(string(tgt) + "_xcode_triple")
+
+	if tc.target != "" {
+		tc.cflags = append(tc.cflags, "-target", tc.target)
+		tc.ldflags = append(tc.ldflags, "-target", tc.target)
+	}
+
+	tc.linker = newXcodeLinker(tc.cxxBinary, tc.ldflags, []string{})
+
+	return
+}
+
+func newToolchainXcodeNative(config *bobConfig) (tc toolchainXcodeNative) {
+	tc.toolchainXcode = newToolchainXcodeCommon(config, tgtTypeHost)
+	return
+}
+
+func newToolchainXcodeCross(config *bobConfig) (tc toolchainXcodeCross) {
+	tc.toolchainXcode = newToolchainXcodeCommon(config, tgtTypeTarget)
+	return
+}
+
 type toolchainSet struct {
 	host   toolchain
 	target toolchain
@@ -641,6 +781,8 @@ func (tcs *toolchainSet) parseConfig(config *bobConfig) {
 		tcs.target = newToolchainGnuCross(config)
 	} else if props.GetBool("target_toolchain_armclang") {
 		tcs.target = newToolchainArmClangCross(config)
+	} else if props.GetBool("target_toolchain_xcode") {
+		tcs.target = newToolchainXcodeCross(config)
 	} else {
 		panic(errors.New("no usable target compiler toolchain configured"))
 	}
@@ -651,6 +793,8 @@ func (tcs *toolchainSet) parseConfig(config *bobConfig) {
 		tcs.host = newToolchainGnuNative(config)
 	} else if props.GetBool("host_toolchain_armclang") {
 		tcs.host = newToolchainArmClangNative(config)
+	} else if props.GetBool("host_toolchain_xcode") {
+		tcs.host = newToolchainXcodeNative(config)
 	} else {
 		panic(errors.New("no usable host compiler toolchain configured"))
 	}

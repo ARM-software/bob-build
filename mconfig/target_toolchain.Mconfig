@@ -29,6 +29,10 @@ config TARGET_ARMCLANG_PREFIX
 	string "Target Arm Compiler 6 compiler prefix"
 	default ""
 
+config TARGET_XCODE_PREFIX
+	string "Target Xcode prefix"
+	default ""
+
 config TARGET_ARMCLANG_FLAGS
 	string
 	default ""
@@ -57,6 +61,9 @@ config TARGET_SYSROOT
 
 # config TARGET_CLANG_TRIPLE
 #	string "Target Clang triple"
+
+# config TARGET_XCODE_TRIPLE
+#	string "Target Xcode triple"
 
 ### Toolchain configuration options ###
 

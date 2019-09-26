@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@
 
 bob_install_group {
     name: "install_group_test",
-    android: {
+    builder_android_make: {
         install_path: "/work/bob/android",
     },
-    linux: {
+    builder_ninja: {
         install_path: "/work/bob/linux",
     },
 }
@@ -34,10 +34,10 @@ bob_resource {
     name: "bob_test_resources",
     srcs: ["main.c"],
     install_group: "install_group_test",
-    android: {
+    builder_android_make: {
         relative_install_path: "x",
     },
-    linux: {
+    builder_ninja: {
         relative_install_path: "y",
     },
 }

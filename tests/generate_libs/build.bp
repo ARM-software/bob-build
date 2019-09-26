@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +17,20 @@
 
 bob_install_group {
     name: "ig_genlib_lib",
-    android: {
+    builder_android_make: {
         install_path: "$(TARGET_OUT)/gen_sh_lib",
     },
-    linux: {
+    builder_ninja: {
         install_path: "${BuildDir}/gen_sh_lib",
     },
 }
 
 bob_install_group {
     name: "ig_genlib_bin",
-    android: {
+    builder_android_make: {
         install_path: "$(TARGET_OUT)/gen_sh_bin",
     },
-    linux: {
+    builder_ninja: {
         install_path: "${BuildDir}/gen_sh_bin",
     },
 }

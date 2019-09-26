@@ -540,7 +540,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 		})
 
 	if hasForwardingLib {
-		flags = append(flags, "-fuse-ld=bfd")
+		flags = append(flags, tc.getLinker().getForwardingLibFlags())
 	}
 	if l.Properties.isRpathWanted() {
 		if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
