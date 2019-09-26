@@ -93,6 +93,7 @@ var copyRule = pctx.StaticRule("copy",
 type singleOutputModule interface {
 	blueprint.Module
 	outputName() string
+	outputFileName() string
 }
 
 type targetableModule interface {
@@ -103,13 +104,13 @@ type targetableModule interface {
 // Where to put generated shared libraries to simplify linking
 // As long as the module is targetable, we can infer the library path
 func getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", string(t.getTarget()), "shared", t.outputName()+".so")
+	return filepath.Join("${BuildDir}", string(t.getTarget()), "shared", t.outputFileName())
 }
 
 // Where to put generated binaries in order to make sure generated binaries
 // are available in the same directory as compiled binaries
 func getBinaryPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", string(t.getTarget()), "executable", t.outputName())
+	return filepath.Join("${BuildDir}", string(t.getTarget()), "executable", t.outputFileName())
 }
 
 // Generate the build actions for a generateSource module and populates the outputs.

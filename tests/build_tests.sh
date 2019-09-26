@@ -19,6 +19,12 @@ function check_stripped() {
     [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
 }
 
+case "$(uname -s)" in
+    Darwin*) SHARED_LIBRARY_EXTENSION=".dylib";;
+    *)       SHARED_LIBRARY_EXTENSION=".so";;
+esac
+
+
 # Do simple checks on the output of each build
 function check_build_output() {
     local DIR="${1}"
@@ -27,11 +33,11 @@ function check_build_output() {
     echo "Checking build output under ${DIR}"
 
     # Check that installed libraries/binaries are present
-    check_installed "${DIR}/install/lib/libstripped_library.so"
+    check_installed "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}"
     check_installed "${DIR}/install/bin/stripped_binary"
 
     # The stripped library must not contain symbols
-    check_stripped "${DIR}/install/lib/libstripped_library.so"
+    check_stripped "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}"
     check_stripped "${DIR}/install/bin/stripped_binary"
 }
 
