@@ -28,12 +28,89 @@ import (
 	"github.com/ARM-software/bob-build/utils"
 )
 
+type linker interface {
+	getTool() string
+	getFlags() []string
+	getLibs() []string
+	keepUnusedDependencies() string
+	dropUnusedDependencies() string
+	setRpathLink(string) string
+	setRpath([]string) string
+	linkWholeArchives([]string) string
+	keepSharedLibraryTransitivity() string
+	dropSharedLibraryTransitivity() string
+}
+
+type defaultLinker struct {
+	tool  string
+	flags []string
+	libs  []string
+}
+
+func (l defaultLinker) getTool() string {
+	return l.tool
+}
+
+func (l defaultLinker) getFlags() []string {
+	return l.flags
+}
+
+func (l defaultLinker) getLibs() []string {
+	return l.libs
+}
+
+func (l defaultLinker) keepUnusedDependencies() string {
+	return "-Wl,--no-as-needed"
+}
+
+func (l defaultLinker) dropUnusedDependencies() string {
+	return "-Wl,--as-needed"
+}
+
+func (l defaultLinker) keepSharedLibraryTransitivity() string {
+	return "-Wl,--copy-dt-needed-entries"
+}
+
+func (l defaultLinker) dropSharedLibraryTransitivity() string {
+	return "-Wl,--no-copy-dt-needed-entries"
+}
+
+func (l defaultLinker) setRpathLink(path string) string {
+	return "-Wl,-rpath-link," + path
+}
+
+func (l defaultLinker) setRpath(paths []string) string {
+	if len(paths) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("-Wl,--enable-new-dtags")
+	for _, p := range paths {
+		fmt.Fprintf(&b, ",-rpath=%s", p)
+	}
+	return b.String()
+}
+
+func (l defaultLinker) linkWholeArchives(libs []string) string {
+	if len(libs) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("-Wl,--whole-archive %s -Wl,--no-whole-archive", utils.Join(libs))
+}
+
+func newDefaultLinker(tool string, flags, libs []string) (linker defaultLinker) {
+	linker.tool = tool
+	linker.flags = flags
+	linker.libs = libs
+	return
+}
+
 type toolchain interface {
 	getArchiver() (tool string, flags []string)
 	getAssembler() (tool string, flags []string)
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
-	getLinker() (tool string, flags, libs []string)
+	getLinker() linker
 	getObjcopy() (tool string)
 }
 
@@ -135,6 +212,7 @@ type toolchainGnuCommon struct {
 	objcopyBinary string
 	gccBinary     string
 	gxxBinary     string
+	linker        linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
 	ldflags       []string // Linker flags, including anything required for C++
@@ -165,8 +243,8 @@ func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
 	return tc.gxxBinary, tc.cflags
 }
 
-func (tc toolchainGnuCommon) getLinker() (tool string, flags, libs []string) {
-	return tc.gxxBinary, tc.ldflags, []string{}
+func (tc toolchainGnuCommon) getLinker() linker {
+	return tc.linker
 }
 
 func (tc toolchainGnuCommon) getObjcopy() string {
@@ -275,6 +353,8 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.cflags = append(tc.cflags, flags...)
 	tc.ldflags = append(tc.ldflags, flags...)
 
+	tc.linker = newDefaultLinker(tc.gxxBinary, tc.ldflags, []string{})
+
 	return
 }
 
@@ -295,6 +375,7 @@ type toolchainClangCommon struct {
 	objcopyBinary  string
 	clangBinary    string
 	clangxxBinary  string
+	linker         linker
 	prefix         string
 	useGnuBinutils bool
 
@@ -341,8 +422,8 @@ func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
 	return tc.clangxxBinary, tc.cxxflags
 }
 
-func (tc toolchainClangCommon) getLinker() (tool string, flags, libs []string) {
-	return tc.clangxxBinary, tc.ldflags, tc.ldlibs
+func (tc toolchainClangCommon) getLinker() linker {
+	return newDefaultLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs)
 }
 
 func (tc toolchainClangCommon) getObjcopy() string {
@@ -456,6 +537,8 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	// every call to getCXXCompiler().
 	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
+	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
+
 	return
 }
 
@@ -475,6 +558,7 @@ type toolchainArmClang struct {
 	objcopyBinary string
 	ccBinary      string
 	cxxBinary     string
+	linker        linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
 }
@@ -503,8 +587,8 @@ func (tc toolchainArmClang) getCXXCompiler() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
-func (tc toolchainArmClang) getLinker() (tool string, flags, libs []string) {
-	return tc.cxxBinary, tc.cflags, []string{}
+func (tc toolchainArmClang) getLinker() linker {
+	return tc.linker
 }
 
 func (tc toolchainArmClang) getObjcopy() string {
@@ -519,6 +603,7 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString("armclang_cxx_binary")
+	tc.linker = newDefaultLinker(tc.cxxBinary, []string{}, []string{})
 
 	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
 

@@ -153,7 +153,7 @@ func specifyCompilerStandard(varname string, flags []string) string {
 // This function generates the Android make fragment to build static
 // libraries, shared libraries and executables. It's evolved over time
 // and needs to be refactored to use interfaces better.
-func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx blueprint.ModuleContext) {
+func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx blueprint.ModuleContext, tcs toolchainSet) {
 	var bt binType
 	var m library
 
@@ -299,6 +299,15 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		sb.WriteString("LOCAL_STRIP_MODULE := true\n")
 	}
 
+	tgt := m.Properties.TargetType
+
+	var tc toolchain
+	if tgt == tgtTypeTarget {
+		tc = tcs.target
+	} else {
+		tc = tcs.host
+	}
+
 	// Can't see a way to wrap a particular library in -Wl in link flags on android, so specify
 	// -Wl,--copy-dt-needed-entries across the lot
 	hasForwardingLib := false
@@ -320,7 +329,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 			}
 		})
 	if hasForwardingLib {
-		copydtneeded = "-fuse-ld=bfd -Wl,--copy-dt-needed-entries"
+		copydtneeded = "-fuse-ld=bfd " + tc.getLinker().keepSharedLibraryTransitivity()
 	}
 
 	// Handle installation
@@ -331,7 +340,6 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	// also do multilib target binaries to allow creation of test
 	// binaries in both modes.
 	// All test binaries will be installable.
-	tgt := m.Properties.TargetType
 	isMultiLib := (tgt == tgtTypeTarget) &&
 		((bt == binTypeShared) || (bt == binTypeStatic) || ok)
 
@@ -424,21 +432,21 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 func (g *androidMkGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		androidLibraryBuildAction(sb, m, ctx)
+		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
 
 func (g *androidMkGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		androidLibraryBuildAction(sb, m, ctx)
+		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
 
 func (g *androidMkGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
-		androidLibraryBuildAction(sb, m, ctx)
+		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
 

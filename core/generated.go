@@ -343,7 +343,9 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	asBinary, astargetflags := tc.getAssembler()
 	cc, cctargetflags := tc.getCCompiler()
 	cxx, cxxtargetflags := tc.getCXXCompiler()
-	linker, ldflags, ldlibs := tc.getLinker()
+	linker := tc.getLinker().getTool()
+	ldflags := tc.getLinker().getFlags()
+	ldlibs := tc.getLinker().getLibs()
 
 	props := &m.Properties.FlagArgsBuild
 
