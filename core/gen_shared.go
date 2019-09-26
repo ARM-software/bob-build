@@ -25,12 +25,13 @@ import (
 
 type generateSharedLibrary struct {
 	generateLibrary
+	fileNameExtension string
 }
 
 //// Support GenerateLibraryInterface
 
 func (m *generateSharedLibrary) libExtension() string {
-	return ".so"
+	return m.fileNameExtension
 }
 
 //// Support PhonyInterface, DependentInterface
@@ -56,12 +57,25 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 	}
 }
 
+//// Support singleOutputModule
+
+func (m *generateSharedLibrary) outputFileName() string {
+	return m.Name() + m.libExtension()
+}
+
 //// Factory functions
 
 func genSharedLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
 	module.generateCommon.Properties.Features.Init(config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
+	switch config.Properties.GetString("os") {
+		case "osx" :
+			module.fileNameExtension = ".dylib"
+			break
+		default:
+			module.fileNameExtension = ".so"
+	}
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

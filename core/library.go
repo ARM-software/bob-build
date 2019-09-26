@@ -476,7 +476,7 @@ func (m *staticLibrary) outputDir(g generatorBackend) string {
 }
 
 func (m *staticLibrary) outputs(g generatorBackend) []string {
-	return []string{filepath.Join(m.outputDir(g), m.outputName()+".a")}
+	return []string{filepath.Join(m.outputDir(g), m.outputFileName())}
 }
 
 func (m *staticLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
@@ -495,12 +495,19 @@ func (m *staticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+//// Support singleOutputModule
+
+func (m *staticLibrary) outputFileName() string {
+	return m.outputName() + ".a"
+}
+
 type sharedLibrary struct {
 	library
+	fileNameExtension string
 }
 
 func (m *sharedLibrary) getLinkName() string {
-	return m.outputName() + ".so"
+	return m.outputFileName()
 }
 
 func (m *sharedLibrary) getSoname() string {
@@ -526,7 +533,7 @@ func (m *sharedLibrary) outputDir(g generatorBackend) string {
 
 func (m *sharedLibrary) outputs(g generatorBackend) []string {
 	if m.library.Properties.Library_version == "" {
-		return []string{filepath.Join(m.outputDir(g), m.outputName()+".so")}
+		return []string{filepath.Join(m.outputDir(g), m.outputName()+m.fileNameExtension)}
 	}
 	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
 }
@@ -565,6 +572,12 @@ func (m *sharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+//// Support singleOutputModule
+
+func (m *sharedLibrary) outputFileName() string {
+	return m.outputName() + m.fileNameExtension
+}
+
 type binary struct {
 	library
 }
@@ -591,6 +604,12 @@ func (m *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+//// Support singleOutputModule
+
+func (m *binary) outputFileName() string {
+	return m.outputName()
+}
+
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
 	l.Properties.Features.Init(config.Properties, BuildProps{})
 	l.Properties.Build.Host.Features.Init(config.Properties, BuildProps{})
@@ -606,6 +625,13 @@ func staticLibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 
 func sharedLibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &sharedLibrary{}
+	switch config.Properties.GetString("os") {
+		case "osx" :
+			module.fileNameExtension = ".dylib"
+			break
+		default:
+			module.fileNameExtension = ".so"
+	}
 	return module.LibraryFactory(config, module)
 }
 
