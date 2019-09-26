@@ -44,22 +44,28 @@ def run(cmd):
         sys.exit(1)
 
 
-def create_debug_info(fname, dbg, objcopy):
+def create_debug_info(fname, dbg, tool):
     # Retain the build-id in the debug object
-    cmd = [objcopy, "--only-keep-debug", fname, dbg]
+    if tool == "dsymutil":
+        cmd = [tool, fname, "-o", dbg]
+    else:
+        cmd = [tool, "--only-keep-debug", fname, dbg]
     run(cmd)
 
 
-def write_output(fname, output, dbg, strip, objcopy):
-    cmd = [objcopy]
-    if dbg:
-        cmd.extend(["--strip-debug",
-                    "--add-gnu-debuglink=" + dbg])
-    if strip:
-        cmd.append("--strip-unneeded")
-    cmd.extend([fname, output])
+def write_output(fname, output, dbg, strip, tool):
+    if os.path.basename(tool) == "dsymutil":
+        run(["strip", "-S", "-o", output, fname])
+    else:
+        cmd = [tool]
+        if dbg:
+            cmd.extend(["--strip-debug",
+                        "--add-gnu-debuglink=" + dbg])
+        if strip:
+            cmd.append("--strip-unneeded")
+        cmd.extend([fname, output])
 
-    run(cmd)
+        run(cmd)
 
 
 def parse_args():
@@ -71,8 +77,10 @@ def parse_args():
                         help="Strip library of unnecessary symbols")
     parser.add_argument("--debug-file", default=None,
                         help="File to keep debug info in")
-    parser.add_argument("--objcopy", default="objcopy",
-                        help="Objcopy executable")
+    parser.add_argument("--tool", default="objcopy",
+                        help="Primary tool to use for stripping (including path if needed)."
+                             "This is expected to be objcopy on Linux platforms,"
+                             "and dsymutil on MacOS.")
 
     args = parser.parse_args()
 
@@ -84,9 +92,9 @@ def main():
 
     if args.debug_file:
         make_dir(os.path.dirname(args.debug_file))
-        create_debug_info(args.input, args.debug_file, args.objcopy)
+        create_debug_info(args.input, args.debug_file, args.tool)
 
-    write_output(args.input, args.output, args.debug_file, args.strip, args.objcopy)
+    write_output(args.input, args.output, args.debug_file, args.strip, args.tool)
 
 
 if __name__ == "__main__":

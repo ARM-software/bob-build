@@ -116,7 +116,7 @@ type toolchain interface {
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
 	getLinker() linker
-	getObjcopy() (tool string)
+	getStripBinary() (tool string)
 }
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
@@ -252,7 +252,7 @@ func (tc toolchainGnuCommon) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainGnuCommon) getObjcopy() string {
+func (tc toolchainGnuCommon) getStripBinary() string {
 	return tc.objcopyBinary
 }
 
@@ -431,7 +431,7 @@ func (tc toolchainClangCommon) getLinker() linker {
 	return newDefaultLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs)
 }
 
-func (tc toolchainClangCommon) getObjcopy() string {
+func (tc toolchainClangCommon) getStripBinary() string {
 	return tc.objcopyBinary
 }
 
@@ -596,7 +596,7 @@ func (tc toolchainArmClang) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainArmClang) getObjcopy() string {
+func (tc toolchainArmClang) getStripBinary() string {
 	return tc.objcopyBinary
 }
 
@@ -724,7 +724,7 @@ func (tc toolchainXcode) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainXcode) getObjcopy() string {
+func (tc toolchainXcode) getStripBinary() string {
 	return tc.objcopyBinary
 }
 

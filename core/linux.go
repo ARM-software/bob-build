@@ -772,9 +772,9 @@ var stripScript = filepath.Join(bobdir, "scripts", "strip.py")
 var stripRule = pctx.StaticRule("strip",
 	blueprint.RuleParams{
 		Command: stripScript +
-			" $args --objcopy $objcopy -o $out $in",
+			" $args --tool $tool -o $out $in",
 		Description: "strip $out",
-	}, "args", "objcopy")
+	}, "args", "tool")
 
 var installRule = pctx.StaticRule("install",
 	blueprint.RuleParams{
@@ -862,8 +862,8 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 					stArgs = append(stArgs, dbgFile)
 				}
 				stripArgs := map[string]string{
-					"args":    strings.Join(stArgs, " "),
-					"objcopy": g.getToolchain(lib.getTarget()).getObjcopy(),
+					"args": strings.Join(stArgs, " "),
+					"tool": g.getToolchain(lib.getTarget()).getStripBinary(),
 				}
 				ctx.Build(pctx,
 					blueprint.BuildParams{
