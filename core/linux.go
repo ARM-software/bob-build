@@ -503,6 +503,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 	useNoAsNeeded := !l.build().isForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
+	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
@@ -511,17 +512,17 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 				b := sl.build()
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
-					flags = append(flags, "-Wl,--copy-dt-needed-entries")
+					flags = append(flags, tc.getLinker().keepSharedLibraryTransitivity())
 					if useNoAsNeeded {
-						flags = append(flags, "-Wl,--no-as-needed")
+						flags = append(flags, tc.getLinker().keepUnusedDependencies())
 					}
 				}
 				flags = append(flags, pathToLibFlag(sl.outputName()))
 				if b.isForwardingSharedLibrary() {
 					if useNoAsNeeded {
-						flags = append(flags, "-Wl,--as-needed")
+						flags = append(flags, tc.getLinker().dropUnusedDependencies())
 					}
-					flags = append(flags, "-Wl,--no-copy-dt-needed-entries")
+					flags = append(flags, tc.getLinker().dropSharedLibraryTransitivity())
 				}
 				if installPath, ok := sl.Properties.InstallableProps.getInstallGroupPath(); ok {
 					installPath = filepath.Join(installPath, proptools.String(sl.Properties.InstallableProps.Relative_install_path))
@@ -543,14 +544,15 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 	}
 	if l.Properties.isRpathWanted() {
 		if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
-			flags = append(flags, "-Wl,--enable-new-dtags")
+			var rpaths []string
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
 				if err != nil {
 					panic(fmt.Errorf("Could not find relative path for: %s due to: %e", path, err))
 				}
-				flags = append(flags, "-Wl,-rpath='$$ORIGIN/"+out+"'")
+				rpaths = append(rpaths, "'$$ORIGIN/"+out+"'")
 			}
+			flags = append(flags, tc.getLinker().setRpath(rpaths))
 		}
 	}
 	return
@@ -570,28 +572,39 @@ func (g *linuxGenerator) sharedLibsDir(tgt tgtType) string {
 
 func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]string {
 	ldflags := l.Properties.Ldflags
+	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
 
 	if l.build().isForwardingSharedLibrary() {
-		ldflags = append(ldflags, "-Wl,--no-as-needed")
+		ldflags = append(ldflags, tc.getLinker().keepUnusedDependencies())
 	} else {
-		ldflags = append(ldflags, "-Wl,--as-needed")
+		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
 	}
 
 	sharedLibFlags := l.getSharedLibFlags(ctx)
 
-	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
-	linker, tcLdflags, tcLdlibs := tc.getLinker()
+	linker := tc.getLinker().getTool()
+	tcLdflags := tc.getLinker().getFlags()
+	tcLdlibs := tc.getLinker().getLibs()
 	buildWrapper, _ := l.Properties.Build.getBuildWrapperAndDeps(ctx)
 
+	wholeStaticLibs := l.GetWholeStaticLibs(ctx)
+	staticLibs := l.GetStaticLibs(ctx)
+	staticLibFlags := []string{}
+	if len(wholeStaticLibs) > 0 {
+		staticLibFlags = append(staticLibFlags, tc.getLinker().linkWholeArchives(
+			wholeStaticLibs))
+	}
+	staticLibFlags = append(staticLibFlags, staticLibs...)
+
 	args := map[string]string{
-		"build_wrapper":     buildWrapper,
-		"ldflags":           utils.Join(tcLdflags, ldflags),
-		"linker":            linker,
-		"shared_libs_dir":   l.getSharedLibraryDir(),
-		"shared_libs_flags": utils.Join(sharedLibFlags),
-		"static_libs":       utils.Join(l.GetStaticLibs(ctx)),
-		"ldlibs":            utils.Join(l.Properties.Ldlibs, tcLdlibs),
-		"whole_static_libs": utils.Join(l.GetWholeStaticLibs(ctx)),
+		"build_wrapper":   buildWrapper,
+		"ldflags":         utils.Join(tcLdflags, ldflags),
+		"linker":          linker,
+		"shared_libs_dir": l.getSharedLibraryDir(),
+		"shared_libs_flags": utils.Join(append(sharedLibFlags,
+			tc.getLinker().setRpathLink(l.getSharedLibraryDir()))),
+		"static_libs": utils.Join(staticLibFlags),
+		"ldlibs":      utils.Join(l.Properties.Ldlibs, tcLdlibs),
 	}
 	return args
 }
@@ -644,12 +657,11 @@ var linkPool = pctx.StaticPool("link", linkPoolParams)
 var sharedLibraryRule = pctx.StaticRule("shared_library",
 	blueprint.RuleParams{
 		Command: "$build_wrapper $linker -shared $in -o $out $ldflags " +
-			"-Wl,--whole-archive  $whole_static_libs -Wl,--no-whole-archive $static_libs " +
-			"-Wl,-rpath-link,$shared_libs_dir -L$shared_libs_dir $shared_libs_flags $ldlibs",
+			"$static_libs -L$shared_libs_dir $shared_libs_flags $ldlibs",
 		Description: "$out",
 		Pool:        linkPool,
 	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir", "shared_libs_flags",
-	"static_libs", "whole_static_libs")
+	"static_libs")
 
 var symlinkRule = pctx.StaticRule("symlink",
 	blueprint.RuleParams{
@@ -700,11 +712,11 @@ func (g *linuxGenerator) binaryOutputDir(m *binary) string {
 var executableRule = pctx.StaticRule("executable",
 	blueprint.RuleParams{
 		Command: "$build_wrapper $linker $in -o $out $ldflags $static_libs " +
-			"-Wl,-rpath-link,$shared_libs_dir -L$shared_libs_dir $shared_libs_flags $ldlibs",
+			"-L$shared_libs_dir $shared_libs_flags $ldlibs",
 		Description: "$out",
 		Pool:        linkPool,
-	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir", "shared_libs_flags",
-	"static_libs", "whole_static_libs")
+	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir",
+	"shared_libs_flags", "static_libs")
 
 func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
