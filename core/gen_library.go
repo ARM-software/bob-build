@@ -64,8 +64,8 @@ func getLibraryGeneratedPath(m generateLibraryInterface, g generatorBackend) str
 // inputs with all outputs
 func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
-	io.genIn = getGeneratedFiles(ctx, g)
+	io.in = append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
+		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
 	io.implicitOuts = m.implicitOutputs(g)
 	return []inout{io}
