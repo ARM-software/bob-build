@@ -171,7 +171,7 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 
 	kmodBuild := filepath.Join(bobdir, "scripts", "kmod_build.py")
 	kdir := m.Properties.Build.Kernel_dir
-	if !filepath.IsAbs(kdir) {
+	if kdir != "" && !filepath.IsAbs(kdir) {
 		kdir = filepath.Join(g.sourcePrefix(), kdir)
 	}
 
