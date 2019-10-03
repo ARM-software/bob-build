@@ -158,7 +158,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 		buildparams := blueprint.BuildParams{
 			Rule:            rule,
-			Inputs:          utils.NewStringSlice(inout.srcIn, inout.genIn),
+			Inputs:          inout.in,
 			Outputs:         inout.out,
 			ImplicitOutputs: inout.implicitOuts,
 			Implicits:       implicits,

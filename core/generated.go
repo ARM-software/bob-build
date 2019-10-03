@@ -45,12 +45,10 @@ var (
 // To support this the inout type is used to group the outputs
 // associated with each src.
 //
-// Inputs are relative to the project directory (they include module
-// directory but not base source directory). Generated inputs are
-// therefore kept separately in gen_in.
+// Inputs should be specified relative to the working directory, to allow both
+// "normal" and generated inputs to be used.
 type inout struct {
-	srcIn        []string
-	genIn        []string
+	in           []string
 	out          []string
 	depfile      string
 	implicitSrcs []string
@@ -406,8 +404,9 @@ func (m *generateCommon) getAliasList() []string {
 
 func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.srcIn = utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix())
-	io.genIn = utils.NewStringSlice(m.generateCommon.Properties.SourceProps.Specials, getGeneratedFiles(ctx, g))
+	io.in = append(append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
+		m.generateCommon.Properties.SourceProps.Specials...),
+		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
 	if m.Properties.Depfile != "" {
 		io.depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), m.Properties.Depfile)
@@ -472,13 +471,6 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 	var inouts []inout
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
-	// For a transform source every input file is expected to be
-	// converted to an output file. So each file in srcs will get its
-	// own inout and each generated input (from module_srcs) will also
-	// get its own inout. That means one of src_in or gen_in is always
-	// empty, and the other has a single element.
-	empty := []string{}
-
 	for _, src := range m.getSources(ctx) {
 		ins := []string{filepath.Join(g.sourcePrefix(), src)}
 		outs := []string{}
@@ -507,7 +499,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 			implicitSrcs = append(implicitSrcs, implSrc)
 		}
 
-		inouts = append(inouts, inout{ins, empty, outs, depfile, implicitSrcs, implicitOuts})
+		inouts = append(inouts, inout{ins, outs, depfile, implicitSrcs, implicitOuts})
 	}
 	for _, src := range utils.NewStringSlice(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx, g)) {
 		ins := []string{src}
@@ -537,7 +529,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 			implicitSrcs = append(implicitSrcs, implSrc)
 		}
 
-		inouts = append(inouts, inout{empty, ins, outs, depfile, implicitSrcs, implicitOuts})
+		inouts = append(inouts, inout{ins, outs, depfile, implicitSrcs, implicitOuts})
 	}
 
 	return inouts
