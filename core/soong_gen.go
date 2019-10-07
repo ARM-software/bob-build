@@ -268,7 +268,7 @@ func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (
 		hostBin = m
 	})
 	if hostBin == nil {
-		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", gc.Properties.Host_bin))
+		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", proptools.String(gc.Properties.Host_bin)))
 	}
 	return
 }
@@ -277,11 +277,11 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	out []string, depfile bool) {
 
 	// Replace ${args} immediately
-	cmd := strings.Replace(gc.Properties.Cmd, "${args}",
+	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
 
 	hostBinModuleName := ""
-	if gc.Properties.Host_bin != "" {
+	if gc.Properties.Host_bin != nil {
 		hostBinModuleName = ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
 	}
 
@@ -291,7 +291,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Srcs:                    gc.Properties.getSources(mctx),
 		Out:                     out,
 		Export_gen_include_dirs: gc.Properties.Export_gen_include_dirs,
-		Tool:                    gc.Properties.Tool,
+		Tool:                    proptools.String(gc.Properties.Tool),
 		HostBin:                 hostBinModuleName,
 		Cmd:                     cmd,
 		Depfile:                 depfile,
@@ -399,11 +399,11 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 
 	// Only set Tool_files or Tool if the Bob property is not ""
 	// otherwise Soong will report a missing dependency
-	if ts.generateCommon.Properties.Tool != "" {
-		transformProps.Tool_files = []string{ts.generateCommon.Properties.Tool}
+	if ts.generateCommon.Properties.Tool != nil {
+		transformProps.Tool_files = []string{proptools.String(ts.generateCommon.Properties.Tool)}
 	}
-	if ts.generateCommon.Properties.Host_bin != "" {
-		transformProps.Tools = []string{ts.generateCommon.Properties.Host_bin}
+	if ts.generateCommon.Properties.Host_bin != nil {
+		transformProps.Tools = []string{proptools.String(ts.generateCommon.Properties.Host_bin)}
 	}
 
 	transformProps.Depfile = ts.generateCommon.Properties.Depfile
@@ -415,11 +415,11 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		proptools.StringPtr(soongOutputExtension(ts.Properties.Out.Replace[0]))
 
 	// Replace ${args} immediately
-	cmd := strings.Replace(ts.generateCommon.Properties.Cmd, "${args}",
+	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",
 		strings.Join(ts.generateCommon.Properties.Args, " "), -1)
 
-	cmd2, err := expandBobVariables(cmd, ts.generateCommon.Properties.Tool,
-		ts.generateCommon.Properties.Host_bin)
+	cmd2, err := expandBobVariables(cmd, proptools.String(ts.generateCommon.Properties.Tool),
+		proptools.String(ts.generateCommon.Properties.Host_bin))
 	if err != nil {
 		panic(fmt.Errorf("%s property cmd %s", mctx.ModuleName(), err.Error()))
 	}

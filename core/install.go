@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/abstr"
 )
@@ -85,7 +86,7 @@ type InstallableProps struct {
 	// Other modules which must be installed alongside this
 	Install_deps []string
 	// Path to install to, relative to the install_group's path
-	Relative_install_path string
+	Relative_install_path *string
 	// Script used during post install
 	Post_install_tool *string
 	// Command to execute on file(s) after they are installed
@@ -102,11 +103,11 @@ func (props *InstallableProps) processPaths(ctx abstr.BaseModuleContext, g gener
 	}
 }
 
-func (props *InstallableProps) getInstallGroupPath() (string, bool) {
+func (props *InstallableProps) getInstallGroupPath() (path string, ok bool) {
 	if props.Install_path == nil {
 		return "", false
 	}
-	return *props.Install_path, true
+	return proptools.String(props.Install_path), true
 }
 
 func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,

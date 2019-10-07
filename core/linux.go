@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/utils"
 )
@@ -522,13 +523,13 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 					flags = append(flags, "-Wl,--no-copy-dt-needed-entries")
 				}
 				if installPath, ok := sl.Properties.InstallableProps.getInstallGroupPath(); ok {
-					installPath = filepath.Join(installPath, sl.Properties.InstallableProps.Relative_install_path)
+					installPath = filepath.Join(installPath, proptools.String(sl.Properties.InstallableProps.Relative_install_path))
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
 				flags = append(flags, pathToLibFlag(sl.outputName()))
 				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallGroupPath(); ok {
-					installPath = filepath.Join(installPath, sl.generateCommon.Properties.InstallableProps.Relative_install_path)
+					installPath = filepath.Join(installPath, proptools.String(sl.generateCommon.Properties.InstallableProps.Relative_install_path))
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else {
@@ -778,8 +779,8 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	}
 	installPath = filepath.Join("${BuildDir}", installPath)
 
-	if props.Relative_install_path != "" {
-		installPath = filepath.Join(installPath, props.Relative_install_path)
+	if props.Relative_install_path != nil {
+		installPath = filepath.Join(installPath, proptools.String(props.Relative_install_path))
 	}
 
 	installedFiles := []string{}

@@ -77,15 +77,15 @@ type GenerateProps struct {
 	 * $src_dir    - the path to the project source directory - this will be different than the build source directory
 	 *               for Android.
 	 * $module_dir - the path to the module directory */
-	Cmd string
+	Cmd *string
 
 	// A path to the tool that is to be used in cmd. If $tool is in the command variable, then this will be replaced.
 	// with the path to this tool
-	Tool string
+	Tool *string
 
 	// Adds a dependency on a binary with `host_supported: true` which is used by this module.
 	// The path can be referenced in cmd as ${host_bin}.
-	Host_bin string
+	Host_bin *string
 
 	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
 	// TODO: Hide this in Android-specific properties
@@ -373,8 +373,8 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 
 	dependents := getDependentArgsAndFiles(ctx, args)
 
-	if m.Properties.Tool != "" {
-		toolPath := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), m.Properties.Tool)
+	if m.Properties.Tool != nil {
+		toolPath := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), proptools.String(m.Properties.Tool))
 		args["tool"] = toolPath
 		dependents = append(dependents, toolPath)
 	}
@@ -386,7 +386,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	}
 
 	// Args can contain other parameters, so replace that immediately
-	cmd := strings.Replace(m.Properties.Cmd, "${args}", strings.Join(m.Properties.Args, " "), -1)
+	cmd := strings.Replace(proptools.String(m.Properties.Cmd), "${args}", strings.Join(m.Properties.Args, " "), -1)
 
 	if proptools.Bool(m.Properties.Depfile) && !strings.Contains(cmd, "${depfile}") {
 		panic(fmt.Errorf("%s depfile is true, but ${depfile} not used in cmd", m.Name()))
@@ -602,9 +602,9 @@ func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
 
 	// Things that a generated/transformed source depends on
 	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		if gsc.Properties.Host_bin != "" {
+		if gsc.Properties.Host_bin != nil {
 			parseAndAddVariationDeps(mctx, hostToolBinTag,
-				gsc.Properties.Host_bin)
+				proptools.String(gsc.Properties.Host_bin))
 		}
 		// Generated sources can use the outputs of another generated
 		// source or library as a source file or dependency.

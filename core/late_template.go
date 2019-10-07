@@ -81,7 +81,7 @@ func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
 	var sourceProps *SourceProps
 	if gsc, ok := getGenerateCommon(module); ok {
 		propArr = []*[]string{&gsc.Properties.Args}
-		propStr = []*string{&gsc.Properties.Cmd}
+		propStr = []*string{gsc.Properties.Cmd}
 		sourceProps = &gsc.Properties.SourceProps
 	} else if buildProps, ok := module.(moduleWithBuildProps); ok {
 		b := buildProps.build()
