@@ -317,7 +317,7 @@ func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 	if ins, ok := mctx.Module().(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			mctx.AddDependency(mctx.Module(), installGroupTag, *props.Install_group)
+			mctx.AddDependency(mctx.Module(), installGroupTag, proptools.String(props.Install_group))
 		}
 		parseAndAddVariationDeps(mctx, installDepTag, props.Install_deps...)
 	}

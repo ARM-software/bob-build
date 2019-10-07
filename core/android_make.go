@@ -27,6 +27,7 @@ import (
 	"sync"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/utils"
 )
@@ -335,7 +336,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		((bt == binTypeShared) || (bt == binTypeStatic) || ok)
 
 	if ok {
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + m.Properties.Relative_install_path + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + proptools.String(m.Properties.Relative_install_path) + "\n")
 		if m.Properties.Post_install_cmd != nil {
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
@@ -492,7 +493,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("LOCAL_INSTALLED_MODULE_STEM := " + filepath.Base(file) + "\n")
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.Properties.Relative_install_path + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.Properties.Relative_install_path) + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 		sb.WriteString("LOCAL_SRC_FILES := " + file + "\n")
 		sb.WriteString("\ninclude $(BUILD_PREBUILT)\n")
@@ -673,7 +674,7 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 		sb.WriteString("LOCAL_INSTALLED_MODULE_STEM := " + filepath.Base(file) + "\n")
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.getInstallableProps().Relative_install_path + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.getInstallableProps().Relative_install_path) + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", tags)
 		sb.WriteString("LOCAL_PREBUILT_MODULE_FILE := " + file + "\n\n")
 
@@ -972,7 +973,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
 	if ok {
 		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + m.Properties.Relative_install_path + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.Properties.Relative_install_path) + "\n")
 	} else {
 		sb.WriteString("LOCAL_UNINSTALLABLE_MODULE := true\n")
 	}
