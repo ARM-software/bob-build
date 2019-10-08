@@ -213,7 +213,7 @@ bob_generate_source {
     name: "gen_source_depfiles",
     srcs: ["depgen1.in"],
     out: ["output.txt"],
-    depfile: "output.d",
+    depfile: true,
     tool: "gen_with_dep.py",
     cmd: "${tool} -o ${out} -d ${depfile} ${in}",
 }

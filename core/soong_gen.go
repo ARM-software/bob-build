@@ -42,7 +42,7 @@ type genBackendProps struct {
 	Cmd                     string
 	HostBin                 string
 	Tool                    string
-	Depfile                 string
+	Depfile                 bool
 	Module_deps             []string
 	Module_srcs             []string
 	Encapsulates            []string
@@ -171,8 +171,8 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		implicits = append(implicits, tool)
 	}
 
-	if m.Properties.Depfile != "" {
-		m.depfile = android.PathForModuleGen(ctx, m.Properties.Depfile)
+	if m.Properties.Depfile {
+		m.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
 		args["depfile"] = m.depfile.String()
 	}
 
@@ -274,7 +274,7 @@ func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
-	out []string, depfile string) {
+	out []string, depfile bool) {
 
 	// Replace ${args} immediately
 	cmd := strings.Replace(gc.Properties.Cmd, "${args}",
@@ -306,22 +306,22 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Depfile)
+	gs.createGenrule(mctx, gs.Properties.Out, proptools.Bool(gs.generateCommon.Properties.Depfile))
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".a"}, "")
+	gs.createGenrule(mctx, []string{name + ".a"}, false)
 }
 
 func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".so"}, "")
+	gs.createGenrule(mctx, []string{name + ".so"}, false)
 }
 
 func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gb.Name()
-	gb.createGenrule(mctx, []string{name}, "")
+	gb.createGenrule(mctx, []string{name}, false)
 }
 
 var (
@@ -406,9 +406,7 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		transformProps.Tools = []string{ts.generateCommon.Properties.Host_bin}
 	}
 
-	// Bob's specified filename will be ignored. Soong will report an
-	// error if $(depfile) is not used in the command
-	transformProps.Depfile = proptools.BoolPtr(ts.Properties.Out.Depfile != "")
+	transformProps.Depfile = ts.generateCommon.Properties.Depfile
 
 	if len(ts.Properties.Out.Replace) > 1 {
 		panic(fmt.Errorf("Multiple outputs not supported in bob_transform_source on soong, %s", mctx.ModuleName()))

@@ -20,6 +20,7 @@ Substitutions can be made in the command, by using
 - `$gen_dir` - the path to the directory which belongs to this source generator
 - `$in` - the path to the sources - space-delimited
 - `$out` - the path to the targets - space-delimited
+- `$depfile` - the path to generated dependency file
 - `$args` - the value of "args" - space-delimited
 - `$tool` - the path to the tool
 - `$host_bin` - the path to the binary that is produced by the host_bin module
@@ -84,3 +85,9 @@ allowing extra variables to be used in `bob_generated.cmd`: `ar`, `cc`, `cxx`,
 The target type - must be either `host` or `target`. This is to choose between
 the host and target variant of the `bob_defaults` specified in
 `bob_generate.flag_defaults`.
+
+----
+### **bob_generated.depfile** (optional)
+If true, a dependency file describing discovered dependencies will be generated
+with a specific name, derived from module name (`bob_generate_source`) or
+source file name (`bob_transform_source`).

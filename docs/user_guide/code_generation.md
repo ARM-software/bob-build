@@ -254,7 +254,7 @@ bob_generate_source {
     name: "wayland_custom_protocol_code",
     srcs: ["custom_protocol.xml]"
     outs: ["code/wayland_server_custom_protocol.c"],
-    depfile: "out.d",
+    depfile: true,
 
     tool: "gen_wayland.py",
     args: [
@@ -271,8 +271,7 @@ bob_static_library {
 }
 ```
 
-For `bob_transform_source` the dependency file name is specified using
-the same regular expression as the output file.
+`depfile` property has the same effect for `bob_transform_source`.
 
 ```
 bob_transform_source {
@@ -286,8 +285,8 @@ bob_transform_source {
     outs: {
         match: "(.*)\.source",
         replace: "$1",
-        depfile: "$1.d",
     },
+    depfile: true,
     export_gen_include_dirs: ["inc"],
 
     tool: "obfuscate.py",
@@ -341,8 +340,8 @@ bob_transform_source {
     outs: {
         match: "(.*)\.source",
         replace: "$1",
-        depfile: "$1.d",
     },
+    depfile: true,
     export_gen_include_dirs: ["inc"],
 
     tool: "obfuscate.py",
@@ -423,6 +422,7 @@ bob_generate_source {
     out: ["inc/emitter.hpp"],
 
     export_gen_include_dir: ["inc"],
+    depfile: true,
 
     args: [
         "-gen-emitter",
@@ -438,6 +438,7 @@ bob_generate_source {
     out: ["inc/registers.hpp"],
 
     export_gen_include_dir: ["inc"],
+    depfile: true,
 
     args: [
         "-gen-register-info",
@@ -451,7 +452,7 @@ bob_generate_source {
     name: "backend_instructions",
     srcs: ["src/backend.td"],
     out: ["inc/intructions.hpp"],
-    depfile: "deps.d",
+    depfile: true,
 
     export_gen_include_dir: ["inc"],
 
@@ -467,7 +468,7 @@ bob_generate_source {
     name: "backend_interface",
     srcs: ["src/backend.td"],
     out: ["inc/disassembler.hpp"],
-    depfile: "deps.d",
+    depfile: true,
 
     export_gen_include_dir: ["inc"],
 
