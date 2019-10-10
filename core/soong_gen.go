@@ -19,9 +19,7 @@
 package core
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -46,6 +44,9 @@ type genBackendProps struct {
 	Module_deps             []string
 	Module_srcs             []string
 	Encapsulates            []string
+
+	Transform_srcs []string
+	TransformSourceProps
 }
 
 type genBackend struct {
@@ -173,6 +174,8 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 	if m.Properties.Depfile {
 		args["depfile"] = ""
 	}
+	args["headers_generated"] = ""
+	args["srcs_generated"] = ""
 
 	rule := ctx.Rule(apctx,
 		"bob_gen_"+ctx.ModuleName(),
@@ -190,6 +193,8 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 		if m.Properties.Depfile {
 			args["depfile"] = sio.depfile.String()
 		}
+		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, sio.out.Strings()), " ")
+		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, sio.out.Strings()), " ")
 
 		ctx.Build(apctx,
 			android.BuildParams{
@@ -230,73 +235,23 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		m.inouts = append(m.inouts, sio)
 	}
 
-	m.buildInouts(ctx, args)
-}
-
-func expandBobVariables(str, tool, hostBin string) (out string, err error) {
-	// Bob is lax on whether there is any parenthesis, or whether
-	// () or {} is used. That's because it relies on the expansion
-	// happening in ninja. In a few cases Bob explicitly looks for
-	// {}. Soong wants ()
-	//
-	// ${host_bin} => $(location tool) or $(location)
-	// ${tool} => $(location tool_file) or $(location)
-	// ${in} => $(in)
-	// ${out} => $(out)
-	// ${depfile} => $(depfile)
-	// ${gen_dir} => $(genDir)
-	//
-	// ${bob_config} - expand inline
-	// ${bob_config_opts} - expand inline
-	// ${args} - expand inline
-	//
-	// {{match_srcs x}} => $(location x) ignoring globs
-	//
-	// ${src_dir}, ${module_dir}, ${xxmod_dir}, ${xxmod_outs} don't appear to be supported
-	// Nor are ${srcs_generated}, ${headers_generated}
-	//
-	// flag_defaults is primarily used to invoke sub-makes of
-	// different libraries. This shouldn't be needed on Android.
-	// This means the following can't be expanded:
-	//
-	// ${ar}
-	// ${as} ${asflags}
-	// ${cc} ${cflags} ${conlyflags}
-	// ${cxx} ${cxxflags}
-	// ${linker} ${ldflags}
-	out = os.Expand(str, func(s string) string {
-		switch s {
-		case "host_bin":
-			if hostBin != "" {
-				return "$(location " + hostBin + ")"
-			} else {
-				err = errors.New("${host_bin} used but host_bin not specified")
-				return "$(location)"
-			}
-		case "tool":
-			if tool != "" {
-				return "$(location " + tool + ")"
-			} else {
-				err = errors.New("${tool} used but tool not specified")
-				return "$(location)"
-			}
-		case "in":
-			return "$(in)"
-		case "out":
-			return "$(out)"
-		case "depfile":
-			return "$(depfile)"
-		case "gen_dir":
-			return "$(genDir)"
-		case "bob_config":
-			return filepath.Join(getBuildDir(), configName)
-		case "bob_config_opts":
-			return configOpts
-		default:
-			return ""
+	re := regexp.MustCompile(m.Properties.TransformSourceProps.Out.Match)
+	for _, tsrc := range m.Properties.Transform_srcs {
+		srcPath := newSourceFilePath(tsrc, ctx, getBackend(ctx))
+		io := m.Properties.inoutForSrc(re, srcPath, "", &m.Properties.Depfile)
+		sio := soongInout{
+			in:           android.PathsForSource(ctx, io.in),
+			implicitSrcs: android.PathsForSource(ctx, io.implicitSrcs),
+			implicitOuts: pathsForModuleGen(ctx, io.implicitOuts),
+			out:          pathsForModuleGen(ctx, io.out),
 		}
-	})
-	return
+		if m.Properties.Depfile {
+			sio.depfile = android.PathForModuleGen(ctx, io.depfile)
+		}
+		m.inouts = append(m.inouts, sio)
+	}
+
+	m.buildInouts(ctx, args)
 }
 
 func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin android.Module) {
@@ -309,17 +264,23 @@ func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (
 	return
 }
 
+func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContext) string {
+	if gc.Properties.Host_bin == nil {
+		return ""
+	}
+	return ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
+}
+
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	out []string, depfile bool) {
+
+	if !isEnabled(gc) {
+		return
+	}
 
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
-
-	hostBinModuleName := ""
-	if gc.Properties.Host_bin != nil {
-		hostBinModuleName = ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
-	}
 
 	nameProps := nameProps{
 		proptools.StringPtr(gc.Name()),
@@ -330,7 +291,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Out:                     out,
 		Export_gen_include_dirs: gc.Properties.Export_gen_include_dirs,
 		Tool:                    proptools.String(gc.Properties.Tool),
-		HostBin:                 hostBinModuleName,
+		HostBin:                 gc.getHostBinModuleName(mctx),
 		Cmd:                     cmd,
 		Depfile:                 depfile,
 		Module_deps:             gc.Properties.Module_deps,
@@ -370,100 +331,31 @@ var (
 	extRegexp = regexp.MustCompile(`^\.`)
 )
 
-// Bob's module type allows the output file name to be specified using
-// a regular expression replace, whereas Soong only allows you to
-// specify the a new extension for the output.
-//
-// Look for an extension Bob's replacement string, and just use that. The
-// replacement output filename won't be precisely as specified. If we
-// want to maintain Bob behaviour we will need our own module type
-// based on gensrcs.
-func soongOutputExtension(re string) string {
-	// We have a regular expression which might look like one of
-	//  $1.ext
-	//  $1.$2.ext
-	//  $1.infix.$2.ext
-	//  dir/$1.ext
-	//
-	// Drop the directory, match parts, and first '.', so we just end
-	// up with `ext` or `infix.ext`. This should be good enough to keep
-	// the files unique, and hopefully won't upset anything.
-	// Drop directory
-	dirChr := strings.LastIndex(re, "/")
-	if dirChr > -1 {
-		re = re[dirChr+1:]
-	}
-	// Remove capture group references, $[0-9]+
-	re = varRegexp.ReplaceAllLiteralString(re, "")
-	// With the capture group references removed, eliminate '.' which
-	// are now adjacent by replacing .. with .
-	// Note that this could cause breakage if we actually have '..'
-	// (parent dir) in the replacement string, but that shouldn't be
-	// happening.
-	re = dotRegexp.ReplaceAllLiteralString(re, ".")
-	// Trim initial '.'
-	return extRegexp.ReplaceAllLiteralString(re, "")
-}
-
 func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	// bob_transform_source maps best to gensrcs
-	//
-	// Setup a gensrcs property struct as if blueprint had read it
-	// Only include the fields that we expect to use
-	transformProps := struct {
-		Name             *string
-		Srcs             []string
-		Exclude_srcs     []string
-		Output_extension *string
-		Depfile          *bool
-
-		Tool_files []string
-		Tools      []string
-		Cmd        *string
-
-		Export_include_dirs []string
-
-		Owner       *string
-		Proprietary *bool
-
-		Enabled *bool
-	}{}
-
-	transformProps.Name = proptools.StringPtr(ts.Name())
-	transformProps.Srcs = relativeToModuleDir(mctx, ts.generateCommon.Properties.Srcs)
-	transformProps.Exclude_srcs = relativeToModuleDir(mctx, ts.generateCommon.Properties.Exclude_srcs)
-	transformProps.Export_include_dirs = ts.generateCommon.Properties.Export_gen_include_dirs
-	transformProps.Enabled = ts.generateCommon.Properties.Enabled
-
-	// Only set Tool_files or Tool if the Bob property is not ""
-	// otherwise Soong will report a missing dependency
-	if ts.generateCommon.Properties.Tool != nil {
-		transformProps.Tool_files = []string{proptools.String(ts.generateCommon.Properties.Tool)}
-	}
-	if ts.generateCommon.Properties.Host_bin != nil {
-		transformProps.Tools = []string{proptools.String(ts.generateCommon.Properties.Host_bin)}
+	if !isEnabled(ts) {
+		return
 	}
 
-	transformProps.Depfile = ts.generateCommon.Properties.Depfile
-
-	if len(ts.Properties.Out.Replace) > 1 {
-		panic(fmt.Errorf("Multiple outputs not supported in bob_transform_source on soong, %s", mctx.ModuleName()))
-	}
-	transformProps.Output_extension =
-		proptools.StringPtr(soongOutputExtension(ts.Properties.Out.Replace[0]))
+	nameProps := nameProps{proptools.StringPtr(ts.Name())}
 
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",
 		strings.Join(ts.generateCommon.Properties.Args, " "), -1)
 
-	cmd2, err := expandBobVariables(cmd, proptools.String(ts.generateCommon.Properties.Tool),
-		proptools.String(ts.generateCommon.Properties.Host_bin))
-	if err != nil {
-		panic(fmt.Errorf("%s property cmd %s", mctx.ModuleName(), err.Error()))
+	genProps := genBackendProps{
+		Transform_srcs:          ts.generateCommon.Properties.getSources(mctx),
+		Export_gen_include_dirs: ts.generateCommon.Properties.Export_gen_include_dirs,
+		Tool:                    proptools.String(ts.generateCommon.Properties.Tool),
+		HostBin:                 ts.getHostBinModuleName(mctx),
+		Cmd:                     cmd,
+		Depfile:                 proptools.Bool(ts.generateCommon.Properties.Depfile),
+		Module_deps:             ts.generateCommon.Properties.Module_deps,
+		Module_srcs:             ts.generateCommon.Properties.Module_srcs,
+		Encapsulates:            ts.generateCommon.Properties.Encapsulates,
+		TransformSourceProps:    ts.Properties.TransformSourceProps,
 	}
-	transformProps.Cmd = proptools.StringPtr(cmd2)
 
 	// The ModuleDir for the new module will be inherited from the
 	// current module via the TopDownMutatorContext
-	mctx.CreateModule(android.ModuleFactoryAdaptor(genrule.GenSrcsFactory), &transformProps)
+	mctx.CreateModule(android.ModuleFactoryAdaptor(genBackendFactory), &nameProps, &genProps)
 }
