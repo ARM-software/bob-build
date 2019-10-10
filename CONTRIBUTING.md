@@ -54,6 +54,11 @@ Bob has three kinds of tests:
     ```
     (thereafter just run `mm`)
 
+    To test the work-in-progress Soong plugin, simply replace the
+    `./bootstrap_android ANDROID=y` command above with `./bootstrap_soong`,
+    then run `mm`. Watch out for left-over `Android.mk` files and `Android.bp`
+    symlinks when swapping between the two implementations.
+
 - Go unit tests, which can be run using `go test` after running
   `setup_workspace_for_bob.bash`:
 
