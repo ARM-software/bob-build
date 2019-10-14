@@ -452,33 +452,6 @@ type TransformSourceProps struct {
 	}
 }
 
-func (tsp *TransformSourceProps) inoutForSrc(relSrc, srcDir, genDir string, depfile *bool) (io inout) {
-	re := regexp.MustCompile(tsp.Out.Match)
-
-	io.in = []string{relSrc}
-
-	for _, rep := range tsp.Out.Replace {
-		out := filepath.Join(genDir, re.ReplaceAllString(relSrc, rep))
-		io.out = append(io.out, out)
-	}
-
-	for _, implOut := range tsp.Out.Implicit_outs {
-		implOut = filepath.Join(genDir, re.ReplaceAllString(relSrc, implOut))
-		io.implicitOuts = append(io.implicitOuts, implOut)
-	}
-
-	if proptools.Bool(depfile) {
-		io.depfile = filepath.Join(genDir, re.ReplaceAllString(relSrc, getDepfileName(filepath.Base(relSrc))))
-	}
-
-	for _, implSrc := range tsp.Out.Implicit_srcs {
-		implSrc = re.ReplaceAllString(relSrc, implSrc)
-		io.implicitSrcs = append(io.implicitSrcs, filepath.Join(srcDir, implSrc))
-	}
-
-	return
-}
-
 func (m *transformSource) outputs(g generatorBackend) []string {
 	return m.outs
 }
@@ -505,17 +478,67 @@ func (m *transformSource) topLevelProperties() []interface{} {
 
 func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var inouts []inout
+	re := regexp.MustCompile(m.Properties.Out.Match)
 
-	for _, src := range utils.NewStringSlice(
-		utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
-		m.generateCommon.Properties.Specials,
-		getGeneratedFiles(ctx, g)) {
+	for _, src := range m.getSources(ctx) {
+		ins := []string{filepath.Join(g.sourcePrefix(), src)}
+		outs := []string{}
+		depfile := ""
+		implicitSrcs := []string{}
+		implicitOuts := []string{}
 
-		io := m.Properties.inoutForSrc(src,
-			filepath.Join(g.sourcePrefix(), ctx.ModuleDir()),
-			g.sourceOutputDir(&m.generateCommon),
-			m.generateCommon.Properties.Depfile)
-		inouts = append(inouts, io)
+		for _, rep := range m.Properties.Out.Replace {
+			out := filepath.Join(g.sourceOutputDir(&m.generateCommon), re.ReplaceAllString(src, rep))
+			outs = append(outs, out)
+		}
+
+		for _, implOut := range m.Properties.Out.Implicit_outs {
+			implOut = filepath.Join(g.sourceOutputDir(&m.generateCommon), re.ReplaceAllString(src, implOut))
+			implicitOuts = append(implicitOuts, implOut)
+		}
+
+		if proptools.Bool(m.generateCommon.Properties.Depfile) {
+			depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon),
+				re.ReplaceAllString(src, getDepfileName(filepath.Base(src))))
+		}
+
+		for _, implSrc := range m.Properties.Out.Implicit_srcs {
+			implSrc = re.ReplaceAllString(src, implSrc)
+			implSrc = filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), implSrc)
+			implicitSrcs = append(implicitSrcs, implSrc)
+		}
+
+		inouts = append(inouts, inout{ins, outs, depfile, implicitSrcs, implicitOuts})
+	}
+	for _, src := range utils.NewStringSlice(m.generateCommon.Properties.Specials, getGeneratedFiles(ctx, g)) {
+		ins := []string{src}
+		outs := []string{}
+		depfile := ""
+		implicitSrcs := []string{}
+		implicitOuts := []string{}
+
+		for _, rep := range m.Properties.Out.Replace {
+			out := filepath.Join(g.sourceOutputDir(&m.generateCommon), re.ReplaceAllString(src, rep))
+			outs = append(outs, out)
+		}
+
+		for _, implOut := range m.Properties.Out.Implicit_outs {
+			implOut = filepath.Join(g.sourceOutputDir(&m.generateCommon), re.ReplaceAllString(src, implOut))
+			implicitOuts = append(implicitOuts, implOut)
+		}
+
+		if proptools.Bool(m.generateCommon.Properties.Depfile) {
+			depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon),
+				re.ReplaceAllString(src, getDepfileName(filepath.Base(src))))
+		}
+
+		for _, implSrc := range m.Properties.Out.Implicit_srcs {
+			implSrc = re.ReplaceAllString(src, implSrc)
+			implSrc = filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), implSrc)
+			implicitSrcs = append(implicitSrcs, implSrc)
+		}
+
+		inouts = append(inouts, inout{ins, outs, depfile, implicitSrcs, implicitOuts})
 	}
 
 	return inouts
