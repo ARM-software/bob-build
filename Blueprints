@@ -42,6 +42,7 @@ bootstrap_go_package {
         "core/defaults.go",
         "core/external_library.go",
         "core/feature.go",
+        "core/filepath.go",
         "core/gen_binary.go",
         "core/gen_library.go",
         "core/gen_shared.go",

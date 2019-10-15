@@ -1,8 +1,8 @@
-void output_f();
-void output_f2();
-void output_f3();
-void output_f4();
-void output_f5();
+#include "f.h"
+#include "f2.h"
+#include "f3.h"
+#include "f4.h"
+#include "f5.h"
 
 void validate_link()
 {
