@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,16 @@ bob_transform_source {
     ],
     out: {
         match: "(.+)\\.in",
-        replace: ["single/$1.cpp"], // inside extra directory
+        replace: [
+            // inside extra directory
+            "single/$1.cpp",
+            "single/$1.h",
+        ],
     },
+    export_gen_include_dirs: ["single/transform_source"],
 
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${out}",
+    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
 }
 
 bob_transform_source {
@@ -39,12 +44,16 @@ bob_transform_source {
     },
     always_enabled_feature: {
         out: {
-            replace: ["$1.cpp"],
+            replace: [
+                "$1.cpp",
+                "$1.h",
+            ],
         },
     },
+    export_gen_include_dirs: ["transform_source"],
 
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${out}",
+    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
 }
 
 bob_transform_source {
@@ -56,16 +65,25 @@ bob_transform_source {
     ],
     out: {
         match: "(.+)\\.in",
-        replace: ["$1.cpp"],
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
     },
+    export_gen_include_dirs: ["transform_source"],
 
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${out}",
+    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
 }
 
 bob_binary {
     name: "validate_link_transform_source",
     generated_sources: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+    ],
+    generated_headers: [
         "transform_source_single_dir",
         "transform_source_single",
         "transform_source_multiple_in",

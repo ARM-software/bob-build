@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2019 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,3 +52,8 @@ if os.path.splitext(output_base_name)[1] != ".cpp":
 without_extension = os.path.splitext(output_base_name)[0]
 with open(args.output, 'w') as outfile:
     outfile.write("void output_%s(){}\n" % without_extension)
+
+# Output a header to go with the cpp file
+header = os.path.splitext(args.output)[0] + ".h"
+with open(header, 'w') as outfile:
+    outfile.write("void output_%s();\n" % without_extension)
