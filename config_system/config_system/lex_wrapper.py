@@ -25,12 +25,10 @@ class LexWrapper:
         self.ignore_missing = ignore_missing
         self.verbose = verbose
 
-    def source(self, fname):
+    def open(self, fname):
+        """Open the named file."""
         if self.root_dir is None:
             self.root_dir = os.path.dirname(fname)
-        else:
-            # All paths are relative to the dir containing the first Mconfig
-            fname = os.path.join(self.root_dir, fname)
 
         if not os.path.exists(fname) and self.ignore_missing:
             return
@@ -42,6 +40,14 @@ class LexWrapper:
 
         self.push_lexer(lexer)
         self.input(file_contents)
+
+    def source(self, fname):
+        """Handle the source command, ensuring we open the file relative to
+        the directory containing the first Mconfig."""
+        if self.root_dir is not None:
+            fname = os.path.join(self.root_dir, fname)
+
+        self.open(fname)
 
     def current_lexer(self):
         return self.lexers[-1]

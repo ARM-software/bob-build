@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
 import ply.yacc as yacc
 
 from config_system import expr
@@ -56,6 +57,7 @@ def p_stmt(p):
             | config_stmt
             | choice_stmt
             | source_stmt
+            | source_local_stmt
             | mainmenu_stmt
     """
     p[0] = p[1]
@@ -222,6 +224,15 @@ def p_source_stmt_first(p):
     p[0] = {}
 
 
+def p_source_local_stmt_first(p):
+    """source_local_stmt_first : SOURCE_LOCAL QUOTED_STRING dummy"""
+    fname = p.lexer.current_lexer().fname
+    dname = os.path.dirname(fname)
+    mname = os.path.join(dname, p[2])
+    p.lexer.open(mname)
+    p[0] = {}
+
+
 def p_mainmenu_stmt_first(p):
     """mainmenu_stmt_first : MAINMENU QUOTED_STRING dummy"""
     p[0] = p[2]
@@ -241,6 +252,11 @@ def p_dummy(p):
 
 def p_source_stmt(p):
     "source_stmt : source_stmt_first EOL"
+    p[0] = {}
+
+
+def p_source_local_stmt(p):
+    'source_local_stmt : source_local_stmt_first EOL'
     p[0] = {}
 
 
