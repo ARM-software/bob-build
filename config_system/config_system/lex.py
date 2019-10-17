@@ -48,6 +48,7 @@ tokens = (
     "QUOTED_STRING",
     "SELECT",
     "SOURCE",
+    "SOURCE_LOCAL",
     "STRING",
     "VISIBLE",
     "YES", "NO",
@@ -74,6 +75,7 @@ commands = (
     "prompt",
     "select",
     "source",
+    "source_local",
     "string",
     "visible",
 )

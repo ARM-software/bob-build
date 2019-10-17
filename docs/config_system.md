@@ -65,10 +65,11 @@ options.
 Configuration options live in a file called `Mconfig` at the root of a project
 directory.
 
-Furthermore, `Mconfig` files can include other ones using the `source`
-statement. The argument to `source` is a directory *relative to the project
-root, not relative to the Mconfig file containing the `source` statement*.
-E.g., for the following layout:
+Furthermore, `Mconfig` files can include other ones using the `source` or
+`source_local` statements. For compatibility with kernel Kconfig files, the
+argument to `source` is a directory *relative to the project root, not relative
+to the Mconfig file containing the `source` statement*. `source_local` takes a
+path relative to the current file. E.g., for the following layout:
 
 ```
 project
@@ -96,6 +97,7 @@ And `subcomponent/Mconfig` would contain:
 ```
 # ...
 source "subcomponent/subsubcomponent/Mconfig"
+# OR: source_local "subsubcomponent/Mconfig"
 # NOT: source "subsubcomponent/Mconfig"
 ```
 
