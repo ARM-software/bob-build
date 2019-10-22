@@ -967,7 +967,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 			Rule:      kbuildRule,
 			Outputs:   []string{builtModule},
 			Inputs:    utils.NewStringSlice(prefixedSources, m.Properties.Build.SourceProps.Specials),
-			Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["copy_with_deps"]}),
+			Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["kmod_build"]}),
 			Optional:  false,
 			Args:      args,
 		})

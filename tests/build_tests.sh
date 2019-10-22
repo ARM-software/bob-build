@@ -144,13 +144,13 @@ UPDATE+=(${build_dir}/target/objects/sl_libb/static_libs/b.c.o
 check_dep_updates "library headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # kernel module dependencies on sources
-SRC=tests/kernel_module/module/test_module.c
-UPDATE=(${build_dir}/target/kernel_modules/test_module/test_module.ko)
+SRC=tests/kernel_module/module1/test_module1.c
+UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
 check_dep_updates "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # kernel module dependencies on kernel header
-SRC=tests/kernel_module/kdir/include/header.h
-UPDATE=(${build_dir}/target/kernel_modules/test_module/test_module.ko)
+SRC=tests/kernel_module/kdir/include/kernel_header.h
+UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
 check_dep_updates "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources

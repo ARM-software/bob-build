@@ -19,10 +19,15 @@
 package core
 
 import (
+	"fmt"
+	"strings"
+
 	"android/soong/android"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 type nameProps struct {
@@ -30,14 +35,16 @@ type nameProps struct {
 }
 
 type kernelModuleBackendProps struct {
-	Srcs    []string
-	Args    kbuildArgs
-	Default bool
+	Srcs          []string
+	Args          kbuildArgs
+	Default       bool
+	Extra_Symbols []string
 }
 
 type kernelModuleBackend struct {
 	android.ModuleBase
 	Properties kernelModuleBackendProps
+	Symvers    android.Path
 }
 
 func kernelModuleBackendFactory() android.Module {
@@ -54,12 +61,17 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 	nameProps := nameProps{proptools.StringPtr(m.Name())}
 
 	props := kernelModuleBackendProps{
-		Args:    m.generateKbuildArgs(mctx),
-		Srcs:    m.Properties.getSources(mctx),
-		Default: isBuiltByDefault(m),
+		Args:          m.generateKbuildArgs(mctx),
+		Srcs:          m.Properties.getSources(mctx),
+		Default:       isBuiltByDefault(m),
+		Extra_Symbols: m.Properties.Extra_symbols,
 	}
 
 	mctx.CreateModule(android.ModuleFactoryAdaptor(kernelModuleBackendFactory), &nameProps, &props)
+}
+
+func (m *kernelModuleBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
+	mctx.AddDependency(mctx.Module(), kernelModuleDepTag, m.Properties.Extra_Symbols...)
 }
 
 var soongKbuildRule = apctx.StaticRule("bobKbuild",
@@ -82,15 +94,40 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 	builtModule := android.PathForModuleOut(ctx, m.Name()+".ko")
 	symvers := android.PathForModuleOut(ctx, "Module.symvers")
 
+	// preserve symvers location for this module (for the parent pass)
+	m.Symvers = symvers
+
+	// gather symvers location for all dependant kernel modules
+	depSymvers := []android.Path{}
+	abstr.VisitDirectDepsIf(ctx,
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
+		func(m blueprint.Module) {
+			if km, ok := m.(*kernelModuleBackend); ok {
+				depSymvers = append(depSymvers, km.Symvers)
+			} else {
+				panic(fmt.Errorf("%s not a kernel module backend", m.Name()))
+			}
+		})
+
+	if len(depSymvers) > 0 {
+		// convert to strings
+		temp := []string{}
+		for _, path := range depSymvers {
+			temp = append(temp, path.String())
+		}
+		// overwrite incorrect paths
+		m.Properties.Args.KbuildExtraSymbols = "--extra-symbols " + strings.Join(temp, " ")
+	}
+
 	ctx.Build(apctx,
 		android.BuildParams{
 			Rule:        soongKbuildRule,
 			Description: "kbuild " + ctx.ModuleName(),
 			Inputs:      android.PathsForSource(ctx, m.Properties.Srcs),
-			//Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["copy_with_deps"]}),
-			Outputs: []android.WritablePath{builtModule},
-			Args:    m.Properties.Args.toDict(),
-			Default: m.Properties.Default,
+			Implicits:   append(depSymvers, android.PathForSource(ctx, m.Properties.Args.KmodBuild)),
+			Outputs:     []android.WritablePath{builtModule},
+			Args:        m.Properties.Args.toDict(),
+			Default:     m.Properties.Default,
 		})
 
 	ctx.InstallFile(android.PathForModuleInstall(ctx, "system", "vendor", "lib"),
