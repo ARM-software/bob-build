@@ -1,0 +1,1 @@
+obj-m += test_module2.o

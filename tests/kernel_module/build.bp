@@ -1,0 +1,4 @@
+bob_alias {
+    name: "bob_test_kernel_module",
+    srcs: ["test_module1", "test_module2"],
+}

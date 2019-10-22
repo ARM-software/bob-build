@@ -11,7 +11,7 @@ include $(M)/Kbuild
 MODULES += $(addprefix $(M)/,$(obj-m:.o=.ko))
 DEPFILES += $(addprefix $(M)/,$(obj-m:.o=.d))
 CPPFLAGS := -Iinclude -MMD -MP
-CFLAGS := -fPIC
+CFLAGS := -fPIC $(EXTRA_CFLAGS)
 
 all: $(MODULES)
 

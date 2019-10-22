@@ -48,6 +48,7 @@ DISABLE_TEST_DIRS=(
     match_source
     output
     source_encapsulation
+    transform_source
 )
 
 for TEST_DIR in "${DISABLE_TEST_DIRS[@]}"; do

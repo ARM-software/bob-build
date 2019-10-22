@@ -1,17 +1,13 @@
 bob_kernel_module {
-    name: "test_module",
+    name: "test_module1",
     /* Usually kernel_dir would be an absolute path. For testing use this
      * workaround to use the spoofed kernel build system included with the Bob
      * tests. */
     kernel_dir: "kernel_module/kdir",
     srcs: [
         "Kbuild",
-        "test_module.c",
+        "test_module1.c",
     ],
+    local_include_dirs: ["."],
     build_by_default: true,
-}
-
-bob_alias {
-    name: "bob_test_kernel_module",
-    srcs: ["test_module"],
 }
