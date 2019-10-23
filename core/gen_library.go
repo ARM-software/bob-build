@@ -50,6 +50,7 @@ type generateLibraryInterface interface {
 
 	libExtension() string
 	getSources(ctx abstr.BaseModuleContext) []string
+	getDepfile(generatorBackend) (string, bool)
 }
 
 //// Local functions
@@ -67,6 +68,9 @@ func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext, g generator
 	io.in = append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
 		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
+	if depfile, ok := m.getDepfile(g); ok {
+		io.depfile = depfile
+	}
 	io.implicitOuts = m.implicitOutputs(g)
 	return []inout{io}
 }
