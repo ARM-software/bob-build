@@ -244,6 +244,15 @@ func (m *generateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
+func (m *generateCommon) getDepfile(g generatorBackend) (name string, depfile bool) {
+	depfile = proptools.Bool(m.Properties.Depfile)
+	if depfile {
+		name = filepath.Join(g.sourceOutputDir(m), getDepfileName(m.Name()))
+		return
+	}
+	return "", depfile
+}
+
 // GenerateSourceProps are properties of 'bob_generate_source', i.e. a module
 // type which can generate sources using a single execution
 // The command will be run once - with $in being the paths in "srcs" and $out being the paths in "out".
@@ -421,8 +430,8 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 		m.generateCommon.Properties.SourceProps.Specials...),
 		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
-	if proptools.Bool(m.generateCommon.Properties.Depfile) {
-		io.depfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), getDepfileName(m.Name()))
+	if depfile, ok := m.getDepfile(g); ok {
+		io.depfile = depfile
 	}
 	io.implicitSrcs = utils.PrefixDirs(m.Properties.Implicit_srcs, filepath.Join(g.sourcePrefix(), ctx.ModuleDir()))
 	io.implicitOuts = m.implicitOutputs(g)
