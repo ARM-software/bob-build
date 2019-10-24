@@ -86,7 +86,7 @@ func (g *linuxGenerator) sourceOutputDir(m *generateCommon) string {
 
 var copyRule = pctx.StaticRule("copy",
 	blueprint.RuleParams{
-		Command:     "cp --reflink=auto $in $out",
+		Command:     "cp $in $out",
 		Description: "$out",
 	})
 
