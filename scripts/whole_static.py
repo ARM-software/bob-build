@@ -88,6 +88,16 @@ def main():
     objects = []
     archives = []
 
+    # Always remove the output file to avoid appending to an existing archive.
+    if os.path.isfile(args.out):
+        try:
+            os.remove(args.out)
+        except OSError as e:
+            sys.stderr.write(
+                "Error: Couldn't remove file '%s': %s\n",
+                args.out, e.strerror)
+            sys.exit(1)
+
     for i in args.inputs:
         ext = os.path.splitext(i)[1]
         if ext == ".o":
