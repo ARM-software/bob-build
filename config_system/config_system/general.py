@@ -538,8 +538,8 @@ class Menu(object):
         self.title = data.get_menu_title(menu_number)
 
         if len(self.items) == 0:
-            # Empty menu
-            self.items = [MenuItem("Empty Menu", None)]
+            # empty menu
+            self.items = [MenuItem('empty', None)]
         elif data.is_choice_group(menu_number):
             # Find currently selected entry
             while self.items[self.selection].get_value() is not True:
@@ -651,9 +651,11 @@ class MenuItem(object):
                     break
             text_parts.append(StyledText("   "))
             text_parts.append(StyledText(" %s (%s)" % (choice['title'], current_value)))
-        else:
+        elif self.type == "empty":
             text_parts.append(StyledText("***"))
-            text_parts.append(StyledText(" %s ***" % self.type))
+            text_parts.append(StyledText(" Empty Menu ***"))
+        else:
+            raise Exception("Unknown type (%s)" % self.type)
 
         text_parts[-1].style = 'highlight' if is_selected else get_default_style()
         return text_parts
@@ -710,10 +712,13 @@ class MenuItem(object):
 
     def get_value(self):
         """Always return a string representation"""
-        value = data.get_config(self.value)['value']
-        if data.get_config(self.value)['datatype'] == 'int':
-            value = str(value)
-        return value
+        if self.type == "empty":
+            return ''
+        else:
+            value = data.get_config(self.value)['value']
+            if data.get_config(self.value)['datatype'] == 'int':
+                value = str(value)
+            return value
 
     def set_value(self, new_value):
         """
@@ -731,9 +736,13 @@ class MenuItem(object):
                 for k in data.get_choice_group(group)['configs']:
                     if k != self.value and len(data.get_config(k)['selected_by']) > 0:
                         return False
+        elif self.type == "empty":
+            return False
         return can_enable(data.get_menu_configitem(self.type, self.value))
 
     def is_visible(self):
+        if self.type == "empty":
+            return False
         return is_visible(data.get_menu_configitem(self.type, self.value))
 
     def select(self):
