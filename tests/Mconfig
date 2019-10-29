@@ -243,3 +243,8 @@ config ALWAYS_ENABLED_FEATURE
 config TEMPLATE_TEST_VALUE
 	int
 	default 6
+
+## configuration to toggle for static library creation test
+config STATIC_LIB_TOGGLE
+	bool "Test toggle"
+    default n

@@ -22,11 +22,19 @@ bob_alias {
         "sl_main_export_static",
         "sl_main_ordered",
         "sl_main_dd",
+        "sl_libb_whole_shared",
+        "sl_libb_shared",
     ],
+}
+
+bob_defaults {
+    name: "shared_code",
+    cflags: ["-fPIC"],
 }
 
 bob_static_library {
     name: "sl_liba",
+    defaults: ["shared_code"],
     srcs: [
         "a/a.c",
         "a.c",
@@ -36,15 +44,53 @@ bob_static_library {
 
 bob_static_library {
     name: "sl_libb_whole_inclusion",
+    defaults: ["shared_code"],
     srcs: ["b.c"],
+
+    // b.c and b2.c contain the same code. Compile different object
+    // based on configuration. After switching configurations the archive
+    // should only ever have one of the objects. This checks archive
+    // creation from archives and objects (calls to whole_static.py).
+    static_lib_toggle: {
+        srcs: ["b2.c"],
+        exclude_srcs: ["b.c"],
+    },
     whole_static_libs: ["sl_liba"],
 }
 
 bob_static_library {
     name: "sl_libb",
+    defaults: ["shared_code"],
     srcs: ["b.c"],
+
+    // b.c and b2.c contain the same code. Compile different object
+    // based on configuration. After switching configurations the archive
+    // should only ever have one of the objects. This checks archive
+    // creation from objects (direct calls to ar).
+    static_lib_toggle: {
+        srcs: ["b2.c"],
+        exclude_srcs: ["b.c"],
+    },
     // Must define FOO for the a.h include
     cflags: ["-DFOO=1"],
+}
+
+bob_shared_library {
+    name: "sl_libb_whole_shared",
+
+    // Include sl_libb_whole_inclusion as a whole archive in this
+    // shared library. If there are duplicate symbols in the static
+    // archive from b.c and b2.c, this link will fail.
+    whole_static_libs: ["sl_libb_whole_inclusion"],
+}
+
+bob_shared_library {
+    name: "sl_libb_shared",
+
+    // Include sl_libb as a whole archive in this shared library. If
+    // there are duplicate symbols in the static archive from b.c and
+    // b2.c, this link will fail.
+    whole_static_libs: ["sl_libb"],
 }
 
 bob_binary {
