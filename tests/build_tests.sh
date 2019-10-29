@@ -78,7 +78,13 @@ check_build_output "${build_dir}"
 
 # A re-bootstrapped build directory with a different working directory
 # should still work. Re-use the last directory
+echo Checking rebootstrap
 tests/bootstrap -o ${build_dir}
+${build_dir}/buildme bob_tests
+
+# Check static archives are built from scratch. Re-use the last directory
+echo Reconfiguring to check archives are clean
+${build_dir}/config STATIC_LIB_TOGGLE=y
 ${build_dir}/buildme bob_tests
 
 # Helper function for testing that appropriate files are rebuilt after
@@ -189,7 +195,6 @@ SRC=tests/implicit_outs/input.in
 UPDATE=(${build_dir}/target/executable/build_implicit_out
         ${build_dir}/target/executable/include_implicit_header)
 check_dep_updates "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
-
 
 # Clean up
 rm -rf "${TEST_DIRS[@]}"
