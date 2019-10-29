@@ -82,6 +82,8 @@ def get_menu_configitem(type, value):
         return get_choice_group(value)
     elif type in ['menu']:
         return get_menu(value)
+    elif type == 'empty':
+        return None
 
 
 def get_config_list():
