@@ -276,6 +276,18 @@ func (l *Build) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	l.Target.SourceProps.processPaths(ctx, g)
 	l.Target.Local_include_dirs = utils.PrefixDirs(l.Target.Local_include_dirs, prefix)
 	l.Target.Export_local_include_dirs = utils.PrefixDirs(l.Target.Export_local_include_dirs, prefix)
+
+	// join module dir with relative kernel dir
+	if l.Kernel_dir != "" && !filepath.IsAbs(l.Kernel_dir) {
+		l.Kernel_dir = filepath.Join(prefix, l.Kernel_dir)
+	}
+	// do it also for host and target features
+	if l.Host.Kernel_dir != "" && !filepath.IsAbs(l.Host.Kernel_dir) {
+		l.Host.Kernel_dir = filepath.Join(prefix, l.Host.Kernel_dir)
+	}
+	if l.Target.Kernel_dir != "" && !filepath.IsAbs(l.Target.Kernel_dir) {
+		l.Target.Kernel_dir = filepath.Join(prefix, l.Target.Kernel_dir)
+	}
 }
 
 // library is a base class for modules which are generated from sets of object files
