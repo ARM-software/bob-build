@@ -20,6 +20,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"android/soong/android"
@@ -117,6 +118,12 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 		}
 		// overwrite incorrect paths
 		m.Properties.Args.KbuildExtraSymbols = "--extra-symbols " + strings.Join(temp, " ")
+	}
+
+	// finalize relative path (assuming location under source dir)
+	kdir := m.Properties.Args.KernelDir
+	if kdir != "" && !filepath.IsAbs(kdir) {
+		m.Properties.Args.KernelDir = android.PathForSource(ctx, kdir).String()
 	}
 
 	ctx.Build(apctx,

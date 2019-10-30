@@ -3,7 +3,7 @@ bob_kernel_module {
     /* Usually kernel_dir would be an absolute path. For testing use this
      * workaround to use the spoofed kernel build system included with the Bob
      * tests. */
-    kernel_dir: "kernel_module/kdir",
+    kernel_dir: "../kdir",
     srcs: [
         "Kbuild",
         "test_module2.c",
