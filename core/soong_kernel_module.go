@@ -40,6 +40,7 @@ type kernelModuleBackendProps struct {
 	Args          kbuildArgs
 	Default       bool
 	Extra_Symbols []string
+	Install_Path  string
 }
 
 type kernelModuleBackend struct {
@@ -61,11 +62,22 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	nameProps := nameProps{proptools.StringPtr(m.Name())}
 
+	installProps := m.getInstallableProps()
+	installPath, ok := installProps.getInstallGroupPath()
+	if !ok {
+		installPath = ""
+	} else {
+		if installProps.Relative_install_path != nil {
+			installPath = filepath.Join(installPath, proptools.String(installProps.Relative_install_path))
+		}
+	}
+
 	props := kernelModuleBackendProps{
 		Args:          m.generateKbuildArgs(mctx),
 		Srcs:          m.Properties.getSources(mctx),
 		Default:       isBuiltByDefault(m),
 		Extra_Symbols: m.Properties.Extra_symbols,
+		Install_Path:  installPath,
 	}
 
 	mctx.CreateModule(android.ModuleFactoryAdaptor(kernelModuleBackendFactory), &nameProps, &props)
@@ -137,7 +149,7 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 			Default:     m.Properties.Default,
 		})
 
-	ctx.InstallFile(android.PathForModuleInstall(ctx, "system", "vendor", "lib"),
+	ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path),
 		m.Name()+".ko", builtModule)
 
 	// Add a dependency between Module.symvers and the kernel module. This
