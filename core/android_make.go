@@ -40,11 +40,20 @@ const (
 	binTypeExecutable binType = binType(2)
 )
 
+var (
+	androidLock sync.Mutex
+
+	dummyRule = pctx.StaticRule("dummy",
+		blueprint.RuleParams{
+			// We don't want this rule to do anything, so just echo the target
+			Command:     "echo $out",
+			Description: "Dummy rule",
+		})
+)
+
 type androidMkGenerator struct {
 	toolchainSet
 }
-
-var androidLock sync.Mutex
 
 func writeIfChanged(filename string, sb *strings.Builder) {
 	mustWrite := true
@@ -906,7 +915,26 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 		}
 		order = append(order[:lowindex], order[lowindex+1:]...)
 	}
-	writeIfChanged(filepath.Join(getBuildDir(), "Android.inc"), sb)
+	androidmkFile := filepath.Join(getBuildDir(), "Android.inc")
+	writeIfChanged(androidmkFile, sb)
+
+	// Blueprint does not output package context dependencies unless
+	// the package context outputs a variable, pool or rule to the
+	// build.ninja.
+	//
+	// The Android make backend does not create variables, pools or
+	// rules since the build logic is actually written in makefiles.
+	// Therefore write a dummy ninja target to ensure that the bob
+	// package context dependencies are output.
+	//
+	// We make the target optional, so that it doesn't execute when
+	// ninja runs without a target.
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:     dummyRule,
+			Outputs:  []string{androidmkFile},
+			Optional: true,
+		})
 }
 
 func (g *androidMkGenerator) moduleOutputDir(moduleName string) string {
