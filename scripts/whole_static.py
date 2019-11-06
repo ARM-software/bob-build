@@ -75,6 +75,7 @@ def extract_archives(ar, dest, archives):
 def parse_args():
     ap = argparse.ArgumentParser()
 
+    ap.add_argument("--build-wrapper", required=False)
     ap.add_argument("--ar", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("inputs", nargs="+")
@@ -116,6 +117,10 @@ def main():
     try:
         extracted_objects = extract_archives(args.ar, tmpdir, archives)
         cmd = [args.ar, "-rcs", args.out] + objects + extracted_objects
+        # prepend with build wrapper
+        # note: we need to split as it can contain wrapper args as well
+        if args.build_wrapper is not None:
+            cmd = args.build_wrapper.split() + cmd
         subprocess.call(cmd)
     except subprocess.CalledProcessError as e:
         sys.stderr.write("Error: Command '%s' failed.\n" % e.cmd)
