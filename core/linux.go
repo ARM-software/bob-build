@@ -431,7 +431,7 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 var wholeStaticScript = filepath.Join(bobdir, "scripts", "whole_static.py")
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
-		Command:     "$whole_static_tool --ar $ar --out $out $in $whole_static_libs",
+		Command:     "$whole_static_tool --build-wrapper \"$build_wrapper\" --ar $ar --out $out $in $whole_static_libs",
 		Description: "$out",
 	}, "ar", "build_wrapper", "whole_static_libs", "whole_static_tool")
 
