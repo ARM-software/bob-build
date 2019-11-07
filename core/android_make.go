@@ -159,6 +159,29 @@ func specifyCompilerStandard(varname string, flags []string) string {
 	return line
 }
 
+func thumbFlag(s string) bool {
+	return s == "-mthumb"
+}
+
+func armFlag(s string) bool {
+	return s == "-marm" || s == "-mno-thumb"
+}
+
+func specifyArmMode(flags []string) string {
+	// Look for the flag setting thumb or not thumb
+	line := ""
+	thumb := utils.Filter(thumbFlag, flags)
+	arm := utils.Filter(armFlag, flags)
+	if len(thumb) > 0 && len(arm) > 0 {
+		panic("Both thumb and no thumb (arm) options are specified")
+	} else if len(thumb) > 0 {
+		line = "LOCAL_ARM_MODE:=thumb\n"
+	} else if len(arm) > 0 {
+		line = "LOCAL_ARM_MODE:=arm\n"
+	}
+	return line
+}
+
 // This function generates the Android make fragment to build static
 // libraries, shared libraries and executables. It's evolved over time
 // and needs to be refactored to use interfaces better.
@@ -265,6 +288,9 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
 	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags)))
 	sb.WriteString(specifyCompilerStandard("LOCAL_CPP_STD", utils.NewStringSlice(cflagsList, m.Properties.Cxxflags)))
+
+	// Setup ARM mode if needed
+	sb.WriteString(specifyArmMode(utils.NewStringSlice(cflagsList, m.Properties.Conlyflags, m.Properties.Cxxflags)))
 
 	// convert Shared_libs, Export_shared_libs, Resolved_static_libs, and
 	// Whole_static_libs to Android module names rather than Bob module
