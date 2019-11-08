@@ -45,9 +45,7 @@ if [ ${DO_PYTHON_TESTS} -eq 1 ] ; then
 
     ####################
     fold_start 'config_system pytest'
-        # The newer command `pytest` is not available on Ubuntu 16.04, which the
-        # Travis environment uses, so invoke the older `py.test` here.
-        py.test-${PYTHON_SUFFIX} config_system
+        python${PYTHON_SUFFIX} -m pytest config_system
     fold_end $?
     ####################
 fi

@@ -5,7 +5,7 @@ fold_start() {
     FOLD="$1"
     travis_fold start "$FOLD"
     travis_time_start
-    echo -e "\e[33;1m$FOLD\e[0m"
+    printf "\e[33;1m$FOLD\e[0m\n"
 }
 
 fold_end() {
@@ -23,18 +23,18 @@ fold_end() {
 }
 
 result_ok() {
-    echo -e "\e[32;1mOK\e[0m"
+    printf "\e[32;1mOK\e[0m\n"
 }
 
 result_skip() {
     local MSG=$1
 
     echo -n "$MSG "
-    echo -e "\e[33;1mSKIP\e[0m"
+    printf "\e[33;1mSKIP\e[0m\n"
 }
 
 result_fail() {
-    echo -e "\e[31;1mFAIL\e[0m"
+    printf "\e[31;1mFAIL\e[0m\n"
 }
 
 # Travis doesn't support multiple languages. So to support multiple

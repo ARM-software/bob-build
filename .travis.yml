@@ -7,22 +7,39 @@ cache:
   directories:
     - $HOME/ninjabin
 
+jobs:
+  allow_failures:
+    - os: osx
+
+addons:
+  apt:
+    packages:
+      - rsync
+      - python
+      - python-pip
+      - python3
+      - python3-pip
+    update: true
+  homebrew:
+    packages:
+      - rsync
+      - python@2
+      - python3
+      - md5sha1sum
+    update: true
+
 before_install:
   - export -f travis_nanoseconds
   - export -f travis_fold
   - export -f travis_time_start
   - export -f travis_time_finish
-  - sudo apt-get update
-  - |
-    sudo apt-get install -y rsync python3 \
-     python-ply  python-pytest  python-pytest-catchlog  python-mock  python-pytest-mock \
-    python3-ply python3-pytest python3-pytest-catchlog python3-mock python3-pytest-mock \
-     python-pep8 pylint \
-    python3-pep8 pylint3
 
 install:
-  - bash .travis/install-ninja.sh
+  - .travis/install-ninja.sh
   - export PATH=$PATH:~/ninjabin
+  - python${PYTHON_SUFFIX} -m pip install --user setuptools
+  - python${PYTHON_SUFFIX} -m pip install --user ply pytest pytest-catchlog mock pytest-mock
+  - python${PYTHON_SUFFIX} -m pip install --user pep8 pylint
 
 before_script:
   - mkdir -p ~/bob_workspace
@@ -37,29 +54,40 @@ before_script:
 
 matrix:
   include:
-  - go: "1.10"
+  - os: linux
+    go: "1.10"
     env:
       - PYTHON_SUFFIX=2.7
       - DO_COMMIT_CHECKS=0
       - DO_PYTHON_TESTS=0
       - DO_GO_TESTS=1
-  - go: "1.11"
+  - os: linux
+    go: "1.11"
     env:
       - PYTHON_SUFFIX=3
       - DO_COMMIT_CHECKS=1
       - DO_PYTHON_TESTS=1
       - DO_GO_TESTS=1
-  - go: "1.12"
+  - os: linux
+    go: "1.12"
     env:
       - PYTHON_SUFFIX=2.7
       - DO_COMMIT_CHECKS=0
       - DO_PYTHON_TESTS=1
       - DO_GO_TESTS=1
-  - go: "1.13"
+  - os: linux
+    go: "1.13"
     env:
       - PYTHON_SUFFIX=2.7
       - DO_COMMIT_CHECKS=0
       - DO_PYTHON_TESTS=0
+      - DO_GO_TESTS=1
+  - os: osx
+    go: "1.13"
+    env:
+      - PYTHON_SUFFIX=2.7
+      - DO_COMMIT_CHECKS=0
+      - DO_PYTHON_TESTS=1
       - DO_GO_TESTS=1
 
 script:
