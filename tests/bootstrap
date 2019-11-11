@@ -50,32 +50,22 @@ EOF
 
 source "${SCRIPT_DIR}/bootstrap_utils.sh"
 
-PARAMS=$(getopt -o "o:h" --name ${BASENAME} -- "$@")
-
-eval set -- "$PARAMS"
-unset PARAMS
-
-while true ; do
-    case $1 in
-        -o)
-            BUILDDIR=$2
-            shift 2
+while getopts "o:h" opt ; do
+    case "${opt}" in
+        o)
+            BUILDDIR="${OPTARG}"
             ;;
-        -h)
+        h)
             usage
             exit
             ;;
-        --)
-            shift
-            break
-            ;;
-        *)
-            echo "Unrecognized option $1"
+        [?])
             usage
             exit 1
             ;;
     esac
 done
+shift $((OPTIND - 1))
 
 # Select a BUILDDIR if not provided one
 if [[ -z "$BUILDDIR" ]]; then
