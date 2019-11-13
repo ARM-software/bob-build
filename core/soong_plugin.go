@@ -34,6 +34,7 @@ import (
 	"android/soong/android"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/graph"
@@ -88,6 +89,30 @@ type moduleBase struct {
 func (m *moduleBase) GenerateAndroidBuildActions(ctx android.ModuleContext) {}
 
 func (m *moduleBase) Name() string { return m.SimpleName.Name() }
+
+// Property structures used to initialize Bob created Soong modules
+type nameProps struct {
+	Name *string
+}
+
+type provenanceProps struct {
+	Proprietary  *bool
+	Owner        *string
+	Vendor       *bool
+	Soc_specific *bool
+}
+
+func getProvenanceProps(props *BuildProps) *provenanceProps {
+	if props.Owner != "" {
+		return &provenanceProps{
+			Proprietary:  proptools.BoolPtr(true),
+			Vendor:       proptools.BoolPtr(true),
+			Soc_specific: proptools.BoolPtr(true),
+			Owner:        proptools.StringPtr(props.Owner),
+		}
+	}
+	return nil
+}
 
 type soongGenerator struct {
 	toolchainSet
