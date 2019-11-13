@@ -127,7 +127,7 @@ func (l *library) getGeneratedHeaders(mctx android.TopDownMutatorContext) (heade
 	return
 }
 
-func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLibraryCommonProps {
+func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (*provenanceProps, *ccLibraryCommonProps) {
 	if len(l.Properties.Export_include_dirs) > 0 {
 		panic(fmt.Errorf("Module %s exports non-local include dirs %v - this is not supported",
 			mctx.ModuleName(), l.Properties.Export_include_dirs))
@@ -135,6 +135,8 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLib
 
 	cflags := utils.NewStringSlice(l.Properties.Cflags,
 		l.Properties.Export_cflags, l.getExportedCflags(mctx))
+
+	provenanceProps := getProvenanceProps(&l.Properties.Build.BuildProps)
 
 	props := &ccLibraryCommonProps{
 		Name:               proptools.StringPtr(l.shortName()),
@@ -152,7 +154,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) *ccLib
 		Ldflags:            l.Properties.Ldflags,
 	}
 
-	return props
+	return provenanceProps, props
 }
 
 // Create a module which only builds on the device. The closest thing Soong
@@ -169,8 +171,7 @@ func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 		return
 	}
 
-	commonProps := l.setupCcLibraryProps(mctx)
-
+	provenanceProps, ccLibProps := l.setupCcLibraryProps(mctx)
 	libProps := &ccStaticOrSharedProps{
 		// Soong's `export_include_dirs` field is relative to the module dir.
 		Export_include_dirs: relativeToModuleDir(mctx, l.Properties.Export_local_include_dirs),
@@ -178,9 +179,9 @@ func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostStaticFactory), commonProps, libProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostStaticFactory), provenanceProps, ccLibProps, libProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetStaticFactory), commonProps, libProps)
+		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetStaticFactory), provenanceProps, ccLibProps, libProps)
 	}
 }
 
@@ -198,8 +199,7 @@ func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 		return
 	}
 
-	commonProps := l.setupCcLibraryProps(mctx)
-
+	provenanceProps, ccLibProps := l.setupCcLibraryProps(mctx)
 	libProps := &ccStaticOrSharedProps{
 		// Soong's `export_include_dirs` field is relative to the module dir.
 		Export_include_dirs: relativeToModuleDir(mctx, l.Properties.Export_local_include_dirs),
@@ -212,10 +212,10 @@ func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
 		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostSharedFactory),
-			commonProps, libProps, stripProps)
+			provenanceProps, ccLibProps, libProps, stripProps)
 	case tgtTypeTarget:
 		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetSharedFactory),
-			commonProps, libProps, stripProps)
+			provenanceProps, ccLibProps, libProps, stripProps)
 	}
 }
 
@@ -236,7 +236,7 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 		return
 	}
 
-	commonProps := b.setupCcLibraryProps(mctx)
+	provenanceProps, ccLibProps := b.setupCcLibraryProps(mctx)
 	stripProps := &cc.StripProperties{}
 	if b.strip() {
 		stripProps.Strip.All = proptools.BoolPtr(true)
@@ -245,10 +245,10 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	switch b.Properties.TargetType {
 	case tgtTypeHost:
 		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryHostFactory),
-			commonProps, stripProps)
+			provenanceProps, ccLibProps, stripProps)
 	case tgtTypeTarget:
 		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryTargetFactory),
-			commonProps, stripProps)
+			provenanceProps, ccLibProps, stripProps)
 	}
 
 }

@@ -31,10 +31,6 @@ import (
 	"github.com/ARM-software/bob-build/abstr"
 )
 
-type nameProps struct {
-	Name *string
-}
-
 type kernelModuleBackendProps struct {
 	Srcs          []string
 	Args          kbuildArgs
@@ -51,16 +47,22 @@ type kernelModuleBackend struct {
 
 func kernelModuleBackendFactory() android.Module {
 	m := &kernelModuleBackend{}
-
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
-	android.InitAndroidModule(m)
+
+	// init module (including name and common properties) with target-specific variants info,
+	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
 
 	return m
 }
 
 func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
+	nameProps := nameProps{
+		proptools.StringPtr(m.Name()),
+	}
 
-	nameProps := nameProps{proptools.StringPtr(m.Name())}
+	provenanceProps := getProvenanceProps(&m.Properties.Build.BuildProps)
 
 	installProps := m.getInstallableProps()
 	installPath, ok := installProps.getInstallGroupPath()
@@ -80,7 +82,8 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 		Install_Path:  installPath,
 	}
 
-	mctx.CreateModule(android.ModuleFactoryAdaptor(kernelModuleBackendFactory), &nameProps, &props)
+	// create module and fill all its registered properties with data from prepared structs
+	mctx.CreateModule(android.ModuleFactoryAdaptor(kernelModuleBackendFactory), &nameProps, provenanceProps, &props)
 }
 
 func (m *kernelModuleBackend) DepsMutator(mctx android.BottomUpMutatorContext) {

@@ -285,7 +285,9 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		hostBinModuleName = ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
 	}
 
-	nameProps := nameProps{proptools.StringPtr(gc.Name())}
+	nameProps := nameProps{
+		proptools.StringPtr(gc.Name()),
+	}
 
 	genProps := genBackendProps{
 		Srcs:                    gc.Properties.getSources(mctx),
