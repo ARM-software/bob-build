@@ -19,14 +19,12 @@ addons:
       - python-pip
       - python3
       - python3-pip
-    update: true
   homebrew:
     packages:
       - rsync
       - python@2
       - python3
       - md5sha1sum
-    update: true
 
 before_install:
   - export -f travis_nanoseconds
