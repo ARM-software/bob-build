@@ -52,9 +52,8 @@ type genBackend struct {
 	android.ModuleBase
 	Properties genBackendProps
 
-	outputs              android.WritablePaths
-	depfile              android.WritablePath
-	exportGenIncludeDirs android.Paths
+	exportGenIncludeDirs android.WritablePaths
+	inouts               []soongInout
 }
 
 func genBackendFactory() android.Module {
@@ -67,10 +66,19 @@ func genBackendFactory() android.Module {
 }
 
 func (m *genBackend) filterOutputs(predicate func(string) bool) (ret android.Paths) {
-	for _, p := range m.outputs {
-		if predicate(p.String()) {
-			ret = append(ret, p)
+	for _, io := range m.inouts {
+		for _, p := range io.out {
+			if predicate(p.String()) {
+				ret = append(ret, p)
+			}
 		}
+	}
+	return
+}
+
+func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.WritablePaths) {
+	for _, path := range paths {
+		ret = append(ret, android.PathForModuleGen(ctx, path))
 	}
 	return
 }
@@ -83,7 +91,7 @@ func (m *genBackend) GeneratedSourceFiles() android.Paths {
 }
 
 func (m *genBackend) GeneratedHeaderDirs() android.Paths {
-	return m.exportGenIncludeDirs
+	return m.exportGenIncludeDirs.Paths()
 }
 
 func (m *genBackend) GeneratedDeps() (srcs android.Paths) {
@@ -153,27 +161,17 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) map[string]string {
 	return args
 }
 
-func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
-	args := m.getArgs(ctx)
-	implicits := []android.Path{}
+type soongInout struct {
+	in           android.Paths
+	out          android.WritablePaths
+	depfile      android.WritablePath
+	implicitSrcs android.Paths
+	implicitOuts android.WritablePaths
+}
 
-	for _, out := range m.Properties.Out {
-		m.outputs = append(m.outputs, android.PathForModuleGen(ctx, out))
-	}
-
-	for _, dir := range m.Properties.Export_gen_include_dirs {
-		m.exportGenIncludeDirs = append(m.exportGenIncludeDirs, android.PathForModuleGen(ctx, dir))
-	}
-
-	if m.Properties.Tool != "" {
-		tool := android.PathForSource(ctx, filepath.Join(ctx.ModuleDir(), m.Properties.Tool))
-		args["tool"] = tool.String()
-		implicits = append(implicits, tool)
-	}
-
+func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]string) {
 	if m.Properties.Depfile {
-		m.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
-		args["depfile"] = m.depfile.String()
+		args["depfile"] = ""
 	}
 
 	rule := ctx.Rule(apctx,
@@ -185,16 +183,54 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		utils.SortedKeys(args)...,
 	)
 
-	ctx.Build(apctx,
-		android.BuildParams{
-			Rule:        rule,
-			Description: "gen " + ctx.ModuleName(),
-			Inputs:      android.PathsForSource(ctx, m.Properties.Srcs),
-			Implicits:   implicits,
-			Outputs:     m.outputs,
-			Args:        args,
-			Depfile:     m.depfile,
-		})
+	for _, sio := range m.inouts {
+		// `args` is slightly different for each inout, but blueprint's
+		// parseBuildParams() function makes a deep copy of the map, so
+		// we're OK to re-use it for each target.
+		if m.Properties.Depfile {
+			args["depfile"] = sio.depfile.String()
+		}
+
+		ctx.Build(apctx,
+			android.BuildParams{
+				Rule:            rule,
+				Description:     "gen " + ctx.ModuleName(),
+				Inputs:          sio.in,
+				Implicits:       sio.implicitSrcs,
+				Outputs:         sio.out,
+				ImplicitOutputs: sio.implicitOuts,
+				Args:            args,
+				Depfile:         sio.depfile,
+			})
+	}
+}
+
+func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	args := m.getArgs(ctx)
+	implicits := []android.Path{}
+
+	m.exportGenIncludeDirs = pathsForModuleGen(ctx, m.Properties.Export_gen_include_dirs)
+
+	if m.Properties.Tool != "" {
+		tool := android.PathForSource(ctx, filepath.Join(ctx.ModuleDir(), m.Properties.Tool))
+		args["tool"] = tool.String()
+		implicits = append(implicits, tool)
+	}
+
+	if len(m.Properties.Out) > 0 {
+		sio := soongInout{
+			in:           android.PathsForSource(ctx, m.Properties.Srcs),
+			implicitSrcs: implicits,
+			out:          pathsForModuleGen(ctx, m.Properties.Out),
+		}
+		if m.Properties.Depfile {
+			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
+		}
+
+		m.inouts = append(m.inouts, sio)
+	}
+
+	m.buildInouts(ctx, args)
 }
 
 func expandBobVariables(str, tool, hostBin string) (out string, err error) {
