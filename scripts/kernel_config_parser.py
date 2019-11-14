@@ -37,8 +37,8 @@ def option_enabled(kdir, option):
                     except ValueError:
                         pass
         except IOError as e:
-            msg = "Failed to open the kernel config file in %s: Couldn't check for option %s"
-            logger.warning(msg, config_file, option)
+            logger.error("Failed to open kernel config file in %s: Couldn't check for option %s",
+                         config_file, option)
         g_kernel_configs[kdir] = config
 
     return g_kernel_configs[kdir].get(option) == 'y'
@@ -46,6 +46,10 @@ def option_enabled(kdir, option):
 
 def get_arch(kdir):
     arch_dir = os.path.join(kdir, "arch")
+    if not os.path.exists(arch_dir):
+        logger.error("'arch' subdirectory in kernel %s does not exist", kdir)
+        return None
+
     # Each directory in $KDIR/arch has a config option with the same name.
     for arch in os.listdir(arch_dir):
         if not os.path.isfile(os.path.join(arch_dir, arch, "Kconfig")):
@@ -66,5 +70,5 @@ def get_arch(kdir):
           option_enabled(kdir, "CONFIG_SUPERH64")):
         return "sh"
 
-    logger.warning("Couldn't get ARCH for kernel %s", kdir)
+    logger.error("Couldn't get ARCH for kernel %s", kdir)
     return None
