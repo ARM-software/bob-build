@@ -20,8 +20,14 @@ function check_stripped() {
 }
 
 case "$(uname -s)" in
-    Darwin*) SHARED_LIBRARY_EXTENSION=".dylib";;
-    *)       SHARED_LIBRARY_EXTENSION=".so";;
+    Darwin*)
+        OPTIONS="OSX=y"
+        SHARED_LIBRARY_EXTENSION=".dylib"
+        ;;
+    *)
+        OPTIONS="LINUX=y"
+        SHARED_LIBRARY_EXTENSION=".so"
+        ;;
 esac
 
 
@@ -57,14 +63,14 @@ rm -rf "${TEST_DIRS[@]}"
 build_dir=build-in-src
 pushd "tests" &> /dev/null
 ./bootstrap -o ${build_dir}
-${build_dir}/config && ${build_dir}/buildme bob_tests
+${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 popd &> /dev/null
 
 # Build in an independent working directory
 build_dir=build-indep
 tests/bootstrap -o ${build_dir}
-${build_dir}/config && ${build_dir}/buildme bob_tests
+${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 
 # Build with the working directory in the output directory
@@ -72,7 +78,7 @@ build_dir=build-in-outp
 mkdir ${build_dir}
 pushd ${build_dir} &> /dev/null
 ../tests/bootstrap -o .
-./config && ./buildme bob_tests
+./config ${OPTIONS} && ./buildme bob_tests
 popd &> /dev/null
 check_build_output "${build_dir}"
 
@@ -84,7 +90,7 @@ ${build_dir}/buildme bob_tests
 
 # Check static archives are built from scratch. Re-use the last directory
 echo Reconfiguring to check archives are clean
-${build_dir}/config STATIC_LIB_TOGGLE=y
+${build_dir}/config ${OPTIONS} STATIC_LIB_TOGGLE=y
 ${build_dir}/buildme bob_tests
 
 # Helper function for testing that appropriate files are rebuilt after
