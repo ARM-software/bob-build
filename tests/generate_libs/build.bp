@@ -49,7 +49,7 @@ bob_generate_shared_library {
      * Note that we make this a host library to avoid having to figure
      * out GCC arguments.
      */
-    cmd: "gcc -fPIC -o ${gen_dir}/libblah_shared.so -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    cmd: "gcc -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
 }
 
