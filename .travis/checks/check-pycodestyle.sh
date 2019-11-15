@@ -2,4 +2,4 @@
 
 BOB_ROOT=$(dirname ${0})/../..
 find "${BOB_ROOT}" -name "*.py" -print0 \
-    | xargs -0 python${PYTHON_SUFFIX} -m pep8 --config="${BOB_ROOT}/.pep8"
+    | xargs -0 python${PYTHON_SUFFIX} -m pycodestyle --config="${BOB_ROOT}/.pycodestyle"

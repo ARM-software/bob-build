@@ -37,7 +37,7 @@ install:
   - export PATH=$PATH:~/ninjabin
   - python${PYTHON_SUFFIX} -m pip install --user setuptools
   - python${PYTHON_SUFFIX} -m pip install --user ply pytest pytest-catchlog mock pytest-mock
-  - python${PYTHON_SUFFIX} -m pip install --user pep8 pylint
+  - python${PYTHON_SUFFIX} -m pip install --user pycodestyle pylint
 
 before_script:
   - mkdir -p ~/bob_workspace

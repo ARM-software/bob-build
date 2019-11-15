@@ -20,8 +20,8 @@ if [ ${DO_COMMIT_CHECKS} -eq 1 ]; then
     ####################
 
     ####################
-    fold_start 'Check:pep8'
-        bash .travis/checks/check-pep8.sh
+    fold_start 'Check:pycodestyle'
+        bash .travis/checks/check-pycodestyle.sh
     fold_end $?
     ####################
 
