@@ -1,4 +1,4 @@
-[pep8]
+[pycodestyle]
 count = True
 max-line-length = 100
 format = pylint
