@@ -23,6 +23,10 @@ import re
 import shutil
 import sys
 
+
+logger = logging.getLogger(__name__)
+
+
 RE_INCLUDE = re.compile(r'^\s*#include ["<](.*)[">]')
 cached_deps = dict()
 
@@ -98,7 +102,7 @@ def copy_if_newer(src, dest):
     except OSError:
         pass
     if not os.path.isfile(src):
-        logging.error("%s does not exist (cwd=%s)", src, os.getcwd())
+        logger.error("%s does not exist (cwd=%s)", src, os.getcwd())
         sys.exit(1)
 
     # If source and dest both exist and are the same, skip the copy.
