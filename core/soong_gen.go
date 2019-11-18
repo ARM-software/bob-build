@@ -44,6 +44,12 @@ type genBackendProps struct {
 	Module_deps             []string
 	Module_srcs             []string
 	Encapsulates            []string
+	Cflags                  []string
+	Conlyflags              []string
+	Cxxflags                []string
+	Asflags                 []string
+	Ldflags                 []string
+	Ldlibs                  []string
 
 	Transform_srcs []string
 	TransformSourceProps
@@ -132,21 +138,23 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) map[string]string {
 		"bob_config_opts": configOpts,
 		"gen_dir":         android.PathForModuleGen(ctx).String(),
 		"host_bin":        m.getHostBin(ctx),
+		"asflags":         utils.Join(m.Properties.Asflags),
+		"cflags":          utils.Join(m.Properties.Cflags),
+		"conlyflags":      utils.Join(m.Properties.Conlyflags),
+		"cxxflags":        utils.Join(m.Properties.Cxxflags),
+		"ldflags":         utils.Join(m.Properties.Ldflags),
+		"ldlibs":          utils.Join(m.Properties.Ldlibs),
 
 		// flag_defaults is primarily used to invoke sub-makes of
 		// different libraries. This shouldn't be needed on Android.
 		// This means the following can't be expanded:
-		"ar":         "",
-		"as":         "",
-		"asflags":    "",
-		"cc":         "",
-		"cflags":     "",
-		"conlyflags": "",
-		"cxx":        "",
-		"cxxflags":   "",
-		"ldflags":    "",
-		"linker":     "",
+		"ar":     "",
+		"as":     "",
+		"cc":     "",
+		"cxx":    "",
+		"linker": "",
 	}
+
 	// TODO: Support `${xxmod_out}`
 	ctx.VisitDirectDepsIf(
 		func(dep android.Module) bool {
@@ -297,6 +305,12 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Module_deps:             gc.Properties.Module_deps,
 		Module_srcs:             gc.Properties.Module_srcs,
 		Encapsulates:            gc.Properties.Encapsulates,
+		Cflags:                  gc.Properties.FlagArgsBuild.Cflags,
+		Conlyflags:              gc.Properties.FlagArgsBuild.Conlyflags,
+		Cxxflags:                gc.Properties.FlagArgsBuild.Cxxflags,
+		Asflags:                 gc.Properties.FlagArgsBuild.Asflags,
+		Ldflags:                 gc.Properties.FlagArgsBuild.Ldflags,
+		Ldlibs:                  gc.Properties.FlagArgsBuild.Ldlibs,
 	}
 
 	// The ModuleDir for the new module will be inherited from the
