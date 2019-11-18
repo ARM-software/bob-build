@@ -57,8 +57,8 @@ def enforce_dependent_values(auto_fix=False):
         if can_enable(c):
             continue
         if c['datatype'] == 'bool' and c['value'] is True:
-            logger.warn("unmet direct dependencies: " +
-                        "%s depends on %s" % (i, c['depends']))
+            logger.warning("unmet direct dependencies: " +
+                           "%s depends on %s" % (i, c['depends']))
             if auto_fix:
                 set_config_internal(i, False)
             else:
@@ -97,7 +97,7 @@ def read_profile_file(profile_filename):
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as e:
-        logger.warn("Failed to load non-existing \"%s\" profile" % profile_filename)
+        logger.warning("Failed to load non-existing \"%s\" profile" % profile_filename)
 
 
 def read_config_file(config_filename):
@@ -127,7 +127,7 @@ def read_config_file(config_filename):
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as e:
-        logger.warn("Failed to load non-existing \"%s\" configuration" % config_filename)
+        logger.warning("Failed to load non-existing \"%s\" configuration" % config_filename)
 
 
 def read_config(options_filename, config_filename, ignore_missing):
@@ -336,7 +336,7 @@ def set_config_if_prompt(key, value, is_user_set=True):
     try:
         c = data.get_config(key)
     except KeyError:
-        logger.warn("Ignoring unknown configuration option %s" % key)
+        logger.warning("Ignoring unknown configuration option %s" % key)
         return
     c['is_new'] = False
     logger.debug(c)
@@ -370,7 +370,7 @@ def set_config(key, value, is_user_set=True):
     try:
         c = data.get_config(key)
     except KeyError:
-        logger.warn("Ignoring unknown configuration option %s" % key)
+        logger.warning("Ignoring unknown configuration option %s" % key)
         return
 
     if is_user_set:
@@ -378,7 +378,7 @@ def set_config(key, value, is_user_set=True):
         if c['datatype'] == 'bool':
             # Must be y or n
             if value not in [True, False]:
-                logger.warn(
+                logger.warning(
                     "Ignoring boolean configuration option %s with non-boolean value '%s'." % (
                         key, value))
                 return
@@ -387,7 +387,7 @@ def set_config(key, value, is_user_set=True):
             try:
                 value = int(value)
             except ValueError:
-                logger.warn(
+                logger.warning(
                     "Ignoring integer configuration option %s with non-integer value '%s'" % (
                         key, value))
                 return
@@ -484,7 +484,7 @@ def force_config(key, value, source):
     try:
         c = data.get_config(key)
     except KeyError:
-        logger.warn("Ignoring unknown configuration option %s" % key)
+        logger.warning("Ignoring unknown configuration option %s" % key)
         return
 
     if value is True:
