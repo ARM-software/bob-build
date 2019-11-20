@@ -134,11 +134,10 @@ func boolValue(thing interface{}) (value, isBool bool) {
 	return
 }
 
-func loadConfig(filename string) *configProperties {
-	properties := &configProperties{}
+func (properties *configProperties) LoadConfig(filename string) error {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("Unable to read configuration file: %s", err.Error())
 	}
 	d := json.NewDecoder(bytes.NewReader(content))
 
@@ -147,7 +146,7 @@ func loadConfig(filename string) *configProperties {
 	d.UseNumber()
 	err = d.Decode(&properties.properties)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("Unable to decode json configuration: %s", err.Error())
 	}
 
 	// Check for old format of config.json
@@ -175,5 +174,5 @@ func loadConfig(filename string) *configProperties {
 	// Calculate the plain list of features once.
 	properties.featureList = utils.SortedKeysBoolMap(properties.features)
 
-	return properties
+	return nil
 }

@@ -572,7 +572,7 @@ type transformSource struct {
 
 func generateSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
-	module.generateCommon.Properties.Features.Init(config.Properties,
+	module.generateCommon.Properties.Features.Init(&config.Properties,
 		GenerateProps{}, GenerateSourceProps{})
 	return module, []interface{}{&module.generateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
@@ -580,7 +580,7 @@ func generateSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) 
 
 func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &transformSource{}
-	module.generateCommon.Properties.Features.Init(config.Properties,
+	module.generateCommon.Properties.Features.Init(&config.Properties,
 		GenerateProps{}, TransformSourceProps{})
 	return module, []interface{}{&module.generateCommon.Properties,
 		&module.Properties,

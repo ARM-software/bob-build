@@ -106,7 +106,7 @@ type generatorBackend interface {
 // retrieve the backend and configuration values from within Blueprint callbacks.
 type bobConfig struct {
 	Generator  generatorBackend
-	Properties *configProperties
+	Properties configProperties
 }
 
 // SourceProps defines module properties that are used to identify the

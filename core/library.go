@@ -623,9 +623,9 @@ func (m *binary) outputFileName() string {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	l.Properties.Features.Init(config.Properties, BuildProps{})
-	l.Properties.Build.Host.Features.Init(config.Properties, BuildProps{})
-	l.Properties.Build.Target.Features.Init(config.Properties, BuildProps{})
+	l.Properties.Features.Init(&config.Properties, BuildProps{})
+	l.Properties.Build.Host.Features.Init(&config.Properties, BuildProps{})
+	l.Properties.Build.Target.Features.Init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }

@@ -67,7 +67,7 @@ func (m *generateSharedLibrary) outputFileName() string {
 
 func genSharedLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
-	module.generateCommon.Properties.Features.Init(config.Properties, GenerateProps{},
+	module.generateCommon.Properties.Features.Init(&config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
 	switch config.Properties.GetString("os") {
 	case "osx":

@@ -61,7 +61,10 @@ var (
 func soongGetConfig() *bobConfig {
 	loadConfigOnce.Do(func() {
 		onceLoadedConfig = &bobConfig{}
-		onceLoadedConfig.Properties = loadConfig(jsonPath)
+		err := onceLoadedConfig.Properties.LoadConfig(jsonPath)
+		if err != nil {
+			panic(err)
+		}
 
 		if !onceLoadedConfig.Properties.GetBool("builder_soong") {
 			panic("Build bootstrapped for Soong, but Soong builder has not been enabled")
