@@ -188,7 +188,7 @@ check_dep_updates "generated source host_bin" "${build_dir}" "${SRC}" "${UPDATE[
 
 # generated sources with depfiles
 SRC=tests/generate_source/depgen2.in
-UPDATE=(${build_dir}/gen/gen_source_depfiles/output.txt)
+UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
 check_dep_updates "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # resource dependencies
