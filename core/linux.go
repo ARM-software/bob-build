@@ -90,6 +90,12 @@ var copyRule = pctx.StaticRule("copy",
 		Description: "$out",
 	})
 
+var touchRule = pctx.StaticRule("touch",
+	blueprint.RuleParams{
+		Command:     "touch -c $out",
+		Description: "touch $out",
+	})
+
 type singleOutputModule interface {
 	blueprint.Module
 	outputName() string
@@ -147,6 +153,10 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		append(utils.SortedKeys(args), "depfile")...)
 
 	for _, inout := range inouts {
+		if inout.depfile != "" && len(inout.out) > 1 {
+			panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", ctx.ModuleName()))
+		}
+
 		if _, ok := args["headers_generated"]; ok {
 			headers := utils.Filter(utils.IsHeader, inout.out)
 			args["headers_generated"] = strings.Join(headers, " ")
@@ -159,22 +169,32 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		implicits = append(implicits, inout.implicitSrcs...)
 
 		buildparams := blueprint.BuildParams{
-			Rule:            rule,
-			Inputs:          inout.in,
-			Outputs:         inout.out,
-			ImplicitOutputs: inout.implicitOuts,
-			Implicits:       implicits,
-			Args:            args,
-			Optional:        true,
+			Rule:      rule,
+			Inputs:    inout.in,
+			Outputs:   inout.out,
+			Implicits: implicits,
+			Args:      args,
+			Optional:  true,
 		}
 
+		// ninja currently does not support case when depfile is defined and
+		// multiple outputs at the same time. For implicit outputs fallback to using a separate rule.
 		if inout.depfile != "" {
-			if len(inout.out) > 1 {
-				panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", ctx.ModuleName()))
+			if len(inout.implicitOuts) > 0 {
+				// No-op rule linking implicit outputs to the main output. Touch the implicit
+				// outputs in case the script actually creates the implicit outputs first.
+				ctx.Build(pctx,
+					blueprint.BuildParams{
+						Rule:     touchRule,
+						Inputs:   inout.out,
+						Outputs:  inout.implicitOuts,
+						Optional: true,
+					})
 			}
-
 			buildparams.Depfile = inout.depfile
 			buildparams.Deps = blueprint.DepsGCC
+		} else {
+			buildparams.ImplicitOutputs = inout.implicitOuts
 		}
 
 		ctx.Build(pctx, buildparams)
