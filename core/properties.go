@@ -97,7 +97,7 @@ func templateApplierMutator(mctx abstr.TopDownMutatorContext) {
 	cfg := getConfig(mctx)
 
 	if m, ok := module.(featurable); ok {
-		cfgProps := cfg.Properties
+		cfgProps := &cfg.Properties
 
 		// TemplateApplier mutator is run before TargetApplier, so we
 		// need to apply templates with the core set, as well as
@@ -125,7 +125,7 @@ func featureApplierMutator(mctx abstr.TopDownMutatorContext) {
 	cfg := getConfig(mctx)
 
 	if m, ok := module.(featurable); ok {
-		cfgProps := cfg.Properties
+		cfgProps := &cfg.Properties
 
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where

@@ -70,7 +70,10 @@ func Main() {
 	// specified in the config.
 	jsonPath := filepath.Join(getBuildDir(), "config.json")
 	config := &bobConfig{}
-	config.Properties = loadConfig(jsonPath)
+	err := config.Properties.LoadConfig(jsonPath)
+	if err != nil {
+		panic(err)
+	}
 
 	// Depend on the config file
 	pctx.AddNinjaFileDeps(jsonPath, filepath.Join(getBuildDir(), ".env.hash"))

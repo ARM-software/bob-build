@@ -253,14 +253,14 @@ func (m *resource) getAliasList() []string {
 
 func installGroupFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &installGroup{}
-	module.Properties.Features.Init(config.Properties, InstallGroupProps{})
+	module.Properties.Features.Init(&config.Properties, InstallGroupProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
 
 func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &resource{}
-	module.Properties.Features.Init(config.Properties, ResourceProps{})
+	module.Properties.Features.Init(&config.Properties, ResourceProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }

@@ -568,7 +568,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
 				if err != nil {
-					panic(fmt.Errorf("Could not find relative path for: %s due to: %e", path, err))
+					panic(fmt.Errorf("Could not find relative path for: %s due to: %s", path, err))
 				}
 				rpaths = append(rpaths, "'$$ORIGIN/"+out+"'")
 			}
