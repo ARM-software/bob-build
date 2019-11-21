@@ -161,7 +161,7 @@ func (s *SourceProps) getSources(ctx abstr.BaseModuleContext) []string {
 func (s *SourceProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 	var special = map[string]string{
-		"${bob_config}": filepath.Join(g.buildDir(), configName),
+		"${bob_config}": configFile,
 	}
 
 	// Look for special items. Remove from Srcs and add to Specials

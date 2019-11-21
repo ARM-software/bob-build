@@ -30,7 +30,8 @@ function write_bootstrap() {
         -e "s|@@BobDir@@|${BOB_DIR}|" \
         -e "s|@@TopName@@|${TOPNAME}|" \
         -e "s|@@ListFile@@|${BLUEPRINT_LIST_FILE}|" \
-        -e "s|@@ConfigName@@|${CONFIGNAME}|" \
+        -e "s|@@ConfigFile@@|${CONFIG_FILE}|" \
+        -e "s|@@ConfigJson@@|${CONFIG_JSON}|" \
         -e "s|@@BobConfigOpts@@|${BOB_CONFIG_OPTS}|" \
         -e "s|@@BobConfigPluginOpts@@|${BOB_CONFIG_PLUGIN_OPTS}|" \
         -e "s|@@BobBootstrapVersion@@|${BOB_VERSION}|" \

@@ -27,5 +27,5 @@ cd "${WORKDIR}"
 
 "${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
-    -j "${BUILDDIR}/config.json" \
-    "${BUILDDIR}/${CONFIGNAME}"
+    -j "${CONFIG_JSON}" \
+    "${CONFIG_FILE}"

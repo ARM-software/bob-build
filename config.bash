@@ -47,5 +47,5 @@ cd "${WORKDIR}"
 
 "${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
-    -j "${BUILDDIR}/config.json" \
-    -c "${BUILDDIR}/${CONFIGNAME}" "${ARG_TARGET[@]}"
+    -j "${CONFIG_JSON}" \
+    -c "${CONFIG_FILE}" "${ARG_TARGET[@]}"

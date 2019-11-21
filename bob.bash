@@ -35,7 +35,7 @@ if [[ "${BOB_BOOTSTRAP_VERSION}" != "${BOB_VERSION}" ]]; then
 fi
 
 # Stop the build if menuconfig.py or update_config.py failed
-if [[ -e "${BUILDDIR}/${CONFIGNAME}.error" ]]; then
+if [[ -e "${CONFIG_FILE}.error" ]]; then
     echo "Configuration errors are present, the build cannot proceed further." >&2
     exit 1
 fi
@@ -44,8 +44,8 @@ fi
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
 python "${BOB_DIR}/config_system/generate_config_json.py" \
-       "${BUILDDIR}/${CONFIGNAME}" --database "${SRCDIR}/Mconfig" \
-       --json "${BUILDDIR}/config.json" ${BOB_CONFIG_OPTS}
+       "${CONFIG_FILE}" --database "${SRCDIR}/Mconfig" \
+       --json "${CONFIG_JSON}" ${BOB_CONFIG_OPTS}
 
 # Get a hash of the environment so we can detect if we need to
 # regenerate the build.ninja

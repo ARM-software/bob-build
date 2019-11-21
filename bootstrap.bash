@@ -48,7 +48,7 @@ fi
 
 if [[ -z "$CONFIGNAME" ]]; then
   echo "CONFIGNAME is not set - using bob.config"
-  export CONFIGNAME="bob.config"
+  CONFIGNAME="bob.config"
 fi
 
 if [[ -z "$TOPNAME" ]]; then
@@ -57,11 +57,11 @@ if [[ -z "$TOPNAME" ]]; then
 fi
 
 if [[ -z "$BOB_CONFIG_OPTS" ]]; then
-  export BOB_CONFIG_OPTS=""
+  BOB_CONFIG_OPTS=""
 fi
 
 if [[ -z "$BOB_CONFIG_PLUGINS" ]]; then
-  export BOB_CONFIG_PLUGINS=""
+  BOB_CONFIG_PLUGINS=""
 fi
 
 if [ "${BUILDDIR}" = "." ] ; then
@@ -86,6 +86,8 @@ fi
 
 # Calculate Bob directory relative to the working directory.
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
+CONFIG_FILE="${BUILDDIR}/${CONFIGNAME}"
+CONFIG_JSON="${BUILDDIR}/config.json"
 
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
