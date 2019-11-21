@@ -424,6 +424,11 @@ func getDepfileName(s string) string {
 	return s + ".d"
 }
 
+func (m *generateSource) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, ctx.ModuleDir())
+	m.generateCommon.processPaths(ctx, g)
+}
+
 func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
 	io.in = append(append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
@@ -433,7 +438,7 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 	if depfile, ok := m.getDepfile(g); ok {
 		io.depfile = depfile
 	}
-	io.implicitSrcs = utils.PrefixDirs(m.Properties.Implicit_srcs, filepath.Join(g.sourcePrefix(), ctx.ModuleDir()))
+	io.implicitSrcs = utils.PrefixDirs(m.Properties.Implicit_srcs, g.sourcePrefix())
 	io.implicitOuts = m.implicitOutputs(g)
 
 	return []inout{io}
