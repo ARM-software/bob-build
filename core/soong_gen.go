@@ -36,6 +36,8 @@ import (
 type genBackendProps struct {
 	Srcs                    []string
 	Out                     []string
+	Implicit_srcs           []string
+	Implicit_outs           []string
 	Export_gen_include_dirs []string
 	Cmd                     string
 	HostBin                 string
@@ -75,6 +77,11 @@ func genBackendFactory() android.Module {
 func (m *genBackend) filterOutputs(predicate func(string) bool) (ret android.Paths) {
 	for _, io := range m.inouts {
 		for _, p := range io.out {
+			if predicate(p.String()) {
+				ret = append(ret, p)
+			}
+		}
+		for _, p := range io.implicitOuts {
 			if predicate(p.String()) {
 				ret = append(ret, p)
 			}
@@ -220,7 +227,7 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 
 func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args := m.getArgs(ctx)
-	implicits := []android.Path{}
+	implicits := android.PathsForSource(ctx, m.Properties.Implicit_srcs)
 
 	m.exportGenIncludeDirs = pathsForModuleGen(ctx, m.Properties.Export_gen_include_dirs)
 
@@ -235,6 +242,7 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 			in:           android.PathsForSource(ctx, m.Properties.Srcs),
 			implicitSrcs: implicits,
 			out:          pathsForModuleGen(ctx, m.Properties.Out),
+			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
 		}
 		if m.Properties.Depfile {
 			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
@@ -250,8 +258,8 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		sio := soongInout{
 			in:           android.PathsForSource(ctx, io.in),
 			implicitSrcs: android.PathsForSource(ctx, io.implicitSrcs),
-			implicitOuts: pathsForModuleGen(ctx, io.implicitOuts),
 			out:          pathsForModuleGen(ctx, io.out),
+			implicitOuts: pathsForModuleGen(ctx, io.implicitOuts),
 		}
 		if m.Properties.Depfile {
 			sio.depfile = android.PathForModuleGen(ctx, io.depfile)
@@ -280,7 +288,7 @@ func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContex
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
-	out []string, depfile bool) {
+	out, implicitSrcs, implicitOuts []string, depfile bool) {
 
 	if !isEnabled(gc) {
 		return
@@ -297,6 +305,8 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 	genProps := genBackendProps{
 		Srcs:                    gc.Properties.getSources(mctx),
 		Out:                     out,
+		Implicit_srcs:           implicitSrcs,
+		Implicit_outs:           implicitOuts,
 		Export_gen_include_dirs: gc.Properties.Export_gen_include_dirs,
 		Tool:                    proptools.String(gc.Properties.Tool),
 		HostBin:                 gc.getHostBinModuleName(mctx),
@@ -319,22 +329,22 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, gs.Properties.Out, proptools.Bool(gs.generateCommon.Properties.Depfile))
+	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Implicit_srcs, gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile))
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".a"}, false)
+	gs.createGenrule(mctx, []string{name + ".a"}, []string{}, []string{}, false)
 }
 
 func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".so"}, false)
+	gs.createGenrule(mctx, []string{name + ".so"}, []string{}, []string{}, false)
 }
 
 func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	name := gb.Name()
-	gb.createGenrule(mctx, []string{name}, false)
+	gb.createGenrule(mctx, []string{name}, []string{}, []string{}, false)
 }
 
 var (
