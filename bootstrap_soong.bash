@@ -46,23 +46,24 @@ source "${BOB_DIR}/bootstrap/utils.bash"
 BUILDDIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}-config"
 mkdir -p "${BUILDDIR}"
 
+CONFIG_FILE="${BUILDDIR}/${CONFIGNAME}"
+CONFIG_JSON="${BUILDDIR}/config.json"
+
 WORKDIR="$(pwd)" write_bootstrap
 
 # Create symlinks to the config system wrapper scripts
 create_config_symlinks "$(relative_path "${BUILDDIR}" "${BOB_DIR}")" "${BUILDDIR}"
 
-CONFIG_JSON="${BUILDDIR}/config.json"
-SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
-
 # Create a Go file containing the path to the config file, which will be
 # compiled into the Soong plugin. This is required because the module factories
 # do not have access to the Soong context when they are called, even though the
 # config file must be loaded before then.
+SOONG_CONFIG_GO="${BUILDDIR}/soong_config.go"
 TMP_GO_CONFIG=$(mktemp)
 sed -e "s#@@BOB_CONFIG_OPTS@@#${BOB_CONFIG_OPTS}#" \
     -e "s#@@BOB_DIR@@#${BOB_DIR}#" \
     -e "s#@@BUILDDIR@@#${BUILDDIR}#" \
-    -e "s#@@CONFIGNAME@@#${CONFIGNAME}#" \
+    -e "s#@@CONFIG_FILE@@#${CONFIG_FILE}#" \
     -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
     -e "s#@@SRCDIR@@#${SRCDIR}#" \
     "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"

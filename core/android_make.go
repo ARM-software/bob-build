@@ -383,7 +383,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		if m.Properties.Post_install_cmd != nil {
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
-			args["bob_config"] = "$(BOB_ANDROIDMK_DIR)/" + configName
+			args["bob_config"] = configFile
 			if m.Properties.Post_install_tool != nil {
 				args["tool"] = *m.Properties.Post_install_tool
 			}

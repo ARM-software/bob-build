@@ -147,7 +147,7 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 
 	dependents = android.PathsForSource(ctx, m.Properties.Implicit_srcs)
 	args = map[string]string{
-		"bob_config":      filepath.Join(getBuildDir(), configName),
+		"bob_config":      configFile,
 		"bob_config_opts": configOpts,
 		"gen_dir":         android.PathForModuleGen(ctx).String(),
 		"host_bin":        m.getHostBin(ctx),

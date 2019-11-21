@@ -367,7 +367,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		"ar":                arBinary,
 		"as":                asBinary,
 		"asflags":           utils.Join(astargetflags, props.Asflags),
-		"bob_config":        filepath.Join(g.buildDir(), configName),
+		"bob_config":        configFile,
 		"bob_config_opts":   configOpts,
 		"cc":                cc,
 		"cflags":            strings.Join(props.Cflags, " "),
