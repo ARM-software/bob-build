@@ -22,6 +22,7 @@ bob_alias {
     srcs: [
         "bob_test_aliases",
         "bob_test_aliases_all_variants",
+        "bob_test_command_vars",
         "bob_test_cxx11simple",
         "bob_test_export_cflags",
         "bob_test_export_include_dirs",

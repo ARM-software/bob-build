@@ -335,7 +335,12 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			}
 
 			depName := ctx.OtherModuleName(m)
-			args[depName+"_dir"] = gen.outputDir(g)
+			// When the dependent module is another Bob generated module, provide
+			// the location of its output dir so the using module can pick and
+			// choose what it uses.
+			if _, ok := getGenerateCommon(m); ok {
+				args[depName+"_dir"] = gen.outputDir(g)
+			}
 			args[depName+"_out"] = strings.Join(gen.outputs(g), " ")
 			depfiles = append(depfiles, gen.outputs(g)...)
 			depfiles = append(depfiles, gen.implicitOutputs(g)...)

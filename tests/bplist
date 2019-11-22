@@ -2,6 +2,7 @@
 ./bob/Blueprints
 ./bob/blueprint/Blueprints
 ./build.bp
+./command_vars/build.bp
 ./cxx11_simple/build.bp
 ./export_cflags/liba/build.bp
 ./export_cflags/libb/build.bp

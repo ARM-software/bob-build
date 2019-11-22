@@ -741,7 +741,7 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 	for _, inout := range inouts {
 		if _, ok := args["headers_generated"]; ok {
 			headers := utils.Filter(utils.IsHeader, inout.out, inout.implicitOuts)
-			args["header_generated"] = strings.Join(headers, " ")
+			args["headers_generated"] = strings.Join(headers, " ")
 		}
 		if _, ok := args["srcs_generated"]; ok {
 			sources := utils.Filter(utils.IsNotHeader, inout.out, inout.implicitOuts)

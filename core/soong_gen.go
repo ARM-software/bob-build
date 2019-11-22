@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"android/soong/android"
+	"android/soong/cc"
 	"android/soong/genrule"
 
 	"github.com/ARM-software/bob-build/utils"
@@ -61,6 +62,7 @@ type genBackend struct {
 	android.ModuleBase
 	Properties genBackendProps
 
+	genDir               android.Path
 	exportGenIncludeDirs android.WritablePaths
 	inouts               []soongInout
 }
@@ -74,17 +76,18 @@ func genBackendFactory() android.Module {
 	return m
 }
 
-func (m *genBackend) filterOutputs(predicate func(string) bool) (ret android.Paths) {
+func (m *genBackend) outputs() (ret android.WritablePaths) {
 	for _, io := range m.inouts {
-		for _, p := range io.out {
-			if predicate(p.String()) {
-				ret = append(ret, p)
-			}
-		}
-		for _, p := range io.implicitOuts {
-			if predicate(p.String()) {
-				ret = append(ret, p)
-			}
+		ret = append(ret, io.out...)
+		ret = append(ret, io.implicitOuts...)
+	}
+	return
+}
+
+func (m *genBackend) filterOutputs(predicate func(string) bool) (ret android.Paths) {
+	for _, p := range m.outputs() {
+		if predicate(p.String()) {
+			ret = append(ret, p)
 		}
 	}
 	return
@@ -139,8 +142,9 @@ func (m *genBackend) getHostBin(ctx android.ModuleContext) string {
 	return htp.HostToolPath().String()
 }
 
-func (m *genBackend) getArgs(ctx android.ModuleContext) map[string]string {
-	args := map[string]string{
+func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
+	dependents = android.PathsForSource(ctx, m.Properties.Implicit_srcs)
+	args = map[string]string{
 		"bob_config":      filepath.Join(getBuildDir(), configName),
 		"bob_config_opts": configOpts,
 		"gen_dir":         android.PathForModuleGen(ctx).String(),
@@ -162,19 +166,25 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) map[string]string {
 		"linker": "",
 	}
 
-	// TODO: Support `${xxmod_out}`
-	ctx.VisitDirectDepsIf(
-		func(dep android.Module) bool {
-			tag := ctx.OtherModuleDependencyTag(dep)
-			if tag == generatedSourceTag || tag == generatedDepTag {
-				return true
-			}
-			return false
-		},
-		func(dep android.Module) {
-			args[dep.Name()+"_out"] = ""
-		})
-	return args
+	// Add arguments providing information about other modules the current
+	// one depends on, accessible via ${module}_out and ${module}_dir.
+	ctx.VisitDirectDepsWithTag(generatedDepTag, func(dep android.Module) {
+		if gdep, ok := dep.(*genBackend); ok {
+			outs := gdep.outputs()
+			dependents = append(dependents, outs.Paths()...)
+
+			args[dep.Name()+"_dir"] = gdep.genDir.String()
+			args[dep.Name()+"_out"] = strings.Join(outs.Strings(), " ")
+		} else if ccmod, ok := dep.(*cc.Module); ok {
+			out := ccmod.OutputFile()
+			dependents = append(dependents, out.Path())
+			// We only expect to use the output from static/shared libraries
+			// and binaries, so `_dir' is not supported on these.
+			args[dep.Name()+"_out"] = out.String()
+		}
+	})
+
+	return
 }
 
 type soongInout struct {
@@ -226,9 +236,9 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 }
 
 func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
-	args := m.getArgs(ctx)
-	implicits := android.PathsForSource(ctx, m.Properties.Implicit_srcs)
+	args, implicits := m.getArgs(ctx)
 
+	m.genDir = android.PathForModuleGen(ctx)
 	m.exportGenIncludeDirs = pathsForModuleGen(ctx, m.Properties.Export_gen_include_dirs)
 
 	if m.Properties.Tool != "" {
