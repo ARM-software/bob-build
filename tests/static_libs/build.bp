@@ -24,6 +24,7 @@ bob_alias {
         "sl_main_dd",
         "sl_libb_whole_shared",
         "sl_libb_shared",
+        "sl_main_duplicates",
     ],
 }
 
@@ -36,7 +37,6 @@ bob_static_library {
     name: "sl_liba",
     defaults: ["shared_code"],
     srcs: [
-        "a/a.c",
         "a.c",
     ],
     export_cflags: ["-DFOO=1"],
@@ -82,7 +82,9 @@ bob_shared_library {
     // shared library. If there are duplicate symbols in the static
     // archive from b.c and b2.c, this link will fail.
     whole_static_libs: ["sl_libb_whole_inclusion"],
-    ldflags: ["-Wl,--no-undefined"],
+    not_osx: {
+        ldflags: ["-Wl,--no-undefined"],
+    },
 }
 
 bob_shared_library {
@@ -93,7 +95,9 @@ bob_shared_library {
     // b2.c, this link will fail.
     whole_static_libs: ["sl_libb"],
     static_libs: ["sl_liba"],
-    ldflags: ["-Wl,--no-undefined"],
+    not_osx: {
+        ldflags: ["-Wl,--no-undefined"],
+    },
 }
 
 bob_binary {
@@ -198,7 +202,6 @@ bob_static_library {
     cflags: [
         "-DFUNCTION=do_g",
     ],
-
 }
 
 bob_binary {
@@ -215,6 +218,32 @@ bob_binary {
     build_wrapper: "static_libs/check_link_order.py",
 
     android: {
+        enabled: false,
+    },
+}
+
+// Check that static libraries can contain multiple objects with the same
+// basename on Linux and Android
+bob_static_library {
+    name: "sl_liba_duplicates",
+    srcs: [
+        "a/a.c",
+        "a.c",
+    ],
+    cflags: ["-DFOO=1"],
+}
+
+bob_static_library {
+    name: "sl_liba_duplicates_2",
+    whole_static_libs: ["sl_liba_duplicates"],
+}
+
+bob_binary {
+    name: "sl_main_duplicates",
+    srcs: ["main3.c"],
+    static_libs: ["sl_liba_duplicates_2"],
+    cflags: ["-DFOO=1"],
+    osx: {
         enabled: false,
     },
 }
