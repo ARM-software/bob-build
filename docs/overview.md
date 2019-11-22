@@ -112,4 +112,5 @@ Building on macOS is supported, however, some features are not available,
 namely:
 
 * Forwarding libraries
+* Static libraries containing multiple objects with the same basename
 * Building Linux Kernel modules
