@@ -19,7 +19,7 @@
 // bob_generate_source via {{match_srcs}}
 //
 // This concatentates 2 files to produce a C file which is only valid
-//if both parts are present.
+// if both parts are present.
 bob_generate_source {
     name: "match_source_gen",
     srcs: [
@@ -38,12 +38,16 @@ bob_generate_source {
 // worked as expected.
 bob_binary {
     name: "match_source_bin",
-    srcs: [
-        "source.c",
-        "exports.txt",
-    ],
+    srcs: ["source.c"],
     generated_sources: ["match_source_gen"],
-    ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
+    not_osx: {
+        srcs: ["exports.txt"],
+        ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
+    },
+    osx: {
+        srcs: ["order_file.txt"],
+        ldflags: ["-Wl,-order_file,{{match_srcs \"*.txt\"}}"],
+    },
 }
 
 bob_alias {
