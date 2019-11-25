@@ -112,3 +112,4 @@ Building on macOS is supported, however, some features are not available,
 namely:
 
 * Forwarding libraries
+* Building Linux Kernel modules
