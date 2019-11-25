@@ -30,6 +30,10 @@ config OSX
 
 endchoice
 
+config NOT_OSX
+	bool
+	default y if !OSX
+
 config OS
 	string
 	default "android" if ANDROID
