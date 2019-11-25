@@ -105,3 +105,10 @@ Note that not all Bob features are supported on Android. This includes:
 
 * Aliases
 * Versioned libraries
+
+## macOS support
+
+Building on macOS is supported, however, some features are not available,
+namely:
+
+* Forwarding libraries
