@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018-2019 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,12 @@ bob_binary {
     name: "forwarding_user",
     srcs: ["main.c"],
     shared_libs: ["libforwarding"],
-    // Android uses the gold linker, which doesn't support
+    // Android and macOS use linkers which don't support
     // --copy-dt-needed-entries, so forwarding libraries won't work.
     android: {
+        enabled: false,
+    },
+    osx: {
         enabled: false,
     },
 }
