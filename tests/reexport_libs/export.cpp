@@ -1,11 +1,11 @@
 #include <hidden.h>
 
-static void checkForHiddenAvability()
+static void checkForHiddenAvailibility()
 {
 	hiddenFunction();
 }
 
 void silenceUnusedFunctionError()
 {
-    checkForHiddenAvability();
+	checkForHiddenAvailibility();
 }
