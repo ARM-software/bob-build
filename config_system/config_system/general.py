@@ -185,6 +185,15 @@ def get_options_depending_on(dependent):
     return enabled_options
 
 
+def get_warning(key):
+    """
+    Returns the warning associated with the given config option.
+    Returns None if there isn't an associated warning.
+    """
+    opt = data.get_config(key)
+    return opt.get('warning', None)
+
+
 def set_initial_values():
     "Set all configuration objects to their default value"
 

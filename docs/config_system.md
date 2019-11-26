@@ -114,6 +114,7 @@ config OPTION_NAME
 	default n|y|"hello"|1234 if D || E
 	default n
 	select ANOTHER_OPTION
+	warning "warning text when option enabled"
 	help
 		This is a longer, possibly multiline help text
 		describing OPTION_NAME.

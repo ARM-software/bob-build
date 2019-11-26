@@ -51,6 +51,7 @@ tokens = (
     "SOURCE_LOCAL",
     "STRING",
     "VISIBLE",
+    "WARNING",
     "YES", "NO",
     "COMMENT",
 )
@@ -78,6 +79,7 @@ commands = (
     "source_local",
     "string",
     "visible",
+    "warning",
 )
 
 params = ("if", "on")
