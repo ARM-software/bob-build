@@ -288,6 +288,7 @@ def p_config_options(p):
                       | config_options config_depends
                       | config_options config_help
                       | config_options config_prompt
+                      | config_options config_warning
                       """
     p[0] = merge(p[1], p[2])
 
@@ -458,6 +459,11 @@ def p_helptext(p):
         p[0] = ""
     else:
         p[0] = p[1] + "\n" + p[2]
+
+
+def p_config_warning(p):
+    "config_warning : WARNING QUOTED_STRING EOL"
+    p[0] = {"warning": p[2]}
 
 
 def p_error(p):

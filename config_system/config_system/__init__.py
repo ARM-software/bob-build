@@ -31,6 +31,7 @@ from config_system.general import \
     get_config_string, \
     get_options_depending_on, \
     get_options_selecting, \
+    get_warning, \
     init_config, \
     read_config, \
     set_config  # nopep8: E402 module level import not at top of file
