@@ -184,6 +184,11 @@ if __name__ == "__main__":
     # Add a dependency on copy_with_deps.py, which won't have been set by Bob
     deps.append(os.path.join(os.path.dirname(sys.argv[0]), "copy_with_deps.py"))
 
+    # Add a dependency on the test kernel Makefile. We do not attempt to add
+    # dependencies on every part of the kernel's build system - this is just
+    # enough to ensure that incremental builds of the Bob tests work OK.
+    deps.append(os.path.join(abs_kdir, "Makefile"))
+
     copy_with_deps.write_depfile(args.depfile, args.output, deps)
 
     make_args = args.make_args
