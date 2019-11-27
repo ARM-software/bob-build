@@ -10,4 +10,7 @@ bob_kernel_module {
     ],
     local_include_dirs: ["."],
     build_by_default: true,
+    osx: {
+        enabled: false,
+    },
 }
