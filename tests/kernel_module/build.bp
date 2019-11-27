@@ -2,3 +2,16 @@ bob_alias {
     name: "bob_test_kernel_module",
     srcs: ["test_module1", "test_module2"],
 }
+
+bob_install_group {
+    name: "IG_modules",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT)/lib/modules",
+    },
+    builder_ninja: {
+        install_path: "lib/modules",
+    },
+    builder_soong: {
+        install_path: "lib/modules",
+    },
+}

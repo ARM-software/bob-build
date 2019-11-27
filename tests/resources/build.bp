@@ -23,11 +23,9 @@ bob_install_group {
     builder_ninja: {
         install_path: "/work/bob/linux",
     },
-}
-
-bob_install_group {
-    name: "install_group_test_android",
-    install_path: "/work/bob/android",
+    builder_soong: {
+        install_path: "resources",
+    },
 }
 
 bob_resource {
@@ -39,5 +37,8 @@ bob_resource {
     },
     builder_ninja: {
         relative_install_path: "y",
+    },
+    builder_soong: {
+        relative_install_path: "z",
     },
 }

@@ -176,6 +176,17 @@ func buildActionsMutator(mctx android.TopDownMutatorContext) {
 	m.soongBuildActions(mctx)
 }
 
+func soongInstallGroupMutator(mctx abstr.TopDownMutatorContext) {
+	if ins, ok := abstr.Module(mctx).(installable); ok {
+		path := getInstallPath(mctx, installGroupTag)
+		if path != nil {
+			// for soong some modules don't need install path, so don't panic
+			props := ins.getInstallableProps()
+			props.Install_path = path
+		}
+	}
+}
+
 func registerMutators(ctx android.RegisterMutatorsContext) {
 	ctx.BottomUp("bob_default_deps", abstr.BottomUpAdaptor(defaultDepsMutator)).Parallel()
 	ctx.TopDown("bob_features_applier", abstr.TopDownAdaptor(featureApplierMutator)).Parallel()
@@ -198,6 +209,7 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 		abstr.TopDownAdaptor(collectReexportLibsDependenciesMutator)).Parallel()
 	ctx.BottomUp("bob_apply_reexport_lib_dependencies",
 		abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
+	ctx.TopDown("bob_install_group", abstr.TopDownAdaptor(soongInstallGroupMutator)).Parallel()
 	ctx.TopDown("bob_rename", renameMutator).Parallel()
 	ctx.TopDown("bob_build_actions", buildActionsMutator).Parallel()
 }

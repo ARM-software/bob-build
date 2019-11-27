@@ -9,6 +9,7 @@ bob_kernel_module {
         "test_module1.c",
     ],
     local_include_dirs: ["."],
+    install_group: "IG_modules",
     build_by_default: true,
     osx: {
         enabled: false,

@@ -23,6 +23,9 @@ bob_install_group {
     builder_ninja: {
         install_path: "${BuildDir}/gen_sh_lib",
     },
+    builder_soong: {
+        install_path: "lib",
+    },
 }
 
 bob_install_group {
@@ -32,6 +35,9 @@ bob_install_group {
     },
     builder_ninja: {
         install_path: "${BuildDir}/gen_sh_bin",
+    },
+    builder_soong: {
+        install_path: "bin",
     },
 }
 

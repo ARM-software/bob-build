@@ -268,10 +268,11 @@ func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 var installGroupTag = dependencyTag{name: "install_group"}
 var installDepTag = dependencyTag{name: "install_dep"}
 
-func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
+func getInstallPath(mctx abstr.TopDownMutatorContext, tag dependencyTag) *string {
 	var installGroupPath *string
 
-	mctx.VisitDirectDepsIf(
+	abstr.VisitDirectDepsIf(
+		mctx,
 		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == tag },
 		func(m blueprint.Module) {
 			insg, ok := m.(*installGroup)
@@ -289,8 +290,8 @@ func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *st
 	return installGroupPath
 }
 
-func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
-	if ins, ok := mctx.Module().(installable); ok {
+func installGroupMutator(mctx abstr.TopDownMutatorContext) {
+	if ins, ok := abstr.Module(mctx).(installable); ok {
 		path := getInstallPath(mctx, installGroupTag)
 		if path != nil {
 			if *path == "" {
