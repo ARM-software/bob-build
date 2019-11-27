@@ -1,4 +1,4 @@
-# python ignores, mostly for scons, based on github's .gitignore for python
+# python ignores, based on github's .gitignore for python
 *.py[cod]
 *.log
 
