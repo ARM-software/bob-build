@@ -209,7 +209,7 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 		KernelCrossCompile: m.Properties.Build.Kernel_cross_compile,
 		KbuildOptions:      kbuildOptions,
 		MakeArgs:           strings.Join(m.Properties.Build.Make_args, " "),
-		OutputModuleDir:    filepath.Join(m.outputDir(g), ctx.ModuleDir()),
+		OutputModuleDir:    filepath.Join(m.outputDir(g), projectModuleDir(ctx)),
 		CCFlag:             kernelToolchain,
 		HostCCFlag:         hostToolchain,
 		ClangTripleFlag:    clangTriple,

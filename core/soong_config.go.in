@@ -26,15 +26,7 @@ var (
 	configName = "@@CONFIGNAME@@"
 	configOpts = "@@BOB_CONFIG_OPTS@@"
 	jsonPath   = "@@CONFIG_JSON@@"
-
-	// The working directory is always the root of the Android source tree, but,
-	// unlike the `Android.mk` backend, ModuleDir() will always include the full
-	// path from the Android root (not from the project directory). This means
-	// that joining `${workdir}/${srcdir}/${moduledir}/file.c` would not be a
-	// valid path, if srcdir actually contained the path to the project root,
-	// because that's also included in moduledir. Work around this by leaving
-	// srcdir empty on Soong.
-	srcdir = ""
+	srcdir     = "@@SRCDIR@@"
 )
 
 func getBuildDir() string {

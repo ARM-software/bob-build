@@ -99,7 +99,7 @@ type InstallableProps struct {
 
 func (props *InstallableProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	if props.Post_install_tool != nil {
-		*props.Post_install_tool = filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), *props.Post_install_tool)
+		*props.Post_install_tool = filepath.Join(g.sourcePrefix(), projectModuleDir(ctx), *props.Post_install_tool)
 	}
 }
 

@@ -64,6 +64,7 @@ sed -e "s#@@BOB_CONFIG_OPTS@@#${BOB_CONFIG_OPTS}#" \
     -e "s#@@BUILDDIR@@#${BUILDDIR}#" \
     -e "s#@@CONFIGNAME@@#${CONFIGNAME}#" \
     -e "s#@@CONFIG_JSON@@#${CONFIG_JSON}#" \
+    -e "s#@@SRCDIR@@#${SRCDIR}#" \
     "${BOB_DIR}/core/soong_config.go.in" > "${TMP_GO_CONFIG}"
 rsync --checksum "${TMP_GO_CONFIG}" "${SOONG_CONFIG_GO}"
 rm -f "${TMP_GO_CONFIG}"

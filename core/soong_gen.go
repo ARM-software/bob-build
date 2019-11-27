@@ -143,6 +143,8 @@ func (m *genBackend) getHostBin(ctx android.ModuleContext) string {
 }
 
 func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
+	g := getBackend(ctx)
+
 	dependents = android.PathsForSource(ctx, m.Properties.Implicit_srcs)
 	args = map[string]string{
 		"bob_config":      filepath.Join(getBuildDir(), configName),
@@ -155,6 +157,7 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 		"cxxflags":        utils.Join(m.Properties.Cxxflags),
 		"ldflags":         utils.Join(m.Properties.Ldflags),
 		"ldlibs":          utils.Join(m.Properties.Ldlibs),
+		"src_dir":         g.sourcePrefix(),
 
 		// flag_defaults is primarily used to invoke sub-makes of
 		// different libraries. This shouldn't be needed on Android.
@@ -249,7 +252,7 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 
 	if len(m.Properties.Out) > 0 {
 		sio := soongInout{
-			in:           android.PathsForSource(ctx, m.Properties.Srcs),
+			in:           android.PathsForSource(ctx, utils.PrefixDirs(m.Properties.Srcs, srcdir)),
 			implicitSrcs: implicits,
 			out:          pathsForModuleGen(ctx, m.Properties.Out),
 			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
