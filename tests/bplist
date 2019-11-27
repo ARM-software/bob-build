@@ -1,4 +1,5 @@
 ./aliases/build.bp
+./binary/build.bp
 ./bob/Blueprints
 ./bob/blueprint/Blueprints
 ./build.bp
