@@ -45,6 +45,10 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
+func projectModuleDir(ctx abstr.BaseModuleContext) string {
+	return ctx.ModuleDir()
+}
+
 func getConfig(ctx abstr.BaseModuleContext) *bobConfig {
 	return ctx.(blueprint.BaseModuleContext).Config().(*bobConfig)
 }

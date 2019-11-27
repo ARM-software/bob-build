@@ -260,7 +260,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 // Add module paths to srcs, exclude_srcs, local_include_dirs, export_local_include_dirs
 // and post_install_tool
 func (l *Build) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
-	prefix := ctx.ModuleDir()
+	prefix := projectModuleDir(ctx)
 	l.SourceProps.processPaths(ctx, g)
 	l.InstallableProps.processPaths(ctx, g)
 	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)

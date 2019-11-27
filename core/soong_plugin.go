@@ -28,7 +28,9 @@
 package core
 
 import (
+	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"android/soong/android"
@@ -131,7 +133,7 @@ func (g *soongGenerator) staticActions(*staticLibrary, blueprint.ModuleContext) 
 func (g *soongGenerator) transformSourceActions(*transformSource, blueprint.ModuleContext, []inout) {}
 
 func (g *soongGenerator) buildDir() string                           { return getBuildDir() }
-func (g *soongGenerator) sourcePrefix() string                       { return "" }
+func (g *soongGenerator) sourcePrefix() string                       { return srcdir }
 func (g *soongGenerator) sharedLibsDir(tgt tgtType) string           { return "" }
 func (g *soongGenerator) sourceOutputDir(m *generateCommon) string   { return "" }
 func (g *soongGenerator) binaryOutputDir(m *binary) string           { return "" }
@@ -229,13 +231,39 @@ func init() {
 	apctx.AddNinjaFileDeps(jsonPath)
 }
 
+// The working directory is always the root of the Android source tree, but,
+// unlike the `Android.mk` backend, ModuleDir() will always include the full
+// path from the Android root (not from the project directory). This means that
+// joining `${workdir}/${srcdir}/${moduledir}/file.c` would not be a valid path,
+// if srcdir actually contained the path to the project root, because that's
+// also included in ModuleDir.
+// This helper works around the issue by wrapping ModuleDir(), to only return
+// the path relative to the project root, rather than the Android root.
+func projectModuleDir(ctx abstr.BaseModuleContext) string {
+	fromAndroidRoot := ctx.ModuleDir()
+	if !strings.HasPrefix(filepath.Clean(fromAndroidRoot)+string(filepath.Separator),
+		filepath.Clean(srcdir)+string(filepath.Separator)) {
+		panic(fmt.Errorf("Module directory '%s' is outside source dir '%s'",
+			fromAndroidRoot, srcdir))
+	}
+	moduleDir, err := filepath.Rel(srcdir, fromAndroidRoot)
+	if err != nil {
+		panic(err)
+	}
+	return moduleDir
+}
+
 // Some module types generate other Soong modules. For these, the sources must
 // be specified relative to the original module's subdirectory. This helper
 // calculates this, effectively undoing most of the work of the process_paths
 // mutator.
 func relativeToModuleDir(mctx android.BaseModuleContext, paths []string) (srcs []string) {
 	for _, path := range paths {
-		rel, err := filepath.Rel(mctx.ModuleDir(), path)
+		// Source paths and `projectModuleDir` are relative to the superproject's
+		// source dir (*not* the root of the Android tree). filepath.Rel doesn't
+		// use the current working directory (i.e. Android root), so it is safe to
+		// do the calculation relative to the project root.
+		rel, err := filepath.Rel(projectModuleDir(mctx), path)
 		if err != nil {
 			panic(err)
 		}

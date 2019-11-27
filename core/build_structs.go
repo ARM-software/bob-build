@@ -159,7 +159,7 @@ func (s *SourceProps) getSources(ctx abstr.BaseModuleContext) []string {
 }
 
 func (s *SourceProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
-	prefix := ctx.ModuleDir()
+	prefix := projectModuleDir(ctx)
 	var special = map[string]string{
 		"${bob_config}": filepath.Join(g.buildDir(), configName),
 	}

@@ -68,7 +68,7 @@ func (file sourceFilePath) moduleDir() string {
 }
 
 func newSourceFilePath(path string, ctx abstr.BaseModuleContext, g generatorBackend) filePath {
-	return sourceFilePath{path, ctx.ModuleDir(), g.sourcePrefix()}
+	return sourceFilePath{path, projectModuleDir(ctx), g.sourcePrefix()}
 }
 
 // Represents a file created in the generated output directory

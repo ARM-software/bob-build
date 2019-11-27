@@ -430,7 +430,7 @@ func getDepfileName(s string) string {
 }
 
 func (m *generateSource) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
-	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, ctx.ModuleDir())
+	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
 	m.generateCommon.processPaths(ctx, g)
 }
 
