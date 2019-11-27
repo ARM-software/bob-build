@@ -21,15 +21,16 @@ function check_stripped() {
 
 case "$(uname -s)" in
     Darwin*)
-        OPTIONS="OSX=y"
+        OS=OSX
         SHARED_LIBRARY_EXTENSION=".dylib"
         ;;
     *)
-        OPTIONS="LINUX=y"
+        OS=LINUX
         SHARED_LIBRARY_EXTENSION=".so"
         ;;
 esac
 
+OPTIONS="$OS=y"
 
 # Do simple checks on the output of each build
 function check_build_output() {
@@ -155,16 +156,6 @@ UPDATE+=(${build_dir}/target/objects/sl_libb/static_libs/b.c.o
          ${build_dir}/target/static/sl_libb.a)
 check_dep_updates "library headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
-# kernel module dependencies on sources
-SRC=tests/kernel_module/module1/test_module1.c
-UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
-check_dep_updates "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
-
-# kernel module dependencies on kernel header
-SRC=tests/kernel_module/kdir/include/kernel_header.h
-UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
-check_dep_updates "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
-
 # generated sources
 SRC=tests/generate_source/before_generate.in
 UPDATE=(${build_dir}/gen/generate_source_single/single.cpp
@@ -201,6 +192,18 @@ SRC=tests/implicit_outs/input.in
 UPDATE=(${build_dir}/target/executable/build_implicit_out
         ${build_dir}/target/executable/include_implicit_header)
 check_dep_updates "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+if [ "$OS" != "OSX" ] ; then
+    # kernel module dependencies on sources
+    SRC=tests/kernel_module/module1/test_module1.c
+    UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
+    check_dep_updates "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+    # kernel module dependencies on kernel header
+    SRC=tests/kernel_module/kdir/include/kernel_header.h
+    UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
+    check_dep_updates "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+fi
 
 # Clean up
 rm -rf "${TEST_DIRS[@]}"
