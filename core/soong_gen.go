@@ -286,6 +286,20 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	m.buildInouts(ctx, args)
 }
 
+func (m *genBackend) AndroidMkEntries() android.AndroidMkEntries {
+	// we skip if multiple outputs defined, as AndroidMkEntries struct support only single one
+	// (this should only affect bob_transform_source and bob_generate_source)
+	if len(m.Properties.Transform_srcs) > 0 && len(m.Properties.Out) > 1 && len(m.inouts) != 1 {
+		return android.AndroidMkEntries{}
+	}
+
+	return android.AndroidMkEntries{
+		Class:      "DATA",
+		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
+		Include:    "$(BUILD_PREBUILT)",
+	}
+}
+
 func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin android.Module) {
 	mctx.VisitDirectDepsWithTag(hostToolBinTag, func(m android.Module) {
 		hostBin = m

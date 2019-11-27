@@ -42,8 +42,9 @@ type kernelModuleBackendProps struct {
 
 type kernelModuleBackend struct {
 	android.ModuleBase
-	Properties kernelModuleBackendProps
-	Symvers    android.Path
+	Properties  kernelModuleBackendProps
+	Symvers     android.WritablePath
+	BuiltModule android.WritablePath
 }
 
 func kernelModuleBackendFactory() android.Module {
@@ -52,7 +53,7 @@ func kernelModuleBackendFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 
-	// init module (including name and common properties) with target-specific variants info,
+	// init module (including name and common properties) with target-specific variants info
 	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
 
 	return m
@@ -113,11 +114,9 @@ var soongKbuildRule = apctx.StaticRule("bobKbuild",
 	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
 
 func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
-	builtModule := android.PathForModuleOut(ctx, m.Name()+".ko")
-	symvers := android.PathForModuleOut(ctx, "Module.symvers")
-
 	// preserve symvers location for this module (for the parent pass)
-	m.Symvers = symvers
+	m.Symvers = android.PathForModuleOut(ctx, "Module.symvers")
+	m.BuiltModule = android.PathForModuleOut(ctx, m.Name()+".ko")
 
 	// gather symvers location for all dependant kernel modules
 	depSymvers := []android.Path{}
@@ -149,13 +148,13 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 			Description: "kbuild " + ctx.ModuleName(),
 			Inputs:      android.PathsForSource(ctx, m.Properties.Srcs),
 			Implicits:   append(depSymvers, android.PathForSource(ctx, m.Properties.Args.KmodBuild)),
-			Outputs:     []android.WritablePath{builtModule},
+			Outputs:     []android.WritablePath{m.BuiltModule},
 			Args:        m.Properties.Args.toDict(),
 			Default:     m.Properties.Default,
 		})
 
 	ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path),
-		m.Name()+".ko", builtModule)
+		m.Name()+".ko", m.BuiltModule)
 
 	// Add a dependency between Module.symvers and the kernel module. This
 	// should really be added to Outputs or ImplicitOutputs above, but
@@ -163,7 +162,20 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 	ctx.Build(apctx,
 		android.BuildParams{
 			Rule:    blueprint.Phony,
-			Inputs:  []android.Path{builtModule},
-			Outputs: []android.WritablePath{symvers},
+			Inputs:  []android.Path{m.BuiltModule},
+			Outputs: []android.WritablePath{m.Symvers},
 		})
+}
+
+func (m *kernelModuleBackend) AndroidMkEntries() android.AndroidMkEntries {
+	return android.AndroidMkEntries{
+		Class:      "DATA",
+		OutputFile: android.OptionalPathForPath(m.BuiltModule),
+		Include:    "$(BUILD_PREBUILT)",
+	}
+}
+
+// required to generate ninja rule for copying file onto partition
+func (m *kernelModuleBackend) InstallBypassMake() bool {
+	return true
 }
