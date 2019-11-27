@@ -18,7 +18,7 @@
 package core
 
 import (
-	"github.com/google/blueprint"
+	"github.com/ARM-software/bob-build/abstr"
 )
 
 var (
@@ -64,8 +64,8 @@ type stripable interface {
 	setDebugPath(*string)
 }
 
-func debugInfoMutator(mctx blueprint.TopDownMutatorContext) {
-	if m, ok := mctx.Module().(stripable); ok {
+func debugInfoMutator(mctx abstr.TopDownMutatorContext) {
+	if m, ok := abstr.Module(mctx).(stripable); ok {
 		path := getInstallPath(mctx, debugInfoTag)
 		m.setDebugPath(path)
 	}

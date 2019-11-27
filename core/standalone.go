@@ -149,8 +149,8 @@ func Main() {
 		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies",
 			abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
-		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
-		ctx.RegisterTopDownMutator("debug_info_mutator", debugInfoMutator).Parallel()
+		ctx.RegisterTopDownMutator("install_group_mutator", abstr.TopDownAdaptor(installGroupMutator)).Parallel()
+		ctx.RegisterTopDownMutator("debug_info_mutator", abstr.TopDownAdaptor(debugInfoMutator)).Parallel()
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
 	}
 
