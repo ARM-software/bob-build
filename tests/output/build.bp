@@ -45,8 +45,8 @@ bob_generate_source {
     out: ["generated_output"],
     tool: "verify.py",
     cmd: "python ${tool} --out='${binary_output_out}' --expected='bob_output' && " +
-        "python ${tool} --out='${lib_sh_output_out}' --expected='libshared_output.so' && " +
-        "python ${tool} --out='${lib_st_output_out}' --expected='static_output.a' && " +
+        "python ${tool} --out='${lib_sh_output_out}' --expected='libshared_output' --shared && " +
+        "python ${tool} --out='${lib_st_output_out}' --expected='static_output' --static && " +
         "cp ${binary_output_out} ${out}",
 }
 
