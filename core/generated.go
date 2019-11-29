@@ -609,7 +609,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext, g generatorBackend) []string
 }
 
 func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
-	if e, ok := mctx.Module().(enableable); ok {
+	if e, ok := abstr.Module(mctx).(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
 			return
@@ -617,19 +617,19 @@ func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
 	}
 
 	// Things which depend on generated/transformed sources
-	if gd, ok := mctx.Module().(generatedDepender); ok {
-		if _, ok := mctx.Module().(*defaults); ok {
+	if gd, ok := abstr.Module(mctx).(generatedDepender); ok {
+		if _, ok := abstr.Module(mctx).(*defaults); ok {
 			// We do not want to add dependencies for defaults
 			return
 		}
 		b := gd.build()
-		mctx.AddDependency(mctx.Module(), generatedSourceTag, b.Generated_sources...)
-		mctx.AddDependency(mctx.Module(), generatedHeaderTag, b.Generated_headers...)
-		mctx.AddDependency(mctx.Module(), generatedDepTag, b.Generated_deps...)
+		mctx.AddDependency(abstr.Module(mctx), generatedSourceTag, b.Generated_sources...)
+		mctx.AddDependency(abstr.Module(mctx), generatedHeaderTag, b.Generated_headers...)
+		mctx.AddDependency(abstr.Module(mctx), generatedDepTag, b.Generated_deps...)
 	}
 
 	// Things that a generated/transformed source depends on
-	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
+	if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
 		if gsc.Properties.Host_bin != nil {
 			parseAndAddVariationDeps(mctx, hostToolBinTag,
 				proptools.String(gsc.Properties.Host_bin))

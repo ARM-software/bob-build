@@ -212,7 +212,7 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 }
 
 func stripEmptyComponentsMutator(mctx abstr.BottomUpMutatorContext) {
-	f, ok := mctx.Module().(featurable)
+	f, ok := abstr.Module(mctx).(featurable)
 	if !ok {
 		return
 	}
@@ -267,7 +267,7 @@ func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
 		if len(variations) > 0 {
 			mctx.AddVariationDependencies(variations, tag, dep)
 		} else {
-			mctx.AddDependency(mctx.Module(), tag, dep)
+			mctx.AddDependency(abstr.Module(mctx), tag, dep)
 		}
 	}
 }
@@ -288,16 +288,16 @@ type targetable interface {
 }
 
 func dependerMutator(mctx abstr.BottomUpMutatorContext) {
-	if e, ok := mctx.Module().(enableable); ok {
+	if e, ok := abstr.Module(mctx).(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
 			return
 		}
 	}
 
-	if t, ok := mctx.Module().(targetable); ok {
+	if t, ok := abstr.Module(mctx).(targetable); ok {
 		build := t.build()
-		if _, ok := mctx.Module().(*defaults); ok {
+		if _, ok := abstr.Module(mctx).(*defaults); ok {
 			// We do not want to add dependencies for defaults
 			return
 		}
@@ -311,20 +311,20 @@ func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Export_shared_libs...)
 	}
-	if km, ok := mctx.Module().(*kernelModule); ok {
-		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
+	if km, ok := abstr.Module(mctx).(*kernelModule); ok {
+		mctx.AddDependency(abstr.Module(mctx), kernelModuleDepTag, km.Properties.Extra_symbols...)
 	}
-	if ins, ok := mctx.Module().(installable); ok {
+	if ins, ok := abstr.Module(mctx).(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			mctx.AddDependency(mctx.Module(), installGroupTag, proptools.String(props.Install_group))
+			mctx.AddDependency(abstr.Module(mctx), installGroupTag, proptools.String(props.Install_group))
 		}
 		parseAndAddVariationDeps(mctx, installDepTag, props.Install_deps...)
 	}
-	if strlib, ok := mctx.Module().(stripable); ok {
+	if strlib, ok := abstr.Module(mctx).(stripable); ok {
 		info := strlib.getDebugInfo()
 		if info != nil {
-			mctx.AddDependency(mctx.Module(), debugInfoTag, *info)
+			mctx.AddDependency(abstr.Module(mctx), debugInfoTag, *info)
 		}
 	}
 }
@@ -373,7 +373,7 @@ type pathProcessor interface {
 
 // Adds module paths to appropriate properties.
 func pathMutator(mctx abstr.BottomUpMutatorContext) {
-	if p, ok := mctx.Module().(pathProcessor); ok {
+	if p, ok := abstr.Module(mctx).(pathProcessor); ok {
 		p.processPaths(mctx, getBackend(mctx))
 	}
 }
@@ -384,7 +384,7 @@ type buildWrapperProcessor interface {
 
 // Prefixes build_wrapper with source path if necessary
 func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
-	if p, ok := mctx.Module().(buildWrapperProcessor); ok {
+	if p, ok := abstr.Module(mctx).(buildWrapperProcessor); ok {
 		p.processBuildWrapper(mctx)
 	}
 }
@@ -433,7 +433,7 @@ func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
 }
 
 func applyReexportLibsDependenciesMutator(mctx abstr.BottomUpMutatorContext) {
-	mainModule := mctx.Module()
+	mainModule := abstr.Module(mctx)
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies

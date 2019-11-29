@@ -116,12 +116,12 @@ func tgtToString(tgts []tgtType) []string {
 
 // Creates all the supported variants of splittable modules, including defaults.
 func splitterMutator(mctx abstr.BottomUpMutatorContext) {
-	if s, ok := mctx.Module().(splittable); ok {
+	if s, ok := abstr.Module(mctx).(splittable); ok {
 		variants := tgtToString(s.supportedVariants())
 		if len(variants) == 0 {
 			s.disable()
 		} else {
-			modules := mctx.CreateVariations(variants...)
+			modules := abstr.CreateVariations(mctx, variants...)
 			for i, v := range variants {
 				newsplit, ok := modules[i].(splittable)
 				if !ok {

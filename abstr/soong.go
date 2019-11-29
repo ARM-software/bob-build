@@ -38,20 +38,20 @@ type visitableModuleContext interface {
 	VisitDirectDepsIf(func(android.Module) bool, func(android.Module))
 }
 
-func TopDownAdaptor(f func(TopDownMutatorContext)) android.AndroidTopDownMutator {
+func TopDownAdaptor(f func(TopDownMutatorContext)) android.TopDownMutator {
 	return func(mctx android.TopDownMutatorContext) {
 		f(mctx)
 	}
 }
 
-func BottomUpAdaptor(f func(BottomUpMutatorContext)) android.AndroidBottomUpMutator {
+func BottomUpAdaptor(f func(BottomUpMutatorContext)) android.BottomUpMutator {
 	return func(mctx android.BottomUpMutatorContext) {
 		f(mctx)
 	}
 }
 
-func Module(mctx TopDownMutatorContext) blueprint.Module {
-	return mctx.(android.TopDownMutatorContext).Module()
+func Module(mctx BaseModuleContext) blueprint.Module {
+	return mctx.(android.BaseModuleContext).Module()
 }
 
 func WalkDeps(mctx VisitableModuleContext, f func(blueprint.Module, blueprint.Module) bool) {
@@ -69,4 +69,8 @@ func VisitDirectDepsIf(mctx VisitableModuleContext, pred func(blueprint.Module) 
 		f(dep)
 	}
 	mctx.VisitDirectDepsIf(androidPred, androidFunc)
+}
+
+func CreateVariations(mctx BottomUpMutatorContext, variationNames ...string) []android.Module {
+	return mctx.(android.BottomUpMutatorContext).CreateVariations(variationNames...)
 }

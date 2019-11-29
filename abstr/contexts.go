@@ -67,10 +67,6 @@ type TopDownMutatorContext interface {
 
 	OtherModuleExists(name string) bool
 	Rename(name string)
-	// No `Module()` method in top down contexts, because Soong's version
-	// uses android.Module instead of blueprint.Module.
-
-	CreateModule(blueprint.ModuleFactory, ...interface{})
 
 	GetDirectDepWithTag(name string, tag blueprint.DependencyTag) blueprint.Module
 	GetDirectDep(name string) (blueprint.Module, blueprint.DependencyTag)
@@ -79,12 +75,9 @@ type TopDownMutatorContext interface {
 // Common functions in blueprint.BottomUpMutatorContext and android.BottomUpMutatorContext
 type BottomUpMutatorContext interface {
 	BaseModuleContext
-	Module() blueprint.Module
 
 	AddDependency(module blueprint.Module, tag blueprint.DependencyTag, name ...string)
 	AddReverseDependency(module blueprint.Module, tag blueprint.DependencyTag, name string)
-	CreateVariations(...string) []blueprint.Module
-	CreateLocalVariations(...string) []blueprint.Module
 	SetDependencyVariation(string)
 	AddVariationDependencies([]blueprint.Variation, blueprint.DependencyTag, ...string)
 	AddFarVariationDependencies([]blueprint.Variation, blueprint.DependencyTag, ...string)
