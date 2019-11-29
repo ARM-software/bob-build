@@ -56,13 +56,23 @@ type ccStaticOrSharedProps struct {
 // `__target` suffix) to disambiguate, and use the `stem` property to fix up
 // the output filename.
 func ccModuleName(mctx android.TopDownMutatorContext, name string) string {
-	m, _ := mctx.GetDirectDep(name + bobModuleSuffix)
+	var dep android.Module
 
-	if l, ok := getLibrary(m); ok {
+	mctx.VisitDirectDeps(func(m android.Module) {
+		if m.Name() == name {
+			dep = m
+		}
+	})
+
+	if dep == nil {
+		panic(fmt.Errorf("%s has no dependency '%s'", mctx.ModuleName(), name))
+	}
+
+	if l, ok := getLibrary(dep); ok {
 		return l.shortName()
 	}
 
-	return m.Name()
+	return dep.Name()
 }
 
 func ccModuleNames(mctx android.TopDownMutatorContext, nameLists ...[]string) []string {
@@ -179,9 +189,9 @@ func (l *staticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostStaticFactory), provenanceProps, ccLibProps, libProps)
+		mctx.CreateModule(cc.LibraryHostStaticFactory, provenanceProps, ccLibProps, libProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetStaticFactory), provenanceProps, ccLibProps, libProps)
+		mctx.CreateModule(libraryTargetStaticFactory, provenanceProps, ccLibProps, libProps)
 	}
 }
 
@@ -211,10 +221,10 @@ func (l *sharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(cc.LibraryHostSharedFactory),
+		mctx.CreateModule(cc.LibraryHostSharedFactory,
 			provenanceProps, ccLibProps, libProps, stripProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(libraryTargetSharedFactory),
+		mctx.CreateModule(libraryTargetSharedFactory,
 			provenanceProps, ccLibProps, libProps, stripProps)
 	}
 }
@@ -244,10 +254,10 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	switch b.Properties.TargetType {
 	case tgtTypeHost:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryHostFactory),
+		mctx.CreateModule(binaryHostFactory,
 			provenanceProps, ccLibProps, stripProps)
 	case tgtTypeTarget:
-		mctx.CreateModule(android.ModuleFactoryAdaptor(binaryTargetFactory),
+		mctx.CreateModule(binaryTargetFactory,
 			provenanceProps, ccLibProps, stripProps)
 	}
 

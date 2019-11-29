@@ -673,7 +673,7 @@ func getLibrary(m blueprint.Module) (*library, bool) {
 }
 
 func checkLibraryFieldsMutator(mctx abstr.BottomUpMutatorContext) {
-	m := mctx.Module()
+	m := abstr.Module(mctx)
 	if b, ok := m.(*binary); ok {
 		props := b.Properties
 		b.checkField(len(props.Export_cflags) == 0, "export_cflags")
@@ -849,7 +849,7 @@ const (
 )
 
 func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.BottomUpMutatorContext) {
-	mainModule := mctx.Module()
+	mainModule := abstr.Module(mctx)
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so not needed

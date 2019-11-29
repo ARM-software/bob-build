@@ -24,6 +24,15 @@ trap 'echo "*** Unexpected error in $0 ***"' ERR
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 BOB_DIR="${SCRIPT_DIR}/.."
 
+source "${SCRIPT_DIR}/bootstrap_utils.sh"
+
+# Add a symlink in the source directory to the parent directory to simulate a
+# project with Bob included in its source dir. On Soong, we don't actually need
+# this, because everything is linked together by Android's build system.
+# However, the tests include some of Bob's Mconfig files, so we need the
+# symlink so that the paths to those files are the same on all test platforms.
+create_link .. "${SCRIPT_DIR}/bob"
+
 source "${BOB_DIR}/pathtools.bash"
 
 export SRCDIR="$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")"

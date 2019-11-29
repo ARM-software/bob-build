@@ -38,8 +38,8 @@ func BottomUpAdaptor(f func(BottomUpMutatorContext)) blueprint.BottomUpMutator {
 	}
 }
 
-func Module(mctx TopDownMutatorContext) blueprint.Module {
-	return mctx.(blueprint.TopDownMutatorContext).Module()
+func Module(mctx BaseModuleContext) blueprint.Module {
+	return mctx.(blueprint.BaseModuleContext).Module()
 }
 
 func WalkDeps(mctx VisitableModuleContext, f func(blueprint.Module, blueprint.Module) bool) {
@@ -48,4 +48,8 @@ func WalkDeps(mctx VisitableModuleContext, f func(blueprint.Module, blueprint.Mo
 
 func VisitDirectDepsIf(mctx VisitableModuleContext, pred func(blueprint.Module) bool, f func(blueprint.Module)) {
 	mctx.VisitDirectDepsIf(pred, f)
+}
+
+func CreateVariations(mctx BottomUpMutatorContext, variationNames ...string) []blueprint.Module {
+	return mctx.(blueprint.BottomUpMutatorContext).CreateVariations(variationNames...)
 }

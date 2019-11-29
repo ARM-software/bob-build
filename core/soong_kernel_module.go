@@ -86,7 +86,7 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 	}
 
 	// create module and fill all its registered properties with data from prepared structs
-	mctx.CreateModule(android.ModuleFactoryAdaptor(kernelModuleBackendFactory), &nameProps, provenanceProps, &props)
+	mctx.CreateModule(kernelModuleBackendFactory, &nameProps, provenanceProps, &props)
 }
 
 func (m *kernelModuleBackend) DepsMutator(mctx android.BottomUpMutatorContext) {

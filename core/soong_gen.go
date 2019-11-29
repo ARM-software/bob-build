@@ -117,8 +117,7 @@ func (m *genBackend) GeneratedDeps() (srcs android.Paths) {
 
 func (m *genBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
 	if m.Properties.HostBin != "" {
-		mctx.AddFarVariationDependencies([]blueprint.Variation{
-			{Mutator: "arch", Variation: mctx.Config().BuildOsVariant}},
+		mctx.AddFarVariationDependencies(mctx.Config().BuildOSTarget.Variations(),
 			hostToolBinTag, m.Properties.HostBin)
 	}
 
@@ -130,16 +129,16 @@ func (m *genBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
 		m.Properties.Encapsulates...)
 }
 
-func (m *genBackend) getHostBin(ctx android.ModuleContext) string {
+func (m *genBackend) getHostBin(ctx android.ModuleContext) android.OptionalPath {
 	if m.Properties.HostBin == "" {
-		return ""
+		return android.OptionalPath{}
 	}
 	hostBinModule := ctx.GetDirectDepWithTag(m.Properties.HostBin, hostToolBinTag)
 	htp, ok := hostBinModule.(genrule.HostToolProvider)
 	if !ok {
 		panic(fmt.Errorf("%s is not a host tool", m.Properties.HostBin))
 	}
-	return htp.HostToolPath().String()
+	return htp.HostToolPath()
 }
 
 func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
@@ -150,7 +149,6 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 		"bob_config":      configFile,
 		"bob_config_opts": configOpts,
 		"gen_dir":         android.PathForModuleGen(ctx).String(),
-		"host_bin":        m.getHostBin(ctx),
 		"asflags":         utils.Join(m.Properties.Asflags),
 		"cflags":          utils.Join(m.Properties.Cflags),
 		"conlyflags":      utils.Join(m.Properties.Conlyflags),
@@ -243,6 +241,11 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 
 	m.genDir = android.PathForModuleGen(ctx)
 	m.exportGenIncludeDirs = pathsForModuleGen(ctx, m.Properties.Export_gen_include_dirs)
+
+	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
+		args["host_bin"] = hostBin.String()
+		implicits = append(implicits, hostBin.Path())
+	}
 
 	if m.Properties.Tool != "" {
 		tool := android.PathForSource(ctx, filepath.Join(ctx.ModuleDir(), m.Properties.Tool))
@@ -338,7 +341,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 
 	// The ModuleDir for the new module will be inherited from the
 	// current module via the TopDownMutatorContext
-	mctx.CreateModule(android.ModuleFactoryAdaptor(genBackendFactory), &nameProps, &genProps)
+	mctx.CreateModule(genBackendFactory, &nameProps, &genProps)
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
@@ -394,5 +397,5 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 
 	// The ModuleDir for the new module will be inherited from the
 	// current module via the TopDownMutatorContext
-	mctx.CreateModule(android.ModuleFactoryAdaptor(genBackendFactory), &nameProps, &genProps)
+	mctx.CreateModule(genBackendFactory, &nameProps, &genProps)
 }
