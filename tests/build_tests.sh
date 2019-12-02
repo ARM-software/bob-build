@@ -15,8 +15,17 @@ function check_installed() {
 # File must be stripped
 function check_stripped() {
     local FILE="${1}"
+    local OS="${2}"
 
-    [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
+    if [ "$OS" != "OSX" ] ; then
+        [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
+    else
+        # The two symbols below are always expected on macOS
+        [ $(nm -a "${FILE}" | grep -Ev " (dyld_stub_binder|__mh_execute_header)$" | wc -l) = "0" ] || {
+            echo "${FILE} not stripped"
+            false
+        }
+    fi
 }
 
 case "$(uname -s)" in
@@ -44,8 +53,8 @@ function check_build_output() {
     check_installed "${DIR}/install/bin/stripped_binary"
 
     # The stripped library must not contain symbols
-    check_stripped "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}"
-    check_stripped "${DIR}/install/bin/stripped_binary"
+    check_stripped "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}" "$OS"
+    check_stripped "${DIR}/install/bin/stripped_binary" "$OS"
 }
 
 export TEST_NON_ASCII_IN_ENV_HASH='ó'
