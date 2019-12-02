@@ -55,7 +55,7 @@ def create_debug_info(fname, dbg, tool):
 
 def write_output(fname, output, dbg, strip, tool):
     if os.path.basename(tool) == "dsymutil":
-        run(["strip", "-S", "-o", output, fname])
+        run(["strip", "-o", output, fname])
     else:
         cmd = [tool]
         if dbg:
