@@ -64,8 +64,15 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
     # Invoke the kernel build system
     cmd = [make_command, "-C", kdir, "M=" + module_dir, "EXTRA_CFLAGS=" + extra_cflags]
     cmd.extend(make_args)
+
+    # Sanitize the environment - we should only use build options passed in via
+    # the command line.
+    env = dict(os.environ)
+    for var in ["ARCH", "CROSS_COMPILE", "CC", "HOSTCC", "CLANG_TRIPLE", "KBUILD_EXTRA_SYMBOLS"]:
+        env.pop(var, None)
+
     try:
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, env=env)
     except subprocess.CalledProcessError as e:
         logger.error("Command failed: %s", str(e.cmd))
         sys.exit(e.returncode)

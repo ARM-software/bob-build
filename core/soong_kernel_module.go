@@ -29,6 +29,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/abstr"
+	"github.com/ARM-software/bob-build/utils"
 )
 
 type kernelModuleBackendProps struct {
@@ -58,6 +59,8 @@ func kernelModuleBackendFactory() android.Module {
 }
 
 func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
+	g := getBackend(mctx)
+
 	nameProps := nameProps{
 		proptools.StringPtr(m.Name()),
 	}
@@ -76,7 +79,7 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 
 	props := kernelModuleBackendProps{
 		Args:          m.generateKbuildArgs(mctx),
-		Srcs:          m.Properties.getSources(mctx),
+		Srcs:          utils.PrefixDirs(m.Properties.getSources(mctx), g.sourcePrefix()),
 		Default:       isBuiltByDefault(m),
 		Extra_Symbols: m.Properties.Extra_symbols,
 		Install_Path:  installPath,
@@ -90,10 +93,13 @@ func (m *kernelModuleBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
 	mctx.AddDependency(mctx.Module(), kernelModuleDepTag, m.Properties.Extra_Symbols...)
 }
 
+const prebuiltMake = "prebuilts/build-tools/linux-x86/bin/make"
+
 var soongKbuildRule = apctx.StaticRule("bobKbuild",
 	blueprint.RuleParams{
 		Command: "python $kmod_build -o $out --depfile $depfile " +
 			"--common-root " + srcdir + " " +
+			"--make-command " + prebuiltMake + " " +
 			"--module-dir $output_module_dir $extra_includes " +
 			"--sources $in $kbuild_extra_symbols " +
 			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
@@ -135,11 +141,7 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 		m.Properties.Args.KbuildExtraSymbols = "--extra-symbols " + strings.Join(temp, " ")
 	}
 
-	// finalize relative path (assuming location under source dir)
-	kdir := m.Properties.Args.KernelDir
-	if kdir != "" && !filepath.IsAbs(kdir) {
-		m.Properties.Args.KernelDir = android.PathForSource(ctx, kdir).String()
-	}
+	m.Properties.Args.OutputModuleDir = android.PathForModuleOut(ctx, projectModuleDir(ctx)).String()
 
 	ctx.Build(apctx,
 		android.BuildParams{
