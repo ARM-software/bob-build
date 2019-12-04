@@ -7,10 +7,6 @@ cache:
   directories:
     - $HOME/ninjabin
 
-jobs:
-  allow_failures:
-    - os: osx
-
 addons:
   apt:
     packages:
