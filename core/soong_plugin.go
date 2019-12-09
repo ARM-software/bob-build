@@ -210,6 +210,7 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 	ctx.BottomUp("bob_apply_reexport_lib_dependencies",
 		abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
 	ctx.TopDown("bob_install_group", abstr.TopDownAdaptor(soongInstallGroupMutator)).Parallel()
+	ctx.TopDown("match_sources_mutator", abstr.TopDownAdaptor(matchSourcesMutator)).Parallel()
 	ctx.TopDown("bob_rename", renameMutator).Parallel()
 	ctx.TopDown("bob_build_actions", buildActionsMutator).Parallel()
 }

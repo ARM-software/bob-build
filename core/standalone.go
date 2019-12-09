@@ -151,7 +151,7 @@ func Main() {
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
 		ctx.RegisterTopDownMutator("install_group_mutator", abstr.TopDownAdaptor(installGroupMutator)).Parallel()
 		ctx.RegisterTopDownMutator("debug_info_mutator", abstr.TopDownAdaptor(debugInfoMutator)).Parallel()
-		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
+		ctx.RegisterTopDownMutator("match_sources_mutator", abstr.TopDownAdaptor(matchSourcesMutator)).Parallel()
 	}
 
 	if config.Properties.GetBool("builder_ninja") {
