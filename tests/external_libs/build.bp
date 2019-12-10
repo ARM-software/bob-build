@@ -70,8 +70,7 @@ bob_static_library {
 // above library is included in the default build.
 bob_binary {
     name: "use_external_lib_proxy_user",
-    srcs: ["external_lib.c"],
-    cflags: ["-DFUNC_NAME=main"],
+    srcs: ["main.c"],
     static_libs: ["use_external_lib_proxy"],
     enabled: false,
     android: {
