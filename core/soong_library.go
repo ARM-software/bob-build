@@ -262,3 +262,6 @@ func (b *binary) soongBuildActions(mctx android.TopDownMutatorContext) {
 	}
 
 }
+
+// For external libraries this is a no-op as they must be already built
+func (*externalLib) soongBuildActions(android.TopDownMutatorContext) {}

@@ -57,10 +57,3 @@ ifneq ($(BOB_GEN_RET_VAL),Success)
 endif
 
 include $(BOB_ANDROIDMK_DIR)/Android.inc
-
-# These should really be in their own Android.mk file - however, to simplify
-# running the tests, include them from here instead. This means that the tests
-# and their dependencies can always be built with a single `mm` command.
-#
-# This script will overwrite $(LOCAL_PATH), so it must be included last!
-include $(LOCAL_PATH)/external_libs/external_libs.mk

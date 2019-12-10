@@ -38,6 +38,9 @@ source "${BOB_DIR}/pathtools.bash"
 export SRCDIR="$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")"
 export BOB_DIR="$(relative_path "${ANDROID_BUILD_TOP}" "${BOB_DIR}")"
 
+# Add a symlink to enable the external_libs test
+create_link external_lib.bp "${SCRIPT_DIR}/external_libs/external/Android.bp"
+
 # Change to the working directory
 cd "${ANDROID_BUILD_TOP}"
 
