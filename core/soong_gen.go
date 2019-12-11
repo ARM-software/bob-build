@@ -67,12 +67,57 @@ type genBackend struct {
 	inouts               []soongInout
 }
 
+type genBinaryBackend struct {
+	genBackend
+}
+
+type genLibraryBackend struct {
+	genBackend
+}
+
+type genStaticLibraryBackend struct {
+	genLibraryBackend
+}
+
+type genSharedLibraryBackend struct {
+	genLibraryBackend
+}
+
 func genBackendFactory() android.Module {
 	m := &genBackend{}
-
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	android.InitAndroidModule(m)
+	return m
+}
 
+func genBinaryBackendFactory() android.Module {
+	m := &genBinaryBackend{}
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
+	m.AddProperties(&m.Properties)
+	android.InitAndroidModule(m)
+	return m
+}
+
+func genStaticLibraryBackendFactory() android.Module {
+	m := &genStaticLibraryBackend{}
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
+	m.AddProperties(&m.Properties)
+	// init module (including name and common properties) with target-specific variants info
+	android.InitAndroidArchModule(m, android.HostAndDeviceDefault, android.MultilibFirst)
+	return m
+}
+
+func genSharedLibraryBackendFactory() android.Module {
+	m := &genSharedLibraryBackend{}
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
+	m.AddProperties(&m.Properties)
+	// init module (including name and common properties) with target-specific variants info
+	android.InitAndroidArchModule(m, android.HostAndDeviceDefault, android.MultilibFirst)
 	return m
 }
 
@@ -156,6 +201,7 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 		"ldflags":         utils.Join(m.Properties.Ldflags),
 		"ldlibs":          utils.Join(m.Properties.Ldlibs),
 		"src_dir":         g.sourcePrefix(),
+		"module_dir":      android.PathForSource(ctx, ctx.ModuleDir()).String(),
 
 		// flag_defaults is primarily used to invoke sub-makes of
 		// different libraries. This shouldn't be needed on Android.
@@ -287,14 +333,42 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 }
 
 func (m *genBackend) AndroidMkEntries() android.AndroidMkEntries {
-	// we skip if multiple outputs defined, as AndroidMkEntries struct support only single one
-	// (this should only affect bob_transform_source and bob_generate_source)
-	if len(m.Properties.Transform_srcs) > 0 && len(m.Properties.Out) > 1 && len(m.inouts) != 1 {
+	// skip if multiple outputs defined, as AndroidMkEntries struct support only single one
+	if len(m.Properties.Transform_srcs) > 0 || len(m.Properties.Out) > 1 {
 		return android.AndroidMkEntries{}
 	}
 
 	return android.AndroidMkEntries{
 		Class:      "DATA",
+		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
+		Include:    "$(BUILD_PREBUILT)",
+		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+			func(entries *android.AndroidMkEntries) {
+				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
+			},
+		},
+	}
+}
+
+func (m *genBinaryBackend) AndroidMkEntries() android.AndroidMkEntries {
+	return android.AndroidMkEntries{
+		Class:      "EXECUTABLES",
+		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
+		Include:    "$(BUILD_PREBUILT)",
+	}
+}
+
+func (m *genStaticLibraryBackend) AndroidMkEntries() android.AndroidMkEntries {
+	return android.AndroidMkEntries{
+		Class:      "STATIC_LIBRARIES",
+		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
+		Include:    "$(BUILD_PREBUILT)",
+	}
+}
+
+func (m *genSharedLibraryBackend) AndroidMkEntries() android.AndroidMkEntries {
+	return android.AndroidMkEntries{
+		Class:      "SHARED_LIBRARIES",
 		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
 		Include:    "$(BUILD_PREBUILT)",
 	}
@@ -318,7 +392,7 @@ func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContex
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
-	out, implicitSrcs, implicitOuts []string, depfile bool) {
+	out, implicitSrcs, implicitOuts []string, depfile bool, factory func() android.Module) {
 
 	if !isEnabled(gc) {
 		return
@@ -353,28 +427,23 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Ldlibs:                  gc.Properties.FlagArgsBuild.Ldlibs,
 	}
 
-	// The ModuleDir for the new module will be inherited from the
-	// current module via the TopDownMutatorContext
-	mctx.CreateModule(genBackendFactory, &nameProps, &genProps)
+	mctx.CreateModule(factory, &nameProps, &genProps)
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Implicit_srcs, gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile))
+	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Implicit_srcs, gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile), genBackendFactory)
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".a"}, []string{}, []string{}, false)
+	gs.createGenrule(mctx, []string{gs.Name() + ".a"}, []string{}, []string{}, false, genStaticLibraryBackendFactory)
 }
 
 func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	name := gs.Name()
-	gs.createGenrule(mctx, []string{name + ".so"}, []string{}, []string{}, false)
+	gs.createGenrule(mctx, []string{gs.Name() + ".so"}, []string{}, []string{}, false, genSharedLibraryBackendFactory)
 }
 
 func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	name := gb.Name()
-	gb.createGenrule(mctx, []string{name}, []string{}, []string{}, false)
+	gb.createGenrule(mctx, []string{gb.Name()}, []string{}, []string{}, false, genBinaryBackendFactory)
 }
 
 var (
@@ -413,3 +482,99 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 	// current module via the TopDownMutatorContext
 	mctx.CreateModule(genBackendFactory, &nameProps, &genProps)
 }
+
+// implement android.ImageInterface so android.ImageMutator generates 'image:core' variant for us
+
+func (mod *genLibraryBackend) ImageMutatorBegin(ctx android.BaseModuleContext) {}
+
+func (mod *genLibraryBackend) CoreVariantNeeded(ctx android.BaseModuleContext) bool {
+	return true
+}
+
+func (mod *genLibraryBackend) RecoveryVariantNeeded(ctx android.BaseModuleContext) bool    { return false }
+func (mod *genLibraryBackend) ExtraImageVariations(ctx android.BaseModuleContext) []string { return nil }
+func (mod *genLibraryBackend) SetImageVariation(ctx android.BaseModuleContext, variation string, module android.Module) {
+}
+
+// implement android.LinkableInterface so android.VersionMutator and android.LinkageMutator
+// generates 'version:' and 'link:static/shared' variant for us
+
+func (mod *genLibraryBackend) Module() android.Module { return mod }
+func (mod *genLibraryBackend) CcLibrary() bool        { return false }
+
+func (mod *genLibraryBackend) CcLibraryInterface() bool {
+	// hardcoded true so link mutator is processed properly
+	return true
+}
+
+func (mod *genLibraryBackend) NonCcVariants() bool { return false }
+
+func (mod *genLibraryBackend) IncludeDirs() android.Paths {
+	return mod.exportGenIncludeDirs.Paths()
+}
+
+func (mod *genLibraryBackend) OutputFile() android.OptionalPath {
+	return android.OptionalPathForPath(mod.inouts[0].out[0])
+}
+
+func (mod *genLibraryBackend) GetDepsInLinkOrder() []android.Path {
+	return []android.Path{mod.OutputFile().Path()}
+}
+
+func (mod *genLibraryBackend) SetDepsInLinkOrder([]android.Path)      {}
+func (mod *genLibraryBackend) HasStaticVariant() bool                 { return false }
+func (mod *genLibraryBackend) GetStaticVariant() cc.LinkableInterface { return nil }
+func (mod *genLibraryBackend) UseVndk() bool                          { return false }
+func (mod *genLibraryBackend) MustUseVendorVariant() bool             { return false }
+func (mod *genLibraryBackend) IsVndk() bool                           { return false }
+func (mod *genLibraryBackend) HasVendorVariant() bool                 { return false }
+func (mod *genLibraryBackend) SdkVersion() string                     { return "" }
+func (mod *genLibraryBackend) ToolchainLibrary() bool                 { return false }
+func (mod *genLibraryBackend) NdkPrebuiltStl() bool                   { return false }
+func (mod *genLibraryBackend) StubDecorator() bool                    { return false }
+func (mod *genLibraryBackend) StubsVersions() []string                { return []string{} }
+func (mod *genLibraryBackend) BuildStubs() bool                       { return false }
+func (mod *genLibraryBackend) SetBuildStubs()                         {}
+func (mod *genLibraryBackend) SetStubsVersions(string)                {}
+func (mod *genLibraryBackend) HasStubsVariants() bool                 { return false }
+func (mod *genLibraryBackend) SelectedStl() string                    { return "" }
+func (mod *genLibraryBackend) ApiLevel() string                       { return "" }
+
+func (mod *genStaticLibraryBackend) BuildStaticVariant() bool {
+	return mod.Static()
+}
+
+func (mod *genStaticLibraryBackend) BuildSharedVariant() bool {
+	return mod.Shared()
+}
+
+func (mod *genSharedLibraryBackend) BuildStaticVariant() bool {
+	return mod.Static()
+}
+
+func (mod *genSharedLibraryBackend) BuildSharedVariant() bool {
+	return mod.Shared()
+}
+
+func (mod *genLibraryBackend) SetStatic() {}
+func (mod *genLibraryBackend) SetShared() {}
+
+func (mod *genStaticLibraryBackend) Static() bool {
+	return true
+}
+
+func (mod *genStaticLibraryBackend) Shared() bool {
+	return false
+}
+
+func (mod *genSharedLibraryBackend) Static() bool {
+	return false
+}
+
+func (mod *genSharedLibraryBackend) Shared() bool {
+	return true
+}
+
+func (mod *genLibraryBackend) Toc() android.OptionalPath { return android.OptionalPath{} }
+func (mod *genLibraryBackend) InRecovery() bool          { return false }
+func (mod *genLibraryBackend) OnlyInRecovery() bool      { return false }
