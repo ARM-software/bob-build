@@ -97,7 +97,7 @@ bob_install_group {
 bob_install_group {
     name: "IG_libs",
     builder_android_make: {
-        install_path: "$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)",
+        install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
     },
     builder_ninja: {
         install_path: "install/lib",
@@ -117,7 +117,7 @@ bob_install_group {
 bob_install_group {
     name: "IG_binaries",
     builder_android_make: {
-        install_path: "$(TARGET_OUT_VENDOR_EXECUTABLES)",
+        install_path: "$(TARGET_OUT_EXECUTABLES)",
     },
     builder_ninja: {
         install_path: "install/bin",
