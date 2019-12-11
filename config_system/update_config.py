@@ -174,7 +174,7 @@ def main():
         except ImportError as err:
             logger.error("Could not import %s plugin: %s" % (name, err))
         except Exception as err:
-            logger.warning("Problem encountered in %s plugin: %s" % (name, repr(err)))
+            logger.error("Problem encountered in %s plugin: %s" % (name, repr(err)))
             import traceback
             traceback.print_tb(sys.exc_info()[2])
 
