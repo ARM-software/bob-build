@@ -182,6 +182,39 @@ func specifyArmMode(flags []string) string {
 	return line
 }
 
+// Identifies if a module links to a generated library. Generated
+// libraries only support a single architecture
+func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
+	seenGeneratedLib := false
+
+	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
+
+		// Only consider dependencies that get linked
+		tag := ctx.OtherModuleDependencyTag(dep)
+		if tag == staticDepTag ||
+			tag == sharedDepTag ||
+			tag == wholeStaticDepTag {
+
+			_, staticLib := dep.(*generateStaticLibrary)
+			_, sharedLib := dep.(*generateSharedLibrary)
+			if sharedLib || staticLib {
+				// We depend on a generated library
+				seenGeneratedLib = true
+
+				// No need to continue walking
+				return false
+			}
+
+			// Keep walking this part of the tree
+			return true
+		}
+
+		return false
+	})
+
+	return seenGeneratedLib
+}
+
 // This function generates the Android make fragment to build static
 // libraries, shared libraries and executables. It's evolved over time
 // and needs to be refactored to use interfaces better.
@@ -377,6 +410,12 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	// All test binaries will be installable.
 	isMultiLib := (tgt == tgtTypeTarget) &&
 		((bt == binTypeShared) || (bt == binTypeStatic) || ok)
+
+	// Disable multilib if this module depends on generated libraries
+	// (which can't support multilib)
+	if isMultiLib && linksToGeneratedLibrary(ctx) {
+		isMultiLib = false
+	}
 
 	if ok {
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + proptools.String(m.Properties.Relative_install_path) + "\n")

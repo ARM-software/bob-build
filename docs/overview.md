@@ -104,7 +104,12 @@ release and the one before that.
 Note that not all Bob features are supported on Android. This includes:
 
 * Aliases
+
 * Versioned libraries
+
+* Generated library modules only support a single target, so any
+  library/binary that uses them will only build for the main target.
+  i.e. Multilib is disabled on them.
 
 ## macOS support
 
