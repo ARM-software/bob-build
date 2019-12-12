@@ -69,6 +69,10 @@ config BUILDER_SOONG
 
 endchoice
 
+config NOT_BUILDER_SOONG
+	bool
+	default y if !BUILDER_SOONG
+
 menu "Toolchain Options"
 
 ## Select toolchain for Bob
