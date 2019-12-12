@@ -56,7 +56,6 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 DISABLE_TEST_DIRS=(
     external_libs
     generate_libs
-    output
     source_encapsulation
     kernel_module
     kernel_module/module1

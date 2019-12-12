@@ -150,7 +150,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (*prov
 
 	props := &ccLibraryCommonProps{
 		Name:               proptools.StringPtr(l.shortName()),
-		Stem:               proptools.StringPtr(l.Name()),
+		Stem:               proptools.StringPtr(l.outputName()),
 		Srcs:               relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
 		Generated_sources:  l.getGeneratedSources(mctx),
 		Generated_headers:  l.getGeneratedHeaders(mctx),
