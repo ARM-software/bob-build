@@ -166,12 +166,18 @@ func (m *genBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
 			hostToolBinTag, m.Properties.HostBin)
 	}
 
-	parseAndAddVariationDeps(mctx, generatedDepTag,
-		m.Properties.Module_deps...)
-	parseAndAddVariationDeps(mctx, generatedSourceTag,
-		m.Properties.Module_srcs...)
-	parseAndAddVariationDeps(mctx, encapsulatesTag,
-		m.Properties.Encapsulates...)
+	// `module_deps` and `module_srcs` can refer not only to source
+	// generation modules, but to binaries and libraries. In this case we
+	// need to handle multilib builds, where a 'target' library could be
+	// split into 32 and 64-bit variants. Use `AddFarVariationDependencies`
+	// here, because this will automatically choose the first available
+	// variant, rather than the other dependency-adding functions, which
+	// will error when multiple variants are present.
+	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Module_deps...)
+	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Module_srcs...)
+	// We can only encapsulate other generated/transformed source modules,
+	// so use the normal `AddDependency` function for these.
+	mctx.AddDependency(mctx.Module(), encapsulatesTag, m.Properties.Encapsulates...)
 }
 
 func (m *genBackend) getHostBin(ctx android.ModuleContext) android.OptionalPath {
