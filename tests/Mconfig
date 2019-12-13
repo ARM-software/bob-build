@@ -256,3 +256,12 @@ config TEMPLATE_TEST_VALUE
 config STATIC_LIB_TOGGLE
 	bool "Test toggle"
 	default n
+
+## KERNEL_ config needed for testing kernel modules
+config KERNEL_CC
+	string "Kernel compiler"
+	default "$(CLANG)" if BUILDER_ANDROID_MAKE
+
+config KERNEL_CLANG_TRIPLE
+	string "Kernel Clang triple"
+	default "x86_64-linux-gnu" if BUILDER_ANDROID_MAKE
