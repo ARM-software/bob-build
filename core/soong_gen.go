@@ -63,7 +63,7 @@ type genBackend struct {
 	Properties genBackendProps
 
 	genDir               android.Path
-	exportGenIncludeDirs android.WritablePaths
+	exportGenIncludeDirs android.Paths
 	inouts               []soongInout
 }
 
@@ -153,7 +153,7 @@ func (m *genBackend) GeneratedSourceFiles() android.Paths {
 }
 
 func (m *genBackend) GeneratedHeaderDirs() android.Paths {
-	return m.exportGenIncludeDirs.Paths()
+	return m.exportGenIncludeDirs
 }
 
 func (m *genBackend) GeneratedDeps() (srcs android.Paths) {
@@ -288,11 +288,38 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 	}
 }
 
+// helper function to get output paths, since for soong processPaths() and encapsulateMutator does not work as expected
+func exportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
+	mod := mctx.Module().(*genBackend)
+	var allIncludeDirs android.Paths
+
+	// add our own include dirs
+	for _, dir := range mod.Properties.Export_gen_include_dirs {
+		allIncludeDirs = append(allIncludeDirs, android.PathForModuleGen(mctx, dir))
+	}
+
+	// add include dirs of our all dependencies
+	mctx.WalkDeps(func(child android.Module, parent android.Module) bool {
+		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
+			return false
+		}
+		if cmod, ok := child.(*genBackend); ok {
+			for _, dir := range cmod.exportGenIncludeDirs {
+				allIncludeDirs = append(allIncludeDirs, dir)
+			}
+		}
+		return true
+	})
+
+	// make unique items as for recursive passes it may contain redundant ones
+	return android.FirstUniquePaths(allIncludeDirs)
+}
+
 func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.getArgs(ctx)
 
 	m.genDir = android.PathForModuleGen(ctx)
-	m.exportGenIncludeDirs = pathsForModuleGen(ctx, m.Properties.Export_gen_include_dirs)
+	m.exportGenIncludeDirs = exportGenIncludeDirs(ctx)
 
 	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
 		args["host_bin"] = hostBin.String()
@@ -516,7 +543,7 @@ func (mod *genLibraryBackend) CcLibraryInterface() bool {
 func (mod *genLibraryBackend) NonCcVariants() bool { return false }
 
 func (mod *genLibraryBackend) IncludeDirs() android.Paths {
-	return mod.exportGenIncludeDirs.Paths()
+	return mod.exportGenIncludeDirs
 }
 
 func (mod *genLibraryBackend) OutputFile() android.OptionalPath {
