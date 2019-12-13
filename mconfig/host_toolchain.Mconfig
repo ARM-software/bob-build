@@ -22,6 +22,7 @@
 
 config HOST_GNU_PREFIX
 	string "Host GNU compiler prefix"
+	default "prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/bin/x86_64-linux-android-" if ANDROID
 	default ""
 
 config HOST_CLANG_PREFIX
