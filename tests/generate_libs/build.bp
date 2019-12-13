@@ -55,7 +55,7 @@ bob_generate_shared_library {
      * Note that we make this a host library to avoid having to figure
      * out GCC arguments.
      */
-    cmd: "gcc -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
 }
 
@@ -82,7 +82,7 @@ bob_generate_static_library {
      * Note that we make this a host library to avoid having to figure
      * out GCC arguments.
      */
-    cmd: "gcc -c -o ${gen_dir}/libblah.o ${in}; ar rcs ${gen_dir}/libblah_static.a ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${gen_dir}/libblah_static.a ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
 }
 

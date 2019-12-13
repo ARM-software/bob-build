@@ -257,6 +257,16 @@ config STATIC_LIB_TOGGLE
 	bool "Test toggle"
 	default n
 
+## GEN_ config needed to do compilation for generator modules
+config GEN_CC
+	string "Compiler"
+	default "$(CLANG) -fuse-ld=lld" if BUILDER_ANDROID_MAKE
+	default HOST_GNU_PREFIX + GNU_CC_BINARY
+
+config GEN_AR
+	string "Archiver"
+	default HOST_GNU_PREFIX + AR_BINARY
+
 ## KERNEL_ config needed for testing kernel modules
 config KERNEL_CC
 	string "Kernel compiler"
