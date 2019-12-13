@@ -4,6 +4,8 @@ bob_kernel_module {
      * workaround to use the spoofed kernel build system included with the Bob
      * tests. */
     kernel_dir: "../kdir",
+    kernel_cc: "{{.kernel_cc}}",
+    kernel_clang_triple: "{{.kernel_clang_triple}}",
     srcs: [
         "Kbuild",
         "test_module1.c",
