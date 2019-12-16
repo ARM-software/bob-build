@@ -20,8 +20,8 @@ function check_stripped() {
     if [ "$OS" != "OSX" ] ; then
         [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
     else
-        # The two symbols below are always expected on macOS
-        [ $(nm -a "${FILE}" | grep -Ev " (dyld_stub_binder|__mh_execute_header)$" | wc -l) = "0" ] || {
+        # The symbol below is always expected on macOS
+        [ $(nm -a "${FILE}" | grep -Ev " dyld_stub_binder$" | wc -l) = "0" ] || {
             echo "${FILE} not stripped"
             false
         }
