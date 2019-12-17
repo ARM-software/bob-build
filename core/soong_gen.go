@@ -58,6 +58,13 @@ type genBackendProps struct {
 	TransformSourceProps
 }
 
+type genBackendInterface interface {
+	genrule.SourceFileGenerator
+
+	outputs() android.WritablePaths
+	outputPath() android.Path
+}
+
 type genBackend struct {
 	android.ModuleBase
 	Properties genBackendProps
@@ -119,6 +126,10 @@ func genSharedLibraryBackendFactory() android.Module {
 	// init module (including name and common properties) with target-specific variants info
 	android.InitAndroidArchModule(m, android.HostAndDeviceDefault, android.MultilibFirst)
 	return m
+}
+
+func (m *genBackend) outputPath() android.Path {
+	return m.genDir
 }
 
 func (m *genBackend) outputs() (ret android.WritablePaths) {
@@ -222,13 +233,13 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 	// Add arguments providing information about other modules the current
 	// one depends on, accessible via ${module}_out and ${module}_dir.
 	ctx.VisitDirectDepsWithTag(generatedDepTag, func(dep android.Module) {
-		if gdep, ok := dep.(*genBackend); ok {
+		if gdep, ok := dep.(genBackendInterface); ok {
 			outs := gdep.outputs()
 			dependents = append(dependents, outs.Paths()...)
 
-			args[dep.Name()+"_dir"] = gdep.genDir.String()
+			args[dep.Name()+"_dir"] = gdep.outputPath().String()
 			args[dep.Name()+"_out"] = strings.Join(outs.Strings(), " ")
-		} else if ccmod, ok := dep.(*cc.Module); ok {
+		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
 			// We only expect to use the output from static/shared libraries
@@ -289,12 +300,11 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 }
 
 // helper function to get output paths, since for soong processPaths() and encapsulateMutator does not work as expected
-func exportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
-	mod := mctx.Module().(*genBackend)
+func (m *genBackend) calcExportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
 	var allIncludeDirs android.Paths
 
 	// add our own include dirs
-	for _, dir := range mod.Properties.Export_gen_include_dirs {
+	for _, dir := range m.Properties.Export_gen_include_dirs {
 		allIncludeDirs = append(allIncludeDirs, android.PathForModuleGen(mctx, dir))
 	}
 
@@ -303,8 +313,8 @@ func exportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
 		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
 			return false
 		}
-		if cmod, ok := child.(*genBackend); ok {
-			for _, dir := range cmod.exportGenIncludeDirs {
+		if cmod, ok := child.(genBackendInterface); ok {
+			for _, dir := range cmod.GeneratedHeaderDirs() {
 				allIncludeDirs = append(allIncludeDirs, dir)
 			}
 		}
@@ -319,7 +329,7 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.getArgs(ctx)
 
 	m.genDir = android.PathForModuleGen(ctx)
-	m.exportGenIncludeDirs = exportGenIncludeDirs(ctx)
+	m.exportGenIncludeDirs = m.calcExportGenIncludeDirs(ctx)
 
 	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
 		args["host_bin"] = hostBin.String()
@@ -529,7 +539,7 @@ func (mod *genLibraryBackend) ExtraImageVariations(ctx android.BaseModuleContext
 func (mod *genLibraryBackend) SetImageVariation(ctx android.BaseModuleContext, variation string, module android.Module) {
 }
 
-// implement android.LinkableInterface so android.VersionMutator and android.LinkageMutator
+// implement cc.LinkableInterface so android.VersionMutator and cc.LinkageMutator
 // generates 'version:' and 'link:static/shared' variant for us
 
 func (mod *genLibraryBackend) Module() android.Module { return mod }

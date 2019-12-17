@@ -27,6 +27,7 @@ config HOST_GNU_PREFIX
 
 config HOST_CLANG_PREFIX
 	string "Host Clang compiler prefix"
+	default "prebuilts/clang/host/linux-x86/clang-r370808/bin/" if ANDROID
 	default ""
 
 config HOST_ARMCLANG_PREFIX
