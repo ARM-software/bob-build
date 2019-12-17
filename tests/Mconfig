@@ -272,7 +272,8 @@ config GEN_AR
 config KERNEL_CC
 	string "Kernel compiler"
 	default "$(CLANG)" if BUILDER_ANDROID_MAKE
+	default HOST_CLANG_PREFIX + CLANG_CC_BINARY if BUILDER_SOONG
 
 config KERNEL_CLANG_TRIPLE
 	string "Kernel Clang triple"
-	default "x86_64-linux-gnu" if BUILDER_ANDROID_MAKE
+	default "x86_64-linux-gnu" if ANDROID
