@@ -51,6 +51,17 @@ function check_build_output() {
     # Check that installed libraries/binaries are present
     check_installed "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}"
     check_installed "${DIR}/install/bin/stripped_binary"
+    check_installed "${DIR}/gen_sh_lib/libblah_shared${SHARED_LIBRARY_EXTENSION}"
+    check_installed "${DIR}/gen_sh_bin/binary_linked_to_gen_shared"
+    check_installed "${DIR}/gen_sh_bin/binary_linked_to_gen_static"
+    check_installed "${DIR}/gen_sh_src/validate_install_generate_sources.txt"
+    check_installed "${DIR}/gen_sh_src/f3.validate_install_transform_source.txt"
+    check_installed "${DIR}/gen_sh_src/f4.validate_install_transform_source.txt"
+    check_installed "${DIR}/install/tests/linux/y/main.c"
+    if [ "$OS" != "OSX" ] ; then
+        check_installed "${DIR}/lib/modules/test_module1.ko"
+        check_installed "${DIR}/lib/modules/test_module2.ko"
+    fi
 
     # The stripped library must not contain symbols
     check_stripped "${DIR}/install/lib/libstripped_library${SHARED_LIBRARY_EXTENSION}" "$OS"
@@ -193,7 +204,7 @@ check_dep_updates "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]
 
 # resource dependencies
 SRC=tests/resources/main.c
-UPDATE=(${build_dir}/work/bob/linux/y/main.c)
+UPDATE=(${build_dir}/install/tests/linux/y/main.c)
 check_dep_updates "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # implicit output

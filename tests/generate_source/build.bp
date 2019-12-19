@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -226,10 +226,19 @@ bob_generate_source {
     ],
 }
 
+bob_generate_source {
+    name: "validate_install_generate_sources",
+    out: ["validate_install_generate_sources.txt"],
+    cmd: "touch ${out}",
+    install_group: "IG_gensrc",
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_generate_source",
     srcs: [
         "validate_link_generate_sources",
+        "validate_install_generate_sources",
         "bin_gen_sources_and_headers",
         "gen_source_depfile",
         "gen_source_depfile_with_implicit_outs",
