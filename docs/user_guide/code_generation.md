@@ -204,7 +204,7 @@ One use for these module types is to extract a library from a
 compressed archive with `tar` or a similar command.
 
 ```
-bob_generated_shared_library {
+bob_generate_shared_library {
     name: "libfoo",
     srcs: "libfoo.tar.bz2",
     headers: ["include/libfoo.h"],

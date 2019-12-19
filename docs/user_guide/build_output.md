@@ -66,10 +66,25 @@ bob_install_group {
 }
 ```
 
-Each `install_path` is referring to a directory under the build output
+On Linux each `install_path` is referring to a directory under the build output
 directory. It's recommended to set up a directory containing all the
 files to be installed, so that they can be copied to the target
 filesystem in one command.
+
+On Android `install_path` has to start with an Android make variable defined in
+[envsetup.mk](https://android.googlesource.com/platform/build/+/master/core/envsetup.mk), e.g.
+
+```
+bob_install_group {
+    name: "IG_libs",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+}
+```
 
 ## Installation properties
 

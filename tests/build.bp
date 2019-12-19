@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,45 @@
  */
 
 subname = "build.bp"
+
+bob_install_group {
+    name: "IG_gensrc",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT)/gen_sh_src",
+    },
+    builder_ninja: {
+        install_path: "gen_sh_src",
+    },
+    builder_soong: {
+        install_path: "gen_sh_src",
+    },
+}
+
+bob_install_group {
+    name: "IG_host_libs",
+    builder_android_make: {
+        install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
+    },
+    builder_ninja: {
+        install_path: "install/host/lib",
+    },
+    builder_soong: {
+        install_path: "install/host/lib",
+    },
+}
+
+bob_install_group {
+    name: "IG_libs",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+    builder_soong: {
+        install_path: "install/lib",
+    },
+}
 
 bob_alias {
     name: "bob_tests",

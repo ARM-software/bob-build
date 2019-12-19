@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,28 +16,31 @@
  */
 
 bob_install_group {
-    name: "ig_genlib_lib",
+    name: "IG_genlib_lib",
     builder_android_make: {
+        /* On Android make install_path is not respected for generated libraries. */
         install_path: "$(TARGET_OUT)/gen_sh_lib",
     },
     builder_ninja: {
-        install_path: "${BuildDir}/gen_sh_lib",
+        install_path: "gen_sh_lib",
     },
     builder_soong: {
-        install_path: "lib",
+        /* On Soong install_path is not respected for generated libraries. */
+        install_path: "gen_sh_lib",
     },
 }
 
 bob_install_group {
-    name: "ig_genlib_bin",
+    name: "IG_genlib_bin",
     builder_android_make: {
         install_path: "$(TARGET_OUT)/gen_sh_bin",
     },
     builder_ninja: {
-        install_path: "${BuildDir}/gen_sh_bin",
+        install_path: "gen_sh_bin",
     },
     builder_soong: {
-        install_path: "bin",
+        /* On Soong install_path is not respected for binaries. */
+        install_path: "gen_sh_bin",
     },
 }
 
@@ -48,7 +51,7 @@ bob_generate_shared_library {
     always_enabled_feature: {
         headers: ["include/libblah_feature.h"],
     },
-    install_group: "ig_genlib_lib",
+    install_group: "IG_genlib_lib",
     export_gen_include_dirs: ["include"],
 
     /* To avoid checking in a binary, call gcc directly.
@@ -63,7 +66,7 @@ bob_binary {
     name: "binary_linked_to_gen_shared",
     srcs: ["main.c"],
     shared_libs: ["libblah_shared"],
-    install_group: "ig_genlib_bin",
+    install_group: "IG_genlib_bin",
     host_supported: true,
     target_supported: false,
     build_by_default: true,
@@ -82,14 +85,14 @@ bob_generate_static_library {
      * Note that we make this a host library to avoid having to figure
      * out GCC arguments.
      */
-    cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${gen_dir}/libblah_static.a ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${out} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
 }
 
 bob_binary {
     name: "binary_linked_to_gen_static",
     srcs: ["main.c"],
-    install_group: "ig_genlib_bin",
+    install_group: "IG_genlib_bin",
     static_libs: ["libblah_static"],
     host_supported: true,
     target_supported: false,

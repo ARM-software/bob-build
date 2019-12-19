@@ -134,7 +134,7 @@ chosen using defaults, or be overridden by the user if user-visible:
 config INSTALL_PATH
 	string "Location to install the binary"
 	default "/usr/local/bin" if LINUX
-	default "$(TARGET_OUT)/bin if ANDROID
+	default "$(TARGET_OUT)/bin" if ANDROID
 ```
 
 String values can also be compared in expressions (`default if` and `depends

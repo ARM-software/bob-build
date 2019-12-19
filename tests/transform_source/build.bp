@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,9 +91,25 @@ bob_binary {
     srcs: ["main.cpp"],
 }
 
+bob_transform_source {
+    name: "validate_install_transform_source",
+    srcs: [
+        "f3.in",
+        "f4.in"
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: ["$1.validate_install_transform_source.txt"]
+    },
+    cmd: "touch ${out}",
+    install_group: "IG_gensrc",
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_transform_source",
     srcs: [
         "validate_link_transform_source",
+        "validate_install_transform_source",
     ],
 }
