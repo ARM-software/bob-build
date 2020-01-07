@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,10 +209,12 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 		KernelCrossCompile: m.Properties.Build.Kernel_cross_compile,
 		KbuildOptions:      kbuildOptions,
 		MakeArgs:           strings.Join(m.Properties.Build.Make_args, " "),
-		OutputModuleDir:    filepath.Join(m.outputDir(g), projectModuleDir(ctx)),
-		CCFlag:             kernelToolchain,
-		HostCCFlag:         hostToolchain,
-		ClangTripleFlag:    clangTriple,
+		// The kernel module builder replicates the out-of-tree module's source tree structure.
+		// The kernel module will be at its equivalent position in the output tree.
+		OutputModuleDir: filepath.Join(m.outputDir(g), projectModuleDir(ctx)),
+		CCFlag:          kernelToolchain,
+		HostCCFlag:      hostToolchain,
+		ClangTripleFlag: clangTriple,
 	}
 }
 

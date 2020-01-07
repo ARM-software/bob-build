@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,19 +30,20 @@ import (
 )
 
 type ccLibraryCommonProps struct {
-	Name               *string
-	Stem               *string
-	Srcs               []string
-	Exclude_srcs       []string
-	Generated_sources  []string
-	Generated_headers  []string
-	Cflags             []string
-	Include_dirs       []string
-	Local_include_dirs []string
-	Static_libs        []string
-	Whole_static_libs  []string
-	Shared_libs        []string
-	Ldflags            []string
+	Name                  *string
+	Stem                  *string
+	Srcs                  []string
+	Exclude_srcs          []string
+	Generated_sources     []string
+	Generated_headers     []string
+	Cflags                []string
+	Include_dirs          []string
+	Local_include_dirs    []string
+	Static_libs           []string
+	Whole_static_libs     []string
+	Shared_libs           []string
+	Ldflags               []string
+	Relative_install_path *string
 }
 
 type ccStaticOrSharedProps struct {
@@ -149,19 +150,20 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (*prov
 	provenanceProps := getProvenanceProps(&l.Properties.Build.BuildProps)
 
 	props := &ccLibraryCommonProps{
-		Name:               proptools.StringPtr(l.shortName()),
-		Stem:               proptools.StringPtr(l.outputName()),
-		Srcs:               relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
-		Generated_sources:  l.getGeneratedSources(mctx),
-		Generated_headers:  l.getGeneratedHeaders(mctx),
-		Exclude_srcs:       relativeToModuleDir(mctx, l.Properties.Exclude_srcs),
-		Cflags:             cflags,
-		Include_dirs:       l.Properties.Include_dirs,
-		Local_include_dirs: relativeToModuleDir(mctx, l.Properties.Local_include_dirs),
-		Static_libs:        ccModuleNames(mctx, l.Properties.ResolvedStaticLibs),
-		Whole_static_libs:  ccModuleNames(mctx, l.Properties.Whole_static_libs),
-		Shared_libs:        ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
-		Ldflags:            l.Properties.Ldflags,
+		Name:                  proptools.StringPtr(l.shortName()),
+		Stem:                  proptools.StringPtr(l.outputName()),
+		Srcs:                  relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
+		Generated_sources:     l.getGeneratedSources(mctx),
+		Generated_headers:     l.getGeneratedHeaders(mctx),
+		Exclude_srcs:          relativeToModuleDir(mctx, l.Properties.Exclude_srcs),
+		Cflags:                cflags,
+		Include_dirs:          l.Properties.Include_dirs,
+		Local_include_dirs:    relativeToModuleDir(mctx, l.Properties.Local_include_dirs),
+		Static_libs:           ccModuleNames(mctx, l.Properties.ResolvedStaticLibs),
+		Whole_static_libs:     ccModuleNames(mctx, l.Properties.Whole_static_libs),
+		Shared_libs:           ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
+		Ldflags:               l.Properties.Ldflags,
+		Relative_install_path: l.getInstallableProps().Relative_install_path,
 	}
 
 	return provenanceProps, props
