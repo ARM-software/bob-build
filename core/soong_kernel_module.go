@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,9 +42,10 @@ type kernelModuleBackendProps struct {
 
 type kernelModuleBackend struct {
 	android.ModuleBase
-	Properties  kernelModuleBackendProps
-	Symvers     android.WritablePath
-	BuiltModule android.WritablePath
+	Properties      kernelModuleBackendProps
+	Symvers         android.WritablePath
+	BuiltModule     android.WritablePath
+	InstalledModule android.InstallPath
 }
 
 func kernelModuleBackendFactory() android.Module {
@@ -140,6 +141,8 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 		m.Properties.Args.KbuildExtraSymbols = "--extra-symbols " + strings.Join(temp, " ")
 	}
 
+	// The kernel module builder replicates the out-of-tree module's source tree structure.
+	// The kernel module will be at its equivalent position in the output tree.
 	m.Properties.Args.OutputModuleDir = android.PathForModuleOut(ctx, projectModuleDir(ctx)).String()
 
 	ctx.Build(apctx,
@@ -153,8 +156,10 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 			Default:     m.Properties.Default,
 		})
 
-	ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path),
-		m.Name()+".ko", m.BuiltModule)
+	if m.Properties.Install_Path != "" {
+		// generate ninja rule for copying file onto partition, also preserve install location
+		m.InstalledModule = ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path), m.Name()+".ko", m.BuiltModule)
+	}
 
 	// Add a dependency between Module.symvers and the kernel module. This
 	// should really be added to Outputs or ImplicitOutputs above, but
@@ -168,10 +173,22 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 }
 
 func (m *kernelModuleBackend) AndroidMkEntries() android.AndroidMkEntries {
+	outputFile := android.OptionalPathForPath(m.BuiltModule)
+	if m.Properties.Install_Path != "" {
+		// reference InstalledModule instead of BuiltModule will ensure triggering install rule after build rule
+		outputFile = android.OptionalPathForPath(m.InstalledModule)
+	}
+
 	return android.AndroidMkEntries{
 		Class:      "DATA",
-		OutputFile: android.OptionalPathForPath(m.BuiltModule),
+		OutputFile: outputFile,
 		Include:    "$(BUILD_PREBUILT)",
+		// don't install in data partition (which is enforced behavior when class is DATA)
+		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+			func(entries *android.AndroidMkEntries) {
+				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
+			},
+		},
 	}
 }
 
