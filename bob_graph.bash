@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,4 +63,4 @@ echo "
 #
 "
 
-"${BOB_BUILDER}" -l "${BLUEPRINT_LIST_FILE}" -b "${BUILDDIR}" "$@" "${TOPNAME}"
+"${BOB_BUILDER}" -l "${BLUEPRINT_LIST_FILE}" -b "${BUILDDIR}" "$@" "${SRCDIR}/${TOPNAME}"
