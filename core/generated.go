@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,11 +161,11 @@ func (m *generateCommon) outputDir(g generatorBackend) string {
 }
 
 func (m *generateCommon) shortName() string {
-	return m.Name()
+	return m.buildbpName()
 }
 
 func (m *generateCommon) altName() string {
-	return m.Name()
+	return m.buildbpName()
 }
 
 func (m *generateCommon) altShortName() string {
@@ -334,7 +334,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 				panic(errors.New(reflect.TypeOf(m).String() + " is not a valid dependent interface"))
 			}
 
-			depName := ctx.OtherModuleName(m)
+			depName := buildbpName(ctx.OtherModuleName(m))
 			// When the dependent module is another Bob generated module, provide
 			// the location of its output dir so the using module can pick and
 			// choose what it uses.
@@ -623,9 +623,9 @@ func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
 			return
 		}
 		b := gd.build()
-		mctx.AddDependency(abstr.Module(mctx), generatedSourceTag, b.Generated_sources...)
-		mctx.AddDependency(abstr.Module(mctx), generatedHeaderTag, b.Generated_headers...)
-		mctx.AddDependency(abstr.Module(mctx), generatedDepTag, b.Generated_deps...)
+		mctx.AddDependency(abstr.Module(mctx), generatedSourceTag, bobNames(b.Generated_sources)...)
+		mctx.AddDependency(abstr.Module(mctx), generatedHeaderTag, bobNames(b.Generated_headers)...)
+		mctx.AddDependency(abstr.Module(mctx), generatedDepTag, bobNames(b.Generated_deps)...)
 	}
 
 	// Things that a generated/transformed source depends on

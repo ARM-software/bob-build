@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,9 +41,25 @@ var (
 	srcdir     = os.Getenv("SRCDIR")
 )
 
+func bobName(buildbpName string) string {
+	return buildbpName
+}
+
+func buildbpName(bobName string) string {
+	return bobName
+}
+
 type moduleBase struct {
 	blueprint.SimpleName
 }
+
+// On Soong, these helpers avoid conflicts with the Soong modules we generate
+// by adding a suffix to all non-backend Bob modules. These are no-ops on Linux
+// and Android Make, but we need the helpers to exist so they can be used by
+// the common code.
+func (m *moduleBase) bobName() string     { return bobName(m.SimpleName.Name()) }
+func (m *moduleBase) buildbpName() string { return m.SimpleName.Name() }
+func (m *moduleBase) Name() string        { return m.bobName() }
 
 func projectModuleDir(ctx abstr.BaseModuleContext) string {
 	return ctx.ModuleDir()

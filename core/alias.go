@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +87,7 @@ func aliasMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 	if a, ok := mctx.Module().(aliasable); ok {
 		for _, s := range a.getAliasList() {
-			mctx.AddReverseDependency(mctx.Module(), aliasTag, s)
+			mctx.AddReverseDependency(mctx.Module(), aliasTag, bobName(s))
 		}
 	}
 }

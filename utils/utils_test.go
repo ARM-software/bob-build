@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -258,4 +258,16 @@ func problematicAppendExample(t *testing.T) {
 	fmt.Printf("B = %v\n", arrB)
 	// C = [1 2 3 4 5 C]
 	fmt.Printf("C = %v\n", arrC)
+}
+
+func Test_Map(t *testing.T) {
+	fn := func(s string) string { return s + "_" }
+
+	// Map returns a zero-element slice, rather than nil, so don't compare it with
+	// []string{}; instead just check that the length is zero.
+	assert.Equal(t, len(Map(fn)), 0)
+	assert.Equal(t, len(Map(fn, []string{})), 0)
+	assert.Equal(t, Map(fn, []string{}, []string{"a"}), []string{"a_"})
+	assert.Equal(t, Map(fn, []string{"z", "y"}, []string{}, []string{"a", "b"}),
+		[]string{"z_", "y_", "a_", "b_"})
 }

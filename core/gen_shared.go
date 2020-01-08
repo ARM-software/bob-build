@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +60,7 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 //// Support singleOutputModule
 
 func (m *generateSharedLibrary) outputFileName() string {
-	return m.Name() + m.libExtension()
+	return m.buildbpName() + m.libExtension()
 }
 
 //// Factory functions

@@ -65,7 +65,7 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 	g := getBackend(mctx)
 
 	nameProps := nameProps{
-		proptools.StringPtr(m.Name()),
+		proptools.StringPtr(m.buildbpName()),
 	}
 
 	provenanceProps := getProvenanceProps(&m.Properties.Build.BuildProps)

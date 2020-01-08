@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -237,8 +237,8 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 			outs := gdep.outputs()
 			dependents = append(dependents, outs.Paths()...)
 
-			args[dep.Name()+"_dir"] = gdep.outputPath().String()
-			args[dep.Name()+"_out"] = strings.Join(outs.Strings(), " ")
+			args[buildbpName(dep.Name())+"_dir"] = gdep.outputPath().String()
+			args[buildbpName(dep.Name())+"_out"] = strings.Join(outs.Strings(), " ")
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
@@ -417,21 +417,26 @@ func (m *genSharedLibraryBackend) AndroidMkEntries() android.AndroidMkEntries {
 	}
 }
 
-func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin android.Module) {
+func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin *binary) {
+	var hostBinModule android.Module
 	mctx.VisitDirectDepsWithTag(hostToolBinTag, func(m android.Module) {
-		hostBin = m
+		hostBinModule = m
 	})
-	if hostBin == nil {
+	if hostBinModule == nil {
 		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", proptools.String(gc.Properties.Host_bin)))
 	}
-	return
+	bin, ok := hostBinModule.(*binary)
+	if !ok {
+		panic(fmt.Errorf("Host binary %s of module %s is not a bob_binary!", bin.buildbpName(), gc.buildbpName()))
+	}
+	return bin
 }
 
 func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContext) string {
 	if gc.Properties.Host_bin == nil {
 		return ""
 	}
-	return ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
+	return ccModuleName(mctx, gc.getHostBinModule(mctx).buildbpName())
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
@@ -446,7 +451,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		strings.Join(gc.Properties.Args, " "), -1)
 
 	nameProps := nameProps{
-		proptools.StringPtr(gc.Name()),
+		proptools.StringPtr(gc.buildbpName()),
 	}
 
 	genProps := genBackendProps{
@@ -478,15 +483,15 @@ func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) 
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, []string{gs.Name() + ".a"}, []string{}, []string{}, false, genStaticLibraryBackendFactory)
+	gs.createGenrule(mctx, []string{gs.buildbpName() + ".a"}, []string{}, []string{}, false, genStaticLibraryBackendFactory)
 }
 
 func (gs *generateSharedLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, []string{gs.Name() + ".so"}, []string{}, []string{}, false, genSharedLibraryBackendFactory)
+	gs.createGenrule(mctx, []string{gs.buildbpName() + ".so"}, []string{}, []string{}, false, genSharedLibraryBackendFactory)
 }
 
 func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gb.createGenrule(mctx, []string{gb.Name()}, []string{}, []string{}, false, genBinaryBackendFactory)
+	gb.createGenrule(mctx, []string{gb.buildbpName()}, []string{}, []string{}, false, genBinaryBackendFactory)
 }
 
 var (
@@ -502,7 +507,7 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		return
 	}
 
-	nameProps := nameProps{proptools.StringPtr(ts.Name())}
+	nameProps := nameProps{proptools.StringPtr(ts.buildbpName())}
 
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",
