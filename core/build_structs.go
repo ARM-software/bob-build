@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -149,6 +149,14 @@ func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []stri
 	return files
 }
 
+func bobNames(buildbpNames ...[]string) []string {
+	return utils.Map(bobName, buildbpNames...)
+}
+
+func buildbpNames(bobNames ...[]string) []string {
+	return utils.Map(buildbpName, bobNames...)
+}
+
 // Get a list of sources to compile.
 //
 // The sources are relative to the project directory (i.e. include
@@ -265,9 +273,9 @@ func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
 		}
 
 		if len(variations) > 0 {
-			mctx.AddVariationDependencies(variations, tag, dep)
+			mctx.AddVariationDependencies(variations, tag, bobName(dep))
 		} else {
-			mctx.AddDependency(abstr.Module(mctx), tag, dep)
+			mctx.AddDependency(abstr.Module(mctx), tag, bobName(dep))
 		}
 	}
 }
@@ -301,30 +309,30 @@ func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 			// We do not want to add dependencies for defaults
 			return
 		}
-		mctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
-		mctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
-		mctx.AddVariationDependencies(nil, staticDepTag, build.Export_static_libs...)
+		mctx.AddVariationDependencies(nil, wholeStaticDepTag, bobNames(build.Whole_static_libs)...)
+		mctx.AddVariationDependencies(nil, staticDepTag, bobNames(build.Static_libs)...)
+		mctx.AddVariationDependencies(nil, staticDepTag, bobNames(build.Export_static_libs)...)
 
-		mctx.AddVariationDependencies(nil, headerDepTag, build.Header_libs...)
-		mctx.AddVariationDependencies(nil, headerDepTag, build.Export_header_libs...)
+		mctx.AddVariationDependencies(nil, headerDepTag, bobNames(build.Header_libs)...)
+		mctx.AddVariationDependencies(nil, headerDepTag, bobNames(build.Export_header_libs)...)
 
-		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
-		mctx.AddVariationDependencies(nil, sharedDepTag, build.Export_shared_libs...)
+		mctx.AddVariationDependencies(nil, sharedDepTag, bobNames(build.Shared_libs)...)
+		mctx.AddVariationDependencies(nil, sharedDepTag, bobNames(build.Export_shared_libs)...)
 	}
 	if km, ok := abstr.Module(mctx).(*kernelModule); ok {
-		mctx.AddDependency(abstr.Module(mctx), kernelModuleDepTag, km.Properties.Extra_symbols...)
+		mctx.AddDependency(abstr.Module(mctx), kernelModuleDepTag, bobNames(km.Properties.Extra_symbols)...)
 	}
 	if ins, ok := abstr.Module(mctx).(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			mctx.AddDependency(abstr.Module(mctx), installGroupTag, proptools.String(props.Install_group))
+			mctx.AddDependency(abstr.Module(mctx), installGroupTag, bobName(proptools.String(props.Install_group)))
 		}
 		parseAndAddVariationDeps(mctx, installDepTag, props.Install_deps...)
 	}
 	if strlib, ok := abstr.Module(mctx).(stripable); ok {
 		info := strlib.getDebugInfo()
 		if info != nil {
-			mctx.AddDependency(abstr.Module(mctx), debugInfoTag, *info)
+			mctx.AddDependency(abstr.Module(mctx), debugInfoTag, bobName(*info))
 		}
 	}
 }
@@ -422,7 +430,7 @@ func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
 			}
 
 			if len(childBuild.Reexport_libs) > 0 &&
-				(parent.Name() == mainModule.Name() || utils.Contains(parentBuild.Reexport_libs, child.Name())) {
+				(parent.Name() == mainModule.Name() || utils.Contains(parentBuild.Reexport_libs, buildbpName(child.Name()))) {
 				mainBuild.ResolvedReexportedLibs = utils.AppendUnique(mainBuild.ResolvedReexportedLibs, childBuild.Reexport_libs)
 				return true
 			}
@@ -444,7 +452,7 @@ func applyReexportLibsDependenciesMutator(mctx abstr.BottomUpMutatorContext) {
 	var build *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
 		build = buildProps.build()
-		mctx.AddVariationDependencies(nil, reexportLibsTag, build.ResolvedReexportedLibs...)
+		mctx.AddVariationDependencies(nil, reexportLibsTag, bobNames(build.ResolvedReexportedLibs)...)
 	}
 }
 

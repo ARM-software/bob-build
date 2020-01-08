@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,10 @@ type externalLib struct {
 
 func (m *externalLib) topLevelProperties() []interface{} { return []interface{}{} }
 
-func (m *externalLib) outputName() string   { return m.Name() }
+func (m *externalLib) outputName() string   { return m.buildbpName() }
 func (m *externalLib) altName() string      { return m.outputName() }
 func (m *externalLib) altShortName() string { return m.altName() }
-func (m *externalLib) shortName() string    { return m.Name() }
+func (m *externalLib) shortName() string    { return m.buildbpName() }
 
 // External libraries have no outputs - they are already built.
 func (m *externalLib) outputs(g generatorBackend) []string         { return []string{} }

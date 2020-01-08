@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -365,7 +365,7 @@ func (l *library) outputName() string {
 	if len(l.Properties.Out) > 0 {
 		return l.Properties.Out
 	}
-	return l.Name()
+	return l.buildbpName()
 }
 
 func (l *library) getDebugInfo() *string {
@@ -404,9 +404,9 @@ func (l *library) altShortName() string {
 // disambiguate.
 func (l *library) shortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.Name() + "__" + string(l.Properties.TargetType)
+		return l.buildbpName() + "__" + string(l.Properties.TargetType)
 	}
-	return l.Name()
+	return l.buildbpName()
 }
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
@@ -858,7 +858,10 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	if _, ok := mainModule.(*defaults); ok {
 		return // ignore bob_defaults
 	}
-	handler.graph.AddNode(mainModule.Name())
+
+	mainModuleName := buildbpName(mainModule.Name())
+
+	handler.graph.AddNode(mainModuleName)
 
 	var mainBuild *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
@@ -868,24 +871,24 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	}
 
 	for _, lib := range mainBuild.Static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModule.Name(), lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModule.Name(), lib, lib))
+		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
+			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
 		}
-		handler.graph.SetEdgeColor(mainModule.Name(), lib, "blue")
+		handler.graph.SetEdgeColor(mainModuleName, lib, "blue")
 	}
 
 	for _, lib := range mainBuild.Export_static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModule.Name(), lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModule.Name(), lib, lib))
+		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
+			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
 		}
-		handler.graph.SetEdgeColor(mainModule.Name(), lib, "green")
+		handler.graph.SetEdgeColor(mainModuleName, lib, "green")
 	}
 
 	for _, lib := range mainBuild.Whole_static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModule.Name(), lib); err != nil {
+		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
 			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModule.Name(), lib, lib))
 		}
-		handler.graph.SetEdgeColor(mainModule.Name(), lib, "red")
+		handler.graph.SetEdgeColor(mainModuleName, lib, "red")
 	}
 
 	temporaryPaths := map[string][]string{} // For preserving order in declaration
@@ -914,7 +917,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 		}
 	}
 
-	sub := graph.GetSubgraph(handler.graph, mainModule.Name())
+	sub := graph.GetSubgraph(handler.graph, mainModuleName)
 
 	// Remove temporary path
 	for key, list := range temporaryPaths {
@@ -954,12 +957,12 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	}
 
 	// The main library must always be evaluated first in the topological sort
-	sub.SetNodePriority(mainModule.Name(), minInt)
+	sub.SetNodePriority(mainModuleName, minInt)
 
 	// We want those edges for calculating priority. After setting priority we can remove them.
 	sub.DeleteProxyEdges("red")
 
-	sub2 := graph.GetSubgraph(sub, mainModule.Name())
+	sub2 := graph.GetSubgraph(sub, mainModuleName)
 	sortedStaticLibs, isDAG := graph.TopologicalSort(sub2)
 
 	// Pop the module itself from the front of the list
@@ -974,9 +977,9 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	alreadyAddedStaticLibsDependencies := utils.NewStringSlice(mainBuild.Static_libs, mainBuild.Export_static_libs)
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, alreadyAddedStaticLibsDependencies)
 
-	mctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
+	mctx.AddVariationDependencies(nil, staticDepTag, bobNames(extraStaticLibsDependencies)...)
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
-	mctx.AddVariationDependencies(nil, sharedDepTag, mainBuild.ExtraSharedLibs...)
+	mctx.AddVariationDependencies(nil, sharedDepTag, bobNames(mainBuild.ExtraSharedLibs)...)
 }

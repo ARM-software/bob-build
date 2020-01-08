@@ -56,31 +56,36 @@ type ccStaticOrSharedProps struct {
 // instead, we use the `shortName()` (which may include a `__host` or
 // `__target` suffix) to disambiguate, and use the `stem` property to fix up
 // the output filename.
-func ccModuleName(mctx android.TopDownMutatorContext, name string) string {
+func ccModuleName(mctx android.TopDownMutatorContext, buildbpName string) string {
 	var dep android.Module
 
+	bobModuleName := bobName(buildbpName)
+
 	mctx.VisitDirectDeps(func(m android.Module) {
-		if m.Name() == name {
+		if m.Name() == bobModuleName {
 			dep = m
 		}
 	})
 
 	if dep == nil {
-		panic(fmt.Errorf("%s has no dependency '%s'", mctx.ModuleName(), name))
+		panic(fmt.Errorf("%s has no dependency '%s'", mctx.ModuleName(), buildbpName))
 	}
 
 	if l, ok := getLibrary(dep); ok {
 		return l.shortName()
 	}
 
-	return dep.Name()
+	// Most cases should match the getLibrary() check above, but generated libraries,
+	// etc, do not, and they also do not require using shortName() (because of not
+	// being target-specific), so just use the original build.bp name.
+	return buildbpName
 }
 
-func ccModuleNames(mctx android.TopDownMutatorContext, nameLists ...[]string) []string {
+func ccModuleNames(mctx android.TopDownMutatorContext, buildbpNameLists ...[]string) []string {
 	ccModules := []string{}
-	for _, nameList := range nameLists {
-		for _, name := range nameList {
-			ccModules = append(ccModules, ccModuleName(mctx, name))
+	for _, buildbpNameList := range buildbpNameLists {
+		for _, buildbpName := range buildbpNameList {
+			ccModules = append(ccModules, ccModuleName(mctx, buildbpName))
 		}
 	}
 	return ccModules
@@ -118,7 +123,7 @@ func (l *library) getGeneratedSources(mctx android.TopDownMutatorContext) (srcs 
 				dep.Name(), l.Name()))
 		}
 
-		srcs = append(srcs, dep.Name())
+		srcs = append(srcs, buildbpName(dep.Name()))
 	})
 	return
 }
@@ -133,7 +138,7 @@ func (l *library) getGeneratedHeaders(mctx android.TopDownMutatorContext) (heade
 				dep.Name(), l.Name()))
 		}
 
-		headers = append(headers, dep.Name())
+		headers = append(headers, buildbpName(dep.Name()))
 	})
 	return
 }

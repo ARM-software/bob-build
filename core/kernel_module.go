@@ -56,7 +56,7 @@ func (m *kernelModule) outputName() string {
 	if len(m.Properties.Out) > 0 {
 		return m.Properties.Out
 	}
-	return m.Name()
+	return m.buildbpName()
 }
 
 func (m *kernelModule) altName() string {
@@ -68,7 +68,7 @@ func (m *kernelModule) altShortName() string {
 }
 
 func (m *kernelModule) shortName() string {
-	return m.Name()
+	return m.buildbpName()
 }
 
 func (m *kernelModule) getEnableableProps() *EnableableProps {
@@ -113,7 +113,7 @@ func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (file
 				file := filepath.Join(km.outputDir(g), "Module.symvers")
 				files = append(files, file)
 			} else {
-				panic(fmt.Errorf("invalid extra_symbols, %s not a kernel module", ctx.OtherModuleName(m)))
+				panic(fmt.Errorf("invalid extra_symbols, %s not a kernel module", buildbpName(ctx.OtherModuleName(m))))
 			}
 		})
 

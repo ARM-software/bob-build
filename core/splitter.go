@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +82,7 @@ func supportedVariantsMutator(mctx abstr.TopDownMutatorContext) {
 			def, ok := dep.(*defaults)
 			if !ok {
 				panic(fmt.Errorf("module %s in %s's defaults is not a default",
-					dep.Name(), mctx.ModuleName()))
+					buildbpName(dep.Name()), buildbpName(mctx.ModuleName())))
 			}
 
 			// Only visit each default once

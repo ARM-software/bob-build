@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -268,4 +268,15 @@ func NewStringSlice(lists ...[]string) []string {
 func Exit(exitCode int, err string) {
 	fmt.Fprintf(os.Stderr, err+"\n")
 	os.Exit(exitCode)
+}
+
+// Map applies the function `fn` to each element of its list inputs,
+// returning a list of the results in the corresponding order.
+func Map(fn func(string) string, lists ...[]string) (ret []string) {
+	for _, list := range lists {
+		for _, str := range list {
+			ret = append(ret, fn(str))
+		}
+	}
+	return
 }
