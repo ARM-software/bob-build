@@ -218,11 +218,9 @@ bob_generate_source {
     out: ["output.txt"],
     depfile: true,
     tool: "gen_with_dep.py",
-    cmd: "${tool} -o ${out} -d ${depfile} ${in}",
+    cmd: "${tool} --gen-implicit-out -o ${out} -d ${depfile} ${in}",
     implicit_outs: [
-      // out.h is not created by the above command. The test simply
-      // checks that ninja reads build.ninja ok.
-      "out.h",
+        "out.h",
     ],
 }
 
