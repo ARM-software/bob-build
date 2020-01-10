@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,7 +281,7 @@ var cxxRule = pctx.StaticRule("cxx",
 	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper", "depfile")
 
 func (l *library) ObjDir() string {
-	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.Name()) + string(os.PathSeparator)
+	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.outputName()) + string(os.PathSeparator)
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
