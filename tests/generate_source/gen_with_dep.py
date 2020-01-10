@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2019 Arm Limited.
+# Copyright 2019-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,8 @@ parser = argparse.ArgumentParser(description="Test generator outputing depfile")
 parser.add_argument("input", default=[], action="append", help="Input file(s)")
 parser.add_argument("-o", "--output", help="Output file")
 parser.add_argument("-d", "--depfile", help="Dependency file")
+parser.add_argument("--gen-implicit-out", action="store_true",
+                    help="Flag to generate implicit output file")
 
 args = parser.parse_args()
 
@@ -46,3 +48,9 @@ template = "{target}: {deps}\n"
 dep_str = " \\\n\t".join(args.input)
 with open(args.depfile, "w") as depfile:
     depfile.write(template.format(target=args.output, deps=dep_str))
+
+# create empty file for test purposes, in the same folder as out file
+if args.gen_implicit_out:
+    outdir = os.path.dirname(args.output)
+    with open(os.path.join(outdir, "out.h"), "w") as implicit_out:
+        implicit_out.write("")
