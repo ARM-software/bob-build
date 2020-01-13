@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,11 +69,55 @@ def enforce_dependent_values(auto_fix=False):
             set_config_internal(i, 0)
 
 
+def check_type(key, config, actual):
+    actual = expr.expr_type(actual)
+    expected = config['datatype']
+    if expected != actual:
+        logger.error("Type mismatch in config %s: expected %s but got %s" %
+                     (key, expected, actual))
+
+
+def validate_configs():
+    """
+    Ensure that the types in 'default' statements are correct,
+    and that the configs referred to in 'select' statements are boolean.
+    """
+    config_list = data.get_config_list()
+    for k in config_list:
+        c = data.get_config(k)
+        if "default_cond" in c:
+            for i in c['default_cond']:
+                check_type(k, c, i['expr'])
+        if "default" in c:
+            check_type(k, c, c["default"])
+        if "select_if" in c:
+            for k in c["select_if"]:
+                try:
+                    c1 = data.get_config(k[0])
+                except KeyError:
+                    logger.warning("Ignoring unknown configuration option %s" % k[0])
+                    continue
+                if c1['datatype'] != "bool":
+                    logger.error('Select option must have type bool but got type %s instead' %
+                                 c1['datatype'])
+        if "select" in c:
+            for k in c["select"]:
+                try:
+                    c1 = data.get_config(k)
+                except KeyError:
+                    logger.warning("Ignoring unknown configuration option %s" % k)
+                    continue
+                if c1['datatype'] != "bool":
+                    logger.error('Select option must have type bool but got type %s instead' %
+                                 c1['datatype'])
+
+
 def init_config(options_filename, ignore_missing=False):
     global menu_data
 
     data.init(options_filename, ignore_missing)
 
+    validate_configs()
     menu_data = menu_parse()
     set_initial_values()
 
@@ -493,8 +537,12 @@ def force_config(key, value, source):
     try:
         c = data.get_config(key)
     except KeyError:
-        logger.warning("Ignoring unknown configuration option %s" % key)
+        # validate_configs must have already output the warning that the
+        # unknown configuration option was ignored, so we just return here
         return
+
+    assert type(value) == bool, \
+        'force_config value argument must be boolean, got %s' % str(value)
 
     if value is True:
         if source in c['selected_by']:

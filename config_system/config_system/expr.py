@@ -1,4 +1,4 @@
-# Copyright 2019 Arm Limited.
+# Copyright 2019-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,6 +147,37 @@ def condexpr_value(e):
         result = False
 
     return result
+
+
+def expr_type(e):
+    """Return the Mconfig type string for the input expression.
+    This isn't expected to use conditional operators.
+    """
+    assert type(e) == tuple
+    assert len(e) in [2, 3]
+    if len(e) == 3:
+        left = expr_type(e[1])
+        right = expr_type(e[2])
+        if left != right:
+            raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
+        elif left == 'bool':
+            raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
+        elif e[0] == '+':
+            return left
+        elif e[0] == '-':
+            if left == 'string':
+                raise TypeError("'-' operator is not valid on strings")
+            return left
+    elif e[0] == 'string':
+        return 'string'
+    elif e[0] == 'number':
+        return 'int'
+    elif e[0] == 'boolean':
+        return 'bool'
+    elif e[0] == 'identifier':
+        return get_config(e[1])['datatype']
+
+    raise Exception("Unexpected depend list: " + str(e))
 
 
 def dependency_list(e):
