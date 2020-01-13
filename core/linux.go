@@ -957,7 +957,7 @@ func copyFileIfExists(ctx blueprint.ModuleContext, source string, dest string) {
 }
 
 func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
-	return filepath.Join("${BuildDir}", "target", "kernel_modules", m.Name())
+	return filepath.Join("${BuildDir}", "target", "kernel_modules", m.outputName())
 }
 
 var kbuildRule = pctx.StaticRule("kbuild",
@@ -977,7 +977,7 @@ var kbuildRule = pctx.StaticRule("kbuild",
 	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
 
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
-	builtModule := filepath.Join(g.kernelModOutputDir(m), m.Name()+".ko")
+	builtModule := filepath.Join(g.kernelModOutputDir(m), m.outputName()+".ko")
 
 	args := m.generateKbuildArgs(ctx).toDict()
 	prefixedSources := utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix())

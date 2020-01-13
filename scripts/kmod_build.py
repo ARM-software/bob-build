@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,7 +86,7 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
             shutil.copy(built_file, output_dir)
         except (OSError, IOError) as e:
             msg = "Copy file from input path: {}\n" \
-                  "to output path: {}" \
+                  "to output path: {}\n" \
                   "finished with error: {}"
             logger.error(msg.format(built_file, output_dir, e))
             sys.exit(1)
