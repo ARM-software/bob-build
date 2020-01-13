@@ -11,7 +11,7 @@ bob_kernel_module {
         "test_module2.c",
     ],
     extra_symbols: [
-        "test_module1",
+        "test_module1_m",
     ],
     local_include_dirs: ["../module1"],
     install_group: "IG_modules",

@@ -1,5 +1,6 @@
 bob_kernel_module {
-    name: "test_module1",
+    name: "test_module1_m",
+    out: "test_module1",
     /* Usually kernel_dir would be an absolute path. For testing use this
      * workaround to use the spoofed kernel build system included with the Bob
      * tests. */
