@@ -24,7 +24,7 @@ bob_install_group {
         install_path: "install/tests/linux",
     },
     builder_soong: {
-        install_path: "install/tests/soong",
+        install_path: "data/x/y",
     },
 }
 

@@ -113,14 +113,6 @@ type BuildProps struct {
 	// The list of modules that generate output required by the build wrapper
 	Generated_deps []string
 
-	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
-	// TODO: Hide this in Android-specific properties
-	Tags []string
-
-	// Value to use on Android for LOCAL_MODULE_OWNER
-	// TODO: Hide this in Android-specific properties
-	Owner string
-
 	// The list of include dirs to use that is relative to the source directory
 	Include_dirs []string
 
@@ -157,6 +149,7 @@ type BuildProps struct {
 	EnableableProps
 	SplittableProps
 	StripProps
+	AndroidProps
 
 	// Linux kernel config options to emulate. These are passed to Kbuild in
 	// the 'make' command-line, and set in the source code via EXTRA_CFLAGS

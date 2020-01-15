@@ -121,6 +121,14 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
+// AndroidProps defines module properties used by Android backends
+type AndroidProps struct {
+	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
+	Tags []string
+	// Value to use on Android for LOCAL_MODULE_OWNER
+	Owner string
+}
+
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
