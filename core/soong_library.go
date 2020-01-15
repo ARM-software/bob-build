@@ -30,20 +30,24 @@ import (
 )
 
 type ccLibraryCommonProps struct {
-	Name                  *string
-	Stem                  *string
-	Srcs                  []string
-	Exclude_srcs          []string
-	Generated_sources     []string
-	Generated_headers     []string
-	Cflags                []string
-	Include_dirs          []string
-	Local_include_dirs    []string
-	Static_libs           []string
-	Whole_static_libs     []string
-	Shared_libs           []string
-	Ldflags               []string
-	Relative_install_path *string
+	Name                      *string
+	Stem                      *string
+	Srcs                      []string
+	Exclude_srcs              []string
+	Generated_sources         []string
+	Generated_headers         []string
+	Cflags                    []string
+	Include_dirs              []string
+	Local_include_dirs        []string
+	Static_libs               []string
+	Whole_static_libs         []string
+	Shared_libs               []string
+	Header_libs               []string
+	Export_shared_lib_headers []string
+	Export_static_lib_headers []string
+	Export_header_lib_headers []string
+	Ldflags                   []string
+	Relative_install_path     *string
 }
 
 type ccStaticOrSharedProps struct {
@@ -154,21 +158,45 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (*prov
 
 	provenanceProps := getProvenanceProps(&l.Properties.Build.BuildProps)
 
+	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs)
+	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)
+	// Exported header libraries must be mentioned in both header_libs
+	// *and* export_header_lib_headers - i.e., we can't export a header
+	// library which isn't actually being used.
+	headerLibs := ccModuleNames(mctx, l.Properties.Header_libs, l.Properties.Export_header_libs)
+
+	reexportShared := []string{}
+	reexportStatic := []string{}
+	reexportHeaders := ccModuleNames(mctx, l.Properties.Export_header_libs)
+	for _, lib := range ccModuleNames(mctx, l.Properties.Reexport_libs) {
+		if utils.Contains(sharedLibs, lib) {
+			reexportShared = append(reexportShared, lib)
+		} else if utils.Contains(staticLibs, lib) {
+			reexportStatic = append(reexportStatic, lib)
+		} else if utils.Contains(headerLibs, lib) {
+			reexportHeaders = append(reexportHeaders, lib)
+		}
+	}
+
 	props := &ccLibraryCommonProps{
-		Name:                  proptools.StringPtr(l.shortName()),
-		Stem:                  proptools.StringPtr(l.outputName()),
-		Srcs:                  relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
-		Generated_sources:     l.getGeneratedSources(mctx),
-		Generated_headers:     l.getGeneratedHeaders(mctx),
-		Exclude_srcs:          relativeToModuleDir(mctx, l.Properties.Exclude_srcs),
-		Cflags:                cflags,
-		Include_dirs:          l.Properties.Include_dirs,
-		Local_include_dirs:    relativeToModuleDir(mctx, l.Properties.Local_include_dirs),
-		Static_libs:           ccModuleNames(mctx, l.Properties.ResolvedStaticLibs),
-		Whole_static_libs:     ccModuleNames(mctx, l.Properties.Whole_static_libs),
-		Shared_libs:           ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
-		Ldflags:               l.Properties.Ldflags,
-		Relative_install_path: l.getInstallableProps().Relative_install_path,
+		Name:                      proptools.StringPtr(l.shortName()),
+		Stem:                      proptools.StringPtr(l.outputName()),
+		Srcs:                      relativeToModuleDir(mctx, utils.Filter(utils.IsCompilableSource, l.Properties.Srcs)),
+		Generated_sources:         l.getGeneratedSources(mctx),
+		Generated_headers:         l.getGeneratedHeaders(mctx),
+		Exclude_srcs:              relativeToModuleDir(mctx, l.Properties.Exclude_srcs),
+		Cflags:                    cflags,
+		Include_dirs:              l.Properties.Include_dirs,
+		Local_include_dirs:        relativeToModuleDir(mctx, l.Properties.Local_include_dirs),
+		Shared_libs:               ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs),
+		Static_libs:               staticLibs,
+		Whole_static_libs:         ccModuleNames(mctx, l.Properties.Whole_static_libs),
+		Header_libs:               headerLibs,
+		Export_shared_lib_headers: reexportShared,
+		Export_static_lib_headers: reexportStatic,
+		Export_header_lib_headers: reexportHeaders,
+		Ldflags:                   l.Properties.Ldflags,
+		Relative_install_path:     l.getInstallableProps().Relative_install_path,
 	}
 
 	return provenanceProps, props
