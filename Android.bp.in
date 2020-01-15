@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +52,7 @@ bootstrap_go_package {
         "core/soong_library.go",
         "core/soong_plugin.go",
         "core/soong_kernel_module.go",
+        "core/soong_resource.go",
         "core/splitter.go",
         "core/strip.go",
         "core/template.go",

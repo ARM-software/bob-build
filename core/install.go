@@ -179,7 +179,7 @@ type ResourceProps struct {
 	AliasableProps
 	InstallableProps
 	EnableableProps
-	Tags []string
+	AndroidProps
 }
 
 type resource struct {

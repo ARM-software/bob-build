@@ -184,6 +184,8 @@ which builds this module is built for.
 ----
 ### **bob_module.owner** (optional)
 Value to use on Android for `LOCAL_MODULE_OWNER`
+If set, then the module is considered proprietary. For the Soong plugin this will
+usually be installed in the vendor partition.
 
 ----
 ### **bob_module.strip** (optional)

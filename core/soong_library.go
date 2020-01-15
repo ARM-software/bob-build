@@ -157,7 +157,7 @@ func (l *library) setupCcLibraryProps(mctx android.TopDownMutatorContext) (*prov
 	cflags := utils.NewStringSlice(l.Properties.Cflags,
 		l.Properties.Export_cflags, l.getExportedCflags(mctx))
 
-	provenanceProps := getProvenanceProps(&l.Properties.Build.BuildProps)
+	provenanceProps := getProvenanceProps(&l.Properties.Build.BuildProps.AndroidProps)
 
 	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs)
 	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -578,6 +578,10 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.Properties.Relative_install_path) + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 		sb.WriteString("LOCAL_SRC_FILES := " + file + "\n")
+		if m.Properties.Owner != "" {
+			sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
+			sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
+		}
 		sb.WriteString("\ninclude $(BUILD_PREBUILT)\n")
 	}
 

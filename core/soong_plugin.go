@@ -120,7 +120,7 @@ type provenanceProps struct {
 	Soc_specific *bool
 }
 
-func getProvenanceProps(props *BuildProps) *provenanceProps {
+func getProvenanceProps(props *AndroidProps) *provenanceProps {
 	if props.Owner != "" {
 		return &provenanceProps{
 			Proprietary:  proptools.BoolPtr(true),

@@ -68,7 +68,7 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 		proptools.StringPtr(m.buildbpName()),
 	}
 
-	provenanceProps := getProvenanceProps(&m.Properties.Build.BuildProps)
+	provenanceProps := getProvenanceProps(&m.Properties.Build.BuildProps.AndroidProps)
 
 	installProps := m.getInstallableProps()
 	installPath, ok := installProps.getInstallGroupPath()
