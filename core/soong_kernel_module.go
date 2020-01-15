@@ -33,6 +33,7 @@ import (
 )
 
 type kernelModuleBackendProps struct {
+	Stem          string
 	Srcs          []string
 	Args          kbuildArgs
 	Default       bool
@@ -80,6 +81,7 @@ func (m *kernelModule) soongBuildActions(mctx android.TopDownMutatorContext) {
 	}
 
 	props := kernelModuleBackendProps{
+		Stem:          m.outputName(),
 		Args:          m.generateKbuildArgs(mctx),
 		Srcs:          utils.PrefixDirs(m.Properties.getSources(mctx), g.sourcePrefix()),
 		Default:       isBuiltByDefault(m),
@@ -117,7 +119,7 @@ var soongKbuildRule = apctx.StaticRule("bobKbuild",
 func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	// preserve symvers location for this module (for the parent pass)
 	m.Symvers = android.PathForModuleOut(ctx, "Module.symvers")
-	m.BuiltModule = android.PathForModuleOut(ctx, m.Name()+".ko")
+	m.BuiltModule = android.PathForModuleOut(ctx, m.Properties.Stem+".ko")
 
 	// gather symvers location for all dependant kernel modules
 	depSymvers := []android.Path{}
@@ -158,7 +160,7 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 
 	if m.Properties.Install_Path != "" {
 		// generate ninja rule for copying file onto partition, also preserve install location
-		m.InstalledModule = ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path), m.Name()+".ko", m.BuiltModule)
+		m.InstalledModule = ctx.InstallFile(android.PathForModuleInstall(ctx, m.Properties.Install_Path), m.Properties.Stem+".ko", m.BuiltModule)
 	}
 
 	// Add a dependency between Module.symvers and the kernel module. This
