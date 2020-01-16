@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -131,6 +131,7 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 			} else {
 				panic("install_dep on non-dependendable module")
 			}
+			visited[m.Name()] = true
 		})
 	return
 }

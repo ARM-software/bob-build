@@ -425,6 +425,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 				if _, ok := visited[m.Name()]; ok {
 					return
 				}
+				visited[m.Name()] = true
 
 				includeDirs = append(includeDirs, gs.Properties.Export_gen_include_dirs...)
 				// Generated headers are "order-only". That means that a source file does not need to rebuild
@@ -458,6 +459,7 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 			// dependency. We've already done this module.
 			return
 		}
+		visited[dep.Name()] = true
 
 		if sl, ok := getLibrary(dep); ok {
 			expLocalIncludes = append(expLocalIncludes, sl.Properties.Export_local_include_dirs...)
