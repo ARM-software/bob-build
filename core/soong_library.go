@@ -109,6 +109,7 @@ func (l *library) getExportedCflags(mctx android.TopDownMutatorContext) []string
 			// dependency. We've already done this module.
 			return
 		}
+		visited[dep.Name()] = true
 
 		if sl, ok := getLibrary(dep); ok {
 			cflags = append(cflags, sl.Properties.Export_cflags...)
