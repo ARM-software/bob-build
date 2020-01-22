@@ -49,6 +49,10 @@ type kernelModuleBackend struct {
 	InstalledModule android.InstallPath
 }
 
+// interfaces implemented
+var _ android.Module = (*kernelModuleBackend)(nil)
+var _ android.AndroidMkEntriesProvider = (*kernelModuleBackend)(nil)
+
 func kernelModuleBackendFactory() android.Module {
 	m := &kernelModuleBackend{}
 	// register all structs that contain module properties (parsable from .bp file)

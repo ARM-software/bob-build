@@ -50,6 +50,10 @@ type prebuiltData struct {
 	android.PrebuiltEtc
 }
 
+// interfaces implemented
+var _ android.Module = (*prebuiltData)(nil)
+var _ android.AndroidMkEntriesProvider = (*prebuiltData)(nil)
+
 func (m *prebuiltData) AndroidMkEntries() android.AndroidMkEntries {
 	return android.AndroidMkEntries{
 		Class:      "DATA",

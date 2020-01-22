@@ -74,21 +74,36 @@ type genBackend struct {
 	inouts               []soongInout
 }
 
+// interfaces implemented
+var _ android.Module = (*genBackend)(nil)
+var _ genrule.SourceFileGenerator = (*genBackend)(nil)
+var _ android.AndroidMkEntriesProvider = (*genBackend)(nil)
+
 type genBinaryBackend struct {
 	genBackend
 }
+
+var _ android.AndroidMkEntriesProvider = (*genBinaryBackend)(nil)
 
 type genLibraryBackend struct {
 	genBackend
 }
 
+var _ android.ImageInterface = (*genLibraryBackend)(nil)
+
 type genStaticLibraryBackend struct {
 	genLibraryBackend
 }
 
+var _ android.AndroidMkEntriesProvider = (*genStaticLibraryBackend)(nil)
+var _ cc.LinkableInterface = (*genStaticLibraryBackend)(nil)
+
 type genSharedLibraryBackend struct {
 	genLibraryBackend
 }
+
+var _ android.AndroidMkEntriesProvider = (*genSharedLibraryBackend)(nil)
+var _ cc.LinkableInterface = (*genSharedLibraryBackend)(nil)
 
 func genBackendFactory() android.Module {
 	m := &genBackend{}
