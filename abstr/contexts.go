@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@ import (
 	"text/scanner"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/pathtools"
 )
 
 // Common functions in blueprint.BaseModuleContext and android.BaseModuleContext
@@ -42,7 +41,6 @@ type BaseModuleContext interface {
 
 	GlobWithDeps(pattern string, excludes []string) ([]string, error)
 
-	Fs() pathtools.FileSystem
 	AddNinjaFileDeps(deps ...string)
 }
 
