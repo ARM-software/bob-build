@@ -178,14 +178,14 @@ func (m *kernelModuleBackend) GenerateAndroidBuildActions(ctx android.ModuleCont
 		})
 }
 
-func (m *kernelModuleBackend) AndroidMkEntries() android.AndroidMkEntries {
+func (m *kernelModuleBackend) AndroidMkEntries() []android.AndroidMkEntries {
 	outputFile := android.OptionalPathForPath(m.BuiltModule)
 	if m.Properties.Install_Path != "" {
 		// reference InstalledModule instead of BuiltModule will ensure triggering install rule after build rule
 		outputFile = android.OptionalPathForPath(m.InstalledModule)
 	}
 
-	return android.AndroidMkEntries{
+	return []android.AndroidMkEntries{android.AndroidMkEntries{
 		Class:      "DATA",
 		OutputFile: outputFile,
 		Include:    "$(BUILD_PREBUILT)",
@@ -195,7 +195,7 @@ func (m *kernelModuleBackend) AndroidMkEntries() android.AndroidMkEntries {
 				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
 			},
 		},
-	}
+	}}
 }
 
 // required to generate ninja rule for copying file onto partition
