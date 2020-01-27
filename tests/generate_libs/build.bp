@@ -60,6 +60,10 @@ bob_generate_shared_library {
      */
     cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
+    builder_soong: {
+        /* On Soong generated libraries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_binary {
@@ -70,6 +74,10 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
+    builder_soong: {
+        /* On Soong generated binaries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_generate_static_library {
@@ -87,6 +95,10 @@ bob_generate_static_library {
      */
     cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${out} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
+    builder_soong: {
+        /* On Soong generated libraries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_binary {
@@ -97,6 +109,10 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
+    builder_soong: {
+        /* On Soong generated binaries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_alias {
