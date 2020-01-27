@@ -335,7 +335,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	exportHeaderLibs := androidModuleNames(m.Properties.Export_header_libs)
 	headerLibs := append(androidModuleNames(m.Properties.Header_libs), exportHeaderLibs...)
 
-	writeListAssignment(sb, "LOCAL_SHARED_LIBRARIES", append(sharedLibs, "liblog"))
+	writeListAssignment(sb, "LOCAL_SHARED_LIBRARIES", sharedLibs)
 	writeListAssignment(sb, "LOCAL_STATIC_LIBRARIES", staticLibs)
 	writeListAssignment(sb, "LOCAL_WHOLE_STATIC_LIBRARIES", wholeStaticLibs)
 	writeListAssignment(sb, "LOCAL_HEADER_LIBRARIES", headerLibs)
