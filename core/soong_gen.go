@@ -335,13 +335,13 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	m.buildInouts(ctx, args)
 }
 
-func (m *genBackend) AndroidMkEntries() android.AndroidMkEntries {
+func (m *genBackend) AndroidMkEntries() []android.AndroidMkEntries {
 	// skip if multiple outputs defined, as AndroidMkEntries struct support only single one
 	if len(m.Properties.Transform_srcs) > 0 || len(m.Properties.Out) > 1 {
-		return android.AndroidMkEntries{}
+		return []android.AndroidMkEntries{}
 	}
 
-	return android.AndroidMkEntries{
+	return []android.AndroidMkEntries{android.AndroidMkEntries{
 		Class:      "DATA",
 		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
 		Include:    "$(BUILD_PREBUILT)",
@@ -350,7 +350,7 @@ func (m *genBackend) AndroidMkEntries() android.AndroidMkEntries {
 				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
 			},
 		},
-	}
+	}}
 }
 
 func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin *binary) {

@@ -54,8 +54,8 @@ type prebuiltData struct {
 var _ android.Module = (*prebuiltData)(nil)
 var _ android.AndroidMkEntriesProvider = (*prebuiltData)(nil)
 
-func (m *prebuiltData) AndroidMkEntries() android.AndroidMkEntries {
-	return android.AndroidMkEntries{
+func (m *prebuiltData) AndroidMkEntries() []android.AndroidMkEntries {
+	return []android.AndroidMkEntries{android.AndroidMkEntries{
 		Class:      "DATA",
 		OutputFile: android.OptionalPathForPath(m.OutputFile()),
 		Include:    "$(BUILD_PREBUILT)",
@@ -65,7 +65,7 @@ func (m *prebuiltData) AndroidMkEntries() android.AndroidMkEntries {
 				entries.SetString("LOCAL_INSTALLED_MODULE_STEM", m.OutputFile().Base())
 			},
 		},
-	}
+	}}
 }
 
 func (m *prebuiltData) InstallInData() bool {
