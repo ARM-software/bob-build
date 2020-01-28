@@ -20,6 +20,9 @@ bob_install_group {
     builder_android_make: {
         install_path: "$(TARGET_OUT)/install/tests/android",
     },
+    builder_android_bp: {
+        install_path: "data/x/y",
+    },
     builder_ninja: {
         install_path: "install/tests/linux",
     },

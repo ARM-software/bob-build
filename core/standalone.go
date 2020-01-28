@@ -172,6 +172,8 @@ func Main() {
 
 	if config.Properties.GetBool("builder_ninja") {
 		config.Generator = &linuxGenerator{}
+	} else if config.Properties.GetBool("builder_android_bp") {
+		config.Generator = &androidBpGenerator{}
 	} else if config.Properties.GetBool("builder_android_make") {
 		config.Generator = &androidMkGenerator{}
 	} else {

@@ -22,6 +22,9 @@ bob_install_group {
     builder_android_make: {
         install_path: "$(TARGET_OUT)/gen_sh_src",
     },
+    builder_android_bp: {
+        install_path: "gen_sh_src",
+    },
     builder_ninja: {
         install_path: "gen_sh_src",
     },
@@ -35,6 +38,9 @@ bob_install_group {
     builder_android_make: {
         install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
     },
+    builder_android_bp: {
+        install_path: "lib",
+    },
     builder_ninja: {
         install_path: "install/host/lib",
     },
@@ -47,6 +53,9 @@ bob_install_group {
     name: "IG_libs",
     builder_android_make: {
         install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
+    },
+    builder_android_bp: {
+        install_path: "lib",
     },
     builder_ninja: {
         install_path: "install/lib",

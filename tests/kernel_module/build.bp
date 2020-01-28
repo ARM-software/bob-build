@@ -8,6 +8,9 @@ bob_install_group {
     builder_android_make: {
         install_path: "$(TARGET_OUT)/lib/modules",
     },
+    builder_android_bp: {
+        install_path: "lib/modules",
+    },
     builder_ninja: {
         install_path: "lib/modules",
     },
