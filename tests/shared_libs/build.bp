@@ -89,6 +89,9 @@ bob_install_group {
     builder_android_make: {
         install_path: "$(HOST_OUT_EXECUTABLES)",
     },
+    builder_android_bp: {
+        install_path: "bin",
+    },
     builder_ninja: {
         install_path: "install/host/bin",
     },
@@ -98,6 +101,9 @@ bob_install_group {
     name: "IG_binaries",
     builder_android_make: {
         install_path: "$(TARGET_OUT_EXECUTABLES)",
+    },
+    builder_android_bp: {
+        install_path: "bin",
     },
     builder_ninja: {
         install_path: "install/bin",

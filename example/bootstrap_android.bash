@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ Usage:
   profiles and explicit options (like DEBUG=y)
 
 Options
-  -m, --menuconfig  Open graphical configuration editor
+  -m, --menuconfig  Open configuration editor
   -h, --help        Help text
 
 Examples:

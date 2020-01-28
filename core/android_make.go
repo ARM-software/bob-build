@@ -55,6 +55,9 @@ type androidMkGenerator struct {
 	toolchainSet
 }
 
+/* Compile time checks for interfaces that must be implemented by androidMkGenerator */
+var _ generatorBackend = (*androidMkGenerator)(nil)
+
 func writeIfChanged(filename string, sb *strings.Builder) {
 	mustWrite := true
 	text := sb.String()

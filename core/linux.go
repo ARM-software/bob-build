@@ -45,6 +45,9 @@ type linuxGenerator struct {
 	toolchainSet
 }
 
+/* Compile time checks for interfaces that must be implemented by linuxGenerator */
+var _ generatorBackend = (*linuxGenerator)(nil)
+
 // Convert a path to a library into a compiler flag.
 // This needs to strip any path, file extension, lib prefix, and prepend -l
 func pathToLibFlag(path string) string {

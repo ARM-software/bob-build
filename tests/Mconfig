@@ -1,4 +1,4 @@
-# Copyright 2016-2019 Arm Limited.
+# Copyright 2016-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,6 +60,12 @@ config BUILDER_ANDROID_MAKE
 	depends on ANDROID
 	help
 	  Generate Android.mk fragments for use with Android make.
+
+config BUILDER_ANDROID_BP
+	bool "Android.bp (EXPERIMENTAL)"
+	depends on ANDROID
+	help
+	  Integrate into Android's build system by writing Android.bp files.
 
 config BUILDER_SOONG
 	bool "Soong plugin (EXPERIMENTAL)"

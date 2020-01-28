@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,22 +17,22 @@
 
 # This script sets up the source tree to use Bob Blueprint under Android.
 
-# Copy the Blueprint version of the Android makefile into place, bootstrap
-# Bob with a BUILDDIR in the Android output directory, and generate an initial
-# config based on the args passed to this script.
+# Bootstrap Bob with a BUILDDIR in the Android output directory, and
+# generate an initial config based on the args passed to this script.
+# Finally run Bob to generate the Android.bp for the configuration.
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BOB_DIR=bob
 PROJ_NAME="bob_tests"
 
-source "$SCRIPT_DIR/bootstrap_utils.sh"
+source "${SCRIPT_DIR}/bootstrap_utils.sh"
 
 BASENAME=$(basename $0)
 function usage {
     cat <<EOF
 $BASENAME
 
-Sets up the Bob tests to build for Android.
+Sets up the Bob tests to build for Android using Android.bp files.
 
 Usage:
  $BASENAME CONFIG_OPTIONS...
@@ -91,41 +91,31 @@ create_link external_lib.bp "${SCRIPT_DIR}/external_libs/external/Android.bp"
 # Change to the working directory
 cd "${ANDROID_BUILD_TOP}"
 
-### Variables required for Bob and Android.mk bootstrap ###
+### Variables required for Bob and Android.bp bootstrap ###
 
-# This must match the path derived from LOCAL_MODULE and LOCAL_MODULE_CLASS
-# in Android.mk.blueprint.
-ANDROIDMK_DIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}_intermediates"
-export BUILDDIR="${ANDROIDMK_DIR}"
+BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"
+export BUILDDIR="${BPBUILD_DIR}"
 export TOPNAME="build.bp"
 export CONFIGNAME="bob.config"
 export SRCDIR="${PROJ_DIR}"
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 
-# Write the Android.mk
-TMP_ANDROID_MK="$(mktemp)"
-sed -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
-    -e "s#@@BOB_DIR@@#$BOB_DIR#" \
-    -e "s#@@CONFIGNAME@@#$CONFIGNAME#" \
-    "${PROJ_DIR}/Android.mk.blueprint" > "$TMP_ANDROID_MK"
-rsync --checksum "$TMP_ANDROID_MK" "${PROJ_DIR}/Android.mk"
-rm -f "$TMP_ANDROID_MK"
-
 # Bootstrap Bob
-"${PROJ_DIR}/${BOB_DIR}/bootstrap_androidmk.bash"
+"${PROJ_DIR}/${BOB_DIR}/bootstrap_androidbp.bash"
 
 
 # Pick up some info that bob has worked out
 source "${BUILDDIR}/.bob.bootstrap"
 
-# Setup the buildme script to just run bob
-ln -sf "bob" "${BUILDDIR}/buildme"
-
-if [ ! -z "$*" ] || [ ! -f "$ANDROIDMK_DIR/$CONFIGNAME" ] ; then
+if [ ! -z "$*" ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "$ANDROIDMK_DIR/config" ANDROID=y "$@"
+    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then
-    "$ANDROIDMK_DIR/menuconfig"
+    "${BPBUILD_DIR}/menuconfig"
 fi
+
+# Once configured, generate the Android.bp by running Bob
+# There is a symlink in the build directory.
+"${BPBUILD_DIR}/bob"

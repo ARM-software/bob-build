@@ -136,6 +136,9 @@ type soongGenerator struct {
 	toolchainSet
 }
 
+/* Compile time checks for interfaces that must be implemented by soongGenerator */
+var _ generatorBackend = (*soongGenerator)(nil)
+
 func (g *soongGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext)                        {}
 func (g *soongGenerator) binaryActions(*binary, blueprint.ModuleContext)                            {}
 func (g *soongGenerator) genBinaryActions(*generateBinary, blueprint.ModuleContext, []inout)        {}
