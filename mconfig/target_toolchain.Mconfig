@@ -1,4 +1,4 @@
-# Copyright 2016-2019 Arm Limited.
+# Copyright 2016-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,7 +121,7 @@ config TARGET_OBJCOPY_BINARY
 	string "Target objcopy"
 	default TARGET_GNU_PREFIX + "objcopy" if TARGET_TOOLCHAIN_GNU || (TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_USE_GNU_BINUTILS)
 	default "llvm-objcopy" if TARGET_TOOLCHAIN_CLANG
-	default "dsymutil" if OSX
+	default "dsymutil" if TARGET_TOOLCHAIN_XCODE
 	default "objcopy"
 	help
 	  The objcopy executable that we can use in post install scripts

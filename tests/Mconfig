@@ -13,67 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## Operating system determines available builders, and used in
-## resource testing
-choice
-	prompt "Operating System"
-	default LINUX
-
-config LINUX
-	bool "Linux"
-
-config ANDROID
-	bool "Android"
-
-config OSX
-	bool "macOS"
-
-endchoice
+source "bob/mconfig/basics.Mconfig"
 
 config NOT_OSX
 	bool
 	default y if !OSX
-
-config OS
-	string
-	default "android" if ANDROID
-	default "osx" if OSX
-	default "linux"
-
-## Need to select the BUILDER_ for Bob
-choice
-	prompt "Builder"
-	default BUILDER_ANDROID_MAKE if ANDROID
-	default BUILDER_NINJA
-	help
-	  Bob supports generating output for different build systems.
-
-	  Select the desired build system.
-
-config BUILDER_NINJA
-	bool "Ninja"
-	help
-	  Generate build.ninja output to use with ninja.
-
-config BUILDER_ANDROID_MAKE
-	bool "Android make"
-	depends on ANDROID
-	help
-	  Generate Android.mk fragments for use with Android make.
-
-config BUILDER_ANDROID_BP
-	bool "Android.bp (EXPERIMENTAL)"
-	depends on ANDROID
-	help
-	  Integrate into Android's build system by writing Android.bp files.
-
-config BUILDER_SOONG
-	bool "Soong plugin (EXPERIMENTAL)"
-	depends on ANDROID
-	help
-	  Integrate into Android's build system by operating as a Soong plugin.
-
-endchoice
 
 config NOT_BUILDER_SOONG
 	bool
