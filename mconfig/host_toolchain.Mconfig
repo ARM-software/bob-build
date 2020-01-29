@@ -1,4 +1,4 @@
-# Copyright 2016-2019 Arm Limited.
+# Copyright 2016-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -124,7 +124,7 @@ config HOST_OBJCOPY_BINARY
 	string "Host objcopy"
 	default HOST_GNU_PREFIX + "objcopy" if HOST_TOOLCHAIN_GNU || (HOST_TOOLCHAIN_CLANG && HOST_CLANG_USE_GNU_BINUTILS)
 	default "llvm-objcopy" if HOST_TOOLCHAIN_CLANG
-	default "dsymutil" if OSX
+	default "dsymutil" if HOST_TOOLCHAIN_XCODE
 	default "objcopy"
 	help
 	  The objcopy executable that we can use in post install scripts

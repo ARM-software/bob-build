@@ -1,49 +1,8 @@
 # This is an example configuration database containing the minimal set
 # of configuration options required by Bob.
 
-choice
-	prompt "Operating System"
-	default LINUX
-
-config LINUX
-	bool "Linux"
-
-config ANDROID
-	bool "Android"
-
-config OSX
-	bool "macOS"
-
-endchoice
-
-config OS
-	string
-	default "android" if ANDROID
-	default "osx" if OSX
-	default "linux"
-
-## Need to select the BUILDER_ for Bob
-choice
-	prompt "Builder"
-	default BUILDER_ANDROID_MAKE if ANDROID
-	default BUILDER_NINJA
-	help
-	  Bob supports generating output for different build systems.
-
-	  Select the desired build system.
-
-config BUILDER_NINJA
-	bool "Ninja"
-	help
-	  Generate build.ninja output to use with ninja.
-
-config BUILDER_ANDROID_MAKE
-	bool "Android make"
-	depends on ANDROID
-	help
-	  Generate Android.mk fragments for use with Android make.
-
-endchoice
+# Update this to reflect the path to Bob within the superproject
+source "bob-build/mconfig/basics.Mconfig"
 
 menu "Toolchain Options"
 
@@ -86,8 +45,6 @@ config TARGET_TOOLCHAIN_XCODE
 	  Toolchain for macOS.
 
 	  Support is still experimental.
-
-
 
 endchoice
 

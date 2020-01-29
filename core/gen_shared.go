@@ -69,11 +69,9 @@ func genSharedLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
 	module.generateCommon.Properties.Features.Init(&config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
-	switch config.Properties.GetString("os") {
-	case "osx":
+	if config.Properties.GetBool("osx") {
 		module.fileNameExtension = ".dylib"
-		break
-	default:
+	} else {
 		module.fileNameExtension = ".so"
 	}
 	return module, []interface{}{
