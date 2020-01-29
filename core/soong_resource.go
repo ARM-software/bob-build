@@ -23,6 +23,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/plugins/prebuilt"
+
 	"android/soong/android"
 
 	"github.com/google/blueprint/proptools"
@@ -42,46 +44,6 @@ type prebuiltEtcProperties struct {
 
 	// Whether this module is directly installable to one of the partitions. Default: true.
 	Installable *bool
-}
-
-// Prebuilts going to data partition
-type prebuiltData struct {
-	// pretend to be soong prebuilt module
-	android.PrebuiltEtc
-}
-
-// interfaces implemented
-var _ android.Module = (*prebuiltData)(nil)
-var _ android.AndroidMkEntriesProvider = (*prebuiltData)(nil)
-
-func (m *prebuiltData) AndroidMkEntries() []android.AndroidMkEntries {
-	return []android.AndroidMkEntries{android.AndroidMkEntries{
-		Class:      "DATA",
-		OutputFile: android.OptionalPathForPath(m.OutputFile()),
-		Include:    "$(BUILD_PREBUILT)",
-		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
-			func(entries *android.AndroidMkEntries) {
-				entries.SetString("LOCAL_MODULE_PATH", m.InstallDirPath().ToMakePath().String())
-				entries.SetString("LOCAL_INSTALLED_MODULE_STEM", m.OutputFile().Base())
-			},
-		},
-	}}
-}
-
-func (m *prebuiltData) InstallInData() bool {
-	return true
-}
-
-func prebuiltDataFactory() android.Module {
-	m := &prebuiltData{}
-	// register PrebuiltEtc properties,
-	// install path will be relative to data partition root
-	android.InitPrebuiltEtcModule(&m.PrebuiltEtc, "")
-
-	// init module (including name and common properties) with target-specific variants info
-	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibFirst)
-
-	return m
 }
 
 func (m *resource) soongBuildActions(mctx android.TopDownMutatorContext) {
@@ -105,7 +67,7 @@ func (m *resource) soongBuildActions(mctx android.TopDownMutatorContext) {
 	factory := (func() android.Module)(nil)
 	if strings.HasPrefix(installPath, "data/") {
 		subdir = strings.Replace(installPath, "data/", "", 1)
-		factory = prebuiltDataFactory
+		factory = prebuilt.PrebuiltDataFactory
 	} else if strings.HasPrefix(installPath, "etc/") {
 		subdir = strings.Replace(installPath, "etc/", "", 1)
 		factory = android.PrebuiltEtcFactory
