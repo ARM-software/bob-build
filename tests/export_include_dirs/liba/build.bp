@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,12 @@ bob_static_library {
         ],
     },
     builder_soong: {
+        // Soong does not support exporting absolute include dirs.
+        export_local_include_dirs: [
+            "include2",
+        ],
+    },
+    builder_android_bp: {
         // Soong does not support exporting absolute include dirs.
         export_local_include_dirs: [
             "include2",
