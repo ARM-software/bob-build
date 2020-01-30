@@ -78,17 +78,18 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
         sys.exit(e.returncode)
 
     # Copy the output of the kernel build to the directory that Bob expects
-    built_kmod = os.path.join(module_dir, module_ko)
-    built_symvers = os.path.join(module_dir, "Module.symvers")
-    built_files = [built_kmod, built_symvers]
+    built_files = [module_ko, "Module.symvers"]
     for built_file in built_files:
         try:
-            shutil.copy(built_file, output_dir)
+            # Don't copy if already existing in desired location
+            if module_dir != os.path.abspath(output_dir):
+                abs_built_file = os.path.join(module_dir, built_file)
+                shutil.copy(abs_built_file, output_dir)
         except (OSError, IOError) as e:
             msg = "Copy file from input path: {}\n" \
                   "to output path: {}\n" \
                   "finished with error: {}"
-            logger.error(msg.format(built_file, output_dir, e))
+            logger.error(msg.format(abs_built_file, output_dir, e))
             sys.exit(1)
 
 
