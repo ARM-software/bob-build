@@ -82,7 +82,7 @@ func supportedVariantsMutator(mctx abstr.TopDownMutatorContext) {
 			def, ok := dep.(*defaults)
 			if !ok {
 				panic(fmt.Errorf("module %s in %s's defaults is not a default",
-					buildbpName(dep.Name()), buildbpName(mctx.ModuleName())))
+					dep.Name(), mctx.ModuleName()))
 			}
 
 			// Only visit each default once

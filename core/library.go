@@ -358,7 +358,7 @@ func (l *library) outputName() string {
 	if len(l.Properties.Out) > 0 {
 		return l.Properties.Out
 	}
-	return l.buildbpName()
+	return l.Name()
 }
 
 func (l *library) getDebugInfo() *string {
@@ -397,9 +397,9 @@ func (l *library) altShortName() string {
 // disambiguate.
 func (l *library) shortName() string {
 	if len(l.supportedVariants()) > 1 {
-		return l.buildbpName() + "__" + string(l.Properties.TargetType)
+		return l.Name() + "__" + string(l.Properties.TargetType)
 	}
-	return l.buildbpName()
+	return l.Name()
 }
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
@@ -852,7 +852,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 		return // ignore bob_defaults
 	}
 
-	mainModuleName := buildbpName(mainModule.Name())
+	mainModuleName := mainModule.Name()
 
 	handler.graph.AddNode(mainModuleName)
 
@@ -879,7 +879,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 
 	for _, lib := range mainBuild.Whole_static_libs {
 		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModule.Name(), lib, lib))
+			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
 		}
 		handler.graph.SetEdgeColor(mainModuleName, lib, "red")
 	}
@@ -962,7 +962,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	sortedStaticLibs = sortedStaticLibs[1:]
 
 	if !isDAG {
-		panic("We have detected cycle: " + mainModule.Name())
+		panic("We have detected cycle: " + mainModuleName)
 	} else {
 		mainBuild.ResolvedStaticLibs = sortedStaticLibs
 	}
@@ -970,9 +970,9 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.Bott
 	alreadyAddedStaticLibsDependencies := utils.NewStringSlice(mainBuild.Static_libs, mainBuild.Export_static_libs)
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, alreadyAddedStaticLibsDependencies)
 
-	mctx.AddVariationDependencies(nil, staticDepTag, bobNames(extraStaticLibsDependencies)...)
+	mctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
-	mctx.AddVariationDependencies(nil, sharedDepTag, bobNames(mainBuild.ExtraSharedLibs)...)
+	mctx.AddVariationDependencies(nil, sharedDepTag, mainBuild.ExtraSharedLibs...)
 }
