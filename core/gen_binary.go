@@ -43,7 +43,7 @@ func (m *generateBinary) outputs(g generatorBackend) []string {
 //// Support singleOutputModule
 
 func (m *generateBinary) outputFileName() string {
-	return m.buildbpName() + m.libExtension()
+	return m.Name() + m.libExtension()
 }
 
 //// Support Installable

@@ -65,7 +65,7 @@ type defaultable interface {
 
 func defaultDepsMutator(mctx abstr.BottomUpMutatorContext) {
 	if l, ok := abstr.Module(mctx).(defaultable); ok {
-		mctx.AddDependency(abstr.Module(mctx), defaultDepTag, bobNames(l.defaults())...)
+		mctx.AddDependency(abstr.Module(mctx), defaultDepTag, l.defaults()...)
 	}
 	if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
@@ -74,7 +74,7 @@ func defaultDepsMutator(mctx abstr.BottomUpMutatorContext) {
 				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
 					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
 			}
-			mctx.AddDependency(abstr.Module(mctx), defaultDepTag, bobNames(gsc.Properties.Flag_defaults)...)
+			mctx.AddDependency(abstr.Module(mctx), defaultDepTag, gsc.Properties.Flag_defaults...)
 		}
 	}
 }

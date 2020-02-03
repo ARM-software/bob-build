@@ -60,7 +60,7 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 //// Support singleOutputModule
 
 func (m *generateSharedLibrary) outputFileName() string {
-	return m.buildbpName() + m.libExtension()
+	return m.Name() + m.libExtension()
 }
 
 //// Factory functions

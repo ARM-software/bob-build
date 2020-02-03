@@ -79,24 +79,13 @@ func getConfig(interface{}) *bobConfig {
 	return soongGetConfig()
 }
 
-// Avoid conflicts with the Soong modules we generate by adding a suffix to all
-// non-backend Bob modules. This means that we have to use these helpers when referring to
-// them, e.g. when adding dependencies.
-func bobName(buildbpName string) string {
-	return buildbpName + bobModuleSuffix
-}
-
-func buildbpName(bobName string) string {
-	return strings.TrimSuffix(bobName, bobModuleSuffix)
-}
-
 type moduleBase struct {
 	// android.ModuleBase and blueprint.SimpleName both contain `Name`
 	// properties and methods. However, we can't access the one provided by
 	// android.ModuleBase without calling InitAndroidModule(), which would
 	// also add a load of other properties that we don't want. So embed
 	// SimpleName here, and provide a Name() method to choose which one to
-	// delegate to (well, via the renaming scheme described above).
+	// delegate to.
 	blueprint.SimpleName
 
 	android.ModuleBase
@@ -104,9 +93,7 @@ type moduleBase struct {
 
 func (m *moduleBase) GenerateAndroidBuildActions(ctx android.ModuleContext) {}
 
-func (m *moduleBase) bobName() string     { return bobName(m.SimpleName.Name()) }
-func (m *moduleBase) buildbpName() string { return m.SimpleName.Name() }
-func (m *moduleBase) Name() string        { return m.bobName() }
+func (m *moduleBase) Name() string { return m.SimpleName.Name() }
 
 // Property structures used to initialize Bob created Soong modules
 type nameProps struct {
@@ -168,6 +155,21 @@ type soongBuildActionsProvider interface {
 	soongBuildActions(android.TopDownMutatorContext)
 }
 
+// Avoid conflicts with the Soong modules we generate by renaming the Bob
+// modules at the last minute. Calls to `mctx.ModuleName()` will return the
+// new name, but the module's `Name()` method will be unchanged.
+//
+// Unfortunately we can't just do this right before calling CreateModule,
+// because renames are only enacted after each mutator pass. Therefore it is
+// done it its own mutator, before buildActionsMutator.
+func renameMutator(mctx android.TopDownMutatorContext) {
+	if _, ok := mctx.Module().(soongBuildActionsProvider); !ok {
+		return
+	}
+
+	mctx.Rename(mctx.ModuleName() + bobModuleSuffix)
+}
+
 func buildActionsMutator(mctx android.TopDownMutatorContext) {
 	m, ok := mctx.Module().(soongBuildActionsProvider)
 	if !ok {
@@ -218,6 +220,7 @@ func registerMutators(ctx android.RegisterMutatorsContext) {
 		abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
 	ctx.TopDown("bob_install_group", abstr.TopDownAdaptor(soongInstallGroupMutator)).Parallel()
 	ctx.TopDown("match_sources_mutator", abstr.TopDownAdaptor(matchSourcesMutator)).Parallel()
+	ctx.TopDown("bob_rename", renameMutator).Parallel()
 	ctx.TopDown("bob_build_actions", buildActionsMutator).Parallel()
 }
 

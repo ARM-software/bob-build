@@ -87,7 +87,7 @@ func aliasMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 	if a, ok := mctx.Module().(aliasable); ok {
 		for _, s := range a.getAliasList() {
-			mctx.AddReverseDependency(mctx.Module(), aliasTag, bobName(s))
+			mctx.AddReverseDependency(mctx.Module(), aliasTag, s)
 		}
 	}
 }

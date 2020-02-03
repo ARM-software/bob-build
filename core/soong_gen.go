@@ -198,8 +198,8 @@ func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string,
 			outs := gdep.outputs()
 			dependents = append(dependents, outs.Paths()...)
 
-			args[buildbpName(dep.Name())+"_dir"] = gdep.outputPath().String()
-			args[buildbpName(dep.Name())+"_out"] = strings.Join(outs.Strings(), " ")
+			args[dep.Name()+"_dir"] = gdep.outputPath().String()
+			args[dep.Name()+"_out"] = strings.Join(outs.Strings(), " ")
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
@@ -370,7 +370,7 @@ func (m *genBackend) AndroidMkEntries() []android.AndroidMkEntries {
 	}}
 }
 
-func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (hostBin *binary) {
+func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) *binary {
 	var hostBinModule android.Module
 	mctx.VisitDirectDepsWithTag(hostToolBinTag, func(m android.Module) {
 		hostBinModule = m
@@ -380,7 +380,7 @@ func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) (
 	}
 	bin, ok := hostBinModule.(*binary)
 	if !ok {
-		panic(fmt.Errorf("Host binary %s of module %s is not a bob_binary!", bin.buildbpName(), gc.buildbpName()))
+		panic(fmt.Errorf("Host binary %s of module %s is not a bob_binary!", hostBinModule.Name(), gc.Name()))
 	}
 	return bin
 }
@@ -389,7 +389,7 @@ func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContex
 	if gc.Properties.Host_bin == nil {
 		return ""
 	}
-	return ccModuleName(mctx, gc.getHostBinModule(mctx).buildbpName())
+	return ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
@@ -404,7 +404,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		strings.Join(gc.Properties.Args, " "), -1)
 
 	nameProps := nameProps{
-		proptools.StringPtr(gc.buildbpName()),
+		proptools.StringPtr(gc.Name()),
 	}
 
 	genProps := genBackendProps{
@@ -467,7 +467,7 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		return
 	}
 
-	nameProps := nameProps{proptools.StringPtr(ts.buildbpName())}
+	nameProps := nameProps{proptools.StringPtr(ts.Name())}
 
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",

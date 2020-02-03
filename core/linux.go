@@ -84,7 +84,7 @@ func (g *linuxGenerator) buildDir() string {
 }
 
 func (g *linuxGenerator) sourceOutputDir(m *generateCommon) string {
-	return filepath.Join("${BuildDir}", "gen", buildbpName(m.Name()))
+	return filepath.Join("${BuildDir}", "gen", m.Name())
 }
 
 var copyRule = pctx.StaticRule("copy",
@@ -156,12 +156,12 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 	}
 
 	//print("Keys:" + strings.Join(argkeys, ",") + "\n")
-	rule := ctx.Rule(pctx, "gen_"+buildbpName(m.Name()), ruleparams,
+	rule := ctx.Rule(pctx, "gen_"+m.Name(), ruleparams,
 		append(utils.SortedKeys(args), "depfile", "rspfile")...)
 
 	for _, inout := range inouts {
 		if inout.depfile != "" && len(inout.out) > 1 {
-			panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", buildbpName(ctx.ModuleName())))
+			panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", ctx.ModuleName()))
 		}
 
 		if inout.rspfile != "" {
@@ -434,9 +434,9 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 	g := getBackend(ctx)
 	libs := []string{}
 	for _, moduleName := range l.Properties.ResolvedStaticLibs {
-		dep, _ := ctx.GetDirectDep(bobName(moduleName))
+		dep, _ := ctx.GetDirectDep(moduleName)
 		if dep == nil {
-			panic(fmt.Errorf("%s has no dependency on static lib %s", l.buildbpName(), moduleName))
+			panic(fmt.Errorf("%s has no dependency on static lib %s", l.Name(), moduleName))
 		}
 		if sl, ok := dep.(*staticLibrary); ok {
 			libs = append(libs, sl.outputs(g)...)
@@ -785,7 +785,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 					return
 				}
 			}
-			name := buildbpName(ctx.OtherModuleName(p))
+			name := ctx.OtherModuleName(p)
 			if lib, ok := p.(phonyInterface); ok {
 				name = lib.shortName()
 			}
@@ -797,7 +797,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
 			Inputs:   srcs,
-			Outputs:  []string{m.buildbpName()},
+			Outputs:  []string{m.Name()},
 			Optional: true,
 		})
 }
