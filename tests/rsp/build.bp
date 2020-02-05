@@ -1,0 +1,62 @@
+/*
+ * Copyright 2020 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Test use of Ninja's `rspfile` option to work around command line length
+// limits by writing the input list to a file before command execution.
+
+bob_transform_source {
+    name: "generate_multiple_sources",
+    // If this was a longer list, then the consumer of this module would
+    // overrun the command line length limit.
+    srcs: [
+        "in1.in",
+        "in2.in",
+        "in3.in",
+    ],
+    out: {
+        match: "in([0-9]+)\\.in",
+        replace: ["out$1.txt"],
+    },
+    rsp_content: "${out}",
+    tool: "rspcat.py",
+    cmd: "${tool} --input ${in} --output_list ${rspfile}",
+}
+
+bob_generate_source {
+    name: "merge_multiple_sources",
+    srcs: ["first.in"],
+    module_srcs: ["generate_multiple_sources"],
+    out: ["merged.c"],
+    rsp_content: "${in}",
+    tool: "rspcat.py",
+    cmd: "${tool} --input_list ${rspfile} --output ${out}",
+}
+
+bob_binary {
+    name: "use_merged_sources",
+    generated_sources: ["merge_multiple_sources"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    // RSP files do work on Soong, but `module_srcs` is not currently
+    // implemented, so the merge_multiple_sources module generates incorrect
+    // output. This should be re-enabled once `module_srcs` is fixed.
+    builder_soong: {
+        enabled: false,
+    },
+}

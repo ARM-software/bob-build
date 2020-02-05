@@ -139,25 +139,33 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 		pool = blueprint.Console
 	}
 
-	rulename := "gen_" + buildbpName(m.Name())
+	ruleparams := blueprint.RuleParams{
+		Command: ldLibraryPath + cmd,
+		// Restat is always set to true. This is due to wanting to enable scripts
+		// to only update the outputs if they have changed (keeping the same mtime if it
+		// has not). If there are no updates, the following rules will not have to update
+		// the output.
+		Restat:      true,
+		Pool:        pool,
+		Description: "$out",
+	}
+
+	if m.Properties.Rsp_content != nil {
+		ruleparams.Rspfile = "${rspfile}"
+		ruleparams.RspfileContent = *m.Properties.Rsp_content
+	}
+
 	//print("Keys:" + strings.Join(argkeys, ",") + "\n")
-	rule := ctx.Rule(pctx,
-		rulename,
-		blueprint.RuleParams{
-			Command: ldLibraryPath + cmd,
-			// Restat is always set to true. This is due to wanting to enable scripts
-			// to only update the outputs if they have changed (keeping the same mtime if it
-			// has not). If there are no updates, the following rules will not have to update
-			// the output.
-			Restat:      true,
-			Pool:        pool,
-			Description: "$out",
-		},
-		append(utils.SortedKeys(args), "depfile")...)
+	rule := ctx.Rule(pctx, "gen_"+buildbpName(m.Name()), ruleparams,
+		append(utils.SortedKeys(args), "depfile", "rspfile")...)
 
 	for _, inout := range inouts {
 		if inout.depfile != "" && len(inout.out) > 1 {
 			panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", buildbpName(ctx.ModuleName())))
+		}
+
+		if inout.rspfile != "" {
+			args["rspfile"] = inout.rspfile
 		}
 
 		if _, ok := args["headers_generated"]; ok {

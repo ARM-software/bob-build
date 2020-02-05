@@ -54,6 +54,7 @@ type inout struct {
 	depfile      string
 	implicitSrcs []string
 	implicitOuts []string
+	rspfile      string
 }
 
 // GenerateProps contains the module properties that allow generation of
@@ -121,6 +122,11 @@ type GenerateProps struct {
 
 	// If true, depfile name will be generated and can be used as ${depfile} reference in 'cmd'
 	Depfile *bool
+
+	// If set, Ninja will expand the string and write it to a file just
+	// before executing the command. This can be used to e.g. contain ${in},
+	// in cases where the command line length is a limiting factor.
+	Rsp_content *string
 }
 
 type generateCommon struct {
@@ -446,6 +452,10 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 	io.implicitSrcs = utils.PrefixDirs(m.Properties.Implicit_srcs, g.sourcePrefix())
 	io.implicitOuts = m.implicitOutputs(g)
 
+	if m.generateCommon.Properties.Rsp_content != nil {
+		io.rspfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), "."+m.Name()+".rsp")
+	}
+
 	return []inout{io}
 }
 
@@ -473,7 +483,7 @@ type TransformSourceProps struct {
 	}
 }
 
-func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath, genDir string, depfile *bool) (io inout) {
+func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath, genDir string, depfile *bool, rspfile bool) (io inout) {
 	io.in = []string{source.buildPath()}
 
 	for _, rep := range tsp.Out.Replace {
@@ -493,6 +503,11 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 	for _, implSrc := range tsp.Out.Implicit_srcs {
 		implSrc = re.ReplaceAllString(source.localPath(), implSrc)
 		io.implicitSrcs = append(io.implicitSrcs, filepath.Join(source.moduleDir(), implSrc))
+	}
+
+	if rspfile {
+		io.rspfile = filepath.Join(genDir, filepath.Dir(source.localPath()),
+			"."+filepath.Base(source.localPath())+".rsp")
 	}
 
 	return
@@ -542,7 +557,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 
 	for _, source := range m.sourceInfo(ctx, g) {
 		io := m.Properties.inoutForSrc(re, source, g.sourceOutputDir(&m.generateCommon),
-			m.generateCommon.Properties.Depfile)
+			m.generateCommon.Properties.Depfile, m.generateCommon.Properties.Rsp_content != nil)
 		inouts = append(inouts, io)
 	}
 
