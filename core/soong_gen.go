@@ -53,6 +53,7 @@ type genBackendProps struct {
 	Asflags                 []string
 	Ldflags                 []string
 	Ldlibs                  []string
+	Rsp_content             *string
 
 	Transform_srcs []string
 	TransformSourceProps
@@ -217,23 +218,28 @@ type soongInout struct {
 	depfile      android.WritablePath
 	implicitSrcs android.Paths
 	implicitOuts android.WritablePaths
+	rspfile      android.WritablePath
 }
 
 func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]string) {
+	ruleparams := blueprint.RuleParams{
+		Command: m.Properties.Cmd,
+		Restat:  true,
+	}
+
 	if m.Properties.Depfile {
 		args["depfile"] = ""
 	}
 	args["headers_generated"] = ""
 	args["srcs_generated"] = ""
 
-	rule := ctx.Rule(apctx,
-		"bob_gen_"+ctx.ModuleName(),
-		blueprint.RuleParams{
-			Command: m.Properties.Cmd,
-			Restat:  true,
-		},
-		utils.SortedKeys(args)...,
-	)
+	if m.Properties.Rsp_content != nil {
+		args["rspfile"] = ""
+		ruleparams.Rspfile = "${rspfile}"
+		ruleparams.RspfileContent = *m.Properties.Rsp_content
+	}
+
+	rule := ctx.Rule(apctx, "bob_gen_"+ctx.ModuleName(), ruleparams, utils.SortedKeys(args)...)
 
 	for _, sio := range m.inouts {
 		// `args` is slightly different for each inout, but blueprint's
@@ -241,6 +247,9 @@ func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]stri
 		// we're OK to re-use it for each target.
 		if m.Properties.Depfile {
 			args["depfile"] = sio.depfile.String()
+		}
+		if m.Properties.Rsp_content != nil {
+			args["rspfile"] = sio.rspfile.String()
 		}
 		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, sio.out.Strings()), " ")
 		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, sio.out.Strings()), " ")
@@ -312,6 +321,9 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		if m.Properties.Depfile {
 			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
 		}
+		if m.Properties.Rsp_content != nil {
+			sio.rspfile = android.PathForModuleGen(ctx, "."+m.Name()+".rsp")
+		}
 
 		m.inouts = append(m.inouts, sio)
 	}
@@ -319,7 +331,8 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	re := regexp.MustCompile(m.Properties.TransformSourceProps.Out.Match)
 	for _, tsrc := range m.Properties.Transform_srcs {
 		srcPath := newSourceFilePath(tsrc, ctx, getBackend(ctx))
-		io := m.Properties.inoutForSrc(re, srcPath, "", &m.Properties.Depfile)
+		io := m.Properties.inoutForSrc(re, srcPath, "", &m.Properties.Depfile,
+			m.Properties.Rsp_content != nil)
 		sio := soongInout{
 			in:           android.PathsForSource(ctx, io.in),
 			implicitSrcs: android.PathsForSource(ctx, io.implicitSrcs),
@@ -328,6 +341,10 @@ func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		}
 		if m.Properties.Depfile {
 			sio.depfile = android.PathForModuleGen(ctx, io.depfile)
+		}
+		if m.Properties.Rsp_content != nil {
+			sio.rspfile = android.PathForModuleGen(ctx, filepath.Dir(tsrc),
+				"."+filepath.Base(tsrc)+".rsp")
 		}
 		m.inouts = append(m.inouts, sio)
 	}
@@ -409,6 +426,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		Asflags:                 gc.Properties.FlagArgsBuild.Asflags,
 		Ldflags:                 gc.Properties.FlagArgsBuild.Ldflags,
 		Ldlibs:                  gc.Properties.FlagArgsBuild.Ldlibs,
+		Rsp_content:             gc.Properties.Rsp_content,
 	}
 
 	mctx.CreateModule(factory, &nameProps, &genProps)
@@ -466,6 +484,7 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		Module_srcs:             ts.generateCommon.Properties.Module_srcs,
 		Encapsulates:            ts.generateCommon.Properties.Encapsulates,
 		TransformSourceProps:    ts.Properties.TransformSourceProps,
+		Rsp_content:             ts.generateCommon.Properties.Rsp_content,
 	}
 
 	// The ModuleDir for the new module will be inherited from the

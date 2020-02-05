@@ -539,3 +539,31 @@ Note that the above is not a recommendation for using Bob to invoke
 other build systems. This should be avoided, as the best way to ensure
 consistent builds is for the build system to be aware of the full
 dependency tree.
+
+### Long command lines
+
+Generator modules with lots of input or output files may sometimes exceed the
+command line length limit. One way to work around this is with RSP ("response")
+files. These allow parts of the command line to be written to a file instead,
+where the size limit does not apply.
+
+To use this, set the `rsp_content` field on a generator module to contain the
+arguments causing the limit overrun. The build system will expand the
+expression and write the result to a file just before the generator command is
+run. The command can then access the file via the name stored in the
+`${rspfile}` variable.
+
+In the following example, we use an RSP file to avoid passing the list of input
+files on the command line:
+
+```
+bob_generate_source {
+    name: "combine_multiple_files",
+    srcs: ["file1.in", ..., "file999.in"],
+    module_srcs: ["module_generating_many_files"],
+    out: ["combined.c"],
+    tool: "combine.sh",
+    rsp_content: "${in}",
+    cmd: "${tool} --input_list ${rspfile} --out ${out}",
+}
+```

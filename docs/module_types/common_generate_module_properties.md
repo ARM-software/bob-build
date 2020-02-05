@@ -21,6 +21,7 @@ Substitutions can be made in the command, by using
 - `$in` - the path to the sources - space-delimited
 - `$out` - the path to the targets - space-delimited
 - `$depfile` - the path to generated dependency file
+- `$rspfile` - the path to the RSP file, if rsp_content is set
 - `$args` - the value of "args" - space-delimited
 - `$tool` - the path to the tool
 - `$host_bin` - the path to the binary that is produced by the host_bin module
@@ -91,3 +92,11 @@ the host and target variant of the `bob_defaults` specified in
 If true, a dependency file describing discovered dependencies will be generated
 with a specific name, derived from module name (`bob_generate_source`) or
 source file name (`bob_transform_source`).
+
+----
+### **bob_generated.rsp_content** (optional)
+If set, the value provided will be expanded and written to a file immediately
+before command execution, and the file name will be made available to the
+command as `${rspfile}`. This allows commands to use argument lists greater
+than the command line length limit, by writing e.g. the input or output list to
+a file.

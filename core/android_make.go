@@ -809,10 +809,20 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 		sb.WriteString(outs + ": in := " + ins + "\n")
 		sb.WriteString(outs + ": out := " + strings.Join(inout.out, " ") + "\n")
 		sb.WriteString(outs + ": depfile := " + inout.depfile + "\n")
+		if m.Properties.Rsp_content != nil {
+			sb.WriteString(outs + ": rspfile := " + inout.rspfile + "\n")
+		}
 		if strings.Contains(cmd, "$(LOCAL_PATH)") {
 			sb.WriteString(outs + ": LOCAL_PATH := $(LOCAL_PATH)" + "\n")
 		}
 		sb.WriteString(outs + ": " + ins + " " + strings.Join(inout.implicitSrcs, " ") + "\n")
+		// Kati will automatically put entire command lines into RSP files, so we can
+		// just echo the content on the command line, even if it exceeds the command
+		// line limit. The proper way to do this would be Make's $(file) function,
+		// except that it isn't permitted on Kati.
+		if m.Properties.Rsp_content != nil {
+			sb.WriteString("\techo \"" + *m.Properties.Rsp_content + "\" > \"$(rspfile)\"\n")
+		}
 		sb.WriteString("\t" + cmd + "\n")
 		if inout.depfile != "" {
 			// Convert the depfile file format as part of this rule.

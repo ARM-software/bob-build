@@ -26,6 +26,7 @@
 ./properties/build.bp
 ./reexport_libs/build.bp
 ./resources/build.bp
+./rsp/build.bp
 ./shared_libs/build.bp
 ./source_encapsulation/build.bp
 ./static_libs/build.bp

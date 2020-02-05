@@ -65,6 +65,7 @@ bob_transform_source {
     post_install_tool: "post_install.py",
     post_install_cmd: "${tool} ${args} ${out}",
     post_install_args: ["arg1", "arg2"],
+    rsp_content: "${in}",
 }
 ```
 
