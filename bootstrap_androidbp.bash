@@ -31,7 +31,7 @@ function die {
 
 # Remove any stalled symlinks from Soong plugin bootstrap
 pushd "${SRCDIR}" >&/dev/null
-find -name Android.bp -xtype l -delete
+find -name Android.bp -type l -delete
 popd >&/dev/null
 
 # Set up Android.bp with plugins

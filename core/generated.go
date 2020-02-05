@@ -308,27 +308,45 @@ func (m *generateSource) topLevelProperties() []interface{} {
 	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateSourceProps)
 }
 
+func (gc *generateCommon) getHostBinModule(mctx blueprint.ModuleContext) (hostBinModule blueprint.Module) {
+	mctx.VisitDirectDepsIf(
+		func(dep blueprint.Module) bool {
+			return mctx.OtherModuleDependencyTag(dep) == hostToolBinTag
+		},
+		func(dep blueprint.Module) {
+			hostBinModule = dep
+		})
+	if hostBinModule == nil {
+		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", *gc.Properties.Host_bin))
+	}
+
+	_, bin_ok := hostBinModule.(*binary)
+	_, genbin_ok := hostBinModule.(*generateBinary)
+
+	if !(bin_ok || genbin_ok) {
+		panic(fmt.Errorf("Host binary %s of module %s is not a bob_binary nor bob_generate_binary!", hostBinModule.Name(), gc.Name()))
+	}
+	return
+}
+
 // Returns the tool binary for a generateSource module. This is different from the "tool"
 // in that it used to depend on a bob_binary module
 func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtType) {
 	g := getBackend(ctx)
 	toolBin := ""
 	toolTarget := tgtTypeUnknown
+	if m.Properties.Host_bin == nil {
+		return toolBin, toolTarget
+	}
 
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == hostToolBinTag
-		},
-		func(m blueprint.Module) {
-			if b, ok := m.(*binary); ok {
-				toolBin = b.outputs(g)[0]
-				toolTarget = b.getTarget()
-			} else if b, ok := m.(*generateBinary); ok {
-				toolBin = b.outputs(g)[0]
-			} else {
-				panic(errors.New("bob_generate_source must depend on a binary, not a library"))
-			}
-		})
+	hostBinModule := m.getHostBinModule(ctx)
+	if b, ok := hostBinModule.(*binary); ok {
+		toolBin = b.outputs(g)[0]
+		toolTarget = b.getTarget()
+	} else if b, ok := hostBinModule.(*generateBinary); ok {
+		toolBin = b.outputs(g)[0]
+	}
+
 	return toolBin, toolTarget
 }
 
@@ -403,7 +421,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	dependents := getDependentArgsAndFiles(ctx, args)
 
 	if m.Properties.Tool != nil {
-		toolPath := getBackendPathInSourceDir(g, ctx.ModuleDir(), proptools.String(m.Properties.Tool))
+		toolPath := getBackendPathInSourceDir(g, proptools.String(m.Properties.Tool))
 		args["tool"] = toolPath
 		dependents = append(dependents, toolPath)
 	}
@@ -432,6 +450,9 @@ func (m *generateCommon) processPaths(ctx abstr.BaseModuleContext, g generatorBa
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
+	if m.Properties.Tool != nil {
+		*m.Properties.Tool = filepath.Join(projectModuleDir(ctx), *m.Properties.Tool)
+	}
 }
 
 func (m *generateCommon) getAliasList() []string {

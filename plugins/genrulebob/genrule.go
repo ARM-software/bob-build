@@ -47,7 +47,7 @@ type GenruleProps struct {
 	Implicit_outs           []string
 	Export_gen_include_dirs []string
 	Cmd                     string
-	HostBin                 string
+	Host_bin                string
 	Tool                    string
 	Depfile                 bool
 	Module_deps             []string
@@ -168,9 +168,9 @@ func (m *genrulebob) GeneratedDeps() (srcs android.Paths) {
 }
 
 func (m *genrulebob) DepsMutator(mctx android.BottomUpMutatorContext) {
-	if m.Properties.HostBin != "" {
+	if m.Properties.Host_bin != "" {
 		mctx.AddFarVariationDependencies(mctx.Config().BuildOSTarget.Variations(),
-			hostToolBinTag, m.Properties.HostBin)
+			hostToolBinTag, m.Properties.Host_bin)
 	}
 
 	// `module_deps` and `module_srcs` can refer not only to source
@@ -188,13 +188,13 @@ func (m *genrulebob) DepsMutator(mctx android.BottomUpMutatorContext) {
 }
 
 func (m *genrulebob) getHostBin(ctx android.ModuleContext) android.OptionalPath {
-	if m.Properties.HostBin == "" {
+	if m.Properties.Host_bin == "" {
 		return android.OptionalPath{}
 	}
-	hostBinModule := ctx.GetDirectDepWithTag(m.Properties.HostBin, hostToolBinTag)
+	hostBinModule := ctx.GetDirectDepWithTag(m.Properties.Host_bin, hostToolBinTag)
 	htp, ok := hostBinModule.(genrule.HostToolProvider)
 	if !ok {
-		panic(fmt.Errorf("%s is not a host tool", m.Properties.HostBin))
+		panic(fmt.Errorf("%s is not a host tool", m.Properties.Host_bin))
 	}
 	return htp.HostToolPath()
 }
@@ -387,7 +387,7 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	}
 
 	if m.Properties.Tool != "" {
-		tool := android.PathForSource(ctx, filepath.Join(ctx.ModuleDir(), m.Properties.Tool))
+		tool := android.PathForModuleSrc(ctx, m.Properties.Tool)
 		args["tool"] = tool.String()
 		implicits = append(implicits, tool)
 	}

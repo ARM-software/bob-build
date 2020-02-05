@@ -44,15 +44,6 @@ func AndroidBpFile() bpwriter.File {
 }
 
 func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext) {}
-func (g *androidBpGenerator) generateSourceActions(*generateSource, blueprint.ModuleContext, []inout) {
-}
-func (g *androidBpGenerator) genBinaryActions(*generateBinary, blueprint.ModuleContext, []inout) {}
-func (g *androidBpGenerator) genSharedActions(*generateSharedLibrary, blueprint.ModuleContext, []inout) {
-}
-func (g *androidBpGenerator) genStaticActions(*generateStaticLibrary, blueprint.ModuleContext, []inout) {
-}
-func (g *androidBpGenerator) transformSourceActions(*transformSource, blueprint.ModuleContext, []inout) {
-}
 
 func (g *androidBpGenerator) buildDir() string                         { return "" }
 func (g *androidBpGenerator) sourcePrefix() string                     { return "" }

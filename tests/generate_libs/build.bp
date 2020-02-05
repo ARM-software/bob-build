@@ -70,6 +70,10 @@ bob_generate_shared_library {
         /* On Soong generated libraries are not supported. */
         enabled: false,
     },
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_binary {
@@ -81,7 +85,11 @@ bob_binary {
     target_supported: false,
     build_by_default: true,
     builder_soong: {
-        /* On Soong generated binaries are not supported. */
+        /* On Soong generated libraries are not supported. */
+        enabled: false,
+    },
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
         enabled: false,
     },
 }
@@ -105,6 +113,10 @@ bob_generate_static_library {
         /* On Soong generated libraries are not supported. */
         enabled: false,
     },
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
+        enabled: false,
+    },
 }
 
 bob_binary {
@@ -116,7 +128,11 @@ bob_binary {
     target_supported: false,
     build_by_default: true,
     builder_soong: {
-        /* On Soong generated binaries are not supported. */
+        /* On Soong generated libraries are not supported. */
+        enabled: false,
+    },
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
         enabled: false,
     },
 }
