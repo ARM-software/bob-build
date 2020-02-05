@@ -31,12 +31,14 @@ bootstrap_go_package {
         "blueprint-bootstrap",
         "blueprint-pathtools",
         "bob-abstr",
+        "bob-bpwriter",
         "bob-graph",
         "bob-utils",
     ],
     srcs: [
-        "core/android_bp.go",
         "core/android_make.go",
+        "core/androidbp_backend.go",
+        "core/androidbp_cclibs.go",
         "core/alias.go",
         "core/build_structs.go",
         "core/config_props.go",
@@ -79,6 +81,14 @@ bootstrap_go_package {
         "abstr/standalone.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/abstr",
+}
+
+bootstrap_go_package {
+    name: "bob-bpwriter",
+    srcs: [
+        "internal/bpwriter/bpwriter.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/bpwriter",
 }
 
 bootstrap_go_package {

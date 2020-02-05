@@ -19,8 +19,15 @@ package core
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/bpwriter"
+)
+
+var (
+	outputFile = bpwriter.FileFactory()
 )
 
 type androidBpGenerator struct {
@@ -30,12 +37,14 @@ type androidBpGenerator struct {
 /* Compile time checks for interfaces that must be implemented by androidBpGenerator */
 var _ generatorBackend = (*androidBpGenerator)(nil)
 
+// Provides access to the global instance of the Android.bp file writer
+func AndroidBpFile() bpwriter.File {
+	return outputFile
+}
+
 func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext)               {}
-func (g *androidBpGenerator) binaryActions(*binary, blueprint.ModuleContext)             {}
 func (g *androidBpGenerator) kernelModuleActions(*kernelModule, blueprint.ModuleContext) {}
 func (g *androidBpGenerator) resourceActions(*resource, blueprint.ModuleContext)         {}
-func (g *androidBpGenerator) sharedActions(*sharedLibrary, blueprint.ModuleContext)      {}
-func (g *androidBpGenerator) staticActions(*staticLibrary, blueprint.ModuleContext)      {}
 
 func (g *androidBpGenerator) generateSourceActions(*generateSource, blueprint.ModuleContext, []inout) {
 }
@@ -64,7 +73,11 @@ func androidBpSingletonFactory() blueprint.Singleton {
 }
 
 func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
+	sb := &strings.Builder{}
+	AndroidBpFile().Render(sb)
+
 	androidbpFile := filepath.Join(srcdir, "Android.bp")
+	writeIfChanged(androidbpFile, sb)
 
 	// Blueprint does not output package context dependencies unless
 	// the package context outputs a variable, pool or rule to the
