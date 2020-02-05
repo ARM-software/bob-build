@@ -26,7 +26,7 @@ import (
 
 	"github.com/google/blueprint/proptools"
 
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 type ccLibraryCommonProps struct {

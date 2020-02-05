@@ -26,7 +26,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/abstr"
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // Types implementing phonyInterface support the creation of phony targets.

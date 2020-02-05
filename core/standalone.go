@@ -31,7 +31,7 @@ import (
 	"github.com/google/blueprint/bootstrap"
 
 	"github.com/ARM-software/bob-build/abstr"
-	"github.com/ARM-software/bob-build/graph"
+	"github.com/ARM-software/bob-build/internal/graph"
 )
 
 var (

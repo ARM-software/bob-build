@@ -105,9 +105,9 @@ For more information see the [documentation](docs/build_defs.md).
 
 `core` - contains the core Go code
 
-`graph` - contains a simple Go graph implementation
+`internal` - contains Go packages for internal use
 
-`utils` - miscellaneous utility functions in Go
+`plugins` - contains plugins for Soong
 
 ### Developing for Bob
 

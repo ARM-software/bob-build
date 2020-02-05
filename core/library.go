@@ -26,8 +26,8 @@ import (
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/abstr"
-	"github.com/ARM-software/bob-build/graph"
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/graph"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // BuildProps contains properties required by all modules that compile C/C++

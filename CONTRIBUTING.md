@@ -66,14 +66,14 @@ Bob has three kinds of tests:
   export GOPATH=~/go
   ./scripts/setup_workspace_for_bob.bash
   go test github.com/ARM-software/bob-build/core \
-          github.com/ARM-software/bob-build/graph \
-          github.com/ARM-software/bob-build/utils
+          github.com/ARM-software/bob-build/internal/graph \
+          github.com/ARM-software/bob-build/internal/utils
   # OR:
   cd $GOPATH/src/github.com/ARM-software/bob-build/core
   go test
   # OR:
   cd $GOPATH/src/github.com/ARM-software/bob-build
-  go test ./core ./graph ./utils
+  go test ./core ./internal/graph ./internal/utils
   ```
 
 - The configuration system tests:

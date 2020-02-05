@@ -83,17 +83,17 @@ bootstrap_go_package {
         "bob-utils-@@PROJ_NAME@@",
     ],
     srcs: [
-        "graph/graph.go",
+        "internal/graph/graph.go",
     ],
-    pkgPath: "github.com/ARM-software/bob-build/graph",
+    pkgPath: "github.com/ARM-software/bob-build/internal/graph",
 }
 
 bootstrap_go_package {
     name: "bob-utils-@@PROJ_NAME@@",
     srcs: [
-        "utils/utils.go",
+        "internal/utils/utils.go",
     ],
-    pkgPath: "github.com/ARM-software/bob-build/utils",
+    pkgPath: "github.com/ARM-software/bob-build/internal/utils",
 }
 
 bootstrap_go_package {
