@@ -35,8 +35,12 @@ bob_resource {
     name: "bob_test_resources",
     srcs: ["main.c"],
     install_group: "install_group_test",
+    build_by_default: true,
     builder_android_make: {
         relative_install_path: "x",
+    },
+    builder_android_bp: {
+        relative_install_path: "z",
     },
     builder_ninja: {
         relative_install_path: "y",

@@ -42,6 +42,7 @@ bootstrap_go_package {
         "core/android_make.go",
         "core/androidbp_backend.go",
         "core/androidbp_cclibs.go",
+        "core/androidbp_resource.go",
         "core/alias.go",
         "core/build_structs.go",
         "core/config_props.go",
