@@ -26,7 +26,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // Convert between Bob module names, and the name we will give the generated

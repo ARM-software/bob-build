@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018, 2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func TestShould_add_new_edge_When_edge_removed(t *testing.T) {

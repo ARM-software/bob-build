@@ -23,7 +23,7 @@ import (
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/abstr"
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // Support generation of static and shared libraries

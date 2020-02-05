@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Arm Limited.
+ * Copyright 2018, 2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +24,8 @@ import (
 
 	"github.com/google/blueprint"
 
-	"github.com/ARM-software/bob-build/graph"
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/graph"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 var (

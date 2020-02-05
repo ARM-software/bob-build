@@ -28,7 +28,7 @@ import (
 	"android/soong/cc"
 	"android/soong/genrule"
 
-	"github.com/ARM-software/bob-build/utils"
+	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
