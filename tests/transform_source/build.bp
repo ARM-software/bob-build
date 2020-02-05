@@ -29,6 +29,11 @@ bob_transform_source {
         ],
     },
     export_gen_include_dirs: ["single/transform_source"],
+    builder_soong: {
+        // On Soong sources matched by regex are not prefixed relative to bob/tests,
+        // rather, they are prefixed relative to the module directory.
+        export_gen_include_dirs: ["single"],
+    },
 
     tool: "generator.py",
     cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
@@ -51,6 +56,11 @@ bob_transform_source {
         },
     },
     export_gen_include_dirs: ["transform_source"],
+    builder_soong: {
+        // On Soong sources matched by regex are not prefixed relative to bob/tests,
+        // rather, they are prefixed relative to the module directory.
+        export_gen_include_dirs: ["."],
+    },
 
     tool: "generator.py",
     cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
@@ -71,6 +81,11 @@ bob_transform_source {
         ],
     },
     export_gen_include_dirs: ["transform_source"],
+    builder_soong: {
+        // On Soong sources matched by regex are not prefixed relative to bob/tests,
+        // rather, they are prefixed relative to the module directory.
+        export_gen_include_dirs: ["."],
+    },
 
     tool: "generator.py",
     cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
