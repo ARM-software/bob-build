@@ -20,355 +20,14 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
-	"regexp"
 	"strings"
 
 	"android/soong/android"
-	"android/soong/cc"
-	"android/soong/genrule"
 
-	"github.com/ARM-software/bob-build/internal/utils"
-
-	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/plugins/genrulebob"
 )
-
-type genBackendProps struct {
-	Srcs                    []string
-	Out                     []string
-	Implicit_srcs           []string
-	Implicit_outs           []string
-	Export_gen_include_dirs []string
-	Cmd                     string
-	HostBin                 string
-	Tool                    string
-	Depfile                 bool
-	Module_deps             []string
-	Module_srcs             []string
-	Encapsulates            []string
-	Cflags                  []string
-	Conlyflags              []string
-	Cxxflags                []string
-	Asflags                 []string
-	Ldflags                 []string
-	Ldlibs                  []string
-	Rsp_content             *string
-
-	Transform_srcs []string
-	TransformSourceProps
-}
-
-type genBackendInterface interface {
-	genrule.SourceFileGenerator
-
-	outputs() android.WritablePaths
-	outputPath() android.Path
-}
-
-type genBackend struct {
-	android.ModuleBase
-	Properties genBackendProps
-
-	genDir               android.Path
-	exportGenIncludeDirs android.Paths
-	inouts               []soongInout
-}
-
-// interfaces implemented
-var _ android.Module = (*genBackend)(nil)
-var _ genrule.SourceFileGenerator = (*genBackend)(nil)
-var _ android.AndroidMkEntriesProvider = (*genBackend)(nil)
-
-func genBackendFactory() android.Module {
-	m := &genBackend{}
-	// register all structs that contain module properties (parsable from .bp file)
-	// note: we register our custom properties first, to take precedence before common ones
-	m.AddProperties(&m.Properties)
-	android.InitAndroidModule(m)
-	return m
-}
-
-func (m *genBackend) outputPath() android.Path {
-	return m.genDir
-}
-
-func (m *genBackend) outputs() (ret android.WritablePaths) {
-	for _, io := range m.inouts {
-		ret = append(ret, io.out...)
-		ret = append(ret, io.implicitOuts...)
-	}
-	return
-}
-
-func (m *genBackend) filterOutputs(predicate func(string) bool) (ret android.Paths) {
-	for _, p := range m.outputs() {
-		if predicate(p.String()) {
-			ret = append(ret, p)
-		}
-	}
-	return
-}
-
-func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.WritablePaths) {
-	for _, path := range paths {
-		ret = append(ret, android.PathForModuleGen(ctx, path))
-	}
-	return
-}
-
-// GeneratedSourceFiles, GeneratedHeaderDirs and GeneratedDeps implement the
-// genrule.SourceFileGenerator interface, which allows these modules to be used
-// to generate inputs for cc_library and cc_binary modules.
-func (m *genBackend) GeneratedSourceFiles() android.Paths {
-	return m.filterOutputs(utils.IsCompilableSource)
-}
-
-func (m *genBackend) GeneratedHeaderDirs() android.Paths {
-	return m.exportGenIncludeDirs
-}
-
-func (m *genBackend) GeneratedDeps() (srcs android.Paths) {
-	return m.filterOutputs(utils.IsNotCompilableSource)
-}
-
-func (m *genBackend) DepsMutator(mctx android.BottomUpMutatorContext) {
-	if m.Properties.HostBin != "" {
-		mctx.AddFarVariationDependencies(mctx.Config().BuildOSTarget.Variations(),
-			hostToolBinTag, m.Properties.HostBin)
-	}
-
-	// `module_deps` and `module_srcs` can refer not only to source
-	// generation modules, but to binaries and libraries. In this case we
-	// need to handle multilib builds, where a 'target' library could be
-	// split into 32 and 64-bit variants. Use `AddFarVariationDependencies`
-	// here, because this will automatically choose the first available
-	// variant, rather than the other dependency-adding functions, which
-	// will error when multiple variants are present.
-	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Module_deps...)
-	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Module_srcs...)
-	// We can only encapsulate other generated/transformed source modules,
-	// so use the normal `AddDependency` function for these.
-	mctx.AddDependency(mctx.Module(), encapsulatesTag, m.Properties.Encapsulates...)
-}
-
-func (m *genBackend) getHostBin(ctx android.ModuleContext) android.OptionalPath {
-	if m.Properties.HostBin == "" {
-		return android.OptionalPath{}
-	}
-	hostBinModule := ctx.GetDirectDepWithTag(m.Properties.HostBin, hostToolBinTag)
-	htp, ok := hostBinModule.(genrule.HostToolProvider)
-	if !ok {
-		panic(fmt.Errorf("%s is not a host tool", m.Properties.HostBin))
-	}
-	return htp.HostToolPath()
-}
-
-func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
-	g := getBackend(ctx)
-
-	dependents = android.PathsForSource(ctx, utils.PrefixDirs(m.Properties.Implicit_srcs, srcdir))
-	args = map[string]string{
-		"bob_config":      configFile,
-		"bob_config_opts": configOpts,
-		"gen_dir":         android.PathForModuleGen(ctx).String(),
-		"asflags":         utils.Join(m.Properties.Asflags),
-		"cflags":          utils.Join(m.Properties.Cflags),
-		"conlyflags":      utils.Join(m.Properties.Conlyflags),
-		"cxxflags":        utils.Join(m.Properties.Cxxflags),
-		"ldflags":         utils.Join(m.Properties.Ldflags),
-		"ldlibs":          utils.Join(m.Properties.Ldlibs),
-		"src_dir":         g.sourcePrefix(),
-		"module_dir":      android.PathForSource(ctx, ctx.ModuleDir()).String(),
-
-		// flag_defaults is primarily used to invoke sub-makes of
-		// different libraries. This shouldn't be needed on Android.
-		// This means the following can't be expanded:
-		"ar":     "",
-		"as":     "",
-		"cc":     "",
-		"cxx":    "",
-		"linker": "",
-	}
-
-	// Add arguments providing information about other modules the current
-	// one depends on, accessible via ${module}_out and ${module}_dir.
-	ctx.VisitDirectDepsWithTag(generatedDepTag, func(dep android.Module) {
-		if gdep, ok := dep.(genBackendInterface); ok {
-			outs := gdep.outputs()
-			dependents = append(dependents, outs.Paths()...)
-
-			args[dep.Name()+"_dir"] = gdep.outputPath().String()
-			args[dep.Name()+"_out"] = strings.Join(outs.Strings(), " ")
-		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
-			out := ccmod.OutputFile()
-			dependents = append(dependents, out.Path())
-			// We only expect to use the output from static/shared libraries
-			// and binaries, so `_dir' is not supported on these.
-			args[dep.Name()+"_out"] = out.String()
-		}
-	})
-
-	return
-}
-
-type soongInout struct {
-	in           android.Paths
-	out          android.WritablePaths
-	depfile      android.WritablePath
-	implicitSrcs android.Paths
-	implicitOuts android.WritablePaths
-	rspfile      android.WritablePath
-}
-
-func (m *genBackend) buildInouts(ctx android.ModuleContext, args map[string]string) {
-	ruleparams := blueprint.RuleParams{
-		Command: m.Properties.Cmd,
-		Restat:  true,
-	}
-
-	if m.Properties.Depfile {
-		args["depfile"] = ""
-	}
-	args["headers_generated"] = ""
-	args["srcs_generated"] = ""
-
-	if m.Properties.Rsp_content != nil {
-		args["rspfile"] = ""
-		ruleparams.Rspfile = "${rspfile}"
-		ruleparams.RspfileContent = *m.Properties.Rsp_content
-	}
-
-	rule := ctx.Rule(apctx, "bob_gen_"+ctx.ModuleName(), ruleparams, utils.SortedKeys(args)...)
-
-	for _, sio := range m.inouts {
-		// `args` is slightly different for each inout, but blueprint's
-		// parseBuildParams() function makes a deep copy of the map, so
-		// we're OK to re-use it for each target.
-		if m.Properties.Depfile {
-			args["depfile"] = sio.depfile.String()
-		}
-		if m.Properties.Rsp_content != nil {
-			args["rspfile"] = sio.rspfile.String()
-		}
-		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, sio.out.Strings()), " ")
-		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, sio.out.Strings()), " ")
-
-		ctx.Build(apctx,
-			android.BuildParams{
-				Rule:            rule,
-				Description:     "gen " + ctx.ModuleName(),
-				Inputs:          sio.in,
-				Implicits:       sio.implicitSrcs,
-				Outputs:         sio.out,
-				ImplicitOutputs: sio.implicitOuts,
-				Args:            args,
-				Depfile:         sio.depfile,
-			})
-	}
-}
-
-// helper function to get output paths, since for soong processPaths() and encapsulateMutator does not work as expected
-func (m *genBackend) calcExportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
-	var allIncludeDirs android.Paths
-
-	// add our own include dirs
-	for _, dir := range m.Properties.Export_gen_include_dirs {
-		allIncludeDirs = append(allIncludeDirs, android.PathForModuleGen(mctx, dir))
-	}
-
-	// add include dirs of our all dependencies
-	mctx.WalkDeps(func(child android.Module, parent android.Module) bool {
-		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
-			return false
-		}
-		if cmod, ok := child.(genBackendInterface); ok {
-			for _, dir := range cmod.GeneratedHeaderDirs() {
-				allIncludeDirs = append(allIncludeDirs, dir)
-			}
-		}
-		return true
-	})
-
-	// make unique items as for recursive passes it may contain redundant ones
-	return android.FirstUniquePaths(allIncludeDirs)
-}
-
-func (m *genBackend) GenerateAndroidBuildActions(ctx android.ModuleContext) {
-	args, implicits := m.getArgs(ctx)
-
-	m.genDir = android.PathForModuleGen(ctx)
-	m.exportGenIncludeDirs = m.calcExportGenIncludeDirs(ctx)
-
-	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
-		args["host_bin"] = hostBin.String()
-		implicits = append(implicits, hostBin.Path())
-	}
-
-	if m.Properties.Tool != "" {
-		tool := android.PathForSource(ctx, filepath.Join(ctx.ModuleDir(), m.Properties.Tool))
-		args["tool"] = tool.String()
-		implicits = append(implicits, tool)
-	}
-
-	if len(m.Properties.Out) > 0 {
-		sio := soongInout{
-			in:           android.PathsForSource(ctx, utils.PrefixDirs(m.Properties.Srcs, srcdir)),
-			implicitSrcs: implicits,
-			out:          pathsForModuleGen(ctx, m.Properties.Out),
-			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
-		}
-		if m.Properties.Depfile {
-			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
-		}
-		if m.Properties.Rsp_content != nil {
-			sio.rspfile = android.PathForModuleGen(ctx, "."+m.Name()+".rsp")
-		}
-
-		m.inouts = append(m.inouts, sio)
-	}
-
-	re := regexp.MustCompile(m.Properties.TransformSourceProps.Out.Match)
-	for _, tsrc := range m.Properties.Transform_srcs {
-		srcPath := newSourceFilePath(tsrc, ctx, getBackend(ctx))
-		io := m.Properties.inoutForSrc(re, srcPath, "", &m.Properties.Depfile,
-			m.Properties.Rsp_content != nil)
-		sio := soongInout{
-			in:           android.PathsForSource(ctx, io.in),
-			implicitSrcs: android.PathsForSource(ctx, io.implicitSrcs),
-			out:          pathsForModuleGen(ctx, io.out),
-			implicitOuts: pathsForModuleGen(ctx, io.implicitOuts),
-		}
-		if m.Properties.Depfile {
-			sio.depfile = android.PathForModuleGen(ctx, io.depfile)
-		}
-		if m.Properties.Rsp_content != nil {
-			sio.rspfile = android.PathForModuleGen(ctx, filepath.Dir(tsrc),
-				"."+filepath.Base(tsrc)+".rsp")
-		}
-		m.inouts = append(m.inouts, sio)
-	}
-
-	m.buildInouts(ctx, args)
-}
-
-func (m *genBackend) AndroidMkEntries() []android.AndroidMkEntries {
-	// skip if multiple outputs defined, as AndroidMkEntries struct support only single one
-	if len(m.Properties.Transform_srcs) > 0 || len(m.Properties.Out) > 1 {
-		return []android.AndroidMkEntries{}
-	}
-
-	return []android.AndroidMkEntries{android.AndroidMkEntries{
-		Class:      "DATA",
-		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
-		Include:    "$(BUILD_PREBUILT)",
-		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
-			func(entries *android.AndroidMkEntries) {
-				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
-			},
-		},
-	}}
-}
 
 func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) *binary {
 	var hostBinModule android.Module
@@ -407,10 +66,10 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		proptools.StringPtr(gc.Name()),
 	}
 
-	genProps := genBackendProps{
-		Srcs:                    gc.Properties.getSources(mctx),
+	genProps := genrulebob.GenruleProps{
+		Srcs:                    relativeToModuleDir(mctx, gc.Properties.getSources(mctx)),
 		Out:                     out,
-		Implicit_srcs:           implicitSrcs,
+		Implicit_srcs:           relativeToModuleDir(mctx, implicitSrcs),
 		Implicit_outs:           implicitOuts,
 		Export_gen_include_dirs: gc.Properties.Export_gen_include_dirs,
 		Tool:                    proptools.String(gc.Properties.Tool),
@@ -435,7 +94,7 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
 	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.getImplicitSources(mctx),
 		gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile),
-		genBackendFactory)
+		genrulebob.GenruleFactory)
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
@@ -456,14 +115,6 @@ func (gb *generateBinary) soongBuildActions(mctx android.TopDownMutatorContext) 
 	}
 }
 
-var (
-	// Use raw string literal backtick to avoid having to escape the
-	// backslash in the regular expressions
-	varRegexp = regexp.MustCompile(`\$[0-9]+`)
-	dotRegexp = regexp.MustCompile(`\.{2,}`)
-	extRegexp = regexp.MustCompile(`^\.`)
-)
-
 func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext) {
 	if !isEnabled(ts) {
 		return
@@ -475,8 +126,8 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",
 		strings.Join(ts.generateCommon.Properties.Args, " "), -1)
 
-	genProps := genBackendProps{
-		Transform_srcs:          ts.generateCommon.Properties.getSources(mctx),
+	genProps := genrulebob.GenruleProps{
+		Multi_out_srcs:          relativeToModuleDir(mctx, ts.generateCommon.Properties.getSources(mctx)),
 		Export_gen_include_dirs: ts.generateCommon.Properties.Export_gen_include_dirs,
 		Tool:                    proptools.String(ts.generateCommon.Properties.Tool),
 		HostBin:                 ts.getHostBinModuleName(mctx),
@@ -485,11 +136,16 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 		Module_deps:             ts.generateCommon.Properties.Module_deps,
 		Module_srcs:             ts.generateCommon.Properties.Module_srcs,
 		Encapsulates:            ts.generateCommon.Properties.Encapsulates,
-		TransformSourceProps:    ts.Properties.TransformSourceProps,
-		Rsp_content:             ts.generateCommon.Properties.Rsp_content,
+		Multi_out_props: genrulebob.MultiOutProps{
+			Match:         ts.Properties.TransformSourceProps.Out.Match,
+			Replace:       ts.Properties.TransformSourceProps.Out.Replace,
+			Implicit_srcs: ts.Properties.TransformSourceProps.Out.Implicit_srcs,
+			Implicit_outs: ts.Properties.TransformSourceProps.Out.Implicit_outs,
+		},
+		Rsp_content: ts.generateCommon.Properties.Rsp_content,
 	}
 
 	// The ModuleDir for the new module will be inherited from the
 	// current module via the TopDownMutatorContext
-	mctx.CreateModule(genBackendFactory, &nameProps, &genProps)
+	mctx.CreateModule(genrulebob.GenruleFactory, &nameProps, &genProps)
 }
