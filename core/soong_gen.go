@@ -29,7 +29,7 @@ import (
 	"github.com/ARM-software/bob-build/plugins/genrulebob"
 )
 
-func (gc *generateCommon) getHostBinModule(mctx android.TopDownMutatorContext) *binary {
+func (gc *generateCommon) getSoongHostBinModule(mctx android.TopDownMutatorContext) *binary {
 	var hostBinModule android.Module
 	mctx.VisitDirectDepsWithTag(hostToolBinTag, func(m android.Module) {
 		hostBinModule = m
@@ -48,7 +48,7 @@ func (gc *generateCommon) getHostBinModuleName(mctx android.TopDownMutatorContex
 	if gc.Properties.Host_bin == nil {
 		return ""
 	}
-	return ccModuleName(mctx, gc.getHostBinModule(mctx).Name())
+	return ccModuleName(mctx, gc.getSoongHostBinModule(mctx).Name())
 }
 
 func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
@@ -66,14 +66,19 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 		proptools.StringPtr(gc.Name()),
 	}
 
+	var tool string = ""
+	if gc.Properties.Tool != nil {
+		tool = relativeToModuleDir(mctx, []string{*gc.Properties.Tool})[0]
+	}
+
 	genProps := genrulebob.GenruleProps{
 		Srcs:                    relativeToModuleDir(mctx, gc.Properties.getSources(mctx)),
 		Out:                     out,
 		Implicit_srcs:           relativeToModuleDir(mctx, implicitSrcs),
 		Implicit_outs:           implicitOuts,
 		Export_gen_include_dirs: gc.Properties.Export_gen_include_dirs,
-		Tool:                    proptools.String(gc.Properties.Tool),
-		HostBin:                 gc.getHostBinModuleName(mctx),
+		Tool:                    tool,
+		Host_bin:                gc.getHostBinModuleName(mctx),
 		Cmd:                     cmd,
 		Depfile:                 depfile,
 		Module_deps:             gc.Properties.Module_deps,
@@ -126,11 +131,16 @@ func (ts *transformSource) soongBuildActions(mctx android.TopDownMutatorContext)
 	cmd := strings.Replace(proptools.String(ts.generateCommon.Properties.Cmd), "${args}",
 		strings.Join(ts.generateCommon.Properties.Args, " "), -1)
 
+	var tool string = ""
+	if ts.generateCommon.Properties.Tool != nil {
+		tool = relativeToModuleDir(mctx, []string{*ts.generateCommon.Properties.Tool})[0]
+	}
+
 	genProps := genrulebob.GenruleProps{
 		Multi_out_srcs:          relativeToModuleDir(mctx, ts.generateCommon.Properties.getSources(mctx)),
 		Export_gen_include_dirs: ts.generateCommon.Properties.Export_gen_include_dirs,
-		Tool:                    proptools.String(ts.generateCommon.Properties.Tool),
-		HostBin:                 ts.getHostBinModuleName(mctx),
+		Tool:                    tool,
+		Host_bin:                ts.getHostBinModuleName(mctx),
 		Cmd:                     cmd,
 		Depfile:                 proptools.Bool(ts.generateCommon.Properties.Depfile),
 		Module_deps:             ts.generateCommon.Properties.Module_deps,
