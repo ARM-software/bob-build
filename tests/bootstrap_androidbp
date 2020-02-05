@@ -23,7 +23,7 @@
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BOB_DIR=bob
-PROJ_NAME="bob_tests"
+export PROJ_NAME="bob_tests"
 
 source "${SCRIPT_DIR}/bootstrap_utils.sh"
 

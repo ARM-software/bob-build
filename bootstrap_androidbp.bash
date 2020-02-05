@@ -16,3 +16,27 @@
 # limitations under the License.
 
 source $(dirname "${BASH_SOURCE[0]}")/bootstrap.bash
+
+BOB_DIR=$(dirname "${BASH_SOURCE[0]}")
+
+function die {
+    echo "${BASH_SOURCE[0]}: ${*}"
+    exit 1
+}
+
+# ${VAR:-} will substitute an empty string if the variable is unset, which
+# stops `set -u` complaining before `die` is invoked.
+[[ -z ${SRCDIR:-} ]] && die "\$SRCDIR not set"
+[[ -z ${PROJ_NAME:-} ]] && die "\$PROJ_NAME not set"
+
+# Remove any stalled symlinks from Soong plugin bootstrap
+pushd "${SRCDIR}" >&/dev/null
+find -name Android.bp -xtype l -delete
+popd >&/dev/null
+
+# Set up Android.bp with plugins
+TMP_ANDROID_BP=$(mktemp)
+sed -e "s#@@PROJ_NAME@@#${PROJ_NAME}#" \
+    "${BOB_DIR}/plugins/Android.bp.in" > "${TMP_ANDROID_BP}"
+rsync --checksum "${TMP_ANDROID_BP}" "${BOB_DIR}/plugins/Android.bp"
+rm -f "${TMP_ANDROID_BP}"
