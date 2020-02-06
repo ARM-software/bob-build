@@ -32,10 +32,13 @@ bootstrap_go_package {
         "blueprint-pathtools",
         "bob-abstr",
         "bob-bpwriter",
+        "bob-ccflags",
+        "bob-fileutils",
         "bob-graph",
         "bob-utils",
     ],
     srcs: [
+        "core/android.go",
         "core/android_make.go",
         "core/androidbp_backend.go",
         "core/androidbp_cclibs.go",
@@ -89,6 +92,22 @@ bootstrap_go_package {
         "internal/bpwriter/bpwriter.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/bpwriter",
+}
+
+bootstrap_go_package {
+    name: "bob-ccflags",
+    srcs: [
+        "internal/ccflags/ccflags.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/ccflags",
+}
+
+bootstrap_go_package {
+    name: "bob-fileutils",
+    srcs: [
+        "internal/fileutils/fileutils.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/fileutils",
 }
 
 bootstrap_go_package {
