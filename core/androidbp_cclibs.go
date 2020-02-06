@@ -189,6 +189,10 @@ func addStripProp(m bpwriter.Module) {
 }
 
 func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(l) {
+		return
+	}
+
 	var modType string
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
@@ -209,6 +213,10 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 }
 
 func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(l) {
+		return
+	}
+
 	var modType string
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
@@ -230,6 +238,10 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 }
 
 func (g *androidBpGenerator) staticActions(l *staticLibrary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(l) {
+		return
+	}
+
 	var modType string
 	switch l.Properties.TargetType {
 	case tgtTypeHost:

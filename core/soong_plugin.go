@@ -174,6 +174,12 @@ func buildActionsMutator(mctx android.TopDownMutatorContext) {
 		return
 	}
 
+	if e, ok := m.(enableable); ok {
+		if !isEnabled(e) || !isRequired(e) {
+			return
+		}
+	}
+
 	m.soongBuildActions(mctx)
 }
 
