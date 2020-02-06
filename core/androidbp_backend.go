@@ -24,6 +24,8 @@ import (
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
+	"github.com/ARM-software/bob-build/internal/fileutils"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 var (
@@ -77,7 +79,10 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	AndroidBpFile().Render(sb)
 
 	androidbpFile := filepath.Join(srcdir, "Android.bp")
-	writeIfChanged(androidbpFile, sb)
+	err := fileutils.WriteIfChanged(androidbpFile, sb)
+	if err != nil {
+		utils.Exit(1, err.Error())
+	}
 
 	// Blueprint does not output package context dependencies unless
 	// the package context outputs a variable, pool or rule to the

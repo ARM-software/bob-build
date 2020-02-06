@@ -20,8 +20,6 @@ package core
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -29,6 +27,8 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/internal/ccflags"
+	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -42,13 +42,6 @@ const (
 
 var (
 	androidLock sync.Mutex
-
-	dummyRule = pctx.StaticRule("dummy",
-		blueprint.RuleParams{
-			// We don't want this rule to do anything, so just echo the target
-			Command:     "echo $out",
-			Description: "Dummy rule",
-		})
 )
 
 type androidMkGenerator struct {
@@ -58,39 +51,12 @@ type androidMkGenerator struct {
 /* Compile time checks for interfaces that must be implemented by androidMkGenerator */
 var _ generatorBackend = (*androidMkGenerator)(nil)
 
-func writeIfChanged(filename string, sb *strings.Builder) {
-	mustWrite := true
-	text := sb.String()
-
-	// If any errors occur trying to determine the state of the existing file,
-	// just write the new file
-	fileinfo, err := os.Stat(filename)
-	if err == nil {
-		if fileinfo.Size() == int64(sb.Len()) {
-			current, err := ioutil.ReadFile(filename)
-			if err == nil {
-				if string(current) == text {
-					// No need to write
-					mustWrite = false
-				}
-			}
-		}
-	}
-
-	if mustWrite {
-		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
-		if err != nil {
-			panic(err)
-		}
-
-		file.WriteString(text)
-		file.Close()
-	}
-}
-
 func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.Builder) {
 	filename := filepath.Join(getBuildDir(), name+".inc")
-	writeIfChanged(filename, sb)
+	err := fileutils.WriteIfChanged(filename, sb)
+	if err != nil {
+		utils.Exit(1, err.Error())
+	}
 }
 
 func writeListAssignment(sb *strings.Builder, varname string, entries []string) {
@@ -101,34 +67,6 @@ func writeListAssignment(sb *strings.Builder, varname string, entries []string) 
 
 func newlineSeparatedList(list []string) string {
 	return " \\\n    " + strings.Join(list, " \\\n    ") + "\n"
-}
-
-// This flag is a machine specific option
-func machineSpecificFlag(s string) bool {
-	return strings.HasPrefix(s, "-m")
-}
-
-// This flag selects the compiler standard
-func compilerStandard(s string) bool {
-	return strings.HasPrefix(s, "-std=")
-}
-
-// Identify whether a compilation flag should be used on android
-//
-// The Android build system should set machine specific flags (so it
-// can do multi-arch builds) and compiler standard, so filter these
-// out from module properties.
-func moduleCompileFlags(s string) bool {
-	return !(machineSpecificFlag(s) || compilerStandard(s))
-}
-
-// Identify whether a link flag should be used on android
-//
-// The Android build system should set machine specific flags (so it
-// can do multi-arch builds), so filter these out from module
-// properties.
-func moduleLinkFlags(s string) bool {
-	return !machineSpecificFlag(s)
 }
 
 var (
@@ -153,7 +91,7 @@ var (
 func specifyCompilerStandard(varname string, flags []string) string {
 	// Look for the flag setting compiler standard
 	line := ""
-	stdList := utils.Filter(compilerStandard, flags)
+	stdList := utils.Filter(ccflags.CompilerStandard, flags)
 	if len(stdList) > 0 {
 		// Use last definition only
 		std := strings.TrimPrefix(stdList[len(stdList)-1], "-std=")
@@ -162,19 +100,11 @@ func specifyCompilerStandard(varname string, flags []string) string {
 	return line
 }
 
-func thumbFlag(s string) bool {
-	return s == "-mthumb"
-}
-
-func armFlag(s string) bool {
-	return s == "-marm" || s == "-mno-thumb"
-}
-
 func specifyArmMode(flags []string) string {
 	// Look for the flag setting thumb or not thumb
 	line := ""
-	thumb := utils.Filter(thumbFlag, flags)
-	arm := utils.Filter(armFlag, flags)
+	thumb := utils.Filter(ccflags.ThumbFlag, flags)
+	arm := utils.Filter(ccflags.ArmFlag, flags)
 	if len(thumb) > 0 && len(arm) > 0 {
 		panic("Both thumb and no thumb (arm) options are specified")
 	} else if len(thumb) > 0 {
@@ -317,9 +247,12 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
 	_, _, exportedCflags := m.GetExportedVariables(ctx)
 	cflagsList = append(cflagsList, exportedCflags...)
-	writeListAssignment(sb, "LOCAL_CFLAGS", utils.Filter(moduleCompileFlags, cflagsList))
-	writeListAssignment(sb, "LOCAL_CPPFLAGS", utils.Filter(moduleCompileFlags, m.Properties.Cxxflags))
-	writeListAssignment(sb, "LOCAL_CONLYFLAGS", utils.Filter(moduleCompileFlags, m.Properties.Conlyflags))
+	writeListAssignment(sb, "LOCAL_CFLAGS",
+		utils.Filter(ccflags.AndroidCompileFlags, cflagsList))
+	writeListAssignment(sb, "LOCAL_CPPFLAGS",
+		utils.Filter(ccflags.AndroidCompileFlags, m.Properties.Cxxflags))
+	writeListAssignment(sb, "LOCAL_CONLYFLAGS",
+		utils.Filter(ccflags.AndroidCompileFlags, m.Properties.Conlyflags))
 
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
 	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags)))
@@ -492,9 +425,11 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 
 	if isMultiLib {
 		sb.WriteString("LOCAL_MULTILIB:=both\n")
-		writeListAssignment(sb, "LOCAL_LDFLAGS_32", append(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), copydtneeded))
+		writeListAssignment(sb, "LOCAL_LDFLAGS_32",
+			append(utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags), copydtneeded))
 	}
-	writeListAssignment(sb, "LOCAL_LDFLAGS", append(utils.Filter(moduleLinkFlags, m.Properties.Ldflags), copydtneeded))
+	writeListAssignment(sb, "LOCAL_LDFLAGS",
+		append(utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags), copydtneeded))
 
 	if tgt == tgtTypeTarget {
 		writeListAssignment(sb, "LOCAL_LDLIBS", m.Properties.Ldlibs)
@@ -925,15 +860,6 @@ type androidNaming interface {
 	altShortName() string
 }
 
-func enabledAndRequired(m blueprint.Module) bool {
-	if e, ok := m.(enableable); ok {
-		if !isEnabled(e) || !isRequired(e) {
-			return false
-		}
-	}
-	return true
-}
-
 func generatesAndroidIncFile(m blueprint.Module) bool {
 	if _, ok := m.(*defaults); ok {
 		return false
@@ -998,7 +924,10 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 		order = append(order[:lowindex], order[lowindex+1:]...)
 	}
 	androidmkFile := filepath.Join(getBuildDir(), "Android.inc")
-	writeIfChanged(androidmkFile, sb)
+	err := fileutils.WriteIfChanged(androidmkFile, sb)
+	if err != nil {
+		utils.Exit(1, err.Error())
+	}
 
 	// Blueprint does not output package context dependencies unless
 	// the package context outputs a variable, pool or rule to the
