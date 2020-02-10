@@ -47,25 +47,24 @@ ninja -f "${BOB_BUILDER_NINJA}" "${BOB_BUILDER_TARGET}"
 
 echo "
 #
-# Legend description
+# Legend
 #
 # Nodes
-# green node            - static library
-# orange node           - shared library
-# gray node             - binary
-# yellow node           - default
+# green           - static library
+# orange          - shared library
+# gray            - binary
+# yellow          - defaults module
+# white           - external library (not defined in Bob)
 
 # Marked node
-# double circle         - marked node
+# double circle   -  marked node
 
 # Edges
-# orange edges          - content of shared_libs
-# orange-dashed edges   - content of export_shared_libs
-# green edges           - content of static_libs
-# green-dashed edges    - content of export_static_libs
-# red edges             - content of whole_static
-# yellow edges          - content of defaults
-#
+# orange edge     - linked by shared_libs
+# green edge      - linked by static_libs
+# red edge        - linked by whole_static
+# yellow edge     - uses defaults
+# dashed edge     - linked using an export_ property
 "
 
 "${BOB_BUILDER}" -l "${BLUEPRINT_LIST_FILE}" -b "${BUILDDIR}" "$@" "${SRCDIR}/${TOPNAME}"
