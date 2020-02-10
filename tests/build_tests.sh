@@ -202,6 +202,10 @@ SRC=tests/generate_source/depgen2.in
 UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
 check_dep_updates "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
+SRC=tests/generate_source/an.implicit.src
+UPDATE=(${build_dir}/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c)
+check_dep_updates "generate source implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
 # resource dependencies
 SRC=tests/resources/main.c
 UPDATE=(${build_dir}/install/tests/linux/y/main.c)

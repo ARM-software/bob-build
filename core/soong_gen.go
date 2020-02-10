@@ -167,7 +167,7 @@ func (m *genBackend) getHostBin(ctx android.ModuleContext) android.OptionalPath 
 func (m *genBackend) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
 	g := getBackend(ctx)
 
-	dependents = android.PathsForSource(ctx, m.Properties.Implicit_srcs)
+	dependents = android.PathsForSource(ctx, utils.PrefixDirs(m.Properties.Implicit_srcs, srcdir))
 	args = map[string]string{
 		"bob_config":      configFile,
 		"bob_config_opts": configOpts,
@@ -433,7 +433,9 @@ func (gc *generateCommon) createGenrule(mctx android.TopDownMutatorContext,
 }
 
 func (gs *generateSource) soongBuildActions(mctx android.TopDownMutatorContext) {
-	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.Implicit_srcs, gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile), genBackendFactory)
+	gs.createGenrule(mctx, gs.Properties.Out, gs.Properties.getImplicitSources(mctx),
+		gs.Properties.Implicit_outs, proptools.Bool(gs.generateCommon.Properties.Depfile),
+		genBackendFactory)
 }
 
 func (gs *generateStaticLibrary) soongBuildActions(mctx android.TopDownMutatorContext) {
