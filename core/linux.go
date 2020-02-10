@@ -177,13 +177,11 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
-		implicits = append(implicits, inout.implicitSrcs...)
-
 		buildparams := blueprint.BuildParams{
 			Rule:      rule,
 			Inputs:    inout.in,
 			Outputs:   inout.out,
-			Implicits: implicits,
+			Implicits: append(inout.implicitSrcs, implicits...),
 			Args:      args,
 			Optional:  true,
 		}

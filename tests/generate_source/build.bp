@@ -232,6 +232,21 @@ bob_generate_source {
     build_by_default: true,
 }
 
+bob_generate_source {
+    name: "gen_source_globbed_implicit_sources",
+    implicit_srcs: ["*.implicit.src"],
+    out: ["validate_globbed_implicit_dependency.c"],
+    cmd: "echo 'int main(void) { return 0; }' > ${out}",
+    build_by_default: true,
+}
+
+bob_binary {
+    name: "use_miscellaneous_generated_source_tests",
+    generated_sources: [
+        "gen_source_globbed_implicit_sources",
+    ],
+}
+
 bob_alias {
     name: "bob_test_generate_source",
     srcs: [
@@ -240,5 +255,6 @@ bob_alias {
         "bin_gen_sources_and_headers",
         "gen_source_depfile",
         "gen_source_depfile_with_implicit_outs",
+        "use_miscellaneous_generated_source_tests",
     ],
 }

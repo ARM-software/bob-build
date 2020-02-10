@@ -267,11 +267,18 @@ func (m *generateCommon) getDepfile(g generatorBackend) (name string, depfile bo
 type GenerateSourceProps struct {
 	// The list of files that will be output.
 	Out []string
-	// List of implicit sources. Implicit sources are input files that do not get mentioned on the command line,
-	// and are not specified in the explicit sources.
+	// List of implicit sources. Implicit sources are input files that do not get
+	// mentioned on the command line, and are not specified in the explicit sources.
 	Implicit_srcs []string
-	// List of implicit outputs. Implicit outputs are output files that do not get mentioned on the command line.
+	// Implicit source files that should not be included. Use with care.
+	Exclude_implicit_srcs []string
+	// List of implicit outputs. Implicit outputs are output files that do not get
+	// mentioned on the command line.
 	Implicit_outs []string
+}
+
+func (g *GenerateSourceProps) getImplicitSources(ctx abstr.BaseModuleContext) []string {
+	return glob(ctx, g.Implicit_srcs, g.Exclude_implicit_srcs)
 }
 
 type generateSource struct {
@@ -449,7 +456,7 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 	if depfile, ok := m.getDepfile(g); ok {
 		io.depfile = depfile
 	}
-	io.implicitSrcs = utils.PrefixDirs(m.Properties.Implicit_srcs, g.sourcePrefix())
+	io.implicitSrcs = utils.PrefixDirs(m.Properties.getImplicitSources(ctx), g.sourcePrefix())
 	io.implicitOuts = m.implicitOutputs(g)
 
 	if m.generateCommon.Properties.Rsp_content != nil {
