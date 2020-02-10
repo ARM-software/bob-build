@@ -53,6 +53,7 @@ echo "
 # green           - static library
 # orange          - shared library
 # gray            - binary
+# blue            - ldlib flag
 # yellow          - defaults module
 # white           - external library (not defined in Bob)
 
@@ -63,6 +64,7 @@ echo "
 # orange edge     - linked by shared_libs
 # green edge      - linked by static_libs
 # red edge        - linked by whole_static
+# blue edge       - linked by ldlibs
 # yellow edge     - uses defaults
 # dashed edge     - linked using an export_ property
 "
