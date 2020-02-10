@@ -18,10 +18,10 @@
 set -e
 
 # Example usage
-# ./bob_graph -graph_out=libMy -graph_who_uses=libMy,libOther -graph_dependencies=libMy,libOther
+# ./bob_graph --graph-start-nodes=libMy,libOther
 #
-# To view dependencies of libOther
-# ./bob_graph -graph_out=libOther_deps -graph_dependencies=libOther
+# To view users of libOther
+# ./bob_graph --graph-start-nodes=libOther --graph-rev-deps
 
 # Switch to the build directory
 cd "$(dirname "${BASH_SOURCE[0]}")"

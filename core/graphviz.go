@@ -29,10 +29,10 @@ import (
 )
 
 var (
+	graphStartNodes      string
 	graphOut             string
-	graphWhoUses         string
-	graphDependencies    string
-	graphMark            string
+	graphShowReverseDeps bool
+	graphShowDeps        bool
 	graphShowDefaults    bool
 	graphShowBinaries    bool
 	graphShowWholeStatic bool
@@ -41,22 +41,26 @@ var (
 )
 
 func init() {
-	flag.StringVar(&graphOut, "graph_out", "", "Output file name for dependency graph")
-	flag.StringVar(&graphWhoUses, "graph_who_uses", "", "List of nodes to see in graph who uses them. If not set will be set as graph_out")
-	flag.StringVar(&graphDependencies, "graph_dependencies", "", "List of nodes to see in graph what dependencies they have. If not set will be set as graph_out")
-	flag.StringVar(&graphMark, "graph_mark", "", "List of nodes which should be marked. If empty this will contain who_uses + dependencies")
-	flag.BoolVar(&graphShowDefaults, "graph_show_defaults", true, "Show default targets in graph")
-	flag.BoolVar(&graphShowBinaries, "graph_show_binaries", true, "Show binaries targets in graph")
-	flag.BoolVar(&graphShowWholeStatic, "graph_show_whole_static", true, "Show whole_static targets in graph")
-	flag.BoolVar(&graphShowStaticLibs, "graph_show_static_libs", true, "Show static_libs targets in graph")
-	flag.BoolVar(&graphShowSharedLibs, "graph_show_shared_libs", true, "Show shared_libs targets in graph")
+	flag.StringVar(&graphStartNodes, "graph-start-nodes", "",
+		"Comma separated list of initial nodes")
+	flag.StringVar(&graphOut, "graph-out", "",
+		"Output file name for dependency graph. Defaults to first graph-start-nodes")
+	flag.BoolVar(&graphShowReverseDeps, "graph-rev-deps", false,
+		"Show reverse dependencies (users) of graph-start-nodes")
+	flag.BoolVar(&graphShowDeps, "graph-deps", true, "Show dependencies of graph-start-nodes")
+	flag.BoolVar(&graphShowDefaults, "graph-show-defaults", false, "Show defaults modules in graph")
+	flag.BoolVar(&graphShowBinaries, "graph-show-binaries", true, "Show binary modules in graph")
+	flag.BoolVar(&graphShowWholeStatic, "graph-show-whole-static", true,
+		"Show static libraries linked as whole_static")
+	flag.BoolVar(&graphShowStaticLibs, "graph-show-static-libs", true, "Show static libraries")
+	flag.BoolVar(&graphShowSharedLibs, "graph-show-shared-libs", true, "Show shared libraries")
 }
 
 type graphvizHandler struct {
 	graph               graph.Graph
-	whoUsesNodes        []string
-	dependenciesOfNodes []string
-	markNodes           []string
+	startNodes          []string
+	showReverseDeps     bool
+	showDeps            bool
 	showDefaults        bool
 	showBinaries        bool
 	showWholeStatic     bool
@@ -65,47 +69,41 @@ type graphvizHandler struct {
 }
 
 func initGrapvizHandler() *graphvizHandler {
-	if len(graphOut) < 1 {
+	if len(graphStartNodes) < 1 {
 		return nil
 	}
 
-	if len(graphWhoUses) < 1 && len(graphDependencies) < 1 {
-		graphWhoUses = graphOut
-		graphDependencies = graphOut
-	}
-	if len(graphMark) < 1 {
-		graphMark = graphWhoUses + "," + graphDependencies
+	if graphOut == "" {
+		graphOut = strings.SplitN(graphStartNodes, ",", 2)[0] + ".graph"
 	}
 
 	return &graphvizHandler{graph.NewGraph(graphOut),
-		utils.Trim(strings.Split(graphWhoUses, ",")),
-		utils.Trim(strings.Split(graphDependencies, ",")),
-		utils.Trim(strings.Split(graphMark, ",")),
-		graphShowDefaults, graphShowBinaries, graphShowWholeStatic, graphShowStaticLibs, graphShowSharedLibs}
+		utils.Trim(strings.Split(graphStartNodes, ",")),
+		graphShowReverseDeps,
+		graphShowDeps,
+		graphShowDefaults,
+		graphShowBinaries, graphShowWholeStatic, graphShowStaticLibs, graphShowSharedLibs}
 }
 
 func (handler *graphvizHandler) generateGraphviz() {
 	outputGraph := graph.NewGraph(handler.graph.GetName())
-	for _, subgraph := range graph.GetSubgraphs(handler.graph) {
-		for _, element := range handler.whoUsesNodes {
-			if utils.Contains(subgraph.GetNodes(), element) {
-				outputGraph.Merge(subgraph)
+	if handler.showReverseDeps {
+		for _, subgraph := range graph.GetSubgraphs(handler.graph) {
+			for _, element := range handler.startNodes {
+				if utils.Contains(subgraph.GetNodes(), element) {
+					outputGraph.Merge(subgraph)
+				}
 			}
 		}
 	}
-	for _, element := range handler.dependenciesOfNodes {
-		dependencySubgraph := graph.GetSubgraph(handler.graph, element)
-		outputGraph.Merge(dependencySubgraph)
-	}
-
-	// Trim tree
-	for _, element := range handler.whoUsesNodes {
-		if !utils.Contains(handler.dependenciesOfNodes, element) {
-			outputGraph.CutSubgraph(element)
+	if handler.showDeps {
+		for _, element := range handler.startNodes {
+			dependencySubgraph := graph.GetSubgraph(handler.graph, element)
+			outputGraph.Merge(dependencySubgraph)
 		}
 	}
 
-	file, _ := os.Create(outputGraph.GetName() + ".graph")
+	file, _ := os.Create(outputGraph.GetName())
 	defer file.Close()
 	file.WriteString(graph.ToString(outputGraph))
 }
@@ -142,7 +140,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 		handler.graph.SetNodeBackgroundColor(mainModule.Name(), "yellow")
 	}
 
-	if utils.Contains(handler.markNodes, mainModule.Name()) {
+	if utils.Contains(handler.startNodes, mainModule.Name()) {
 		handler.graph.SetNodeProperty(mainModule.Name(), "shape", "doublecircle")
 	}
 
