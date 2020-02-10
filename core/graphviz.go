@@ -38,6 +38,7 @@ var (
 	graphShowWholeStatic bool
 	graphShowStaticLibs  bool
 	graphShowSharedLibs  bool
+	graphShowLdlibs      bool
 )
 
 func init() {
@@ -54,6 +55,7 @@ func init() {
 		"Show static libraries linked as whole_static")
 	flag.BoolVar(&graphShowStaticLibs, "graph-show-static-libs", true, "Show static libraries")
 	flag.BoolVar(&graphShowSharedLibs, "graph-show-shared-libs", true, "Show shared libraries")
+	flag.BoolVar(&graphShowLdlibs, "graph-show-ldlibs", false, "Show ldlib usage")
 }
 
 type graphvizHandler struct {
@@ -66,6 +68,7 @@ type graphvizHandler struct {
 	showWholeStatic     bool
 	showStaticLibraries bool
 	showSharedLibraries bool
+	showLdlibs          bool
 }
 
 func initGrapvizHandler() *graphvizHandler {
@@ -82,7 +85,8 @@ func initGrapvizHandler() *graphvizHandler {
 		graphShowReverseDeps,
 		graphShowDeps,
 		graphShowDefaults,
-		graphShowBinaries, graphShowWholeStatic, graphShowStaticLibs, graphShowSharedLibs}
+		graphShowBinaries, graphShowWholeStatic, graphShowStaticLibs, graphShowSharedLibs,
+		graphShowLdlibs}
 }
 
 func (handler *graphvizHandler) generateGraphviz() {
@@ -116,6 +120,8 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 		}
 	}
 
+	showLdlibs := handler.showLdlibs
+
 	// Set type of node
 	switch mainModule.(type) {
 	case *staticLibrary:
@@ -123,6 +129,10 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			return
 		}
 		handler.graph.SetNodeBackgroundColor(mainModule.Name(), "green")
+
+		// Don't show ldlibs usage on static libraries, as these
+		// aren't actually applied
+		showLdlibs = false
 	case *sharedLibrary:
 		if !handler.showSharedLibraries {
 			return
@@ -183,6 +193,22 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 				handler.graph.DeleteProxyEdge(mainModule.Name(), lib)
 			}
 		}
+
+		if showLdlibs {
+			for _, lib := range mainBuild.Ldlibs {
+				handler.graph.SetNodeBackgroundColor(lib, "skyblue")
+				handler.graph.AddEdge(mainModule.Name(), lib)
+				handler.graph.SetEdgeColor(mainModule.Name(), lib, "skyblue")
+			}
+
+			// We will only be outputing export_ldlibs for defaults
+			for _, lib := range mainBuild.Export_ldlibs {
+				handler.graph.SetNodeBackgroundColor(lib, "skyblue")
+				handler.graph.AddEdge(mainModule.Name(), lib)
+				handler.graph.SetEdgeColor(mainModule.Name(), lib, "skyblue")
+				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", "dashed")
+			}
+		}
 	}
 
 	if moduleDefault, ok := mainModule.(*defaults); ok && handler.showDefaults {
@@ -190,7 +216,6 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			handler.graph.AddEdge(mainModule.Name(), element)
 			handler.graph.SetEdgeColor(mainModule.Name(), element, "yellow")
 		}
-
 	}
 }
 
