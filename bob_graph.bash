@@ -32,13 +32,18 @@ source ".bob.bootstrap"
 # Switch to the working directory
 cd "${WORKDIR}"
 
-BOB_BUILDER="${BUILDDIR}/.bootstrap/bin/bob"
+BOB_BUILDER_TARGET=".bootstrap/bin/bob"
+BOB_BUILDER="${BUILDDIR}/${BOB_BUILDER_TARGET}"
+BOB_BUILDER_NINJA="${BUILDDIR}/.bootstrap/build.ninja"
 
-if [ ! -f "${BOB_BUILDER}" ]; then
-	echo "Please first run buildme"
-	echo "Missing bob_builder: ${BOB_BUILDER}"
+if [ ! -f "${BOB_BUILDER_NINJA}" ]; then
+	echo "Missing ${BOB_BUILDER_NINJA}"
+	echo "Please build your project first"
 	exit 1
 fi
+
+# Make sure Bob is built
+ninja -f "${BOB_BUILDER_NINJA}" "${BOB_BUILDER_TARGET}"
 
 echo "
 #
