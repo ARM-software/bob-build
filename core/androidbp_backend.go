@@ -44,8 +44,7 @@ func AndroidBpFile() bpwriter.File {
 	return outputFile
 }
 
-func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext)               {}
-func (g *androidBpGenerator) kernelModuleActions(*kernelModule, blueprint.ModuleContext) {}
+func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext) {}
 func (g *androidBpGenerator) generateSourceActions(*generateSource, blueprint.ModuleContext, []inout) {
 }
 func (g *androidBpGenerator) genBinaryActions(*generateBinary, blueprint.ModuleContext, []inout) {}

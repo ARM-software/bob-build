@@ -119,13 +119,39 @@ def parse_source_list(sources):
     return module_sources, extra_symbols
 
 
+def parse_output_list(parser, outputs):
+    """When this script is called from a `genrule` module, the .ko _and_
+    Module.symvers file may be listed as outputs. Filter out the symvers file.
+    """
+    module_output = None
+    module_symvers = None
+    for output in outputs:
+        if os.path.basename(output) == "Module.symvers":
+            if module_symvers:
+                parser.error("Module.symvers specified multiple times: {} and {}".format(
+                             module_symvers, output))
+            module_symvers = output
+        elif os.path.splitext(output)[1] == ".ko":
+            if module_output:
+                parser.error(".ko output specified multiple times: {} and {}".format(
+                             module_output, output))
+            module_output = output
+        else:
+            parser.error("Unknown output file type: {}".format(os.path.basename(output)))
+
+    if not module_output:
+        parser.error("No .ko output file specified")
+
+    return module_output
+
+
 def parse_args():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
     cli_description = "Encapsulate an out-of-tree kernel module build, " \
                       "where the build does not modify the source directory"
     parser = argparse.ArgumentParser(description=cli_description)
-    parser.add_argument("--output", "-o", required=True,
+    parser.add_argument("--output", "-o", required=True, nargs="+",
                         help="Kernel module to build (including output path)")
     parser.add_argument("--sources", "-s", metavar="FILE", nargs="+", required=True,
                         help="Kernel module source files")
@@ -165,6 +191,7 @@ def parse_args():
     args = parser.parse_args()
 
     args.module_sources, args.extra_symbols = parse_source_list(args.sources)
+    args.output = parse_output_list(parser, args.output)
 
     return args
 
