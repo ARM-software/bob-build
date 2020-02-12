@@ -21,6 +21,8 @@ package ccflags
 
 import (
 	"strings"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // This flag is a machine specific option
@@ -57,4 +59,28 @@ func AndroidCompileFlags(s string) bool {
 // properties.
 func AndroidLinkFlags(s string) bool {
 	return !machineSpecificFlag(s)
+}
+
+func GetCompilerStandard(flags ...[]string) (std string) {
+	// Look for the flag setting compiler standard
+	stdList := utils.Filter(CompilerStandard, flags...)
+	if len(stdList) > 0 {
+		// Use last definition only
+		std = strings.TrimPrefix(stdList[len(stdList)-1], "-std=")
+	}
+	return
+}
+
+func GetArmMode(flags ...[]string) (armMode string) {
+	// Look for the flag setting thumb or not thumb
+	thumb := utils.Filter(ThumbFlag, flags...)
+	arm := utils.Filter(ArmFlag, flags...)
+	if len(thumb) > 0 && len(arm) > 0 {
+		panic("Both thumb and no thumb (arm) options are specified")
+	} else if len(thumb) > 0 {
+		armMode = "thumb"
+	} else if len(arm) > 0 {
+		armMode = "arm"
+	}
+	return
 }

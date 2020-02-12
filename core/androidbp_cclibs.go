@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
+	"github.com/ARM-software/bob-build/internal/ccflags"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -115,6 +116,22 @@ func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
 	}
 }
 
+func filterCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags []string) []string {
+	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
+		m.AddString("c_std", std)
+	}
+
+	if std := ccflags.GetCompilerStandard(cflags, cxxFlags); std != "" {
+		m.AddString("cpp_std", std)
+	}
+
+	if armMode := ccflags.GetArmMode(cflags, conlyFlags, cxxFlags); armMode != "" {
+		m.AddString("instruction_set", armMode)
+	}
+
+	return utils.Filter(ccflags.AndroidCompileFlags, cflags)
+}
+
 func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	if len(l.Properties.Export_include_dirs) > 0 {
 		panic(fmt.Errorf("Module %s exports non-local include dirs %v - this is not supported",
@@ -125,8 +142,8 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	// modules, but it doesn't export cflags.
 	_, _, exported_cflags := l.GetExportedVariables(mctx)
 
-	cflags := utils.NewStringSlice(l.Properties.Cflags,
-		l.Properties.Export_cflags, exported_cflags)
+	cflags := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags, exported_cflags)
+	cflags = filterCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
 
 	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs)
 	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)

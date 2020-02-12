@@ -88,31 +88,18 @@ var (
 	}
 )
 
-func specifyCompilerStandard(varname string, flags []string) string {
-	// Look for the flag setting compiler standard
-	line := ""
-	stdList := utils.Filter(ccflags.CompilerStandard, flags)
-	if len(stdList) > 0 {
-		// Use last definition only
-		std := strings.TrimPrefix(stdList[len(stdList)-1], "-std=")
-		line += varname + ":=" + std + "\n"
+func specifyCompilerStandard(varname string, flags ...[]string) (line string) {
+	if std := ccflags.GetCompilerStandard(flags...); std != "" {
+		line = varname + ":=" + std + "\n"
 	}
-	return line
+	return
 }
 
-func specifyArmMode(flags []string) string {
-	// Look for the flag setting thumb or not thumb
-	line := ""
-	thumb := utils.Filter(ccflags.ThumbFlag, flags)
-	arm := utils.Filter(ccflags.ArmFlag, flags)
-	if len(thumb) > 0 && len(arm) > 0 {
-		panic("Both thumb and no thumb (arm) options are specified")
-	} else if len(thumb) > 0 {
-		line = "LOCAL_ARM_MODE:=thumb\n"
-	} else if len(arm) > 0 {
-		line = "LOCAL_ARM_MODE:=arm\n"
+func specifyArmMode(flags ...[]string) (line string) {
+	if armMode := ccflags.GetArmMode(flags...); armMode != "" {
+		line = "LOCAL_ARM_MODE:=" + armMode + "\n"
 	}
-	return line
+	return
 }
 
 // Identifies if a module links to a generated library. Generated
@@ -255,11 +242,11 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		utils.Filter(ccflags.AndroidCompileFlags, m.Properties.Conlyflags))
 
 	// Setup module C/C++ standard if requested. Note that this only affects Android O and later.
-	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", utils.NewStringSlice(cflagsList, m.Properties.Conlyflags)))
-	sb.WriteString(specifyCompilerStandard("LOCAL_CPP_STD", utils.NewStringSlice(cflagsList, m.Properties.Cxxflags)))
+	sb.WriteString(specifyCompilerStandard("LOCAL_C_STD", cflagsList, m.Properties.Conlyflags))
+	sb.WriteString(specifyCompilerStandard("LOCAL_CPP_STD", cflagsList, m.Properties.Cxxflags))
 
 	// Setup ARM mode if needed
-	sb.WriteString(specifyArmMode(utils.NewStringSlice(cflagsList, m.Properties.Conlyflags, m.Properties.Cxxflags)))
+	sb.WriteString(specifyArmMode(cflagsList, m.Properties.Conlyflags, m.Properties.Cxxflags))
 
 	// convert Shared_libs, Export_shared_libs, Resolved_static_libs, and
 	// Whole_static_libs to Android module names rather than Bob module
