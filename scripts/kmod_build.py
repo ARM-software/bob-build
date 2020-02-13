@@ -103,7 +103,23 @@ def get_tool_abspath(tool):
     return tool
 
 
-if __name__ == "__main__":
+def parse_source_list(sources):
+    module_sources = []
+    extra_symbols = []
+    for source in sources:
+        if os.path.basename(source) == "Module.symvers":
+            extra_symbols.append(source)
+        elif os.path.splitext(source)[1] == ".ko":
+            # Ignore .ko files - we will detect their symbols via their
+            # corresponding Module.symvers file.
+            pass
+        else:
+            module_sources.append(source)
+
+    return module_sources, extra_symbols
+
+
+def parse_args():
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 
     cli_description = "Encapsulate an out-of-tree kernel module build, " \
@@ -139,8 +155,6 @@ if __name__ == "__main__":
                        help="Kernel config options to enable, that get added to EXTRA_CFLAGS too")
     group.add_argument("--extra-cflags", default="",
                        help="Options to add to EXTRA_CFLAGS as a string")
-    group.add_argument("--extra-symbols", nargs="+", default=None,
-                       help="Paths to Module.symvers for external symbols")
     group.add_argument("make_args", nargs=argparse.REMAINDER, default=[],
                        help="Make variables to be set")
 
@@ -149,6 +163,14 @@ if __name__ == "__main__":
                        help="Include file search path")
 
     args = parser.parse_args()
+
+    args.module_sources, args.extra_symbols = parse_source_list(args.sources)
+
+    return args
+
+
+def main():
+    args = parse_args()
 
     # The build is run in $KDIR, rather than the usual build workdir, so
     # parameters need to be absolute so they are accessible with a different CWD.
@@ -177,7 +199,7 @@ if __name__ == "__main__":
     search_path.extend([str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths])
     kconfig = os.path.join(abs_kdir, "linux", "kconfig.h")
     root = os.path.abspath(args.common_root)
-    for src in args.sources:
+    for src in args.module_sources:
         src_rel = os.path.relpath(os.path.abspath(src), root)
         if src_rel.startswith("../"):
             msg = "Source path: %s doesn't share common root directory: %s"
@@ -212,7 +234,7 @@ if __name__ == "__main__":
         make_args.append("HOSTCC=" + host_cc)
     if args.clang_triple:
         make_args.append("CLANG_TRIPLE=" + args.clang_triple)
-    if args.extra_symbols is not None:
+    if args.extra_symbols:
         extra_symbols = [os.path.abspath(d) for d in args.extra_symbols]
         make_args.append("KBUILD_EXTRA_SYMBOLS=" + " ".join(extra_symbols))
 
@@ -230,3 +252,7 @@ if __name__ == "__main__":
     abs_module_dir = os.path.abspath(args.module_dir)
     build_module(output_dir, module_ko, abs_kdir, abs_module_dir,
                  make_command, make_args, extra_cflags)
+
+
+if __name__ == "__main__":
+    main()

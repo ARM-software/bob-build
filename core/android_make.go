@@ -1019,7 +1019,8 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	sb.WriteString("include $(BUILD_SYSTEM)/base_rules.mk\n\n")
 
 	args := m.generateKbuildArgs(ctx).toDict()
-	args["sources"] = "$(addprefix $(LOCAL_PATH)/,$(LOCAL_SRC_FILES))"
+	args["sources"] = utils.Join([]string{"$(addprefix $(LOCAL_PATH)/,$(LOCAL_SRC_FILES))"},
+		m.extraSymbolsFiles(ctx))
 	args["local_path"] = "$(LOCAL_PATH)"
 	args["make_command_args"] = strings.Join(makeCommandArgs, " ")
 
@@ -1029,14 +1030,12 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	}
 
 	sb.WriteString("\n$(LOCAL_BUILT_MODULE): $(LOCAL_MODULE_MAKEFILE_DEP) " +
-		args["sources"] + " " +
-		args["kmod_build"] + " " +
-		strings.Join(m.extraSymbolsFiles(ctx), " ") + "\n")
+		args["sources"] + " " + args["kmod_build"] + "\n")
 	sb.WriteString("\tmkdir -p \"$(@D)\"\n")
 	cmd := "python $(kmod_build) --output $@ --depfile $@.d $(make_command_args) " +
 		"--common-root $(local_path) " +
 		"--module-dir \"$(output_module_dir)\" $(extra_includes) " +
-		"--sources $(sources) $(kbuild_extra_symbols) " +
+		"--sources $(sources) " +
 		"--kernel \"$(kernel_dir)\" --cross-compile \"$(kernel_cross_compile)\" " +
 		"$(cc_flag) $(hostcc_flag) $(clang_triple_flag) " +
 		"$(kbuild_options) --extra-cflags=\"$(extra_cflags)\" $(make_args)"

@@ -20,7 +20,6 @@ package kernelmodule
 
 import (
 	"fmt"
-	"strings"
 
 	"android/soong/android"
 	"github.com/google/blueprint"
@@ -38,7 +37,6 @@ type KbuildArgs struct {
 	KmodBuild          string
 	ExtraIncludes      string
 	ExtraCflags        string
-	KbuildExtraSymbols string
 	KernelDir          string
 	KernelCrossCompile string
 	KbuildOptions      string
@@ -54,7 +52,6 @@ func (a KbuildArgs) toDict() map[string]string {
 		"kmod_build":           a.KmodBuild,
 		"extra_includes":       a.ExtraIncludes,
 		"extra_cflags":         a.ExtraCflags,
-		"kbuild_extra_symbols": a.KbuildExtraSymbols,
 		"kernel_dir":           a.KernelDir,
 		"kernel_cross_compile": a.KernelCrossCompile,
 		"kbuild_options":       a.KbuildOptions,
@@ -129,7 +126,7 @@ var soongKbuildRule = pctx.StaticRule(
 			"--common-root $common_root " +
 			"--make-command " + prebuiltMake + " " +
 			"--module-dir $output_module_dir $extra_includes " +
-			"--sources $in $kbuild_extra_symbols " +
+			"--sources $in " +
 			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
 			"$cc_flag $hostcc_flag $clang_triple_flag " +
 			"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
@@ -146,28 +143,19 @@ func (m *KernelModule) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	m.Symvers = android.PathForModuleOut(ctx, "Module.symvers")
 	m.BuiltModule = android.PathForModuleOut(ctx, m.Properties.Stem+".ko")
 	args := m.Properties.Args.toDict()
+	srcs := android.PathsForModuleSrc(ctx, m.Properties.Srcs)
 
-	// gather symvers location for all dependent kernel modules
-	depSymvers := []android.Path{}
+	// gather symvers location for all dependent kernel modules and add to
+	// the source list.
 	ctx.VisitDirectDepsIf(
 		func(m android.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
 		func(m android.Module) {
 			if km, ok := m.(*KernelModule); ok {
-				depSymvers = append(depSymvers, km.Symvers)
+				srcs = append(srcs, km.Symvers)
 			} else {
 				panic(fmt.Errorf("%s not a kernel module backend", m.Name()))
 			}
 		})
-
-	if len(depSymvers) > 0 {
-		// convert to strings
-		temp := []string{}
-		for _, path := range depSymvers {
-			temp = append(temp, path.String())
-		}
-		// overwrite incorrect paths
-		args["kbuild_extra_symbols"] = "--extra-symbols " + strings.Join(temp, " ")
-	}
 
 	args["output_module_dir"] = android.PathForModuleOut(ctx).String()
 	args["common_root"] = ctx.ModuleDir()
@@ -176,8 +164,8 @@ func (m *KernelModule) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		android.BuildParams{
 			Rule:        soongKbuildRule,
 			Description: "kbuild " + ctx.ModuleName(),
-			Inputs:      android.PathsForModuleSrc(ctx, m.Properties.Srcs),
-			Implicits:   append(depSymvers, android.PathForSource(ctx, args["kmod_build"])),
+			Inputs:      srcs,
+			Implicits:   android.PathsForModuleSrc(ctx, []string{args["kmod_build"]}),
 			Outputs:     []android.WritablePath{m.BuiltModule},
 			Args:        args,
 			Default:     m.Properties.Default,
