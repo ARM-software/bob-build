@@ -103,15 +103,12 @@ func (m *kernelModule) processPaths(ctx abstr.BaseModuleContext, g generatorBack
 	m.Properties.Build.processPaths(ctx, g)
 }
 
-func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (files []string) {
-	g := getBackend(ctx)
-
+func (m *kernelModule) extraSymbolsModules(ctx abstr.VisitableModuleContext) (modules []*kernelModule) {
 	abstr.VisitDirectDepsIf(ctx,
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
 		func(m blueprint.Module) {
 			if km, ok := m.(*kernelModule); ok {
-				file := filepath.Join(km.outputDir(g), "Module.symvers")
-				files = append(files, file)
+				modules = append(modules, km)
 			} else {
 				panic(fmt.Errorf("invalid extra_symbols, %s not a kernel module", ctx.OtherModuleName(m)))
 			}
@@ -120,11 +117,20 @@ func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (file
 	return
 }
 
+func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (files []string) {
+	g := getBackend(ctx)
+
+	for _, mod := range m.extraSymbolsModules(ctx) {
+		files = append(files, filepath.Join(mod.outputDir(g), "Module.symvers"))
+	}
+
+	return
+}
+
 type kbuildArgs struct {
 	KmodBuild          string
 	ExtraIncludes      string
 	ExtraCflags        string
-	KbuildExtraSymbols string
 	KernelDir          string
 	KernelCrossCompile string
 	KbuildOptions      string
@@ -140,7 +146,6 @@ func (a kbuildArgs) toDict() map[string]string {
 		"kmod_build":           a.KmodBuild,
 		"extra_includes":       a.ExtraIncludes,
 		"extra_cflags":         a.ExtraCflags,
-		"kbuild_extra_symbols": a.KbuildExtraSymbols,
 		"kernel_dir":           a.KernelDir,
 		"kernel_cross_compile": a.KernelCrossCompile,
 		"kbuild_options":       a.KbuildOptions,
@@ -175,11 +180,6 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 		kdir = filepath.Join(g.sourcePrefix(), kdir)
 	}
 
-	extraSymbols := ""
-	if len(m.extraSymbolsFiles(ctx)) > 0 {
-		extraSymbols = "--extra-symbols " + strings.Join(m.extraSymbolsFiles(ctx), " ")
-	}
-
 	kbuildOptions := ""
 	if len(m.build().Kbuild_options) > 0 {
 		kbuildOptions = "--kbuild-options " + strings.Join(m.build().Kbuild_options, " ")
@@ -204,7 +204,6 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 		KmodBuild:          kmodBuild,
 		ExtraIncludes:      strings.Join(extraIncludePaths, " "),
 		ExtraCflags:        strings.Join(extraCflags, " "),
-		KbuildExtraSymbols: extraSymbols,
 		KernelDir:          kdir,
 		KernelCrossCompile: m.Properties.Build.Kernel_cross_compile,
 		KbuildOptions:      kbuildOptions,

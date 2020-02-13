@@ -977,7 +977,7 @@ var kbuildRule = pctx.StaticRule("kbuild",
 		Command: "python $kmod_build -o $out --depfile $depfile " +
 			"--common-root ${SrcDir} " +
 			"--module-dir $output_module_dir $extra_includes " +
-			"--sources $in $kbuild_extra_symbols " +
+			"--sources $in " +
 			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
 			"$cc_flag $hostcc_flag $clang_triple_flag " +
 			"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
@@ -985,21 +985,24 @@ var kbuildRule = pctx.StaticRule("kbuild",
 		Deps:        blueprint.DepsGCC,
 		Pool:        blueprint.Console,
 		Description: "$out",
-	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kbuild_extra_symbols", "kernel_dir", "kernel_cross_compile",
+	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kernel_dir", "kernel_cross_compile",
 	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
 
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
 	builtModule := filepath.Join(g.kernelModOutputDir(m), m.outputName()+".ko")
 
 	args := m.generateKbuildArgs(ctx).toDict()
-	prefixedSources := utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix())
+	sources := utils.NewStringSlice(
+		utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix()),
+		m.Properties.Build.SourceProps.Specials,
+		m.extraSymbolsFiles(ctx))
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      kbuildRule,
 			Outputs:   []string{builtModule},
-			Inputs:    utils.NewStringSlice(prefixedSources, m.Properties.Build.SourceProps.Specials),
-			Implicits: utils.NewStringSlice(m.extraSymbolsFiles(ctx), []string{args["kmod_build"]}),
+			Inputs:    sources,
+			Implicits: []string{args["kmod_build"]},
 			Optional:  false,
 			Args:      args,
 		})
