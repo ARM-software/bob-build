@@ -211,7 +211,7 @@ config STATIC_LIB_TOGGLE
 config GEN_CC
 	string "Compiler"
 	default "$(CLANG) -fuse-ld=lld" if BUILDER_ANDROID_MAKE
-	default HOST_CLANG_PREFIX + CLANG_CC_BINARY + " -fuse-ld=lld" if BUILDER_SOONG
+	default HOST_CLANG_PREFIX + CLANG_CC_BINARY + " -fuse-ld=lld" if BUILDER_ANDROID_BP || BUILDER_SOONG
 	default HOST_GNU_PREFIX + GNU_CC_BINARY
 
 config GEN_AR
@@ -222,7 +222,7 @@ config GEN_AR
 config KERNEL_CC
 	string "Kernel compiler"
 	default "$(CLANG)" if BUILDER_ANDROID_MAKE
-	default HOST_CLANG_PREFIX + CLANG_CC_BINARY if BUILDER_SOONG
+	default HOST_CLANG_PREFIX + CLANG_CC_BINARY if BUILDER_ANDROID_BP || BUILDER_SOONG
 
 config KERNEL_CLANG_TRIPLE
 	string "Kernel Clang triple"
