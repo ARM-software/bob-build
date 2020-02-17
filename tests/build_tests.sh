@@ -83,14 +83,14 @@ rm -rf "${TEST_DIRS[@]}"
 # Build with working directory in source directory
 build_dir=build-in-src
 pushd "tests" &> /dev/null
-./bootstrap -o ${build_dir}
+./bootstrap_linux -o ${build_dir}
 ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 popd &> /dev/null
 
 # Build in an independent working directory
 build_dir=build-indep
-tests/bootstrap -o ${build_dir}
+tests/bootstrap_linux -o ${build_dir}
 ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 
@@ -98,7 +98,7 @@ check_build_output "${build_dir}"
 build_dir=build-in-outp
 mkdir ${build_dir}
 pushd ${build_dir} &> /dev/null
-../tests/bootstrap -o .
+../tests/bootstrap_linux -o .
 ./config ${OPTIONS} && ./buildme bob_tests
 popd &> /dev/null
 check_build_output "${build_dir}"
@@ -106,7 +106,7 @@ check_build_output "${build_dir}"
 # A re-bootstrapped build directory with a different working directory
 # should still work. Re-use the last directory
 echo Checking rebootstrap
-tests/bootstrap -o ${build_dir}
+tests/bootstrap_linux -o ${build_dir}
 ${build_dir}/buildme bob_tests
 
 # Check static archives are built from scratch. Re-use the last directory

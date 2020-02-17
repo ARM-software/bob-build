@@ -25,8 +25,8 @@ order to use Bob. It contains the following files:
 
 |File|Description|
 |---|---|
-|bootstrap_android.bash   | Android bootstrap script |
-|bootstrap_linux.bash     | Bootstrap script |
+|bootstrap_androidmk.bash | Android bootstrap script |
+|bootstrap_linux.bash     | Linux bootstrap script |
 |bplist                   | Blueprint list file |
 |Mconfig                  | Project configuration database |
 |build.bp                 | Root build description |
