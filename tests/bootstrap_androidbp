@@ -107,7 +107,7 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 # Pick up some info that bob has worked out
 source "${BUILDDIR}/.bob.bootstrap"
 
-if [ ! -z "$*" ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
+if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
     # Have arguments or missing bob.config. Run config.
     "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y "$@"
 fi
