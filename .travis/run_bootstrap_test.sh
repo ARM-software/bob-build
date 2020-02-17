@@ -27,7 +27,7 @@ else
     git checkout ${PARENT}
     cd "${BOB_ROOT}/tests"
     rm -rf ${build_dir} # Cleanup test directory
-    ./bootstrap -o ${build_dir}
+    ./bootstrap_linux -o ${build_dir}
     ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 
     # Wait for filesystems with low timestamp resolution

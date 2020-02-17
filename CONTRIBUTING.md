@@ -35,7 +35,7 @@ Bob has three kinds of tests:
 
     ```bash
     cd tests
-    ./bootstrap
+    ./bootstrap_linux
     ./build/config
     ./build/buildme
     ```
@@ -49,13 +49,13 @@ Bob has three kinds of tests:
     mkdir -p $ANDROID_TOP/external/bob
     bindfs -n $BOB_LOCATION $ANDROID_TOP/external/bob
     cd $ANDROID_TOP/external/bob/tests
-    ./bootstrap_android ANDROID=y
+    ./bootstrap_androidmk ANDROID=y
     mm
     ```
     (thereafter just run `mm`)
 
     To test the work-in-progress Soong plugin, simply replace the
-    `./bootstrap_android ANDROID=y` command above with `./bootstrap_soong`,
+    `./bootstrap_androidmk ANDROID=y` command above with `./bootstrap_soong`,
     then run `mm`. Watch out for left-over `Android.mk` files and `Android.bp`
     symlinks when swapping between the two implementations.
 
