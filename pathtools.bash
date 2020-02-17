@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +50,10 @@ else
     }
 fi
 
+function bob_abspath() {
+    python -c "import os, sys; print(os.path.abspath(sys.argv[1]))" "$1"
+}
+
 function path_is_parent() {
     local parent="$1" subpath="$2"
     if [[ ${parent} == / ]]; then
@@ -62,13 +66,13 @@ function path_is_parent() {
 
 # Return a path that references $2 from $1
 # $1 and $2 must exist
-# This is a simple implementation. We rely on readlink to sort out symlink issues for us.
+# This is a simple implementation. Symlinks are not followed.
 # If there are fewer path elements in the absolute version, return that instead.
 function relative_path() {
     [[ -e $1 ]] || { echo "relative_path: Source path '$1' does not exist" >&2; return 1; }
     [[ -e $2 ]] || { echo "relative_path: Target path '$2' does not exist" >&2; return 1; }
-    local SRC_ABS=$(bob_realpath "${1}")
-    local TGT_ABS=$(bob_realpath "${2}")
+    local SRC_ABS=$(bob_abspath "${1}")
+    local TGT_ABS=$(bob_abspath "${2}")
     local BACK= RESULT= CMN_PFX=
 
     if [[ ${TGT_ABS} == ${SRC_ABS} ]]; then
