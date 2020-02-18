@@ -52,7 +52,7 @@ type androidMkGenerator struct {
 var _ generatorBackend = (*androidMkGenerator)(nil)
 
 func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.Builder) {
-	filename := filepath.Join(getBuildDir(), name+".inc")
+	filename := getPathInBuildDir(name + ".inc")
 	err := fileutils.WriteIfChanged(filename, sb)
 	if err != nil {
 		utils.Exit(1, err.Error())
@@ -915,7 +915,7 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 		}
 		order = append(order[:lowindex], order[lowindex+1:]...)
 	}
-	androidmkFile := filepath.Join(getBuildDir(), "Android.inc")
+	androidmkFile := getPathInBuildDir("Android.inc")
 	err := fileutils.WriteIfChanged(androidmkFile, sb)
 	if err != nil {
 		utils.Exit(1, err.Error())
