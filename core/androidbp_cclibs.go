@@ -116,7 +116,7 @@ func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
 	}
 }
 
-func filterCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags []string) []string {
+func addCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags []string) error {
 	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
 		m.AddString("c_std", std)
 	}
@@ -125,11 +125,19 @@ func filterCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFl
 		m.AddString("cpp_std", std)
 	}
 
-	if armMode := ccflags.GetArmMode(cflags, conlyFlags, cxxFlags); armMode != "" {
+	armMode, err := ccflags.GetArmMode(cflags, conlyFlags, cxxFlags)
+	if err != nil {
+		return err
+	}
+
+	if armMode != "" {
 		m.AddString("instruction_set", armMode)
 	}
 
-	return utils.Filter(ccflags.AndroidCompileFlags, cflags)
+	m.AddStringList("cflags", utils.Filter(ccflags.AndroidCompileFlags, cflags))
+	m.AddStringList("conlyflags", utils.Filter(ccflags.AndroidCompileFlags, conlyFlags))
+	m.AddStringList("cxxflags", utils.Filter(ccflags.AndroidCompileFlags, cxxFlags))
+	return nil
 }
 
 func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
@@ -143,7 +151,6 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	_, _, exported_cflags := l.GetExportedVariables(mctx)
 
 	cflags := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags, exported_cflags)
-	cflags = filterCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
 
 	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs)
 	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)
@@ -172,7 +179,10 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
 	m.AddStringList("generated_headers", l.getGeneratedHeaderModules(mctx))
 	m.AddStringList("exclude_srcs", l.Properties.Exclude_srcs)
-	m.AddStringList("cflags", cflags)
+	err := addCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
+	if err != nil {
+		panic(fmt.Errorf("Module %s: %s", mctx.ModuleName(), err.Error()))
+	}
 	m.AddStringList("include_dirs", l.Properties.Include_dirs)
 	m.AddStringList("local_include_dirs", l.Properties.Local_include_dirs)
 	m.AddStringList("shared_libs", ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs))

@@ -96,7 +96,12 @@ func specifyCompilerStandard(varname string, flags ...[]string) (line string) {
 }
 
 func specifyArmMode(flags ...[]string) (line string) {
-	if armMode := ccflags.GetArmMode(flags...); armMode != "" {
+	armMode, err := ccflags.GetArmMode(flags...)
+	if err != nil {
+		panic(err)
+	}
+
+	if armMode != "" {
 		line = "LOCAL_ARM_MODE:=" + armMode + "\n"
 	}
 	return

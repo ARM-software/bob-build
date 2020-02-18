@@ -20,6 +20,7 @@ package ccflags
 // Encapsulate knowledge about common compiler and linker flags
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -31,15 +32,15 @@ func machineSpecificFlag(s string) bool {
 }
 
 // This flag selects the compiler standard
-func CompilerStandard(s string) bool {
+func compilerStandard(s string) bool {
 	return strings.HasPrefix(s, "-std=")
 }
 
-func ThumbFlag(s string) bool {
+func thumbFlag(s string) bool {
 	return s == "-mthumb"
 }
 
-func ArmFlag(s string) bool {
+func armFlag(s string) bool {
 	return s == "-marm" || s == "-mno-thumb"
 }
 
@@ -49,7 +50,7 @@ func ArmFlag(s string) bool {
 // can do multi-arch builds) and compiler standard, so filter these
 // out from module properties.
 func AndroidCompileFlags(s string) bool {
-	return !(machineSpecificFlag(s) || CompilerStandard(s))
+	return !(machineSpecificFlag(s) || compilerStandard(s))
 }
 
 // Identify whether a link flag should be used on android
@@ -63,7 +64,7 @@ func AndroidLinkFlags(s string) bool {
 
 func GetCompilerStandard(flags ...[]string) (std string) {
 	// Look for the flag setting compiler standard
-	stdList := utils.Filter(CompilerStandard, flags...)
+	stdList := utils.Filter(compilerStandard, flags...)
 	if len(stdList) > 0 {
 		// Use last definition only
 		std = strings.TrimPrefix(stdList[len(stdList)-1], "-std=")
@@ -71,12 +72,12 @@ func GetCompilerStandard(flags ...[]string) (std string) {
 	return
 }
 
-func GetArmMode(flags ...[]string) (armMode string) {
+func GetArmMode(flags ...[]string) (armMode string, err error) {
 	// Look for the flag setting thumb or not thumb
-	thumb := utils.Filter(ThumbFlag, flags...)
-	arm := utils.Filter(ArmFlag, flags...)
+	thumb := utils.Filter(thumbFlag, flags...)
+	arm := utils.Filter(armFlag, flags...)
 	if len(thumb) > 0 && len(arm) > 0 {
-		panic("Both thumb and no thumb (arm) options are specified")
+		err = fmt.Errorf("Both thumb and no thumb (arm) options are specified")
 	} else if len(thumb) > 0 {
 		armMode = "thumb"
 	} else if len(arm) > 0 {
