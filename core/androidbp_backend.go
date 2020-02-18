@@ -18,7 +18,6 @@
 package core
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -75,7 +74,7 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	sb := &strings.Builder{}
 	AndroidBpFile().Render(sb)
 
-	androidbpFile := filepath.Join(srcdir, "Android.bp")
+	androidbpFile := getPathInSourceDir("Android.bp")
 	err := fileutils.WriteIfChanged(androidbpFile, sb)
 	if err != nil {
 		utils.Exit(1, err.Error())

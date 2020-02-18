@@ -125,22 +125,38 @@ func getPathInBuildDir(elems ...string) string {
 	return filepath.Join(append([]string{getBuildDir()}, elems...)...)
 }
 
+// Construct a path to a file within the source directory that Go can
+// use to create a file.
+//
+// This is _not_ intended for use in writing ninja rules.
+func getPathInSourceDir(elems ...string) string {
+	return filepath.Join(append([]string{getSourceDir()}, elems...)...)
+}
+
+// Construct paths to files within the source directory that Go can
+// use to create files.
+//
+// This is _not_ intended for use in writing ninja rules.
+func getPathsInSourceDir(filelist []string) []string {
+	return utils.PrefixDirs(filelist, getSourceDir())
+}
+
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	// If any globs are used, we need to use an exclude list which is
 	// relative to the source directory.
-	excludesFromSrcDir := utils.PrefixDirs(excludes, srcdir)
+	excludesFromSrcDir := getPathsInSourceDir(excludes)
 
 	for _, file := range globs {
 		if strings.ContainsAny(file, "*?[") {
 			// Globs need to be calculated relative to the source
 			// directory (not the working directory), so add it
 			// here, and remove it afterwards.
-			file = filepath.Join(srcdir, file)
+			file = getPathInSourceDir(file)
 			matches, _ := ctx.GlobWithDeps(file, excludesFromSrcDir)
 			for _, match := range matches {
-				rel, err := filepath.Rel(srcdir, match)
+				rel, err := filepath.Rel(getSourceDir(), match)
 				if err != nil {
 					panic(err)
 				}

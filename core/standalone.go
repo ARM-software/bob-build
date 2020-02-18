@@ -59,6 +59,10 @@ func getBuildDir() string {
 	return bootstrap.BuildDir
 }
 
+func getSourceDir() string {
+	return srcdir
+}
+
 // Main is the entry point for the bob primary builder.
 //
 // It loads the configuration from config.json, registers the module type
