@@ -22,7 +22,6 @@
 package core
 
 var (
-	bobdir     = "@@BOB_DIR@@"
 	configFile = "@@CONFIG_FILE@@"
 	configOpts = "@@BOB_CONFIG_OPTS@@"
 	jsonPath   = "@@CONFIG_JSON@@"
@@ -34,4 +33,8 @@ func getBuildDir() string {
 
 func getSourceDir() string {
 	return "@@SRCDIR@@"
+}
+
+func getBobDir() string {
+	return "@@BOB_DIR@@"
 }

@@ -141,6 +141,15 @@ func getPathsInSourceDir(filelist []string) []string {
 	return utils.PrefixDirs(filelist, getSourceDir())
 }
 
+// Construct a path to a file within the scripts directory that Go can
+// use to create a file.
+//
+// This _is_ intended for use in writing ninja rules, but will use an explicit path
+// instead of backend specific variable expansions.
+func getPathInScriptDir(elems ...string) string {
+	return filepath.Join(append([]string{getBobDir(), "scripts"}, elems...)...)
+}
+
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 

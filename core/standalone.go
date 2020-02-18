@@ -63,6 +63,10 @@ func getSourceDir() string {
 	return srcdir
 }
 
+func getBobDir() string {
+	return bobdir
+}
+
 // Main is the entry point for the bob primary builder.
 //
 // It loads the configuration from config.json, registers the module type
