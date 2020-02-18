@@ -363,7 +363,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 			args["cxxflags"] = "$cxxflags"
 			rule = cxxRule
 		default:
-			nonCompiledDeps = append(nonCompiledDeps, filepath.Join(g.sourcePrefix(), source))
+			nonCompiledDeps = append(nonCompiledDeps, getBackendPathInSourceDir(g, source))
 			continue
 		}
 
@@ -375,7 +375,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 			sourceWithoutPrefix = source[len(buildDir):]
 		} else {
 			sourceWithoutPrefix = source
-			source = filepath.Join(g.sourcePrefix(), source)
+			source = getBackendPathInSourceDir(g, source)
 		}
 		output := l.ObjDir() + sourceWithoutPrefix + ".o"
 
@@ -868,7 +868,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		// Resources always come from the source directory.
 		// All other module types install files from the build directory.
 		if isResource {
-			src = filepath.Join(g.sourcePrefix(), src)
+			src = getBackendPathInSourceDir(g, src)
 		}
 
 		// Interpose strip target
@@ -996,7 +996,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 
 	args := m.generateKbuildArgs(ctx).toDict()
 	sources := utils.NewStringSlice(
-		utils.PrefixDirs(m.Properties.getSources(ctx), g.sourcePrefix()),
+		getBackendPathsInSourceDir(g, m.Properties.getSources(ctx)),
 		m.Properties.Build.SourceProps.Specials,
 		m.extraSymbolsFiles(ctx))
 

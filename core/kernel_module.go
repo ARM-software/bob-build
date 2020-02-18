@@ -165,7 +165,7 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 	extraCflags := m.build().BuildProps.Cflags
 
 	for _, includeDir := range m.build().BuildProps.Local_include_dirs {
-		includeDir = "-I" + filepath.Join(g.sourcePrefix(), includeDir)
+		includeDir = "-I" + getBackendPathInSourceDir(g, includeDir)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
@@ -177,7 +177,7 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 	kmodBuild := getPathInScriptDir("kmod_build.py")
 	kdir := m.Properties.Build.Kernel_dir
 	if kdir != "" && !filepath.IsAbs(kdir) {
-		kdir = filepath.Join(g.sourcePrefix(), kdir)
+		kdir = getBackendPathInSourceDir(g, kdir)
 	}
 
 	kbuildOptions := ""
