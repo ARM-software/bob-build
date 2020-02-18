@@ -34,9 +34,12 @@ import (
 )
 
 var (
-	pctx        = blueprint.NewPackageContext("bob")
-	srcdirVar   = pctx.StaticVariable("SrcDir", srcdir)
-	builddirVar = pctx.VariableFunc("BuildDir", func(interface{}) (string, error) {
+	pctx = blueprint.NewPackageContext("bob")
+
+	_ = pctx.VariableFunc("SrcDir", func(interface{}) (string, error) {
+		return getSourceDir(), nil
+	})
+	_ = pctx.VariableFunc("BuildDir", func(interface{}) (string, error) {
 		return getBuildDir(), nil
 	})
 )

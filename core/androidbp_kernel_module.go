@@ -21,8 +21,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func stringParam(optName string, optValue string) (opts []string) {
@@ -59,7 +57,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 
 	kdir := l.Properties.Kernel_dir
 	if !filepath.IsAbs(kdir) {
-		kdir = filepath.Join(srcdir, kdir)
+		kdir = getPathInSourceDir(kdir)
 	}
 
 	addProvenanceProps(bpmod, l.Properties.AndroidProps)
@@ -76,7 +74,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"-o", filepath.Join("$(genDir)", out),
 			"--depfile", "$(depfile)",
 			"--sources", "$(in)",
-			"--common-root", srcdir,
+			"--common-root", getSourceDir(),
 			"--kernel", kdir,
 			"--module-dir", "$(genDir)/" + mctx.ModuleDir(),
 			"--make-command", prebuiltMake,
@@ -87,5 +85,5 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		stringParam("--hostcc", l.Properties.Kernel_hostcc),
 		stringParams("-I",
 			l.Properties.Include_dirs,
-			utils.PrefixDirs(l.Properties.Local_include_dirs, srcdir)))
+			getPathsInSourceDir(l.Properties.Local_include_dirs)))
 }

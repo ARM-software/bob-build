@@ -139,7 +139,7 @@ func (g *soongGenerator) staticActions(*staticLibrary, blueprint.ModuleContext) 
 func (g *soongGenerator) transformSourceActions(*transformSource, blueprint.ModuleContext, []inout) {}
 
 func (g *soongGenerator) buildDir() string                           { return getBuildDir() }
-func (g *soongGenerator) sourcePrefix() string                       { return srcdir }
+func (g *soongGenerator) sourcePrefix() string                       { return getSourceDir() }
 func (g *soongGenerator) sharedLibsDir(tgt tgtType) string           { return "" }
 func (g *soongGenerator) sourceOutputDir(m *generateCommon) string   { return "" }
 func (g *soongGenerator) binaryOutputDir(m *binary) string           { return "" }
@@ -267,11 +267,11 @@ func init() {
 func projectModuleDir(ctx abstr.BaseModuleContext) string {
 	fromAndroidRoot := ctx.ModuleDir()
 	if !strings.HasPrefix(filepath.Clean(fromAndroidRoot)+string(filepath.Separator),
-		filepath.Clean(srcdir)+string(filepath.Separator)) {
+		filepath.Clean(getSourceDir())+string(filepath.Separator)) {
 		panic(fmt.Errorf("Module directory '%s' is outside source dir '%s'",
-			fromAndroidRoot, srcdir))
+			fromAndroidRoot, getSourceDir()))
 	}
-	moduleDir, err := filepath.Rel(srcdir, fromAndroidRoot)
+	moduleDir, err := filepath.Rel(getSourceDir(), fromAndroidRoot)
 	if err != nil {
 		panic(err)
 	}
