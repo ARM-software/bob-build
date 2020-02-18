@@ -19,7 +19,6 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -99,7 +98,7 @@ type InstallableProps struct {
 
 func (props *InstallableProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
 	if props.Post_install_tool != nil {
-		*props.Post_install_tool = filepath.Join(g.sourcePrefix(), projectModuleDir(ctx), *props.Post_install_tool)
+		*props.Post_install_tool = getBackendPathInSourceDir(g, projectModuleDir(ctx), *props.Post_install_tool)
 	}
 }
 

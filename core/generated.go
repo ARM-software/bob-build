@@ -392,7 +392,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		"linker":            linker,
 		"gen_dir":           g.sourceOutputDir(m),
 		"headers_generated": "",
-		"module_dir":        filepath.Join(g.sourcePrefix(), ctx.ModuleDir()),
+		"module_dir":        getBackendPathInSourceDir(g, ctx.ModuleDir()),
 		"shared_libs_dir":   g.sharedLibsDir(m.Properties.GenerateProps.Target),
 		"src_dir":           g.sourcePrefix(),
 		"srcs_generated":    "",
@@ -403,7 +403,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	dependents := getDependentArgsAndFiles(ctx, args)
 
 	if m.Properties.Tool != nil {
-		toolPath := filepath.Join(g.sourcePrefix(), ctx.ModuleDir(), proptools.String(m.Properties.Tool))
+		toolPath := getBackendPathInSourceDir(g, ctx.ModuleDir(), proptools.String(m.Properties.Tool))
 		args["tool"] = toolPath
 		dependents = append(dependents, toolPath)
 	}
@@ -449,14 +449,14 @@ func (m *generateSource) processPaths(ctx abstr.BaseModuleContext, g generatorBa
 
 func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.in = append(append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
+	io.in = append(append(getBackendPathsInSourceDir(g, m.getSources(ctx)),
 		m.generateCommon.Properties.SourceProps.Specials...),
 		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
 	if depfile, ok := m.getDepfile(g); ok {
 		io.depfile = depfile
 	}
-	io.implicitSrcs = utils.PrefixDirs(m.Properties.getImplicitSources(ctx), g.sourcePrefix())
+	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
 	io.implicitOuts = m.implicitOutputs(g)
 
 	if m.generateCommon.Properties.Rsp_content != nil {

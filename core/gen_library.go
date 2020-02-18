@@ -65,8 +65,7 @@ func getLibraryGeneratedPath(m generateLibraryInterface, g generatorBackend) str
 // inputs with all outputs
 func inouts(m generateLibraryInterface, ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.in = append(utils.PrefixDirs(m.getSources(ctx), g.sourcePrefix()),
-		getGeneratedFiles(ctx, g)...)
+	io.in = append(getBackendPathsInSourceDir(g, m.getSources(ctx)), getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
 	if depfile, ok := m.getDepfile(g); ok {
 		io.depfile = depfile
