@@ -109,18 +109,6 @@ type bobConfig struct {
 	Properties configProperties
 }
 
-// SourceProps defines module properties that are used to identify the
-// source files associated with a module.
-type SourceProps struct {
-	// The list of source files. Wildcards can be used (but are suboptimal)
-	Srcs []string
-	// The list of source files that should not be included. Use with care.
-	Exclude_srcs []string
-
-	// Sources that we need to treat specially
-	Specials []string `blueprint:"mutated"`
-}
-
 // AndroidProps defines module properties used by Android backends
 type AndroidProps struct {
 	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
@@ -155,6 +143,18 @@ func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []stri
 		}
 	}
 	return files
+}
+
+// SourceProps defines module properties that are used to identify the
+// source files associated with a module.
+type SourceProps struct {
+	// The list of source files. Wildcards can be used (but are suboptimal)
+	Srcs []string
+	// The list of source files that should not be included. Use with care.
+	Exclude_srcs []string
+
+	// Sources that we need to treat specially
+	Specials []string `blueprint:"mutated"`
 }
 
 // Get a list of sources to compile.
