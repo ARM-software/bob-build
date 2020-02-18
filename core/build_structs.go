@@ -117,6 +117,14 @@ type AndroidProps struct {
 	Owner string
 }
 
+// Construct a path to a file within the build directory that Go can
+// use to create a file.
+//
+// This is _not_ intended for use in writing ninja rules.
+func getPathInBuildDir(elems ...string) string {
+	return filepath.Join(append([]string{getBuildDir()}, elems...)...)
+}
+
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 

@@ -25,7 +25,6 @@ package core
 import (
 	"errors"
 	"os"
-	"path/filepath"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
@@ -68,7 +67,7 @@ func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
 	// specified in the config.
-	jsonPath := filepath.Join(getBuildDir(), "config.json")
+	jsonPath := getPathInBuildDir("config.json")
 	config := &bobConfig{}
 	err := config.Properties.LoadConfig(jsonPath)
 	if err != nil {
@@ -76,7 +75,7 @@ func Main() {
 	}
 
 	// Depend on the config file
-	pctx.AddNinjaFileDeps(jsonPath, filepath.Join(getBuildDir(), ".env.hash"))
+	pctx.AddNinjaFileDeps(jsonPath, getPathInBuildDir(".env.hash"))
 
 	var ctx = blueprint.NewContext()
 
