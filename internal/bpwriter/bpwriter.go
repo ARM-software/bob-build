@@ -162,7 +162,7 @@ type module struct {
 	group
 
 	// Nested properties (1 level deep only)
-	groups []group
+	groups []*group
 }
 
 var _ Module = (*module)(nil)
@@ -194,7 +194,7 @@ func (m *module) NewGroup(name string) Group {
 	g := group{}
 	g.name = name
 	g.depth = 2
-	m.groups = append(m.groups, g)
+	m.groups = append(m.groups, &g)
 	return &g
 }
 
