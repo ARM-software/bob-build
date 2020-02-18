@@ -26,7 +26,6 @@ bootstrap_go_package {
         "bob-graph-@@PROJ_NAME@@",
         "bob-utils-@@PROJ_NAME@@",
         "bob-plugins-prebuilt-@@PROJ_NAME@@",
-        "bob-plugins-kernelmodule-@@PROJ_NAME@@",
         "bob-plugins-genrulebob-@@PROJ_NAME@@",
         "soong-android",
         "soong-cc",
@@ -54,7 +53,6 @@ bootstrap_go_package {
         "core/soong_gen.go",
         "core/soong_library.go",
         "core/soong_plugin.go",
-        "core/soong_kernel_module.go",
         "core/soong_resource.go",
         "core/splitter.go",
         "core/strip.go",
@@ -106,17 +104,6 @@ bootstrap_go_package {
         "plugins/prebuilt/prebuilt_data.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/prebuilt",
-}
-
-bootstrap_go_package {
-    name: "bob-plugins-kernelmodule-@@PROJ_NAME@@",
-    deps: [
-        "soong-android",
-    ],
-    srcs: [
-        "plugins/kernelmodule/kernel_module.go",
-    ],
-    pkgPath: "github.com/ARM-software/bob-build/plugins/kernelmodule",
 }
 
 bootstrap_go_package {

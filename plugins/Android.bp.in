@@ -26,16 +26,3 @@ bootstrap_go_package {
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/prebuilt",
 }
-
-bootstrap_go_package {
-    name: "bob-plugins-kernelmodule-@@PROJ_NAME@@",
-    pluginFor: ["soong_build"],
-    deps: [
-        "blueprint",
-        "soong-android",
-    ],
-    srcs: [
-        "kernelmodule/kernel_module.go",
-    ],
-    pkgPath: "github.com/ARM-software/bob-build/plugins/kernelmodule",
-}
