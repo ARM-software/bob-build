@@ -463,7 +463,7 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper")
 
-var wholeStaticScript = filepath.Join(bobdir, "scripts", "whole_static.py")
+var wholeStaticScript = getPathInScriptDir("whole_static.py")
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
 		Command:     "$whole_static_tool --build-wrapper \"$build_wrapper\" --ar $ar --out $out $in $whole_static_libs",
@@ -803,7 +803,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		})
 }
 
-var stripScript = filepath.Join(bobdir, "scripts", "strip.py")
+var stripScript = getPathInScriptDir("strip.py")
 var stripRule = pctx.StaticRule("strip",
 	blueprint.RuleParams{
 		Command: stripScript +
