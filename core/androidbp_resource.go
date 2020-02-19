@@ -49,6 +49,9 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	} else if strings.HasPrefix(installPath, "etc/") {
 		subdir = strings.Replace(installPath, "etc/", "", 1)
 		modType = "prebuilt_etc"
+	} else if strings.HasPrefix(installPath, "firmware/") {
+		subdir = strings.Replace(installPath, "firmware/", "", 1)
+		modType = "prebuilt_firmware"
 	} else {
 		panic(fmt.Errorf("Install path must be prefixed either with 'data' or 'etc' (%s)", installPath))
 	}
