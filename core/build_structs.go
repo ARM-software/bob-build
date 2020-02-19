@@ -150,6 +150,12 @@ func getPathInScriptDir(elems ...string) string {
 	return filepath.Join(append([]string{getBobDir(), "scripts"}, elems...)...)
 }
 
+// Construct a path to a file within the build directory to be used
+// in backend output files.
+func getBackendPathInBuildDir(g generatorBackend, elems ...string) string {
+	return filepath.Join(append([]string{g.buildDir()}, elems...)...)
+}
+
 // Construct a path to a file within the source directory to be used
 // in backend output files.
 func getBackendPathInSourceDir(g generatorBackend, elems ...string) string {

@@ -373,7 +373,7 @@ func (l *library) setDebugPath(path *string) {
 }
 
 func (m *library) stripOutputDir(g generatorBackend) string {
-	return filepath.Join(g.buildDir(), string(m.Properties.TargetType), "strip")
+	return getBackendPathInBuildDir(g, string(m.Properties.TargetType), "strip")
 }
 
 func (l *library) implicitOutputs(g generatorBackend) []string {
