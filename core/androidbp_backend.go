@@ -18,6 +18,7 @@
 package core
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -45,8 +46,22 @@ func AndroidBpFile() bpwriter.File {
 
 func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext) {}
 
-func (g *androidBpGenerator) buildDir() string                         { return "" }
-func (g *androidBpGenerator) sourcePrefix() string                     { return "" }
+func (g *androidBpGenerator) buildDir() string { return "" }
+
+func (g *androidBpGenerator) sourcePrefix() string {
+	// The androidbp backend writes paths into an Android.bp file in
+	// the project directory. All paths should be relative to that
+	// file, so there should be no need for the source directory.
+	return ""
+}
+
+func (g *androidBpGenerator) bobScriptsDir() string {
+	// In the androidbp backend, we just want the relative path to the
+	// script directory.
+	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
+	return filepath.Join(g.sourcePrefix(), srcToScripts)
+}
+
 func (g *androidBpGenerator) sharedLibsDir(tgtType) string             { return "" }
 func (g *androidBpGenerator) sourceOutputDir(*generateCommon) string   { return "" }
 func (g *androidBpGenerator) binaryOutputDir(*binary) string           { return "" }

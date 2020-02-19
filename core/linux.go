@@ -42,6 +42,9 @@ var (
 	_ = pctx.VariableFunc("BuildDir", func(interface{}) (string, error) {
 		return getBuildDir(), nil
 	})
+	_ = pctx.VariableFunc("BobScriptsDir", func(interface{}) (string, error) {
+		return getBobScriptsDir(), nil
+	})
 )
 
 type linuxGenerator struct {
@@ -84,6 +87,10 @@ func (g *linuxGenerator) sourcePrefix() string {
 
 func (g *linuxGenerator) buildDir() string {
 	return "${BuildDir}"
+}
+
+func (g *linuxGenerator) bobScriptsDir() string {
+	return "${BobScriptsDir}"
 }
 
 func (g *linuxGenerator) sourceOutputDir(m *generateCommon) string {
@@ -463,7 +470,7 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper")
 
-var wholeStaticScript = getPathInScriptDir("whole_static.py")
+var wholeStaticScript = "${BobScriptsDir}/whole_static.py"
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
 		Command:     "$whole_static_tool --build-wrapper \"$build_wrapper\" --ar $ar --out $out $in $whole_static_libs",
@@ -803,7 +810,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		})
 }
 
-var stripScript = getPathInScriptDir("strip.py")
+var stripScript = "${BobScriptsDir}/strip.py"
 var stripRule = pctx.StaticRule("strip",
 	blueprint.RuleParams{
 		Command: stripScript +

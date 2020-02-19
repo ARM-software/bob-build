@@ -48,7 +48,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 
 	out := l.outputName() + ".ko"
 
-	kmod_build, _ := filepath.Rel(getSourceDir(), getPathInScriptDir("kmod_build.py"))
+	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 
 	srcs := l.Properties.getSources(mctx)
 	for _, mod := range l.extraSymbolsModules(mctx) {
