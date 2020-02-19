@@ -139,7 +139,9 @@ func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
 	return "", &exec.Error{Name: toolUnqualified, Err: exec.ErrNotFound}
 }
 
-func getToolPath(toolUnqualified string) (toolPath string) {
+func getToolPath(toolUnqualified string) string {
+	var toolPath string
+
 	if filepath.IsAbs(toolUnqualified) {
 		toolPath = toolUnqualified
 		toolUnqualified = filepath.Base(toolUnqualified)
@@ -163,7 +165,15 @@ func getToolPath(toolUnqualified string) (toolPath string) {
 			}
 		}
 	}
-	return
+
+	// Follow symlinks to get to the actual tool location, in case e.g. it
+	// is going via something like update-alternatives.
+	realToolPath, err := filepath.EvalSymlinks(toolPath)
+	if err != nil {
+		panic(fmt.Errorf("Could not follow toolchain symlink %s: %v", toolPath, err))
+	}
+
+	return realToolPath
 }
 
 // Run the compiler with the -print-file-name option, and return the result.
