@@ -140,6 +140,7 @@ func (g *soongGenerator) transformSourceActions(*transformSource, blueprint.Modu
 
 func (g *soongGenerator) buildDir() string                           { return getBuildDir() }
 func (g *soongGenerator) sourcePrefix() string                       { return getSourceDir() }
+func (g *soongGenerator) bobScriptsDir() string                      { return getBobScriptsDir() }
 func (g *soongGenerator) sharedLibsDir(tgt tgtType) string           { return "" }
 func (g *soongGenerator) sourceOutputDir(m *generateCommon) string   { return "" }
 func (g *soongGenerator) binaryOutputDir(m *binary) string           { return "" }

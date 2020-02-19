@@ -88,6 +88,7 @@ type generatorBackend interface {
 	// Backend specific info for module types
 	buildDir() string
 	sourcePrefix() string
+	bobScriptsDir() string
 	sharedLibsDir(tgt tgtType) string
 	sourceOutputDir(m *generateCommon) string
 	binaryOutputDir(m *binary) string
@@ -117,6 +118,10 @@ type AndroidProps struct {
 	Owner string
 }
 
+func getBobScriptsDir() string {
+	return filepath.Join(getBobDir(), "scripts")
+}
+
 // Construct a path to a file within the build directory that Go can
 // use to create a file.
 //
@@ -141,15 +146,6 @@ func getPathsInSourceDir(filelist []string) []string {
 	return utils.PrefixDirs(filelist, getSourceDir())
 }
 
-// Construct a path to a file within the scripts directory that Go can
-// use to create a file.
-//
-// This _is_ intended for use in writing ninja rules, but will use an explicit path
-// instead of backend specific variable expansions.
-func getPathInScriptDir(elems ...string) string {
-	return filepath.Join(append([]string{getBobDir(), "scripts"}, elems...)...)
-}
-
 // Construct a path to a file within the build directory to be used
 // in backend output files.
 func getBackendPathInBuildDir(g generatorBackend, elems ...string) string {
@@ -166,6 +162,12 @@ func getBackendPathInSourceDir(g generatorBackend, elems ...string) string {
 // backend output files.
 func getBackendPathsInSourceDir(g generatorBackend, filelist []string) []string {
 	return utils.PrefixDirs(filelist, g.sourcePrefix())
+}
+
+// Construct a path to a file within the scripts directory to be used
+// in backend output files.
+func getBackendPathInBobScriptsDir(g generatorBackend, elems ...string) string {
+	return filepath.Join(append([]string{g.bobScriptsDir()}, elems...)...)
 }
 
 func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {

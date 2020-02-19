@@ -174,7 +174,7 @@ func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbui
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
-	kmodBuild := getPathInScriptDir("kmod_build.py")
+	kmodBuild := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 	kdir := m.Properties.Build.Kernel_dir
 	if kdir != "" && !filepath.IsAbs(kdir) {
 		kdir = getBackendPathInSourceDir(g, kdir)

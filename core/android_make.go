@@ -528,6 +528,11 @@ func (g *androidMkGenerator) buildDir() string {
 	return "$(BOB_ANDROIDMK_DIR)"
 }
 
+func (g *androidMkGenerator) bobScriptsDir() string {
+	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
+	return filepath.Join(g.sourcePrefix(), srcToScripts)
+}
+
 func outputDirVarName(m *generateCommon) string {
 	return m.Name() + "_GEN_DIR"
 }
