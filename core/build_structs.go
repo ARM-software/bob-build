@@ -87,7 +87,7 @@ type generatorBackend interface {
 
 	// Backend specific info for module types
 	buildDir() string
-	sourcePrefix() string
+	sourceDir() string
 	bobScriptsDir() string
 	sharedLibsDir(tgt tgtType) string
 	sourceOutputDir(m *generateCommon) string
@@ -155,13 +155,13 @@ func getBackendPathInBuildDir(g generatorBackend, elems ...string) string {
 // Construct a path to a file within the source directory to be used
 // in backend output files.
 func getBackendPathInSourceDir(g generatorBackend, elems ...string) string {
-	return filepath.Join(append([]string{g.sourcePrefix()}, elems...)...)
+	return filepath.Join(append([]string{g.sourceDir()}, elems...)...)
 }
 
 // Construct paths to files within the source directory to be used in
 // backend output files.
 func getBackendPathsInSourceDir(g generatorBackend, filelist []string) []string {
-	return utils.PrefixDirs(filelist, g.sourcePrefix())
+	return utils.PrefixDirs(filelist, g.sourceDir())
 }
 
 // Construct a path to a file within the scripts directory to be used
