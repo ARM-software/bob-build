@@ -81,7 +81,7 @@ func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 		})
 }
 
-func (g *linuxGenerator) sourcePrefix() string {
+func (g *linuxGenerator) sourceDir() string {
 	return "${SrcDir}"
 }
 

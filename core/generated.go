@@ -412,7 +412,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		"headers_generated": "",
 		"module_dir":        getBackendPathInSourceDir(g, ctx.ModuleDir()),
 		"shared_libs_dir":   g.sharedLibsDir(m.Properties.GenerateProps.Target),
-		"src_dir":           g.sourcePrefix(),
+		"src_dir":           g.sourceDir(),
 		"srcs_generated":    "",
 	}
 

@@ -520,7 +520,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 	androidMkWriteString(ctx, m.altShortName(), sb)
 }
 
-func (g *androidMkGenerator) sourcePrefix() string {
+func (g *androidMkGenerator) sourceDir() string {
 	return "$(LOCAL_PATH)"
 }
 
@@ -530,7 +530,7 @@ func (g *androidMkGenerator) buildDir() string {
 
 func (g *androidMkGenerator) bobScriptsDir() string {
 	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
-	return filepath.Join(g.sourcePrefix(), srcToScripts)
+	return filepath.Join(g.sourceDir(), srcToScripts)
 }
 
 func outputDirVarName(m *generateCommon) string {

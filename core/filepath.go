@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,7 +68,7 @@ func (file sourceFilePath) moduleDir() string {
 }
 
 func newSourceFilePath(path string, ctx abstr.BaseModuleContext, g generatorBackend) filePath {
-	return sourceFilePath{path, projectModuleDir(ctx), g.sourcePrefix()}
+	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir()}
 }
 
 // Represents a file created in the generated output directory
