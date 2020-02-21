@@ -418,19 +418,24 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 }
 
 func (m *genrulebob) AndroidMkEntries() []android.AndroidMkEntries {
-	// skip if multiple outputs defined, as AndroidMkEntries struct support only single one
-	if len(m.Properties.Multi_out_srcs) > 0 || len(m.Properties.Out) > 1 {
-		return []android.AndroidMkEntries{}
-	}
+	entries := []android.AndroidMkEntries{}
+	for _, inout := range m.inouts {
+		for _, outfile := range inout.out {
 
-	return []android.AndroidMkEntries{android.AndroidMkEntries{
-		Class:      "DATA",
-		OutputFile: android.OptionalPathForPath(m.inouts[0].out[0]),
-		Include:    "$(BUILD_PREBUILT)",
-		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
-			func(entries *android.AndroidMkEntries) {
-				entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
-			},
-		},
-	}}
+			entries = append(entries, android.AndroidMkEntries{
+				Class:      "DATA",
+				OutputFile: android.OptionalPathForPath(outfile),
+				// if module has more than one output, keep LOCAL_MODULE unique
+				SubName: "__" + strings.Replace(outfile.Rel(), "/", "__", -1),
+				Include: "$(BUILD_PREBUILT)",
+				ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+					func(entries *android.AndroidMkEntries) {
+						entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
+					},
+				},
+			})
+
+		}
+	}
+	return entries
 }
