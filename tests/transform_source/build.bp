@@ -103,10 +103,48 @@ bob_transform_source {
     build_by_default: true,
 }
 
+bob_transform_source {
+    // Ensure that name clashes between files having the same basename
+    // are avoided for RSP files and depfiles.
+    name: "validate_transform_source_nested_output",
+    srcs: [
+        "a/f.in",
+        "b/f.in",
+    ],
+    out: {
+        match: "(.+/.+)\\.in",
+        replace: ["$1.txt"]
+    },
+    depfile: true,
+    rsp_content: "${in}",
+    cmd: "touch ${depfile}; cat ${rspfile} > ${out}",
+    build_by_default: true,
+}
+
+bob_transform_source {
+    // Ensure that RSP files and depfiles are not being created in
+    // non-existent directories.
+    name: "validate_transform_source_flattened_output",
+    srcs: [
+        "a/f0.in",
+        "b/f.in",
+    ],
+    out: {
+        match: ".+/(.+)\\.in",
+        replace: ["$1.txt"]
+    },
+    depfile: true,
+    rsp_content: "${in}",
+    cmd: "touch ${depfile}; cat ${rspfile} > ${out}",
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_transform_source",
     srcs: [
         "validate_link_transform_source",
         "validate_install_transform_source",
+        "validate_transform_source_nested_output",
+        "validate_transform_source_flattened_output",
     ],
 }

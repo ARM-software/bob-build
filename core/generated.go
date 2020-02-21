@@ -258,6 +258,15 @@ func (m *generateCommon) getDepfile(g generatorBackend) (name string, depfile bo
 	return "", depfile
 }
 
+func (m *generateCommon) getRspfile(g generatorBackend) (name string, rspfile bool) {
+	rspfile = m.Properties.Rsp_content != nil
+	if rspfile {
+		name = filepath.Join(g.sourceOutputDir(m), getRspfileName(m.Name()))
+		return
+	}
+	return "", rspfile
+}
+
 // GenerateSourceProps are properties of 'bob_generate_source', i.e. a module
 // type which can generate sources using a single execution
 // The command will be run once - with $in being the paths in "srcs" and $out being the paths in "out".
@@ -469,7 +478,11 @@ func (m *generateCommon) getAliasList() []string {
 }
 
 func getDepfileName(s string) string {
-	return s + ".d"
+	return utils.FlattenPath(s) + ".d"
+}
+
+func getRspfileName(s string) string {
+	return "." + utils.FlattenPath(s) + ".rsp"
 }
 
 func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -483,14 +496,14 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 		m.generateCommon.Properties.SourceProps.Specials...),
 		getGeneratedFiles(ctx, g)...)
 	io.out = m.outputs(g)
-	if depfile, ok := m.getDepfile(g); ok {
-		io.depfile = depfile
-	}
 	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
 	io.implicitOuts = m.implicitOutputs(g)
 
-	if m.generateCommon.Properties.Rsp_content != nil {
-		io.rspfile = filepath.Join(g.sourceOutputDir(&m.generateCommon), "."+m.Name()+".rsp")
+	if depfile, ok := m.getDepfile(g); ok {
+		io.depfile = depfile
+	}
+	if rspfile, ok := m.getRspfile(g); ok {
+		io.rspfile = rspfile
 	}
 
 	return []inout{io}
@@ -534,7 +547,7 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 	}
 
 	if proptools.Bool(depfile) {
-		io.depfile = filepath.Join(genDir, getDepfileName(filepath.Base(source.localPath())))
+		io.depfile = filepath.Join(genDir, getDepfileName(source.localPath()))
 	}
 
 	for _, implSrc := range tsp.Out.Implicit_srcs {
@@ -543,8 +556,7 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 	}
 
 	if rspfile {
-		io.rspfile = filepath.Join(genDir, filepath.Dir(source.localPath()),
-			"."+filepath.Base(source.localPath())+".rsp")
+		io.rspfile = filepath.Join(genDir, getRspfileName(source.localPath()))
 	}
 
 	return
