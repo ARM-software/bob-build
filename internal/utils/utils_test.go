@@ -259,3 +259,9 @@ func problematicAppendExample(t *testing.T) {
 	// C = [1 2 3 4 5 C]
 	fmt.Printf("C = %v\n", arrC)
 }
+
+func Test_FlattenPath(t *testing.T) {
+	flattened := FlattenPath("a__b/c/d_e/_f_.txt")
+
+	assert.Equal(t, "a__b__c__d_e___f_.txt", flattened)
+}

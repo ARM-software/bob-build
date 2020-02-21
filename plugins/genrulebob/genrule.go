@@ -323,7 +323,11 @@ func (m *genrulebob) calcExportGenIncludeDirs(mctx android.ModuleContext) androi
 }
 
 func getDepfileName(s string) string {
-	return s + ".d"
+	return utils.FlattenPath(s) + ".d"
+}
+
+func getRspfileName(s string) string {
+	return "." + utils.FlattenPath(s) + ".rsp"
 }
 
 // Remove the relative part from android.Path
@@ -364,12 +368,10 @@ func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp, s
 	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(mop.Implicit_outs))
 
 	if m.Properties.Depfile {
-		sio.depfile = android.PathForModuleGen(ctx, getDepfileName(filepath.Base(source.Rel())))
+		sio.depfile = android.PathForModuleGen(ctx, getDepfileName(source.Rel()))
 	}
-
 	if m.Properties.Rsp_content != nil {
-		sio.rspfile = android.PathForModuleGen(ctx, filepath.Dir(source.Rel()),
-			"."+filepath.Base(source.Rel())+".rsp")
+		sio.rspfile = android.PathForModuleGen(ctx, getRspfileName(source.Rel()))
 	}
 
 	return
@@ -403,7 +405,7 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
 		}
 		if m.Properties.Rsp_content != nil {
-			sio.rspfile = android.PathForModuleGen(ctx, "."+m.Name()+".rsp")
+			sio.rspfile = android.PathForModuleGen(ctx, getRspfileName(m.Name()))
 		}
 
 		m.inouts = append(m.inouts, sio)

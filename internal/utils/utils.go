@@ -269,3 +269,8 @@ func Exit(exitCode int, err string) {
 	fmt.Fprintf(os.Stderr, err+"\n")
 	os.Exit(exitCode)
 }
+
+// FlattenPath produces a filename containing no slashes from a path.
+func FlattenPath(s string) string {
+	return strings.Replace(s, "/", "__", -1)
+}
