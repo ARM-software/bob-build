@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 source ".bob.bootstrap"
 
 # Switch to the working directory
-cd "${WORKDIR}"
+cd -P "${WORKDIR}"
 
 # Get Bob bootstrap version
 source "${BOB_DIR}/bob.bootstrap.version"
