@@ -74,7 +74,9 @@ pushd "${BOB_ROOT}" &> /dev/null
 
 TEST_DIRS=("build-indep"
            "build-in-outp"
-           "tests/build-in-src")
+           "tests/build-in-src"
+           "build-link"
+           "build-link-target")
 rm -rf "${TEST_DIRS[@]}"
 
 # Test by explicitly requesting the `bob_tests` alias, which should include all
@@ -90,6 +92,14 @@ popd &> /dev/null
 
 # Build in an independent working directory
 build_dir=build-indep
+tests/bootstrap_linux -o ${build_dir}
+${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
+check_build_output "${build_dir}"
+
+# Build in a directory referred to via a symlink
+build_dir=build-link
+mkdir -p build-link-target/builds/build
+ln -s build-link-target/builds/build ${build_dir}
 tests/bootstrap_linux -o ${build_dir}
 ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"

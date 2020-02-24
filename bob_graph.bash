@@ -30,7 +30,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 source ".bob.bootstrap"
 
 # Switch to the working directory
-cd "${WORKDIR}"
+cd -P "${WORKDIR}"
 
 BOB_BUILDER_TARGET=".bootstrap/bin/bob"
 BOB_BUILDER="${BUILDDIR}/${BOB_BUILDER_TARGET}"

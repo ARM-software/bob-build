@@ -54,6 +54,21 @@ function bob_abspath() {
     python -c "import os, sys; print(os.path.abspath(sys.argv[1]))" "$1"
 }
 
+# Get the target of a symlink. If the target is a relative path, it is intended
+# to be relative to the directory containing the link, not the current working
+# directory, so it is prefixed with the link's dirname.
+function bob_eval_link() {
+    local link_target="$(readlink "${1}")" link_dir=
+    if [[ "${link_target:0:1}" != "/" ]]; then
+        link_dir="$(dirname "${1}")"
+        if [[ "${link_dir: -1}" != "/" ]]; then
+            link_dir="${link_dir}/"
+        fi
+        link_target="${link_dir}${link_target}"
+    fi
+    echo "${link_target}"
+}
+
 function path_is_parent() {
     local parent="$1" subpath="$2"
     if [[ ${parent} == / ]]; then
@@ -66,14 +81,18 @@ function path_is_parent() {
 
 # Return a path that references $2 from $1
 # $1 and $2 must exist
-# This is a simple implementation. Symlinks are not followed.
-# If there are fewer path elements in the absolute version, return that instead.
+#
+# The minimum possible number of symlinks will be followed, in order to
+# preserve the filesystem structure as the user sees it. Symlinks inside the
+# source path *are* expanded when it is required to access their parent
+# directory, because `..` on a soft link returns the parent directory of the
+# link's target, rather than the link.
 function relative_path() {
     [[ -e $1 ]] || { echo "relative_path: Source path '$1' does not exist" >&2; return 1; }
     [[ -e $2 ]] || { echo "relative_path: Target path '$2' does not exist" >&2; return 1; }
     local SRC_ABS=$(bob_abspath "${1}")
     local TGT_ABS=$(bob_abspath "${2}")
-    local BACK= RESULT= CMN_PFX=
+    local BACK= RESULT= CMN_PFX= RELPATH_FROM_LINK=
 
     if [[ ${TGT_ABS} == ${SRC_ABS} ]]; then
         RESULT=.
@@ -90,6 +109,12 @@ function relative_path() {
         # TGT_ABS is a parent of SRC_ABS
 
         while [[ ${TGT_ABS} != ${SRC_ABS} ]]; do
+            if [[ -L ${SRC_ABS} ]]; then
+                SRC_ABS="$(bob_eval_link "${SRC_ABS}")" || return $?
+                RELPATH_FROM_LINK="$(relative_path "${SRC_ABS}" "${TGT_ABS}")" || return $?
+                echo "${BACK}${RELPATH_FROM_LINK}"
+                return
+            fi
             SRC_ABS=$(dirname ${SRC_ABS})
             BACK="../${BACK}"
         done
@@ -100,6 +125,12 @@ function relative_path() {
         CMN_PFX=${SRC_ABS}
 
         while ! path_is_parent "${CMN_PFX}" "${TGT_ABS}"; do
+            if [[ -L ${CMN_PFX} ]]; then
+                CMN_PFX="$(bob_eval_link "${CMN_PFX}")" || return $?
+                RELPATH_FROM_LINK="$(relative_path "${CMN_PFX}" "${TGT_ABS}")" || return $?
+                echo "${BACK}${RELPATH_FROM_LINK}"
+                return
+            fi
             CMN_PFX=$(dirname ${CMN_PFX})
             BACK="../${BACK}"
         done

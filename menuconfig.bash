@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ cd $(dirname "${BASH_SOURCE[0]}")
 source ".bob.bootstrap"
 
 # Move to the working directory
-cd "${WORKDIR}"
+cd -P "${WORKDIR}"
 
 "${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
