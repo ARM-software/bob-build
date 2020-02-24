@@ -13,8 +13,12 @@ linker command-line - in this example, `libA` must appear *before* `libB`.
 With shared libraries, this is handled automatically by the linker, because
 dependencies can be encoded in the shared library file itself. However,
 static libraries are simply collections of `.o` files, so this is not possible.
-Instead, Bob provides two tools to automatically generate the correct library
-order - `export_static_libs` and `whole_static_libs`.
+Bob allows static libraries to declare dependencies on other static libraries.
+When binaries and shared libraries are linked, all dependent static libraries
+are sorted and added to the command line. Bob also allows static libraries to
+specify dependent shared libraries and ldlibs, and these will all propagate to
+the link commands of binaries and shared libraries that use the static library.
+`whole_static_libs` can also be used to aggregate static libraries.
 
 ## Full specification of `bob_static_library` properties
 `bob_static_library` supports [features](../features.md)
@@ -53,14 +57,14 @@ bob_static_library {
     ldflags: ["..."],
     export_ldflags: ["..."],
 
-    export_static_libs: ["libFooStatic"],
+    static_libs: ["libFooStatic"],
 
-    export_shared_libs: ["..."],
+    shared_libs: ["..."],
 
     reexport_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
     whole_static_libs: ["bob_static_lib.name"],
 
-    export_ldlibs: ["-llog"],
+    ldlibs: ["-llog"],
 
     generated_headers: ["bob_generate_source.name"],
     generated_sources: ["bob_transform_source.name"],
@@ -90,11 +94,11 @@ bob_static_library {
 Linker flags to be propagated to the top-level shared library or binary.
 
 ----
-### **bob_static_lib.export_static_libs** (optional)
-Static libraries can use the `export_static_libs` property to tell Bob about
-any other static libraries they depend on. Bob will ensure that all static
-libraries are placed earlier in the link order than their dependents. The
-earlier example could therefore be resolved as follows:
+### **bob_static_lib.static_libs** (optional)
+Static libraries can use the `static_libs` property to tell Bob about any other
+static libraries they depend on. Bob ensures that all static libraries are
+placed earlier in the link order than their dependents. The earlier example
+could therefore be resolved as follows:
 
 ```bp
 bob_static_library {
@@ -104,7 +108,7 @@ bob_static_library {
 
 bob_static_library {
     name: "libA",
-    export_static_libs: ["libB"],
+    static_libs: ["libB"],
     srcs: ["a.c"],
 }
 
@@ -156,14 +160,14 @@ bob_static_library {
 ```
 
 ----
-### **bob_static_lib.export_shared_libs** (optional)
+### **bob_static_lib.shared_libs** (optional)
 The libraries mentioned here will be appended to `shared_libs` of the top-level
 build object (shared library or binary) linking with this module.
-`export_shared_libs` is an indication that this module is using a shared
+`shared_libs` is an indication that this module is using a shared
 library, and users of this module need to link it.
 
 
 ----
-### **bob_static_lib.export_ldlibs** (optional)
+### **bob_static_lib.ldlibs** (optional)
 Library dependency-related linker flags which should be added to the link
 command of the top-level build object (shared library or binary).

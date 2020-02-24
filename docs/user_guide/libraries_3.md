@@ -76,7 +76,7 @@ bob_static_library {
 
     export_cflags: ["{{.libdrm_cflags}}"],
     export_ldflags: ["{{.libdrm_ldflags}}"],
-    export_ldlibs: ["{{.libdrm_ldlibs}}"],
+    ldlibs: ["{{.libdrm_ldlibs}}"],
 }
 
 bob_binary {

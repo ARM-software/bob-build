@@ -253,11 +253,9 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	// Setup ARM mode if needed
 	sb.WriteString(specifyArmMode(cflagsList, m.Properties.Conlyflags, m.Properties.Cxxflags))
 
-	// convert Shared_libs, Export_shared_libs, Resolved_static_libs, and
-	// Whole_static_libs to Android module names rather than Bob module
-	// names
-	sharedLibs := append(androidModuleNames(m.Properties.Shared_libs),
-		androidModuleNames(m.Properties.Export_shared_libs)...)
+	// convert Shared_libs, Resolved_static_libs, and Whole_static_libs
+	// to Android module names rather than Bob module names
+	sharedLibs := androidModuleNames(m.Properties.Shared_libs)
 	staticLibs := androidModuleNames(m.Properties.ResolvedStaticLibs)
 	wholeStaticLibs := androidModuleNames(m.Properties.Whole_static_libs)
 	exportHeaderLibs := androidModuleNames(m.Properties.Export_header_libs)

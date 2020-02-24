@@ -121,6 +121,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 	}
 
 	showLdlibs := handler.showLdlibs
+	depEdgeStyle := "solid"
 
 	// Set type of node
 	switch mainModule.(type) {
@@ -133,6 +134,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 		// Don't show ldlibs usage on static libraries, as these
 		// aren't actually applied
 		showLdlibs = false
+		depEdgeStyle = "dashed"
 	case *sharedLibrary:
 		if !handler.showSharedLibraries {
 			return
@@ -161,12 +163,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			for _, lib := range mainBuild.Shared_libs {
 				handler.graph.AddEdge(mainModule.Name(), lib)
 				handler.graph.SetEdgeColor(mainModule.Name(), lib, "orange")
-			}
-
-			for _, lib := range mainBuild.Export_shared_libs {
-				handler.graph.AddEdge(mainModule.Name(), lib)
-				handler.graph.SetEdgeColor(mainModule.Name(), lib, "orange")
-				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", "dashed")
+				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", depEdgeStyle)
 			}
 		}
 
@@ -174,12 +171,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			for _, lib := range mainBuild.Static_libs {
 				handler.graph.AddEdge(mainModule.Name(), lib)
 				handler.graph.SetEdgeColor(mainModule.Name(), lib, "green")
-			}
-
-			for _, lib := range mainBuild.Export_static_libs {
-				handler.graph.AddEdge(mainModule.Name(), lib)
-				handler.graph.SetEdgeColor(mainModule.Name(), lib, "green")
-				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", "dashed")
+				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", depEdgeStyle)
 			}
 		}
 
@@ -199,14 +191,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 				handler.graph.SetNodeBackgroundColor(lib, "skyblue")
 				handler.graph.AddEdge(mainModule.Name(), lib)
 				handler.graph.SetEdgeColor(mainModule.Name(), lib, "skyblue")
-			}
-
-			// We will only be outputing export_ldlibs for defaults
-			for _, lib := range mainBuild.Export_ldlibs {
-				handler.graph.SetNodeBackgroundColor(lib, "skyblue")
-				handler.graph.AddEdge(mainModule.Name(), lib)
-				handler.graph.SetEdgeColor(mainModule.Name(), lib, "skyblue")
-				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", "dashed")
+				handler.graph.SetEdgeProperty(mainModule.Name(), lib, "style", depEdgeStyle)
 			}
 		}
 	}

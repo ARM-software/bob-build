@@ -66,6 +66,19 @@ func getBobDir() string {
 	return bobdir
 }
 
+// NOTE: This mutator is here temporarily and will be removed once other parts of the
+// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
+func mergeExportsMutator(mctx blueprint.BottomUpMutatorContext) {
+	if l, ok := getLibrary(mctx.Module()); ok {
+		l.Properties.Static_libs = append(l.Properties.Static_libs, l.Properties.Export_static_libs...)
+		l.Properties.Shared_libs = append(l.Properties.Shared_libs, l.Properties.Export_shared_libs...)
+		l.Properties.Ldlibs = append(l.Properties.Ldlibs, l.Properties.Export_ldlibs...)
+		l.Properties.Export_static_libs = []string{}
+		l.Properties.Export_shared_libs = []string{}
+		l.Properties.Export_ldlibs = []string{}
+	}
+}
+
 // Main is the entry point for the bob primary builder.
 //
 // It loads the configuration from config.json, registers the module type
@@ -132,6 +145,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
 	ctx.RegisterTopDownMutator("default_applier", defaultApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("merge_exports", mergeExportsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()

@@ -46,8 +46,9 @@ bob_binary {
 
 bob_static_library {
     name: "libbob_test_external_shared_proxy",
-    export_shared_libs: ["libbob_test_external_shared"],
-    // export_shared_libs just makes the final link use `-l$LIBNAME` - to
+    shared_libs: ["libbob_test_external_shared"],
+
+    // shared_libs just makes the final link use `-l$LIBNAME` - to
     // propagate the include paths, we also need reexport_libs.
     reexport_libs: ["libbob_test_external_shared"],
     enabled: false,
@@ -59,7 +60,7 @@ bob_static_library {
 bob_static_library {
     name: "use_external_lib_proxy",
     srcs: ["use_external_shared_via_proxy.c"],
-    export_static_libs: ["libbob_test_external_shared_proxy"],
+    static_libs: ["libbob_test_external_shared_proxy"],
     enabled: false,
     android: {
         enabled: true,

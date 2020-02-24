@@ -58,7 +58,7 @@ echo "
 # white           - external library (not defined in Bob)
 
 # Marked node
-# double circle   -  marked node
+# double circle   - marked node
 
 # Edges
 # orange edge     - linked by shared_libs
@@ -66,7 +66,7 @@ echo "
 # red edge        - linked by whole_static
 # blue edge       - linked by ldlibs
 # yellow edge     - uses defaults
-# dashed edge     - linked using an export_ property
+# dashed edge     - dependency propagated to closest binary or shared library
 "
 
 "${BOB_BUILDER}" -l "${BLUEPRINT_LIST_FILE}" -b "${BUILDDIR}" "$@" "${SRCDIR}/${TOPNAME}"

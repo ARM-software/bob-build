@@ -478,10 +478,6 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	}, "ar", "build_wrapper", "whole_static_libs", "whole_static_tool")
 
 func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
-	if len(m.Properties.Static_libs) > 0 || len(m.Properties.Shared_libs) > 0 {
-		panic(errors.New("static library cannot include another library, only include it using whole_static"))
-	}
-
 	rule := staticLibraryRule
 
 	buildWrapper, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
