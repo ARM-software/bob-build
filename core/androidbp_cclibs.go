@@ -152,7 +152,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 
 	cflags := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags, exported_cflags)
 
-	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs)
+	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs)
 	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)
 	// Exported header libraries must be mentioned in both header_libs
 	// *and* export_header_lib_headers - i.e., we can't export a header
@@ -185,7 +185,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 	m.AddStringList("include_dirs", l.Properties.Include_dirs)
 	m.AddStringList("local_include_dirs", l.Properties.Local_include_dirs)
-	m.AddStringList("shared_libs", ccModuleNames(mctx, l.Properties.Shared_libs, l.Properties.Export_shared_libs))
+	m.AddStringList("shared_libs", ccModuleNames(mctx, l.Properties.Shared_libs))
 	m.AddStringList("static_libs", staticLibs)
 	m.AddStringList("whole_static_libs", ccModuleNames(mctx, l.Properties.Whole_static_libs))
 	m.AddStringList("header_libs", headerLibs)

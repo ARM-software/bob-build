@@ -137,10 +137,18 @@ directories this library should both import and export to its users.
 ----
 ### **bob_module.static_libs** (optional)
 The list of static lib modules that this library depends on.
+These are propagated to the closest linking object when specified on static
+libraries.
+`static_libs` is an indication that this module is using a static library, and
+users of this module need to link against it.
 
 ----
 ### **bob_module.shared_libs** (optional)
 The list of shared lib modules that this library depends on.
+These are propagated to the closest linking object when specified on static
+libraries.
+`shared_libs` is an indication that this module is using a shared library, and
+users of this module need to link against it.
 
 ----
 ### **bob_module.reexport_libs** (optional)
@@ -153,6 +161,8 @@ identifiers.
 ### **bob_module.ldlibs** (optional)
 Linker flags required to link to the necessary system libraries. Unlike
 `ldflags`, this is added to the _end_ of the linker command-line.
+These are propagated to the closest linking object when specified on static
+libraries.
 
 ----
 ### **bob_module.generated_headers** (optional)

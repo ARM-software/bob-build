@@ -56,24 +56,26 @@ type BuildProps struct {
 	Library_version string
 
 	// The list of shared lib modules that this library depends on.
-	// 'shared_libs' only makes sense for share libraries and executables -
-	// static libs should use 'export_shared_libs', so the dependency is
-	// propagated to the top-level object.
+	// These are propagated to the closest linking object when specified on static libraries.
+	// shared_libs is an indication that this module is using a shared library, and
+	// users of this module need to link against it.
 	Shared_libs []string
 	// The libraries mentioned here will be appended to shared_libs of the modules that use
 	// this library (via static_libs, whole_static_libs or shared_libs).
-	// export_shared_libs is an indication that this module is using a shared library, and
-	// users of this module need to link against it.
+	ExtraSharedLibs []string `blueprint:"mutated"`
+
+	// NOTE: This field is here temporarily and will be removed once other parts of the
+	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
 	Export_shared_libs []string
-	ExtraSharedLibs    []string `blueprint:"mutated"`
 
 	// The list of static lib modules that this library depends on
-	// Only makes sense to define for shared libraries and executables
+	// These are propagated to the closest linking object when specified on static libraries.
+	// static_libs is an indication that this module is using a static library, and
+	// users of this module need to link against it.
 	Static_libs []string
-	// The libraries mentioned here will be appended to static_libs of the modules that use
-	// this library (via static_libs, whole_static_libs or shared_libs).
-	// export_static_libs is an indication that this module is using a static library, and
-	// users of this module need to link it.
+
+	// NOTE: This field is here temporarily and will be removed once other parts of the
+	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
 	Export_static_libs []string
 
 	// This list of dependencies that exported cflags and exported include dirs
@@ -98,9 +100,11 @@ type BuildProps struct {
 	Export_header_libs []string
 
 	// Linker flags required to link to the necessary system libraries
+	// These are propagated to the closest linking object when specified on static libraries.
 	Ldlibs []string
-	// Same as ldlibs, but specified on static libraries and
-	// propagated to the top-level build object.
+
+	// NOTE: This field is here temporarily and will be removed once other parts of the
+	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
 	Export_ldlibs []string
 
 	// The list of modules that generate extra headers for this module
@@ -685,8 +689,6 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		sl.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
 	} else if sl, ok := m.(*staticLibrary); ok {
 		props := sl.Properties
-		sl.checkField(len(props.Shared_libs) == 0, "shared_libs")
-		sl.checkField(len(props.Static_libs) == 0, "static_libs")
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	}
 }
@@ -700,8 +702,6 @@ func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
 				l.Properties.Static_libs,
 				l.Properties.Header_libs,
 				l.Properties.Whole_static_libs,
-				l.Properties.Export_shared_libs,
-				l.Properties.Export_static_libs,
 				l.Properties.Export_header_libs) {
 				panic(fmt.Errorf("%s reexports unused library %s", mctx.ModuleName(), lib))
 			}
@@ -730,11 +730,11 @@ func getLinkableModules(mctx blueprint.TopDownMutatorContext) map[blueprint.Modu
 }
 
 // Check that no libraries are being accidentally linked twice, by having one copy
-// linked explicitly (via export_static_libs), and another included in a different
+// linked explicitly (via static_libs), and another included in a different
 // library via whole_static_libs.
-func checkForMultipleLinking(topLevelModuleName string, allExportStaticLibs map[string]bool, insideWholeLibs map[string]string) {
+func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bool, insideWholeLibs map[string]string) {
 	duplicateDeps := []string{}
-	for dep := range allExportStaticLibs {
+	for dep := range staticLibs {
 		if _, ok := insideWholeLibs[dep]; ok {
 			duplicateDeps = append(duplicateDeps, dep)
 		}
@@ -753,13 +753,13 @@ func checkForMultipleLinking(topLevelModuleName string, allExportStaticLibs map[
 // While traversing the static library dependency tree, propagate extra properties.
 func propagateOtherExportedProperties(l *library, depLib *staticLibrary) {
 	props := l.build()
-	for _, shLib := range depLib.Properties.Export_shared_libs {
+	for _, shLib := range depLib.Properties.Shared_libs {
 		if !utils.Contains(props.Shared_libs, shLib) {
 			props.Shared_libs = append(props.Shared_libs, shLib)
 			props.ExtraSharedLibs = append(props.ExtraSharedLibs, shLib)
 		}
 	}
-	for _, ldlib := range depLib.Properties.Export_ldlibs {
+	for _, ldlib := range depLib.Properties.Ldlibs {
 		if !utils.Contains(props.Ldlibs, ldlib) {
 			props.Ldlibs = append(props.Ldlibs, ldlib)
 		}
@@ -777,9 +777,9 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 		return
 	}
 
-	// Track the set of everything mentioned in 'export_static_libs' of all
+	// Track the set of everything mentioned in 'static_libs' of all
 	// dependencies of this module, for multiple-link checking.
-	allExportStaticLibs := make(map[string]bool)
+	allImportedStaticLibs := make(map[string]bool)
 	// Map between a library name and the first encountered lib in which it
 	// is used in whole_static_libs.
 	insideWholeLibs := make(map[string]string)
@@ -802,8 +802,8 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 					insideWholeLibs[subLib] = depLib.Name()
 				}
 			}
-			for _, subLib := range depLib.Properties.Export_static_libs {
-				allExportStaticLibs[subLib] = true
+			for _, subLib := range depLib.Properties.Static_libs {
+				allImportedStaticLibs[subLib] = true
 			}
 
 			propagateOtherExportedProperties(l, depLib)
@@ -827,7 +827,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 		}
 	})
 
-	checkForMultipleLinking(mctx.ModuleName(), allExportStaticLibs, insideWholeLibs)
+	checkForMultipleLinking(mctx.ModuleName(), allImportedStaticLibs, insideWholeLibs)
 }
 
 type graphMutatorHandler struct {
@@ -868,13 +868,6 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 		handler.graph.SetEdgeColor(mainModuleName, lib, "blue")
 	}
 
-	for _, lib := range mainBuild.Export_static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
-		}
-		handler.graph.SetEdgeColor(mainModuleName, lib, "green")
-	}
-
 	for _, lib := range mainBuild.Whole_static_libs {
 		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
 			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
@@ -887,18 +880,6 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 	for i, previous := range mainBuild.Static_libs {
 		for j := i + 1; j < len(mainBuild.Static_libs); j++ {
 			lib := mainBuild.Static_libs[j]
-			if !handler.graph.IsReachable(lib, previous) {
-				if handler.graph.AddEdge(previous, lib) {
-					temporaryPaths[previous] = append(temporaryPaths[previous], lib)
-					handler.graph.SetEdgeColor(previous, lib, "pink")
-				}
-			}
-		}
-	}
-
-	for i, previous := range mainBuild.Export_static_libs {
-		for j := i + 1; j < len(mainBuild.Export_static_libs); j++ {
-			lib := mainBuild.Export_static_libs[j]
 			if !handler.graph.IsReachable(lib, previous) {
 				if handler.graph.AddEdge(previous, lib) {
 					temporaryPaths[previous] = append(temporaryPaths[previous], lib)
@@ -965,8 +946,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 		mainBuild.ResolvedStaticLibs = sortedStaticLibs
 	}
 
-	alreadyAddedStaticLibsDependencies := utils.NewStringSlice(mainBuild.Static_libs, mainBuild.Export_static_libs)
-	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, alreadyAddedStaticLibsDependencies)
+	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, mainBuild.Static_libs)
 
 	mctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
 

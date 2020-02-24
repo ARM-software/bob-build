@@ -60,9 +60,9 @@ its users to rebuild.
 
 A library may call code from other libraries. To ensure that the
 executable (or shared library) links against the right thing, use
-`export_static_libs`, `export_shared_libs` and `export_ldlibs`. These
-effectively say "I'm using this library, make sure it is added to your
-list of (static|shared|system) libraries".
+`static_libs`, `shared_libs` and `ldlibs`. These effectively say
+"I'm using this library, make sure it is added to your list of
+(static|shared|system) libraries".
 
 For completeness, `export_ldflags` is also supported. This propagates
 linker flags to modules that link against this library. You can use
@@ -88,7 +88,7 @@ bob_static_library {
     name: "libcompression",
     srcs: ["compression/compression.c"],
     export_local_include_dirs: ["compression/include"],
-    export_static_libs: ["libgzip"],
+    static_libs: ["libgzip"],
 
     // One of the libcompression's external headers includes a gzip header
     reexport_libs: ["libgzip"],
@@ -101,9 +101,8 @@ bob_static_library {
 }
 ```
 
-The other export properties, `export_static_libs`,
-`export_shared_libs`, `export_ldlibs`, and `export_ldflags`, always
-propagate to the nearest module doing the link i.e. the nearest
+On static libraries `static_libs`, `shared_libs`, `ldlibs`, and `export_ldflags`
+always propagate to the nearest module doing the link i.e. the nearest
 `bob_binary` or `bob_shared_library`.
 
 ## Static Library Encapsulation
@@ -128,7 +127,7 @@ bob_binary {
 
 bob_static_library {
     name: "libhelpers",
-    export_static_libs: [
+    static_libs: [
         "libcompression",
         "libsha1",
         "libutf8",
@@ -141,7 +140,7 @@ bob_static_library {
         "compress.c",
         "inflate.c",
     ],
-    export_static_libs: [
+    static_libs: [
         "libgzip",
         "libbzip",
         "liblzma",
@@ -206,17 +205,16 @@ bob_static_library {
 
 ## Link What You Use
 
-When `export_static_libs` and `export_shared_libs` are used
-extensively you may find that builds happen to work because the
-exports from low level libraries satisfy the requirements of higher
-level libraries.
+When `static_libs` and `shared_libs` are used extensively on static
+libraries (where they are propagated) you may find that builds happen
+to work because the exports from low level libraries satisfy the
+requirements of higher level libraries.
 
 Although this works, avoid relying on this. This is an analogous
 situation to C/C++ header usage, and the advice is the same. Instead
 of "Include What You Use", "Link What You Use" - for every (external)
 symbol in the `srcs` of your module the library that supplies the
-symbol must be listed in either `static_libs`, `shared_libs`,
-`export_static_libs`, `export_shared_libs` or
+symbol must be listed in either `static_libs`, `shared_libs` or
 `whole_static_libs`. Symbols include function calls and global
 variable access. Note that for enumeration and macro values you can
 get away with just including headers, and not linking - however it's
@@ -294,7 +292,7 @@ retained in the shared library.
 bob_static_library {
     name: "libcompapi",
     srcs: "api.c",
-    export_static_libs: [
+    static_libs: [
         "libgzip",
         "libbzip",
         "liblzma",
@@ -304,7 +302,7 @@ bob_static_library {
 bob_static_library {
     name: "libhelpers",
     srcs: "helpers.c"
-    export_static_libs: [
+    static_libs: [
          "libsha1",
          "libutf8",
     ],

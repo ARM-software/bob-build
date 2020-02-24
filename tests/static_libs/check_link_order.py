@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018, 2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +46,7 @@ deps = {
     "sl_libf.a": ["sl_libg.a"],
     "sl_libh.a": ["sl_libe.a"],
 
-    # Implicit dependencies in export_static_libs are not followed
+    # Implicit dependencies in static_libs are not followed
     # "sl_libe.a" : ["sl_libf.a"],
     # "sl_libg.a" : ["sl_libh.a"],
     "sl_libe.a": [],

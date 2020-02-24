@@ -363,13 +363,11 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 		mctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
 		mctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
-		mctx.AddVariationDependencies(nil, staticDepTag, build.Export_static_libs...)
 
 		mctx.AddVariationDependencies(nil, headerDepTag, build.Header_libs...)
 		mctx.AddVariationDependencies(nil, headerDepTag, build.Export_header_libs...)
 
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
-		mctx.AddVariationDependencies(nil, sharedDepTag, build.Export_shared_libs...)
 	}
 	if km, ok := mctx.Module().(*kernelModule); ok {
 		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)

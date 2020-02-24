@@ -45,18 +45,15 @@ bob_defaults {
     ldflags: ["..."],
     export_ldflags: ["..."],
 
-    static_libs: ["bob_static_lib.name"],
-    export_static_libs: ["..."],
+    static_libs: ["bob_static_lib.name", "..."],
 
-    shared_libs: ["bob_shared_lib.name"],
-    export_shared_libs: ["..."],
+    shared_libs: ["bob_shared_lib.name", "..."],
 
     reexport_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
 
     whole_static_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
 
-    ldlibs: ["-lz"],
-    export_ldlibs: ["-llog"],
+    ldlibs: ["-lz", "..."],
 
     generated_headers: ["bob_generate_source.name"],
     generated_sources: ["bob_transform_source.name"],
