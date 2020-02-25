@@ -165,7 +165,7 @@ type symlinkInstaller interface {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string
+	filesToInstall(ctx blueprint.BaseModuleContext) []string
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -224,15 +224,15 @@ func (m *resource) getEnableableProps() *EnableableProps {
 // Resources don't have any outputs (i.e. stuff generated in the build
 // directory) - they only copy source files to the installation dir. This
 // method exists to implement PhonyInterface.
-func (m *resource) outputs(g generatorBackend) []string {
+func (m *resource) outputs() []string {
 	return []string{}
 }
 
-func (m *resource) implicitOutputs(g generatorBackend) []string {
+func (m *resource) implicitOutputs() []string {
 	return []string{}
 }
 
-func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
+func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.Properties.SourceProps.getSources(ctx)
 }
 

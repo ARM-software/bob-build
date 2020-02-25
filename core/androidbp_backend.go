@@ -87,10 +87,6 @@ func (g *androidBpGenerator) sharedLibsDir(tgtType) string {
 // add the necessary paths when it runs. Therefore all these return an
 // empty string.
 func (g *androidBpGenerator) sourceOutputDir(*generateCommon) string   { return "" }
-func (g *androidBpGenerator) binaryOutputDir(*binary) string           { return "" }
-func (g *androidBpGenerator) staticLibOutputDir(*staticLibrary) string { return "" }
-func (g *androidBpGenerator) sharedLibOutputDir(*sharedLibrary) string { return "" }
-func (g *androidBpGenerator) kernelModOutputDir(*kernelModule) string  { return "" }
 
 //// End module specific functions
 

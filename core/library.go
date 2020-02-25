@@ -288,6 +288,7 @@ func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend
 // library is a base class for modules which are generated from sets of object files
 type library struct {
 	moduleBase
+	simpleOutputProducer
 
 	Properties struct {
 		Features
@@ -379,10 +380,6 @@ func (m *library) stripOutputDir(g generatorBackend) string {
 	return getBackendPathInBuildDir(g, string(m.Properties.TargetType), "strip")
 }
 
-func (l *library) implicitOutputs(g generatorBackend) []string {
-	return []string{}
-}
-
 func (l *library) altName() string {
 	return l.outputName()
 }
@@ -405,7 +402,6 @@ func (l *library) shortName() string {
 }
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
-	g := getBackend(ctx)
 	visited := map[string]bool{}
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
@@ -432,7 +428,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 				if !ok {
 					panic(errors.New("generated header must have outputs()"))
 				}
-				generatedHeaders := getHeadersGenerated(g, ds)
+				generatedHeaders := getHeadersGenerated(ds)
 
 				orderOnly = append(orderOnly, generatedHeaders...)
 			}
@@ -476,26 +472,18 @@ func (l *library) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 	l.Properties.Build.Target.processBuildWrapper(ctx)
 }
 
-type staticLibrary struct {
-	library
-}
-
-func (m *staticLibrary) outputDir(g generatorBackend) string {
-	return g.staticLibOutputDir(m)
-}
-
-func (m *staticLibrary) outputs(g generatorBackend) []string {
-	return []string{filepath.Join(m.outputDir(g), m.outputFileName())}
-}
-
-func (m *staticLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
-	return m.outputs(g)
+func (m *library) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+	return m.outputs()
 }
 
 func (l *library) checkField(cond bool, fieldName string) {
 	if !cond {
 		panic(fmt.Sprintf("%s has field %s set", l.Name(), fieldName))
 	}
+}
+
+type staticLibrary struct {
+	library
 }
 
 func (m *staticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -536,23 +524,8 @@ func (m *sharedLibrary) getRealName() string {
 	return name
 }
 
-func (m *sharedLibrary) outputDir(g generatorBackend) string {
-	return g.sharedLibOutputDir(m)
-}
-
-func (m *sharedLibrary) outputs(g generatorBackend) []string {
-	if m.library.Properties.Library_version == "" {
-		return []string{filepath.Join(m.outputDir(g), m.outputName()+m.fileNameExtension)}
-	}
-	return []string{filepath.Join(m.outputDir(g), m.getRealName())}
-}
-
 func (l *sharedLibrary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
-}
-
-func (m *sharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
-	return m.outputs(g)
 }
 
 func (m *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
@@ -591,20 +564,8 @@ type binary struct {
 	library
 }
 
-func (m *binary) outputDir(g generatorBackend) string {
-	return g.binaryOutputDir(m)
-}
-
-func (m *binary) outputs(g generatorBackend) []string {
-	return []string{filepath.Join(m.outputDir(g), m.outputName())}
-}
-
 func (l *binary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
-}
-
-func (m *binary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
-	return m.outputs(g)
 }
 
 func (m *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
