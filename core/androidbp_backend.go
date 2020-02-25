@@ -55,7 +55,13 @@ func (g *androidBpGenerator) genStaticActions(*generateStaticLibrary, blueprint.
 func (g *androidBpGenerator) transformSourceActions(*transformSource, blueprint.ModuleContext, []inout) {
 }
 
-func (g *androidBpGenerator) buildDir() string { return "" }
+func (g *androidBpGenerator) buildDir() string {
+	// The androidbp backend writes an Android.bp file, which should
+	// never reference an actual output directory (which will be
+	// chosen by Soong). Therefore this function returns an empty
+	// string.
+	return ""
+}
 
 func (g *androidBpGenerator) sourceDir() string {
 	// The androidbp backend writes paths into an Android.bp file in
@@ -71,12 +77,31 @@ func (g *androidBpGenerator) bobScriptsDir() string {
 	return filepath.Join(g.sourceDir(), srcToScripts)
 }
 
-func (g *androidBpGenerator) sharedLibsDir(tgtType) string             { return "" }
+func (g *androidBpGenerator) sharedLibsDir(tgtType) string {
+	// When writing link commands, it's common to put all the shared
+	// libraries in a single location to make it easy for the linker to
+	// find them. This function tells us where this is for the current
+	// generatorBackend.
+	//
+	// In the androidbp backend, we don't write link command lines. Soong
+	// will do this after processing the generated Android.bp. Therefore
+	// this function just returns an empty string.
+	return ""
+}
+
+//// Module specific functions identifying where backends expect module output to go.
+
+// The androidbp backend writes Android.bp files, which should never
+// need to reference files in their actual output location. Soong will
+// add the necessary paths when it runs. Therefore all these return an
+// empty string.
 func (g *androidBpGenerator) sourceOutputDir(*generateCommon) string   { return "" }
 func (g *androidBpGenerator) binaryOutputDir(*binary) string           { return "" }
 func (g *androidBpGenerator) staticLibOutputDir(*staticLibrary) string { return "" }
 func (g *androidBpGenerator) sharedLibOutputDir(*sharedLibrary) string { return "" }
 func (g *androidBpGenerator) kernelModOutputDir(*kernelModule) string  { return "" }
+
+//// End module specific functions
 
 type androidBpSingleton struct {
 }
