@@ -27,6 +27,7 @@ import (
 
 type kernelModule struct {
 	moduleBase
+	simpleOutputProducer
 	Properties struct {
 		Features
 		Build
@@ -73,20 +74,8 @@ func (m *kernelModule) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *kernelModule) outputDir(g generatorBackend) string {
-	return g.kernelModOutputDir(m)
-}
-
-func (m *kernelModule) outputs(g generatorBackend) []string {
-	return []string{filepath.Join(m.outputDir(g), m.outputName()+".ko")}
-}
-
-func (m *kernelModule) implicitOutputs(g generatorBackend) []string {
-	return []string{}
-}
-
-func (m *kernelModule) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
-	return m.outputs(g)
+func (m *kernelModule) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+	return m.outputs()
 }
 
 func (m *kernelModule) getInstallableProps() *InstallableProps {
@@ -116,10 +105,8 @@ func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (mod
 }
 
 func (m *kernelModule) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
-	g := getBackend(ctx)
-
 	for _, mod := range m.extraSymbolsModules(ctx) {
-		files = append(files, filepath.Join(mod.outputDir(g), "Module.symvers"))
+		files = append(files, filepath.Join(mod.outputDir(), "Module.symvers"))
 	}
 
 	return
@@ -208,7 +195,7 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		MakeArgs:           strings.Join(m.Properties.Build.Make_args, " "),
 		// The kernel module builder replicates the out-of-tree module's source tree structure.
 		// The kernel module will be at its equivalent position in the output tree.
-		OutputModuleDir: filepath.Join(m.outputDir(g), projectModuleDir(ctx)),
+		OutputModuleDir: filepath.Join(m.outputDir(), projectModuleDir(ctx)),
 		CCFlag:          kernelToolchain,
 		HostCCFlag:      hostToolchain,
 		ClangTripleFlag: clangTriple,

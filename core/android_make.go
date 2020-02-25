@@ -145,18 +145,22 @@ func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
 // and needs to be refactored to use interfaces better.
 func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx blueprint.ModuleContext, tcs toolchainSet) {
 	var bt binType
-	var m library
+	var m *library
+	var libname string
 
 	switch real := mod.(type) {
 	case *staticLibrary:
 		bt = binTypeStatic
-		m = real.library
+		m = &real.library
+		libname = real.outputFileName()
 	case *sharedLibrary:
 		bt = binTypeShared
-		m = real.library
+		m = &real.library
+		libname = real.outputFileName()
 	case *binary:
 		bt = binTypeExecutable
-		m = real.library
+		m = &real.library
+		libname = real.outputFileName()
 	default:
 		panic(fmt.Errorf("Unexpected module type %T", real))
 	}
@@ -164,6 +168,9 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	if m.Properties.Build_wrapper != nil {
 		panic(errors.New("build_wrapper not supported on Android"))
 	}
+
+	// Calculate and record outputs
+	m.outs = []string{filepath.Join(m.outputDir(), libname)}
 
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 	sb.WriteString("LOCAL_MODULE:=" + m.altName() + "\n")
@@ -434,6 +441,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 func (g *androidMkGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		m.outputdir = g.staticLibOutputDir(m)
 		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
@@ -441,6 +449,7 @@ func (g *androidMkGenerator) staticActions(m *staticLibrary, ctx blueprint.Modul
 func (g *androidMkGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		m.outputdir = g.sharedLibOutputDir(m)
 		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
@@ -448,6 +457,7 @@ func (g *androidMkGenerator) sharedActions(m *sharedLibrary, ctx blueprint.Modul
 func (g *androidMkGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		m.outputdir = g.binaryOutputDir(m)
 		androidLibraryBuildAction(sb, m, ctx, g.toolchainSet)
 	}
 }
@@ -491,7 +501,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		return
 	}
 
-	filesToInstall := m.filesToInstall(ctx, g)
+	filesToInstall := m.filesToInstall(ctx)
 	requiredModuleNames := m.getInstallDepPhonyNames(ctx)
 
 	for _, file := range filesToInstall {
@@ -682,7 +692,7 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 		return
 	}
 	sb.WriteString("\n")
-	filesToInstall := m.filesToInstall(ctx, getBackend(ctx))
+	filesToInstall := m.filesToInstall(ctx)
 
 	for _, file := range filesToInstall {
 		moduleName := pathToModuleName(file)
@@ -702,6 +712,11 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 }
 
 func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *generateCommon, ctx blueprint.ModuleContext, inouts []inout) {
+	m.outputdir = g.sourceOutputDir(m)
+	prefixInoutsWithOutputDir(inouts, m.outputDir())
+	// Calculate and record outputs
+	m.recordOutputsFromInout(inouts)
+
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 
 	// This is required to have $(local-generated-sources-dir) work as expected
@@ -738,7 +753,9 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 
 		sb.WriteString(outs + ": in := " + ins + "\n")
 		sb.WriteString(outs + ": out := " + strings.Join(inout.out, " ") + "\n")
-		sb.WriteString(outs + ": depfile := " + inout.depfile + "\n")
+		if inout.depfile != "" {
+			sb.WriteString(outs + ": depfile := " + inout.depfile + "\n")
+		}
 		if m.Properties.Rsp_content != nil {
 			sb.WriteString(outs + ": rspfile := " + inout.rspfile + "\n")
 		}
@@ -798,7 +815,12 @@ func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blue
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		declarePrebuiltStaticLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		outputs := m.outputs()
+		if len(outputs) != 1 {
+			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_static_lib %s", len(outputs), m.Name()))
+		}
+		library := outputs[0]
+		declarePrebuiltStaticLib(sb, m.altShortName(), library,
 			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
@@ -812,7 +834,12 @@ func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blue
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		declarePrebuiltSharedLib(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		outputs := m.outputs()
+		if len(outputs) != 1 {
+			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_shared_lib %s", len(outputs), m.Name()))
+		}
+		library := outputs[0]
+		declarePrebuiltSharedLib(sb, m.altShortName(), library,
 			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
@@ -826,7 +853,12 @@ func (g *androidMkGenerator) genBinaryActions(m *generateBinary, ctx blueprint.M
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
-		declarePrebuiltBinary(sb, m.altShortName(), getLibraryGeneratedPath(m, g),
+		outputs := m.outputs()
+		if len(outputs) != 1 {
+			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_binary %s", len(outputs), m.Name()))
+		}
+		binary := outputs[0]
+		declarePrebuiltBinary(sb, m.altShortName(), binary,
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
 		androidMkWriteString(ctx, m.altShortName(), sb)
@@ -997,6 +1029,10 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	if !enabledAndRequired(m) {
 		return
 	}
+	// Calculate and record outputs
+	m.outputdir = g.kernelModOutputDir(m)
+	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
+
 	sb := &strings.Builder{}
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 	sb.WriteString("LOCAL_MODULE := " + m.altShortName() + "\n")

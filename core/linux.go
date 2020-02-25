@@ -70,7 +70,7 @@ func pathToLibFlag(path string) string {
 func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 	installDeps []string, optional bool) {
 
-	deps := utils.NewStringSlice(p.outputs(getBackend(ctx)), p.implicitOutputs(getBackend(ctx)), installDeps)
+	deps := utils.NewStringSlice(p.outputs(), p.implicitOutputs(), installDeps)
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
@@ -134,6 +134,10 @@ func getBinaryPath(t targetableModule) string {
 
 // Generate the build actions for a generateSource module and populates the outputs.
 func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.ModuleContext, inouts []inout) {
+	m.outputdir = g.sourceOutputDir(m)
+	prefixInoutsWithOutputDir(inouts, m.outputDir())
+	// Calculate and record outputs
+	m.recordOutputsFromInout(inouts)
 
 	cmd, args, implicits, hostTarget := m.getArgs(ctx)
 
@@ -249,7 +253,7 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     copyRule,
-			Inputs:   []string{getLibraryGeneratedPath(m, g)},
+			Inputs:   m.outputs(),
 			Outputs:  []string{getSharedLibLinkPath(m)},
 			Optional: true,
 		})
@@ -266,7 +270,7 @@ func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.Modul
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     copyRule,
-			Inputs:   []string{getLibraryGeneratedPath(m, g)},
+			Inputs:   m.outputs(),
 			Outputs:  []string{getBinaryPath(m)},
 			Optional: true,
 		})
@@ -403,14 +407,13 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 
 // Returns all the source files for a C/C++ library. This includes any sources that are generated.
 func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
-	g := getBackend(ctx)
 	srcs := l.Properties.getSources(ctx)
 	srcs = append(srcs, l.Properties.Build.SourceProps.Specials...)
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
-				srcs = append(srcs, getSourcesGenerated(g, gs)...)
+				srcs = append(srcs, getSourcesGenerated(gs)...)
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " does not have outputs"))
 			}
@@ -420,15 +423,14 @@ func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
 
 // Returns the whole static dependencies for a library.
 func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
-	g := getBackend(ctx)
 	libs := []string{}
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == wholeStaticDepTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*staticLibrary); ok {
-				libs = append(libs, sl.outputs(g)...)
+				libs = append(libs, sl.outputs()...)
 			} else if sl, ok := m.(*generateStaticLibrary); ok {
-				libs = append(libs, getLibraryGeneratedPath(sl, g))
+				libs = append(libs, sl.outputs()...)
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a static library"))
 			}
@@ -439,7 +441,6 @@ func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 
 // Returns all the static library dependencies for a module.
 func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
-	g := getBackend(ctx)
 	libs := []string{}
 	for _, moduleName := range l.Properties.ResolvedStaticLibs {
 		dep, _ := ctx.GetDirectDep(moduleName)
@@ -447,9 +448,9 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			panic(fmt.Errorf("%s has no dependency on static lib %s", l.Name(), moduleName))
 		}
 		if sl, ok := dep.(*staticLibrary); ok {
-			libs = append(libs, sl.outputs(g)...)
+			libs = append(libs, sl.outputs()...)
 		} else if sl, ok := dep.(*generateStaticLibrary); ok {
-			libs = append(libs, getLibraryGeneratedPath(sl, g))
+			libs = append(libs, sl.outputs()...)
 		} else {
 			panic(errors.New(ctx.OtherModuleName(dep) + " is not a static library"))
 		}
@@ -478,6 +479,11 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	}, "ar", "build_wrapper", "whole_static_libs", "whole_static_tool")
 
 func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
+
+	// Calculate and record outputs
+	m.outputdir = g.staticLibOutputDir(m)
+	m.outs = []string{filepath.Join(m.outputDir(), m.outputFileName())}
+
 	rule := staticLibraryRule
 
 	buildWrapper, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
@@ -507,7 +513,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      rule,
-			Outputs:   m.outputs(g),
+			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
 			Implicits: implicits,
 			OrderOnly: buildWrapperDeps,
@@ -708,6 +714,14 @@ var symlinkRule = pctx.StaticRule("symlink",
 	}, "target")
 
 func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
+	// Calculate and record outputs
+	m.outputdir = g.sharedLibOutputDir(m)
+	if m.library.Properties.Library_version == "" {
+		m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+m.fileNameExtension)}
+	} else {
+		m.outs = []string{filepath.Join(m.outputDir(), m.getRealName())}
+	}
+
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
 
 	_, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
@@ -716,8 +730,8 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 
 	// Create symlinks if needed
 	for name, symlinkTgt := range m.librarySymlinks(ctx) {
-		symlink := filepath.Join(m.outputDir(g), name)
-		lib := filepath.Join(m.outputDir(g), symlinkTgt)
+		symlink := filepath.Join(m.outputDir(), name)
+		lib := filepath.Join(m.outputDir(), symlinkTgt)
 		ctx.Build(pctx,
 			blueprint.BuildParams{
 				Rule:     symlinkRule,
@@ -732,7 +746,7 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      sharedLibraryRule,
-			Outputs:   m.outputs(g),
+			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
 			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
@@ -757,6 +771,10 @@ var executableRule = pctx.StaticRule("executable",
 	"shared_libs_flags", "static_libs")
 
 func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
+	// Calculate and record outputs
+	m.outputdir = g.binaryOutputDir(m)
+	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}
+
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
@@ -766,7 +784,7 @@ func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      executableRule,
-			Outputs:   m.outputs(g),
+			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
 			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
@@ -866,7 +884,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	// Check if this is a resource
 	_, isResource := ins.(*resource)
 
-	for _, src := range ins.filesToInstall(ctx, g) {
+	for _, src := range ins.filesToInstall(ctx) {
 		dest := filepath.Join(installPath, filepath.Base(src))
 		// Resources always come from the source directory.
 		// All other module types install files from the build directory.
@@ -995,7 +1013,9 @@ var kbuildRule = pctx.StaticRule("kbuild",
 	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
 
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
-	builtModule := filepath.Join(g.kernelModOutputDir(m), m.outputName()+".ko")
+	// Calculate and record outputs
+	m.outputdir = g.kernelModOutputDir(m)
+	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
 
 	args := m.generateKbuildArgs(ctx).toDict()
 	sources := utils.NewStringSlice(
@@ -1006,7 +1026,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      kbuildRule,
-			Outputs:   []string{builtModule},
+			Outputs:   m.outputs(),
 			Inputs:    sources,
 			Implicits: []string{args["kmod_build"]},
 			Optional:  false,
@@ -1019,8 +1039,8 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
-			Inputs:   []string{builtModule},
-			Outputs:  []string{filepath.Join(g.kernelModOutputDir(m), "Module.symvers")},
+			Inputs:   m.outputs(),
+			Outputs:  []string{filepath.Join(m.outputDir(), "Module.symvers")},
 			Optional: true,
 		})
 

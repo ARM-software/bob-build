@@ -31,8 +31,8 @@ import (
 // Types implementing phonyInterface support the creation of phony targets.
 type phonyInterface interface {
 	// A list of the outputs to be built when shortName is specified as the target
-	outputs(g generatorBackend) []string
-	implicitOutputs(g generatorBackend) []string
+	outputs() []string
+	implicitOutputs() []string
 
 	// The name of the target that can be used
 	shortName() string
@@ -53,7 +53,7 @@ type TargetSpecific struct {
 // A type implementing dependentInterface can be depended upon by other modules.
 type dependentInterface interface {
 	phonyInterface
-	outputDir(g generatorBackend) string
+	outputDir() string
 }
 
 // dependencyTag contains the name of the tag used to track a particular type
@@ -90,10 +90,6 @@ type generatorBackend interface {
 	bobScriptsDir() string
 	sharedLibsDir(tgt tgtType) string
 	sourceOutputDir(m *generateCommon) string
-	binaryOutputDir(m *binary) string
-	staticLibOutputDir(m *staticLibrary) string
-	sharedLibOutputDir(m *sharedLibrary) string
-	kernelModOutputDir(m *kernelModule) string
 
 	// Backend initialisation
 	init(*blueprint.Context, *bobConfig)

@@ -78,6 +78,8 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	if !enabledAndRequired(gs) {
 		return
 	}
+	// Calculate and record outputs
+	gs.recordOutputsFromInout(inouts)
 
 	m, err := AndroidBpFile().NewModule("genrule_bob", gs.shortName())
 	if err != nil {
@@ -96,6 +98,8 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 	if !enabledAndRequired(ts) {
 		return
 	}
+	// Calculate and record outputs
+	ts.recordOutputsFromInout(inouts)
 
 	m, err := AndroidBpFile().NewModule("genrule_bob", ts.shortName())
 	if err != nil {

@@ -218,6 +218,9 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 		return
 	}
 
+	// Calculate and record outputs
+	l.outs = []string{l.outputName()}
+
 	var modType string
 	switch l.Properties.TargetType {
 	case tgtTypeHost:
@@ -241,6 +244,9 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 	if !enabledAndRequired(l) {
 		return
 	}
+
+	// Calculate and record outputs
+	l.outs = []string{l.outputName() + l.fileNameExtension}
 
 	var modType string
 	switch l.Properties.TargetType {
@@ -266,6 +272,9 @@ func (g *androidBpGenerator) staticActions(l *staticLibrary, mctx blueprint.Modu
 	if !enabledAndRequired(l) {
 		return
 	}
+
+	// Calculate and record outputs
+	l.outs = []string{l.outputName()}
 
 	var modType string
 	switch l.Properties.TargetType {

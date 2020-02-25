@@ -46,7 +46,9 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		panic(err)
 	}
 
+	// Calculate and record outputs
 	out := l.outputName() + ".ko"
+	l.outs = []string{out}
 
 	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 

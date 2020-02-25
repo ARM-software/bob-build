@@ -61,6 +61,7 @@ bootstrap_go_package {
         "core/kernel_module.go",
         "core/late_template.go",
         "core/library.go",
+        "core/output_producer.go",
         "core/properties.go",
         "core/splitter.go",
         "core/standalone.go",
