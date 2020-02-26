@@ -53,12 +53,9 @@ bob_binary {
         "-Wall",
         "-Werror",
     ],
-    // RSP files do work on Soong and Android.bp, but `module_srcs` is not currently
+    // RSP files do work on Android.bp, but `module_srcs` is not currently
     // implemented, so the merge_multiple_sources module generates incorrect
     // output. This should be re-enabled once `module_srcs` is fixed.
-    builder_soong: {
-        enabled: false,
-    },
     builder_android_bp: {
         enabled: false,
     },

@@ -49,15 +49,15 @@ Bob has three kinds of tests:
     mkdir -p $ANDROID_TOP/external/bob
     bindfs -n $BOB_LOCATION $ANDROID_TOP/external/bob
     cd $ANDROID_TOP/external/bob/tests
-    ./bootstrap_androidmk ANDROID=y
+    ./bootstrap_androidmk
     mm
     ```
     (thereafter just run `mm`)
 
-    To test the work-in-progress Soong plugin, simply replace the
-    `./bootstrap_androidmk ANDROID=y` command above with `./bootstrap_soong`,
-    then run `mm`. Watch out for left-over `Android.mk` files and `Android.bp`
-    symlinks when swapping between the two implementations.
+    To test the work-in-progress Android BP backend, simply replace the
+    `./bootstrap_androidmk` command above with `./bootstrap_androidbp`,
+    then run `mm`. Watch out for left-over `Android.mk` and `Android.bp` files
+    when swapping between the two implementations.
 
 - Go unit tests, which can be run using `go test` after running
   `setup_workspace_for_bob.bash`:

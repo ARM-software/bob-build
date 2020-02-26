@@ -60,10 +60,4 @@ config BUILDER_NINJA
 	help
 	  Generate build.ninja output to use with ninja.
 
-config BUILDER_SOONG
-	bool "Soong (EXPERIMENTAL)"
-	depends on ANDROID
-	help
-	  Use the experimental Soong plugin.
-
 endchoice
