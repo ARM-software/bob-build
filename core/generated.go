@@ -341,10 +341,20 @@ func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtTyp
 
 	hostBinModule := m.getHostBinModule(ctx)
 	if b, ok := hostBinModule.(*binary); ok {
-		toolBin = b.outputs(g)[0]
+		outputs := b.outputs(g)
+		if len(outputs) != 1 {
+			panic(fmt.Errorf("outputs() returned %d outputs for host_bin module %s",
+				len(outputs), hostBinModule.Name()))
+		}
+		toolBin = outputs[0]
 		toolTarget = b.getTarget()
 	} else if b, ok := hostBinModule.(*generateBinary); ok {
-		toolBin = b.outputs(g)[0]
+		outputs := b.outputs(g)
+		if len(outputs) != 1 {
+			panic(fmt.Errorf("outputs() returned %d outputs for host_bin module %s",
+				len(outputs), hostBinModule.Name()))
+		}
+		toolBin = outputs[0]
 	}
 
 	return toolBin, toolTarget

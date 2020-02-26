@@ -128,7 +128,7 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 					ret = append(ret, dep.shortName())
 				}
 			} else {
-				panic("install_dep on non-dependendable module")
+				panic(fmt.Errorf("install_dep on non-dependendable module %s", m.Name()))
 			}
 			visited[m.Name()] = true
 		})
