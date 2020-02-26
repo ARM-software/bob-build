@@ -28,9 +28,6 @@ bob_install_group {
     builder_ninja: {
         install_path: "gen_sh_src",
     },
-    builder_soong: {
-        install_path: "gen_sh_src",
-    },
 }
 
 bob_install_group {
@@ -44,9 +41,6 @@ bob_install_group {
     builder_ninja: {
         install_path: "install/host/lib",
     },
-    builder_soong: {
-        install_path: "install/host/lib",
-    },
 }
 
 bob_install_group {
@@ -58,9 +52,6 @@ bob_install_group {
         install_path: "lib",
     },
     builder_ninja: {
-        install_path: "install/lib",
-    },
-    builder_soong: {
         install_path: "install/lib",
     },
 }

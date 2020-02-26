@@ -27,10 +27,6 @@ bob_install_group {
     builder_ninja: {
         install_path: "gen_sh_lib",
     },
-    builder_soong: {
-        /* On Soong install_path is not respected for generated libraries. */
-        install_path: "gen_sh_lib",
-    },
 }
 
 bob_install_group {
@@ -42,10 +38,6 @@ bob_install_group {
         install_path: "gen_sh_lib",
     },
     builder_ninja: {
-        install_path: "gen_sh_bin",
-    },
-    builder_soong: {
-        /* On Soong install_path is not respected for binaries. */
         install_path: "gen_sh_bin",
     },
 }
@@ -66,10 +58,6 @@ bob_generate_shared_library {
      */
     cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
-    builder_soong: {
-        /* On Soong generated libraries are not supported. */
-        enabled: false,
-    },
     builder_android_bp: {
         /* On Android BP generated libraries are not supported. */
         enabled: false,
@@ -84,10 +72,6 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    builder_soong: {
-        /* On Soong generated libraries are not supported. */
-        enabled: false,
-    },
     builder_android_bp: {
         /* On Android BP generated libraries are not supported. */
         enabled: false,
@@ -109,10 +93,6 @@ bob_generate_static_library {
      */
     cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${out} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
-    builder_soong: {
-        /* On Soong generated libraries are not supported. */
-        enabled: false,
-    },
     builder_android_bp: {
         /* On Android BP generated libraries are not supported. */
         enabled: false,
@@ -127,10 +107,6 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    builder_soong: {
-        /* On Soong generated libraries are not supported. */
-        enabled: false,
-    },
     builder_android_bp: {
         /* On Android BP generated libraries are not supported. */
         enabled: false,

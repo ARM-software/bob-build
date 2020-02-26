@@ -26,9 +26,6 @@ bob_install_group {
     builder_ninja: {
         install_path: "install/tests/linux",
     },
-    builder_soong: {
-        install_path: "data/x/y",
-    },
 }
 
 bob_resource {
@@ -44,8 +41,5 @@ bob_resource {
     },
     builder_ninja: {
         relative_install_path: "y",
-    },
-    builder_soong: {
-        relative_install_path: "z",
     },
 }

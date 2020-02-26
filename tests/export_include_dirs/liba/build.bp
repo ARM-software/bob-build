@@ -36,12 +36,6 @@ bob_static_library {
             "include2",
         ],
     },
-    builder_soong: {
-        // Soong does not support exporting absolute include dirs.
-        export_local_include_dirs: [
-            "include2",
-        ],
-    },
     builder_android_bp: {
         // Soong does not support exporting absolute include dirs.
         export_local_include_dirs: [

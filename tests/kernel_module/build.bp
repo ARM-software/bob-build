@@ -14,7 +14,4 @@ bob_install_group {
     builder_ninja: {
         install_path: "lib/modules",
     },
-    builder_soong: {
-        install_path: "lib/modules",
-    },
 }

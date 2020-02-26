@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ bob_generate_source {
     // The `out` field is translated to `stem`, which is currently ignored by
     // Soong on static libraries, so only check the static library output on
     // the other generators.
-    not_builder_soong: {
+    not_builder_android_bp: {
         args: [
             "&& python ${tool} --out='${lib_st_output_out}' --expected='static_output' --static",
         ],

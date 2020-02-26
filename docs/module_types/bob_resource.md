@@ -8,9 +8,9 @@ need while executing.
 This will reference an `bob_install_group` so it gets copied to an appropriate location
 relative to the binaries.
 
-For the Soong plugin, the `install_path` set in the `bob_install_group` must be
+For the Android BP backend, the `install_path` set in the `bob_install_group` must be
 prefixed by a known string to select an appropriate Android directory.
-Currently `data/` and `etc/` are supported. The `owner` property also influences
+Currently `data/`, 'firmware/' and `etc/` are supported. The `owner` property also influences
 where the files will be installed.
 
 `bob_resource` supports [features](../features.md)
@@ -60,5 +60,5 @@ Adds this module to an alias.
 ----
 ### **bob_module.owner** (optional)
 Value to use on Android for `LOCAL_MODULE_OWNER`
-If set, then the module is considered proprietary. For the Soong plugin this will
+If set, then the module is considered proprietary. For the Android BP backend this will
 usually be installed in the vendor partition.
