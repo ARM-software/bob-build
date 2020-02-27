@@ -22,8 +22,6 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 // EnableableProps allow a module to be disabled or only built when explicitly requested
@@ -96,7 +94,7 @@ type InstallableProps struct {
 	Install_path *string `blueprint:"mutated"`
 }
 
-func (props *InstallableProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (props *InstallableProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	if props.Post_install_tool != nil {
 		*props.Post_install_tool = getBackendPathInSourceDir(g, projectModuleDir(ctx), *props.Post_install_tool)
 	}
@@ -167,7 +165,7 @@ type symlinkInstaller interface {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string
+	filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -234,7 +232,7 @@ func (m *resource) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *resource) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return m.Properties.SourceProps.getSources(ctx)
 }
 
@@ -242,7 +240,7 @@ func (m *resource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *resource) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (m *resource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 }
@@ -268,11 +266,10 @@ func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 var installGroupTag = dependencyTag{name: "install_group"}
 var installDepTag = dependencyTag{name: "install_dep"}
 
-func getInstallPath(mctx abstr.TopDownMutatorContext, tag dependencyTag) *string {
+func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
 	var installGroupPath *string
 
-	abstr.VisitDirectDepsIf(
-		mctx,
+	mctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == tag },
 		func(m blueprint.Module) {
 			insg, ok := m.(*installGroup)
@@ -290,8 +287,8 @@ func getInstallPath(mctx abstr.TopDownMutatorContext, tag dependencyTag) *string
 	return installGroupPath
 }
 
-func installGroupMutator(mctx abstr.TopDownMutatorContext) {
-	if ins, ok := abstr.Module(mctx).(installable); ok {
+func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
+	if ins, ok := mctx.Module().(installable); ok {
 		path := getInstallPath(mctx, installGroupTag)
 		if path != nil {
 			if *path == "" {

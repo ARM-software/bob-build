@@ -19,8 +19,6 @@ package core
 
 import (
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 type generateBinary struct {
@@ -48,7 +46,7 @@ func (m *generateBinary) outputFileName() string {
 
 //// Support Installable
 
-func (m *generateBinary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *generateBinary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return []string{getLibraryGeneratedPath(m, g)}
 }
 

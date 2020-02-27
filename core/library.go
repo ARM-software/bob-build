@@ -25,7 +25,6 @@ import (
 
 	"github.com/google/blueprint"
 
-	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -251,7 +250,7 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 
 // Add module paths to srcs, exclude_srcs, local_include_dirs, export_local_include_dirs
 // and post_install_tool
-func (l *Build) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 	l.SourceProps.processPaths(ctx, g)
 	l.InstallableProps.processPaths(ctx, g)
@@ -463,7 +462,7 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	return
 }
 
-func (l *library) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	l.Properties.Build.processPaths(ctx, g)
 }
 
@@ -485,7 +484,7 @@ func (m *staticLibrary) outputs(g generatorBackend) []string {
 	return []string{filepath.Join(m.outputDir(g), m.outputFileName())}
 }
 
-func (m *staticLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *staticLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -548,7 +547,7 @@ func (l *sharedLibrary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
 }
 
-func (m *sharedLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *sharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -600,7 +599,7 @@ func (l *binary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
 }
 
-func (m *binary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *binary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -664,8 +663,8 @@ func getLibrary(m blueprint.Module) (*library, bool) {
 	return nil, false
 }
 
-func checkLibraryFieldsMutator(mctx abstr.BottomUpMutatorContext) {
-	m := abstr.Module(mctx)
+func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
+	m := mctx.Module()
 	if b, ok := m.(*binary); ok {
 		props := b.Properties
 		b.checkField(len(props.Export_cflags) == 0, "export_cflags")
@@ -693,8 +692,8 @@ func checkLibraryFieldsMutator(mctx abstr.BottomUpMutatorContext) {
 }
 
 // Check that each module only reexports libraries that it is actually using.
-func checkReexportLibsMutator(mctx abstr.TopDownMutatorContext) {
-	if l, ok := getLibrary(abstr.Module(mctx)); ok {
+func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
+	if l, ok := getLibrary(mctx.Module()); ok {
 		for _, lib := range l.Properties.Reexport_libs {
 			if !utils.ListsContain(lib,
 				l.Properties.Shared_libs,
@@ -840,8 +839,8 @@ const (
 	minInt = -maxInt - 1
 )
 
-func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx abstr.BottomUpMutatorContext) {
-	mainModule := abstr.Module(mctx)
+func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.BottomUpMutatorContext) {
+	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so not needed

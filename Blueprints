@@ -30,7 +30,6 @@ bootstrap_go_package {
         "blueprint",
         "blueprint-bootstrap",
         "blueprint-pathtools",
-        "bob-abstr",
         "bob-bpwriter",
         "bob-ccflags",
         "bob-fileutils",
@@ -76,18 +75,6 @@ bootstrap_go_package {
         "core/androidbp_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",
-}
-
-bootstrap_go_package {
-    name: "bob-abstr",
-    deps: [
-        "blueprint",
-    ],
-    srcs: [
-        "abstr/contexts.go",
-        "abstr/standalone.go",
-    ],
-    pkgPath: "github.com/ARM-software/bob-build/abstr",
 }
 
 bootstrap_go_package {

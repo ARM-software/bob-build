@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,26 +22,24 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 // Applies default options
-func defaultApplierMutator(mctx abstr.TopDownMutatorContext) {
+func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	// This method walks down the dependency list to include all defaults that include other defaults
 	// with the ones further down the tree being applied first.
 	// Walkdeps is a preorder depth-first search - meaning a parent is visited before children, and children
 	// is visited before siblings.
-	_, isDefaults := abstr.Module(mctx).(*defaults)
+	_, isDefaults := mctx.Module().(*defaults)
 	if isDefaults {
 		return
 	}
 
 	var build *Build
 
-	if target, ok := abstr.Module(mctx).(defaultable); ok {
+	if target, ok := mctx.Module().(defaultable); ok {
 		build = target.build()
-	} else if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
+	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		build = &gsc.Properties.FlagArgsBuild
 	} else {
 		// Not defaultable.
@@ -50,7 +48,7 @@ func defaultApplierMutator(mctx abstr.TopDownMutatorContext) {
 
 	visited := map[string]bool{}
 
-	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
+	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			//print("Visiting " + mctx.OtherModuleName(dep) + " for dependency " + mctx.ModuleName() + "\n")
 			def, ok := dep.(*defaults)
@@ -92,8 +90,8 @@ type featurable interface {
 	features() *Features
 }
 
-func templateApplierMutator(mctx abstr.TopDownMutatorContext) {
-	module := abstr.Module(mctx)
+func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
+	module := mctx.Module()
 	cfg := getConfig(mctx)
 
 	if m, ok := module.(featurable); ok {
@@ -120,8 +118,8 @@ type propmap struct {
 }
 
 // Applies feature specific properties within each module
-func featureApplierMutator(mctx abstr.TopDownMutatorContext) {
-	module := abstr.Module(mctx)
+func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
+	module := mctx.Module()
 	cfg := getConfig(mctx)
 
 	if m, ok := module.(featurable); ok {

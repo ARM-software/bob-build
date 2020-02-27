@@ -21,8 +21,6 @@ import (
 	"fmt"
 
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 type defaults struct {
@@ -63,18 +61,18 @@ type defaultable interface {
 	defaults() []string
 }
 
-func defaultDepsMutator(mctx abstr.BottomUpMutatorContext) {
-	if l, ok := abstr.Module(mctx).(defaultable); ok {
-		mctx.AddDependency(abstr.Module(mctx), defaultDepTag, l.defaults()...)
+func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
+	if l, ok := mctx.Module().(defaultable); ok {
+		mctx.AddDependency(mctx.Module(), defaultDepTag, l.defaults()...)
 	}
-	if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
+	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
 			if !(tgt == tgtTypeHost || tgt == tgtTypeTarget) {
 				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
 					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
 			}
-			mctx.AddDependency(abstr.Module(mctx), defaultDepTag, gsc.Properties.Flag_defaults...)
+			mctx.AddDependency(mctx.Module(), defaultDepTag, gsc.Properties.Flag_defaults...)
 		}
 	}
 }

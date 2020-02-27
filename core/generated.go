@@ -28,7 +28,6 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
-	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -277,7 +276,7 @@ type GenerateSourceProps struct {
 	Implicit_outs []string
 }
 
-func (g *GenerateSourceProps) getImplicitSources(ctx abstr.BaseModuleContext) []string {
+func (g *GenerateSourceProps) getImplicitSources(ctx blueprint.BaseModuleContext) []string {
 	return glob(ctx, g.Implicit_srcs, g.Exclude_implicit_srcs)
 }
 
@@ -452,11 +451,11 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	return cmd, args, dependents, hostTarget
 }
 
-func (m *generateCommon) getSources(ctx abstr.BaseModuleContext) []string {
+func (m *generateCommon) getSources(ctx blueprint.BaseModuleContext) []string {
 	return m.Properties.getSources(ctx)
 }
 
-func (m *generateCommon) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
@@ -473,7 +472,7 @@ func getDepfileName(s string) string {
 	return s + ".d"
 }
 
-func (m *generateSource) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
 	m.generateCommon.processPaths(ctx, g)
 }
@@ -497,7 +496,7 @@ func (m *generateSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend)
 	return []inout{io}
 }
 
-func (m *generateSource) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *generateSource) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
 	return m.outputs(g)
 }
@@ -602,7 +601,7 @@ func (m *transformSource) Inouts(ctx blueprint.ModuleContext, g generatorBackend
 	return inouts
 }
 
-func (m *transformSource) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *transformSource) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	// Install everything that we generate
 	return m.outputs(g)
 }
@@ -661,8 +660,8 @@ func getGeneratedFiles(ctx blueprint.ModuleContext, g generatorBackend) []string
 	return srcs
 }
 
-func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
-	if e, ok := abstr.Module(mctx).(enableable); ok {
+func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
+	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
 			return
@@ -670,19 +669,19 @@ func generatedDependerMutator(mctx abstr.BottomUpMutatorContext) {
 	}
 
 	// Things which depend on generated/transformed sources
-	if gd, ok := abstr.Module(mctx).(generatedDepender); ok {
-		if _, ok := abstr.Module(mctx).(*defaults); ok {
+	if gd, ok := mctx.Module().(generatedDepender); ok {
+		if _, ok := mctx.Module().(*defaults); ok {
 			// We do not want to add dependencies for defaults
 			return
 		}
 		b := gd.build()
-		mctx.AddDependency(abstr.Module(mctx), generatedSourceTag, b.Generated_sources...)
-		mctx.AddDependency(abstr.Module(mctx), generatedHeaderTag, b.Generated_headers...)
-		mctx.AddDependency(abstr.Module(mctx), generatedDepTag, b.Generated_deps...)
+		mctx.AddDependency(mctx.Module(), generatedSourceTag, b.Generated_sources...)
+		mctx.AddDependency(mctx.Module(), generatedHeaderTag, b.Generated_headers...)
+		mctx.AddDependency(mctx.Module(), generatedDepTag, b.Generated_deps...)
 	}
 
 	// Things that a generated/transformed source depends on
-	if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
+	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		if gsc.Properties.Host_bin != nil {
 			parseAndAddVariationDeps(mctx, hostToolBinTag,
 				proptools.String(gsc.Properties.Host_bin))

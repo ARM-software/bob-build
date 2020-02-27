@@ -23,8 +23,6 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 type kernelModule struct {
@@ -87,7 +85,7 @@ func (m *kernelModule) implicitOutputs(g generatorBackend) []string {
 	return []string{}
 }
 
-func (m *kernelModule) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *kernelModule) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return m.outputs(g)
 }
 
@@ -99,12 +97,12 @@ func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []st
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, kernelModuleDepTag)
 }
 
-func (m *kernelModule) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (m *kernelModule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
 }
 
-func (m *kernelModule) extraSymbolsModules(ctx abstr.VisitableModuleContext) (modules []*kernelModule) {
-	abstr.VisitDirectDepsIf(ctx,
+func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*kernelModule) {
+	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
 		func(m blueprint.Module) {
 			if km, ok := m.(*kernelModule); ok {
@@ -117,7 +115,7 @@ func (m *kernelModule) extraSymbolsModules(ctx abstr.VisitableModuleContext) (mo
 	return
 }
 
-func (m *kernelModule) extraSymbolsFiles(ctx abstr.VisitableModuleContext) (files []string) {
+func (m *kernelModule) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
 	g := getBackend(ctx)
 
 	for _, mod := range m.extraSymbolsModules(ctx) {
@@ -157,7 +155,7 @@ func (a kbuildArgs) toDict() map[string]string {
 	}
 }
 
-func (m *kernelModule) generateKbuildArgs(ctx abstr.VisitableModuleContext) kbuildArgs {
+func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuildArgs {
 	var extraIncludePaths []string
 
 	g := getBackend(ctx)

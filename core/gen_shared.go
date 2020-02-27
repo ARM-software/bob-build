@@ -19,8 +19,6 @@ package core
 
 import (
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 type generateSharedLibrary struct {
@@ -43,7 +41,7 @@ func (m *generateSharedLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateSharedLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *generateSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return []string{getLibraryGeneratedPath(m, g)}
 }
 
