@@ -22,14 +22,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 var matchSourcesRegex = regexp.MustCompile(`\{\{match_srcs\s+(.+?)\}\}`)
 
-func (s *SourceProps) matchSources(ctx abstr.BaseModuleContext, arg string) string {
+func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string) string {
 	g := getBackend(ctx)
 
 	for _, match := range matchSourcesRegex.FindAllStringSubmatch(arg, -1) {
@@ -66,8 +65,8 @@ func (s *SourceProps) matchSources(ctx abstr.BaseModuleContext, arg string) stri
 // - Generated Common:
 //  - Args
 //  - Cmd
-func matchSourcesMutator(mctx abstr.TopDownMutatorContext) {
-	module := abstr.Module(mctx)
+func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
+	module := mctx.Module()
 	matchSrcsString := "{{match_srcs "
 	if e, ok := module.(enableable); ok {
 		if !isEnabled(e) {

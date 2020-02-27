@@ -23,8 +23,6 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 // SplittableProps are embedded by modules which can be split into multiple variants
@@ -51,15 +49,15 @@ type splittable interface {
 
 // Traverse the core properties of defaults to find out which variations are
 // supported.
-func supportedVariantsMutator(mctx abstr.TopDownMutatorContext) {
-	sp, ok := abstr.Module(mctx).(splittable)
+func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
+	sp, ok := mctx.Module().(splittable)
 	if !ok {
 		return
 	}
 
 	// It's not valid to specify host_supported or target_supported in a
 	// target: {} or host: {} section
-	if moduleWithBuildProps, ok := abstr.Module(mctx).(moduleWithBuildProps); ok {
+	if moduleWithBuildProps, ok := mctx.Module().(moduleWithBuildProps); ok {
 		b := moduleWithBuildProps.build()
 		if b.Host.SplittableProps.Host_supported != nil ||
 			b.Host.SplittableProps.Target_supported != nil ||
@@ -71,13 +69,13 @@ func supportedVariantsMutator(mctx abstr.TopDownMutatorContext) {
 	}
 
 	// Defaults are always split into both variants
-	if _, isDefaults := abstr.Module(mctx).(*defaults); isDefaults {
+	if _, isDefaults := mctx.Module().(*defaults); isDefaults {
 		return
 	}
 
 	visited := map[string]bool{}
 
-	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
+	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*defaults)
 			if !ok {
@@ -115,13 +113,13 @@ func tgtToString(tgts []tgtType) []string {
 }
 
 // Creates all the supported variants of splittable modules, including defaults.
-func splitterMutator(mctx abstr.BottomUpMutatorContext) {
-	if s, ok := abstr.Module(mctx).(splittable); ok {
+func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
+	if s, ok := mctx.Module().(splittable); ok {
 		variants := tgtToString(s.supportedVariants())
 		if len(variants) == 0 {
 			s.disable()
 		} else {
-			modules := abstr.CreateVariations(mctx, variants...)
+			modules := mctx.CreateVariations(variants...)
 			for i, v := range variants {
 				newsplit, ok := modules[i].(splittable)
 				if !ok {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 package core
 
 import (
-	"github.com/ARM-software/bob-build/abstr"
+	"github.com/google/blueprint"
 )
 
 var (
@@ -64,8 +64,8 @@ type stripable interface {
 	setDebugPath(*string)
 }
 
-func debugInfoMutator(mctx abstr.TopDownMutatorContext) {
-	if m, ok := abstr.Module(mctx).(stripable); ok {
+func debugInfoMutator(mctx blueprint.TopDownMutatorContext) {
+	if m, ok := mctx.Module().(stripable); ok {
 		path := getInstallPath(mctx, debugInfoTag)
 		m.setDebugPath(path)
 	}

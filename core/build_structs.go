@@ -25,7 +25,6 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
-	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -64,7 +63,7 @@ type dependencyTag struct {
 	name string
 }
 
-func getBackend(ctx abstr.BaseModuleContext) generatorBackend {
+func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
 	return getConfig(ctx).Generator
 }
 
@@ -170,7 +169,7 @@ func getBackendPathInBobScriptsDir(g generatorBackend, elems ...string) string {
 	return filepath.Join(append([]string{g.bobScriptsDir()}, elems...)...)
 }
 
-func glob(ctx abstr.BaseModuleContext, globs []string, excludes []string) []string {
+func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
 	// If any globs are used, we need to use an exclude list which is
@@ -215,11 +214,11 @@ type SourceProps struct {
 // The sources are relative to the project directory (i.e. include
 // the module directory but not the base source directory), and
 // excludes have been handled.
-func (s *SourceProps) getSources(ctx abstr.BaseModuleContext) []string {
+func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 	return glob(ctx, s.Srcs, s.Exclude_srcs)
 }
 
-func (s *SourceProps) processPaths(ctx abstr.BaseModuleContext, g generatorBackend) {
+func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 	var special = map[string]string{
 		"${bob_config}": configFile,
@@ -272,8 +271,8 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 	}
 }
 
-func stripEmptyComponentsMutator(mctx abstr.BottomUpMutatorContext) {
-	f, ok := abstr.Module(mctx).(featurable)
+func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
+	f, ok := mctx.Module().(featurable)
 	if !ok {
 		return
 	}
@@ -300,7 +299,7 @@ func moduleNamesFromLibList(libList []string) (ret []string) {
 
 const splitterMutatorName string = "bob_splitter"
 
-func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
+func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
 	hostVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
@@ -328,7 +327,7 @@ func parseAndAddVariationDeps(mctx abstr.BottomUpMutatorContext,
 		if len(variations) > 0 {
 			mctx.AddVariationDependencies(variations, tag, dep)
 		} else {
-			mctx.AddDependency(abstr.Module(mctx), tag, dep)
+			mctx.AddDependency(mctx.Module(), tag, dep)
 		}
 	}
 }
@@ -348,17 +347,17 @@ type targetable interface {
 	getTarget() tgtType
 }
 
-func dependerMutator(mctx abstr.BottomUpMutatorContext) {
-	if e, ok := abstr.Module(mctx).(enableable); ok {
+func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
+	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
 			return
 		}
 	}
 
-	if t, ok := abstr.Module(mctx).(targetable); ok {
+	if t, ok := mctx.Module().(targetable); ok {
 		build := t.build()
-		if _, ok := abstr.Module(mctx).(*defaults); ok {
+		if _, ok := mctx.Module().(*defaults); ok {
 			// We do not want to add dependencies for defaults
 			return
 		}
@@ -372,41 +371,40 @@ func dependerMutator(mctx abstr.BottomUpMutatorContext) {
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Export_shared_libs...)
 	}
-	if km, ok := abstr.Module(mctx).(*kernelModule); ok {
-		mctx.AddDependency(abstr.Module(mctx), kernelModuleDepTag, km.Properties.Extra_symbols...)
+	if km, ok := mctx.Module().(*kernelModule); ok {
+		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
 	}
-	if ins, ok := abstr.Module(mctx).(installable); ok {
+	if ins, ok := mctx.Module().(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			mctx.AddDependency(abstr.Module(mctx), installGroupTag, proptools.String(props.Install_group))
+			mctx.AddDependency(mctx.Module(), installGroupTag, proptools.String(props.Install_group))
 		}
 		parseAndAddVariationDeps(mctx, installDepTag, props.Install_deps...)
 	}
-	if strlib, ok := abstr.Module(mctx).(stripable); ok {
+	if strlib, ok := mctx.Module().(stripable); ok {
 		info := strlib.getDebugInfo()
 		if info != nil {
-			mctx.AddDependency(abstr.Module(mctx), debugInfoTag, *info)
+			mctx.AddDependency(mctx.Module(), debugInfoTag, *info)
 		}
 	}
 }
 
 // Applies target specific properties within each module. Must be done
 // after the libraries have been split.
-func targetMutator(mctx abstr.TopDownMutatorContext) {
+func targetMutator(mctx blueprint.TopDownMutatorContext) {
 	var build *Build
 	var tgt tgtType
 
-	if def, ok := abstr.Module(mctx).(targetable); ok {
+	if def, ok := mctx.Module().(targetable); ok {
 		build = def.build()
 		tgt = def.getTarget()
-	} else if gsc, ok := getGenerateCommon(abstr.Module(mctx)); ok {
+	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		build = &gsc.Properties.FlagArgsBuild
 		tgt = gsc.Properties.Target
 	} else {
 		return
 	}
 
-	//print(mctx.ModuleName() + " is targetable\n")
 	var src *TargetSpecific
 	if tgt == tgtTypeHost {
 		src = &build.Host
@@ -429,12 +427,12 @@ func targetMutator(mctx abstr.TopDownMutatorContext) {
 }
 
 type pathProcessor interface {
-	processPaths(abstr.BaseModuleContext, generatorBackend)
+	processPaths(blueprint.BaseModuleContext, generatorBackend)
 }
 
 // Adds module paths to appropriate properties.
-func pathMutator(mctx abstr.BottomUpMutatorContext) {
-	if p, ok := abstr.Module(mctx).(pathProcessor); ok {
+func pathMutator(mctx blueprint.BottomUpMutatorContext) {
+	if p, ok := mctx.Module().(pathProcessor); ok {
 		p.processPaths(mctx, getBackend(mctx))
 	}
 }
@@ -445,13 +443,13 @@ type buildWrapperProcessor interface {
 
 // Prefixes build_wrapper with source path if necessary
 func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
-	if p, ok := abstr.Module(mctx).(buildWrapperProcessor); ok {
+	if p, ok := mctx.Module().(buildWrapperProcessor); ok {
 		p.processBuildWrapper(mctx)
 	}
 }
 
-func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
-	mainModule := abstr.Module(mctx)
+func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
+	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so don't add dependencies
@@ -465,7 +463,7 @@ func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
 		return // We do not want to add dependencies for not targets
 	}
 
-	abstr.WalkDeps(mctx, func(child blueprint.Module, parent blueprint.Module) bool {
+	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := mctx.OtherModuleDependencyTag(child)
 		if depTag == wholeStaticDepTag || depTag == staticDepTag || depTag == sharedDepTag {
 			var parentBuild *Build
@@ -493,8 +491,8 @@ func collectReexportLibsDependenciesMutator(mctx abstr.TopDownMutatorContext) {
 	})
 }
 
-func applyReexportLibsDependenciesMutator(mctx abstr.BottomUpMutatorContext) {
-	mainModule := abstr.Module(mctx)
+func applyReexportLibsDependenciesMutator(mctx blueprint.BottomUpMutatorContext) {
+	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
@@ -509,12 +507,12 @@ func applyReexportLibsDependenciesMutator(mctx abstr.BottomUpMutatorContext) {
 	}
 }
 
-func findRequiredModulesMutator(mctx abstr.TopDownMutatorContext) {
+func findRequiredModulesMutator(mctx blueprint.TopDownMutatorContext) {
 	// Non-enableable module types are aliases and defaults. All
 	// dependencies of an alias should be required. Ignore defaults,
 	// because they've already been applied and don't generate any build
 	// rules themselves.
-	if e, ok := abstr.Module(mctx).(enableable); ok {
+	if e, ok := mctx.Module().(enableable); ok {
 		// If it's a top-level module (enabled and built by default), mark it as
 		// required, and continue to visit its dependencies. Otherwise, we don't
 		// need its dependencies so return.
@@ -523,13 +521,13 @@ func findRequiredModulesMutator(mctx abstr.TopDownMutatorContext) {
 		} else {
 			return
 		}
-	} else if _, ok := abstr.Module(mctx).(*defaults); ok { // Ignore defaults.
+	} else if _, ok := mctx.Module().(*defaults); ok { // Ignore defaults.
 		return
-	} else if _, ok := abstr.Module(mctx).(*alias); ok { // Ignore aliases.
+	} else if _, ok := mctx.Module().(*alias); ok { // Ignore aliases.
 		return
 	}
 
-	abstr.WalkDeps(mctx, func(dep blueprint.Module, parent blueprint.Module) bool {
+	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		e, ok := dep.(enableable)
 		if ok {
 			// Stop traversing if we've already visited this while

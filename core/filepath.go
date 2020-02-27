@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ARM-software/bob-build/abstr"
+	"github.com/google/blueprint"
 )
 
 // filePath encapsulates paths that may need to be used in different
@@ -67,7 +67,7 @@ func (file sourceFilePath) moduleDir() string {
 	return filepath.Join(file.srcPrefix, file.module)
 }
 
-func newSourceFilePath(path string, ctx abstr.BaseModuleContext, g generatorBackend) filePath {
+func newSourceFilePath(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
 	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir()}
 }
 

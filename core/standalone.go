@@ -29,7 +29,6 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
-	"github.com/ARM-software/bob-build/abstr"
 	"github.com/ARM-software/bob-build/internal/graph"
 )
 
@@ -44,12 +43,12 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
-func projectModuleDir(ctx abstr.BaseModuleContext) string {
+func projectModuleDir(ctx blueprint.BaseModuleContext) string {
 	return ctx.ModuleDir()
 }
 
-func getConfig(ctx abstr.BaseModuleContext) *bobConfig {
-	return ctx.(blueprint.BaseModuleContext).Config().(*bobConfig)
+func getConfig(ctx blueprint.BaseModuleContext) *bobConfig {
+	return ctx.Config().(*bobConfig)
 }
 
 func getBuildDir() string {
@@ -122,20 +121,20 @@ func Main() {
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
 	// The generated depender mutator add dependencies to generated source modules.
-	ctx.RegisterBottomUpMutator("default_deps", abstr.BottomUpAdaptor(defaultDepsMutator)).Parallel()
-	ctx.RegisterTopDownMutator("features_applier", abstr.TopDownAdaptor(featureApplierMutator)).Parallel()
-	ctx.RegisterTopDownMutator("template_applier", abstr.TopDownAdaptor(templateApplierMutator)).Parallel()
-	ctx.RegisterBottomUpMutator("check_lib_fields", abstr.BottomUpAdaptor(checkLibraryFieldsMutator)).Parallel()
-	ctx.RegisterBottomUpMutator("strip_empty_components", abstr.BottomUpAdaptor(stripEmptyComponentsMutator)).Parallel()
-	ctx.RegisterBottomUpMutator("process_paths", abstr.BottomUpAdaptor(pathMutator)).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps", defaultDepsMutator).Parallel()
+	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
+	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
-	ctx.RegisterTopDownMutator("supported_variants", abstr.TopDownAdaptor(supportedVariantsMutator)).Parallel()
-	ctx.RegisterBottomUpMutator(splitterMutatorName, abstr.BottomUpAdaptor(splitterMutator)).Parallel()
-	ctx.RegisterTopDownMutator("target", abstr.TopDownAdaptor(targetMutator)).Parallel()
-	ctx.RegisterTopDownMutator("default_applier", abstr.TopDownAdaptor(defaultApplierMutator)).Parallel()
-	ctx.RegisterBottomUpMutator("depender", abstr.BottomUpAdaptor(dependerMutator)).Parallel()
+	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()
+	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
+	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
+	ctx.RegisterTopDownMutator("default_applier", defaultApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
-	ctx.RegisterBottomUpMutator("generated", abstr.BottomUpAdaptor(generatedDependerMutator)).Parallel()
+	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
 
 	if handler := initGrapvizHandler(); handler != nil {
 		ctx.RegisterBottomUpMutator("graphviz_output", handler.graphvizMutator)
@@ -146,19 +145,19 @@ func Main() {
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
 		dependencyGraphHandler := graphMutatorHandler{graph.NewGraph("All")}
 		ctx.RegisterBottomUpMutator("sort_resolved_static_libs",
-			abstr.BottomUpAdaptor(dependencyGraphHandler.ResolveDependencySortMutator)) // This can't be parallel
+			dependencyGraphHandler.ResolveDependencySortMutator) // This can't be parallel
 		ctx.RegisterTopDownMutator("find_required_modules",
-			abstr.TopDownAdaptor(findRequiredModulesMutator)).Parallel()
+			findRequiredModulesMutator).Parallel()
 		ctx.RegisterTopDownMutator("check_reexport_libs",
-			abstr.TopDownAdaptor(checkReexportLibsMutator)).Parallel()
+			checkReexportLibsMutator).Parallel()
 		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies",
-			abstr.TopDownAdaptor(collectReexportLibsDependenciesMutator)).Parallel()
+			collectReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies",
-			abstr.BottomUpAdaptor(applyReexportLibsDependenciesMutator)).Parallel()
+			applyReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
-		ctx.RegisterTopDownMutator("install_group_mutator", abstr.TopDownAdaptor(installGroupMutator)).Parallel()
-		ctx.RegisterTopDownMutator("debug_info_mutator", abstr.TopDownAdaptor(debugInfoMutator)).Parallel()
-		ctx.RegisterTopDownMutator("match_sources_mutator", abstr.TopDownAdaptor(matchSourcesMutator)).Parallel()
+		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
+		ctx.RegisterTopDownMutator("debug_info_mutator", debugInfoMutator).Parallel()
+		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
 	}
 
 	if config.Properties.GetBool("builder_ninja") {

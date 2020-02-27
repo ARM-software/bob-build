@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,6 @@ package core
 
 import (
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/abstr"
 )
 
 type generateStaticLibrary struct {
@@ -42,7 +40,7 @@ func (m *generateStaticLibrary) outputs(g generatorBackend) []string {
 
 //// Support Installable
 
-func (m *generateStaticLibrary) filesToInstall(ctx abstr.BaseModuleContext, g generatorBackend) []string {
+func (m *generateStaticLibrary) filesToInstall(ctx blueprint.BaseModuleContext, g generatorBackend) []string {
 	return []string{getLibraryGeneratedPath(m, g)}
 }
 
