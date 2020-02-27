@@ -57,6 +57,7 @@ bob_generate_source {
         ],
     },
     cmd: "${args} && cp ${binary_output_out} ${out}",
+    build_by_default: true,
 }
 
 bob_alias {
