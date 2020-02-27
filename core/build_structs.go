@@ -89,7 +89,6 @@ type generatorBackend interface {
 	sourceDir() string
 	bobScriptsDir() string
 	sharedLibsDir(tgt tgtType) string
-	sourceOutputDir(m *generateCommon) string
 
 	// Backend initialisation
 	init(*blueprint.Context, *bobConfig)

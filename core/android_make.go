@@ -714,8 +714,9 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *generateCommon, ctx blueprint.ModuleContext, inouts []inout) {
 	m.outputdir = g.sourceOutputDir(m)
 	prefixInoutsWithOutputDir(inouts, m.outputDir())
-	// Calculate and record outputs
+	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
+	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
 
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 
@@ -821,7 +822,7 @@ func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blue
 		}
 		library := outputs[0]
 		declarePrebuiltStaticLib(sb, m.altShortName(), library,
-			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
+			strings.Join(m.genIncludeDirs(), " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
 		androidMkWriteString(ctx, m.altShortName(), sb)
@@ -840,7 +841,7 @@ func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blue
 		}
 		library := outputs[0]
 		declarePrebuiltSharedLib(sb, m.altShortName(), library,
-			strings.Join(m.generateCommon.Properties.Export_gen_include_dirs, " "),
+			strings.Join(m.genIncludeDirs(), " "),
 			m.generateCommon.Properties.Target != tgtTypeHost)
 
 		androidMkWriteString(ctx, m.altShortName(), sb)

@@ -145,6 +145,7 @@ type GenerateProps struct {
 type generateCommon struct {
 	moduleBase
 	simpleOutputProducer
+	headerProducer
 	Properties struct {
 		GenerateProps
 		Features
@@ -478,7 +479,6 @@ func (m *generateCommon) getSources(ctx blueprint.BaseModuleContext) []string {
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
-	m.Properties.Export_gen_include_dirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, g.sourceOutputDir(m))
 	if m.Properties.Tool != nil {
 		*m.Properties.Tool = filepath.Join(projectModuleDir(ctx), *m.Properties.Tool)
 	}
@@ -722,32 +722,4 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		parseAndAddVariationDeps(mctx, encapsulatesTag,
 			gsc.Properties.Encapsulates...)
 	}
-}
-
-func encapsulatesMutator(mctx blueprint.TopDownMutatorContext) {
-	mainModule := mctx.Module()
-	if e, ok := mainModule.(enableable); ok {
-		if !isEnabled(e) {
-			return // Not enabled, so don't add dependencies
-		}
-	}
-
-	mainGenProp, ok := getGenerateCommon(mainModule)
-	if !ok {
-		return
-	}
-
-	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
-		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
-			return false
-		}
-		childProp, ok := getGenerateCommon(child)
-		if !ok {
-			panic(errors.New(child.Name() + " does not support being encapsulated"))
-		}
-
-		mainGenProp.Properties.Export_gen_include_dirs = utils.AppendUnique(mainGenProp.Properties.Export_gen_include_dirs,
-			childProp.Properties.Export_gen_include_dirs)
-		return true
-	})
 }
