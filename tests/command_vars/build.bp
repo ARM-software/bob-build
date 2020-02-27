@@ -6,6 +6,7 @@ bob_generate_source {
     ],
     tool: "generate_trivial_function.py",
     cmd: "${tool} module_dir_and_outs ${srcs_generated} ${headers_generated}",
+    build_by_default: true,
 }
 
 bob_generate_source {
@@ -20,22 +21,13 @@ bob_generate_source {
         "--check-basename ${bob_test_generate_source_single_out} dir_and_outs.c dir_and_outs.h " +
         "--copy ${bob_test_generate_source_single_out} ${gen_dir}",
     export_gen_include_dirs: ["."],
+    build_by_default: true,
 }
 
-// Compile the output of all of the above tests. This ensures that they are
-// actually built on Soong, until we get `mm` to successfully build targets
-// with custom rules.
-bob_binary {
+bob_alias {
     name: "bob_test_command_vars",
-    srcs: ["main.c"],
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
-    generated_sources: [
+    srcs: [
+        "bob_test_generate_source_single",
         "bob_test_module_dep_dir_and_outs",
-    ],
-    generated_headers: [
-        "bob_test_module_dep_dir_and_outs",
-    ],
+    ]
 }
