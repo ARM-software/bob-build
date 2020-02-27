@@ -18,7 +18,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -403,36 +402,60 @@ func (l *library) shortName() string {
 
 func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
 	visited := map[string]bool{}
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			tag := ctx.OtherModuleDependencyTag(m)
-			return tag == generatedHeaderTag || tag == staticDepTag || tag == sharedDepTag
-		},
-		func(m blueprint.Module) {
 
-			if gs, ok := getGenerateCommon(m); ok {
-				// VisitDirectDepsIf will visit a module once for each
-				// dependency. Only list the headers once.
-				if _, ok := visited[m.Name()]; ok {
-					return
+	mainModule := ctx.Module()
+
+	ctx.WalkDeps(func(child, parent blueprint.Module) bool {
+
+		tag := ctx.OtherModuleDependencyTag(child)
+
+		// We want all the includes from modules mentioned by the main
+		// module (i.e. from generated_headers, static_libs and
+		// shared_libs). We also want headers from encapsulated source
+		// modules under the generated_header modules.
+		//
+		// Note that generatedHeaderTags can't have child
+		// generatedHeaderTags, staticDepTags or sharedDepTags (as
+		// these are only added by libraries).
+		topLevelGenHeader := tag == generatedHeaderTag && parent == mainModule
+
+		if topLevelGenHeader || tag == staticDepTag || tag == sharedDepTag || tag == encapsulatesTag {
+
+			// Add include directories for any generated modules
+			if gs, ok := getGenerateCommon(child); ok {
+				// WalkDeps will visit a module once for each
+				// dependency tag. Only list the headers once.
+				if _, seen := visited[child.Name()]; !seen {
+					visited[child.Name()] = true
+
+					includeDirs = append(includeDirs, gs.genIncludeDirs()...)
+
+					// Generated headers are "order-only". That means that a source file does not need to rebuild
+					// if a generated header changes, just that it must be built after a generated header.
+					// The source file _will_ be rebuilt if it uses the header (since that is registered in the
+					// depfile). Note that this means that generated headers cannot change which headers are used
+					// (by aliasing another header).
+					ds, ok := child.(dependentInterface)
+					if !ok {
+						panic(fmt.Errorf("generated_headers %s must have outputs()", child.Name()))
+					}
+
+					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
-				visited[m.Name()] = true
-
-				includeDirs = append(includeDirs, gs.Properties.Export_gen_include_dirs...)
-				// Generated headers are "order-only". That means that a source file does not need to rebuild
-				// if a generated header changes, just that it must be built after a generated header.
-				// The source file _will_ be rebuilt if it uses the header (since that is registered in the
-				// depfile). Note that this means that generated headers cannot change which headers are used
-				// (by aliasing another header).
-				ds, ok := m.(dependentInterface)
-				if !ok {
-					panic(errors.New("generated header must have outputs()"))
-				}
-				generatedHeaders := getHeadersGenerated(ds)
-
-				orderOnly = append(orderOnly, generatedHeaders...)
 			}
-		})
+			// else this may be a normal static or shared library
+		}
+
+		if topLevelGenHeader {
+			// Check top level generated header modules for encapsulated modules
+			return true
+		} else if tag == encapsulatesTag {
+			// Keep walking encapsulated modules
+			return true
+		}
+
+		return false
+	})
 	return
 }
 

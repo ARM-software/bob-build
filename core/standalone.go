@@ -168,7 +168,6 @@ func Main() {
 			collectReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterBottomUpMutator("apply_reexport_lib_dependencies",
 			applyReexportLibsDependenciesMutator).Parallel()
-		ctx.RegisterTopDownMutator("encapsulates_mutator", encapsulatesMutator).Parallel()
 		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
 		ctx.RegisterTopDownMutator("debug_info_mutator", debugInfoMutator).Parallel()
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()

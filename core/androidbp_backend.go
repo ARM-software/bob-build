@@ -80,16 +80,6 @@ func (g *androidBpGenerator) sharedLibsDir(tgtType) string {
 	return ""
 }
 
-//// Module specific functions identifying where backends expect module output to go.
-
-// The androidbp backend writes Android.bp files, which should never
-// need to reference files in their actual output location. Soong will
-// add the necessary paths when it runs. Therefore all these return an
-// empty string.
-func (g *androidBpGenerator) sourceOutputDir(*generateCommon) string   { return "" }
-
-//// End module specific functions
-
 type androidBpSingleton struct {
 }
 

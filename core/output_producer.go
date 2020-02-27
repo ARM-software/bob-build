@@ -66,3 +66,24 @@ func (m *simpleOutputProducer) outputs() []string {
 func (m *simpleOutputProducer) implicitOutputs() []string {
 	return m.implicitOuts
 }
+
+// Modules that produce headers in the build output directory that may
+// be referenced by other modules must implement the genIncludeDirs()
+// function. This structure supplies a basic version of this function,
+// where the modules just need to create the relevant lists.
+//
+// This must be set by the time GenerateBuildActions() completes.
+type headerProducer struct {
+	// List of all include directories within the output directory
+	// that are exported by this module. The directories are as we
+	// expect to see them named in the generated build definition.
+	// Whether these are relative or absolute paths will depend on the
+	// generatorBackend in use. Where the generatorBackend requires
+	// full paths, then BackendPaths (which use build system
+	// variables) rather than explicit paths should be used.
+	includeDirs []string
+}
+
+func (m *headerProducer) genIncludeDirs() []string {
+	return m.includeDirs
+}
