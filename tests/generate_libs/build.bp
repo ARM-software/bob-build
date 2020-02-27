@@ -113,10 +113,28 @@ bob_binary {
     },
 }
 
+bob_generate_binary {
+    name: "generated_binary",
+    srcs: ["main2.c"],
+    install_group: "IG_genlib_bin",
+
+    /* Note that we make this a host binary to avoid having to figure
+     * out GCC arguments.
+     */
+    cmd: "{{.gen_cc}} -fPIE -o ${out} ${in}",
+    target: "host",
+    build_by_default: true,
+    builder_android_bp: {
+        /* On Android BP generated binaries are not supported. */
+        enabled: false,
+    },
+}
+
 bob_alias {
     name: "bob_test_generate_libs",
     srcs: [
         "binary_linked_to_gen_static",
         "binary_linked_to_gen_shared",
+        "generated_binary",
     ],
 }

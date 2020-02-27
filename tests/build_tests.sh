@@ -54,6 +54,7 @@ function check_build_output() {
     check_installed "${DIR}/gen_sh_lib/libblah_shared${SHARED_LIBRARY_EXTENSION}"
     check_installed "${DIR}/gen_sh_bin/binary_linked_to_gen_shared"
     check_installed "${DIR}/gen_sh_bin/binary_linked_to_gen_static"
+    check_installed "${DIR}/gen_sh_bin/generated_binary"
     check_installed "${DIR}/gen_sh_src/validate_install_generate_sources.txt"
     check_installed "${DIR}/gen_sh_src/f3.validate_install_transform_source.txt"
     check_installed "${DIR}/gen_sh_src/f4.validate_install_transform_source.txt"
