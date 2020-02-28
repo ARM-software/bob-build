@@ -18,6 +18,9 @@
 package core
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -89,10 +92,33 @@ func androidBpSingletonFactory() blueprint.Singleton {
 
 func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
 	sb := &strings.Builder{}
+
+	// read definitions of plugin packages
+	content, err := ioutil.ReadFile(filepath.Join(getBobDir(), "plugins/Android.bp.in"))
+	if err != nil {
+		utils.Exit(1, err.Error())
+	}
+
+	// use source dir to get project-unique identifier,
+	// generate 10 chars in hex based on its hash
+	h := sha1.New()
+	h.Write([]byte(getSourceDir()))
+	projUid := hex.EncodeToString((h.Sum(nil)[:5]))
+	// bob dir must be relative to source dir
+	srcToBobDir, _ := filepath.Rel(getSourceDir(), getBobDir())
+
+	// substitute template variables
+	text := string(content)
+	text = strings.Replace(text, "@@PROJ_UID@@", projUid, -1)
+	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
+	sb.WriteString(text)
+	sb.WriteString("\n")
+
+	// dump all modules
 	AndroidBpFile().Render(sb)
 
 	androidbpFile := getPathInSourceDir("Android.bp")
-	err := fileutils.WriteIfChanged(androidbpFile, sb)
+	err = fileutils.WriteIfChanged(androidbpFile, sb)
 	if err != nil {
 		utils.Exit(1, err.Error())
 	}

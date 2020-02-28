@@ -16,38 +16,38 @@
  */
 
 bootstrap_go_package {
-    name: "bob-utils-@@PROJ_NAME@@",
+    name: "bob-utils-@@PROJ_UID@@",
     pluginFor: ["soong_build"],
     srcs: [
-        "../internal/utils/utils.go",
+        "@@BOB_DIR@@/internal/utils/utils.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/utils",
 }
 
 bootstrap_go_package {
-    name: "bob-plugins-prebuilt-@@PROJ_NAME@@",
+    name: "bob-plugins-prebuilt-@@PROJ_UID@@",
     pluginFor: ["soong_build"],
     deps: [
         "soong-android",
     ],
     srcs: [
-        "prebuilt/prebuilt_data.go",
+        "@@BOB_DIR@@/plugins/prebuilt/prebuilt_data.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/prebuilt",
 }
 
 bootstrap_go_package {
-    name: "bob-plugins-genrulebob-@@PROJ_NAME@@",
+    name: "bob-plugins-genrulebob-@@PROJ_UID@@",
     pluginFor: ["soong_build"],
     deps: [
         "blueprint",
         "soong-android",
         "soong-cc",
         "soong-genrule",
-        "bob-utils-@@PROJ_NAME@@",
+        "bob-utils-@@PROJ_UID@@",
     ],
     srcs: [
-        "genrulebob/genrule.go",
+        "@@BOB_DIR@@/plugins/genrulebob/genrule.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/genrulebob",
 }
