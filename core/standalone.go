@@ -43,11 +43,16 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
+// configProvider allows the retrieval of configuration
+type configProvider interface {
+	Config() interface{}
+}
+
 func projectModuleDir(ctx blueprint.BaseModuleContext) string {
 	return ctx.ModuleDir()
 }
 
-func getConfig(ctx blueprint.BaseModuleContext) *bobConfig {
+func getConfig(ctx configProvider) *bobConfig {
 	return ctx.Config().(*bobConfig)
 }
 
