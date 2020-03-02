@@ -92,11 +92,11 @@ bob_transform_source {
     name: "validate_install_transform_source",
     srcs: [
         "f3.in",
-        "f4.in"
+        "f4.in",
     ],
     out: {
         match: "(.+)\\.in",
-        replace: ["$1.validate_install_transform_source.txt"]
+        replace: ["$1.validate_install_transform_source.txt"],
     },
     cmd: "touch ${out}",
     install_group: "IG_gensrc",
@@ -113,11 +113,11 @@ bob_transform_source {
     ],
     out: {
         match: "(.+/.+)\\.in",
-        replace: ["$1.txt"]
+        replace: ["$1.txt"],
     },
     depfile: true,
     rsp_content: "${in}",
-    cmd: "touch ${depfile}; cat ${rspfile} > ${out}",
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
     build_by_default: true,
 }
 
@@ -131,11 +131,11 @@ bob_transform_source {
     ],
     out: {
         match: ".+/(.+)\\.in",
-        replace: ["$1.txt"]
+        replace: ["$1.txt"],
     },
     depfile: true,
     rsp_content: "${in}",
-    cmd: "touch ${depfile}; cat ${rspfile} > ${out}",
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
     build_by_default: true,
 }
 
