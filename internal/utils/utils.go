@@ -98,6 +98,20 @@ func SortedKeysBoolMap(m map[string]bool) []string {
 	return keys
 }
 
+func SortedKeysByteSlice(m map[string][]byte) []string {
+	keys := make([]string, len(m))
+
+	i := 0
+	for key := range m {
+		keys[i] = key
+		i++
+	}
+
+	sort.Strings(keys)
+
+	return keys
+}
+
 /* Identifies whether the array 'list' contains the string 'x'. */
 func Contains(list []string, x string) bool {
 	for _, y := range list {
