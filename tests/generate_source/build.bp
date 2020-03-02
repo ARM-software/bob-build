@@ -210,6 +210,7 @@ bob_generate_source {
     depfile: true,
     tool: "gen_with_dep.py",
     cmd: "${tool} -o ${out} -d ${depfile} ${in}",
+    build_by_default: true,
 }
 
 bob_generate_source {
@@ -222,6 +223,7 @@ bob_generate_source {
     implicit_outs: [
         "out.h",
     ],
+    build_by_default: true,
 }
 
 bob_generate_source {
