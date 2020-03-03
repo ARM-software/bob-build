@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,17 +19,28 @@ from __future__ import print_function
 
 import argparse
 import os
+import sys
 
 parser = argparse.ArgumentParser(description='Test generator.')
 parser.add_argument('--in', nargs='*', dest='input', action='store', help='Input files')
 parser.add_argument('--out', nargs='*', dest='output', action='store', help='Output file')
+parser.add_argument("--expect-in", nargs='*', action='store',
+                    help='Basenames of expected input files')
 
 args = parser.parse_args()
+
+if args.expect_in:
+    received_basenames = sorted(os.path.basename(i) for i in args.input)
+    expected_basenames = sorted(args.expect_in)
+    if received_basenames != expected_basenames:
+        print("Expected the following files:", ", ".join(expected_basenames))
+        print("But received these:", ", ".join(received_basenames))
+        sys.exit(1)
 
 for input_file in args.input:
     if not os.path.exists(input_file):
         print("Input file doesn't exist: " + input_file)
-        exit(-1)
+        sys.exit(1)
 
 for out in args.output:
     file_name = os.path.basename(out)
