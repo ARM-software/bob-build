@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +28,14 @@ cd $(dirname "${BASH_SOURCE[0]}")
 
 source ".bob.bootstrap"
 
-# Check for missing configuration
-if [ ! -f "${CONFIGNAME}" ] ; then
-    echo "${CONFIGNAME} is missing. Use config or menuconfig to configure the project."
-    exit 1
-fi
-
 # Move to the working directory
 cd "${WORKDIR}"
+
+# Check for missing configuration
+if [ ! -f "${CONFIG_FILE}" ] ; then
+    echo "${CONFIG_FILE} is missing. Use config or menuconfig to configure the project."
+    exit 1
+fi
 
 # Build
 "${BUILDDIR}/bob" "$@"

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +18,11 @@
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BOB_DIR=bob-build
 
-# Currently SRCDIR must be absolute. Because it's derived from
-# SCRIPT_DIR, make SCRIPT_DIR absolute so that we get SRCDIR for free.
-if [ "${SCRIPT_DIR:0:1}" != '/' ]; then
-    SCRIPT_DIR="$(readlink -f "${SCRIPT_DIR}")"
-fi
+source "${SCRIPT_DIR}/${BOB_DIR}/pathtools.bash"
 
 # Select a BUILDDIR if not provided one
 if [[ -z "$BUILDDIR" ]]; then
-    echo "BUILDDIR is not set - using build"
+    echo "BUILDDIR is not set - using 'build'"
     BUILDDIR=build
 fi
 
@@ -34,11 +30,10 @@ fi
 # existing directories.
 mkdir -p "$BUILDDIR"
 
-source "${SCRIPT_DIR}/${BOB_DIR}/pathtools.bash"
+# Currently SRCDIR must be absolute.
+SRCDIR="$(bob_abspath ${SCRIPT_DIR})"
 
 ORIG_BUILDDIR="${BUILDDIR}"
-
-SRCDIR="${SCRIPT_DIR}"
 if [ "${BUILDDIR:0:1}" != '/' ]; then
     # Redo BUILDDIR to be relative to SRCDIR
     BUILDDIR="$(relative_path "${SRCDIR}" "${BUILDDIR}")"
@@ -47,21 +42,22 @@ fi
 # Move to the source directory - we want this to be the working directory of the build
 cd "${SRCDIR}"
 
-# Set variables to bootstrap Bob.
-export TOPNAME="build.bp"
-export BLUEPRINT_LIST_FILE="bplist"
-export CONFIGNAME="bob.config"
-export BOB_CONFIG_OPTS=
-export BOB_CONFIG_PLUGINS=
+# Export data needed for Bob bootstrap script
 export SRCDIR
 export BUILDDIR
+export CONFIGNAME="bob.config"
+export TOPNAME="build.bp"
+export BOB_CONFIG_OPTS=
+export BOB_CONFIG_PLUGINS=
+export BLUEPRINT_LIST_FILE="bplist"
 
+# Bootstrap Bob (and Blueprint)
 "${BOB_DIR}/bootstrap_linux.bash"
 
 # Pick up some info that bob has worked out
 source "${BUILDDIR}/.bob.bootstrap"
 
-# Setup the build script
+# Setup the buildme script
 if [ "${SRCDIR:0:1}" != '/' ]; then
     # Use a relative symlink
     if [ "${SRCDIR}" != '.' ]; then

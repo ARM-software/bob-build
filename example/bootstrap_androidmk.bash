@@ -112,9 +112,9 @@ source "${BUILDDIR}/.bob.bootstrap"
 # Setup the buildme script to just run bob
 ln -sf "bob" "${BUILDDIR}/buildme"
 
-if [ ! -z "$*" ] || [ ! -f "$ANDROIDMK_DIR/$CONFIGNAME" ] ; then
+if [ $MENU -ne 1 ] || [ ! -f "$ANDROIDMK_DIR/$CONFIGNAME" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "$ANDROIDMK_DIR/config" ANDROID=y "$@"
+    "$ANDROIDMK_DIR/config" ANDROID=y BUILDER_ANDROID_MK=y "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then

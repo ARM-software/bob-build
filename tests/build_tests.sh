@@ -77,7 +77,8 @@ TEST_DIRS=("build-indep"
            "build-in-outp"
            "tests/build-in-src"
            "build-link"
-           "build-link-target")
+           "build-link-target"
+           "build-example")
 rm -rf "${TEST_DIRS[@]}"
 
 # Test by explicitly requesting the `bob_tests` alias, which should include all
@@ -239,6 +240,31 @@ if [ "$OS" != "OSX" ] ; then
     UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
     check_dep_updates "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
+
+# Test example setup if it's buildable
+cp -r example build-example
+pushd build-example &> /dev/null
+git clone https://github.com/ARM-software/bob-build
+cd bob-build
+git submodule update --init
+cd -
+./bootstrap_linux.bash
+
+# Generate example source file
+cat > hello_world.cpp << EOF
+int main()
+{
+    int hello = 1;
+    hello += 1;
+    return 0;
+}
+EOF
+
+cd build
+./config ${OPTIONS}
+./buildme
+check_installed "out/bin/hello_world"
+popd &> /dev/null
 
 # Clean up
 rm -rf "${TEST_DIRS[@]}"
