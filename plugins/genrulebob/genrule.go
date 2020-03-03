@@ -241,6 +241,17 @@ func (m *genrulebob) getArgs(ctx android.ModuleContext) (args map[string]string,
 	return
 }
 
+func (m *genrulebob) getModuleSrcs(ctx android.ModuleContext) (srcs []android.Path) {
+	ctx.VisitDirectDepsWithTag(generatedSourceTag, func(dep android.Module) {
+		if gdep, ok := dep.(genruleInterface); ok {
+			srcs = append(srcs, gdep.outputs().Paths()...)
+		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
+			srcs = append(srcs, ccmod.OutputFile().Path())
+		}
+	})
+	return
+}
+
 type soongInout struct {
 	in           android.Paths
 	out          android.WritablePaths
@@ -396,7 +407,8 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 
 	if len(m.Properties.Out) > 0 {
 		sio := soongInout{
-			in:           android.PathsForModuleSrc(ctx, m.Properties.Srcs),
+			in: append(android.PathsForModuleSrc(ctx, m.Properties.Srcs),
+				m.getModuleSrcs(ctx)...),
 			implicitSrcs: implicits,
 			out:          pathsForModuleGen(ctx, m.Properties.Out),
 			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
@@ -409,11 +421,15 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		}
 
 		m.inouts = append(m.inouts, sio)
-	}
 
-	re := regexp.MustCompile(m.Properties.Multi_out_props.Match)
-	for _, tsrc := range m.Properties.Multi_out_srcs {
-		m.inouts = append(m.inouts, m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, tsrc)))
+	} else if len(m.Properties.Multi_out_srcs) > 0 {
+		re := regexp.MustCompile(m.Properties.Multi_out_props.Match)
+		for _, tsrc := range m.Properties.Multi_out_srcs {
+			m.inouts = append(m.inouts, m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, tsrc)))
+		}
+		for _, tsrc := range m.getModuleSrcs(ctx) {
+			m.inouts = append(m.inouts, m.inoutForSrc(ctx, re, tsrc))
+		}
 	}
 
 	m.buildInouts(ctx, args)
