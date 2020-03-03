@@ -249,6 +249,27 @@ bob_binary {
     ],
 }
 
+// Check that generated modules can depend on a specific variant of a module
+bob_binary {
+    name: "host_and_target_supported_binary",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    srcs: ["simple_main.c"],
+    // Verify that the generated module doesn't accidentally pick up the target variant
+    host: {
+        out: "host_binary",
+    },
+}
+
+bob_generate_source {
+    name: "use_target_specific_library",
+    out: ["libout.a"],
+    module_deps: ["host_and_target_supported_binary:host"],
+    cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_generate_source",
     srcs: [
