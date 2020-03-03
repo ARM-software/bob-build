@@ -62,8 +62,8 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	}
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
-	m.AddStringList("module_deps", gc.Properties.Module_deps)
-	m.AddStringList("module_srcs", gc.Properties.Module_srcs)
+	m.AddStringList("module_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
+	m.AddStringList("module_srcs", getShortNamesForDirectDepsWithTags(mctx, generatedSourceTag))
 	m.AddStringList("encapsulates", gc.Properties.Encapsulates)
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)
