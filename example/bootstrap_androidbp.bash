@@ -22,17 +22,15 @@
 # Finally run Bob to generate the Android.bp for the configuration.
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-BOB_DIR=bob
-PROJ_NAME="bob_tests"
-
-source "${SCRIPT_DIR}/bootstrap_utils.sh"
+BOB_DIR=bob-build
+PROJ_NAME="bob_example"
 
 BASENAME=$(basename $0)
 function usage {
     cat <<EOF
 $BASENAME
 
-Sets up the Bob tests to build for Android using Android.bp files.
+Sets up the Bob to build for Android using Android.bp files.
 
 Usage:
  $BASENAME CONFIG_OPTIONS...
@@ -77,22 +75,14 @@ done
 [[ -n ${OUT} ]] || { echo "\$OUT is not set - did you run 'lunch'?"; exit 1; }
 [[ -n ${ANDROID_BUILD_TOP} ]] || { echo "\$ANDROID_BUILD_TOP is not set - did you run 'lunch'?"; exit 1; }
 
-# The tests need a symlink in the source directory to the parent bob
-# directory, as Blueprint won't accept ..
-create_link .. "${SCRIPT_DIR}/${BOB_DIR}"
-
 source "${SCRIPT_DIR}/${BOB_DIR}/pathtools.bash"
 
 PROJ_DIR=$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")
 
-# Add a symlink to enable the external_libs test
-create_link external_lib.bp "${SCRIPT_DIR}/external_libs/external/Android.bp"
-
 # Change to the working directory
 cd "${ANDROID_BUILD_TOP}"
 
-### Variables required for Bob and Android.bp bootstrap ###
-
+### Variables required for Bob and Android.mk bootstrap ###
 BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"
 export BUILDDIR="${BPBUILD_DIR}"
 export TOPNAME="build.bp"
