@@ -792,27 +792,30 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 	sb.WriteString(".KATI_RESTAT: " + g.outputs(m) + "\n")
 }
 
-func (g *androidMkGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidMkGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		inouts := m.generateInouts(ctx, g)
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 		installGeneratedFiles(sb, m, ctx, m.generateCommon.Properties.Tags)
 		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
-func (g *androidMkGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidMkGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		inouts := m.generateInouts(ctx, g)
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 		installGeneratedFiles(sb, m, ctx, m.generateCommon.Properties.Tags)
 		androidMkWriteString(ctx, m.altShortName(), sb)
 	}
 }
 
-func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		inouts := m.generateInouts(ctx, g)
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
@@ -829,9 +832,10 @@ func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blue
 	}
 }
 
-func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		inouts := m.generateInouts(ctx, g)
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs
@@ -848,9 +852,10 @@ func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blue
 	}
 }
 
-func (g *androidMkGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidMkGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		sb := &strings.Builder{}
+		inouts := m.generateInouts(ctx, g)
 		g.generateCommonActions(sb, &m.generateCommon, ctx, inouts)
 
 		// Add prebuilt outputs

@@ -321,8 +321,7 @@ type generateSource struct {
 func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
-		inouts := m.generateInouts(ctx, g)
-		g.generateSourceActions(m, ctx, inouts)
+		g.generateSourceActions(m, ctx)
 	}
 }
 
@@ -585,8 +584,7 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
-		inouts := m.generateInouts(ctx, g)
-		g.transformSourceActions(m, ctx, inouts)
+		g.transformSourceActions(m, ctx)
 	}
 }
 

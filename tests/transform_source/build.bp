@@ -54,13 +54,19 @@ bob_transform_source {
     cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
 }
 
+bob_generate_source {
+    name: "generate_source_to_transform",
+    out: ["f5.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+}
+
 bob_transform_source {
     name: "transform_source_multiple_in",
     srcs: [
         "f3.in",
         "f4.in",
-        "f5.in",
     ],
+    module_srcs: ["generate_source_to_transform"],
     out: {
         match: "(.+)\\.in",
         replace: [
@@ -68,7 +74,10 @@ bob_transform_source {
             "$1.h",
         ],
     },
-    export_gen_include_dirs: ["transform_source"],
+    export_gen_include_dirs: [
+        "generate_source_to_transform",
+        "transform_source",
+    ],
     tool: "generator.py",
     cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
 }

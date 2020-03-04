@@ -31,6 +31,10 @@ var _ generateLibraryInterface = (*generateSharedLibrary)(nil)
 var _ singleOutputModule = (*generateSharedLibrary)(nil)
 var _ blueprint.Module = (*generateSharedLibrary)(nil)
 
+func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
+	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
+}
+
 //// Support generateLibraryInterface
 
 func (m *generateSharedLibrary) libExtension() string {
@@ -42,9 +46,7 @@ func (m *generateSharedLibrary) libExtension() string {
 func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
-		implicitOuts := m.Properties.Headers
-		inouts := generateLibraryInouts(m, ctx, g, implicitOuts)
-		g.genSharedActions(m, ctx, inouts)
+		g.genSharedActions(m, ctx)
 	}
 }
 
