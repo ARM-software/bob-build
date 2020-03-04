@@ -27,19 +27,19 @@ import (
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 )
 
-func (g *androidBpGenerator) genBinaryActions(m *generateBinary, mctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidBpGenerator) genBinaryActions(m *generateBinary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		panic(fmt.Errorf("Generated binaries are not supported (%s)", m.Name()))
 	}
 }
 
-func (g *androidBpGenerator) genSharedActions(m *generateSharedLibrary, mctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidBpGenerator) genSharedActions(m *generateSharedLibrary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		panic(fmt.Errorf("Generated shared libraries are not supported (%s)", m.Name()))
 	}
 }
 
-func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		panic(fmt.Errorf("Generated static libraries are not supported (%s)", m.Name()))
 	}
@@ -74,12 +74,10 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
-func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(gs) {
 		return
 	}
-	// Calculate and record outputs
-	gs.recordOutputsFromInout(inouts)
 
 	m, err := AndroidBpFile().NewModule("genrule_bob", gs.shortName())
 	if err != nil {
@@ -94,12 +92,10 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	populateCommonProps(&gs.generateCommon, mctx, m)
 }
 
-func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx blueprint.ModuleContext, inouts []inout) {
+func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(ts) {
 		return
 	}
-	// Calculate and record outputs
-	ts.recordOutputsFromInout(inouts)
 
 	m, err := AndroidBpFile().NewModule("genrule_bob", ts.shortName())
 	if err != nil {

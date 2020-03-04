@@ -30,6 +30,10 @@ var _ generateLibraryInterface = (*generateBinary)(nil)
 var _ singleOutputModule = (*generateBinary)(nil)
 var _ blueprint.Module = (*generateBinary)(nil)
 
+func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
+	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
+}
+
 //// Support generateLibraryInterface
 
 func (m *generateBinary) libExtension() string {
@@ -47,9 +51,7 @@ func (m *generateBinary) outputFileName() string {
 func (m *generateBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
-		implicitOuts := m.Properties.Headers
-		inouts := generateLibraryInouts(m, ctx, g, implicitOuts)
-		g.genBinaryActions(m, ctx, inouts)
+		g.genBinaryActions(m, ctx)
 	}
 }
 

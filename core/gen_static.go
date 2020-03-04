@@ -30,6 +30,10 @@ var _ generateLibraryInterface = (*generateStaticLibrary)(nil)
 var _ singleOutputModule = (*generateStaticLibrary)(nil)
 var _ blueprint.Module = (*generateStaticLibrary)(nil)
 
+func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
+	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
+}
+
 //// Support generateLibraryInterface
 
 func (m *generateStaticLibrary) libExtension() string {
@@ -41,9 +45,7 @@ func (m *generateStaticLibrary) libExtension() string {
 func (m *generateStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
-		implicitOuts := m.Properties.Headers
-		inouts := generateLibraryInouts(m, ctx, g, implicitOuts)
-		g.genStaticActions(m, ctx, inouts)
+		g.genStaticActions(m, ctx)
 	}
 }
 

@@ -225,28 +225,32 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 	}
 }
 
-func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	// Create a rule to copy the generated library
@@ -263,7 +267,8 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	// Create a rule to copy the generated binary
