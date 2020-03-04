@@ -47,7 +47,7 @@ func Test_addCFlags(t *testing.T) {
 	m.On("AddString", "instruction_set", "arm")
 	m.On("AddStringList", "cflags", []string{"-cl-no-signed-zeros"})
 	m.On("AddStringList", "conlyflags", []string(nil))
-	m.On("AddStringList", "cxxflags", []string(nil))
+	m.On("AddStringList", "cppflags", []string(nil))
 
 	cflags := []string{"-marm", "-mx32", "-cl-no-signed-zeros"}
 	conlyFlags := []string{"-std=c11"}
@@ -66,7 +66,7 @@ func Test_addCFlags2(t *testing.T) {
 	m.On("AddString", "instruction_set", "thumb")
 	m.On("AddStringList", "cflags", []string(nil))
 	m.On("AddStringList", "conlyflags", []string(nil))
-	m.On("AddStringList", "cxxflags", []string(nil))
+	m.On("AddStringList", "cppflags", []string(nil))
 
 	cflags := []string{"-mthumb", "-mx32"}
 	conlyFlags := []string{"-std=c17"}
@@ -83,7 +83,7 @@ func Test_addCFlags3(t *testing.T) {
 	m.On("AddString", "cpp_std", "c++17")
 	m.On("AddStringList", "cflags", []string(nil))
 	m.On("AddStringList", "conlyflags", []string(nil))
-	m.On("AddStringList", "cxxflags", []string(nil))
+	m.On("AddStringList", "cppflags", []string(nil))
 
 	cflags := []string{"-mx32"}
 	conlyFlags := []string{}

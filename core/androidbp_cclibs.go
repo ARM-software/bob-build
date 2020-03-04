@@ -136,7 +136,7 @@ func addCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags
 
 	m.AddStringList("cflags", utils.Filter(ccflags.AndroidCompileFlags, cflags))
 	m.AddStringList("conlyflags", utils.Filter(ccflags.AndroidCompileFlags, conlyFlags))
-	m.AddStringList("cxxflags", utils.Filter(ccflags.AndroidCompileFlags, cxxFlags))
+	m.AddStringList("cppflags", utils.Filter(ccflags.AndroidCompileFlags, cxxFlags))
 	return nil
 }
 
