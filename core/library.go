@@ -63,19 +63,11 @@ type BuildProps struct {
 	// this library (via static_libs, whole_static_libs or shared_libs).
 	ExtraSharedLibs []string `blueprint:"mutated"`
 
-	// NOTE: This field is here temporarily and will be removed once other parts of the
-	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
-	Export_shared_libs []string
-
 	// The list of static lib modules that this library depends on
 	// These are propagated to the closest linking object when specified on static libraries.
 	// static_libs is an indication that this module is using a static library, and
 	// users of this module need to link against it.
 	Static_libs []string
-
-	// NOTE: This field is here temporarily and will be removed once other parts of the
-	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
-	Export_static_libs []string
 
 	// This list of dependencies that exported cflags and exported include dirs
 	// should be propagated 1-level higher
@@ -101,10 +93,6 @@ type BuildProps struct {
 	// Linker flags required to link to the necessary system libraries
 	// These are propagated to the closest linking object when specified on static libraries.
 	Ldlibs []string
-
-	// NOTE: This field is here temporarily and will be removed once other parts of the
-	// codebase no longer depend on Export_static_libs, Export_shared_libs and Export_ldlibs
-	Export_ldlibs []string
 
 	// The list of modules that generate extra headers for this module
 	Generated_headers []string
@@ -659,18 +647,12 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		b.checkField(len(props.Export_include_dirs) == 0, "export_include_dirs")
 		b.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		b.checkField(len(props.Export_local_include_dirs) == 0, "export_local_include_dirs")
-		b.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
-		b.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
 		b.checkField(len(props.Reexport_libs) == 0, "reexport_libs")
-		b.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
 		b.checkField(len(props.Whole_static_libs) == 0, "whole_static_libs")
 		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	} else if sl, ok := m.(*sharedLibrary); ok {
 		props := sl.Properties
 		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
-		sl.checkField(len(props.Export_shared_libs) == 0, "export_shared_libs")
-		sl.checkField(len(props.Export_static_libs) == 0, "export_static_libs")
-		sl.checkField(len(props.Export_ldlibs) == 0, "export_ldlibs")
 	} else if sl, ok := m.(*staticLibrary); ok {
 		props := sl.Properties
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
