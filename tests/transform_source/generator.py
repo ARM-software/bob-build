@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,46 +14,74 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from __future__ import print_function
 import argparse
 import os
 
-parser = argparse.ArgumentParser(description='Test generator.')
-parser.add_argument('--in', dest='input', action='store', help='Input files')
-parser.add_argument('--out', dest='output', action='store', help='Output file')
 
-args = parser.parse_args()
+def basename_no_ext(fname):
+    return os.path.splitext(os.path.basename(fname))[0]
 
-if len(args.input) < 1 or len(args.output) < 1:
-    print("Invalid input/output")
-    print("Input: " + args.input)
-    print("Output: " + args.output)
-    exit(1)
 
-input_basename = os.path.basename(args.input)
-if os.path.splitext(input_basename)[1] != ".in":
-    print("Input file should end with '.in': " + input_basename)
-    exit(1)
+def parse_args():
+    ap = argparse.ArgumentParser(description='Test generator.')
+    ap.add_argument("--in", dest="input", action="store", help="Input file", required=True)
+    ap.add_argument("--gen-src", action="store", help="Source file to generate", required=True)
+    ap.add_argument("--src-template", type=argparse.FileType("rt"),
+                    help="Template file to use for source file generation")
 
-output_base_name = os.path.basename(args.output)
+    header = ap.add_mutually_exclusive_group(required=True)
+    header.add_argument("--gen-header", action="store", help="Header to generate")
+    header.add_argument("--gen-implicit-header", action="store_true",
+                        help="Generate a header alongside the generated source")
 
-if os.path.splitext(input_basename)[0] != os.path.splitext(output_base_name)[0]:
-    print("Not matching base name: ")
-    print("Input: ")
-    print(os.path.splitext(input_basename))
-    print("Output: ")
-    print(os.path.splitext(output_base_name))
-    exit(1)
+    args = ap.parse_args()
 
-if os.path.splitext(output_base_name)[1] != ".cpp":
-    print("Output file should end with '.cpp': " + output_base_name)
-    exit(1)
+    if args.gen_implicit_header:
+        args.gen_header = os.path.join(os.path.dirname(args.gen_src),
+                                       basename_no_ext(args.gen_src) + ".h")
 
-without_extension = os.path.splitext(output_base_name)[0]
-with open(args.output, 'w') as outfile:
-    outfile.write("void output_%s(){}\n" % without_extension)
+    # Do some basic checks to ensure the transform source regexp replacement
+    # worked as expected.
+    if os.path.splitext(args.input)[1] != ".in":
+        ap.error("Input file does not have `.in` extension: {}".format(args.input))
 
-# Output a header to go with the cpp file
-header = os.path.splitext(args.output)[0] + ".h"
-with open(header, 'w') as outfile:
-    outfile.write("void output_%s();\n" % without_extension)
+    if os.path.splitext(args.gen_src)[1] != ".cpp":
+        ap.error("Generated source file does not have `.cpp` extension: {}".format(args.gen_src))
+
+    if basename_no_ext(args.gen_header) != basename_no_ext(args.input):
+        ap.error("Basename of generated output {} does not match input {}".format(args.gen_header,
+                                                                                  args.input))
+
+    if basename_no_ext(args.gen_src) != basename_no_ext(args.input):
+        ap.error("Basename of generated output {} does not match input {}".format(args.gen_src,
+                                                                                  args.input))
+
+    if os.path.splitext(args.gen_header)[1] != ".h":
+        ap.error("Generated header file does not have `.h` extension: {}".format(args.gen_src))
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    func = basename_no_ext(args.input)
+
+    if args.src_template:
+        src_template = args.src_template.read()
+    else:
+        src_template = "void output_{func}() {{}}\n"
+
+    header_template = "void output_{func}();\n"
+
+    with open(args.gen_src, 'wt') as outfile:
+        outfile.write(src_template.format(func=func))
+
+    with open(args.gen_header, 'wt') as outfile:
+        outfile.write(header_template.format(func=func))
+
+
+if __name__ == "__main__":
+    main()

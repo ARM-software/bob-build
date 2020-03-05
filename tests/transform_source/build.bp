@@ -30,7 +30,7 @@ bob_transform_source {
     },
     export_gen_include_dirs: ["single/transform_source"],
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
+    cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-implicit-header",
 }
 
 bob_transform_source {
@@ -51,7 +51,7 @@ bob_transform_source {
     },
     export_gen_include_dirs: ["transform_source"],
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
+    cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-implicit-header",
 }
 
 bob_generate_source {
@@ -79,7 +79,33 @@ bob_transform_source {
         "transform_source",
     ],
     tool: "generator.py",
-    cmd: "python ${tool} --in ${in} --out ${srcs_generated}",
+    cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-implicit-header",
+}
+
+bob_generate_source {
+    name: "generate_template_source_used_by_transform",
+    out: ["test_src.tmpl"],
+    // To get a single pair of braces `{}` in the output, we have to escape
+    // Go's templates and *then* Python's format() specifiers.
+    cmd: "echo 'void output_{func}(void) {{\"{{\"}}{{\"}}\"}}' > ${out}",
+}
+
+bob_transform_source {
+    name: "transform_source_module_deps",
+    module_deps: ["generate_template_source_used_by_transform"],
+    srcs: [
+        "f6.in",
+    ],
+    out: {
+        match: ".*/(.+).in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    export_gen_include_dirs: ["."],
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-header ${headers_generated} --src-template ${generate_template_source_used_by_transform_out}",
 }
 
 bob_binary {
@@ -88,11 +114,13 @@ bob_binary {
         "transform_source_single_dir",
         "transform_source_single",
         "transform_source_multiple_in",
+        "transform_source_module_deps",
     ],
     generated_headers: [
         "transform_source_single_dir",
         "transform_source_single",
         "transform_source_multiple_in",
+        "transform_source_module_deps",
     ],
     srcs: ["main.cpp"],
 }
