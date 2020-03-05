@@ -369,7 +369,9 @@ func pathsForImplicitSrcs(ctx android.ModuleContext, source android.Path, props 
 	return
 }
 
-func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp, source android.Path) (sio soongInout) {
+func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
+	source android.Path, commonImplicits android.Paths) (sio soongInout) {
+
 	replaceSource := func(props []string) (newProps []string) {
 		for _, prop := range props {
 			newProps = append(newProps, re.ReplaceAllString(source.Rel(), prop))
@@ -380,7 +382,8 @@ func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp, s
 
 	sio.in = android.Paths{source}
 	sio.out = pathsForModuleGen(ctx, replaceSource(mop.Replace))
-	sio.implicitSrcs = pathsForImplicitSrcs(ctx, source, replaceSource(mop.Implicit_srcs))
+	sio.implicitSrcs = append(pathsForImplicitSrcs(ctx, source, replaceSource(mop.Implicit_srcs)),
+		commonImplicits...)
 	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(mop.Implicit_outs))
 
 	if m.Properties.Depfile {
@@ -430,10 +433,12 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	} else if len(m.Properties.Multi_out_srcs) > 0 {
 		re := regexp.MustCompile(m.Properties.Multi_out_props.Match)
 		for _, tsrc := range m.Properties.Multi_out_srcs {
-			m.inouts = append(m.inouts, m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, tsrc)))
+			io := m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, tsrc), implicits)
+			m.inouts = append(m.inouts, io)
 		}
 		for _, tsrc := range m.getModuleSrcs(ctx) {
-			m.inouts = append(m.inouts, m.inoutForSrc(ctx, re, tsrc))
+			io := m.inoutForSrc(ctx, re, tsrc, implicits)
+			m.inouts = append(m.inouts, io)
 		}
 	}
 
