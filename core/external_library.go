@@ -21,11 +21,27 @@ import (
 	"github.com/google/blueprint"
 )
 
-type externalLib struct {
-	moduleBase
+type ExternalLibProps struct {
+	Export_cflags  []string
+	Export_ldflags []string
+	Ldlibs         []string
 }
 
-func (m *externalLib) topLevelProperties() []interface{} { return []interface{}{} }
+type externalLib struct {
+	moduleBase
+	Properties struct {
+		ExternalLibProps
+		Features
+	}
+}
+
+func (m *externalLib) topLevelProperties() []interface{} {
+	return []interface{}{&m.Properties.ExternalLibProps}
+}
+
+func (m *externalLib) features() *Features {
+	return &m.Properties.Features
+}
 
 func (m *externalLib) outputName() string   { return m.Name() }
 func (m *externalLib) altName() string      { return m.outputName() }
@@ -42,11 +58,23 @@ func (m *externalLib) disable()                             {}
 func (m *externalLib) setVariant(tgtType)                   {}
 func (m *externalLib) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
+// Implement the propertyExporter interface so that external libraries can pass
+// on properties e.g. from pkg-config
+
+func (m *externalLib) exportCflags() []string           { return m.Properties.Export_cflags }
+func (m *externalLib) exportIncludeDirs() []string      { return []string{} }
+func (m *externalLib) exportLocalIncludeDirs() []string { return []string{} }
+func (m *externalLib) exportLdflags() []string          { return m.Properties.Export_ldflags }
+func (m *externalLib) exportLdlibs() []string           { return m.Properties.Ldlibs }
+func (m *externalLib) exportSharedLibs() []string       { return []string{} }
+
+var _ propertyExporter = (*externalLib)(nil)
+
 // External libraries have no actions - they are already built.
 func (m *externalLib) GenerateBuildActions(ctx blueprint.ModuleContext) {}
 
 func externalLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &externalLib{}
-
-	return module, []interface{}{&module.SimpleName.Properties}
+	module.Properties.Features.Init(&config.Properties, ExternalLibProps{})
+	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
