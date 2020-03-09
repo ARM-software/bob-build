@@ -28,6 +28,15 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
+type propertyExporter interface {
+	exportCflags() []string
+	exportIncludeDirs() []string
+	exportLdflags() []string
+	exportLdlibs() []string
+	exportLocalIncludeDirs() []string
+	exportSharedLibs() []string
+}
+
 // BuildProps contains properties required by all modules that compile C/C++
 type BuildProps struct {
 	SourceProps
@@ -285,6 +294,8 @@ type library struct {
 	}
 }
 
+var _ propertyExporter = (*library)(nil)
+
 func (l *library) defaults() []string {
 	return l.Properties.Defaults
 }
@@ -309,8 +320,23 @@ func (l *library) getInstallableProps() *InstallableProps {
 	return &l.Properties.InstallableProps
 }
 
+// Return the shortName of dependencies which must be installed alongside the
+// library. Exclude external libraries - these will never be added via
+// install_deps, but may end up in shared_libs.
 func (l *library) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, sharedDepTag)
+	return getShortNamesForDirectDepsIf(ctx,
+		func(m blueprint.Module) bool {
+			tag := ctx.OtherModuleDependencyTag(m)
+			// External libraries do not have a build target so don't
+			// try to add a dependency on them.
+			if _, ok := m.(*externalLib); ok {
+				return false
+			}
+			if tag == installDepTag || tag == sharedDepTag {
+				return true
+			}
+			return false
+		})
 }
 
 func (l *library) getEnableableProps() *EnableableProps {
@@ -463,10 +489,10 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 		}
 		visited[dep.Name()] = true
 
-		if sl, ok := getLibrary(dep); ok {
-			expLocalIncludes = append(expLocalIncludes, sl.Properties.Export_local_include_dirs...)
-			expIncludes = append(expIncludes, sl.Properties.Export_include_dirs...)
-			expCflags = append(expCflags, sl.Properties.Export_cflags...)
+		if pe, ok := dep.(propertyExporter); ok {
+			expLocalIncludes = append(expLocalIncludes, pe.exportLocalIncludeDirs()...)
+			expIncludes = append(expIncludes, pe.exportIncludeDirs()...)
+			expCflags = append(expCflags, pe.exportCflags()...)
 		}
 	})
 
@@ -492,6 +518,14 @@ func (l *library) checkField(cond bool, fieldName string) {
 		panic(fmt.Sprintf("%s has field %s set", l.Name(), fieldName))
 	}
 }
+
+// All libraries must implement `propertyExporter`
+func (l *library) exportCflags() []string           { return l.Properties.Export_cflags }
+func (l *library) exportIncludeDirs() []string      { return l.Properties.Export_include_dirs }
+func (l *library) exportLocalIncludeDirs() []string { return l.Properties.Export_local_include_dirs }
+func (l *library) exportLdflags() []string          { return l.Properties.Export_ldflags }
+func (l *library) exportLdlibs() []string           { return l.Properties.Ldlibs }
+func (l *library) exportSharedLibs() []string       { return l.Properties.Shared_libs }
 
 type staticLibrary struct {
 	library
@@ -717,20 +751,20 @@ func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bo
 }
 
 // While traversing the static library dependency tree, propagate extra properties.
-func propagateOtherExportedProperties(l *library, depLib *staticLibrary) {
+func propagateOtherExportedProperties(l *library, depLib propertyExporter) {
 	props := l.build()
-	for _, shLib := range depLib.Properties.Shared_libs {
+	for _, shLib := range depLib.exportSharedLibs() {
 		if !utils.Contains(props.Shared_libs, shLib) {
 			props.Shared_libs = append(props.Shared_libs, shLib)
 			props.ExtraSharedLibs = append(props.ExtraSharedLibs, shLib)
 		}
 	}
-	for _, ldlib := range depLib.Properties.Ldlibs {
+	for _, ldlib := range depLib.exportLdlibs() {
 		if !utils.Contains(props.Ldlibs, ldlib) {
 			props.Ldlibs = append(props.Ldlibs, ldlib)
 		}
 	}
-	props.Ldflags = append(props.Ldflags, depLib.Properties.Export_ldflags...)
+	props.Ldflags = append(props.Ldflags, depLib.exportLdflags()...)
 
 	// Header libraries are *not* propagated here, because they are currently
 	// only supported on Android, which will automatically re-export them just
@@ -779,8 +813,8 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			// The GeneratedStaticLibrary is expected to be self
 			// contained, so no pulling in of other static or shared
 			// libraries.
-		} else if _, ok := dep.(*externalLib); ok {
-			// External libary dependencies are not handled.
+		} else if depLib, ok := dep.(*externalLib); ok {
+			propagateOtherExportedProperties(l, depLib)
 		} else {
 			panic(fmt.Sprintf("%s is not a staticLibrary", dep.Name()))
 		}

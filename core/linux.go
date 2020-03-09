@@ -437,6 +437,9 @@ func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 				libs = append(libs, sl.outputs()...)
 			} else if sl, ok := m.(*generateStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)
+			} else if _, ok := m.(*externalLib); ok {
+				panic(errors.New(ctx.OtherModuleName(m) +
+					" is external, so cannot be used in whole_static_libs"))
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a static library"))
 			}
@@ -457,6 +460,10 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			libs = append(libs, sl.outputs()...)
 		} else if sl, ok := dep.(*generateStaticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
+		} else if _, ok := dep.(*externalLib); ok {
+			// External static libraries are added to the link using the flags
+			// exported by their ldlibs and ldflags properties, rather than by
+			// specifying the filename here.
 		} else {
 			panic(errors.New(ctx.OtherModuleName(dep) + " is not a static library"))
 		}
@@ -539,7 +546,10 @@ func (l *library) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []str
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
 				libs = append(libs, getSharedLibLinkPath(t))
-
+			} else if _, ok := m.(*externalLib); ok {
+				// Don't try and guess the path to external libraries,
+				// and as they are outside of the build we don't need to
+				// add a dependency on them anyway.
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " doesn't support targets"))
 			}
@@ -547,7 +557,7 @@ func (l *library) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []str
 	return
 }
 
-func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string) {
+func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
 	useNoAsNeeded := !l.build().isForwardingSharedLibrary()
@@ -562,35 +572,38 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 				b := sl.build()
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
-					flags = append(flags, tc.getLinker().keepSharedLibraryTransitivity())
+					ldlibs = append(ldlibs, tc.getLinker().keepSharedLibraryTransitivity())
 					if useNoAsNeeded {
-						flags = append(flags, tc.getLinker().keepUnusedDependencies())
+						ldlibs = append(ldlibs, tc.getLinker().keepUnusedDependencies())
 					}
 				}
-				flags = append(flags, pathToLibFlag(sl.outputName()))
+				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
 				if b.isForwardingSharedLibrary() {
 					if useNoAsNeeded {
-						flags = append(flags, tc.getLinker().dropUnusedDependencies())
+						ldlibs = append(ldlibs, tc.getLinker().dropUnusedDependencies())
 					}
-					flags = append(flags, tc.getLinker().dropSharedLibraryTransitivity())
+					ldlibs = append(ldlibs, tc.getLinker().dropSharedLibraryTransitivity())
 				}
 				if installPath, ok := sl.Properties.InstallableProps.getInstallGroupPath(); ok {
 					installPath = filepath.Join(installPath, proptools.String(sl.Properties.InstallableProps.Relative_install_path))
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
-				flags = append(flags, pathToLibFlag(sl.outputName()))
+				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
 				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallGroupPath(); ok {
 					installPath = filepath.Join(installPath, proptools.String(sl.generateCommon.Properties.InstallableProps.Relative_install_path))
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
+			} else if el, ok := m.(*externalLib); ok {
+				ldlibs = append(ldlibs, el.exportLdlibs()...)
+				ldflags = append(ldflags, el.exportLdflags()...)
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " is not a shared library"))
 			}
 		})
 
 	if hasForwardingLib {
-		flags = append(flags, tc.getLinker().getForwardingLibFlags())
+		ldlibs = append(ldlibs, tc.getLinker().getForwardingLibFlags())
 	}
 	if l.Properties.isRpathWanted() {
 		if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
@@ -602,7 +615,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (flags []string
 				}
 				rpaths = append(rpaths, "'$$ORIGIN/"+out+"'")
 			}
-			flags = append(flags, tc.getLinker().setRpath(rpaths))
+			ldlibs = append(ldlibs, tc.getLinker().setRpath(rpaths))
 		}
 	}
 	return
@@ -630,7 +643,7 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
 	}
 
-	sharedLibFlags := l.getSharedLibFlags(ctx)
+	sharedLibLdlibs, sharedLibLdflags := l.getSharedLibFlags(ctx)
 
 	linker := tc.getLinker().getTool()
 	tcLdflags := tc.getLinker().getFlags()
@@ -648,10 +661,10 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 
 	args := map[string]string{
 		"build_wrapper":   buildWrapper,
-		"ldflags":         utils.Join(tcLdflags, ldflags),
+		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
 		"linker":          linker,
 		"shared_libs_dir": l.getSharedLibraryDir(),
-		"shared_libs_flags": utils.Join(append(sharedLibFlags,
+		"shared_libs_flags": utils.Join(append(sharedLibLdlibs,
 			tc.getLinker().setRpathLink(l.getSharedLibraryDir()))),
 		"static_libs": utils.Join(staticLibFlags),
 		"ldlibs":      utils.Join(l.Properties.Ldlibs, tcLdlibs),

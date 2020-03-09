@@ -107,19 +107,12 @@ func (props *InstallableProps) getInstallGroupPath() (path string, ok bool) {
 	return proptools.String(props.Install_path), true
 }
 
-func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
-	tags ...dependencyTag) (ret []string) {
+func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,
+	pred func(m blueprint.Module) bool) (ret []string) {
+
 	visited := map[string]bool{}
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			tag := ctx.OtherModuleDependencyTag(m)
-			for _, i := range tags {
-				if tag == i {
-					return true
-				}
-			}
-			return false
-		},
+
+	ctx.VisitDirectDepsIf(pred,
 		func(m blueprint.Module) {
 			if dep, ok := m.(phonyInterface); ok {
 				if _, ok := visited[m.Name()]; !ok {
@@ -131,6 +124,21 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 			visited[m.Name()] = true
 		})
 	return
+}
+
+func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
+	tags ...dependencyTag) (ret []string) {
+
+	return getShortNamesForDirectDepsIf(ctx,
+		func(m blueprint.Module) bool {
+			tag := ctx.OtherModuleDependencyTag(m)
+			for _, i := range tags {
+				if tag == i {
+					return true
+				}
+			}
+			return false
+		})
 }
 
 // InstallGroupProps describes the properties of bob_install_group modules
