@@ -18,6 +18,7 @@ Bob
 - [bob_external_header_library](module_types/bob_external_library.md)
 - [bob_external_shared_library](module_types/bob_external_library.md)
 - [bob_external_static_library](module_types/bob_external_library.md)
+- [bob_generate_binary](module_types/bob_generate_library.md)
 - [bob_generate_shared_library](module_types/bob_generate_library.md)
 - [bob_generate_source](module_types/bob_generate_source.md)
 - [bob_generate_static_library](module_types/bob_generate_library.md)
