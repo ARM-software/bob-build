@@ -1,16 +1,19 @@
-Module: bob_generate_shared_library & bob_generate_static_library
-=================================================================
+Module: bob_generate_shared_library, bob_generate_static_library, bob_generate_binary
+========================================================================================
 
-This target generates a shared/static library and headers using a
-custom command, instead of via the default compiler and linker. The
-library can be linked to other modules using the normal properties
-that reference shared/static libraries.
+This target generates a shared library, a static library, or a binary
+using a custom command instead of via the default compiler and linker.
+The libraries can be linked to other modules using the normal
+properties that reference shared/static libraries. Headers for the
+libraries can be generated at the same time.
 
-The module type is `bob_generate_shared_library` or `bob_generate_static_library`.
+The module type is `bob_generate_shared_library`,
+`bob_generate_static_library`, or `bob_generate_binary`.
 
-`bob_generate_static_library` supports [features](../features.md)
+These module types support [features](../features.md)
 
-## Full specification of `bob_generate_shared_library` and `bob_generate_static_library`
+## Full specification of `bob_generate_[shared|static]_library` and `bob_generate_binary` properties
+
 For general common properties please
 [check detailed documentation](common_module_properties.md).
 
@@ -19,7 +22,13 @@ For generate common properties please
 
 ```bp
 bob_generate_static_library {
-    // see below
+    // see bob_generate_shared_library
+}
+```
+
+```bp
+bob_generate_binary {
+    // see bob_generate_shared_library
 }
 ```
 
@@ -65,5 +74,6 @@ bob_generate_shared_library {
 ```
 
 ----
-### **bob_generate_shared_library.headers** or **bob_generate_static_library.headers** (optional)
+### **bob_generate_*.headers** (optional)
+
 List of headers that are created (if any).
