@@ -15,7 +15,7 @@ with the output of the config system. Each config option (e.g. `DEBUG`)
 generates a matching feature (`debug`).
 
 ## How a feature is set and referred to
-A feature added to [Mconfig](docs/mconfig.md) (e.g. `FOO`)
+A feature added to [Mconfig](docs/config_system.md) (e.g. `FOO`)
 becomes `CONFIG_xxx=value` (e.g. `CONFIG_FOO=value`) in
 `$OUT/build.config`. We can refer to it in Bob modules as follows:
 

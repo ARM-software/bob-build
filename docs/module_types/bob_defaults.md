@@ -11,7 +11,7 @@ Most properties are optional.
 
 `bob_defaults` supports [features](../features.md)
 
-For detailed documentation please go to [common module properties](docs/bp/module/common_module_properties.md).
+For detailed documentation please go to [common module properties](common_module_properties.md).
 For kernel module related stuff please check [bob_kernel_module](bob_kernel_module.md)
 
 ```bp
