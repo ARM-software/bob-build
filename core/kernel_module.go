@@ -52,8 +52,8 @@ func (m *kernelModule) features() *Features {
 }
 
 func (m *kernelModule) outputName() string {
-	if len(m.Properties.Out) > 0 {
-		return m.Properties.Out
+	if m.Properties.Out != nil {
+		return *m.Properties.Out
 	}
 	return m.Name()
 }
