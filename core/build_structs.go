@@ -272,7 +272,14 @@ func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
 		return
 	}
 
-	for _, props := range f.topLevelProperties() {
+	strippableProps := f.topLevelProperties()
+
+	if def, ok := mctx.Module().(targetable); ok {
+		strippableProps = append(strippableProps, []interface{}{&def.build().Host.BuildProps}...)
+		strippableProps = append(strippableProps, []interface{}{&def.build().Target.BuildProps}...)
+	}
+
+	for _, props := range strippableProps {
 		propsVal := reflect.Indirect(reflect.ValueOf(props))
 		stripEmptyComponentsRecursive(propsVal)
 	}
