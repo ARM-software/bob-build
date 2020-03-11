@@ -34,7 +34,7 @@ type BuildProps struct {
 	AliasableProps
 
 	// Alternate output name, used for the file name and Android rules
-	Out string
+	Out *string
 
 	// Flags used for C/C++ compilation
 	Cflags []string
@@ -357,8 +357,8 @@ func (l *library) getSplittableProps() *SplittableProps {
 }
 
 func (l *library) outputName() string {
-	if len(l.Properties.Out) > 0 {
-		return l.Properties.Out
+	if l.Properties.Out != nil {
+		return *l.Properties.Out
 	}
 	return l.Name()
 }
