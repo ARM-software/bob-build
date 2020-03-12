@@ -265,3 +265,36 @@ func Test_FlattenPath(t *testing.T) {
 
 	assert.Equal(t, "a__b__c__d_e___f_.txt", flattened)
 }
+
+func Test_ExpandReplacesMappedVars(t *testing.T) {
+	res := Expand("$$ ${x0}s and ${x1}s ; ${y} $$", func(s string) string {
+		dict := map[string]string{
+			"x0": "apple",
+			"x1": "orange",
+			"x2": "carrot",
+		}
+		if val, ok := dict[s]; ok {
+			return val
+		} else {
+			return "${" + s + "}"
+		}
+	})
+
+	assert.Equal(t, "$$ apples and oranges ; ${y} $$", res)
+}
+
+func Test_ExpandIncomplete(t *testing.T) {
+	res := Expand("1 $2 3", func(string) string {
+		return ""
+	})
+	res2 := Expand("1 2 3$", func(string) string {
+		return ""
+	})
+	res3 := Expand("1 2 3${x", func(string) string {
+		return ""
+	})
+
+	assert.Equal(t, "1 $2 3", res)
+	assert.Equal(t, "1 2 3$", res2)
+	assert.Equal(t, "1 2 3${x", res3)
+}
