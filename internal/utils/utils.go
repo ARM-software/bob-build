@@ -288,3 +288,49 @@ func Exit(exitCode int, err string) {
 func FlattenPath(s string) string {
 	return strings.Replace(s, "/", "__", -1)
 }
+
+// Expand function is similar to os.Expand, with one difference: curly braces
+// around variable names are compulsory - this only replaces recognized
+// variable references. In particular, '$' followed by a character other than
+// '{' will not be affected by expansion. E.g. "$a" will remain "$a" after
+// expansion.
+func Expand(s string, mapping func(string) string) (res string) {
+	const (
+		outsideRef = iota
+		enteringRef
+		insideRef
+	)
+	state := outsideRef
+	variable := ""
+	for _, c := range s {
+		switch state {
+		case outsideRef:
+			if c == '$' {
+				state = enteringRef
+			} else {
+				res += string(c)
+			}
+		case enteringRef:
+			if c == '{' {
+				state = insideRef
+			} else {
+				res += "$" + string(c)
+				state = outsideRef
+			}
+		case insideRef:
+			if c == '}' {
+				res += mapping(variable)
+				variable = ""
+				state = outsideRef
+			} else {
+				variable += string(c)
+			}
+		}
+	}
+	if state == enteringRef {
+		res += "$"
+	} else if state == insideRef {
+		res += "${" + variable
+	}
+	return
+}
