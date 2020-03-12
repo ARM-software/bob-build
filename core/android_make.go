@@ -187,12 +187,11 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	exportIncludeDirs := utils.NewStringSlice(m.Properties.Export_include_dirs, utils.PrefixDirs(m.Properties.Export_local_include_dirs, "$(LOCAL_PATH)"))
 
 	// Handle generated headers
+	additionalDeps := []string{}
 	if len(m.Properties.Generated_headers) > 0 {
 		headerDirs, headerOutputs := m.GetGeneratedHeaders(ctx)
 		includes = append(includes, headerDirs...)
-
-		writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", headerOutputs)
-		sb.WriteString("\n")
+		additionalDeps = headerOutputs
 	}
 
 	// Handle generated sources
@@ -235,12 +234,14 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	}
 	srcs := utils.NewStringSlice(m.Properties.getSources(ctx), m.Properties.Build.SourceProps.Specials)
 
-	// Remove sources which are not used in Android (e.g custom sources)
+	// Remove sources which are not compiled
 	nonCompiledDeps := utils.Filter(utils.IsNotCompilableSource, srcs)
 	srcs = utils.Filter(utils.IsCompilableSource, srcs)
 
 	writeListAssignment(sb, "LOCAL_SRC_FILES", srcs)
-	writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)"))
+
+	additionalDeps = append(additionalDeps, utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)")...)
+	writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", additionalDeps)
 	writeListAssignment(sb, "LOCAL_C_INCLUDES", includes)
 
 	cflagsList := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
