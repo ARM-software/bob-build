@@ -202,13 +202,15 @@ func (m *genrulebob) getHostBin(ctx android.ModuleContext) android.OptionalPath 
 func (m *genrulebob) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
 	dependents = android.PathsForModuleSrc(ctx, m.Properties.Implicit_srcs)
 	args = map[string]string{
-		"gen_dir":    android.PathForModuleGen(ctx).String(),
-		"asflags":    utils.Join(m.Properties.Asflags),
-		"cflags":     utils.Join(m.Properties.Cflags),
-		"conlyflags": utils.Join(m.Properties.Conlyflags),
-		"cxxflags":   utils.Join(m.Properties.Cxxflags),
-		"ldflags":    utils.Join(m.Properties.Ldflags),
-		"ldlibs":     utils.Join(m.Properties.Ldlibs),
+		"gen_dir":         android.PathForModuleGen(ctx).String(),
+		"asflags":         utils.Join(m.Properties.Asflags),
+		"cflags":          utils.Join(m.Properties.Cflags),
+		"conlyflags":      utils.Join(m.Properties.Conlyflags),
+		"cxxflags":        utils.Join(m.Properties.Cxxflags),
+		"ldflags":         utils.Join(m.Properties.Ldflags),
+		"ldlibs":          utils.Join(m.Properties.Ldlibs),
+		"module_dir":      ctx.ModuleDir(),
+		"shared_libs_dir": "",
 
 		// flag_defaults is primarily used to invoke sub-makes of
 		// different libraries. This shouldn't be needed on Android.
