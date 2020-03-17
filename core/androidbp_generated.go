@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func (g *androidBpGenerator) genBinaryActions(m *generateBinary, mctx blueprint.ModuleContext) {
@@ -45,10 +46,28 @@ func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blu
 	}
 }
 
+func expandCmd(s string, moduleDir string) string {
+	return utils.Expand(s, func(s string) string {
+		switch s {
+		case "src_dir":
+			return "${module_dir}"
+		case "module_dir":
+			return moduleDir
+		case "bob_config":
+			return configFile
+		case "bob_config_opts":
+			return configOpts
+		default:
+			return "${" + s + "}"
+		}
+	})
+}
+
 func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
+	cmd = expandCmd(cmd, mctx.ModuleDir())
 	m.AddString("cmd", cmd)
 
 	if gc.Properties.Tool != nil {
