@@ -276,6 +276,20 @@ bob_static_library {
 }
 ```
 
+## Supporting different generations of compiler flags
+
+Sometimes a library needs to be compatible with a whole range of
+compiler versions that might have different behaviours between each
+generation. One common usage is to avoid new warnings being introduced
+by more modern compilers.
+
+In that case you can use the template `{{add_if_supported
+"<compiler_flag>"}}` in the `cflags`, `cxxflags` or `conlyflags` to
+instruct Bob to add the given compiler flag to the compiler arguments,
+but only if the compiler recognises that flag. If the compiler doesn't
+recognise the `<compiler_flag>` it will be silently discarded from
+`cflags`, `cxxflags` and `conlyflags`.
+
 ## Retaining API functions in shared libraries
 
 The linker will typically remove unused code from the output file. For

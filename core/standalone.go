@@ -171,6 +171,7 @@ func Main() {
 			ctx.RegisterTopDownMutator("escape_mutator", escapeMutator).Parallel()
 		}
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
+		ctx.RegisterBottomUpMutator("check_supported_flags_mutator", checkCompilerFlagsMutator).Parallel()
 	}
 
 	if builder_ninja {

@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -117,6 +118,7 @@ type toolchain interface {
 	getCXXCompiler() (tool string, flags []string)
 	getLinker() linker
 	getStripBinary() (tool string)
+	checkFlagIsSupported(language, flag string) bool
 }
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {
@@ -214,6 +216,69 @@ func getFileNameDir(tc toolchain, basename string) (dirs []string) {
 	return
 }
 
+// Type for caching the supported flags of a compiler
+// Cache maps flags+compiler+language to an boolean:
+//    false - not supported
+//    true  - supported
+type flagSupportedCache struct {
+	m    map[string]bool
+	lock sync.RWMutex
+}
+
+func newFlagCache() (cache *flagSupportedCache) {
+	cache = &flagSupportedCache{}
+	cache.m = make(map[string]bool)
+	return
+}
+
+// Check that a toolchain's compiler for 'language' supports the given 'flag'
+func (cache *flagSupportedCache) checkFlag(tc toolchain, language, flag string) bool {
+	compiler := ""
+	flags := []string{}
+	switch language {
+	case "c++":
+		compiler, flags = tc.getCXXCompiler()
+	case "c":
+		compiler, flags = tc.getCCompiler()
+	default:
+		// No other language currently supported
+		return false
+	}
+
+	// The search key is "<flag>/<compiler>/<language>"
+	key := strings.Join([]string{flag, compiler, language}, "/")
+
+	cache.lock.RLock()
+	supported, ok := cache.m[key]
+	cache.lock.RUnlock()
+	if ok {
+		return supported
+	}
+
+	// We have not seen the flag before, check it by running the compiler with the flag
+	// Add a '-Werror' to make sure that the compiler exits with an error code if the
+	// flag is unknown. If the flag starts with '-Wno-' remove the 'no-' part so that
+	// we can test the actual flag. This is to work around the fact that gcc is silent
+	// about '-Wno-<flag_name>' flags it doesn't recognise until you actually compile a file
+	saneFlag := strings.Replace(flag, "-Wno-", "-W", 1)
+	testFlags := utils.Remove(utils.NewStringSlice(flags, []string{"-x", language, "-c", os.DevNull, "-Werror", saneFlag}), "")
+	cmd := exec.Command(compiler, testFlags...)
+	_, err := cmd.CombinedOutput()
+	if err == nil {
+		cache.lock.Lock()
+		cache.m[key] = true
+		cache.lock.Unlock()
+		return true
+	}
+
+	// Compiler did not recognise the flag
+	cache.lock.Lock()
+	cache.m[key] = false
+	cache.lock.Unlock()
+
+	return false
+}
+
 type toolchainGnu interface {
 	toolchain
 	getBinDirs() []string
@@ -232,6 +297,7 @@ type toolchainGnuCommon struct {
 	cflags        []string // Flags for both C and C++
 	ldflags       []string // Linker flags, including anything required for C++
 	binDir        string
+	flagCache     *flagSupportedCache
 }
 
 type toolchainGnuNative struct {
@@ -268,6 +334,10 @@ func (tc toolchainGnuCommon) getStripBinary() string {
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
 	return []string{tc.binDir}
+}
+
+func (tc toolchainGnuCommon) checkFlagIsSupported(language, flag string) bool {
+	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
 // The libstdc++ headers shipped with GCC toolchains are stored, relative to
@@ -369,6 +439,7 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.ldflags = append(tc.ldflags, flags...)
 
 	tc.linker = newDefaultLinker(tc.gxxBinary, tc.ldflags, []string{})
+	tc.flagCache = newFlagCache()
 
 	return
 }
@@ -404,7 +475,8 @@ type toolchainClangCommon struct {
 	ldflags  []string // Linker flags, including anything required for C++
 	ldlibs   []string // Linker libraries
 
-	target string
+	target    string
+	flagCache *flagSupportedCache
 }
 
 type toolchainClangNative struct {
@@ -443,6 +515,10 @@ func (tc toolchainClangCommon) getLinker() linker {
 
 func (tc toolchainClangCommon) getStripBinary() string {
 	return tc.objcopyBinary
+}
+
+func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool {
+	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
 func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangCommon) {
@@ -553,6 +629,7 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
 	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
+	tc.flagCache = newFlagCache()
 
 	return
 }
@@ -576,6 +653,7 @@ type toolchainArmClang struct {
 	linker        linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
+	flagCache     *flagSupportedCache
 }
 
 type toolchainArmClangNative struct {
@@ -610,6 +688,10 @@ func (tc toolchainArmClang) getStripBinary() string {
 	return tc.objcopyBinary
 }
 
+func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
+	return tc.flagCache.checkFlag(tc, language, flag)
+}
+
 func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArmClang) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
@@ -621,6 +703,7 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	tc.linker = newDefaultLinker(tc.cxxBinary, []string{}, []string{})
 
 	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
+	tc.flagCache = newFlagCache()
 
 	return
 }
@@ -644,6 +727,7 @@ type toolchainXcode struct {
 	linker        linker
 	prefix        string
 	target        string
+	flagCache     *flagSupportedCache
 
 	cflags  []string
 	ldflags []string
@@ -671,6 +755,10 @@ func (tc toolchainXcode) getCCompiler() (string, []string) {
 
 func (tc toolchainXcode) getCXXCompiler() (string, []string) {
 	return tc.cxxBinary, tc.cflags
+}
+
+func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
+	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
 type xcodeLinker struct {
@@ -756,6 +844,7 @@ func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode)
 	}
 
 	tc.linker = newXcodeLinker(tc.cxxBinary, tc.ldflags, []string{})
+	tc.flagCache = newFlagCache()
 
 	return
 }

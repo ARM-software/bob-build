@@ -1,0 +1,40 @@
+/*
+ * Copyright 2020 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_binary {
+    name: "bob_test_flag_supported",
+    srcs: ["test.c", "test_cpp.cpp"],
+    conlyflags: [
+        "{{add_if_supported \"-Wno-discarded-qualifiers\"}}",
+        "{{add_if_supported \"-Wno-ignored-qualifiers\"}}",
+        "{{add_if_supported \"-Wno-main-return-type\"}}",
+	/* old gcc uses -Wmain to warn about the declaration of 'main' */
+        "{{add_if_supported \"-Wno-main\"}}",
+    ],
+    cflags: ["-Wall", "-Werror"],
+    cxxflags: [
+        "{{add_if_supported \"-Wno-ignored-qualifiers\"}}",
+    ],
+}
+
+bob_binary {
+    name: "bob_test_flag_unsupported",
+    srcs: ["test2.c"],
+    conlyflags: ["{{add_if_supported \"-Wnon_existent_conly_flag\"}}"],
+    cflags: ["{{add_if_supported \"-Wnon_existent_c_flag\"}}"],
+    cxxflags: ["{{add_if_supported \"-Wnon_existent_cxx_flag\"}}"],
+}
