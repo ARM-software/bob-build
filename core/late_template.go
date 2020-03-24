@@ -129,3 +129,49 @@ func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
 		}
 	}
 }
+
+var flagFilterRegex = regexp.MustCompile(`\{\{add_if_supported\s+(.+?)\}\}`)
+
+// Iterate over an array of flags and filter out the ones that are not supported
+// based on the list of languages in a toolchain
+func checkFlags(flags, languages []string, tc toolchain) []string {
+	out := []string{}
+	for _, flag := range flags {
+		matches := flagFilterRegex.FindAllStringSubmatch(flag, -1)
+		if matches != nil {
+			for _, match := range matches {
+				for _, lang := range languages {
+					if tc.checkFlagIsSupported(lang, match[1]) {
+						out = append(out, match[1])
+						break
+					}
+				}
+			}
+		} else {
+			out = append(out, flag)
+		}
+	}
+	return out
+}
+
+// This mutator handles {{add_if_supported}}. It checks the compiler flag passed
+// on the input and keeps it *if* the compiler supports it.
+func checkCompilerFlagsMutator(mctx blueprint.BottomUpMutatorContext) {
+	module := mctx.Module()
+	g := getBackend(mctx)
+	if e, ok := module.(enableable); ok {
+		if !isEnabled(e) {
+			// Not enabled, skip execution
+			return
+		}
+	}
+
+	if t, ok := mctx.Module().(moduleWithBuildProps); ok {
+		build := t.build()
+		tc := g.getToolchain(build.TargetType)
+		build.Cflags = checkFlags(build.Cflags, []string{"c++", "c"}, tc)
+		build.Cxxflags = checkFlags(build.Cxxflags, []string{"c++"}, tc)
+		build.Export_cflags = checkFlags(build.Export_cflags, []string{"c++", "c"}, tc)
+		build.Conlyflags = checkFlags(build.Conlyflags, []string{"c"}, tc)
+	}
+}

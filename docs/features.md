@@ -79,6 +79,9 @@ A few custom functions are implemented by Bob:
                              `srcs` property (only valid in `ldflags`,
                              `cmd` and `args`)
 
+`{{add_if_supported compiler_flag}}` - return the parameter if the compiler used for
+                                     the module recognises it as a valid argument
+
 Go templates natively support more. [Check Go template package.](https://golang.org/pkg/text/template/)
 
 #### Example

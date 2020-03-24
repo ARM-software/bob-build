@@ -91,6 +91,10 @@ func matchSrcs(input string) string {
 	return "{{match_srcs " + input + "}}"
 }
 
+func filter_compiler_flags(flag string) string {
+	return "{{add_if_supported " + flag + "}}"
+}
+
 // ApplyTemplate writes configuration values (from properties) into the string
 // properties in props. This is done recursively.
 func ApplyTemplate(props interface{}, properties *configProperties) {
@@ -102,6 +106,7 @@ func ApplyTemplate(props interface{}, properties *configProperties) {
 	funcmap["reg_match"] = regMatch
 	funcmap["reg_replace"] = regReplace
 	funcmap["match_srcs"] = matchSrcs
+	funcmap["add_if_supported"] = filter_compiler_flags
 	propsVal := reflect.Indirect(reflect.ValueOf(props))
 
 	applyTemplateRecursive(propsVal, stringvalues, funcmap)
