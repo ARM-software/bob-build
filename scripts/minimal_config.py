@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,8 @@ def main():
                         help="Path to the config JSON file")
     parser.add_argument("--ignore-missing", default=False, action="store_true",
                         help="Ignore missing database files included with 'source'")
+    parser.add_argument("--depfile", type=argparse.FileType("wt"),
+                        help="Write dependencies to a depfile")
     args = parser.parse_args()
 
     if not os.path.isfile(args.database):
@@ -83,6 +85,9 @@ def main():
     json_config = config_to_json(args.database, args.config, args.ignore_missing)
     with config_system.utils.open_and_write_if_changed(args.output) as fp:
         json.dump(json_config, fp, sort_keys=True, indent=4, separators=(',', ': '))
+
+    if args.depfile:
+        args.depfile.write("{output}: {config} {database}\n".format(**vars(args)))
 
 
 if __name__ == "__main__":
