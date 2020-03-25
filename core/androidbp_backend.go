@@ -115,10 +115,10 @@ func hashBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
 	buildbpHashes[path] = hash.Sum(nil)
 }
 
-func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext) {
+func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext, projUid string) {
 	g := getConfig(ctx).Generator
 
-	bpmod, err := AndroidBpFile().NewModule("genrule", "_check_buildbp_updates_")
+	bpmod, err := AndroidBpFile().NewModule("genrule", "_check_buildbp_updates_"+projUid)
 	if err != nil {
 		panic(err)
 	}
@@ -144,8 +144,6 @@ func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext
 }
 
 func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
-	s.generateBuildbpCheck(ctx)
-
 	sb := &strings.Builder{}
 
 	// read definitions of plugin packages
@@ -168,6 +166,8 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
 	sb.WriteString(text)
 	sb.WriteString("\n")
+
+	s.generateBuildbpCheck(ctx, projUid)
 
 	// dump all modules
 	AndroidBpFile().Render(sb)
