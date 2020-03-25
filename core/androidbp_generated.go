@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -50,9 +51,18 @@ func expandCmd(s string, moduleDir string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
+			// All modules are written to the same Android.bp, at the project root,
+			// so Bob's `src_dir` (i.e. the project root) just maps to module dir.
 			return "${module_dir}"
 		case "module_dir":
-			return moduleDir
+			// ...whereas module_dir refers to the directory containing the
+			// build.bp - so we need to expand it before it's "flattened" into a
+			// single Android.bp file. Also prefix with the directory containing
+			// the Android.bp, which makes the result relative to the working
+			// directory (= the root of the Android tree). This is required because
+			// the result will be used directly in `cmd`, rather than being
+			// included in a `srcs` field which would be processed further.
+			return filepath.Join("${module_dir}", moduleDir)
 		case "bob_config":
 			return configFile
 		case "bob_config_opts":
