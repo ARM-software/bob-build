@@ -126,3 +126,9 @@ config TARGET_OBJCOPY_BINARY
 	help
 	  The objcopy executable that we can use in post install scripts
 	  to manipulate target libraries and executables.
+
+config TARGET_AR_BINARY
+	string "GNU and Clang Archiver binary"
+	default "ar"
+	help
+	  The name of the archiver used to create target static libraries.

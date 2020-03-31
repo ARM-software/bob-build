@@ -419,7 +419,7 @@ func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
 func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
-	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
@@ -527,7 +527,7 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	// This assumes arBinary and asBinary are either in the path, or the same directory as clang.
 	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU toolchain.
-	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
@@ -829,7 +829,7 @@ func (tc toolchainXcode) getStripBinary() string {
 func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
-	tc.arBinary = tc.prefix + props.GetString("ar_binary")
+	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 

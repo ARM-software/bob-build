@@ -291,7 +291,7 @@ config GEN_CC
 
 config GEN_AR
 	string "Archiver"
-	default HOST_GNU_PREFIX + AR_BINARY
+	default HOST_GNU_PREFIX + HOST_AR_BINARY
 
 ## KERNEL_ config needed for testing kernel modules
 config KERNEL_CC
