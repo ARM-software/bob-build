@@ -145,9 +145,21 @@ func (m *genrulebob) filterOutputs(predicate func(string) bool) (ret android.Pat
 	return
 }
 
+// Soong's gen dirs are generally of the form `/path/to/module/gen`. However, the
+// Android.mk and Linux backends use the form `build/gen/module_name`. Normally this
+// doesn't matter, as everything is contained within the gen dir, except when chaining
+// multiple generated modules. In this case, bob_transform_source used on Android.mk or
+// Linux may expect the module name to be included when doing the regex replacement, and
+// be exporting include directories accordingly. We therefore need to add a subdirectory
+// named after the module inside Soong's gen dir for compatibility.
+func pathForModuleGen(ctx android.ModuleContext, paths ...string) android.WritablePath {
+	prefix := []string{ctx.ModuleName()}
+	return android.PathForModuleGen(ctx, append(prefix, paths...)...)
+}
+
 func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.WritablePaths) {
 	for _, path := range paths {
-		ret = append(ret, android.PathForModuleGen(ctx, path))
+		ret = append(ret, pathForModuleGen(ctx, path))
 	}
 	return
 }
@@ -202,7 +214,7 @@ func (m *genrulebob) getHostBin(ctx android.ModuleContext) android.OptionalPath 
 func (m *genrulebob) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
 	dependents = android.PathsForModuleSrc(ctx, m.Properties.Implicit_srcs)
 	args = map[string]string{
-		"gen_dir":         android.PathForModuleGen(ctx).String(),
+		"gen_dir":         pathForModuleGen(ctx).String(),
 		"asflags":         utils.Join(m.Properties.Asflags),
 		"cflags":          utils.Join(m.Properties.Cflags),
 		"conlyflags":      utils.Join(m.Properties.Conlyflags),
@@ -320,7 +332,7 @@ func (m *genrulebob) calcExportGenIncludeDirs(mctx android.ModuleContext) androi
 
 	// Add our own include dirs
 	for _, dir := range m.Properties.Export_gen_include_dirs {
-		allIncludeDirs = append(allIncludeDirs, android.PathForModuleGen(mctx, dir))
+		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(mctx, dir))
 	}
 
 	// Add include dirs of our all dependencies
@@ -389,10 +401,10 @@ func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
 	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(mop.Implicit_outs))
 
 	if m.Properties.Depfile {
-		sio.depfile = android.PathForModuleGen(ctx, getDepfileName(source.Rel()))
+		sio.depfile = pathForModuleGen(ctx, getDepfileName(source.Rel()))
 	}
 	if m.Properties.Rsp_content != nil {
-		sio.rspfile = android.PathForModuleGen(ctx, getRspfileName(source.Rel()))
+		sio.rspfile = pathForModuleGen(ctx, getRspfileName(source.Rel()))
 	}
 
 	return
@@ -401,7 +413,7 @@ func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
 func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.getArgs(ctx)
 
-	m.genDir = android.PathForModuleGen(ctx)
+	m.genDir = pathForModuleGen(ctx)
 	m.exportGenIncludeDirs = m.calcExportGenIncludeDirs(ctx)
 
 	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
@@ -424,10 +436,10 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
 		}
 		if m.Properties.Depfile {
-			sio.depfile = android.PathForModuleGen(ctx, getDepfileName(m.Name()))
+			sio.depfile = pathForModuleGen(ctx, getDepfileName(m.Name()))
 		}
 		if m.Properties.Rsp_content != nil {
-			sio.rspfile = android.PathForModuleGen(ctx, getRspfileName(m.Name()))
+			sio.rspfile = pathForModuleGen(ctx, getRspfileName(m.Name()))
 		}
 
 		m.inouts = append(m.inouts, sio)
