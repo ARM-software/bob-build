@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -661,7 +661,13 @@ def main():
     should_save = curses.wrapper(gui_main)
 
     if should_save:
-        general.enforce_dependent_values()
+        # Prior to calling plugins, ensure that values are consistent as
+        # possible. After this call, there may still be inconsistencies
+        # from selects enabling options with disabled dependencies. The
+        # user generally does not need to know about bool inconsistencies,
+        # but log them to INFO so they can see if we're seeing them.
+        general.enforce_dependent_values("Inconsistency prior to plugins: ",
+                                         error_level=logging.INFO)
         for plugin in args.plugin:
             path, name = os.path.split(plugin)
             if path.startswith("/"):
@@ -679,6 +685,9 @@ def main():
                 import traceback
                 traceback.print_tb(sys.exc_info()[2])
 
+        # If any bool values are still inconsistent, force the user to fix
+        general.enforce_dependent_values("Inconsistent values: ",
+                                         error_level=logging.ERROR)
         general.write_config(args.config)
         if args.json is not None:
             config_json.write_config(args.json)

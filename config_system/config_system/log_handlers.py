@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,14 +48,7 @@ class ErrorCounterHandler(logging.Handler):
 
     def __init__(self, *args, **kwargs):
         super(ErrorCounterHandler, self).__init__(*args, **kwargs)
-        self.counts = {
-            "NOTSETS": 0,
-            "DEBUG": 0,
-            "INFO": 0,
-            "WARNING": 0,
-            "ERROR": 0,
-            "CRITICAL": 0,
-        }
+        self.reset()
 
     def emit(self, record):
         lvl = record.levelname
@@ -75,6 +68,16 @@ class ErrorCounterHandler(logging.Handler):
 
     def criticals(self):
         return self.counts["CRITICAL"]
+
+    def reset(self):
+        self.counts = {
+            "NOTSETS": 0,
+            "DEBUG": 0,
+            "INFO": 0,
+            "WARNING": 0,
+            "ERROR": 0,
+            "CRITICAL": 0,
+        }
 
 
 class ColorFormatter(logging.Formatter):
