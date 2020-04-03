@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -158,8 +158,13 @@ def main():
             logger.info("Reading %s" % arg)
             read_profile_file(arg)
 
-    enforce_dependent_values()
-    check_values_as_requested(args.args)
+    # Prior to calling plugins, ensure that values are consistent as
+    # possible. After this call, there may still be inconsistencies
+    # from selects enabling options with disabled dependencies. The
+    # user generally does not need to know about bool inconsistencies,
+    # but log them to INFO so they can see if we're seeing them.
+    enforce_dependent_values("Inconsistency prior to plugins: ",
+                             error_level=logging.INFO)
 
     for plugin in args.plugin:
         path, name = os.path.split(plugin)
@@ -177,6 +182,11 @@ def main():
             logger.error("Problem encountered in %s plugin: %s" % (name, repr(err)))
             import traceback
             traceback.print_tb(sys.exc_info()[2])
+
+    # If any bool values are still inconsistent, force the user to fix
+    enforce_dependent_values("Inconsistent values: ",
+                             error_level=logging.ERROR)
+    check_values_as_requested(args.args)
 
     write_config(args.config)
     if args.json is not None:

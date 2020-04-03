@@ -1,4 +1,4 @@
-# Copyright 2019 Arm Limited.
+# Copyright 2019-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,15 @@
 
 import argparse
 import logging
+import os
 import pytest
 
 import update_config
 
 ignored_option_testdata = [
     # Attempt to set a non-user-settable option
-    ("""
+    (
+        """
 config NON_USER_SETTABLE
 	bool
 	default n
@@ -32,7 +34,8 @@ config NON_USER_SETTABLE
     ),
 
     # Specify the same option multiple times with different values
-    ("""
+    (
+        """
 config USER_SETTABLE_INT_VALUE
     int "This integer can be set by the user"
 
@@ -44,7 +47,8 @@ config BLA
     ),
 
     # Test the formatting of a simple unmet dependency
-    ("""
+    (
+        """
 config FALSE
 	bool
 
@@ -57,7 +61,8 @@ config SIMPLE_DEPENDENCIES_NOT_MET
     ),
 
     # Test the formatting of a more complex dependency
-    ("""
+    (
+        """
 config STRING_VALUE
 	string
 	default "string"
@@ -77,7 +82,8 @@ config COMPLEX_DEPENDENCIES_NOT_MET
 
     # Test the formatting of an integer expression, including all the
     # comparison operators
-    ("""
+    (
+        """
 config INT_VALUE
 	int
 	default 60221409
@@ -123,12 +129,13 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
         config=str(config_fname),
         database=str(mconfig_fname),
         json=None,
-        new=False,
+        new=True,
         plugin=[],
         ignore_missing=False,
         args=args,
     ))
 
+    update_config.counter.reset()
     returncode = update_config.main()
 
     errors = []
@@ -139,3 +146,216 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
     assert returncode != 0
     assert len(errors) == 1
     assert errors[0] == error
+
+
+# Test handling of dependent boolean values
+select_depend_testdata = [
+    # Depend on with no issue
+    (
+        """
+config GATE
+    bool "gating"
+
+config OPTION
+    bool "option"
+    depends on GATE
+""",
+        None,
+        ["GATE=y", "OPTION=y"],
+        [],
+        [],
+        [],
+    ),
+    # Set the option when the dependency is not met.
+    # Check of command line options will fail
+    (
+        """
+config GATE
+    bool "gating"
+
+config OPTION
+    bool "option"
+    depends on GATE
+""",
+        None,
+        ["OPTION=y"],
+        [],
+        [],
+        ["OPTION=y was ignored; its dependencies were not met: GATE[=n]"],
+    ),
+    # Force the option. Error raised to fix Mconfig.
+    (
+        """
+config GATE
+    bool "gating"
+
+config OPTION
+    bool "option"
+    depends on GATE
+
+config FORCE
+    bool "force"
+    select OPTION
+""",
+        None,
+        ["FORCE=y"],
+        [],
+        [],
+        ["Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"],
+    ),
+    # Input contains an inconsistency on read, fix up on read,
+    # Error still produced
+    (
+        """
+config GATE
+    bool "gating"
+
+config OPTION
+    bool "option"
+    depends on GATE
+
+config FORCE
+    bool "force"
+    select OPTION
+""",
+        """
+#CONFIG_GATE=n
+CONFIG_OPTION=y
+CONFIG_FORCE=y
+        """,
+        [],
+        ["Inconsistency prior to plugins: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."],
+        ["Inconsistent input, correcting: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."],
+        ["Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"],
+    ),
+    # Input contains an inconsistency on read, fix up on read,
+    # No error.
+    (
+        """
+config GATE
+    bool "gating"
+
+config OPTION
+    bool "option"
+    depends on GATE
+""",
+        """
+#CONFIG_GATE=n
+CONFIG_OPTION=y
+        """,
+        [],
+        [],
+        [],
+        [],
+    ),
+]
+
+@pytest.mark.parametrize("mconfig,config,args,expected_infos,expected_warnings,expected_errors", select_depend_testdata)
+def test_select_depend(caplog, mocker, tmpdir,
+                       mconfig, config, args, expected_infos,
+                       expected_warnings, expected_errors):
+    """
+    For each test case, run update_config's `main()` function with the
+    provided Mconfig and command-line arguments. No errors
+    should be reported.
+    """
+    caplog.set_level(logging.INFO)
+
+    config_fname = tmpdir.join("bob.config")
+    mconfig_fname = tmpdir.join("Mconfig")
+    mconfig_fname.write(mconfig, "wt")
+    if config != None:
+        config_fname.write(config)
+
+    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
+        config=str(config_fname),
+        database=str(mconfig_fname),
+        json=None,
+        new=(config==None),
+        plugin=[],
+        ignore_missing=False,
+        args=args,
+    ))
+
+    update_config.counter.reset()
+    returncode = update_config.main()
+
+    infos = []
+    warnings = []
+    errors = []
+    for record in caplog.records:
+        if record.levelno == logging.INFO:
+            infos.append(record.message)
+        if record.levelno == logging.WARNING:
+            warnings.append(record.message)
+        if record.levelno == logging.ERROR:
+            errors.append(record.message)
+
+    for single_info in expected_infos:
+        assert single_info in infos
+
+    assert warnings == expected_warnings
+    assert errors == expected_errors
+    if len(expected_errors) < 1:
+        assert returncode == 0
+    else:
+        assert returncode != 0
+
+option_depends_on_plugin_testdata = [
+    # Attempt to set an option that depends on something set by a plugin
+    (
+        """
+from config_system import set_config
+
+def plugin_exec():
+    set_config("PLUGIN_SET_OPTION", True)
+""",
+        """
+config PLUGIN_SET_OPTION
+    bool "plugin set"
+    default n
+
+config USER_OPTION
+    bool "user"
+    depends on PLUGIN_SET_OPTION
+    default n
+""",
+        ["USER_OPTION=y"],
+    ),
+]
+
+
+@pytest.mark.parametrize("plugin,mconfig,args", option_depends_on_plugin_testdata)
+def test_option_depends_on_plugin(caplog, mocker, tmpdir, plugin, mconfig, args):
+    """
+    For each test case, run update_config's `main()` function with the
+    provided plugin, Mconfig and command-line arguments. No errors
+    should be reported.
+    """
+
+    config_fname = tmpdir.join("bob.config")
+    mconfig_fname = tmpdir.join("Mconfig")
+    plugin_fname = tmpdir.join("plugin.py")
+    mconfig_fname.write(mconfig, "wt")
+    plugin_fname.write(plugin, "wt")
+
+    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
+        config=str(config_fname),
+        database=str(mconfig_fname),
+        json=None,
+        new=True,
+        plugin=[os.path.splitext(str(plugin_fname))[0]],
+        ignore_missing=False,
+        args=args,
+    ))
+
+    update_config.counter.reset()
+    returncode = update_config.main()
+
+    errors = []
+    for record in caplog.records:
+        if record.levelno == logging.ERROR:
+            errors.append(record.message)
+
+    assert returncode == 0
+    assert len(errors) == 0

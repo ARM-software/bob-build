@@ -39,30 +39,55 @@ def is_visible(config):
     return expr.condexpr_value(e)
 
 
-def enforce_dependent_values(auto_fix=False):
+def enforce_dependent_values(stage, fix_bools=False,
+                             error_level=logging.WARNING):
     """
     Check that values are consistently set, specifically with respect
     to whether the dependencies are correct.
 
-    For boolean values we only reset to n if auto_fix is
-    True. Otherwise we raise an exception (the Mconfig needs to be
-    fixed).
+    This function is called when we expect the values to be
+    consistent. i.e. after reading in a new config, or prior to
+    writing it out. It is called prior to plugin execution, to try and
+    ensure the plugins see consistent state.
 
-    For string and int values, if the configuration value is not
-    enabled, reset them to "" and 0 respectively. This is different to
-    the bool case as we need to reset default values.
+    For non-boolean configs (string, int), set their value to default
+    ("", 0) if the config's dependencies are not met. This can happen
+    where a user sets the value of the config, and then changes
+    another config resulting in the dependency being disabled.
+
+    Boolean values are treated specially. Normally they will be kept
+    in a consistent state (wrt dependencies) by set_config(). However
+    they can be forced by a 'select' statement even when the
+    dependencies are not met. This indicates there is a problem with
+    the Mconfig that needs to be fixed. This function will only reset
+    Boolean values to n if specifically requested by fix_bools=True.
+    This is only expected to be used after reading in a config file.
+    That file may have been written with a different Mconfig that
+    allowed the selection.
+
+    The error_level determines the log level at which bool
+    inconsistencies are reported. When set to logging.ERROR this forces
+    the user to fix the Mconfig.
     """
     for i in data.get_config_list():
         c = data.get_config(i)
         if can_enable(c):
             continue
         if c['datatype'] == 'bool' and c['value'] is True:
-            logger.warning("unmet direct dependencies: " +
-                           "%s depends on %s" % (i, c['depends']))
-            if auto_fix:
-                set_config_internal(i, False)
+            if len(c['selected_by']) > 0:
+                msg = "{0}unmet direct dependencies: {1} depends on {2}, " \
+                      "but is selected by [{3}].".format(stage, i,
+                                                         c['depends'][1],
+                                                         ",".join(c['selected_by']))
+                if error_level is logging.ERROR:
+                    msg += " Update the Mconfig so that this can't happen"
+                logger.log(error_level, msg)
             else:
-                raise Exception("Unmet direct dependencies")
+                raise Exception("Unmet direct dependencies without select")
+
+            if fix_bools:
+                set_config_internal(i, False)
+
         elif c['datatype'] == 'string':
             set_config_internal(i, '')
         elif c['datatype'] == 'int':
@@ -177,11 +202,10 @@ def read_config_file(config_filename):
 def read_config(options_filename, config_filename, ignore_missing):
     init_config(options_filename, ignore_missing)
     read_config_file(config_filename)
-    enforce_dependent_values(True)
+    enforce_dependent_values("Inconsistent input, correcting: ", fix_bools=True)
 
 
 def write_config(config_filename):
-    enforce_dependent_values()
     with utils.open_and_write_if_changed(config_filename) as f:
         for (i_type, i_symbol) in data.iter_symbols_menuorder():
             if i_type in ["config", "menuconfig"]:
