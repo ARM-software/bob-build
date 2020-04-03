@@ -97,7 +97,7 @@ bob_transform_source {
         "f6.in",
     ],
     out: {
-        match: ".*/(.+).in",
+        match: ".*/(.+)\\.in",
         replace: [
             "$1.cpp",
             "$1.h",
