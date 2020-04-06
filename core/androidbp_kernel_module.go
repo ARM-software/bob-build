@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func stringParam(optName string, optValue string) (opts []string) {
@@ -81,6 +83,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"--module-dir", "$(genDir)/" + mctx.ModuleDir(),
 			"--make-command", prebuiltMake,
 		},
+		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
 		stringParam("--cc", l.Properties.Kernel_cc),
 		stringParam("--clang-triple", l.Properties.Kernel_clang_triple),
 		stringParam("--cross-compile", l.Properties.Kernel_cross_compile),
