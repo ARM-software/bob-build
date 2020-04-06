@@ -62,17 +62,18 @@ func (g *androidBpGenerator) buildDir() string {
 }
 
 func (g *androidBpGenerator) sourceDir() string {
-	// The androidbp backend writes paths into an Android.bp file in
-	// the project directory. All paths should be relative to that
-	// file, so there should be no need for the source directory.
-	return ""
+	// On the androidbp backend, sourceDir() is only used for match_src
+	// handling and for locating bob scripts. In these cases we want
+	// paths relative to ANDROID_BUILD_TOP directory,
+	// which is where all commands will be executed from
+	return getSourceDir()
 }
 
 func (g *androidBpGenerator) bobScriptsDir() string {
 	// In the androidbp backend, we just want the relative path to the
 	// script directory.
 	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
-	return filepath.Join(g.sourceDir(), srcToScripts)
+	return srcToScripts
 }
 
 func (g *androidBpGenerator) sharedLibsDir(tgtType) string {

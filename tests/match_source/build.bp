@@ -48,10 +48,6 @@ bob_binary {
         srcs: ["order_file.txt"],
         ldflags: ["-Wl,-order_file,{{match_srcs \"*.txt\"}}"],
     },
-    builder_android_bp: {
-        /* On Android BP match_srcs macro is not working correctly yet */
-        enabled: false,
-    },
 }
 
 bob_alias {
