@@ -130,11 +130,60 @@ bob_generate_binary {
     },
 }
 
+bob_generate_shared_library {
+    name: "libblah_shared_rename",
+    out: "libblah_shared2",
+    srcs: ["libblah/libblah.c"],
+    headers: [
+        "include/libblah.h",
+        "include/libblah_feature.h",
+    ],
+    export_gen_include_dirs: ["include"],
+    cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    target: "host",
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
+        enabled: false,
+    },
+
+}
+
+bob_binary {
+    name: "binary_linked_to_gen_shared_rename",
+    srcs: ["main.c"],
+    shared_libs: ["libblah_shared_rename"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
+        enabled: false,
+    },
+}
+
+/* Check that the binary has a NEEDED entry for the renamed shared library */
+bob_generate_source {
+    name: "check_renamed_gen_library",
+    out: ["success.txt"],
+    module_srcs: ["binary_linked_to_gen_shared_rename"],
+    tool: "check_library_link.py",
+    cmd: "${tool} --links-to libblah_shared2 ${args} ${in} && touch ${out}",
+    osx: {
+        args: ["--read-deps-method otool"],
+    },
+    build_by_default: true,
+    builder_android_bp: {
+        /* On Android BP generated libraries are not supported. */
+        enabled: false,
+    },
+}
+
 bob_alias {
     name: "bob_test_generate_libs",
     srcs: [
         "binary_linked_to_gen_static",
         "binary_linked_to_gen_shared",
         "generated_binary",
+        "check_renamed_gen_library",
     ],
 }
