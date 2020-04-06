@@ -52,7 +52,7 @@ func (m *generateStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 //// Support singleOutputModule
 
 func (m *generateStaticLibrary) outputFileName() string {
-	return m.Name() + m.libExtension()
+	return m.altName() + m.libExtension()
 }
 
 //// Factory functions

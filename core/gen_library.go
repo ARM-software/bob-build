@@ -28,6 +28,9 @@ import (
 type GenerateLibraryProps struct {
 	// List of headers that are created (if any)
 	Headers []string
+
+	// Alternate output name, used for the file name and Android rules
+	Out *string
 }
 
 type generateLibrary struct {
@@ -103,7 +106,20 @@ func (m *generateLibrary) topLevelProperties() []interface{} {
 //// Support singleOutputModule interface
 
 func (m *generateLibrary) outputName() string {
+	if m.Properties.Out != nil {
+		return *m.Properties.Out
+	}
 	return m.Name()
+}
+
+// Other naming functions, which need to reflect the output name, e.g. for the
+// module name map to work correctly on Android.mk.
+func (l *generateLibrary) altName() string {
+	return l.outputName()
+}
+
+func (l *generateLibrary) altShortName() string {
+	return l.outputName()
 }
 
 //// Support installable

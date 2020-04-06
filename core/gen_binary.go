@@ -43,7 +43,7 @@ func (m *generateBinary) libExtension() string {
 //// Support singleOutputModule
 
 func (m *generateBinary) outputFileName() string {
-	return m.Name() + m.libExtension()
+	return m.altName() + m.libExtension()
 }
 
 //// Support blueprint.Module
