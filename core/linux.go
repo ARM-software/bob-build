@@ -1022,14 +1022,14 @@ var kbuildRule = pctx.StaticRule("kbuild",
 			"--module-dir $output_module_dir $extra_includes " +
 			"--sources $in " +
 			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
-			"$cc_flag $hostcc_flag $clang_triple_flag " +
+			"$cc_flag $hostcc_flag $clang_triple_flag $ld_flag " +
 			"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
 		Pool:        blueprint.Console,
 		Description: "$out",
 	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kernel_dir", "kernel_cross_compile",
-	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag")
+	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
 
 func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs

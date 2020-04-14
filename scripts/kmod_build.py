@@ -68,7 +68,8 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
     # Sanitize the environment - we should only use build options passed in via
     # the command line.
     env = dict(os.environ)
-    for var in ["ARCH", "CROSS_COMPILE", "CC", "HOSTCC", "CLANG_TRIPLE", "KBUILD_EXTRA_SYMBOLS"]:
+    for var in ["ARCH", "CROSS_COMPILE", "CC", "HOSTCC",
+                "CLANG_TRIPLE", "KBUILD_EXTRA_SYMBOLS", "LD"]:
         env.pop(var, None)
 
     try:
@@ -177,6 +178,8 @@ def parse_args():
                        help="Kernel CROSS_COMPILE")
     group.add_argument("--clang-triple", default=None,
                        help="Kernel CLANG_TRIPLE")
+    group.add_argument("--ld", default=None,
+                       help="Kernel LD")
     group.add_argument("--kbuild-options", nargs="+", default=[],
                        help="Kernel config options to enable, that get added to EXTRA_CFLAGS too")
     group.add_argument("--extra-cflags", default="",
@@ -261,6 +264,11 @@ def main():
         make_args.append("HOSTCC=" + host_cc)
     if args.clang_triple:
         make_args.append("CLANG_TRIPLE=" + args.clang_triple)
+    if args.ld:
+        make_args.append("LD=" + args.ld)
+    elif kernel_config_parser.option_enabled(abs_kdir, "CONFIG_LD_IS_LLD"):
+        # Auto-set LD to `ld.lld` if LTO has been enabled
+        make_args.append("LD=ld.lld")
     if args.extra_symbols:
         extra_symbols = [os.path.abspath(d) for d in args.extra_symbols]
         make_args.append("KBUILD_EXTRA_SYMBOLS=" + " ".join(extra_symbols))

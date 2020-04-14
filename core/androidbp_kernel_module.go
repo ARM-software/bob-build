@@ -84,10 +84,11 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"--make-command", prebuiltMake,
 		},
 		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
-		stringParam("--cc", l.Properties.Kernel_cc),
-		stringParam("--clang-triple", l.Properties.Kernel_clang_triple),
 		stringParam("--cross-compile", l.Properties.Kernel_cross_compile),
+		stringParam("--cc", l.Properties.Kernel_cc),
 		stringParam("--hostcc", l.Properties.Kernel_hostcc),
+		stringParam("--clang-triple", l.Properties.Kernel_clang_triple),
+		stringParam("--ld", l.Properties.Kernel_ld),
 		stringParams("-I",
 			l.Properties.Include_dirs,
 			getPathsInSourceDir(l.Properties.Local_include_dirs)))

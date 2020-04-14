@@ -1088,7 +1088,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 		"--module-dir \"$(output_module_dir)\" $(extra_includes) " +
 		"--sources $(sources) " +
 		"--kernel \"$(kernel_dir)\" --cross-compile \"$(kernel_cross_compile)\" " +
-		"$(cc_flag) $(hostcc_flag) $(clang_triple_flag) " +
+		"$(cc_flag) $(hostcc_flag) $(clang_triple_flag) $(ld_flag) " +
 		"$(kbuild_options) --extra-cflags=\"$(extra_cflags)\" $(make_args)"
 
 	sb.WriteString("\techo " + cmd + "\n")
