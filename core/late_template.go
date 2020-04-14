@@ -24,11 +24,15 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 var matchSourcesRegex = regexp.MustCompile(`\{\{match_srcs\s+(.+?)\}\}`)
 
-func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string) string {
+func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
+	matchedNonCompiledSources map[string]bool) string {
+
 	g := getBackend(ctx)
 
 	for _, match := range matchSourcesRegex.FindAllStringSubmatch(arg, -1) {
@@ -42,6 +46,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string) 
 				panic("Error during matching filepath pattern")
 			}
 			if matched {
+				matchedNonCompiledSources[src] = true
 				matchedSources = append(matchedSources, getBackendPathInSourceDir(g, src))
 			}
 		}
@@ -89,19 +94,38 @@ func matchSourcesMutator(mctx blueprint.TopDownMutatorContext) {
 		propStr = []*string{}
 		sourceProps = &b.SourceProps
 	}
+
+	// Unused non-compiled sources are not allowed, so create
+	// a map to mark whether a non-compiled source is matched.
+	matchedNonCompiledSources := make(map[string]bool)
+	if _, ok := getLibrary(module); ok {
+		for _, src := range sourceProps.getSources(mctx) {
+			if utils.IsNotCompilableSource(src) {
+				matchedNonCompiledSources[src] = false
+			}
+		}
+	}
+
 	for _, prop := range propArr {
 		for i := range *prop {
-			(*prop)[i] = sourceProps.matchSources(mctx, (*prop)[i])
+			(*prop)[i] = sourceProps.matchSources(mctx, (*prop)[i], matchedNonCompiledSources)
 		}
 	}
 	for _, prop := range propStr {
-		*prop = sourceProps.matchSources(mctx, *prop)
+		*prop = sourceProps.matchSources(mctx, *prop, matchedNonCompiledSources)
 	}
 	for _, prop := range errorArrays {
 		for i := range *prop {
 			if strings.Contains((*prop)[i], matchSrcsString) {
 				panic("Match_srcs not supported for exported variables.")
 			}
+		}
+	}
+
+	// Ensure that all non-compiled sources have been matched.
+	for src, matched := range matchedNonCompiledSources {
+		if !matched {
+			panic(fmt.Errorf("Non-compiled source %s is not used by match_srcs.", src))
 		}
 	}
 }
