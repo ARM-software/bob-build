@@ -124,6 +124,7 @@ type kbuildArgs struct {
 	CCFlag             string
 	HostCCFlag         string
 	ClangTripleFlag    string
+	LDFlag             string
 }
 
 func (a kbuildArgs) toDict() map[string]string {
@@ -139,6 +140,7 @@ func (a kbuildArgs) toDict() map[string]string {
 		"cc_flag":              a.CCFlag,
 		"hostcc_flag":          a.HostCCFlag,
 		"clang_triple_flag":    a.ClangTripleFlag,
+		"ld_flag":              a.LDFlag,
 	}
 }
 
@@ -185,6 +187,11 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		clangTriple = "--clang-triple " + clangTriple
 	}
 
+	ld := m.Properties.Build.Kernel_ld
+	if ld != "" {
+		ld = "--ld " + ld
+	}
+
 	return kbuildArgs{
 		KmodBuild:          kmodBuild,
 		ExtraIncludes:      strings.Join(extraIncludePaths, " "),
@@ -198,6 +205,7 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		OutputModuleDir: filepath.Join(m.outputDir(), projectModuleDir(ctx)),
 		CCFlag:          kernelToolchain,
 		HostCCFlag:      hostToolchain,
+		LDFlag:          ld,
 		ClangTripleFlag: clangTriple,
 	}
 }

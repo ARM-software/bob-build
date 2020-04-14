@@ -165,6 +165,8 @@ type BuildProps struct {
 	Kernel_cc string
 	// Kernel host compiler
 	Kernel_hostcc string
+	// Kernel linker
+	Kernel_ld string
 	// Target triple when using clang as the compiler
 	Kernel_clang_triple string
 
