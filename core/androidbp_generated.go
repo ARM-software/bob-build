@@ -126,14 +126,13 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 		return
 	}
 
-	m, err := AndroidBpFile().NewModule("genrule_bob", ts.shortName())
+	m, err := AndroidBpFile().NewModule("gensrcs_bob", ts.shortName())
 	if err != nil {
 		panic(err.Error())
 	}
 
-	m.AddStringList("multi_out_srcs", ts.generateCommon.Properties.getSources(mctx))
-
-	gr := m.NewGroup("multi_out_props")
+	m.AddStringList("srcs", ts.generateCommon.Properties.getSources(mctx))
+	gr := m.NewGroup("out")
 	// if REs had double slashes in original value, at parsing they got removed, so compensate for that
 	gr.AddString("match", strings.Replace(ts.Properties.TransformSourceProps.Out.Match, "\\", "\\\\", -1))
 	gr.AddStringList("replace", ts.Properties.TransformSourceProps.Out.Replace)

@@ -33,18 +33,8 @@ import (
 	"github.com/google/blueprint"
 )
 
-type MultiOutProps struct {
-	Match         string
-	Replace       []string
-	Implicit_srcs []string
-	Implicit_outs []string
-}
-
-type GenruleProps struct {
+type commonProps struct {
 	Srcs                    []string
-	Out                     []string
-	Implicit_srcs           []string
-	Implicit_outs           []string
 	Export_gen_include_dirs []string
 	Cmd                     string
 	Host_bin                string
@@ -60,11 +50,34 @@ type GenruleProps struct {
 	Ldflags                 []string
 	Ldlibs                  []string
 	Rsp_content             *string
-
-	Multi_out_srcs  []string
-	Multi_out_props MultiOutProps
 }
 
+type genruleProps struct {
+	Out           []string
+	Implicit_srcs []string
+	Implicit_outs []string
+}
+
+type gensrcsProps struct {
+	Out struct {
+		Match         string
+		Replace       []string
+		Implicit_srcs []string
+		Implicit_outs []string
+	}
+}
+
+// inout structure with soong data types
+type soongInout struct {
+	in           android.Paths
+	out          android.WritablePaths
+	depfile      android.WritablePath
+	implicitSrcs android.Paths
+	implicitOuts android.WritablePaths
+	rspfile      android.WritablePath
+}
+
+// helper interface to distinguish genrulebob/gensrcsbob module from other soong modules
 type genruleInterface interface {
 	genrule.SourceFileGenerator
 
@@ -72,14 +85,31 @@ type genruleInterface interface {
 	outputPath() android.Path
 }
 
-type genrulebob struct {
+type genrulebobCommon struct {
 	android.ModuleBase
-	Properties GenruleProps
+
+	Properties commonProps
 
 	genDir               android.Path
 	exportGenIncludeDirs android.Paths
 	inouts               []soongInout
 }
+
+type genrulebob struct {
+	genrulebobCommon
+	Properties genruleProps
+}
+
+type gensrcsbob struct {
+	genrulebobCommon
+	Properties gensrcsProps
+}
+
+// implemented interfaces check
+var _ android.AndroidMkEntriesProvider = (*genrulebobCommon)(nil)
+var _ genruleInterface = (*genrulebobCommon)(nil)
+var _ android.Module = (*genrulebob)(nil)
+var _ android.Module = (*gensrcsbob)(nil)
 
 type generatedSourceTagType struct {
 	blueprint.BaseDependencyTag
@@ -106,29 +136,36 @@ var (
 	hostToolBinTag     hostToolBinTagType
 )
 
-// interfaces implemented
-var _ android.Module = (*genrulebob)(nil)
-var _ genrule.SourceFileGenerator = (*genrulebob)(nil)
-var _ android.AndroidMkEntriesProvider = (*genrulebob)(nil)
-
-func GenruleFactory() android.Module {
+func genrulebobFactory() android.Module {
 	m := &genrulebob{}
 	// register all structs that contain module properties (parsable from .bp file)
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
+	m.AddProperties(&m.genrulebobCommon.Properties)
+	android.InitAndroidModule(m)
+	return m
+}
+
+func gensrcsbobFactory() android.Module {
+	m := &gensrcsbob{}
+	// register all structs that contain module properties (parsable from .bp file)
+	// note: we register our custom properties first, to take precedence before common ones
+	m.AddProperties(&m.Properties)
+	m.AddProperties(&m.genrulebobCommon.Properties)
 	android.InitAndroidModule(m)
 	return m
 }
 
 func init() {
-	android.RegisterModuleType("genrule_bob", GenruleFactory)
+	android.RegisterModuleType("genrule_bob", genrulebobFactory)
+	android.RegisterModuleType("gensrcs_bob", gensrcsbobFactory)
 }
 
-func (m *genrulebob) outputPath() android.Path {
+func (m *genrulebobCommon) outputPath() android.Path {
 	return m.genDir
 }
 
-func (m *genrulebob) outputs() (ret android.WritablePaths) {
+func (m *genrulebobCommon) outputs() (ret android.WritablePaths) {
 	for _, io := range m.inouts {
 		ret = append(ret, io.out...)
 		ret = append(ret, io.implicitOuts...)
@@ -136,7 +173,7 @@ func (m *genrulebob) outputs() (ret android.WritablePaths) {
 	return
 }
 
-func (m *genrulebob) filterOutputs(predicate func(string) bool) (ret android.Paths) {
+func (m *genrulebobCommon) filterOutputs(predicate func(string) bool) (ret android.Paths) {
 	for _, p := range m.outputs() {
 		if predicate(p.String()) {
 			ret = append(ret, p)
@@ -167,19 +204,19 @@ func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.W
 // GeneratedSourceFiles, GeneratedHeaderDirs and GeneratedDeps implement the
 // genrule.SourceFileGenerator interface, which allows these modules to be used
 // to generate inputs for cc_library and cc_binary modules.
-func (m *genrulebob) GeneratedSourceFiles() android.Paths {
+func (m *genrulebobCommon) GeneratedSourceFiles() android.Paths {
 	return m.filterOutputs(utils.IsCompilableSource)
 }
 
-func (m *genrulebob) GeneratedHeaderDirs() android.Paths {
+func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 	return m.exportGenIncludeDirs
 }
 
-func (m *genrulebob) GeneratedDeps() (srcs android.Paths) {
+func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
 	return m.filterOutputs(utils.IsNotCompilableSource)
 }
 
-func (m *genrulebob) DepsMutator(mctx android.BottomUpMutatorContext) {
+func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
 	if m.Properties.Host_bin != "" {
 		mctx.AddFarVariationDependencies(mctx.Config().BuildOSTarget.Variations(),
 			hostToolBinTag, m.Properties.Host_bin)
@@ -199,7 +236,7 @@ func (m *genrulebob) DepsMutator(mctx android.BottomUpMutatorContext) {
 	mctx.AddDependency(mctx.Module(), encapsulatesTag, m.Properties.Encapsulates...)
 }
 
-func (m *genrulebob) getHostBin(ctx android.ModuleContext) android.OptionalPath {
+func (m *genrulebobCommon) getHostBin(ctx android.ModuleContext) android.OptionalPath {
 	if m.Properties.Host_bin == "" {
 		return android.OptionalPath{}
 	}
@@ -211,8 +248,7 @@ func (m *genrulebob) getHostBin(ctx android.ModuleContext) android.OptionalPath 
 	return htp.HostToolPath()
 }
 
-func (m *genrulebob) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
-	dependents = android.PathsForModuleSrc(ctx, m.Properties.Implicit_srcs)
+func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
 	args = map[string]string{
 		"gen_dir":         pathForModuleGen(ctx).String(),
 		"asflags":         utils.Join(m.Properties.Asflags),
@@ -260,7 +296,7 @@ func (m *genrulebob) getArgs(ctx android.ModuleContext) (args map[string]string,
 	return
 }
 
-func (m *genrulebob) getModuleSrcs(ctx android.ModuleContext) (srcs []android.Path) {
+func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []android.Path) {
 	ctx.VisitDirectDepsWithTag(generatedSourceTag, func(dep android.Module) {
 		if gdep, ok := dep.(genruleInterface); ok {
 			srcs = append(srcs, gdep.outputs().Paths()...)
@@ -271,16 +307,7 @@ func (m *genrulebob) getModuleSrcs(ctx android.ModuleContext) (srcs []android.Pa
 	return
 }
 
-type soongInout struct {
-	in           android.Paths
-	out          android.WritablePaths
-	depfile      android.WritablePath
-	implicitSrcs android.Paths
-	implicitOuts android.WritablePaths
-	rspfile      android.WritablePath
-}
-
-func (m *genrulebob) buildInouts(ctx android.ModuleContext, args map[string]string) {
+func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[string]string) {
 	ruleparams := blueprint.RuleParams{
 		Command: m.Properties.Cmd,
 		Restat:  true,
@@ -327,7 +354,7 @@ func (m *genrulebob) buildInouts(ctx android.ModuleContext, args map[string]stri
 	}
 }
 
-func (m *genrulebob) calcExportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
+func (m *genrulebobCommon) calcExportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
 	var allIncludeDirs android.Paths
 
 	// Add our own include dirs
@@ -383,35 +410,70 @@ func pathsForImplicitSrcs(ctx android.ModuleContext, source android.Path, props 
 	return
 }
 
-func (m *genrulebob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
+func (m *gensrcsbob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
 	source android.Path, commonImplicits android.Paths) (sio soongInout) {
 
+	// helper to replace source path
 	replaceSource := func(props []string) (newProps []string) {
 		for _, prop := range props {
 			newProps = append(newProps, re.ReplaceAllString(source.Rel(), prop))
 		}
 		return
 	}
-	mop := m.Properties.Multi_out_props
 
 	sio.in = android.Paths{source}
-	sio.out = pathsForModuleGen(ctx, replaceSource(mop.Replace))
-	sio.implicitSrcs = append(pathsForImplicitSrcs(ctx, source, replaceSource(mop.Implicit_srcs)),
+	sio.out = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Replace))
+	sio.implicitSrcs = append(pathsForImplicitSrcs(ctx, source, replaceSource(m.Properties.Out.Implicit_srcs)),
 		commonImplicits...)
-	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(mop.Implicit_outs))
+	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Implicit_outs))
 
-	if m.Properties.Depfile {
+	if m.genrulebobCommon.Properties.Depfile {
 		sio.depfile = pathForModuleGen(ctx, getDepfileName(source.Rel()))
 	}
-	if m.Properties.Rsp_content != nil {
+	if m.genrulebobCommon.Properties.Rsp_content != nil {
 		sio.rspfile = pathForModuleGen(ctx, getRspfileName(source.Rel()))
 	}
 
 	return
 }
 
-func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
-	args, implicits := m.getArgs(ctx)
+func (m *gensrcsbob) createSoongInouts(ctx android.ModuleContext,
+	commonImplicits android.Paths) (inouts []soongInout) {
+	re := regexp.MustCompile(m.Properties.Out.Match)
+
+	for _, src := range m.genrulebobCommon.Properties.Srcs {
+		inouts = append(inouts,
+			m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, src), commonImplicits))
+	}
+	for _, src := range m.getModuleSrcs(ctx) {
+		inouts = append(inouts,
+			m.inoutForSrc(ctx, re, src, commonImplicits))
+	}
+
+	return
+}
+
+func (m *genrulebob) createSoongInouts(ctx android.ModuleContext,
+	commonImplicits android.Paths) []soongInout {
+
+	sio := soongInout{
+		in:           append(android.PathsForModuleSrc(ctx, m.genrulebobCommon.Properties.Srcs), m.getModuleSrcs(ctx)...),
+		implicitSrcs: append(commonImplicits, android.PathsForModuleSrc(ctx, m.Properties.Implicit_srcs)...),
+		out:          pathsForModuleGen(ctx, m.Properties.Out),
+		implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
+	}
+	if m.genrulebobCommon.Properties.Depfile {
+		sio.depfile = pathForModuleGen(ctx, getDepfileName(m.Name()))
+	}
+	if m.genrulebobCommon.Properties.Rsp_content != nil {
+		sio.rspfile = pathForModuleGen(ctx, getRspfileName(m.Name()))
+	}
+
+	return []soongInout{sio}
+}
+
+func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args map[string]string, implicits []android.Path) {
+	args, implicits = m.getArgs(ctx)
 
 	m.genDir = pathForModuleGen(ctx)
 	m.exportGenIncludeDirs = m.calcExportGenIncludeDirs(ctx)
@@ -427,39 +489,22 @@ func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		implicits = append(implicits, tool)
 	}
 
-	if len(m.Properties.Out) > 0 {
-		sio := soongInout{
-			in: append(android.PathsForModuleSrc(ctx, m.Properties.Srcs),
-				m.getModuleSrcs(ctx)...),
-			implicitSrcs: implicits,
-			out:          pathsForModuleGen(ctx, m.Properties.Out),
-			implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
-		}
-		if m.Properties.Depfile {
-			sio.depfile = pathForModuleGen(ctx, getDepfileName(m.Name()))
-		}
-		if m.Properties.Rsp_content != nil {
-			sio.rspfile = pathForModuleGen(ctx, getRspfileName(m.Name()))
-		}
-
-		m.inouts = append(m.inouts, sio)
-
-	} else if len(m.Properties.Multi_out_srcs) > 0 {
-		re := regexp.MustCompile(m.Properties.Multi_out_props.Match)
-		for _, tsrc := range m.Properties.Multi_out_srcs {
-			io := m.inoutForSrc(ctx, re, android.PathForModuleSrc(ctx, tsrc), implicits)
-			m.inouts = append(m.inouts, io)
-		}
-		for _, tsrc := range m.getModuleSrcs(ctx) {
-			io := m.inoutForSrc(ctx, re, tsrc, implicits)
-			m.inouts = append(m.inouts, io)
-		}
-	}
-
-	m.buildInouts(ctx, args)
+	return
 }
 
-func (m *genrulebob) AndroidMkEntries() []android.AndroidMkEntries {
+func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	args, implicits := m.setupBuildActions(ctx)
+	m.inouts = m.createSoongInouts(ctx, implicits)
+	m.writeNinjaRules(ctx, args)
+}
+
+func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	args, implicits := m.setupBuildActions(ctx)
+	m.inouts = m.createSoongInouts(ctx, implicits)
+	m.writeNinjaRules(ctx, args)
+}
+
+func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	entries := []android.AndroidMkEntries{}
 	for _, inout := range m.inouts {
 		for _, outfile := range inout.out {
