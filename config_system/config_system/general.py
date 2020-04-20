@@ -236,7 +236,7 @@ def write_config(config_filename):
 
 
 def write_depfile(depfile, target_name):
-    with open(depfile, "wt") as fp:
+    with utils.open_and_write_if_changed(depfile) as fp:
         fp.write(target_name + ": \\\n    ")
         fp.write(" \\\n    ".join(data.get_mconfig_srcs()) + "\n")
 

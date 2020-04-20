@@ -18,6 +18,7 @@
 package core
 
 import (
+	"bufio"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
@@ -35,8 +36,8 @@ import (
 )
 
 var (
-	outputFile    = bpwriter.FileFactory()
-	buildbpHashes = map[string][]byte{}
+	outputFile      = bpwriter.FileFactory()
+	buildbpPathsMap = map[string]bool{}
 )
 
 type androidBpGenerator struct {
@@ -95,14 +96,46 @@ func androidBpSingletonFactory() blueprint.Singleton {
 	return &androidBpSingleton{}
 }
 
-func hashBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
-	path := mctx.BlueprintsFile()
+func collectBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
+	buildbpPathsMap[mctx.BlueprintsFile()] = true
+}
 
-	if _, ok := buildbpHashes[path]; ok {
-		return
+// Extract dependencies from a depfile where:
+// * The first line contains the target (and no dependencies)
+// * The rest of the file contains dependencies, one file per line
+// NOTE: This is not a general-purpose function for parsing depfiles.
+// It is only compatible with depfiles satisfying the above (that is,
+// with the depfile format used by the config system)
+func extractDeps(depfile string) []string {
+	file, err := os.Open(depfile)
+	if err != nil {
+		panic(fmt.Errorf("Could not open depfile %s: %v", depfile, err))
+	}
+	defer file.Close()
+
+	lines := []string{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		panic(fmt.Errorf("Error reading depfile %s: %v", depfile, err))
 	}
 
-	file, err := os.Open(filepath.Join(getSourceDir(), path))
+	if len(lines) == 0 {
+		return []string{}
+	}
+
+	deps := lines[1:] // The first line contains the target
+	for i, dep := range deps {
+		deps[i] = strings.TrimSpace(strings.TrimSuffix(dep, "\\"))
+	}
+
+	return deps
+}
+
+func hashFileAtPath(path string) []byte {
+	file, err := os.Open(path)
 	if err != nil {
 		panic(fmt.Errorf("Could not open %s for hashing: %v", path, err))
 	}
@@ -113,7 +146,16 @@ func hashBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
 		panic(err)
 	}
 
-	buildbpHashes[path] = hash.Sum(nil)
+	return hash.Sum(nil)
+}
+
+// Compute the hash of build.bp and Mconfig files.
+func hashBuildConfig(paths []string) string {
+	combinedHash := sha1.New()
+	for _, path := range paths {
+		combinedHash.Write(hashFileAtPath(path))
+	}
+	return hex.EncodeToString(combinedHash.Sum(nil))
 }
 
 func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext, projUid string) {
@@ -124,21 +166,35 @@ func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext
 		panic(err)
 	}
 
-	checkerScript := getBackendPathInBobScriptsDir(g, "check_buildbp.py")
+	checkerScript := getBackendPathInBobScriptsDir(g, "verify_hash.py")
 
-	buildbpFileNames := utils.SortedKeysByteSlice(buildbpHashes)
-	combinedHash := sha1.New()
-	for _, path := range buildbpFileNames {
-		combinedHash.Write(buildbpHashes[path])
+	buildbpPathsList := utils.SortedKeysBoolMap(buildbpPathsMap)
+	prefixedBuildbpPathsList := utils.PrefixDirs(buildbpPathsList, getSourceDir())
+
+	configDeps := []string{}
+	prefixedConfigDeps := extractDeps(configFile + ".d")
+	for _, path := range prefixedConfigDeps {
+		relPath, err := filepath.Rel(getSourceDir(), path)
+		if err != nil {
+			panic(err)
+		}
+		configDeps = append(configDeps, relPath)
 	}
 
-	bpmod.AddStringList("srcs", buildbpFileNames)
+	srcs := append(buildbpPathsList, configDeps...)
+	prefixedSrcs := append(prefixedBuildbpPathsList, prefixedConfigDeps...)
+
+	hash := hashBuildConfig(prefixedSrcs)
+
+	ctx.AddNinjaFileDeps(configFile + ".d")
+
+	bpmod.AddStringList("srcs", srcs)
 	bpmod.AddStringList("out", []string{"androidbp_up_to_date"})
 	bpmod.AddStringList("tool_files", []string{checkerScript})
 	bpmod.AddStringCmd("cmd",
 		[]string{
 			"python", "$(location " + checkerScript + ")",
-			"--hash", hex.EncodeToString(combinedHash.Sum(nil)),
+			"--hash", hash,
 			"--out", "$(out)",
 			"--", "$(in)",
 		})
@@ -200,7 +256,7 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 
 func (g *androidBpGenerator) init(ctx *blueprint.Context, config *bobConfig) {
 	// Do not run in parallel to avoid locking issues on the map
-	ctx.RegisterBottomUpMutator("hash_buildbp", hashBuildBpFilesMutator)
+	ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
 
 	ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
 
