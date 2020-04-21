@@ -72,9 +72,6 @@ expected. This is expected to be relative to the working directory
 
 `BLUEPRINT_LIST_FILE` is the path to the Blueprint list file.
 
-`TOPNAME` is the path to the root build definition, relative to
-`SRCDIR`.
-
 `CONFIGNAME` is the path to the configuration file, relative to
 `BUILDDIR`.
 
@@ -99,7 +96,7 @@ You should update the following:
 * Set `SRCDIR` based on `SCRIPT_DIR`. If the bootstrap script is in
   the root directory, this can be set to `SCRIPT_DIR`.
 
-* Tweak `TOPNAME`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME` as needed.
+* Tweak `BLUEPRINT_LIST_FILE` and `CONFIGNAME` as needed.
 
 * Tweak `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` if needed.
 
@@ -113,7 +110,7 @@ On Android the output directory is determined by the project name.
 * Update `PROJ_NAME` to be a short string that is unique in the
   Android makefile namespace.
 
-* Update `SRCDIR`, `TOPNAME`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
+* Update `SRCDIR`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
   `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` as done for Linux.
 
 ## Blueprint file list (bplist)

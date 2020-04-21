@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@
 # BOB_CONFIG_OPTS - Configuration options to be used when calling the
 #                   configuration system.
 # BOB_CONFIG_PLUGINS - Configuration system plugins to use
-# TOPNAME - Name used for Bob Blueprint files.
 
 # The location that this script is called from determines the working
 # directory of the build.
@@ -49,11 +48,6 @@ fi
 if [[ -z "$CONFIGNAME" ]]; then
   echo "CONFIGNAME is not set - using bob.config"
   CONFIGNAME="bob.config"
-fi
-
-if [[ -z "$TOPNAME" ]]; then
-  echo "TOPNAME must be set"
-  exit 1
 fi
 
 if [[ -z "$BOB_CONFIG_OPTS" ]]; then
@@ -89,6 +83,7 @@ BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
 CONFIG_FILE="${BUILDDIR}/${CONFIGNAME}"
 CONFIG_JSON="${BUILDDIR}/config.json"
 
+export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
 

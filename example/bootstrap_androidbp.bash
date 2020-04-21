@@ -85,7 +85,6 @@ cd "${ANDROID_BUILD_TOP}"
 ### Variables required for Bob and Android.mk bootstrap ###
 BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"
 export BUILDDIR="${BPBUILD_DIR}"
-export TOPNAME="build.bp"
 export CONFIGNAME="bob.config"
 export SRCDIR="${PROJ_DIR}"
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"

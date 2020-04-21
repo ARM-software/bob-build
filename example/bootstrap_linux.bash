@@ -46,7 +46,6 @@ cd "${SRCDIR}"
 export SRCDIR
 export BUILDDIR
 export CONFIGNAME="bob.config"
-export TOPNAME="build.bp"
 export BOB_CONFIG_OPTS=
 export BOB_CONFIG_PLUGINS=
 export BLUEPRINT_LIST_FILE="bplist"

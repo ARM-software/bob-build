@@ -88,7 +88,6 @@ cd "${ANDROID_BUILD_TOP}"
 # in Android.mk.blueprint.
 ANDROIDMK_DIR="${OUT}/gen/STATIC_LIBRARIES/${PROJ_NAME}_intermediates"
 export BUILDDIR="${ANDROIDMK_DIR}"
-export TOPNAME="build.bp"
 export CONFIGNAME="bob.config"
 export SRCDIR="${PROJ_DIR}"
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
