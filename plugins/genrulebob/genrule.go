@@ -327,29 +327,29 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 
 	rule := ctx.Rule(pctx, "bob_gen_"+ctx.ModuleName(), ruleparams, utils.SortedKeys(args)...)
 
-	for _, sio := range m.inouts {
+	for _, io := range m.inouts {
 		// `args` is slightly different for each inout, but blueprint's
 		// parseBuildParams() function makes a deep copy of the map, so
 		// we're OK to re-use it for each target.
 		if m.Properties.Depfile {
-			args["depfile"] = sio.depfile.String()
+			args["depfile"] = io.depfile.String()
 		}
 		if m.Properties.Rsp_content != nil {
-			args["rspfile"] = sio.rspfile.String()
+			args["rspfile"] = io.rspfile.String()
 		}
-		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, sio.out.Strings()), " ")
-		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, sio.out.Strings()), " ")
+		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, io.out.Strings()), " ")
+		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, io.out.Strings()), " ")
 
 		ctx.Build(pctx,
 			android.BuildParams{
 				Rule:            rule,
 				Description:     "gen " + ctx.ModuleName(),
-				Inputs:          sio.in,
-				Implicits:       sio.implicitSrcs,
-				Outputs:         sio.out,
-				ImplicitOutputs: sio.implicitOuts,
+				Inputs:          io.in,
+				Implicits:       io.implicitSrcs,
+				Outputs:         io.out,
+				ImplicitOutputs: io.implicitOuts,
 				Args:            args,
-				Depfile:         sio.depfile,
+				Depfile:         io.depfile,
 			})
 	}
 }
@@ -411,7 +411,7 @@ func pathsForImplicitSrcs(ctx android.ModuleContext, source android.Path, props 
 }
 
 func (m *gensrcsbob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
-	source android.Path, commonImplicits android.Paths) (sio soongInout) {
+	source android.Path, commonImplicits android.Paths) (io soongInout) {
 
 	// helper to replace source path
 	replaceSource := func(props []string) (newProps []string) {
@@ -421,23 +421,23 @@ func (m *gensrcsbob) inoutForSrc(ctx android.ModuleContext, re *regexp.Regexp,
 		return
 	}
 
-	sio.in = android.Paths{source}
-	sio.out = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Replace))
-	sio.implicitSrcs = append(pathsForImplicitSrcs(ctx, source, replaceSource(m.Properties.Out.Implicit_srcs)),
+	io.in = android.Paths{source}
+	io.out = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Replace))
+	io.implicitSrcs = append(pathsForImplicitSrcs(ctx, source, replaceSource(m.Properties.Out.Implicit_srcs)),
 		commonImplicits...)
-	sio.implicitOuts = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Implicit_outs))
+	io.implicitOuts = pathsForModuleGen(ctx, replaceSource(m.Properties.Out.Implicit_outs))
 
 	if m.genrulebobCommon.Properties.Depfile {
-		sio.depfile = pathForModuleGen(ctx, getDepfileName(source.Rel()))
+		io.depfile = pathForModuleGen(ctx, getDepfileName(source.Rel()))
 	}
 	if m.genrulebobCommon.Properties.Rsp_content != nil {
-		sio.rspfile = pathForModuleGen(ctx, getRspfileName(source.Rel()))
+		io.rspfile = pathForModuleGen(ctx, getRspfileName(source.Rel()))
 	}
 
 	return
 }
 
-func (m *gensrcsbob) createSoongInouts(ctx android.ModuleContext,
+func (m *gensrcsbob) createInouts(ctx android.ModuleContext,
 	commonImplicits android.Paths) (inouts []soongInout) {
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
@@ -453,23 +453,23 @@ func (m *gensrcsbob) createSoongInouts(ctx android.ModuleContext,
 	return
 }
 
-func (m *genrulebob) createSoongInouts(ctx android.ModuleContext,
+func (m *genrulebob) createInouts(ctx android.ModuleContext,
 	commonImplicits android.Paths) []soongInout {
 
-	sio := soongInout{
+	io := soongInout{
 		in:           append(android.PathsForModuleSrc(ctx, m.genrulebobCommon.Properties.Srcs), m.getModuleSrcs(ctx)...),
 		implicitSrcs: append(commonImplicits, android.PathsForModuleSrc(ctx, m.Properties.Implicit_srcs)...),
 		out:          pathsForModuleGen(ctx, m.Properties.Out),
 		implicitOuts: pathsForModuleGen(ctx, m.Properties.Implicit_outs),
 	}
 	if m.genrulebobCommon.Properties.Depfile {
-		sio.depfile = pathForModuleGen(ctx, getDepfileName(m.Name()))
+		io.depfile = pathForModuleGen(ctx, getDepfileName(m.Name()))
 	}
 	if m.genrulebobCommon.Properties.Rsp_content != nil {
-		sio.rspfile = pathForModuleGen(ctx, getRspfileName(m.Name()))
+		io.rspfile = pathForModuleGen(ctx, getRspfileName(m.Name()))
 	}
 
-	return []soongInout{sio}
+	return []soongInout{io}
 }
 
 func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args map[string]string, implicits []android.Path) {
@@ -494,26 +494,26 @@ func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args ma
 
 func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
-	m.inouts = m.createSoongInouts(ctx, implicits)
+	m.inouts = m.createInouts(ctx, implicits)
 	m.writeNinjaRules(ctx, args)
 }
 
 func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
-	m.inouts = m.createSoongInouts(ctx, implicits)
+	m.inouts = m.createInouts(ctx, implicits)
 	m.writeNinjaRules(ctx, args)
 }
 
 func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	entries := []android.AndroidMkEntries{}
-	for _, inout := range m.inouts {
-		for _, outfile := range inout.out {
+	for _, io := range m.inouts {
+		for _, outfile := range io.out {
 
 			entries = append(entries, android.AndroidMkEntries{
 				Class:      "DATA",
 				OutputFile: android.OptionalPathForPath(outfile),
 				// if module has more than one output, keep LOCAL_MODULE unique
-				SubName: "__" + strings.Replace(outfile.Rel(), "/", "__", -1),
+				SubName: "__" + utils.FlattenPath(outfile.Rel()),
 				Include: "$(BUILD_PREBUILT)",
 				ExtraEntries: []android.AndroidMkExtraEntriesFunc{
 					func(entries *android.AndroidMkEntries) {
