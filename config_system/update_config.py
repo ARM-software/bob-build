@@ -25,7 +25,7 @@ import sys
 from config_system import log_handlers, config_json
 from config_system.general import enforce_dependent_values, init_config, \
     read_config, read_profile_file, set_config_if_prompt, write_config, \
-    can_enable
+    can_enable, write_depfile
 from config_system.data import get_config
 from config_system.expr import format_dependency_list
 
@@ -133,6 +133,8 @@ def parse_args():
     parser.add_argument('-p', '--plugin', action='append',
                         help='Post configuration plugin to execute',
                         default=[])
+    parser.add_argument('--depfile', default=None,
+                        help='Write dependencies to named file')
     parser.add_argument('--ignore-missing', action='store_true', default=False,
                         help="Ignore missing database files included with 'source'")
     parser.add_argument('args', nargs="*")
@@ -191,6 +193,8 @@ def main():
     write_config(args.config)
     if args.json is not None:
         config_json.write_config(args.json)
+    if args.depfile is not None:
+        write_depfile(args.depfile, args.config)
 
     error_count = counter.errors() + counter.criticals()
 

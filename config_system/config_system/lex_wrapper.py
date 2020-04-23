@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ from config_system import lex
 class LexWrapper:
     def __init__(self, ignore_missing, verbose=False):
         self.lexers = []
+        self.sources = []
         self.root_dir = None
         self.ignore_missing = ignore_missing
         self.verbose = verbose
@@ -48,6 +49,7 @@ class LexWrapper:
             fname = os.path.join(self.root_dir, fname)
 
         self.open(fname)
+        self.sources.append(fname)
 
     def current_lexer(self):
         return self.lexers[-1]

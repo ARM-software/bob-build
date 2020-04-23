@@ -131,6 +131,7 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
         json=None,
         new=True,
         plugin=[],
+        depfile=None,
         ignore_missing=False,
         args=args,
     ))
@@ -273,6 +274,7 @@ def test_select_depend(caplog, mocker, tmpdir,
         json=None,
         new=(config==None),
         plugin=[],
+        depfile=None,
         ignore_missing=False,
         args=args,
     ))
@@ -345,6 +347,7 @@ def test_option_depends_on_plugin(caplog, mocker, tmpdir, plugin, mconfig, args)
         json=None,
         new=True,
         plugin=[os.path.splitext(str(plugin_fname))[0]],
+        depfile=None,
         ignore_missing=False,
         args=args,
     ))

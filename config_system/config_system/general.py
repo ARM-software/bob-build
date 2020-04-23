@@ -235,6 +235,12 @@ def write_config(config_filename):
     logger.info("Written configuration to '%s'" % config_filename)
 
 
+def write_depfile(depfile, target_name):
+    with open(depfile, "wt") as fp:
+        fp.write(target_name + ": \\\n    ")
+        fp.write(" \\\n    ".join(data.get_mconfig_srcs()) + "\n")
+
+
 def get_options_selecting(selected):
     """Return the options which select `selected`"""
     opt = data.get_config(selected)
