@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ logger.addHandler(logging.NullHandler())
 
 
 __mconfig_dir = ""
+__mconfig_srcs = []
 
 
 def get_mconfig_dir():
@@ -30,16 +31,25 @@ def get_mconfig_dir():
     return __mconfig_dir
 
 
+def get_mconfig_srcs():
+    """
+    Retrieve the list of sourced configuration files.
+    """
+    return __mconfig_srcs
+
+
 def init(options_filename, ignore_missing=False):
     from config_system import lex, lex_wrapper, syntax
 
     global __mconfig_dir
+    global __mconfig_srcs
     global configuration
 
     try:
         lexer = lex_wrapper.LexWrapper(ignore_missing)
         lexer.source(options_filename)
         configuration = syntax.parser.parse(None, debug=False, lexer=lexer)
+        __mconfig_srcs = lexer.sources
     except lex.TokenizeError as e:
         logger.debug("Failed to tokenise input")
         exit(1)

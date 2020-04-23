@@ -626,6 +626,8 @@ def parse_args():
     parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debug logging")
     parser.add_argument("-p", "--plugin", action="append",
                         help="Post configuration plugin to execute", default=[])
+    parser.add_argument('--depfile', default=None,
+                        help='Write dependencies to named file')
     parser.add_argument("--ignore-missing", action="store_true", default=False,
                         help="Ignore missing database files included with 'source'")
     return parser.parse_args()
@@ -691,6 +693,8 @@ def main():
         general.write_config(args.config)
         if args.json is not None:
             config_json.write_config(args.json)
+        if args.depfile is not None:
+            general.write_depfile(args.depfile, args.config)
 
     # Flush all log messages on exit
     msgBuffer.close()
