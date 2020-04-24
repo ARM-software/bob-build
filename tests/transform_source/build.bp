@@ -108,6 +108,27 @@ bob_transform_source {
     cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-header ${headers_generated} --src-template ${generate_template_source_used_by_transform_out}",
 }
 
+bob_generate_source {
+    name: "generate_source_module_srcs_only",
+    out: ["f7.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+}
+
+bob_transform_source {
+    name: "transform_source_module_srcs_only",
+    module_srcs: ["generate_source_module_srcs_only"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    tool: "generator.py",
+    cmd: "python ${tool} --in ${in} --gen-src ${srcs_generated} --gen-implicit-header",
+    build_by_default: true,
+}
+
 bob_binary {
     name: "validate_link_transform_source",
     generated_sources: [
@@ -115,6 +136,7 @@ bob_binary {
         "transform_source_single",
         "transform_source_multiple_in",
         "transform_source_module_deps",
+        "transform_source_module_srcs_only",
     ],
     generated_headers: [
         "transform_source_single_dir",
