@@ -43,7 +43,7 @@ func stringParams(optName string, optValueLists ...[]string) (opts []string) {
 }
 
 func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint.ModuleContext) {
-	bpmod, err := AndroidBpFile().NewModule("genrule", l.Name())
+	bpmod, err := AndroidBpFile().NewModule("genrule_bob", l.Name())
 	if err != nil {
 		panic(err)
 	}
@@ -54,9 +54,12 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 
 	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 
-	srcs := l.Properties.getSources(mctx)
+	sources_param := "${in}"
+	var module_deps []string
 	for _, mod := range l.extraSymbolsModules(mctx) {
-		srcs = append(srcs, ":"+mod.Name())
+		module_deps = append(module_deps, mod.Name())
+		// reference all dependent modules outputs, needed for related symvers files
+		sources_param += " ${" + mod.Name() + "_dir}/Module.symvers"
 	}
 
 	kdir := l.Properties.Kernel_dir
@@ -65,22 +68,24 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	}
 
 	addProvenanceProps(bpmod, l.Properties.AndroidProps)
-	bpmod.AddStringList("srcs", srcs)
-	bpmod.AddStringList("out", []string{out, "Module.symvers"})
-	bpmod.AddStringList("tool_files", []string{kmod_build})
+	bpmod.AddStringList("srcs", l.Properties.getSources(mctx))
+	bpmod.AddStringList("module_deps", module_deps)
+	bpmod.AddStringList("out", l.outs)
+	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})
+	bpmod.AddString("tool", kmod_build)
 	bpmod.AddBool("depfile", true)
 
 	// Generate the build command. Use the `stringParam` helper for options which
 	// may be empty to avoid writing a flag name with no corresponding value.
 	bpmod.AddStringCmd("cmd",
 		[]string{
-			"python", "$(location " + kmod_build + ")",
-			"-o", filepath.Join("$(genDir)", out),
-			"--depfile", "$(depfile)",
-			"--sources", "$(in)",
+			"${tool}",
+			"-o ${out}",
+			"--depfile", "${depfile}",
+			"--sources", sources_param,
 			"--common-root", getSourceDir(),
 			"--kernel", kdir,
-			"--module-dir", "$(genDir)/" + mctx.ModuleDir(),
+			"--module-dir", "${gen_dir}/" + mctx.ModuleDir(),
 			"--make-command", prebuiltMake,
 		},
 		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
