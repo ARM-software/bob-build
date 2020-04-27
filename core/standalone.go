@@ -86,6 +86,10 @@ func Main() {
 		panic(err)
 	}
 
+	builder_ninja := config.Properties.GetBool("builder_ninja")
+	builder_android_bp := config.Properties.GetBool("builder_android_bp")
+	builder_android_make := config.Properties.GetBool("builder_android_make")
+
 	// Depend on the config file
 	pctx.AddNinjaFileDeps(jsonPath, getPathInBuildDir(".env.hash"))
 
@@ -161,14 +165,19 @@ func Main() {
 			applyReexportLibsDependenciesMutator).Parallel()
 		ctx.RegisterTopDownMutator("install_group_mutator", installGroupMutator).Parallel()
 		ctx.RegisterTopDownMutator("debug_info_mutator", debugInfoMutator).Parallel()
+		if !builder_android_bp {
+			// The android_bp backend's escape function is a no-op,
+			// so optimize by skipping the mutator
+			ctx.RegisterTopDownMutator("escape_mutator", escapeMutator).Parallel()
+		}
 		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
 	}
 
-	if config.Properties.GetBool("builder_ninja") {
+	if builder_ninja {
 		config.Generator = &linuxGenerator{}
-	} else if config.Properties.GetBool("builder_android_bp") {
+	} else if builder_android_bp {
 		config.Generator = &androidBpGenerator{}
-	} else if config.Properties.GetBool("builder_android_make") {
+	} else if builder_android_make {
 		config.Generator = &androidMkGenerator{}
 	} else {
 		panic(errors.New("unknown builder backend"))

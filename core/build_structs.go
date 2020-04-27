@@ -90,6 +90,9 @@ type generatorBackend interface {
 	bobScriptsDir() string
 	sharedLibsDir(tgt tgtType) string
 
+	// Backend flag escaping
+	escapeFlag(string) string
+
 	// Backend initialisation
 	init(*blueprint.Context, *bobConfig)
 

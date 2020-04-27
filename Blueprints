@@ -32,6 +32,7 @@ bootstrap_go_package {
         "blueprint-pathtools",
         "bob-bpwriter",
         "bob-ccflags",
+        "bob-escape",
         "bob-fileutils",
         "bob-graph",
         "bob-utils",
@@ -49,6 +50,7 @@ bootstrap_go_package {
         "core/config_props.go",
         "core/defaults.go",
         "core/external_library.go",
+        "core/escape.go",
         "core/feature.go",
         "core/filepath.go",
         "core/gen_binary.go",
@@ -98,6 +100,17 @@ bootstrap_go_package {
         "internal/ccflags/ccflags.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/ccflags",
+}
+
+bootstrap_go_package {
+    name: "bob-escape",
+    deps: [
+        "blueprint",
+    ],
+    srcs: [
+        "internal/escape/escape.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/escape",
 }
 
 bootstrap_go_package {

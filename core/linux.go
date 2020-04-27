@@ -81,6 +81,10 @@ func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 		})
 }
 
+func (g *linuxGenerator) escapeFlag(s string) string {
+	return proptools.NinjaAndShellEscape(s)
+}
+
 func (g *linuxGenerator) sourceDir() string {
 	return "${SrcDir}"
 }
@@ -339,9 +343,8 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
 	includeDirs = append(includeDirs, gendirs...)
 	includeFlags := utils.PrefixAll(includeDirs, "-I")
-	cflagsList := utils.NewStringSlice(l.Properties.Cflags, includeFlags)
-	cflagsList = append(cflagsList, l.Properties.Export_cflags...)
-	cflagsList = append(cflagsList, exportedCflags...)
+	cflagsList := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags,
+		exportedCflags, includeFlags)
 
 	tc := g.getToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.getAssembler()

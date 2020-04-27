@@ -98,6 +98,19 @@ Flags can be added with the `cflags` parameter.
 Note that defines are not specially treated, and must
 thus be added as flags using `"-DCOLOR_DEF=blue"`
 
+Double quotes (") need to be escaped with backslash (\) to prevent the
+blueprint parser consuming them. As with any string property, Go
+templates can be used. Otherwise each flag should be written
+as the C compiler expects to see it in its argument list i.e. without
+shell escaping. Expansion of environment variables, ninja variables,
+or make variables is not possible.
+
+For example to define a string literal:
+
+```
+    cflags: ["-DCOLOR_DEF=\"blue\""]
+```
+
 ----
 ### **bob_module.export_cflags** (optional)
 Flags exported to modules which depend on the current one. These will
@@ -108,22 +121,38 @@ dependencies `libA -> libB -> libC`, flags inside `libC`'s
 If `libB` wishes to propagate `libC`'s flags to `libA`, it should add
 `libC` to its `reexport_libs` list.
 
+Also see `cflags`.
+
 ----
 ### **bob_module.conlyflags** (optional)
-Flags used for C compilation.
+Flags used for C compilation. See `cflags`.
 
 ----
 ### **bob_module.cxxflags** (optional)
-Flags used for C++ compilation.
+Flags used for C++ compilation. See `cflags`.
 
 ----
 ### **bob_module.asflags** (optional)
 Flags used for assembly compilation.
 
+Double quotes (") need to be escaped with backslash (\) to prevent the
+blueprint parser consuming them. As with any string property, Go
+templates can be used. Otherwise each flag should be written as the
+assembler expects to see it in its argument list i.e. without shell
+escaping. Expansion of environment variables, ninja variables, or make
+variables is not possible.
+
 ----
 ### **bob_module.ldflags** (optional)
 Flags used for linking. Unlike `ldlibs`, `ldflags` is added to the _start_ of
 the linker command-line.
+
+Double quotes (") need to be escaped with backslash (\) to prevent the
+blueprint parser consuming them. As with any string property, Go
+templates can be used. Otherwise each flag should be written
+as the linker expects to see it in its argument list i.e. without
+shell escaping. Expansion of environment variables, ninja variables,
+or make variables is not possible.
 
 ---
 ### **bob_module.header_libs** (optional)
