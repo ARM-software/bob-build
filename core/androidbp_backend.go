@@ -89,6 +89,12 @@ func (g *androidBpGenerator) sharedLibsDir(tgtType) string {
 	return ""
 }
 
+func (g *androidBpGenerator) escapeFlag(s string) string {
+	// Soong will handle the escaping of flags, so the androidbp backend
+	// just passes them through.
+	return s
+}
+
 type androidBpSingleton struct {
 }
 

@@ -28,6 +28,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/ccflags"
+	"github.com/ARM-software/bob-build/internal/escape"
 	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -50,6 +51,10 @@ type androidMkGenerator struct {
 
 /* Compile time checks for interfaces that must be implemented by androidMkGenerator */
 var _ generatorBackend = (*androidMkGenerator)(nil)
+
+func (g *androidMkGenerator) escapeFlag(s string) string {
+	return escape.MakefileAndShellEscape(s)
+}
 
 func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.Builder) {
 	filename := getPathInBuildDir(name + ".inc")
@@ -421,13 +426,13 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		}
 	}
 
+	ldflags := utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags)
+	ldflags = append(ldflags, copydtneeded)
 	if isMultiLib {
 		sb.WriteString("LOCAL_MULTILIB:=both\n")
-		writeListAssignment(sb, "LOCAL_LDFLAGS_32",
-			append(utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags), copydtneeded))
+		writeListAssignment(sb, "LOCAL_LDFLAGS_32", ldflags)
 	}
-	writeListAssignment(sb, "LOCAL_LDFLAGS",
-		append(utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags), copydtneeded))
+	writeListAssignment(sb, "LOCAL_LDFLAGS", ldflags)
 
 	if tgt == tgtTypeTarget {
 		writeListAssignment(sb, "LOCAL_LDLIBS", m.Properties.Ldlibs)
