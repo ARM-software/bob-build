@@ -315,6 +315,7 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 
 	if m.Properties.Depfile {
 		args["depfile"] = ""
+		ruleparams.Deps = blueprint.DepsGCC
 	}
 	args["headers_generated"] = ""
 	args["srcs_generated"] = ""
