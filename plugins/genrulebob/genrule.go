@@ -320,10 +320,6 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 		Restat:  true,
 	}
 
-	if m.Properties.Depfile {
-		args["depfile"] = ""
-		ruleparams.Deps = blueprint.DepsGCC
-	}
 	args["headers_generated"] = ""
 	args["srcs_generated"] = ""
 
@@ -333,15 +329,20 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 		ruleparams.RspfileContent = *m.Properties.Rsp_content
 	}
 
-	rule := ctx.Rule(pctx, "bob_gen_"+ctx.ModuleName(), ruleparams, utils.SortedKeys(args)...)
+	// no need to keep depfile in args, as the same named argument will be provided by ninja BuildParams below,
+	// we need it however to check existence of cmd argument
+	keys := utils.SortedKeys(args)
+	if m.Properties.Depfile {
+		keys = append(keys, "depfile")
+		ruleparams.Deps = blueprint.DepsGCC
+	}
+
+	rule := ctx.Rule(pctx, "bob_gen_"+ctx.ModuleName(), ruleparams, keys...)
 
 	for _, io := range m.inouts {
 		// `args` is slightly different for each inout, but blueprint's
 		// parseBuildParams() function makes a deep copy of the map, so
 		// we're OK to re-use it for each target.
-		if m.Properties.Depfile {
-			args["depfile"] = io.depfile.String()
-		}
 		if m.Properties.Rsp_content != nil {
 			args["rspfile"] = io.rspfile.String()
 		}
