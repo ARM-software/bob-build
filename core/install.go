@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -105,6 +106,18 @@ func (props *InstallableProps) getInstallGroupPath() (path string, ok bool) {
 		return "", false
 	}
 	return proptools.String(props.Install_path), true
+}
+
+func (props *InstallableProps) getFullInstallPath() (installPath string, ok bool) {
+	installPath, ok = props.getInstallGroupPath()
+	if !ok {
+		installPath = ""
+	} else {
+		if props.Relative_install_path != nil {
+			installPath = filepath.Join(installPath, proptools.String(props.Relative_install_path))
+		}
+	}
+	return
 }
 
 func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,

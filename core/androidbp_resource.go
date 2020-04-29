@@ -19,11 +19,9 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 )
 
 func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleContext) {
@@ -31,15 +29,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 		return
 	}
 
-	installProps := r.getInstallableProps()
-	installPath, ok := installProps.getInstallGroupPath()
-	if !ok {
-		installPath = ""
-	} else {
-		if installProps.Relative_install_path != nil {
-			installPath = filepath.Join(installPath, proptools.String(installProps.Relative_install_path))
-		}
-	}
+	installPath, _ := r.getInstallableProps().getFullInstallPath()
 
 	subdir := ""
 	var modType string
