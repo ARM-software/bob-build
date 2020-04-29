@@ -50,6 +50,10 @@ type commonProps struct {
 	Ldflags                 []string
 	Ldlibs                  []string
 	Rsp_content             *string
+
+	// if install path is not empty, module will be installed onto partition,
+	// it should contain path relative to partition root
+	Install_path *string
 }
 
 type genruleProps struct {
@@ -93,6 +97,7 @@ type genrulebobCommon struct {
 	genDir               android.Path
 	exportGenIncludeDirs android.Paths
 	inouts               []soongInout
+	installedOuts        []android.InstallPath
 }
 
 type genrulebob struct {
@@ -142,7 +147,7 @@ func genrulebobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	// init module with target-specific variants info
+	// init module with target-specific variants info, needed also to get install path right
 	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
 	return m
 }
@@ -153,7 +158,7 @@ func gensrcsbobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	// init module with target-specific variants info
+	// init module with target-specific variants info, needed also to get install path right
 	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
 	return m
 }
@@ -354,6 +359,13 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 				Args:            args,
 				Depfile:         io.depfile,
 			})
+
+		if m.Properties.Install_path != nil {
+			for _, outfile := range io.out {
+				// generate ninja rule for copying file onto partition
+				m.installedOuts = append(m.installedOuts, ctx.InstallFile(android.PathForModuleInstall(ctx, *m.Properties.Install_path), filepath.Base(outfile.String()), outfile))
+			}
+		}
 	}
 }
 
@@ -509,23 +521,41 @@ func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 
 func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	entries := []android.AndroidMkEntries{}
-	for _, io := range m.inouts {
-		for _, outfile := range io.out {
+	outs := []android.OptionalPath{}
 
-			entries = append(entries, android.AndroidMkEntries{
-				Class:      "DATA",
-				OutputFile: android.OptionalPathForPath(outfile),
-				// if module has more than one output, keep LOCAL_MODULE unique
-				SubName: "__" + utils.FlattenPath(outfile.Rel()),
-				Include: "$(BUILD_PREBUILT)",
-				ExtraEntries: []android.AndroidMkExtraEntriesFunc{
-					func(entries *android.AndroidMkEntries) {
-						entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
-					},
-				},
-			})
-
+	// reference installed files instead of built files will ensure triggering install rule after build rule
+	if m.Properties.Install_path != nil {
+		for _, outfile := range m.installedOuts {
+			outs = append(outs, android.OptionalPathForPath(outfile))
+		}
+	} else {
+		for _, io := range m.inouts {
+			for _, outfile := range io.out {
+				outs = append(outs, android.OptionalPathForPath(outfile))
+			}
 		}
 	}
+
+	for _, outfile := range outs {
+		entries = append(entries, android.AndroidMkEntries{
+			Class:      "DATA",
+			OutputFile: outfile,
+			// if module has more than one output, keep LOCAL_MODULE unique
+			SubName: "__" + utils.FlattenPath(outfile.Path().Rel()),
+			Include: "$(BUILD_PREBUILT)",
+			ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+				func(entries *android.AndroidMkEntries) {
+					// don't install in data partition (which is enforced behavior when class is DATA)
+					entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
+				},
+			},
+		})
+
+	}
 	return entries
+}
+
+// required to generate ninja rule for copying file onto partition
+func (m *genrulebobCommon) InstallBypassMake() bool {
+	return m.Properties.Install_path != nil
 }

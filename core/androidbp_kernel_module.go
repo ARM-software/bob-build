@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -87,6 +88,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"--kernel", kdir,
 			"--module-dir", "${gen_dir}/" + mctx.ModuleDir(),
 			"--make-command", prebuiltMake,
+			"--extra-cflags='" + utils.Join(l.Properties.Cflags) + "'",
 		},
 		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
 		stringParam("--cross-compile", l.Properties.Kernel_cross_compile),
@@ -96,5 +98,22 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		stringParam("--ld", l.Properties.Kernel_ld),
 		stringParams("-I",
 			l.Properties.Include_dirs,
-			getPathsInSourceDir(l.Properties.Local_include_dirs)))
+			getPathsInSourceDir(l.Properties.Local_include_dirs)),
+		l.Properties.Make_args,
+	)
+
+	installProps := l.getInstallableProps()
+	installPath, ok := installProps.getInstallGroupPath()
+	if !ok {
+		installPath = ""
+	} else {
+		if installProps.Relative_install_path != nil {
+			installPath = filepath.Join(installPath, proptools.String(installProps.Relative_install_path))
+		}
+	}
+
+	if installPath != "" {
+		bpmod.AddString("install_path", installPath)
+	}
+
 }
