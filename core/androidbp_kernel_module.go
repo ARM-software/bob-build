@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -102,17 +101,8 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		l.Properties.Make_args,
 	)
 
-	installProps := l.getInstallableProps()
-	installPath, ok := installProps.getInstallGroupPath()
-	if !ok {
-		installPath = ""
-	} else {
-		if installProps.Relative_install_path != nil {
-			installPath = filepath.Join(installPath, proptools.String(installProps.Relative_install_path))
-		}
-	}
-
-	if installPath != "" {
+	installPath, ok := l.getInstallableProps().getFullInstallPath()
+	if ok {
 		bpmod.AddString("install_path", installPath)
 	}
 
