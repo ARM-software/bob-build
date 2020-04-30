@@ -142,7 +142,8 @@ func genrulebobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	android.InitAndroidModule(m)
+	// init module with target-specific variants info
+	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
 	return m
 }
 
@@ -152,7 +153,8 @@ func gensrcsbobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	android.InitAndroidModule(m)
+	// init module with target-specific variants info
+	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
 	return m
 }
 

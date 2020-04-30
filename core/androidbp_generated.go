@@ -101,6 +101,16 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	m.AddStringList("asflags", gc.Properties.FlagArgsBuild.Asflags)
 	m.AddStringList("ldflags", gc.Properties.FlagArgsBuild.Ldflags)
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
+
+	// make use of soong properties for selecting variant
+	// (by default device is supported and host is not)
+	if gc.getTarget() == tgtTypeHost {
+		m.AddBool("device_supported", false)
+		m.AddBool("host_supported", true)
+	} else if gc.getTarget() == tgtTypeTarget {
+		m.AddBool("device_supported", true)
+		m.AddBool("host_supported", false)
+	}
 }
 
 func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blueprint.ModuleContext) {
