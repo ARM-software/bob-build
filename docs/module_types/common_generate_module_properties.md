@@ -13,26 +13,34 @@ be referred to as `bob_generated`.
 
 ----
 ### **bob_generated.cmd** (required)
-The command that is to be run for this source generation.
-Substitutions can be made in the command, by using
-`$name_of_var`. A list of substitutions that can be used:
+The command that is to be run for this module. Bob supports various
+substitutions in the command, by using `${name_of_var}`. The
+available substitutions are:
 
-- `$gen_dir` - the path to the directory which belongs to this source generator
-- `$in` - the path to the sources - space-delimited
-- `$out` - the path to the targets - space-delimited
-- `$depfile` - the path to generated dependency file
-- `$rspfile` - the path to the RSP file, if rsp_content is set
-- `$args` - the value of "args" - space-delimited
-- `$tool` - the path to the tool
-- `$host_bin` - the path to the binary that is produced by the host_bin module
-- `$(name)_dir` - the build directory for each dep in generated_dep
-- `$src_dir` - the path to the project source directory - this will be different
+- `${in}` - space-delimited list of source (input) paths
+- `${out}` - space-delimited list of target (output) paths
+- `${depfile}` - the path for the generated dependency file
+- `${rspfile}` - the path to the RSP file, if `rsp_content` is set
+- `${args}` - the value of `args` - space-delimited
+- `${tool}` - the path to the script specified by `tool`
+- `${host_bin}` - the path to the binary specified by `host_bin`
+- `${module_dir}` - the path this module's source directory
+- `${gen_dir}` - the path to the output directory for this module
+- `${(name)_dir}` - the output directory for the `module_deps` dependency with `name`
+- `${(name)_out}` - the outputs of the `module_deps` dependency with `name`
+- `${src_dir}` - the path to the project source directory - this will be different
   than the build source directory for Android.
-- `$module_dir` - the path to the module directory
+
+The value in `cmd` is executed by the shell. Compound shell
+expressions and expansions can be used, though we recommend keeping
+commands simple. If double quotes (") need to be on the shell command
+line, they should be escaped with backslash (\) to get through the
+blueprint parser. Where a `$` needs to be evaluated by the shell (for
+example to expand an environment variable) use `$$`.
 
 ----
 ### **bob_generated.tool** (required)
-A path to the tool that is to be used in `cmd`. If `$tool` is in
+A path to the tool that is to be used in `cmd`. If `${tool}` is in
 the command variable, then this will be replaced with the path to
 this tool.
 
@@ -45,7 +53,7 @@ be built before the `bob_generated`.
 ----
 ### **bob_generated.module_deps** (optional)
 A list of other modules that this generator depends on. The dependencies can be
-used in the command through `$(name_of_dependency)_dir` (that is, the variable's
+used in the command through `${(name_of_dependency)_dir}` (that is, the variable's
 name is the name of the dependency, with the `_dir` suffix).
 
 ----
