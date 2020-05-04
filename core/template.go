@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +46,7 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 	elem.SetString(buf.String())
 }
 
-func applyTemplateRecursive(propsVal reflect.Value, properties *configProperties,
+func applyTemplateRecursive(propsVal reflect.Value,
 	stringvalues map[string]string, funcmap map[string]interface{}) {
 
 	for i := 0; i < propsVal.NumField(); i++ {
@@ -72,7 +72,7 @@ func applyTemplateRecursive(propsVal reflect.Value, properties *configProperties
 			}
 
 		case reflect.Struct:
-			applyTemplateRecursive(field, properties, stringvalues, funcmap)
+			applyTemplateRecursive(field, stringvalues, funcmap)
 		}
 	}
 }
@@ -104,5 +104,5 @@ func ApplyTemplate(props interface{}, properties *configProperties) {
 	funcmap["match_srcs"] = matchSrcs
 	propsVal := reflect.Indirect(reflect.ValueOf(props))
 
-	applyTemplateRecursive(propsVal, properties, stringvalues, funcmap)
+	applyTemplateRecursive(propsVal, stringvalues, funcmap)
 }
