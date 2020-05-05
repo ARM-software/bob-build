@@ -1,0 +1,4 @@
+int submain(void)
+{
+	return 0;
+}

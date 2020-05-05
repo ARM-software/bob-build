@@ -126,13 +126,14 @@ echo Reconfiguring to check archives are clean
 ${build_dir}/config ${OPTIONS} STATIC_LIB_TOGGLE=y
 ${build_dir}/buildme bob_tests
 
-# Helper function for testing that appropriate files are rebuilt after
+# Helper function for testing that appropriate files are rebuilt (or not) after
 # a specified source is modified.
-function check_dep_updates() {
-    local DESC="${1}"
-    local DIR="${2}"
-    local SRC="${3}"
-    shift 3
+function _check_dep_updates() {
+    local MODE="${1}"
+    local DESC="${2}"
+    local DIR="${3}"
+    local SRC="${4}"
+    shift 4
     local UPDATE=("$@")
     local RESULT=0
 
@@ -162,13 +163,28 @@ function check_dep_updates() {
         if [ ! -e "${file}" ] ; then
             echo Error: Output "${file}" expected but does not exist after rebuild
             RESULT=1
-        elif [ "${file}" -ot "${SRC}" ] ; then
-            echo Error: Output "${file}" is older than source "${SRC}" after building
-            RESULT=1
+        elif [ "${MODE}" == "updated" ] ; then
+            if [ "${file}" -ot "${SRC}" ] ; then
+                echo Error: Output "${file}" is older than source "${SRC}" after building
+                RESULT=1
+            fi
+        elif [ "${MODE}" == "not updated" ] ; then
+            if [ "${file}" -nt "${SRC}" ] ; then
+                echo Error: Output "${file}" is newer than source "${SRC}" after building. Output should not be updated by "{SRC}"
+                RESULT=1
+            fi
         fi
     done
 
     return ${RESULT}
+}
+
+function check_dep_updated() {
+    _check_dep_updates "updated" "$@"
+}
+
+function check_dep_not_updated() {
+    _check_dep_updates "not updated" "$@"
 }
 
 ## Various checks that dependency tracking is working. Re-use the
@@ -180,19 +196,19 @@ SRC=tests/static_libs/a.c
 UPDATE=(${build_dir}/target/objects/sl_liba/static_libs/a.c.o
         ${build_dir}/target/static/sl_liba.a
         ${build_dir}/target/executable/sl_main_whole)
-check_dep_updates "library sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "library sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # library dependencies on header file
 SRC=tests/static_libs/a.h
 UPDATE+=(${build_dir}/target/objects/sl_libb/static_libs/b.c.o
          ${build_dir}/target/static/sl_libb.a)
-check_dep_updates "library headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "library headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources
 SRC=tests/generate_source/before_generate.in
 UPDATE=(${build_dir}/gen/generate_source_single/single.cpp
         ${build_dir}/target/executable/validate_link_generate_sources)
-check_dep_updates "generated sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "generated sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources tool update
 SRC=tests/generate_source/gen.sh
@@ -200,45 +216,49 @@ UPDATE=(${build_dir}/gen/gen_sources_and_headers/foo/src/foo.c
         ${build_dir}/gen/gen_sources_and_headers/foo/foo.h
         ${build_dir}/gen/gen_sources_and_headers/foo/src/foo.c
         ${build_dir}/target/executable/bin_gen_sources_and_headers)
-check_dep_updates "generated source tool" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "generated source tool" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources host_bin update
 SRC=tests/shared_libs/main.c
 UPDATE=(${build_dir}/host/executable/sharedtest
         ${build_dir}/gen/use_sharedtest_host/use_sharedtest_host_main.c
         ${build_dir}/target/executable/use_sharedtest_host_gen_source)
-check_dep_updates "generated source host_bin" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "generated source host_bin" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources with depfiles
 SRC=tests/generate_source/depgen2.in
 UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
-check_dep_updates "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 SRC=tests/generate_source/an.implicit.src
 UPDATE=(${build_dir}/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c)
-check_dep_updates "generate source implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "generate source implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+SRC=tests/generate_source/an.implicit.src
+UPDATE=(${build_dir}/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c)
+check_dep_not_updated "excluded implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # resource dependencies
 SRC=tests/resources/main.c
 UPDATE=(${build_dir}/install/tests/linux/y/main.c)
-check_dep_updates "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # implicit output
 SRC=tests/implicit_outs/input.in
 UPDATE=(${build_dir}/target/executable/build_implicit_out
         ${build_dir}/target/executable/include_implicit_header)
-check_dep_updates "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+check_dep_updated "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 if [ "$OS" != "OSX" ] ; then
     # kernel module dependencies on sources
     SRC=tests/kernel_module/module1/test_module1.c
     UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
-    check_dep_updates "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+    check_dep_updated "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
     # kernel module dependencies on kernel header
     SRC=tests/kernel_module/kdir/include/kernel_header.h
     UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
-    check_dep_updates "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+    check_dep_updated "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
 
 # Test example setup if it's buildable

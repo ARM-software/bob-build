@@ -238,7 +238,18 @@ bob_generate_source {
     name: "gen_source_globbed_implicit_sources",
     implicit_srcs: ["*.implicit.src"],
     out: ["validate_globbed_implicit_dependency.c"],
-    cmd: "echo 'int main(void) { return 0; }' > ${out}",
+    tool: "join_srcs.py",
+    cmd: "python ${tool} --src-dir ${module_dir} --use-a --out ${out}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "gen_source_globbed_exclude_implicit_sources",
+    implicit_srcs: ["*.src"],
+    exclude_implicit_srcs: ["an.implicit.src", "bn.src"],
+    out: ["validate_globbed_exclude_implicit_dependency.c"],
+    tool: "join_srcs.py",
+    cmd: "python ${tool} --src-dir ${module_dir} --use-c --out ${out}",
     build_by_default: true,
 }
 
@@ -246,6 +257,7 @@ bob_binary {
     name: "use_miscellaneous_generated_source_tests",
     generated_sources: [
         "gen_source_globbed_implicit_sources",
+        "gen_source_globbed_exclude_implicit_sources",
     ],
 }
 

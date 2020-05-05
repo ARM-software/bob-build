@@ -125,7 +125,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 
 	m.AddStringList("srcs", gs.generateCommon.Properties.getSources(mctx))
 	m.AddStringList("out", gs.Properties.Out)
-	m.AddStringList("implicit_srcs", gs.Properties.Implicit_srcs)
+	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
 	m.AddStringList("implicit_outs", gs.Properties.Implicit_outs)
 
 	populateCommonProps(&gs.generateCommon, mctx, m)
