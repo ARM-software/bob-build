@@ -497,6 +497,7 @@ func getRspfileName(s string) string {
 
 func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
+	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, projectModuleDir(ctx))
 	m.generateCommon.processPaths(ctx, g)
 }
 

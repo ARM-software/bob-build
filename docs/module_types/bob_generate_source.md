@@ -72,6 +72,11 @@ List of implicit sources. Implicit sources are input files that do not get
 mentioned on the command line, and are not specified in the explicit sources.
 
 ----
+### **bob_generate_source.exclude_implicit_srcs** (optional)
+From `implicit_srcs` files filter out those that should not be included.
+Useful if `implicit_srcs` uses glob pattern that pulls in too many files.
+
+----
 ### **bob_generate_source.implicit_outs** (optional)
 List of implicit outputs. Implicit outputs are output files that do not get
 mentioned on the command line.
