@@ -408,6 +408,4 @@ The `instrumentation` Soong property will be automatically set to `true` if
 `profile_file` is set. Similarly, the only supported value of Soong's `sampling`
 field is `false`, so it is not settable in Bob.
 
-Note that the `add_if_supported` template is not supported on `pgo.cflags`.
-
 On backends other than Android.bp, these properties will be ignored.

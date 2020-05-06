@@ -84,6 +84,11 @@ property is determined by the module type.
 Maps may contain values of any type. Lists and maps may have trailing
 commas after the last value.
 
+Strings can contain Go templates (except in the `name`, `defaults`,
+and `flag_defaults` properties). Go templates start with `{{` and end
+with `}}`. Bob may expand Go templates more that once, which means
+that getting literal `{{` or `}}` is implementation dependent.
+
 ## Operators
 
 Strings, lists  of strings,  and maps  can be  appended using  the `+`
