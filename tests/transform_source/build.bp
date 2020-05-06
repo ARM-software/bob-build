@@ -85,9 +85,8 @@ bob_transform_source {
 bob_generate_source {
     name: "generate_template_source_used_by_transform",
     out: ["test_src.tmpl"],
-    // To get a single pair of braces `{}` in the output, we have to escape
-    // Go's templates and *then* Python's format() specifiers.
-    cmd: "echo 'void output_{func}(void) {{\"{{\"}}{{\"}}\"}}' > ${out}",
+    tool: "write_tmpl.py",
+    cmd: "python ${tool} ${out}",
 }
 
 bob_transform_source {
