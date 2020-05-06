@@ -259,8 +259,13 @@ const (
 	tgtTypeUnknown tgtType = ""
 )
 
-func stripEmptyComponentsRecursive(propsVal reflect.Value) {
+func stripEmptyComponents(list []string) []string {
 	var emptyStrFilter = func(s string) bool { return s != "" }
+
+	return utils.Filter(emptyStrFilter, list)
+}
+
+func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 
 	for i := 0; i < propsVal.NumField(); i++ {
 		field := propsVal.Field(i)
@@ -269,7 +274,7 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 		case reflect.Slice:
 			if field.Type().Elem().Kind() == reflect.String {
 				list := field.Interface().([]string)
-				list = utils.Filter(emptyStrFilter, list)
+				list = stripEmptyComponents(list)
 				field.Set(reflect.ValueOf(list))
 			}
 

@@ -170,8 +170,7 @@ func Main() {
 			// so optimize by skipping the mutator
 			ctx.RegisterTopDownMutator("escape_mutator", escapeMutator).Parallel()
 		}
-		ctx.RegisterTopDownMutator("match_sources_mutator", matchSourcesMutator).Parallel()
-		ctx.RegisterBottomUpMutator("check_supported_flags_mutator", checkCompilerFlagsMutator).Parallel()
+		ctx.RegisterTopDownMutator("late_template_mutator", lateTemplateMutator).Parallel()
 	}
 
 	if builder_ninja {

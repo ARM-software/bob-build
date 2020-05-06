@@ -88,11 +88,11 @@ func regReplace(rule string, input string, replace string) string {
 }
 
 func matchSrcs(input string) string {
-	return "{{match_srcs " + input + "}}"
+	return "{{match_srcs \"" + input + "\"}}"
 }
 
 func filter_compiler_flags(flag string) string {
-	return "{{add_if_supported " + flag + "}}"
+	return "{{add_if_supported \"" + flag + "\"}}"
 }
 
 // ApplyTemplate writes configuration values (from properties) into the string
