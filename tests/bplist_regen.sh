@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2018 Arm Limited.
+# Copyright 2018, 2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,7 @@ find . -mindepth 1 \
 echo ./bob/Blueprints >> "${TEMP_LIST_FILE}"
 echo ./bob/blueprint/Blueprints >> "${TEMP_LIST_FILE}"
 
-sort "${TEMP_LIST_FILE}" -o "${TEMP_LIST_FILE}"
+LC_ALL=C sort "${TEMP_LIST_FILE}" -o "${TEMP_LIST_FILE}"
 
 if cmp -s "${LIST_FILE}" "${TEMP_LIST_FILE}"; then
   rm "${TEMP_LIST_FILE}"
