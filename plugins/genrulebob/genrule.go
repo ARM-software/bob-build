@@ -86,6 +86,7 @@ type genruleInterface interface {
 	genrule.SourceFileGenerator
 
 	outputs() android.WritablePaths
+	implicitOutputs() android.WritablePaths
 	outputPath() android.Path
 }
 
@@ -175,15 +176,28 @@ func (m *genrulebobCommon) outputPath() android.Path {
 func (m *genrulebobCommon) outputs() (ret android.WritablePaths) {
 	for _, io := range m.inouts {
 		ret = append(ret, io.out...)
+	}
+	return
+}
+
+func (m *genrulebobCommon) implicitOutputs() (ret android.WritablePaths) {
+	for _, io := range m.inouts {
 		ret = append(ret, io.implicitOuts...)
 	}
 	return
 }
 
-func (m *genrulebobCommon) filterOutputs(predicate func(string) bool) (ret android.Paths) {
-	for _, p := range m.outputs() {
-		if predicate(p.String()) {
-			ret = append(ret, p)
+func (m *genrulebobCommon) filterAllOutputs(predicate func(string) bool) (ret android.Paths) {
+	for _, io := range m.inouts {
+		for _, p := range io.out {
+			if predicate(p.String()) {
+				ret = append(ret, p)
+			}
+		}
+		for _, p := range io.implicitOuts {
+			if predicate(p.String()) {
+				ret = append(ret, p)
+			}
 		}
 	}
 	return
@@ -212,7 +226,7 @@ func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.W
 // genrule.SourceFileGenerator interface, which allows these modules to be used
 // to generate inputs for cc_library and cc_binary modules.
 func (m *genrulebobCommon) GeneratedSourceFiles() android.Paths {
-	return m.filterOutputs(utils.IsCompilableSource)
+	return m.filterAllOutputs(utils.IsCompilableSource)
 }
 
 func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
@@ -220,7 +234,7 @@ func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 }
 
 func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
-	return m.filterOutputs(utils.IsNotCompilableSource)
+	return m.filterAllOutputs(utils.IsNotCompilableSource)
 }
 
 func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
@@ -287,10 +301,10 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 		varName := strings.TrimSuffix(strings.TrimSuffix(dep.Name(), "__host"), "__target")
 
 		if gdep, ok := dep.(genruleInterface); ok {
-			outs := gdep.outputs()
-			dependents = append(dependents, outs.Paths()...)
+			dependents = append(dependents, gdep.outputs().Paths()...)
+			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
 			args[varName+"_dir"] = gdep.outputPath().String()
-			args[varName+"_out"] = strings.Join(outs.Strings(), " ")
+			args[varName+"_out"] = strings.Join(gdep.outputs().Strings(), " ")
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
@@ -307,6 +321,7 @@ func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []andr
 	ctx.VisitDirectDepsWithTag(generatedSourceTag, func(dep android.Module) {
 		if gdep, ok := dep.(genruleInterface); ok {
 			srcs = append(srcs, gdep.outputs().Paths()...)
+			srcs = append(srcs, gdep.implicitOutputs().Paths()...)
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			srcs = append(srcs, ccmod.OutputFile().Path())
 		}
