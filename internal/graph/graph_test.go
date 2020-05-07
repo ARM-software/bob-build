@@ -326,3 +326,47 @@ func Test_SubnodeOrderAfterDeleteProxyEdges(t *testing.T) {
 			strings.Join(target, ", "))
 	}
 }
+
+func Test_GetSubgraphNodeCount(t *testing.T) {
+	testGraph := NewGraph("Test")
+	testGraph.AddEdge("top", "a")
+	testGraph.AddEdge("top", "b")
+
+	testGraph.AddEdge("a", "a0")
+	testGraph.AddEdge("a", "a1")
+	testGraph.AddEdge("b", "b0")
+	testGraph.AddEdge("b", "b1")
+
+	nodes := []string{"top", "a", "a0", "a1", "b", "b0", "b1"}
+
+	for _, node := range nodes {
+		count1 := GetSubgraph(testGraph, node).GetNodeCount()
+		count2 := GetSubgraphNodeCount(testGraph, node)
+		if count1 != count2 {
+			t.Errorf("Mismatch!\n%d <------- result\n%d <------- correct", count1, count2)
+		}
+	}
+}
+
+func Test_GetSubgraphHasNode(t *testing.T) {
+	testGraph := NewGraph("Test")
+	testGraph.AddEdge("top", "a")
+	testGraph.AddEdge("top", "b")
+
+	testGraph.AddEdge("a", "a0")
+	testGraph.AddEdge("a", "a1")
+	testGraph.AddEdge("b", "b0")
+	testGraph.AddEdge("b", "b1")
+
+	nodes := []string{"top", "a", "a0", "a1", "b", "b0", "b1"}
+
+	for _, node1 := range nodes {
+		for _, node2 := range nodes {
+			res1 := GetSubgraphHasNode(testGraph, node1, node2)
+			res2 := GetSubgraph(testGraph, node1).HasNode(node2)
+			if res1 != res2 {
+				t.Errorf("Mismatch!\n%v <------- result\n%v <------- correct", res1, res2)
+			}
+		}
+	}
+}
