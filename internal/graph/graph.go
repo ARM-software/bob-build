@@ -431,8 +431,7 @@ func (g *graph) IsReachable(source, target string) bool {
 		return false
 	}
 
-	sub := GetSubgraph(g, source)
-	return sub.HasNode(target)
+	return GetSubgraphHasNode(g, source, target)
 }
 
 func (g *graph) getEdgeAttributes(source, target string) (Attributes, error) {
@@ -647,6 +646,58 @@ func walkDown(graph Graph, walk Graph, nodeID string, visited map[string]bool) {
 			walkDown(graph, walk, targetID, visited)
 		}
 	}
+}
+
+// Same as walkDown but allows custom callbacks for handling nodes and edges.
+// Does not copy anything by default but creates a map of visited nodes.
+// Callbacks can interrupt this function by returning true.
+func walkDownNoCopy(graph Graph, nodeID string, visited map[string]bool,
+	onNode func(graph Graph, nodeID string, visited map[string]bool) bool,
+	onEdge func(graph Graph, nodeID string, targetID string, visited map[string]bool) bool) {
+	visited[nodeID] = true
+	if onNode(graph, nodeID, visited) {
+		return
+	}
+
+	targets, _ := graph.GetTargets(nodeID)
+
+	for _, targetID := range targets {
+		if onEdge(graph, nodeID, targetID, visited) {
+			return
+		}
+		if !visited[targetID] {
+			walkDownNoCopy(graph, targetID, visited, onNode, onEdge)
+		}
+	}
+}
+
+// A faster alternative to GetSubgraph(graph, start).GetNodeCount()
+func GetSubgraphNodeCount(graph Graph, start string) int {
+	visited := make(map[string]bool)
+
+	walkDownNoCopy(graph, start, visited,
+		func(Graph, string, map[string]bool) bool { return false },
+		func(Graph, string, string, map[string]bool) bool { return false })
+
+	return len(visited)
+}
+
+// A faster alternative to GetSubgraph(graph, start).HasNode(target)
+func GetSubgraphHasNode(graph Graph, start string, target string) bool {
+	visited := make(map[string]bool)
+	hasNode := false
+
+	walkDownNoCopy(graph, start, visited,
+		func(_ Graph, nodeID string, _ map[string]bool) bool {
+			if nodeID != target {
+				return false
+			}
+			hasNode = true
+			return true
+		},
+		func(Graph, string, string, map[string]bool) bool { return false })
+
+	return hasNode
 }
 
 // Retrive all possible SubGraphs. Check GetSubGraph to understand what is sub graph

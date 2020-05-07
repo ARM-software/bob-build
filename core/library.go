@@ -976,7 +976,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 	// dependencies and the (shared) graph will be complete (for the
 	// current module).
 	for _, nodeID := range sub.GetNodes() {
-		cost := graph.GetSubgraph(sub, nodeID).GetNodeCount()
+		cost := graph.GetSubgraphNodeCount(sub, nodeID)
 		sources, _ := sub.GetSources(nodeID)
 		priority := len(sources)
 		sub.SetNodePriority(nodeID, (10*priority)-cost)
