@@ -76,6 +76,13 @@ matrix:
       - DO_COMMIT_CHECKS=0
       - DO_PYTHON_TESTS=0
       - DO_GO_TESTS=1
+  - os: linux
+    go: "1.14"
+    env:
+      - PYTHON_SUFFIX=2.7
+      - DO_COMMIT_CHECKS=0
+      - DO_PYTHON_TESTS=0
+      - DO_GO_TESTS=1
   - os: osx
     go: "1.13"
     env:
