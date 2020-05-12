@@ -1,3 +1,20 @@
+/*
+ * Copyright 2019-2020 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 bob_external_static_library {
     name: "libbob_test_external_static",
 }
@@ -8,6 +25,19 @@ bob_external_shared_library {
 
 bob_external_header_library {
     name: "libbob_test_external_header",
+}
+
+// The above external libraries are difficult to test on Linux without invoking
+// a second build system, but we can do a simple test using zlib. Note that
+// this must be called `libz` to match what Android calls it, but the
+// pkg-config file is `zlib`.
+bob_external_shared_library {
+    name: "libz",
+    builder_ninja: {
+        export_cflags: ["{{.zlib_cflags}}"],
+        export_ldflags: ["{{.zlib_ldflags}}"],
+        ldlibs: ["{{.zlib_ldlibs}}"],
+    },
 }
 
 bob_static_library {
@@ -79,11 +109,18 @@ bob_binary {
     },
 }
 
+bob_binary {
+    name: "use_external_zlib",
+    srcs: ["zlib.c"],
+    shared_libs: ["libz"],
+}
+
 bob_alias {
     name: "bob_test_external_libs",
     srcs: [
         "use_external_libs",
         "use_external_header",
         "use_external_lib_proxy_user",
+        "use_external_zlib",
     ],
 }
