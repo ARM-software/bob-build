@@ -159,8 +159,20 @@ source "bob/mconfig/toolchain.Mconfig"
 
 endmenu
 
+## pkg-config configuration sub-menu
+
+menu "pkg-config configuration"
+	depends on ALLOW_HOST_EXPLORE
+	help
+	  pkg-config is a Linux tool that allows discovery of available
+	  libraries. On a standard Linux install pkg-config will be
+	  setup correctly for the build host. To use pkg-config for a
+	  target system in a cross compile, the package information
+	  for the target needs to be available.
+
 config PKG_CONFIG
 	bool "Enable use of pkg-config"
+	default y if BUILDER_NINJA
 	help
 	  When enabled, pkg-config is used to retrieve information
 	  about the package(s) declared in PKG_CONFIG_PACKAGES.
@@ -177,6 +189,69 @@ config PKG_CONFIG
 
 	  Where no package information exists the default configuration
 	  value will be used.
+
+config PKG_CONFIG_FLAGS
+	depends on PKG_CONFIG
+	string "pkg-config flags"
+	help
+	  This field contains command line arguments to pass to pkg-config.
+
+	  This field is specially processed so that the text %MCONFIGDIR% is
+	  replaced with the absolute directory that the Mconfig file is in.
+
+	  This should usually be left empty.
+
+config PKG_CONFIG_PACKAGES
+	depends on PKG_CONFIG
+	string "Packages"
+	default "zlib"
+	help
+	  This field contains a comma separated list of packages.
+
+	  The default value contains packages normally used in the
+	  selected configuration.
+
+config PKG_CONFIG_SYSROOT_DIR
+	depends on PKG_CONFIG
+	string "PKG_CONFIG_SYSROOT_DIR"
+	default ""
+	help
+	  This field allows a path to be assigned to the PKG_CONFIG_SYSROOT_DIR
+	  environment variable. See pkg-config man pages for further details of
+	  what PKG_CONFIG_SYSROOT_DIR does.
+
+config PKG_CONFIG_PATH
+	depends on PKG_CONFIG
+	string "PKG_CONFIG_PATH"
+	help
+	  This field allows a path to be assigned to the PKG_CONFIG_PATH
+	  environment variable. See pkg-config man pages for further details of
+	  what PKG_CONFIG_PATH does.
+
+	  This field is specially processed so that the text %MCONFIGDIR%
+	  is replaced with the absolute directory that the Mconfig file is
+	  in. This is to allow a project to point pkg-config at its own
+	  pkgconfig files.
+
+# Eg. for a package called 'win-utils' declared in PKG_CONFIG_PACKAGES, the following three
+# configuration entries must be present. The defaults will be overridden by pkg-config if
+# package information is available.
+#
+# config WIN_UTILS_CFLAGS
+#	string ""
+#	default "-I/usr/include"
+#
+# config WIN_UTILS_LDFLAGS
+#	string ""
+#	default "-L/usr/lib"
+#
+# config WIN_UTILS_LIBS
+#	string ""
+#	default "-lwin-utils"
+
+source "external_libs/Mconfig"
+
+endmenu
 
 ## Include this to allow us to test Bob host exploration if needed
 config ALLOW_HOST_EXPLORE
