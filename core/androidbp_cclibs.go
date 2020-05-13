@@ -177,7 +177,9 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.Srcs))
 	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
-	m.AddStringList("generated_headers", l.getGeneratedHeaderModules(mctx))
+	genHeaderModules := l.getGeneratedHeaderModules(mctx)
+	m.AddStringList("generated_headers", genHeaderModules)
+	m.AddStringList("export_generated_headers", genHeaderModules)
 	m.AddStringList("exclude_srcs", l.Properties.Exclude_srcs)
 	err := addCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
 	if err != nil {
