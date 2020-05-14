@@ -149,7 +149,8 @@ func genrulebobFactory() android.Module {
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
 	// init module with target-specific variants info, needed also to get install path right
-	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
+	// (hardcode to device variant, host variant currently not supported)
+	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
 	return m
 }
 
@@ -160,7 +161,8 @@ func gensrcsbobFactory() android.Module {
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
 	// init module with target-specific variants info, needed also to get install path right
-	android.InitAndroidArchModule(m, android.HostAndDeviceSupported, android.MultilibCommon)
+	// (hardcode to device variant, host variant currently not supported)
+	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
 	return m
 }
 
