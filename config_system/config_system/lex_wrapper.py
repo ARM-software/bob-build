@@ -41,6 +41,7 @@ class LexWrapper:
 
         self.push_lexer(lexer)
         self.input(file_contents)
+        self.sources.append(fname)
 
     def source(self, fname):
         """Handle the source command, ensuring we open the file relative to
@@ -49,7 +50,6 @@ class LexWrapper:
             fname = os.path.join(self.root_dir, fname)
 
         self.open(fname)
-        self.sources.append(fname)
 
     def current_lexer(self):
         return self.lexers[-1]
