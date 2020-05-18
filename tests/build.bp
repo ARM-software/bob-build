@@ -75,6 +75,7 @@ bob_alias {
         "bob_test_kernel_module",
         "bob_test_match_source",
         "bob_test_output",
+        "bob_test_pgo",
         "bob_test_properties",
         "bob_test_reexport_libs",
         "bob_test_resources",

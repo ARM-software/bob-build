@@ -1,0 +1,22 @@
+bob_shared_library {
+    name: "libbob_pgo_test",
+    srcs: ["main.c"],
+    enabled: false,
+    builder_android_bp: {
+        enabled: true,
+        build_by_default: true,
+    },
+    pgo: {
+        benchmarks: ["pgo_test_benchmark"],
+        profile_file: "libbob_pgo_test.profdata",
+        enable_profile_use: true,
+        cflags: ["-DPGO_USED=1"],
+    },
+}
+
+bob_alias {
+    name: "bob_test_pgo",
+    srcs: [
+        "libbob_pgo_test",
+    ],
+}

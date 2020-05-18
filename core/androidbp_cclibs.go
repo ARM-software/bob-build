@@ -116,6 +116,31 @@ func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
 	}
 }
 
+func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
+	if props.Pgo.Profile_file == nil {
+		return
+	}
+
+	g := m.NewGroup("pgo")
+
+	// `instrumentation` controls whether PGO is used for this module. This function checks
+	// `profile_file` at the start; if it was set, we can infer that PGO is being used.
+	g.AddBool("instrumentation", true)
+
+	// Sampling-based PGO is not currently supported, so Soong only allows
+	// this to be false. There is therefore no need to set it explicitly.
+	// g.AddBool("sampling", false)
+	g.AddStringList("benchmarks", props.Pgo.Benchmarks)
+
+	g.AddString("profile_file", *props.Pgo.Profile_file)
+
+	// If not overridden explicitly, don't set it, which will result in
+	// Soong's default value of `true` being used.
+	g.AddOptionalBool("enable_profile_use", props.Pgo.Enable_profile_use)
+
+	g.AddStringList("cflags", props.Pgo.Cflags)
+}
+
 func addCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags []string) error {
 	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
 		m.AddString("c_std", std)
@@ -200,6 +225,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 
 	addProvenanceProps(m, l.Properties.Build.AndroidProps)
+	addPGOProps(m, l.Properties.Build.AndroidPGOProps)
 }
 
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {

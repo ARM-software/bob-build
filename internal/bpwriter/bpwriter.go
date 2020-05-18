@@ -63,6 +63,7 @@ type property struct {
 type Group interface {
 	AddString(name, value string)
 	AddBool(name string, value bool)
+	AddOptionalBool(name string, value *bool)
 	AddStringList(name string, list []string)
 	AddStringCmd(name string, argLists ...[]string)
 }
@@ -100,6 +101,14 @@ func (g *group) AddBool(name string, value bool) {
 		g.addProp(name, "true")
 	} else {
 		g.addProp(name, "false")
+	}
+}
+
+// Add a boolean property to the property group, leaving it unset if no value
+// was explicitly provided.
+func (g *group) AddOptionalBool(name string, value *bool) {
+	if value != nil {
+		g.AddBool(name, *value)
 	}
 }
 
@@ -175,6 +184,12 @@ func (m *module) AddString(name, value string) {
 // Add a boolean property as a top level module property
 func (m *module) AddBool(name string, value bool) {
 	m.group.AddBool(name, value)
+}
+
+// Add a boolean property as a top level module property, leaving it unset if
+// no value was explicitly provided.
+func (m *module) AddOptionalBool(name string, value *bool) {
+	m.group.AddOptionalBool(name, value)
 }
 
 // Add a string list property as a top level module property
