@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,6 +58,13 @@ def pkg_config():
         pkg_config_flags = pkg_config_flags.replace("%MCONFIGDIR%", get_mconfig_dir())
         cmd.extend(pkg_config_flags.split(' '))
 
+        # clean already existing env vars, as leaving them may be erroneous
+        for k in ('PKG_CONFIG_PATH', 'PKG_CONFIG_SYSROOT_DIR'):
+            if k in os.environ:
+                logger.warning("Environment variable %s is already defined. "
+                               "It will be ignored." % k)
+                del os.environ[k]
+
         pkg_config_path = get_config_string('PKG_CONFIG_PATH')
         if pkg_config_path != '':
             pkg_config_path = pkg_config_path.replace("%MCONFIGDIR%", get_mconfig_dir())
@@ -65,6 +72,7 @@ def pkg_config():
 
         pkg_config_sys_root = get_config_string('PKG_CONFIG_SYSROOT_DIR')
         if pkg_config_sys_root != '':
+            pkg_config_sys_root = pkg_config_sys_root.replace("%MCONFIGDIR%", get_mconfig_dir())
             os.putenv('PKG_CONFIG_SYSROOT_DIR', pkg_config_sys_root)
 
         pkg_config_packages = get_config_string('PKG_CONFIG_PACKAGES')
