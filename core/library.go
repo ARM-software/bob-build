@@ -149,6 +149,7 @@ type BuildProps struct {
 	SplittableProps
 	StripProps
 	AndroidProps
+	AndroidPGOProps
 
 	// Linux kernel config options to emulate. These are passed to Kbuild in
 	// the 'make' command-line, and set in the source code via EXTRA_CFLAGS

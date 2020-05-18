@@ -381,3 +381,33 @@ bob_binary {
     },
 }
 ```
+
+----
+### **bob_module.pgo** (optional)
+Bob has rudimentary support for Profile-Guided Optimization when using the
+Android.bp backend. Properties in the `pgo` block can be set, and will be
+used as the values for the corresponding Soong properties, as described
+[here](https://source.android.com/devices/tech/perf/pgo).
+
+```bp
+bob_binary {
+    name: "pgo_optimized_binary",
+    srcs: [...],
+    pgo: {
+        benchmarks: [
+            "benchmark1",
+            "benchmark2",
+        ],
+        profile_file: "pgo_optimized_binary.profdata",
+        enable_profile_use: true,
+        cflags: ["-DENABLED_WHEN_PGO_USED"],
+    }
+```
+
+The `instrumentation` Soong property will be automatically set to `true` if
+`profile_file` is set. Similarly, the only supported value of Soong's `sampling`
+field is `false`, so it is not settable in Bob.
+
+Note that the `add_if_supported` template is not supported on `pgo.cflags`.
+
+On backends other than Android.bp, these properties will be ignored.

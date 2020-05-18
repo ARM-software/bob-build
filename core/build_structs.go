@@ -115,6 +115,16 @@ type AndroidProps struct {
 	Owner string
 }
 
+// AndroidPGOProps defines properties used to support profile-guided optimization.
+type AndroidPGOProps struct {
+	Pgo struct {
+		Benchmarks         []string
+		Profile_file       *string
+		Enable_profile_use *bool
+		Cflags             []string
+	}
+}
+
 func getBobScriptsDir() string {
 	return filepath.Join(getBobDir(), "scripts")
 }
