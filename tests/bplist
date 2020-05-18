@@ -25,6 +25,7 @@
 ./kernel_module/module2/build.bp
 ./match_source/build.bp
 ./output/build.bp
+./pgo/build.bp
 ./properties/build.bp
 ./reexport_libs/build.bp
 ./resources/build.bp
