@@ -45,15 +45,15 @@ result_fail() {
 set_python_version() {
     local SUFFIX=$1
     if [[ -n $SUFFIX ]]; then
-        local PYTHON_WRAPPER=~/pythonbin/python
+        local PYTHON_WRAPPER=$TRAVIS_WORK_DIR/pythonbin/python
         rm -f "$PYTHON_WRAPPER"
-        mkdir -p $(dirname "$PYTHON_WRAPPER" ~/pythonbin)
+        mkdir -p $(dirname "$PYTHON_WRAPPER" $TRAVIS_WORK_DIR/pythonbin)
 
         echo "#!/usr/bin/env bash" > "$PYTHON_WRAPPER"
         echo "python$PYTHON_SUFFIX" '"$@"' >> "$PYTHON_WRAPPER"
         chmod +x $PYTHON_WRAPPER
 
-        export PATH=~/pythonbin:$PATH
+        export PATH=$TRAVIS_WORK_DIR/pythonbin:$PATH
         local PYVER=$(python -c 'import sys; print("%d.%d." % (sys.version_info.major, sys.version_info.minor))')
         echo "Check python version"
         if [[ $PYVER != "$SUFFIX."* ]]; then

@@ -7,7 +7,7 @@ set -ev
 
 SCRIPT_HASH=$(sha1sum ${BASH_SOURCE[0]} | awk '{print $1}')
 
-cd ~
+cd $TRAVIS_WORK_DIR
 if [[ -d ninjabin && "$SCRIPT_HASH" == "$(cat ninjabin/script_hash)" ]]; then
     exit 0
 fi
