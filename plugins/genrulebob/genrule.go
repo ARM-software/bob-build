@@ -133,6 +133,14 @@ type hostToolBinTagType struct {
 	blueprint.BaseDependencyTag
 }
 
+func init() {
+	// Import config package into pctx context, which is used for writing ninja rules.
+	// This makes vars from config package accessible, eg. ${config.ClangBin} reference
+	// can be used in cmd and args of ninja rules, which will interpolate
+	// into ${g.android.soong.cc.config.ClangBin}
+	pctx.Import("android/soong/cc/config")
+}
+
 var (
 	pctx = android.NewPackageContext("plugins/genrulebob")
 
