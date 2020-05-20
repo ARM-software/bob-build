@@ -5,7 +5,7 @@ git:
 
 cache:
   directories:
-    - $HOME/ninjabin
+    - ~/ninjabin
 
 addons:
   apt:
@@ -29,6 +29,7 @@ before_install:
   - export -f travis_time_finish
 
 install:
+  - echo
   - .travis/install-ninja.sh
   - export PATH=$PATH:~/ninjabin
   - python${PYTHON_SUFFIX} -m pip install --user setuptools
@@ -36,6 +37,7 @@ install:
   - python${PYTHON_SUFFIX} -m pip install --user pycodestyle pylint
 
 before_script:
+  - echo
   - mkdir -p ~/bob_workspace
   - mkdir -p ~/bob_workspace/src/github.com/google/
   - mkdir -p ~/bob_workspace/src/github.com/ARM-software/
