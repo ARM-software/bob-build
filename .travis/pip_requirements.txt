@@ -1,0 +1,7 @@
+ply
+pytest
+pytest-catchlog
+mock
+pytest-mock
+pycodestyle
+pylint
