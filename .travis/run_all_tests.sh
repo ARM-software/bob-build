@@ -3,11 +3,6 @@ source .travis/utils.sh
 STATUS_CODE=0 # reset
 
 ####################
-fold_start 'Setup:python'
-    set_python_version ${PYTHON_SUFFIX}
-fold_end $?
-
-####################
 fold_start 'Relative path tests'
     bash tests/relative_path_tests.sh
 fold_end $?
@@ -51,7 +46,7 @@ if [ ${DO_PYTHON_TESTS} -eq 1 ] ; then
 
     ####################
     fold_start 'config_system pytest'
-        python${PYTHON_SUFFIX} -m pytest config_system
+        pytest config_system
     fold_end $?
     ####################
 fi
