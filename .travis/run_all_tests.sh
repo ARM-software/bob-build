@@ -20,6 +20,12 @@ fold_start 'Build tests'
 fold_end ${build_result}
 ####################
 
+####################
+fold_start 'Build example tests'
+    bash .travis/build_example_proj.sh
+fold_end $?
+####################
+
 # Tests of go code (python version doesn't matter)
 if [ ${DO_GO_TESTS} -eq 1 ] ; then
     ####################
