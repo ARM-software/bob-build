@@ -26,6 +26,7 @@ bob_generate_source {
     out: ["my_out.cpp"],
     depfile: true,
     implicit_srcs: ["foo/scatter.scat"],
+    exclude_implicit_srcs: ["foo/skip.scat"],
 
     enabled: false,
     build_by_default: true,
@@ -73,8 +74,8 @@ mentioned on the command line, and are not specified in the explicit sources.
 
 ----
 ### **bob_generate_source.exclude_implicit_srcs** (optional)
-From `implicit_srcs` files filter out those that should not be included.
-Useful if `implicit_srcs` uses glob pattern that pulls in too many files.
+Used in combination with glob patterns in `implicit_srcs` to exclude
+files that are not sources.
 
 ----
 ### **bob_generate_source.implicit_outs** (optional)

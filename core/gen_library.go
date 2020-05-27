@@ -19,6 +19,8 @@ package core
 
 import (
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // Support generation of static and shared libraries
@@ -31,6 +33,13 @@ type GenerateLibraryProps struct {
 
 	// Alternate output name, used for the file name and Android rules
 	Out *string
+
+	// List of implicit sources. Implicit sources are input files that do not get
+	// mentioned on the command line, and are not specified in the explicit sources.
+	Implicit_srcs []string
+
+	// Implicit source files that should not be included. Use with care.
+	Exclude_implicit_srcs []string
 }
 
 type generateLibrary struct {
@@ -55,6 +64,7 @@ type generateLibraryInterface interface {
 	libExtension() string
 	outputFileName() string
 	getSources(ctx blueprint.BaseModuleContext) []string
+	getImplicitSources(ctx blueprint.BaseModuleContext) []string
 	getDepfile() (string, bool)
 }
 
@@ -76,8 +86,22 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile
 	}
+	io.implicitSrcs = getBackendPathsInSourceDir(g, m.getImplicitSources(ctx))
 	io.implicitOuts = implicitOuts
 	return []inout{io}
+}
+
+func (m *generateLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	pmdir := projectModuleDir(ctx)
+	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, pmdir)
+	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, pmdir)
+	m.generateCommon.processPaths(ctx, g)
+}
+
+//// Support generateLibraryInterface
+
+func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []string {
+	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
 }
 
 //// Support splittable
