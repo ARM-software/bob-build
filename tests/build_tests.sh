@@ -230,13 +230,20 @@ SRC=tests/generate_source/depgen2.in
 UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
 check_dep_updated "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
+# generated sources with implicit source
 SRC=tests/generate_source/an.implicit.src
 UPDATE=(${build_dir}/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c)
 check_dep_updated "generate source implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
+# generated source with excluded implicit source
 SRC=tests/generate_source/an.implicit.src
 UPDATE=(${build_dir}/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c)
 check_dep_not_updated "excluded implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+# generated library with implicit source
+SRC=tests/generate_libs/libblah/libblah_feature.h
+UPDATE=(${build_dir}/gen/libblah_shared/libblah_shared${SHARED_LIBRARY_EXTENSION})
+check_dep_updated "generate library implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # resource dependencies
 SRC=tests/resources/main.c

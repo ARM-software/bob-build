@@ -37,6 +37,8 @@ bob_generate_shared_library {
     name: "custom_name",
     srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
     exclude_srcs: ["src/common/skip_this.cpp"],
+    implicit_srcs: ["foo/*.tmpl],
+    exclude_implicit_srcs: ["foo/a.tmpl"],
     headers: ["my.h"],
 
     enabled: false,
@@ -72,6 +74,18 @@ bob_generate_shared_library {
     rsp_content: "${in}",
 }
 ```
+
+----
+### **bob_generate_*.implicit_srcs** (optional)
+
+List of implicit sources. Implicit sources are input files that do not get
+mentioned on the command line, and are not specified in the explicit sources.
+
+----
+### **bob_generate_*.exclude_implicit_srcs** (optional)
+
+Used in combination with glob patterns in `implicit_srcs` to exclude
+files that are not sources.
 
 ----
 ### **bob_generate_*.headers** (optional)

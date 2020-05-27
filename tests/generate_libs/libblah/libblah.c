@@ -1,3 +1,6 @@
+#include "libblah.h"
+#include "libblah_feature.h"
+
 int output(void) {
 	return 42;
 }
