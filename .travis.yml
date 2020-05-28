@@ -13,7 +13,6 @@ addons:
     packages:
       - python
       - python3
-      - python3-pip
       - rsync
   homebrew:
     packages:
@@ -32,9 +31,9 @@ before_install:
 install:
   - .travis/install-ninja.sh
   - export PATH=$PATH:$TRAVIS_WORK_DIR/ninjabin
-  - python3 -m pip install --user setuptools
-  - python3 -m pip install --user virtualenv
-  - python3 -m virtualenv -p ${PYTHON_SUFFIX} $TRAVIS_WORK_DIR/python_env
+  - python -m pip install --user setuptools
+  - python -m pip install --user virtualenv
+  - python -m virtualenv -p python${PYTHON_SUFFIX} $TRAVIS_WORK_DIR/python_env
   - source $TRAVIS_WORK_DIR/python_env/bin/activate
   - pip install -r .travis/pip_requirements.txt
 
