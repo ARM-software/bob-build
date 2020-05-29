@@ -566,31 +566,39 @@ func (g *androidMkGenerator) outputs(m *generateCommon) string {
 	return "$(" + outputsVarName(m) + ")"
 }
 
+// Setup rule to create export_includes
+func writeExportIncludeMkText(sb *strings.Builder, moduleName string) {
+	// The following makefile snippets are based on Android makefiles from AOSP
+	//  See aosp/build/core/make/prebuilt_internal.mk
+
+	sb.WriteString("export_includes:=$(intermediates)/export_includes\n" +
+		"$(export_includes): PRIVATE_EXPORT_C_INCLUDE_DIRS:=$(LOCAL_EXPORT_C_INCLUDE_DIRS)\n")
+
+	// Define the actual rule, with dependencies on this module's output
+	sb.WriteString("$(export_includes): $(" + moduleName +
+		"_OUTPUTS) $(LOCAL_MODULE_MAKEFILE_DEP)\n")
+
+	sb.WriteString("\t@echo Export includes file: $< -- $@\n" +
+		"\t$(hide) mkdir -p $(dir $@) && rm -f $@\n" +
+		"ifdef LOCAL_EXPORT_C_INCLUDE_DIRS\n" +
+		"\t$(hide) for d in $(PRIVATE_EXPORT_C_INCLUDE_DIRS); do \\\n" +
+		"\t\techo \"-I $$d\" >> $@; \\\n" +
+		"\t\tdone\n" +
+		"else\n" +
+		"\t$(hide) touch $@\n" +
+		"endif\n\n" +
+
+		"$(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES) | $(export_includes)\n" +
+		"\tmkdir -p $(dir $@)\n" +
+		"\tcp $< $@\n\n")
+}
+
 // The following makefile snippets are based on Android makefiles from AOSP
 //  See aosp/build/core/make/prebuilt_internal.mk
-const cmnLibraryMkText string = "include $(BUILD_SYSTEM)/base_rules.mk\n\n" +
-	"export_includes:=$(intermediates)/export_includes\n" +
 
-	//  Setup rule to create export_includes
-	"$(export_includes): PRIVATE_EXPORT_C_INCLUDE_DIRS:=$(LOCAL_EXPORT_C_INCLUDE_DIRS)\n" +
-	"$(export_includes): $(LOCAL_MODULE_MAKEFILE_DEP)\n" +
-	"\t@echo Export includes file: $< -- $@\n" +
-	"\t$(hide) mkdir -p $(dir $@) && rm -f $@\n" +
-	"ifdef LOCAL_EXPORT_C_INCLUDE_DIRS\n" +
-	"\t$(hide) for d in $(PRIVATE_EXPORT_C_INCLUDE_DIRS); do \\\n" +
-	"\t\techo \"-I $$d\" >> $@; \\\n" +
-	"\t\tdone\n" +
-	"else\n" +
-	"\t$(hide) touch $@\n" +
-	"endif\n\n" +
-
-	"$(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES) | $(export_includes)\n" +
-	"\tmkdir -p $(dir $@)\n" +
-	"\tcp $< $@\n\n" +
-
-	// Setup link type
-	// We assume LOCAL_SDK_VERSION and LOCAL_USE_VNDK will not be set
-	"ifeq ($(PLATFORM_SDK_VERSION),25)\n" +
+// Setup link type
+// We assume LOCAL_SDK_VERSION and LOCAL_USE_VNDK will not be set
+const libraryLinkTypeMkText string = "ifeq ($(PLATFORM_SDK_VERSION),25)\n" +
 	"  # link_type not required\n" +
 
 	// Android O only.
@@ -636,7 +644,10 @@ func declarePrebuiltStaticLib(sb *strings.Builder, moduleName, path, includePath
 		sb.WriteString("LOCAL_EXPORT_C_INCLUDE_DIRS:=" + includePaths + "\n")
 	}
 
-	sb.WriteString(cmnLibraryMkText)
+	sb.WriteString("include $(BUILD_SYSTEM)/base_rules.mk\n\n")
+
+	writeExportIncludeMkText(sb, moduleName)
+	sb.WriteString(libraryLinkTypeMkText)
 }
 
 func declarePrebuiltSharedLib(sb *strings.Builder, moduleName, path, includePaths string, target bool) {
@@ -669,7 +680,10 @@ func declarePrebuiltSharedLib(sb *strings.Builder, moduleName, path, includePath
 		sb.WriteString("OVERRIDE_BUILT_MODULE_PATH:=$(HOST_OUT_INTERMEDIATE_LIBRARIES)\n\n")
 	}
 
-	sb.WriteString(cmnLibraryMkText)
+	sb.WriteString("include $(BUILD_SYSTEM)/base_rules.mk\n\n")
+
+	writeExportIncludeMkText(sb, moduleName)
+	sb.WriteString(libraryLinkTypeMkText)
 }
 
 func declarePrebuiltBinary(sb *strings.Builder, moduleName, path string, target bool) {
