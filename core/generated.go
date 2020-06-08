@@ -144,7 +144,7 @@ type GenerateProps struct {
 
 type generateCommon struct {
 	moduleBase
-	simpleOutputProducer
+	encapsulatedOutputProducer
 	headerProducer
 	Properties struct {
 		GenerateProps
@@ -395,13 +395,18 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			}
 
 			depName := ctx.OtherModuleName(m)
-			// When the dependent module is another Bob generated module, provide
-			// the location of its output dir so the using module can pick and
-			// choose what it uses.
-			if _, ok := getGenerateCommon(m); ok {
-				args[depName+"_dir"] = gen.outputDir()
+			// don't provide _dir and _out placeholders for encapsulated modules
+			if ctx.OtherModuleDependencyTag(m) == generatedDepTag {
+				// When the dependent module is another Bob generated module, provide
+				// the location of its output dir so the using module can pick and
+				// choose what it uses.
+				if gc, ok := getGenerateCommon(m); ok {
+					args[depName+"_dir"] = gc.outputDir()
+					args[depName+"_out"] = strings.Join(gc.cmdOutputs(), " ")
+				} else {
+					args[depName+"_out"] = strings.Join(gen.outputs(), " ")
+				}
 			}
-			args[depName+"_out"] = strings.Join(gen.outputs(), " ")
 			depfiles = append(depfiles, gen.outputs()...)
 			depfiles = append(depfiles, gen.implicitOutputs()...)
 		})
@@ -677,13 +682,46 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
-				srcs = append(srcs, gs.outputs()...)
+				if gc, ok := getGenerateCommon(m); ok {
+					srcs = append(srcs, gc.cmdOutputs()...)
+				} else {
+					srcs = append(srcs, gs.outputs()...)
+				}
 				srcs = append(srcs, gs.implicitOutputs()...)
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " does not have outputs"))
 			}
 		})
 	return srcs
+}
+
+func getGeneratedEncapsulatedFiles(ctx blueprint.ModuleContext) (encapsulatedOuts []string) {
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == encapsulatesTag },
+		func(m blueprint.Module) {
+			if gs, ok := getGenerateCommon(m); ok {
+				// Add output of our direct encapsulated dependencies
+				encapsulatedOuts = append(encapsulatedOuts, gs.cmdOutputs()...)
+				encapsulatedOuts = append(encapsulatedOuts, gs.implicitOutputs()...)
+				// Add output of transitively encapsulated dependencies
+				encapsulatedOuts = append(encapsulatedOuts, gs.encapsulatedOutputs()...)
+			}
+		})
+	return
+}
+
+func getGeneratedEncapsulatedModules(ctx blueprint.ModuleContext) (encapsulatedMods []string) {
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == encapsulatesTag },
+		func(m blueprint.Module) {
+			if gs, ok := getGenerateCommon(m); ok {
+				// Add our own name
+				encapsulatedMods = append(encapsulatedMods, m.Name())
+				// Add transitively encapsulated module names
+				encapsulatedMods = append(encapsulatedMods, gs.encapsulatedModules()...)
+			}
+		})
+	return
 }
 
 func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {

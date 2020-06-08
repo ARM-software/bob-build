@@ -199,7 +199,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	}
 
 	// Handle generated sources
-	for _, module := range m.Properties.Generated_sources {
+	for _, module := range m.getAllGeneratedSourceModules(ctx) {
 		// LOCAL_GENERATED_SOURCES is used to name target generated as
 		// part of this module which we also link into a library. The
 		// generated sources are automatically added to the
@@ -741,6 +741,7 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
 	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
+	m.encapsulatedMods = getGeneratedEncapsulatedModules(ctx)
 
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 

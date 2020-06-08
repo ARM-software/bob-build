@@ -88,6 +88,7 @@ type genruleInterface interface {
 	outputs() android.WritablePaths
 	implicitOutputs() android.WritablePaths
 	outputPath() android.Path
+	getEncapsulatedOuts() android.Paths
 }
 
 type genrulebobCommon struct {
@@ -97,6 +98,7 @@ type genrulebobCommon struct {
 
 	genDir               android.Path
 	exportGenIncludeDirs android.Paths
+	encapsulatedOuts     android.Paths
 	inouts               []soongInout
 	installedOuts        []android.InstallPath
 }
@@ -197,6 +199,10 @@ func (m *genrulebobCommon) implicitOutputs() (ret android.WritablePaths) {
 	return
 }
 
+func (m *genrulebobCommon) getEncapsulatedOuts() android.Paths {
+	return m.encapsulatedOuts
+}
+
 func (m *genrulebobCommon) filterAllOutputs(predicate func(string) bool) (ret android.Paths) {
 	for _, io := range m.inouts {
 		for _, p := range io.out {
@@ -208,6 +214,12 @@ func (m *genrulebobCommon) filterAllOutputs(predicate func(string) bool) (ret an
 			if predicate(p.String()) {
 				ret = append(ret, p)
 			}
+		}
+	}
+	// filter also outputs of encapsulated modules
+	for _, p := range m.encapsulatedOuts {
+		if predicate(p.String()) {
+			ret = append(ret, p)
 		}
 	}
 	return
@@ -323,6 +335,13 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			args[varName+"_out"] = out.String()
 		}
 	})
+	// add outputs of encapsulated modules
+	ctx.VisitDirectDepsWithTag(encapsulatesTag, func(dep android.Module) {
+		if gdep, ok := dep.(genruleInterface); ok {
+			dependents = append(dependents, gdep.outputs().Paths()...)
+			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
+		}
+	})
 
 	return
 }
@@ -418,6 +437,19 @@ func (m *genrulebobCommon) calcExportGenIncludeDirs(mctx android.ModuleContext) 
 
 	// Make unique items as for recursive passes it may contain redundant ones
 	return android.FirstUniquePaths(allIncludeDirs)
+}
+
+func (m *genrulebobCommon) calcEncapsulatedOuts(mctx android.ModuleContext) (encapsulatedOuts android.Paths) {
+	mctx.VisitDirectDepsWithTag(encapsulatesTag, func(dep android.Module) {
+		if gdep, ok := dep.(genruleInterface); ok {
+			// Add output of our direct encapsulated dependencies
+			encapsulatedOuts = append(encapsulatedOuts, gdep.outputs().Paths()...)
+			encapsulatedOuts = append(encapsulatedOuts, gdep.implicitOutputs().Paths()...)
+			// Add output of transitively encapsulated dependencies
+			encapsulatedOuts = append(encapsulatedOuts, gdep.getEncapsulatedOuts()...)
+		}
+	})
+	return
 }
 
 func getDepfileName(s string) string {
@@ -536,12 +568,14 @@ func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args ma
 func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
 	m.inouts = m.createInouts(ctx, implicits)
+	m.encapsulatedOuts = m.calcEncapsulatedOuts(ctx)
 	m.writeNinjaRules(ctx, args)
 }
 
 func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
 	m.inouts = m.createInouts(ctx, implicits)
+	m.encapsulatedOuts = m.calcEncapsulatedOuts(ctx)
 	m.writeNinjaRules(ctx, args)
 }
 

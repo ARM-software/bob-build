@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019-2020 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,26 +15,15 @@
  * limitations under the License.
  */
 
-//////////////////////////////////////////////////////////////
-//      Graph representation for both cases
+////////////////////////////////////////////////////////////////////////////////
+// Case A - generated headers: direct and transitive encapsulation of header dirs
 //
-//               3
-//              / .
-//             /   .
-//            /     .
-//           2       4
-//          /         \
-//         1           5
+//             3 (root module)
+//            /
+//           2
+//          /
+//         1
 //
-// Explanation:
-// 3 - root node both for simple and complex case:
-//  a) for simple case it includes via encapsulates header3
-//  b) for complex case header4 is copied into header3
-//////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////
-// Simple case
 bob_generate_source {
     name: "encapsulation_source1",
 
@@ -67,11 +56,17 @@ bob_generate_source {
     encapsulates: ["encapsulation_source2"],
 }
 
-// Simple case
-//////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
-// Complex case
+/////////////////////////////////////////////////////////////////////////
+// Case B - generated headers: uses modules from case A, but additionally
+// module 3 uses output of module 4 through module_deps relation,
+// ignoring any further encapsulations that module 4 may have defined.
+//
+//             3 (root module)
+//            / .
+//           2   4
+//          /     \
+//         1       5 (should not be included by 3)
+//
 bob_generate_source {
     name: "encapsulation_source5",
 
@@ -104,8 +99,72 @@ bob_generate_source {
     encapsulates: ["encapsulation_source2"],
 }
 
-// Complex case
-//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// Case C - generated sources: direct and transitive encapsulation of outputs,
+// module 3 uses output of module 4 through module_srcs relation,
+// ignoring any further encapsulations that module 4 may have defined.
+//
+//             3 (root module)
+//            / .
+//           2   4
+//          /     \
+//         1       5 (should not be included by 3, but included by 4)
+//
+bob_generate_source {
+    name: "encapsulation_generated_sources1",
+
+    srcs: ["srcs/fun1.c"],
+    out: ["fun1.c"],
+
+    cmd: "cp ${in} ${out}",
+}
+
+bob_generate_source {
+    name: "encapsulation_generated_sources2",
+
+    srcs: ["srcs/fun2.c"],
+    out: ["fun2.c"],
+
+    cmd: "cp ${in} ${out}",
+    encapsulates: ["encapsulation_generated_sources1"],
+}
+
+bob_generate_source {
+    name: "encapsulation_generated_sources5",
+
+    srcs: ["srcs/fun5.c"],
+    out: ["fun5.c"],
+
+    cmd: "cp ${in} ${out}",
+}
+
+bob_generate_source {
+    name: "encapsulation_generated_sources4",
+
+    out: ["funcs.txt"],
+
+    tool: "extract_funcs.py",
+    cmd: "python ${tool} --in ${encapsulation_generated_sources5_out} --out ${out}",
+
+    encapsulates: ["encapsulation_generated_sources5"],
+    // module_deps is required to get encapsulation_generated_sources5_out
+    // reference in cmd, as encapsulates does not create such reference
+    module_deps: ["encapsulation_generated_sources5"],
+}
+
+bob_generate_source {
+    name: "encapsulation_generated_sources3",
+    module_srcs: ["encapsulation_generated_sources4"],
+
+    out: ["fun3.c"],
+
+    tool: "gen_fun3.py",
+    cmd: "python ${tool} --in ${in} --out ${out}",
+
+    encapsulates: ["encapsulation_generated_sources2"],
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 bob_binary {
     name: "validate_source_encapsulation_simple",
@@ -122,10 +181,17 @@ bob_binary {
     },
 }
 
+bob_binary {
+    name: "validate_source_encapsulation_generated_sources",
+    generated_sources: ["encapsulation_generated_sources3"],
+    srcs: ["main_fun.c"],
+}
+
 bob_alias {
     name: "bob_test_source_encapsulation",
     srcs: [
         "validate_source_encapsulation_simple",
         "validate_source_encapsulation_complex",
+        "validate_source_encapsulation_generated_sources",
     ],
 }
