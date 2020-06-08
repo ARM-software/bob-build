@@ -476,6 +476,20 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 	return
 }
 
+func (l *library) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
+		func(m blueprint.Module) {
+			if gs, ok := getGenerateCommon(m); ok {
+				// Add our own name
+				modules = append(modules, gs.Name())
+				// Add transitively encapsulated module names (if any)
+				modules = append(modules, gs.encapsulatedModules()...)
+			}
+		})
+	return
+}
+
 func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalIncludes, expIncludes, expCflags []string) {
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {

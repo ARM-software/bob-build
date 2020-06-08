@@ -1,1 +1,1 @@
-#define E 123
+#error This file should not be included
