@@ -43,6 +43,10 @@ func stringParams(optName string, optValueLists ...[]string) (opts []string) {
 }
 
 func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(l) {
+		return
+	}
+
 	bpmod, err := AndroidBpFile().NewModule("genrule_bob", l.Name())
 	if err != nil {
 		panic(err)
