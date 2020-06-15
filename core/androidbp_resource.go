@@ -29,21 +29,17 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 		return
 	}
 
-	installPath, _ := r.getInstallableProps().getFullInstallPath()
+	installBase, installRel, _ := getAndroidInstallPath(r.getInstallableProps())
 
-	subdir := ""
 	var modType string
-	if strings.HasPrefix(installPath, "data/") {
-		subdir = strings.Replace(installPath, "data/", "", 1)
+	if strings.HasPrefix(installBase+"/", "data/") {
 		modType = "prebuilt_data_bob"
-	} else if strings.HasPrefix(installPath, "etc/") {
-		subdir = strings.Replace(installPath, "etc/", "", 1)
+	} else if strings.HasPrefix(installBase+"/", "etc/") {
 		modType = "prebuilt_etc"
-	} else if strings.HasPrefix(installPath, "firmware/") {
-		subdir = strings.Replace(installPath, "firmware/", "", 1)
+	} else if strings.HasPrefix(installBase+"/", "firmware/") {
 		modType = "prebuilt_firmware"
 	} else {
-		panic(fmt.Errorf("Install path must be prefixed either with 'data' or 'etc' (%s)", installPath))
+		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
 	}
 
 	// as prebuilt_etc module supports only single src, we have to split into N modules
@@ -60,7 +56,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 
 		// add prebuilt_etc properties
 		m.AddString("src", src)
-		m.AddString("sub_dir", subdir)
+		m.AddString("sub_dir", installRel)
 		m.AddBool("filename_from_src", true)
 		m.AddBool("installable", true)
 	}

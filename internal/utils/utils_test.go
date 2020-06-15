@@ -298,3 +298,15 @@ func Test_ExpandIncomplete(t *testing.T) {
 	assert.Equal(t, "1 2 3$", res2)
 	assert.Equal(t, "1 2 3${x", res3)
 }
+
+func Test_SplitPath(t *testing.T) {
+	assert.Equal(t, []string{}, SplitPath(""))
+	assert.Equal(t, []string{"/"}, SplitPath("/"))
+	assert.Equal(t, []string{"/bin"}, SplitPath("/bin"))
+	assert.Equal(t, []string{"/bin"}, SplitPath("/bin/"))
+	assert.Equal(t, []string{"/usr", "bin"}, SplitPath("/usr/bin"))
+	assert.Equal(t, []string{"/usr", "bin"}, SplitPath("/usr/bin/"))
+	assert.Equal(t, []string{"rel"}, SplitPath("rel"))
+	assert.Equal(t, []string{"a", "rel", "path"}, SplitPath("a/rel/path"))
+	assert.Equal(t, []string{"a", "rel", "path"}, SplitPath("a/rel/path/"))
+}

@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/ccflags"
@@ -220,8 +219,10 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	m.AddStringList("export_static_lib_headers", reexportStatic)
 	m.AddStringList("export_header_lib_headers", reexportHeaders)
 	m.AddStringList("ldflags", l.Properties.Ldflags)
-	if l.getInstallableProps().Relative_install_path != nil {
-		m.AddString("relative_install_path", proptools.String(l.getInstallableProps().Relative_install_path))
+
+	_, installRel, ok := getAndroidInstallPath(l.getInstallableProps())
+	if ok && installRel != "" {
+		m.AddString("relative_install_path", installRel)
 	}
 
 	addProvenanceProps(m, l.Properties.Build.AndroidProps)

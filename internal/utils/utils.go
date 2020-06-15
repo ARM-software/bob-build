@@ -334,3 +334,29 @@ func Expand(s string, mapping func(string) string) (res string) {
 	}
 	return
 }
+
+func SplitPath(path string) (components []string) {
+	pathSep := string(os.PathSeparator)
+
+	if path == "" {
+		return []string{}
+	} else if path == pathSep {
+		return []string{pathSep}
+	}
+
+	// Ignore trailing slashes
+	if path[len(path)-1:] == pathSep {
+		path = path[:len(path)-1]
+	}
+
+	dir, file := filepath.Split(path)
+
+	if dir == "" {
+		return []string{file}
+	} else if dir == pathSep {
+		// Treat subdirs of the root directory as single components, e.g. /var -> ["/var"].
+		return []string{path}
+	}
+
+	return append(SplitPath(dir), file)
+}
