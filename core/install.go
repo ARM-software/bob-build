@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 )
 
 // EnableableProps allow a module to be disabled or only built when explicitly requested
@@ -92,7 +91,7 @@ type InstallableProps struct {
 	// Arguments to post install command
 	Post_install_args []string
 	// The path retrieved from the install group so we don't need to walk dependencies to get it
-	Install_path *string `blueprint:"mutated"`
+	InstallGroupPath *string `blueprint:"mutated"`
 }
 
 func (props *InstallableProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -101,23 +100,18 @@ func (props *InstallableProps) processPaths(ctx blueprint.BaseModuleContext, g g
 	}
 }
 
-func (props *InstallableProps) getInstallGroupPath() (path string, ok bool) {
-	if props.Install_path == nil {
+func (props *InstallableProps) getInstallPath() (string, bool) {
+	if props.InstallGroupPath == nil {
 		return "", false
 	}
-	return proptools.String(props.Install_path), true
-}
 
-func (props *InstallableProps) getFullInstallPath() (installPath string, ok bool) {
-	installPath, ok = props.getInstallGroupPath()
-	if !ok {
-		installPath = ""
-	} else {
-		if props.Relative_install_path != nil {
-			installPath = filepath.Join(installPath, proptools.String(props.Relative_install_path))
-		}
+	installPath := *props.InstallGroupPath
+
+	if props.Relative_install_path != nil {
+		installPath = filepath.Join(installPath, *props.Relative_install_path)
 	}
-	return
+
+	return installPath, true
 }
 
 func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,
@@ -287,7 +281,7 @@ func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 var installGroupTag = dependencyTag{name: "install_group"}
 var installDepTag = dependencyTag{name: "install_dep"}
 
-func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
+func getInstallGroupPathFromTag(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
 	var installGroupPath *string
 
 	mctx.VisitDirectDepsIf(
@@ -310,14 +304,14 @@ func getInstallPath(mctx blueprint.TopDownMutatorContext, tag dependencyTag) *st
 
 func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
 	if ins, ok := mctx.Module().(installable); ok {
-		path := getInstallPath(mctx, installGroupTag)
+		path := getInstallGroupPathFromTag(mctx, installGroupTag)
 		if path != nil {
 			if *path == "" {
 				panic(fmt.Sprintf("Module %s has empty install path", mctx.ModuleName()))
 			}
 
 			props := ins.getInstallableProps()
-			props.Install_path = path
+			props.InstallGroupPath = path
 		}
 	}
 }

@@ -25,7 +25,6 @@ import (
 	"sync"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/ccflags"
 	"github.com/ARM-software/bob-build/internal/escape"
@@ -340,7 +339,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	}
 
 	// Handle installation
-	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
+	installBase, installRel, ok := getAndroidInstallPath(&m.Properties.InstallableProps)
 
 	// Only setup multilib for target modules.
 	// Normally this should only apply to target libraries, but we
@@ -357,7 +356,6 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	}
 
 	if ok {
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + proptools.String(m.Properties.Relative_install_path) + "\n")
 		if m.Properties.Post_install_cmd != nil {
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
@@ -386,15 +384,21 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 			if isMultiLib {
 				// For executables we need to be clear about where to
 				// install both 32 and 64 bit versions of the
-				// binaries.
+				// binaries. This is done by appending `64` to the install dir.
+				// However, there are not separate variables for the 32 and 64-bit
+				// relative paths, so ignore LOCAL_MODULE_RELATIVE_PATH and put the
+				// relative_install_path in LOCAL_MODULE_PATH_[32|64] instead.
+				//
 				// LOCAL_UNSTRIPPED_PATH does not need to be set
-				sb.WriteString("LOCAL_MODULE_PATH_32:=" + installGroupPath + "\n")
-				sb.WriteString("LOCAL_MODULE_PATH_64:=" + installGroupPath + "64\n")
+				fullInstallPath := filepath.Join(installBase, installRel)
+				sb.WriteString("LOCAL_MODULE_PATH_32:=" + fullInstallPath + "\n")
+				sb.WriteString("LOCAL_MODULE_PATH_64:=" + fullInstallPath + "64\n")
 			} else {
+				sb.WriteString("LOCAL_MODULE_PATH:=" + installBase + "\n")
+				sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + installRel + "\n")
+
 				// When LOCAL_MODULE_PATH is specified, you need to
 				// specify LOCAL_UNSTRIPPED_PATH too
-				sb.WriteString("LOCAL_MODULE_PATH:=" + installGroupPath + "\n")
-
 				if tgt == tgtTypeTarget {
 					// Unstripped executables only generated for target
 					sb.WriteString("LOCAL_UNSTRIPPED_PATH:=$(TARGET_OUT_EXECUTABLES_UNSTRIPPED)\n")
@@ -402,8 +406,8 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 			}
 		} else {
 			// You can't specify an explicit install dir for
-			// libraries, you have to use
-			// LOCAL_MODULE_RELATIVE_PATH
+			// libraries, so we can only control LOCAL_MODULE_RELATIVE_PATH
+			sb.WriteString("LOCAL_MODULE_RELATIVE_PATH:=" + installRel + "\n")
 		}
 
 		requiredModuleNames := m.getInstallDepPhonyNames(ctx)
@@ -501,7 +505,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 	}
 	sb := &strings.Builder{}
 
-	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
+	installBase, installRel, ok := getAndroidInstallPath(&m.Properties.InstallableProps)
 	if !ok {
 		androidMkWriteString(ctx, m.altShortName(), sb)
 		return
@@ -518,8 +522,8 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("LOCAL_MODULE := " + moduleName + "\n")
 		sb.WriteString("LOCAL_INSTALLED_MODULE_STEM := " + filepath.Base(file) + "\n")
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
-		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.Properties.Relative_install_path) + "\n")
+		sb.WriteString("LOCAL_MODULE_PATH := " + installBase + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + installRel + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 		sb.WriteString("LOCAL_SRC_FILES := " + file + "\n")
 		if m.Properties.Owner != "" {
@@ -706,7 +710,7 @@ func declarePrebuiltBinary(sb *strings.Builder, moduleName, path string, target 
 
 func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.ModuleContext, tags []string) {
 	/* Install generated files one by one, if required */
-	installGroupPath, ok := m.getInstallableProps().getInstallGroupPath()
+	installBase, installRel, ok := getAndroidInstallPath(m.getInstallableProps())
 
 	if !ok {
 		return
@@ -722,8 +726,8 @@ func installGeneratedFiles(sb *strings.Builder, m installable, ctx blueprint.Mod
 		sb.WriteString("LOCAL_MODULE := " + moduleName + "\n")
 		sb.WriteString("LOCAL_INSTALLED_MODULE_STEM := " + filepath.Base(file) + "\n")
 		sb.WriteString("LOCAL_MODULE_CLASS := ETC\n")
-		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.getInstallableProps().Relative_install_path) + "\n")
+		sb.WriteString("LOCAL_MODULE_PATH := " + installBase + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + installRel + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", tags)
 		sb.WriteString("LOCAL_PREBUILT_MODULE_FILE := " + file + "\n\n")
 
@@ -1074,10 +1078,10 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 	// Now the build rules (i.e. what would be done by an 'include
 	// $(BUILD_KERNEL_MODULE)', if there was one).
 	sb.WriteString("TARGET_OUT_$(LOCAL_MODULE_CLASS) := $(TARGET_OUT)/lib/modules\n")
-	installGroupPath, ok := m.Properties.InstallableProps.getInstallGroupPath()
+	installBase, installRel, ok := getAndroidInstallPath(&m.Properties.InstallableProps)
 	if ok {
-		sb.WriteString("LOCAL_MODULE_PATH := " + installGroupPath + "\n")
-		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + proptools.String(m.Properties.Relative_install_path) + "\n")
+		sb.WriteString("LOCAL_MODULE_PATH := " + installBase + "\n")
+		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + installRel + "\n")
 	} else {
 		sb.WriteString("LOCAL_UNINSTALLABLE_MODULE := true\n")
 	}

@@ -587,14 +587,12 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 					}
 					ldlibs = append(ldlibs, tc.getLinker().dropSharedLibraryTransitivity())
 				}
-				if installPath, ok := sl.Properties.InstallableProps.getInstallGroupPath(); ok {
-					installPath = filepath.Join(installPath, proptools.String(sl.Properties.InstallableProps.Relative_install_path))
+				if installPath, ok := sl.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
-				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallGroupPath(); ok {
-					installPath = filepath.Join(installPath, proptools.String(sl.generateCommon.Properties.InstallableProps.Relative_install_path))
+				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if el, ok := m.(*externalLib); ok {
@@ -609,7 +607,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 		ldlibs = append(ldlibs, tc.getLinker().getForwardingLibFlags())
 	}
 	if l.Properties.isRpathWanted() {
-		if installPath, ok := l.Properties.InstallableProps.getInstallGroupPath(); ok {
+		if installPath, ok := l.Properties.InstallableProps.getInstallPath(); ok {
 			var rpaths []string
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
@@ -864,15 +862,11 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	ins := m.(installable)
 
 	props := ins.getInstallableProps()
-	installPath, ok := props.getInstallGroupPath()
+	installPath, ok := props.getInstallPath()
 	if !ok {
 		return []string{}
 	}
 	installPath = filepath.Join("${BuildDir}", installPath)
-
-	if props.Relative_install_path != nil {
-		installPath = filepath.Join(installPath, proptools.String(props.Relative_install_path))
-	}
 
 	installedFiles := []string{}
 

@@ -66,7 +66,7 @@ type stripable interface {
 
 func debugInfoMutator(mctx blueprint.TopDownMutatorContext) {
 	if m, ok := mctx.Module().(stripable); ok {
-		path := getInstallPath(mctx, debugInfoTag)
+		path := getInstallGroupPathFromTag(mctx, debugInfoTag)
 		m.setDebugPath(path)
 	}
 }

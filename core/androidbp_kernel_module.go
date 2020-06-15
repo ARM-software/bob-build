@@ -105,7 +105,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		l.Properties.Make_args,
 	)
 
-	installPath, ok := l.getInstallableProps().getFullInstallPath()
+	installPath, ok := l.getInstallableProps().getInstallPath()
 	if ok {
 		bpmod.AddString("install_path", installPath)
 	}
