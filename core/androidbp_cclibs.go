@@ -229,12 +229,41 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	addPGOProps(m, l.Properties.Build.AndroidPGOProps)
 }
 
+func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
+	// Handle installation
+	if _, installRel, ok := getAndroidInstallPath(l.getInstallableProps()); ok {
+		// Only setup multilib for target modules.
+		// We support multilib target binaries to allow creation of test
+		// binaries in both modes.
+		// We disable multilib if this module depends on generated libraries
+		// (which can't support multilib).
+		if l.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
+			m.AddString("compile_multilib", "both")
+
+			// For executables we need to be clear about where to
+			// install both 32 and 64 bit versions of the
+			// binaries.
+			g := m.NewGroup("multilib")
+			g.NewGroup("lib32").AddString("relative_install_path", installRel)
+			g.NewGroup("lib64").AddString("relative_install_path", installRel+"64")
+		}
+	}
+}
+
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	// Soong's `export_include_dirs` field is relative to the module
 	// dir. The Android.bp backend writes the file into the project
 	// root, so we can use the Export_local_include_dirs property
 	// unchanged.
 	m.AddStringList("export_include_dirs", l.Properties.Export_local_include_dirs)
+
+	// Only setup multilib for target modules.
+	// This part handles the target libraries.
+	// We disable multilib if this module depends on generated libraries
+	// (which can't support multilib).
+	if l.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
+		m.AddString("compile_multilib", "both")
+	}
 }
 
 func addStripProp(m bpwriter.Module) {
@@ -264,6 +293,7 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 	}
 
 	addCcLibraryProps(m, l.library, mctx)
+	addBinaryProps(m, *l, mctx)
 	if l.strip() {
 		addStripProp(m)
 	}

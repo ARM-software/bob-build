@@ -66,6 +66,7 @@ type Group interface {
 	AddOptionalBool(name string, value *bool)
 	AddStringList(name string, list []string)
 	AddStringCmd(name string, argLists ...[]string)
+	NewGroup(name string) Group
 }
 
 type group struct {
@@ -78,6 +79,8 @@ type group struct {
 	// Properties in the group.
 	// This is a list rather than a map to maintain ordering.
 	props []property
+	// Nested properties
+	groups []*group
 }
 
 var _ Group = (*group)(nil)
@@ -143,11 +146,25 @@ func (g *group) AddStringCmd(name string, argLists ...[]string) {
 	g.AddString(name, utils.Join(argLists...))
 }
 
+// Create a nested group
+func (g *group) NewGroup(name string) Group {
+	g0 := group{}
+	g0.name = name
+	g0.depth = g.depth + 1
+	g.groups = append(g.groups, &g0)
+	return &g0
+}
+
 // Render the property group into a string
 func (g *group) render(b *strings.Builder) {
 	indent := indentString(g.depth)
 	for _, p := range g.props {
 		b.WriteString(indent + p.key + ": " + p.value + ",\n")
+	}
+	for _, group := range g.groups {
+		b.WriteString(indent + group.name + ": {\n")
+		group.render(b)
+		b.WriteString(indent + "},\n")
 	}
 }
 
@@ -157,7 +174,6 @@ func (g *group) render(b *strings.Builder) {
 // in a single thread.
 type Module interface {
 	Group
-	NewGroup(name string) Group
 }
 
 type module struct {
@@ -169,9 +185,6 @@ type module struct {
 
 	// Top level properties of module
 	group
-
-	// Nested properties (1 level deep only)
-	groups []*group
 }
 
 var _ Module = (*module)(nil)
@@ -204,13 +217,8 @@ func (m *module) AddStringCmd(name string, argLists ...[]string) {
 	m.group.AddStringCmd(name, argLists...)
 }
 
-// Create a property group in the module
 func (m *module) NewGroup(name string) Group {
-	g := group{}
-	g.name = name
-	g.depth = 2
-	m.groups = append(m.groups, &g)
-	return &g
+	return m.group.NewGroup(name)
 }
 
 // Render the module into a string
@@ -218,11 +226,6 @@ func (m *module) render(b *strings.Builder) {
 	indent := indentString(1)
 	b.WriteString(m.modType + " {\n" + indent + "name: \"" + m.name + "\",\n")
 	m.group.render(b)
-	for _, group := range m.groups {
-		b.WriteString(indent + group.name + ": {\n")
-		group.render(b)
-		b.WriteString(indent + "},\n")
-	}
 	b.WriteString("}\n\n")
 }
 
