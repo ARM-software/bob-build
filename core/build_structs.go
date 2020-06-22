@@ -18,6 +18,7 @@
 package core
 
 import (
+	"fmt"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -562,6 +563,47 @@ func findRequiredModulesMutator(mctx blueprint.TopDownMutatorContext) {
 		}
 		return true
 	})
+}
+
+func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
+	module := mctx.Module()
+	// Skip if already disabled, or if defaults type,
+	// or if type is not enableable (eg. alias)
+	ep, ok := module.(enableable)
+	if ok {
+		if _, ok := module.(*defaults); ok {
+			return
+		}
+		if !isEnabled(ep) {
+			return
+		}
+	} else {
+		return
+	}
+
+	// check if any direct dependency is disabled
+	any_dep_disabled := false
+	mctx.VisitDirectDeps(func(dep blueprint.Module) {
+		// ignore defaults - it's allowed for them to be disabled
+		if _, ok := dep.(*defaults); ok {
+			return
+		}
+		if e, ok := dep.(enableable); ok {
+			if !isEnabled(e) {
+				any_dep_disabled = true
+			}
+		}
+	})
+
+	// disable current module if dependency is disabled, or panic if it's required
+	if any_dep_disabled {
+		if isRequired(ep) {
+			panic(fmt.Errorf("Module %s is required, cannot disable", module.Name()))
+		} else {
+			ep.getEnableableProps().Enabled = proptools.BoolPtr(false)
+			return
+		}
+	}
 }
 
 type factoryWithConfig func(*bobConfig) (blueprint.Module, []interface{})

@@ -157,6 +157,8 @@ func Main() {
 			dependencyGraphHandler.ResolveDependencySortMutator) // This can't be parallel
 		ctx.RegisterTopDownMutator("find_required_modules",
 			findRequiredModulesMutator).Parallel()
+		ctx.RegisterBottomUpMutator("check_disabled_modules",
+			checkDisabledMutator).Parallel()
 		ctx.RegisterTopDownMutator("check_reexport_libs",
 			checkReexportLibsMutator).Parallel()
 		ctx.RegisterTopDownMutator("collect_reexport_lib_dependencies",
