@@ -261,7 +261,8 @@ func (cache *flagSupportedCache) checkFlag(tc toolchain, language, flag string) 
 	// we can test the actual flag. This is to work around the fact that gcc is silent
 	// about '-Wno-<flag_name>' flags it doesn't recognise until you actually compile a file
 	saneFlag := strings.Replace(flag, "-Wno-", "-W", 1)
-	testFlags := utils.Remove(utils.NewStringSlice(flags, []string{"-x", language, "-c", os.DevNull, "-Werror", saneFlag}), "")
+	testFlags := utils.NewStringSlice(flags, []string{"-x", language, "-c", os.DevNull, "-o", os.DevNull, "-Werror", saneFlag})
+	testFlags = utils.Remove(testFlags, "")
 	cmd := exec.Command(compiler, testFlags...)
 	_, err := cmd.CombinedOutput()
 	if err == nil {
