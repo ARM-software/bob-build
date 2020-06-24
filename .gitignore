@@ -11,6 +11,8 @@
 # * VIm
 *~
 *.sw[nop]
+Session.vim
+Sessionx.vim
 
 # * patch
 *.orig
