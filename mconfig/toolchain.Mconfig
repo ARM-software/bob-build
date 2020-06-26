@@ -17,18 +17,6 @@
 
 menu "Toolchain binary names"
 
-config GNU_CC_BINARY
-	string "GNU C compiler binary"
-	default "gcc"
-	help
-	  The name of the C compiler when the GNU toolchain is used.
-
-config GNU_CXX_BINARY
-	string "GNU C++ compiler binary"
-	default "g++"
-	help
-	  The name of the C++ compiler when the GNU toolchain is used.
-
 config AS_BINARY
 	string "GNU and Clang Assembler binary"
 	default "as"
@@ -37,32 +25,6 @@ config AS_BINARY
 	  hand-written assembly code.
 
 ###################################
-
-config CLANG_CC_BINARY
-	string "Clang C compiler binary"
-	default "clang"
-	help
-	  The name of the C compiler when Clang toolchain is used.
-
-config CLANG_CXX_BINARY
-	string "Clang C++ compiler binary"
-	default "clang++"
-	help
-	  The name of the C++ compiler when Clang toolchain is used.
-
-###################################
-
-config ARMCLANG_CC_BINARY
-	string "Armclang C compiler binary"
-	default "armclang"
-	help
-	  The name of the C compiler when the Arm Compiler is used.
-
-config ARMCLANG_CXX_BINARY
-	string "Armclang C++ compiler binary"
-	default "armclang"
-	help
-	  The name of the C++ compiler when the Arm Compiler is used.
 
 config ARMCLANG_LD_BINARY
 	string

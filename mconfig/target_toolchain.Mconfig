@@ -25,9 +25,33 @@ config TARGET_CLANG_PREFIX
 	string "Target Clang compiler prefix"
 	default ""
 
+config TARGET_CLANG_CC_BINARY
+	string "Target Clang C compiler binary"
+	default "clang"
+	help
+	  The name of the target C compiler when Clang toolchain is used.
+
+config TARGET_CLANG_CXX_BINARY
+	string "Target Clang C++ compiler binary"
+	default "clang++"
+	help
+	  The name of the target C++ compiler when Clang toolchain is used.
+
 config TARGET_ARMCLANG_PREFIX
 	string "Target Arm Compiler 6 compiler prefix"
 	default ""
+
+config TARGET_ARMCLANG_CC_BINARY
+	string "Target Armclang C compiler binary"
+	default "armclang"
+	help
+	  The name of the target C compiler when the Arm Compiler is used.
+
+config TARGET_ARMCLANG_CXX_BINARY
+	string "Target Armclang C++ compiler binary"
+	default "armclang"
+	help
+	  The name of the target C++ compiler when the Arm Compiler is used.
 
 config TARGET_XCODE_PREFIX
 	string "Target Xcode prefix"
@@ -47,6 +71,18 @@ config TARGET_SYSROOT
 	  The path to the target's system root directory. This should
 	  contain include and lib directories, with headers and libraries
 	  for the target system.
+
+config TARGET_GNU_CC_BINARY
+	string "Target GNU C compiler binary"
+	default "gcc"
+	help
+	  The name of the target C compiler when the GNU toolchain is used.
+
+config TARGET_GNU_CXX_BINARY
+	string "Target GNU C++ compiler binary"
+	default "g++"
+	help
+	  The name of the target C++ compiler when the GNU toolchain is used.
 
 # The following, despite being only used by Bob, must be defined by
 # the superproject so that it can add any desired defaults, etc:

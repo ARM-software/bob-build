@@ -425,8 +425,8 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 
-	tc.gccBinary = tc.prefix + props.GetString("gnu_cc_binary")
-	tc.gxxBinary = tc.prefix + props.GetString("gnu_cxx_binary")
+	tc.gccBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cc_binary")
+	tc.gxxBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 
 	sysroot := props.GetString(string(tgt) + "_sysroot")
@@ -533,8 +533,8 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 
-	tc.clangBinary = tc.prefix + props.GetString("clang_cc_binary")
-	tc.clangxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
+	tc.clangBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
+	tc.clangxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")
 
 	tc.target = props.GetString(string(tgt) + "_clang_triple")
 
@@ -699,8 +699,8 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
-	tc.ccBinary = tc.prefix + props.GetString("armclang_cc_binary")
-	tc.cxxBinary = tc.prefix + props.GetString("armclang_cxx_binary")
+	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cc_binary")
+	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cxx_binary")
 	tc.linker = newDefaultLinker(tc.cxxBinary, []string{}, []string{})
 
 	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
@@ -834,8 +834,8 @@ func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode)
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 
-	tc.ccBinary = tc.prefix + props.GetString("clang_cc_binary")
-	tc.cxxBinary = tc.prefix + props.GetString("clang_cxx_binary")
+	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
+	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")
 
 	tc.target = props.GetString(string(tgt) + "_xcode_triple")
 
