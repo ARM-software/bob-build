@@ -92,6 +92,10 @@ var androidInstallLocationSplits = map[string]int{
 	// the same as the other filetype-specific stuff - this just catches anything else.
 	"data":               1,
 	"$(TARGET_OUT_DATA)": 1,
+
+	// /testcases is unstructured
+	"testcases":               1,
+	"$(TARGET_OUT_TESTCASES)": 1,
 }
 
 func splitAndroidPath(path string) (string, string) {
