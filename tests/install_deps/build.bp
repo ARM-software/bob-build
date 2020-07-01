@@ -1,0 +1,44 @@
+bob_install_group {
+    name: "IG_resources",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT)/data/resources",
+    },
+    builder_android_bp: {
+        install_path: "data/resources",
+    },
+    builder_ninja: {
+        install_path: "data/resources",
+    },
+}
+
+bob_static_library {
+    name: "bob_test_install_deps_library",
+    srcs: ["library.c"],
+    install_group: "IG_libs",
+    build_by_default: false,
+}
+
+bob_binary {
+    name: "bob_test_install_deps_binary",
+    srcs: ["main.c"],
+    install_group: "IG_binaries",
+    build_by_default: false,
+}
+
+bob_resource {
+    name: "bob_test_install_deps_resource",
+    srcs: ["bob_test_install_deps_resource.txt"],
+    install_group: "IG_resources",
+    build_by_default: false,
+}
+
+bob_binary {
+    name: "bob_test_install_deps",
+    srcs: ["main.c"],
+    install_group: "IG_binaries",
+    install_deps: [
+        "bob_test_install_deps_binary",
+        "bob_test_install_deps_library",
+        "bob_test_install_deps_resource",
+    ],
+}

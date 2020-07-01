@@ -140,6 +140,13 @@ func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
 	g.AddStringList("cflags", props.Pgo.Cflags)
 }
 
+func addRequiredModules(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
+	if _, _, ok := getAndroidInstallPath(l.getInstallableProps()); ok {
+		requiredModuleNames := l.getInstallDepPhonyNames(mctx)
+		m.AddStringList("required", ccModuleNames(mctx, requiredModuleNames))
+	}
+}
+
 func addCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags []string) error {
 	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
 		m.AddString("c_std", std)
@@ -227,6 +234,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 
 	addProvenanceProps(m, l.Properties.Build.AndroidProps)
 	addPGOProps(m, l.Properties.Build.AndroidPGOProps)
+	addRequiredModules(m, l, mctx)
 }
 
 func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
