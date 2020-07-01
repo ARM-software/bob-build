@@ -59,6 +59,10 @@ function check_build_output() {
     check_installed "${DIR}/gen_sh_src/f3.validate_install_transform_source.txt"
     check_installed "${DIR}/gen_sh_src/f4.validate_install_transform_source.txt"
     check_installed "${DIR}/install/testcases/y/main.c"
+    check_installed "${DIR}/install/lib/bob_test_install_deps_library.a"
+    check_installed "${DIR}/install/bin/bob_test_install_deps_binary"
+    check_installed "${DIR}/data/resources/bob_test_install_deps_resource.txt"
+    check_installed "${DIR}/install/bin/bob_test_install_deps"
     if [ "$OS" != "OSX" ] ; then
         check_installed "${DIR}/lib/modules/test_module1.ko"
         check_installed "${DIR}/lib/modules/test_module2.ko"
