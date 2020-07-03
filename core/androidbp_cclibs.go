@@ -220,7 +220,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	m.AddStringList("export_header_lib_headers", reexportHeaders)
 	m.AddStringList("ldflags", l.Properties.Ldflags)
 
-	_, installRel, ok := getAndroidInstallPath(l.getInstallableProps())
+	_, installRel, ok := getSoongInstallPath(l.getInstallableProps())
 	if ok && installRel != "" {
 		m.AddString("relative_install_path", installRel)
 	}
@@ -231,7 +231,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 
 func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
 	// Handle installation
-	if _, installRel, ok := getAndroidInstallPath(l.getInstallableProps()); ok {
+	if _, installRel, ok := getSoongInstallPath(l.getInstallableProps()); ok {
 		// Only setup multilib for target modules.
 		// We support multilib target binaries to allow creation of test
 		// binaries in both modes.

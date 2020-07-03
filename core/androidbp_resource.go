@@ -29,7 +29,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 		return
 	}
 
-	installBase, installRel, _ := getAndroidInstallPath(r.getInstallableProps())
+	installBase, installRel, _ := getSoongInstallPath(r.getInstallableProps())
 
 	var modType string
 	if strings.HasPrefix(installBase+"/", "data/") {
