@@ -21,6 +21,7 @@ package core
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/google/blueprint"
 
@@ -98,12 +99,7 @@ var androidInstallLocationSplits = map[string]int{
 	"$(TARGET_OUT_TESTCASES)": 1,
 }
 
-func splitAndroidPath(path string) (string, string) {
-	components := utils.SplitPath(path)
-
-	// If no match, the whole path is the "base" section.
-	relStart := len(components)
-
+func findAndroidInstallLocationSplit(components []string) (int, bool) {
 	// Try longer sections of path first to avoid incorrect matches on common prefixes
 	for i := 2; i > 0; i-- {
 		if i > len(components) {
@@ -111,10 +107,17 @@ func splitAndroidPath(path string) (string, string) {
 		}
 		split, ok := androidInstallLocationSplits[filepath.Join(components[0:i]...)]
 		if ok {
-			relStart = split
-			break
+			return split, true
 		}
 	}
+	// If no match, the whole path is the "base" section.
+	return len(components), false
+}
+
+func splitAndroidPath(path string) (string, string) {
+	components := utils.SplitPath(path)
+
+	relStart, _ := findAndroidInstallLocationSplit(components)
 
 	if relStart > len(components) {
 		relStart = len(components)
@@ -133,5 +136,56 @@ func getAndroidInstallPath(props *InstallableProps) (string, string, bool) {
 	}
 
 	base, rel := splitAndroidPath(installPath)
+	return base, rel, true
+}
+
+// Map of Android.mk variables and the equivalent Soong locations. Only
+// locations that it is possible to install to are included, so this is a
+// subset of androidInstallLocationSplits.
+var androidMkInstallLocationTranslations = map[string]string{
+	"TARGET_OUT":                         "",
+	"TARGET_OUT_DATA":                    "data",
+	"TARGET_OUT_ETC":                     "etc",
+	"TARGET_OUT_EXECUTABLES":             "system/bin",
+	"TARGET_OUT_SHARED_LIBRARIES":        "system/lib",
+	"TARGET_OUT_SYSTEM":                  "system",
+	"TARGET_OUT_TESTCASES":               "testcases",
+	"TARGET_OUT_VENDOR":                  "vendor",
+	"TARGET_OUT_VENDOR_ETC":              "vendor/etc",
+	"TARGET_OUT_VENDOR_EXECUTABLES":      "vendor/bin",
+	"TARGET_OUT_VENDOR_SHARED_LIBRARIES": "vendor/lib",
+}
+
+func expandAndroidMkInstallVars(path string) string {
+	// Only the first component of a path can be an Android.mk variable
+	components := utils.SplitPath(path)
+
+	if len(components) == 0 {
+		return path
+	}
+
+	varName := strings.TrimSuffix(strings.TrimPrefix(components[0], "$("), ")")
+	if len(varName) != len(components[0])-3 {
+		// Not all parts were stripped, so this isn't a variable expansion
+		return path
+	}
+	soongPath, ok := androidMkInstallLocationTranslations[varName]
+	if !ok {
+		return path
+	}
+	components[0] = soongPath
+	return filepath.Join(components...)
+}
+
+func getSoongInstallPath(props *InstallableProps) (string, string, bool) {
+	installPath, ok := props.getInstallPath()
+	if !ok {
+		return "", "", false
+	}
+
+	base, rel := splitAndroidPath(installPath)
+
+	base = expandAndroidMkInstallVars(base)
+
 	return base, rel, true
 }
