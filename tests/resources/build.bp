@@ -16,22 +16,22 @@
  */
 
 bob_install_group {
-    name: "install_group_test",
+    name: "IG_testcases",
     builder_android_make: {
-        install_path: "$(TARGET_OUT)/install/tests/android",
+        install_path: "$(TARGET_OUT_TESTCASES)",
     },
     builder_android_bp: {
-        install_path: "data/x/y",
+        install_path: "testcases",
     },
     builder_ninja: {
-        install_path: "install/tests/linux",
+        install_path: "install/testcases",
     },
 }
 
 bob_resource {
     name: "bob_test_resources",
     srcs: ["main.c"],
-    install_group: "install_group_test",
+    install_group: "IG_testcases",
     build_by_default: true,
     builder_android_make: {
         relative_install_path: "x",
@@ -42,4 +42,15 @@ bob_resource {
     builder_ninja: {
         relative_install_path: "y",
     },
+}
+
+bob_resource {
+    name: "bob_test_resource_in_bin",
+    srcs: [
+        "bob_resource_test_script.sh",
+        "bob_resource_test_data.json",
+    ],
+    install_group: "IG_binaries",
+    relative_install_path: "bob_tests",
+    build_by_default: true,
 }
