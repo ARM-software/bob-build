@@ -19,10 +19,27 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/bpwriter"
 )
+
+func writeDataResourceModule(m bpwriter.Module, src, installRel string) {
+	// add prebuilt_etc properties
+	m.AddString("src", src)
+	m.AddString("sub_dir", installRel)
+	m.AddBool("filename_from_src", true)
+	m.AddBool("installable", true)
+}
+
+func writeCodeResourceModule(m bpwriter.Module, src, installRel string) {
+	m.AddStringList("srcs", []string{src})
+	m.AddString("stem", filepath.Base(src))
+	m.AddString("relative_install_path", installRel)
+}
 
 func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(r) {
@@ -32,12 +49,26 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	installBase, installRel, _ := getSoongInstallPath(r.getInstallableProps())
 
 	var modType string
+	// Soong has two types of backend modules; "data" ones, for places like
+	// /etc, and "code" ones, for locations like /bin. Write different sets
+	// of properties depending on which one is required.
+	var write func(bpwriter.Module, string, string)
+
 	if strings.HasPrefix(installBase+"/", "data/") {
 		modType = "prebuilt_data_bob"
+		write = writeDataResourceModule
 	} else if strings.HasPrefix(installBase+"/", "etc/") {
 		modType = "prebuilt_etc"
+		write = writeDataResourceModule
 	} else if strings.HasPrefix(installBase+"/", "firmware/") {
 		modType = "prebuilt_firmware"
+		write = writeDataResourceModule
+	} else if strings.HasPrefix(installBase+"/", "bin/") {
+		modType = "cc_prebuilt_binary"
+		write = writeCodeResourceModule
+	} else if strings.HasPrefix(installBase+"/", "testcases/") {
+		modType = "prebuilt_testcase_bob"
+		write = writeDataResourceModule
 	} else {
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
 	}
@@ -46,7 +77,6 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	for _, src := range r.Properties.getSources(mctx) {
 		// keep module name unique, remove slashes
 		modName := r.shortName() + "__" + strings.Replace(src, "/", "_", -1)
-
 		m, err := AndroidBpFile().NewModule(modType, modName)
 		if err != nil {
 			panic(err.Error())
@@ -54,10 +84,6 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 
 		addProvenanceProps(m, r.Properties.AndroidProps)
 
-		// add prebuilt_etc properties
-		m.AddString("src", src)
-		m.AddString("sub_dir", installRel)
-		m.AddBool("filename_from_src", true)
-		m.AddBool("installable", true)
+		write(m, src, installRel)
 	}
 }
