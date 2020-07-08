@@ -63,6 +63,7 @@ bob_alias {
         "bob_test_aliases_all_variants",
         "bob_test_command_vars",
         "bob_test_cxx11simple",
+        "bob_test_encapsulates",
         "bob_test_export_cflags",
         "bob_test_export_include_dirs",
         "bob_test_external_libs",

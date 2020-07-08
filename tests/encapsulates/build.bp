@@ -1,0 +1,141 @@
+/*
+ * Copyright 2020 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+*                 encapsulates_1_2_3
+ *               /        |         \
+ *              /   encapsulated2    encapsulated3
+ * encapsulated1          |                 \ (module_deps)
+ *              encapsulated2_actual     not_encapsulated
+ */
+
+bob_generate_source {
+    name: "encapsulated1",
+    out: ["subdir/1.h"],
+    export_gen_include_dirs: ["subdir"],
+    cmd: "echo '#define D1 1' > ${out}",
+}
+
+bob_generate_source {
+    name: "encapsulated2_actual",
+    out: ["2.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "echo '#define D2 2' > ${out}",
+}
+
+bob_generate_source {
+    name: "encapsulated2",
+    out: ["unused2.txt"],
+    cmd: "echo > ${out}",
+    encapsulates: ["encapsulated2_actual"],
+}
+
+/* This module should *not* be transitively encapsulated. Generate headers
+ * which conflict with as much as possible, and another which will be tested
+ * with __has_include, so that we can detect if this include directory is
+ * passed incorrectly.
+ */
+bob_generate_source {
+    name: "not_encapsulated",
+    out: [
+        "subdir/1.h",
+        "2.h",
+        "3.h",
+        "must_not_have.h",
+    ],
+    export_gen_include_dirs: [
+        "subdir",
+        ".",
+    ],
+    // Tee will copy its input to each file in ${out} as well as stdout (which
+    // is redirected to avoid cluttering the build output).
+    cmd: "echo '#error' | tee ${out} >/dev/null",
+}
+
+bob_generate_source {
+    name: "encapsulated3",
+    out: ["3.h"],
+    export_gen_include_dirs: ["."],
+    module_srcs: ["not_encapsulated"],
+    module_deps: ["not_encapsulated"],
+    cmd: "echo '#define D3 3' > ${out}",
+}
+
+// Encapsulate modules 1, 2, and 3, to allow testing that encapsulated outputs
+// and include directories are propagated to the next level correctly.
+bob_generate_source {
+    name: "encapsulates_1_2_3",
+    out: ["unused.txt"],
+    encapsulates: [
+        "encapsulated1",
+        "encapsulated2",
+        "encapsulated3",
+    ],
+    // While we're here, ensure that ${outs} *doesn't* include the encapsulated
+    // outputs - only downstream modules should include those. Also - we can't
+    // test this, but this command should *not* have access to e.g.
+    // ${encapsulated1_out} - that should only be provided by module_deps.
+    tool: "check_basenames.py",
+    cmd: "${tool} -o ${out} --expected unused.txt --actual ${out}",
+}
+
+bob_binary {
+    name: "check_includes",
+    generated_headers: ["encapsulates_1_2_3"],
+    srcs: ["check_includes.c"],
+    enabled: false,
+    test_encapsulated_outputs: {
+        enabled: true,
+    },
+}
+
+// Check that ${modname_out} includes ${modname}'s encapsulated oututs
+bob_generate_source {
+    name: "check_outputs_via_module_deps",
+    out: ["unused.txt"],
+    module_deps: ["encapsulates_1_2_3"],
+    tool: "check_basenames.py",
+    cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${encapsulates_1_2_3_out}",
+    build_by_default: true,
+    enabled: false,
+    test_encapsulated_outputs: {
+        enabled: true,
+    },
+}
+
+// Check that module_srcs: [${modname}] includes ${modname}'s encapsulated oututs
+bob_generate_source {
+    name: "check_outputs_via_module_srcs",
+    out: ["unused.txt"],
+    module_srcs: ["encapsulates_1_2_3"],
+    tool: "check_basenames.py",
+    cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${in}",
+    build_by_default: true,
+    enabled: false,
+    test_encapsulated_outputs: {
+        enabled: true,
+    },
+}
+
+bob_alias {
+    name: "bob_test_encapsulates",
+    srcs: [
+        "check_includes",
+        "check_outputs_via_module_deps",
+        "check_outputs_via_module_srcs",
+    ],
+}
