@@ -38,6 +38,7 @@ func Test_splitAndroidPath(t *testing.T) {
 	checkSplit(t, "vendor/bin", "vendor/bin", "")
 	checkSplit(t, "data/nativetest/mytests", "data", "nativetest/mytests")
 	checkSplit(t, "$(TARGET_OUT_DATA)/nativetest", "$(TARGET_OUT_DATA)", "nativetest")
+	checkSplit(t, "$(TARGET_OUT_DATA_NATIVE_TEST)/mytests", "$(TARGET_OUT_DATA_NATIVE_TEST)", "mytests")
 	checkSplit(t, "$(TARGET_OUT_VENDOR)/lib", "$(TARGET_OUT_VENDOR)/lib", "")
 	checkSplit(t, "$(TARGET_OUT_EXECUTABLES)", "$(TARGET_OUT_EXECUTABLES)", "")
 	checkSplit(t, "$(TARGET_OUT_SHARED_LIBRARIES)/libdir", "$(TARGET_OUT_SHARED_LIBRARIES)", "libdir")

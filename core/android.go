@@ -91,11 +91,12 @@ var androidInstallLocationSplits = map[string]int{
 	// /data isn't quite so structured, so put most components in the relative_install_path.
 	// Note that $(TARGET_OUT_DATA_EXECUTABLES) etc actually maps to /system, so is handled
 	// the same as the other filetype-specific stuff - this just catches anything else.
-	"data":               1,
-	"$(TARGET_OUT_DATA)": 1,
+	"data":                           1,
+	"$(TARGET_OUT_DATA)":             1,
+	"$(TARGET_OUT_DATA_NATIVE_TEST)": 1,
 
 	// /testcases is unstructured
-	"testcases":               1,
+	"tests":                   1,
 	"$(TARGET_OUT_TESTCASES)": 1,
 }
 
@@ -149,11 +150,12 @@ var androidMkInstallLocationTranslations = map[string]string{
 	"TARGET_OUT_EXECUTABLES":             "system/bin",
 	"TARGET_OUT_SHARED_LIBRARIES":        "system/lib",
 	"TARGET_OUT_SYSTEM":                  "system",
-	"TARGET_OUT_TESTCASES":               "testcases",
+	"TARGET_OUT_TESTCASES":               "tests",
 	"TARGET_OUT_VENDOR":                  "vendor",
 	"TARGET_OUT_VENDOR_ETC":              "vendor/etc",
 	"TARGET_OUT_VENDOR_EXECUTABLES":      "vendor/bin",
 	"TARGET_OUT_VENDOR_SHARED_LIBRARIES": "vendor/lib",
+	"TARGET_OUT_DATA_NATIVE_TEST":        "tests",
 }
 
 func expandAndroidMkInstallVars(path string) string {
