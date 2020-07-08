@@ -287,12 +287,25 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 	// Calculate and record outputs
 	l.outs = []string{l.outputName()}
 
+	installBase, _, _ := getAndroidInstallPath(l.getInstallableProps())
+
 	var modType string
-	switch l.Properties.TargetType {
-	case tgtTypeHost:
-		modType = "cc_binary_host"
-	case tgtTypeTarget:
-		modType = "cc_binary"
+	useCcTest := false
+	if installBase == "tests" {
+		useCcTest = true
+		switch l.Properties.TargetType {
+		case tgtTypeHost:
+			modType = "cc_test_host"
+		case tgtTypeTarget:
+			modType = "cc_test"
+		}
+	} else {
+		switch l.Properties.TargetType {
+		case tgtTypeHost:
+			modType = "cc_binary_host"
+		case tgtTypeTarget:
+			modType = "cc_binary"
+		}
 	}
 
 	m, err := AndroidBpFile().NewModule(modType, l.shortName())
@@ -304,6 +317,13 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 	addBinaryProps(m, *l, mctx)
 	if l.strip() {
 		addStripProp(m)
+	}
+	if useCcTest {
+		// Avoid using cc_test default setup
+		m.AddBool("no_named_install_directory", true)
+		m.AddBool("include_build_directory", false)
+		m.AddBool("auto_gen_config", false)
+		m.AddBool("gtest", false)
 	}
 }
 

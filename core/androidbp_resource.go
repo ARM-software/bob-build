@@ -66,8 +66,13 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	} else if strings.HasPrefix(installBase+"/", "bin/") {
 		modType = "cc_prebuilt_binary"
 		write = writeCodeResourceModule
-	} else if strings.HasPrefix(installBase+"/", "testcases/") {
-		modType = "prebuilt_testcase_bob"
+	} else if installBase == "tests" {
+		// Eventually we want to install in testcases,
+		// But we can't put binaries there yet.
+		// So place resources in /data/nativetest to align with cc_test.
+		//modType = "prebuilt_testcase_bob"
+		modType = "prebuilt_data_bob"
+		installRel = filepath.Join("nativetest", installRel)
 		write = writeDataResourceModule
 	} else {
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
