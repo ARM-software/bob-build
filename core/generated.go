@@ -32,11 +32,12 @@ import (
 )
 
 var (
-	generatedHeaderTag = dependencyTag{name: "generated_headers"}
-	generatedSourceTag = dependencyTag{name: "generated_sources"}
-	generatedDepTag    = dependencyTag{name: "generated_dep"}
-	encapsulatesTag    = dependencyTag{name: "source_encapsulation"}
-	hostToolBinTag     = dependencyTag{name: "host_tool_bin"}
+	generatedHeaderTag       = dependencyTag{name: "generated_headers"}
+	exportGeneratedHeaderTag = dependencyTag{name: "export_generated_headers"}
+	generatedSourceTag       = dependencyTag{name: "generated_sources"}
+	generatedDepTag          = dependencyTag{name: "generated_dep"}
+	encapsulatesTag          = dependencyTag{name: "source_encapsulation"}
+	hostToolBinTag           = dependencyTag{name: "host_tool_bin"}
 )
 
 // For bob_transform_source each src in the glob will get its own
@@ -741,6 +742,7 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		b := gd.build()
 		mctx.AddDependency(mctx.Module(), generatedSourceTag, b.Generated_sources...)
 		mctx.AddDependency(mctx.Module(), generatedHeaderTag, b.Generated_headers...)
+		mctx.AddDependency(mctx.Module(), exportGeneratedHeaderTag, b.Export_generated_headers...)
 		mctx.AddDependency(mctx.Module(), generatedDepTag, b.Generated_deps...)
 	}
 

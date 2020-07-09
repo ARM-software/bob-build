@@ -72,6 +72,7 @@ bob_alias {
         "bob_test_forwarding_libs",
         "bob_test_generate_libs",
         "bob_test_generate_source",
+        "bob_test_generated_headers",
         "bob_test_globs",
         "bob_test_implicit_outs",
         "bob_test_install_deps",

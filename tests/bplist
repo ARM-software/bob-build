@@ -18,6 +18,7 @@
 ./forwarding_libs/forwarding_user/build.bp
 ./generate_libs/build.bp
 ./generate_source/build.bp
+./generated_headers/build.bp
 ./globs/build.bp
 ./implicit_outs/build.bp
 ./install_deps/build.bp
