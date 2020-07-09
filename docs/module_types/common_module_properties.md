@@ -325,7 +325,7 @@ be placed in a separate file (Linux only).
 
 ----
 ### **bob_module.post_install_tool** (optional)
-Script used during post install.
+Script used during post install. Not supported on Android.bp.
 
 ----
 ### **bob_module.post_install_cmd** (optional)
@@ -337,10 +337,12 @@ are substituted into the command:
 - `${bob_config}` - the Bob configuration file.
 - `${args}` - arguments from `post_install_args`
 
+Not supported on Android.bp.
+
 ### **bob_module.post_install_args** (optional)
 
 Arguments to insert into `post_install_cmd`. This allows arguments to
-added based on features and defaults.
+added based on features and defaults. Not supported on Android.bp.
 
 ----
 ### **bob_module.target_supported** (optional)
