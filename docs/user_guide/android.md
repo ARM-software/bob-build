@@ -31,6 +31,8 @@ whether it is in the vendor partition or not.
 The Android make backend does not support [build
 wrappers](wrappers.md) or [library versioning](versioning.md).
 
+The Android.bp backend does not support post install actions.
+
 Support for [forwarding libraries](forwarding.md) on Android is
 minimal. Notably, if something links against a forwarding library,
 `--copy-dt-needed-entries` is applied across the whole link and

@@ -239,6 +239,13 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	addProvenanceProps(m, l.Properties.Build.AndroidProps)
 	addPGOProps(m, l.Properties.Build.AndroidPGOProps)
 	addRequiredModules(m, l, mctx)
+
+	if l.Properties.Post_install_cmd != nil ||
+		l.Properties.Post_install_args != nil ||
+		l.Properties.Post_install_tool != nil {
+		panic(fmt.Errorf("Module %s has post install actions - this is not supported on Android.bp",
+			mctx.ModuleName()))
+	}
 }
 
 func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
