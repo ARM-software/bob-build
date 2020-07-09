@@ -699,7 +699,6 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		b.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		b.checkField(len(props.Export_local_include_dirs) == 0, "export_local_include_dirs")
 		b.checkField(len(props.Reexport_libs) == 0, "reexport_libs")
-		b.checkField(len(props.Whole_static_libs) == 0, "whole_static_libs")
 		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	} else if sl, ok := m.(*sharedLibrary); ok {
 		props := sl.Properties
