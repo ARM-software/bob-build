@@ -210,7 +210,9 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	sb := &strings.Builder{}
 
 	// read definitions of plugin packages
-	content, err := ioutil.ReadFile(filepath.Join(getBobDir(), "plugins/Android.bp.in"))
+	pluginTemplate := filepath.Join(getBobDir(), "plugins/Android.bp.in")
+	ctx.AddNinjaFileDeps(pluginTemplate)
+	content, err := ioutil.ReadFile(pluginTemplate)
 	if err != nil {
 		utils.Exit(1, err.Error())
 	}
