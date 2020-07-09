@@ -106,6 +106,10 @@ type BuildProps struct {
 	// The list of modules that generate extra headers for this module
 	Generated_headers []string
 
+	// The list of modules that generate extra headers for this module,
+	// which should be made available to linking modules
+	Export_generated_headers []string
+
 	// The list of modules that generate extra source files for this module
 	Generated_sources []string
 
@@ -426,18 +430,59 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 
 		tag := ctx.OtherModuleDependencyTag(child)
 
-		// We want all the includes from modules mentioned by the main
-		// module (i.e. from generated_headers, static_libs and
-		// shared_libs). We also want headers from encapsulated source
-		// modules under the generated_header modules.
-		//
-		// Note that generatedHeaderTags can't have child
-		// generatedHeaderTags, staticDepTags or sharedDepTags (as
-		// these are only added by libraries).
-		topLevelGenHeader := tag == generatedHeaderTag && parent == mainModule
+		/* We want all the export_gen_include_dirs from generated modules mentioned by the
+		 * main module, primarily from generated_headers, but also static_libs and
+		 * shared_libs where they refer to a bob_generated_[static|shared]_library.
+		 *
+		 * We also want all the export_generated_headers from libraries mentioned by the main
+		 * module, i.e. from static_libs and shared_libs, as well as
+		 * export_generated_headers from the main module itself.
+		 *
+		 * Any time we visit a generated module, we must also visit its children, in case
+		 * they are encapsulated. At this point, the only subsequent modules visited will be
+		 * other generated modules via the `encapsulates` property.
+		 *
+		 * Note that generated_header and export_generated_header tags can't have child
+		 * generated_header, export_generated_header, static_libs or shared_libs tags,
+		 * because these are only added by libraries.
+		 */
+		importHeaderDirs := false
+		visitChildren := false
+		childMustBeGenerated := true
+		if parent == mainModule {
+			if tag == generatedHeaderTag || tag == exportGeneratedHeaderTag {
+				importHeaderDirs = true
+				// Check top level generated header modules for encapsulated modules
+				visitChildren = true
+			} else if tag == staticDepTag || tag == sharedDepTag || tag == reexportLibsTag {
+				/* Try to import generated header dirs from static|shared_libs too:
+				 * - The library could be a bob_generate_shared_library or
+				 *   bob_generate_static_library, in which case we need to import
+				 *   any generated header dirs it exports.
+				 * - If it's a bob_static_library or bob_shared_library, it may
+				 *   export generated header dirs, so it's children need visiting.
+				 * In either case we need to keep recursing in case of encapsulated
+				 * modules.
+				 */
+				importHeaderDirs = true
+				visitChildren = true
+				// We don't know the module type so disable the check
+				childMustBeGenerated = false
+			}
+		} else {
+			if tag == exportGeneratedHeaderTag {
+				importHeaderDirs = true
+				// Visit children of exported gen header dirs
+				// in case the module encapsulates anything.
+				visitChildren = true
+			} else if tag == encapsulatesTag {
+				importHeaderDirs = true
+				// Keep walking encapsulated modules indefinitely
+				visitChildren = true
+			}
+		}
 
-		if topLevelGenHeader || tag == staticDepTag || tag == sharedDepTag || tag == encapsulatesTag {
-
+		if importHeaderDirs {
 			// Add include directories for any generated modules
 			if gs, ok := getGenerateCommon(child); ok {
 				// WalkDeps will visit a module once for each
@@ -459,19 +504,12 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 
 					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
+			} else if childMustBeGenerated {
+				panic(fmt.Errorf("%s dependency on non-generated module %s", tag.(dependencyTag).name, child.Name()))
 			}
-			// else this may be a normal static or shared library
 		}
 
-		if topLevelGenHeader {
-			// Check top level generated header modules for encapsulated modules
-			return true
-		} else if tag == encapsulatesTag {
-			// Keep walking encapsulated modules
-			return true
-		}
-
-		return false
+		return visitChildren
 	})
 	return
 }

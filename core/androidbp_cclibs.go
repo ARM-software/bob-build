@@ -87,12 +87,18 @@ func (l *library) getGeneratedSourceModules(mctx blueprint.BaseModuleContext) (s
 	return
 }
 
-func (l *library) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (headers []string) {
-	mctx.VisitDirectDepsIf(
-		func(dep blueprint.Module) bool {
-			return mctx.OtherModuleDependencyTag(dep) == generatedHeaderTag
-		},
+func (l *library) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (headers, exportHeaders []string) {
+	mctx.VisitDirectDeps(
 		func(dep blueprint.Module) {
+			switch mctx.OtherModuleDependencyTag(dep) {
+			case generatedHeaderTag:
+				headers = append(headers, dep.Name())
+			case exportGeneratedHeaderTag:
+				exportHeaders = append(exportHeaders, dep.Name())
+			default:
+				return
+			}
+
 			switch dep.(type) {
 			case *generateSource:
 			case *transformSource:
@@ -100,8 +106,6 @@ func (l *library) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (h
 				panic(fmt.Errorf("Dependency %s of %s is not a generated source",
 					dep.Name(), l.Name()))
 			}
-
-			headers = append(headers, dep.Name())
 		})
 	return
 }
@@ -208,9 +212,9 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.Srcs))
 	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
-	genHeaderModules := l.getGeneratedHeaderModules(mctx)
-	m.AddStringList("generated_headers", genHeaderModules)
-	m.AddStringList("export_generated_headers", genHeaderModules)
+	genHeaderModules, exportGenHeaderModules := l.getGeneratedHeaderModules(mctx)
+	m.AddStringList("generated_headers", append(genHeaderModules, exportGenHeaderModules...))
+	m.AddStringList("export_generated_headers", exportGenHeaderModules)
 	m.AddStringList("exclude_srcs", l.Properties.Exclude_srcs)
 	err := addCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
 	if err != nil {

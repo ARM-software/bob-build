@@ -191,12 +191,9 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	exportIncludeDirs := utils.NewStringSlice(m.Properties.Export_include_dirs, utils.PrefixDirs(m.Properties.Export_local_include_dirs, "$(LOCAL_PATH)"))
 
 	// Handle generated headers
-	additionalDeps := []string{}
-	if len(m.Properties.Generated_headers) > 0 {
-		headerDirs, headerOutputs := m.GetGeneratedHeaders(ctx)
-		includes = append(includes, headerDirs...)
-		additionalDeps = headerOutputs
-	}
+	headerDirs, headerOutputs := m.GetGeneratedHeaders(ctx)
+	includes = append(includes, headerDirs...)
+	additionalDeps := headerOutputs
 
 	// Handle generated sources
 	for _, module := range m.getAllGeneratedSourceModules(ctx) {
