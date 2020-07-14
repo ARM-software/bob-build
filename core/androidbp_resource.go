@@ -54,16 +54,16 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	// of properties depending on which one is required.
 	var write func(bpwriter.Module, string, string)
 
-	if strings.HasPrefix(installBase+"/", "data/") {
+	if installBase == "data" {
 		modType = "prebuilt_data_bob"
 		write = writeDataResourceModule
-	} else if strings.HasPrefix(installBase+"/", "etc/") {
+	} else if installBase == "etc" {
 		modType = "prebuilt_etc"
 		write = writeDataResourceModule
-	} else if strings.HasPrefix(installBase+"/", "firmware/") {
+	} else if installBase == "firmware" {
 		modType = "prebuilt_firmware"
 		write = writeDataResourceModule
-	} else if strings.HasPrefix(installBase+"/", "bin/") {
+	} else if installBase == "bin" {
 		modType = "cc_prebuilt_binary"
 		write = writeCodeResourceModule
 	} else if installBase == "tests" {
