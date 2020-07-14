@@ -105,9 +105,29 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		l.Properties.Make_args,
 	)
 
-	installPath, ok := l.getInstallableProps().getInstallPath()
+	installBase, installRel, ok := getSoongInstallPath(l.getInstallableProps())
 	if ok {
-		bpmod.AddString("install_path", installPath)
+		switch installBase {
+		case "data":
+			bpmod.AddBool("install_in_data", true)
+		case "tests":
+			/* Eventually we want to install in testcases,
+			 * but we can't put binaries there yet:
+			 * bpmod.AddBool("install_in_testcases", true)
+			 * So place resources in /data/nativetest to align with cc_test.
+			 *
+			 * `nativetest` has no corresponding `InstallIn...` method,
+			 * so request the `/data` partition and add the `nativetest`
+			 * part in as another relative component. */
+			bpmod.AddBool("install_in_data", true)
+			installRel = filepath.Join(installRel, "nativetest")
+		default:
+			/* Paths like `lib/modules` are implicitly in /system, or /vendor, but
+			 * unlike e.g. a library, which would add the `lib` for us, we need to add
+			 * it ourselves here - so the whole path is used as the relative part. */
+			installRel = filepath.Join(installBase, installRel)
+		}
+		bpmod.AddString("install_path", installRel)
 	}
 
 }

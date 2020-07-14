@@ -54,6 +54,9 @@ type commonProps struct {
 	// if install path is not empty, module will be installed onto partition,
 	// it should contain path relative to partition root
 	Install_path *string
+	// Partition selection options
+	Install_in_data      bool
+	Install_in_testcases bool
 }
 
 type genruleProps struct {
@@ -618,4 +621,12 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 // required to generate ninja rule for copying file onto partition
 func (m *genrulebobCommon) InstallBypassMake() bool {
 	return m.Properties.Install_path != nil
+}
+
+func (m *genrulebobCommon) InstallInData() bool {
+	return m.Properties.Install_in_data
+}
+
+func (m *genrulebobCommon) InstallInTestcases() bool {
+	return m.Properties.Install_in_testcases
 }
