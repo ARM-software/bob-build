@@ -8,14 +8,16 @@ need while executing.
 This will reference an `bob_install_group` so it gets copied to an appropriate location
 relative to the binaries.
 
-For the Android BP backend, the `install_path` set in the `bob_install_group` must be
-prefixed by a known string to select an appropriate Android directory.
-Currently `data/`, 'firmware/' and `etc/` are supported. The `owner` property also influences
-where the files will be installed.
+For the Android.bp backend, the `install_path` set in the
+`bob_install_group` must be prefixed by a known string to select an
+appropriate directory. Currently `data`, `firmware`, `etc`, `bin` and
+`tests` are supported. The `owner` property also influences which
+partition the files will be installed.
 
 `bob_resource` supports [features](../features.md)
 
 ## Full specification of `bob_resource` properties
+
 For general common properties please
 [check detailed documentation](common_module_properties.md).
 
@@ -47,18 +49,23 @@ bob_resource {
 
 ----
 ### **bob_resource.name** (required)
+
 The unique identifier that can be used to refer to this module.
 
 ----
 ### **bob_resource.srcs** (optional)
+
 Source files to copy to the installation directory.
 
 ----
 ### **bob_resource.add_to_alias** (optional)
+
 Adds this module to an alias.
 
 ----
 ### **bob_module.owner** (optional)
+
 Value to use on Android for `LOCAL_MODULE_OWNER`
-If set, then the module is considered proprietary. For the Android BP backend this will
-usually be installed in the vendor partition.
+
+If set, then the module is considered proprietary. For the Android.bp
+backend this will usually be installed in the vendor partition.
