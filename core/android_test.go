@@ -33,11 +33,14 @@ func checkSplit(t *testing.T, path, expectedBase, expectedRel string) {
 }
 
 func Test_splitAndroidPath(t *testing.T) {
-	checkSplit(t, "vendor/lib/", "vendor/lib", "")
-	checkSplit(t, "vendor/bin/binsubdir", "vendor/bin", "binsubdir")
-	checkSplit(t, "vendor/bin", "vendor/bin", "")
-	checkSplit(t, "data/nativetest/mytests", "data", "nativetest/mytests")
-	checkSplit(t, "$(TARGET_OUT_DATA)/nativetest", "$(TARGET_OUT_DATA)", "nativetest")
+	checkSplit(t, "bin/binsubdir", "bin", "binsubdir")
+	checkSplit(t, "lib/egl", "lib", "egl")
+	checkSplit(t, "etc/firmware", "etc/firmware", "")
+	checkSplit(t, "firmware/subdir", "firmware", "subdir")
+	checkSplit(t, "etc/subdir", "etc", "subdir")
+	checkSplit(t, "tests/subdir", "tests", "subdir")
+	checkSplit(t, "data/nativetest/mytests", "data/nativetest", "mytests")
+	checkSplit(t, "$(TARGET_OUT_DATA)/nativetest", "$(TARGET_OUT_DATA)/nativetest", "")
 	checkSplit(t, "$(TARGET_OUT_DATA_NATIVE_TEST)/mytests", "$(TARGET_OUT_DATA_NATIVE_TEST)", "mytests")
 	checkSplit(t, "$(TARGET_OUT_VENDOR)/lib", "$(TARGET_OUT_VENDOR)/lib", "")
 	checkSplit(t, "$(TARGET_OUT_EXECUTABLES)", "$(TARGET_OUT_EXECUTABLES)", "")

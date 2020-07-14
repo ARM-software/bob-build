@@ -300,6 +300,11 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 			modType = "cc_test"
 		}
 	} else {
+		if installBase != "" && installBase != "bin" {
+			panic(fmt.Errorf("Unknown base install location for %s (%s)",
+				l.Name(), installBase))
+		}
+
 		switch l.Properties.TargetType {
 		case tgtTypeHost:
 			modType = "cc_binary_host"
@@ -341,6 +346,12 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 		modType = "cc_library_host_shared"
 	case tgtTypeTarget:
 		modType = "cc_library_shared"
+	}
+
+	installBase, _, _ := getAndroidInstallPath(l.getInstallableProps())
+	if installBase != "" && installBase != "lib" {
+		panic(fmt.Errorf("Unknown base install location for %s (%s)",
+			l.Name(), installBase))
 	}
 
 	m, err := AndroidBpFile().NewModule(modType, l.shortName())

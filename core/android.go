@@ -51,8 +51,6 @@ func enabledAndRequired(m blueprint.Module) bool {
 var androidInstallLocationSplits = map[string]int{
 	// Paths in system and vendor have another component, e.g. `bin` or
 	// `lib` - after that, it is all relative.
-	"system":                2,
-	"vendor":                2,
 	"$(TARGET_OUT)":         3,
 	"$(TARGET_OUT_PRODUCT)": 2,
 	"$(TARGET_OUT_SYSTEM)":  2,
@@ -62,6 +60,8 @@ var androidInstallLocationSplits = map[string]int{
 	"$(TARGET_OUT_GEN)": 2,
 
 	// Filetype-specific Android.mk variables already include the `lib` or `bin` part.
+	"bin":                                       1,
+	"lib":                                       1,
 	"$(TARGET_OUT_DATA_EXECUTABLES)":            1,
 	"$(TARGET_OUT_DATA_METRIC_TESTS)":           1,
 	"$(TARGET_OUT_DATA_NATIVE_TESTS)":           1,
@@ -77,22 +77,37 @@ var androidInstallLocationSplits = map[string]int{
 	"$(TARGET_OUT_VENDOR_OPTIONAL_EXECUTABLES)": 1,
 	"$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)":     1,
 
-	// /etc contains subdirs like `firmware` which need to be part of the base path
-	"vendor/etc":                         3,
-	"system/etc":                         3,
-	"etc":                                2,
-	"$(TARGET_OUT_DATA_ETC)":             2,
-	"$(TARGET_OUT_ETC)":                  2,
-	"$(TARGET_OUT_OEM_ETC)":              2,
-	"$(TARGET_OUT_PRODUCT_ETC)":          2,
-	"$(TARGET_OUT_PRODUCT_SERVICES_ETC)": 2,
-	"$(TARGET_OUT_VENDOR_ETC)":           2,
+	// /etc can be used on its own (prebuilt_etc) or contain subdir
+	// `firmware` which need to be part of the base path
+	"etc":                                1,
+	"$(TARGET_OUT_DATA_ETC)":             1,
+	"$(TARGET_OUT_ETC)":                  1,
+	"$(TARGET_OUT_OEM_ETC)":              1,
+	"$(TARGET_OUT_PRODUCT_ETC)":          1,
+	"$(TARGET_OUT_PRODUCT_SERVICES_ETC)": 1,
+	"$(TARGET_OUT_VENDOR_ETC)":           1,
+
+	// Catch etc/firmware in the base path when
+	// $(TARGET_OUT_ETC)/firmware is used
+	"firmware":                                    1,
+	"etc/firmware":                                2,
+	"$(TARGET_OUT_DATA_ETC)/firmware":             2,
+	"$(TARGET_OUT_ETC)/firmware":                  2,
+	"$(TARGET_OUT_OEM_ETC)/firmware":              2,
+	"$(TARGET_OUT_PRODUCT_ETC)/firmware":          2,
+	"$(TARGET_OUT_PRODUCT_SERVICES_ETC)/firmware": 2,
+	"$(TARGET_OUT_VENDOR_ETC)/firmware":           2,
 
 	// /data isn't quite so structured, so put most components in the relative_install_path.
 	// Note that $(TARGET_OUT_DATA_EXECUTABLES) etc actually maps to /system, so is handled
 	// the same as the other filetype-specific stuff - this just catches anything else.
-	"data":                           1,
-	"$(TARGET_OUT_DATA)":             1,
+	"data":               1,
+	"$(TARGET_OUT_DATA)": 1,
+
+	// Catch data/nativetest in the base path when
+	// $(TARGET_OUT_DATA)/nativetest is used
+	"data/nativetest":                2,
+	"$(TARGET_OUT_DATA)/nativetest":  2,
 	"$(TARGET_OUT_DATA_NATIVE_TEST)": 1,
 
 	// /testcases is unstructured
@@ -140,21 +155,25 @@ func getAndroidInstallPath(props *InstallableProps) (string, string, bool) {
 	return base, rel, true
 }
 
-// Map of Android.mk variables and the equivalent Soong locations. Only
-// locations that it is possible to install to are included, so this is a
-// subset of androidInstallLocationSplits.
+// Map of Android.mk variables and the equivalent androidbp backend
+// locations. Only locations that it is possible to install to are
+// included, so this is a subset of androidInstallLocationSplits.
+//
+// The identifiers understood by the androidbp backend are bin, lib,
+// etc, firmware, data and tests. vendor and system will be inferred
+// from the owner property.
 var androidMkInstallLocationTranslations = map[string]string{
 	"TARGET_OUT":                         "",
 	"TARGET_OUT_DATA":                    "data",
 	"TARGET_OUT_ETC":                     "etc",
-	"TARGET_OUT_EXECUTABLES":             "system/bin",
-	"TARGET_OUT_SHARED_LIBRARIES":        "system/lib",
-	"TARGET_OUT_SYSTEM":                  "system",
+	"TARGET_OUT_EXECUTABLES":             "bin",
+	"TARGET_OUT_SHARED_LIBRARIES":        "lib",
+	"TARGET_OUT_SYSTEM":                  "",
 	"TARGET_OUT_TESTCASES":               "tests",
-	"TARGET_OUT_VENDOR":                  "vendor",
-	"TARGET_OUT_VENDOR_ETC":              "vendor/etc",
-	"TARGET_OUT_VENDOR_EXECUTABLES":      "vendor/bin",
-	"TARGET_OUT_VENDOR_SHARED_LIBRARIES": "vendor/lib",
+	"TARGET_OUT_VENDOR":                  "",
+	"TARGET_OUT_VENDOR_ETC":              "etc",
+	"TARGET_OUT_VENDOR_EXECUTABLES":      "bin",
+	"TARGET_OUT_VENDOR_SHARED_LIBRARIES": "lib",
 	"TARGET_OUT_DATA_NATIVE_TEST":        "tests",
 }
 
@@ -179,15 +198,28 @@ func expandAndroidMkInstallVars(path string) string {
 	return filepath.Join(components...)
 }
 
+// After translating make variables like TARGET_OUT, TARGET_OUT_ETC,
+// TARGET_OUT_DATA, we may still have multiple path elements. Map
+// these to the right androidbp backend location.
+var basePathTranslations = map[string]string{
+	"etc/firmware":    "firmware",
+	"data/nativetest": "tests",
+}
+
 func getSoongInstallPath(props *InstallableProps) (string, string, bool) {
 	installPath, ok := props.getInstallPath()
 	if !ok {
 		return "", "", false
 	}
 
+	installPath = expandAndroidMkInstallVars(installPath)
+
 	base, rel := splitAndroidPath(installPath)
 
-	base = expandAndroidMkInstallVars(base)
+	base2, ok := basePathTranslations[base]
+	if ok {
+		base = base2
+	}
 
 	return base, rel, true
 }
