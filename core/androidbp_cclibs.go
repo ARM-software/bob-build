@@ -111,7 +111,7 @@ func (l *library) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (h
 }
 
 func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
-	if props.Owner != "" {
+	if props.isProprietary() {
 		m.AddString("owner", props.Owner)
 		m.AddBool("vendor", true)
 		m.AddBool("proprietary", true)

@@ -116,6 +116,10 @@ type AndroidProps struct {
 	Owner string
 }
 
+func (p *AndroidProps) isProprietary() bool {
+	return p.Owner != ""
+}
+
 // AndroidPGOProps defines properties used to support profile-guided optimization.
 type AndroidPGOProps struct {
 	Pgo struct {
