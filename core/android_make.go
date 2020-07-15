@@ -294,7 +294,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 
 	writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 	writeListAssignment(sb, "LOCAL_EXPORT_C_INCLUDE_DIRS", exportIncludeDirs)
-	if m.Properties.Owner != "" {
+	if m.Properties.isProprietary() {
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
 	}
@@ -523,7 +523,7 @@ func (g *androidMkGenerator) resourceActions(m *resource, ctx blueprint.ModuleCo
 		sb.WriteString("LOCAL_MODULE_RELATIVE_PATH := " + installRel + "\n")
 		writeListAssignment(sb, "LOCAL_MODULE_TAGS", m.Properties.Tags)
 		sb.WriteString("LOCAL_SRC_FILES := " + file + "\n")
-		if m.Properties.Owner != "" {
+		if m.Properties.isProprietary() {
 			sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 			sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
 		}
@@ -1084,7 +1084,7 @@ func (g *androidMkGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.
 		sb.WriteString("LOCAL_UNINSTALLABLE_MODULE := true\n")
 	}
 	sb.WriteString("LOCAL_MODULE_SUFFIX := .ko\n")
-	if m.Properties.Owner != "" {
+	if m.Properties.isProprietary() {
 		sb.WriteString("LOCAL_MODULE_OWNER := " + m.Properties.Owner + "\n")
 		sb.WriteString("LOCAL_PROPRIETARY_MODULE := true\n")
 	}

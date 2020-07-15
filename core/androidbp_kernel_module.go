@@ -120,7 +120,12 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			 * so request the `/data` partition and add the `nativetest`
 			 * part in as another relative component. */
 			bpmod.AddBool("install_in_data", true)
-			installRel = filepath.Join(installRel, "nativetest")
+			if l.Properties.isProprietary() {
+				// Vendor modules need an additional path element to match cc_test
+				installRel = filepath.Join("nativetest", "vendor", installRel)
+			} else {
+				installRel = filepath.Join("nativetest", installRel)
+			}
 		default:
 			/* Paths like `lib/modules` are implicitly in /system, or /vendor, but
 			 * unlike e.g. a library, which would add the `lib` for us, we need to add
