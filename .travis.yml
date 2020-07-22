@@ -47,7 +47,11 @@ before_script:
   - export GOROOT=$(go env GOROOT)
   - export BOB_WORKSPACE=$TRAVIS_WORK_DIR/bob_workspace
   - export GOPATH=${BOB_WORKSPACE}
-  - go get github.com/stretchr/testify
+  - go get -d github.com/stretchr/testify
+  - cd $GOPATH/src/github.com/stretchr/testify
+  - git checkout v1.6.1
+  - go install github.com/stretchr/testify
+  - cd -
 
 matrix:
   include:
