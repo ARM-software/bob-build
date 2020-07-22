@@ -145,7 +145,7 @@ func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
 }
 
 func addRequiredModules(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
-	if _, _, ok := getAndroidInstallPath(l.getInstallableProps()); ok {
+	if _, _, ok := getSoongInstallPath(l.getInstallableProps()); ok {
 		requiredModuleNames := l.getInstallDepPhonyNames(mctx)
 		m.AddStringList("required", ccModuleNames(mctx, requiredModuleNames))
 	}
@@ -291,7 +291,7 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 	// Calculate and record outputs
 	l.outs = []string{l.outputName()}
 
-	installBase, _, _ := getAndroidInstallPath(l.getInstallableProps())
+	installBase, _, _ := getSoongInstallPath(l.getInstallableProps())
 
 	var modType string
 	useCcTest := false
@@ -352,7 +352,7 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 		modType = "cc_library_shared"
 	}
 
-	installBase, _, _ := getAndroidInstallPath(l.getInstallableProps())
+	installBase, _, _ := getSoongInstallPath(l.getInstallableProps())
 	if installBase != "" && installBase != "lib" {
 		panic(fmt.Errorf("Unknown base install location for %s (%s)",
 			l.Name(), installBase))
