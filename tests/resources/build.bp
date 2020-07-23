@@ -21,7 +21,7 @@ bob_install_group {
         install_path: "$(TARGET_OUT_TESTCASES)",
     },
     builder_android_bp: {
-        install_path: "testcases",
+        install_path: "tests",
     },
     builder_ninja: {
         install_path: "install/testcases",
