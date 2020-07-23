@@ -20,6 +20,7 @@ package prebuilt
 
 import (
 	"android/soong/android"
+	"android/soong/etc"
 )
 
 func init() {
@@ -30,7 +31,7 @@ func init() {
 // Prebuilts going to data partition
 type PrebuiltData struct {
 	// pretend to be soong prebuilt module
-	android.PrebuiltEtc
+	etc.PrebuiltEtc
 }
 
 // implemented interfaces check
@@ -41,7 +42,7 @@ func PrebuiltDataFactory() android.Module {
 	m := &PrebuiltData{}
 	// register PrebuiltEtc properties,
 	// install path will be relative to data partition root
-	android.InitPrebuiltEtcModule(&m.PrebuiltEtc, "")
+	etc.InitPrebuiltEtcModule(&m.PrebuiltEtc, "")
 
 	// init module (including name and common properties) with target-specific variants info
 	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibFirst)
@@ -71,7 +72,7 @@ func (m *PrebuiltData) InstallInData() bool {
 // Prebuilts going to data partition
 type PrebuiltTestcase struct {
 	// pretend to be soong prebuilt module
-	android.PrebuiltEtc
+	etc.PrebuiltEtc
 }
 
 // implemented interfaces check
@@ -82,7 +83,7 @@ func PrebuiltTestcaseFactory() android.Module {
 	m := &PrebuiltTestcase{}
 	// register PrebuiltEtc properties,
 	// install path will be relative to the `testcases` directory
-	android.InitPrebuiltEtcModule(&m.PrebuiltEtc, "")
+	etc.InitPrebuiltEtcModule(&m.PrebuiltEtc, "")
 
 	// init module (including name and common properties) with target-specific variants info
 	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibFirst)

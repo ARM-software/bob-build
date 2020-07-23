@@ -29,6 +29,7 @@ bootstrap_go_package {
     pluginFor: ["soong_build"],
     deps: [
         "soong-android",
+        "soong-etc",
     ],
     srcs: [
         "@@BOB_DIR@@/plugins/prebuilt/prebuilt_data.go",
