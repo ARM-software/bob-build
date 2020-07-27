@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+import re
 import subprocess
 import sys
 
@@ -15,11 +16,17 @@ ENDC = '\033[0m'
 def isAutomaticMerge(sha):
     """
     Check whether a commit is a non-conflicting merge. Such merge
-    doesn't have any changes in it
+    either doesn't have any changes in it or has a commit message
+    matching a certain regular expression
     """
     cmd = ['git', 'show', '--format=', '--raw', sha]
     commit = subprocess.check_output(cmd).decode("utf-8")
-    return len(commit) == 0
+    if len(commit) == 0:
+        return True
+
+    cmd = ['git', 'log', '-n1', '--format=%B', sha]
+    commit_message = subprocess.check_output(cmd).decode("utf-8")
+    return re.match('Merge [0-9a-f]+ into [0-9a-f]+\n\n$', commit_message)
 
 
 def isSignedOff(message):
