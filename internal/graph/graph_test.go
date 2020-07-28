@@ -18,10 +18,10 @@
 package graph
 
 import (
-	"reflect"
 	"strconv"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -270,21 +270,13 @@ func Test_TopologicalSortMaintainsSubnodeOrder(t *testing.T) {
 	target := []string{"top", "a", "b", "c", "d", "e", "f"}
 
 	sorted, _ := TopologicalSort(testGraph)
-	if !reflect.DeepEqual(target, sorted) {
-		t.Errorf("Mismatch!\n%s <------- result\n%s <------- correct",
-			strings.Join(sorted, ", "),
-			strings.Join(target, ", "))
-	}
+	assert.Equal(t, target, sorted)
 
 	// If we copy the graph we should still get the same sort result
 	subGraph := GetSubgraph(testGraph, "top")
 
 	sorted, _ = TopologicalSort(subGraph)
-	if !reflect.DeepEqual(target, sorted) {
-		t.Errorf("Mismatch after copy!\n%s <------- result\n%s <------- correct",
-			strings.Join(sorted, ", "),
-			strings.Join(target, ", "))
-	}
+	assert.Equal(t, target, sorted)
 }
 
 func Test_SubnodeOrderAfterDeleteProxyEdges(t *testing.T) {
@@ -320,11 +312,7 @@ func Test_SubnodeOrderAfterDeleteProxyEdges(t *testing.T) {
 	target := []string{"top", "af", "ae", "bf", "be", "cf", "ce", "df", "de"}
 
 	sorted, _ := TopologicalSort(testGraph)
-	if !reflect.DeepEqual(target, sorted) {
-		t.Errorf("Mismatch!\n%s <------- result\n%s <------- correct",
-			strings.Join(sorted, ", "),
-			strings.Join(target, ", "))
-	}
+	assert.Equal(t, target, sorted)
 }
 
 func Test_GetSubgraphNodeCount(t *testing.T) {
@@ -340,11 +328,9 @@ func Test_GetSubgraphNodeCount(t *testing.T) {
 	nodes := []string{"top", "a", "a0", "a1", "b", "b0", "b1"}
 
 	for _, node := range nodes {
-		count1 := GetSubgraph(testGraph, node).GetNodeCount()
-		count2 := GetSubgraphNodeCount(testGraph, node)
-		if count1 != count2 {
-			t.Errorf("Mismatch!\n%d <------- result\n%d <------- correct", count1, count2)
-		}
+		expected := GetSubgraph(testGraph, node).GetNodeCount()
+		result := GetSubgraphNodeCount(testGraph, node)
+		assert.Equal(t, expected, result)
 	}
 }
 
@@ -362,11 +348,9 @@ func Test_GetSubgraphHasNode(t *testing.T) {
 
 	for _, node1 := range nodes {
 		for _, node2 := range nodes {
-			res1 := GetSubgraphHasNode(testGraph, node1, node2)
-			res2 := GetSubgraph(testGraph, node1).HasNode(node2)
-			if res1 != res2 {
-				t.Errorf("Mismatch!\n%v <------- result\n%v <------- correct", res1, res2)
-			}
+			expected := GetSubgraph(testGraph, node1).HasNode(node2)
+			result := GetSubgraphHasNode(testGraph, node1, node2)
+			assert.Equal(t, expected, result)
 		}
 	}
 }
