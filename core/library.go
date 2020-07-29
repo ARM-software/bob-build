@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/* This comment is a temporary check to test 
+ * that the signoff checker fix works. Do not
+ * commit this to master.
+ */
+
 package core
 
 import (
