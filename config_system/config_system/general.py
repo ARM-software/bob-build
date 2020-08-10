@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import os
 import re
 
 from config_system import data, expr, utils
@@ -150,6 +151,7 @@ def init_config(options_filename, ignore_missing=False):
 def read_profile_file(profile_filename):
     try:
         with open(profile_filename, "rt") as f:
+            source = os.path.basename(profile_filename)
             for line in f:
                 line = line.strip()
                 if line == "":
@@ -162,7 +164,7 @@ def read_profile_file(profile_filename):
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
                         if quoted == '"':
                             value = re.sub(r"\\(.)", r"\1", value)
-                        set_config_if_prompt(key, value, True)
+                        set_config_if_prompt(key, value, True, source=source)
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as e:
@@ -173,26 +175,38 @@ def read_config_file(config_filename):
     try:
         with open(config_filename, "rt") as f:
             for line in f:
+                source = ""
+                is_user_set = False
                 line = line.strip()
                 if line == "":
                     continue  # Ignore blank lines
                 elif line.startswith("#"):
-                    m = re.match(r"^#\s*CONFIG_([^=]+) is not set", line)
+                    # match config name together with optional '[by user]' and '(source)' parts
+                    # eg. "# CONFIG_RELEASE is not set [by user] (source)"
+                    m = re.match(r"# CONFIG_([^=]+) is not set( \[by user\](?: \((.+)\))?)?", line)
                     if m:
                         key = m.group(1)
+                        is_user_set = True if m.group(2) else False
+                        source = m.group(3) if m.group(3) else ""
                         value = 'n'
-                        set_config_if_prompt(key, value, ("[by user]" in line))
+                        set_config_if_prompt(key, value, is_user_set, source)
                     # else ignore comment
                 else:
                     line = line.split("#", 1)  # Strip comment from line eg. "xyz # comment"
                     comment = line[1] if len(line) > 1 else ""
+                    if comment:
+                        # match the source if present eg. " set by user (source)"
+                        m = re.match(r" set by user(?: \((.+)\))?", comment)
+                        if m:
+                            is_user_set = True
+                            source = m.group(1) if m.group(1) else ""
                     line = line[0].rstrip()  # Remove extra space before comment
                     m = re.match(r"CONFIG_([^=]+)=(\"?)(.*)\2", line)
                     if m:
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
                         if quoted == '"':
                             value = re.sub(r"\\(.)", r"\1", value)
-                        set_config_if_prompt(key, value, ("by user" in comment))
+                        set_config_if_prompt(key, value, is_user_set, source)
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as e:
@@ -227,6 +241,8 @@ def write_config(config_filename):
                     f.write("CONFIG_%s=%s" % (i_symbol, c['value']))
                 # Save meta data as user explicit mark this
                 if c['is_user_set']:
+                    if 'source' in c and c['source']:
+                        mark_set_by_user += " (" + c['source'] + ")"
                     f.write("%s" % mark_set_by_user)
                 f.write("\n")
             elif i_type == "menu":
@@ -239,6 +255,23 @@ def write_depfile(depfile, target_name):
     with utils.open_and_write_if_changed(depfile) as fp:
         fp.write(target_name + ": \\\n    ")
         fp.write(" \\\n    ".join(data.get_mconfig_srcs()) + "\n")
+
+
+def get_user_set_options():
+    """
+    Return all the options which have been set by the user
+    """
+    user_set_options = []
+    for (i_type, i_symbol) in data.iter_symbols_menuorder():
+        if i_type in ["config", "menuconfig"]:
+            c = data.get_config(i_symbol)
+            if c['is_user_set']:
+                value = c['value']
+                if c['datatype'] == "bool":
+                    value = "y" if c['value'] else "n"
+                source = c['source'] if "source" in c else ""
+                user_set_options.append((i_symbol, value, source))
+    return user_set_options
 
 
 def get_options_selecting(selected):
@@ -408,7 +441,7 @@ def update_defaults(k):
         set_config_internal(k, 0)
 
 
-def set_config_if_prompt(key, value, is_user_set=True):
+def set_config_if_prompt(key, value, is_user_set=True, source="cmd_line"):
     """
     Used to set the option value from the command line, and through
     profile files. Only options that have prompts (indicating they are
@@ -427,6 +460,8 @@ def set_config_if_prompt(key, value, is_user_set=True):
         logger.debug("Setting %s : %s " % (key, value))
         if c['datatype'] == 'bool':
             value = True if value == 'y' else False
+        if is_user_set:
+            c['source'] = source
         set_config(key, value, is_user_set)
 
 

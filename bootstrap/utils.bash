@@ -43,7 +43,9 @@ function create_config_symlinks() {
     local BOB_DIR="${1}" BUILDDIR="${2}"
 
     ln -sf "${BOB_DIR}/config.bash" "${BUILDDIR}/config"
+    ln -sf "${BOB_DIR}/reconfig.bash" "${BUILDDIR}/reconfig"
     ln -sf "${BOB_DIR}/menuconfig.bash" "${BUILDDIR}/menuconfig"
+    ln -sf "${BOB_DIR}/print_user_config.bash" "${BUILDDIR}/print_user_config"
     ln -sf "${BOB_DIR}/config_system/mconfigfmt.py" "${BUILDDIR}/mconfigfmt"
 }
 
