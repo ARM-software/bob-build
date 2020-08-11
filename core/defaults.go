@@ -24,7 +24,14 @@ import (
 )
 
 type defaults struct {
-	library
+	moduleBase
+
+	Properties struct {
+		Features
+		Build
+		// The list of default properties that should prepended to all configuration
+		Defaults []string
+	}
 }
 
 func (m *defaults) supportedVariants() []tgtType {
@@ -36,11 +43,35 @@ func (m *defaults) disable() {
 }
 
 func (m *defaults) setVariant(variant tgtType) {
-	m.library.setVariant(variant)
+	m.Properties.TargetType = variant
 }
 
 func (m *defaults) getSplittableProps() *SplittableProps {
-	return m.library.getSplittableProps()
+	return &SplittableProps{}
+}
+
+func (m *defaults) defaults() []string {
+	return m.Properties.Defaults
+}
+
+func (m *defaults) build() *Build {
+	return &m.Properties.Build
+}
+
+func (m *defaults) topLevelProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps}
+}
+
+func (m *defaults) features() *Features {
+	return &m.Properties.Features
+}
+
+func (m *defaults) getTarget() tgtType {
+	return m.Properties.TargetType
+}
+
+func (m *defaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.Build.processPaths(ctx, g)
 }
 
 func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -48,7 +79,12 @@ func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
-	return module.LibraryFactory(config, module)
+
+	module.Properties.Features.Init(&config.Properties, BuildProps{})
+	module.Properties.Build.Target.Init(&config.Properties, BuildProps{})
+	module.Properties.Build.Host.Init(&config.Properties, BuildProps{})
+
+	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 
 var defaultDepTag = dependencyTag{name: "default"}
@@ -60,6 +96,21 @@ type defaultable interface {
 	features() *Features
 	defaults() []string
 }
+
+// Defaults use other defaults, so are themselves `defaultable`
+var _ defaultable = (*defaults)(nil)
+
+// Defaults have build properties
+var _ moduleWithBuildProps = (*defaults)(nil)
+
+// Defaults have host and target variants
+var _ targetable = (*defaults)(nil)
+
+// Defaults support conditional properties via "features"
+var _ featurable = (*defaults)(nil)
+
+// Defaults contain path fragments which need to be prefixes
+var _ pathProcessor = (*defaults)(nil)
 
 func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 	if l, ok := mctx.Module().(defaultable); ok {
