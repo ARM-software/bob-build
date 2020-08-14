@@ -136,7 +136,6 @@ func Main() {
 	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
-	ctx.RegisterBottomUpMutator("process_build_wrapper", buildWrapperMutator).Parallel()
 	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()

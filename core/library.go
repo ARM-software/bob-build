@@ -286,6 +286,10 @@ func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend
 	if l.Target.Kernel_dir != "" && !filepath.IsAbs(l.Target.Kernel_dir) {
 		l.Target.Kernel_dir = filepath.Join(prefix, l.Target.Kernel_dir)
 	}
+
+	l.BuildProps.processBuildWrapper(ctx)
+	l.Host.processBuildWrapper(ctx)
+	l.Target.processBuildWrapper(ctx)
 }
 
 // library is a base class for modules which are generated from sets of object files
@@ -556,12 +560,6 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 
 func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	l.Properties.Build.processPaths(ctx, g)
-}
-
-func (l *library) processBuildWrapper(ctx blueprint.BaseModuleContext) {
-	l.Properties.Build.BuildProps.processBuildWrapper(ctx)
-	l.Properties.Build.Host.processBuildWrapper(ctx)
-	l.Properties.Build.Target.processBuildWrapper(ctx)
 }
 
 func (m *library) filesToInstall(ctx blueprint.BaseModuleContext) []string {

@@ -460,17 +460,6 @@ func pathMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-type buildWrapperProcessor interface {
-	processBuildWrapper(blueprint.BaseModuleContext)
-}
-
-// Prefixes build_wrapper with source path if necessary
-func buildWrapperMutator(mctx blueprint.BottomUpMutatorContext) {
-	if p, ok := mctx.Module().(buildWrapperProcessor); ok {
-		p.processBuildWrapper(mctx)
-	}
-}
-
 func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext) {
 	mainModule := mctx.Module()
 	if e, ok := mainModule.(enableable); ok {
