@@ -159,13 +159,6 @@ type hostBin interface {
 	hostBin() string
 }
 
-// Modules implementing generatedDepender can depend on any of generator
-// modules (bob_generate_source, bob_transform_source,
-// bob_generate_static_lib, bob_generate_shared_lib, bob_generated_binary)
-type generatedDepender interface {
-	build() *Build
-}
-
 // When referencing libraries provided by a generator module use "module/path/to/lib"
 // This function splits the reference into the module and the library.
 func splitGeneratedComponent(comp string) (module string, lib string) {
@@ -734,16 +727,11 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	// Things which depend on generated/transformed sources
-	if gd, ok := mctx.Module().(generatedDepender); ok {
-		if _, ok := mctx.Module().(*defaults); ok {
-			// We do not want to add dependencies for defaults
-			return
-		}
-		b := gd.build()
-		mctx.AddDependency(mctx.Module(), generatedSourceTag, b.Generated_sources...)
-		mctx.AddDependency(mctx.Module(), generatedHeaderTag, b.Generated_headers...)
-		mctx.AddDependency(mctx.Module(), exportGeneratedHeaderTag, b.Export_generated_headers...)
-		mctx.AddDependency(mctx.Module(), generatedDepTag, b.Generated_deps...)
+	if l, ok := getLibrary(mctx.Module()); ok {
+		mctx.AddDependency(mctx.Module(), generatedSourceTag, l.Properties.Generated_sources...)
+		mctx.AddDependency(mctx.Module(), generatedHeaderTag, l.Properties.Generated_headers...)
+		mctx.AddDependency(mctx.Module(), exportGeneratedHeaderTag, l.Properties.Export_generated_headers...)
+		mctx.AddDependency(mctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
 	}
 
 	// Things that a generated/transformed source depends on
