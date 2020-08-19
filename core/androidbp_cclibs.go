@@ -210,7 +210,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	if l.shortName() != l.outputName() {
 		m.AddString("stem", l.outputName())
 	}
-	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.Srcs))
+	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.getSources(mctx)))
 	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
 	genHeaderModules, exportGenHeaderModules := l.getGeneratedHeaderModules(mctx)
 	m.AddStringList("generated_headers", append(genHeaderModules, exportGenHeaderModules...))
