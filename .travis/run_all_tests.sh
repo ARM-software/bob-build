@@ -49,6 +49,12 @@ if [ ${DO_PYTHON_TESTS} -eq 1 ] ; then
         pytest config_system
     fold_end $?
     ####################
+
+    ####################
+    fold_start 'scripts pytest'
+        pytest scripts/env_hash.py
+    fold_end $?
+    ####################
 fi
 
 ####################
