@@ -39,20 +39,63 @@ kernel_search_paths = [
 ]
 
 
-def kbuild_to_cflag(option):
-    parts = option.split("=", 1)
+def parse_kbuild_options(kbuild_options):
+    """Return a dictionary of kbuild_options {option:value}"""
+    options = dict()
 
-    if len(parts) != 2:
-        logger.error("Invalid Kbuild option: '%s'", option)
+    for option in kbuild_options:
+        parts = option.split("=", 1)
 
-    key, value = parts[0], parts[1]
+        if len(parts) != 2:
+            logger.error("Invalid Kbuild option: '%s'", option)
+        else:
+            options[parts[0]] = parts[1]
 
+    return options
+
+
+def check_kbuild_option_conflicts(kdir, option, value):
+    """
+    Checks whether kbuild_option is already defined in the kernel config
+    causing conflicts by overriding them in EXTRA_CFLAGS
+    :return: Zero(0) if there is no conflict, one(1) otherwise
+    """
+    message = "Overridden '{0}' option in EXTRA_CFLAGS. " \
+              "Bob was asked to set the kernel option '{0}={1}', " \
+              "which is already present in the kernel's config. " \
+              "Please disable this option in the kernel " \
+              "or disable out-of-tree kernel module builds in Bob to continue."
+
+    # There are few cases when Bob is allowed to override a kernel option:
+    #
+    # 1. If the kernel has an option present, it is set to `y` or `m` and Bob is overriding it
+    #    with the same value
+    # 2. If the kernel has an option present, it is set to `n` and Bob is overriding it
+    #    either with `y` or `m` or `n`
+    # 3. If the kernel has an option present, it is set to any value and Bob is overriding it
+    #    with the same value (imply first case)
+
+    k_option_val = kernel_config_parser.get_value(kdir, option)
+
+    if k_option_val:
+        if not (k_option_val == value) and not (k_option_val == 'n' and value in ['y', 'm']):
+            logger.error(message.format(option, value))
+            return 1
+
+    return 0
+
+
+def kbuild_to_cflag(option, value):
     if value in ['m', 'y']:
-        cflag = str.format("-D{}=1", key)
+        cflag = str.format("-D{}=1", option)
     elif value == 'n':
-        cflag = str.format("-U{}", key)
+        cflag = str.format("-U{}", option)
+    elif value.isdigit():
+        cflag = str.format("-D{}={}", option, value)
     else:
-        cflag = str.format("-D{}={}", key, value)
+        # passing values as string needs special treatment due to shell interpretation
+        # -DCONFIG_A='"string value"' conforms to #define CONFIG_A "string value"
+        cflag = str.format("-D{}='\"{}\"'", option, value)
 
     return cflag
 
@@ -214,18 +257,29 @@ def main():
     host_cc = get_tool_abspath(args.hostcc)
     make_command = get_tool_abspath(args.make_command)
 
-    # Prepend EXTRA_CFLAGS with modified include paths
-    includes = ["-I" + s for s in search_path]
-    extra_cflags = " ".join(includes) + " " + args.extra_cflags + " " + \
-                   " ".join([kbuild_to_cflag(o) for o in args.kbuild_options])
-
-    deps = []
-
-    # Add commonly needed search paths for copy_with_deps
+    # Check the kernel ARCH
     arch = kernel_config_parser.get_arch(abs_kdir)
     if not arch:
         sys.exit(1)
 
+    kbuild_cflags = []
+    kbuild_conflicts = 0
+    # Parse kbuild_options and make them cflags style
+    for option, value in parse_kbuild_options(args.kbuild_options).items():
+        kbuild_conflicts += check_kbuild_option_conflicts(abs_kdir, option, value)
+        kbuild_cflags.append(kbuild_to_cflag(option, value))
+
+    if kbuild_conflicts > 0:
+        sys.exit(1)
+
+    # Prepend EXTRA_CFLAGS with modified include paths
+    includes = ["-I" + s for s in search_path]
+    extra_cflags = " ".join(includes) + " " + args.extra_cflags + " " + \
+                   " ".join(kbuild_cflags)
+
+    deps = []
+
+    # Add commonly needed search paths for copy_with_deps
     search_path.extend([str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths])
     kconfig = os.path.join(abs_kdir, "linux", "kconfig.h")
     root = os.path.abspath(args.common_root)
