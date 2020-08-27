@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,27 +21,38 @@ logger = logging.getLogger(__name__)
 g_kernel_configs = dict()
 
 
-def option_enabled(kdir, option):
-    """Return true if a given kernel config option is enabled"""
+def parse_kernel_config(kdir):
+    """Parse kernel configuration from provided directory"""
+    config_file = os.path.join(kdir, '.config')
+    config = dict()
+
+    try:
+        with open(config_file, "rt") as fp:
+            for line in fp.readlines():
+                try:
+                    (key, val) = line.split("=")
+                    config[key.strip()] = val.strip().strip('"')
+                except ValueError:
+                    pass
+    except IOError as e:
+        logger.error("Failed to open kernel config file in %s:", config_file)
+
+    return config
+
+
+def get_value(kdir, option):
+    """Return value of the kernel config opption"""
     global g_kernel_configs
 
     if kdir not in g_kernel_configs:
-        config_file = os.path.join(kdir, '.config')
-        config = dict()
-        try:
-            with open(config_file, "rt") as fp:
-                for line in fp.readlines():
-                    try:
-                        (key, val) = line.split("=")
-                        config[key.strip()] = val.strip()
-                    except ValueError:
-                        pass
-        except IOError as e:
-            logger.error("Failed to open kernel config file in %s: Couldn't check for option %s",
-                         config_file, option)
-        g_kernel_configs[kdir] = config
+        g_kernel_configs[kdir] = parse_kernel_config(kdir)
 
-    return g_kernel_configs[kdir].get(option) == 'y'
+    return g_kernel_configs[kdir].get(option)
+
+
+def option_enabled(kdir, option):
+    """Return true if a given kernel config option is enabled"""
+    return get_value(kdir, option) == 'y'
 
 
 def get_arch(kdir):
