@@ -800,6 +800,21 @@ class MenuItem(object):
             return config['datatype'] in ["string", "int"]
         return False
 
+    def __clear_config_source(self, key):
+        """
+        Clear 'source' property of a config and all its
+        counterparts if it's a member of a choice group
+        """
+        config = data.get_config(key)
+        if "choice_group" in config:
+            group = config['choice_group']
+            cg = data.get_choice_group(group)
+            for k in cg['configs']:
+                c2 = data.get_config(k)
+                c2.pop('source', None)
+        else:
+            config.pop('source', None)
+
     def set(self):
         """Sets a boolean option to true"""
         if self.type in ["config", "menuconfig"]:
@@ -924,6 +939,10 @@ class MenuItem(object):
 
         # We need to set it to False because update_defaults will ignore if user set
         config['is_user_set'] = False
+
+        # Clear 'source' for config
+        self.__clear_config_source(self.value)
+
         update_defaults(self.value)
         logger.info("After reset: %s" % self.get_value())
 
