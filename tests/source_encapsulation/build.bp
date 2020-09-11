@@ -15,14 +15,20 @@
  * limitations under the License.
  */
 
-////////////////////////////////////////////////////////////////////////////////
-// Case A - generated headers: direct and transitive encapsulation of header dirs
+//////////////////////////////////////////////////////////////////////////////
+// Case A - generated headers: direct and transitive encapsulation of outputs.
+// Test checks proper output encapsulation.
 //
-//             3 (root module)
-//            /
-//           2
-//          /
-//         1
+// Modules:
+// 1 - encapsulation_source1
+// 2 - encapsulation_source2
+// 3 - encapsulation_source3
+//
+//                    3 (root module)
+//    (encapsulates) /
+//                  2
+//  (encapsulates) /
+//                1
 //
 bob_generate_source {
     name: "encapsulation_source1",
@@ -56,59 +62,171 @@ bob_generate_source {
     encapsulates: ["encapsulation_source2"],
 }
 
-/////////////////////////////////////////////////////////////////////////
-// Case B - generated headers: uses modules from case A, but additionally
-// module 3 uses output of module 4 through module_deps relation,
-// ignoring any further encapsulations that module 4 may have defined.
+bob_binary {
+    name: "validate_source_encapsulation_simple",
+    generated_headers: ["encapsulation_source3"],
+    srcs: ["test_simple.c"],
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Case B - generated headers: direct encapsulation of outputs.
+// Test checks interaction of encapsulation with 'module_deps'.
 //
-//             3 (root module)
-//            / .
-//           2   4
-//          /     \
-//         1       5 (should not be included by 3)
+// Module 2 depends on module 1 due to 'module_deps' property.
+// Module 3 encapsulates module 2 which can see must_have.h but
+// not must_not_have.h
+//
+// Modules:
+// 1 - gen_srcs_one
+// 2 - gen_srcs_two
+// 3 - encapsulation_source_mod_deps
+//
+//                    3 (root module)
+//    (encapsulates) /
+//                  2
+//   (module_deps) /
+//                1
 //
 bob_generate_source {
-    name: "encapsulation_source5",
-
-    srcs: ["srcs/header5.h"],
-    out: ["header5.h"],
-
-    cmd: "cp ${in} ${out}",
+    name: "gen_srcs_one",
+    out: ["subdir/must_not_have.h"],
+    export_gen_include_dirs: ["subdir"],
+    cmd: "echo '#define D1 1' > ${out}",
 }
 
 bob_generate_source {
-    name: "encapsulation_source4",
-
-    srcs: ["srcs/header4.h"],
-    out: ["header4.h"],
-
-    cmd: "cp ${in} ${out}",
+    name: "gen_srcs_two",
+    out: ["must_have.h"],
     export_gen_include_dirs: ["."],
-    encapsulates: ["encapsulation_source5"],
+    cmd: "cat ${gen_srcs_one_out} > ${out}",
+    module_deps: ["gen_srcs_one"],
 }
 
 bob_generate_source {
-    name: "encapsulation_source3_complex",
-    module_deps: ["encapsulation_source4"],
-
-    srcs: ["srcs/header3.h"],
-    out: ["header3.h"],
-
-    cmd: "cat ${in} ${encapsulation_source4_out} >> ${out}",
+    name: "encapsulation_source_mod_deps",
+    out: ["types.h"],
     export_gen_include_dirs: ["."],
-    encapsulates: ["encapsulation_source2"],
+    cmd: "echo '#define D2 2' > ${out}",
+    encapsulates: ["gen_srcs_two"]
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Case C - generated sources: direct and transitive encapsulation of outputs,
-// module 3 uses output of module 4 through module_srcs relation,
-// ignoring any further encapsulations that module 4 may have defined.
+bob_binary {
+    name: "validate_source_encapsulation_mod_deps",
+    generated_headers: ["encapsulation_source_mod_deps"],
+    srcs: ["test_deps.c"],
+    linux: {
+        build_wrapper: "source_encapsulation/check_includes.py",
+    },
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Case C - generated headers: direct encapsulation of outputs.
+// Test checks interaction of encapsulation with 'module_srcs'.
 //
-//             3 (root module)
-//            / .
-//           2   4
-//          /     \
-//         1       5 (should not be included by 3, but included by 4)
+// Module 2 depends on module 1 due to 'module_srcs' property.
+// Module 3 encapsulates module 2 which can see must_have.h but
+// not must_not_have.h
+//
+// Modules:
+// 1 - gen_srcs_three
+// 2 - gen_srcs_four
+// 3 - encapsulation_source_mod_srcs
+//
+//                    3 (root module)
+//    (encapsulates) /
+//                  2
+//   (module_srcs) /
+//                1
+//
+bob_generate_source {
+    name: "gen_srcs_three",
+    out: ["subdir/must_not_have.h"],
+    export_gen_include_dirs: ["subdir"],
+    cmd: "echo '#define D1 1' > ${out}",
+}
+
+bob_generate_source {
+    name: "gen_srcs_four",
+    out: ["must_have.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "cat ${in} > ${out}",
+    module_srcs: ["gen_srcs_three"],
+}
+
+bob_generate_source {
+    name: "encapsulation_source_mod_srcs",
+    out: ["types.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "echo '#define D2 2' > ${out}",
+    encapsulates: ["gen_srcs_four"]
+}
+
+bob_binary {
+    name: "validate_source_encapsulation_mod_srcs",
+    generated_headers: ["encapsulation_source_mod_srcs"],
+    srcs: ["test_deps.c"],
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Case D - generated headers: direct encapsulation of outputs and implicit outputs.
+// Test checks interaction of encapsulation with 'implicit_outs'.
+//
+// Module 1 has implicit output which should be available due to 2 encapsulating it.
+//
+// Modules:
+// 1 - gen_srcs_five
+// 2 - encapsulation_source_implicit_outs
+//
+//                    2 (root module)
+//    (encapsulates) /
+//                  1
+//
+bob_generate_source {
+    name: "gen_srcs_five",
+    out: ["message.h"],
+    implicit_outs: ["impl/implicit.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "echo '#error \"Error!\"' > ${out} && echo '#define IMPL 1' > ${gen_dir}/impl/implicit.h",
+}
+
+bob_generate_source {
+    name: "encapsulation_source_implicit_outs",
+    out: ["types.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "echo '#define D3 3' > ${out}",
+    encapsulates: ["gen_srcs_five"]
+}
+
+bob_binary {
+    name: "validate_source_encapsulation_implicit_outs",
+    generated_headers: ["encapsulation_source_implicit_outs"],
+    srcs: ["test_implicit.c"],
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Case E - generated sources: direct and transitive encapsulation of outputs.
+// Test should check complex case of direct and transitive encapsulation
+// together with use of 'module_srcs' property.
+//
+// Module 3 uses output of module 4 through 'module_srcs' relation while module
+// 4 encapsulates 5.
+// This way module 3 should have input of: encapsulation_generated_sources4/funcs.txt
+// and encapsulation_generated_sources5/fun5.c. Also it can see:
+// encapsulation_generated_sources1/fun1.c and encapsulation_generated_sources2/fun2.c
+// cause of encapsulation.
+//
+// Modules:
+// 1 - encapsulation_generated_sources1
+// 2 - encapsulation_generated_sources2
+// 3 - encapsulation_generated_sources3
+// 4 - encapsulation_generated_sources4
+// 5 - encapsulation_generated_sources5
+//
+//                     3
+//     (encapsulates) / \ (module_srcs)
+//                   2   4
+//   (encapsulates) /     \ (encapsulates)
+//                 1       5
 //
 bob_generate_source {
     name: "encapsulation_generated_sources1",
@@ -141,15 +259,13 @@ bob_generate_source {
 bob_generate_source {
     name: "encapsulation_generated_sources4",
 
+    srcs: ["srcs/fun2.c"],
     out: ["funcs.txt"],
 
     tool: "extract_funcs.py",
-    cmd: "python ${tool} --in ${encapsulation_generated_sources5_out} --out ${out}",
+    cmd: "python ${tool} --in ${in} --out ${out}",
 
     encapsulates: ["encapsulation_generated_sources5"],
-    // module_deps is required to get encapsulation_generated_sources5_out
-    // reference in cmd, as encapsulates does not create such reference
-    module_deps: ["encapsulation_generated_sources5"],
 }
 
 bob_generate_source {
@@ -159,39 +275,24 @@ bob_generate_source {
     out: ["fun3.c"],
 
     tool: "gen_fun3.py",
-    cmd: "python ${tool} --in ${in} --out ${out}",
+    cmd: "python ${tool} --in ${in} --out ${out} --expected encapsulation_generated_sources4/funcs.txt encapsulation_generated_sources5/fun5.c",
 
     encapsulates: ["encapsulation_generated_sources2"],
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-bob_binary {
-    name: "validate_source_encapsulation_simple",
-    generated_headers: ["encapsulation_source3"],
-    srcs: ["simple.c"],
-}
-
-bob_binary {
-    name: "validate_source_encapsulation_complex",
-    generated_headers: ["encapsulation_source3_complex"],
-    srcs: ["complex.c"],
-    linux: {
-        build_wrapper: "source_encapsulation/check_includes.py",
-    },
 }
 
 bob_binary {
     name: "validate_source_encapsulation_generated_sources",
     generated_sources: ["encapsulation_generated_sources3"],
-    srcs: ["main_fun.c"],
+    srcs: ["test_complex.c"],
 }
 
 bob_alias {
     name: "bob_test_source_encapsulation",
     srcs: [
         "validate_source_encapsulation_simple",
-        "validate_source_encapsulation_complex",
+        "validate_source_encapsulation_mod_deps",
+        "validate_source_encapsulation_mod_srcs",
+        "validate_source_encapsulation_implicit_outs",
         "validate_source_encapsulation_generated_sources",
     ],
 }

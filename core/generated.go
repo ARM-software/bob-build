@@ -379,8 +379,7 @@ func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtTyp
 func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]string) (depfiles []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
-			depTag := ctx.OtherModuleDependencyTag(m)
-			return depTag == generatedDepTag || depTag == encapsulatesTag
+			return ctx.OtherModuleDependencyTag(m) == generatedDepTag
 		},
 		func(m blueprint.Module) {
 			gen, ok := m.(dependentInterface)
@@ -389,18 +388,16 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			}
 
 			depName := ctx.OtherModuleName(m)
-			// don't provide _dir and _out placeholders for encapsulated modules
-			if ctx.OtherModuleDependencyTag(m) == generatedDepTag {
-				// When the dependent module is another Bob generated module, provide
-				// the location of its output dir so the using module can pick and
-				// choose what it uses.
-				if gc, ok := getGenerateCommon(m); ok {
-					args[depName+"_dir"] = gc.outputDir()
-					args[depName+"_out"] = strings.Join(gc.cmdOutputs(), " ")
-				} else {
-					args[depName+"_out"] = strings.Join(gen.outputs(), " ")
-				}
+			// When the dependent module is another Bob generated module, provide
+			// the location of its output dir so the using module can pick and
+			// choose what it uses.
+			if gc, ok := getGenerateCommon(m); ok {
+				args[depName+"_dir"] = gc.outputDir()
+				args[depName+"_out"] = strings.Join(gc.outputs(), " ")
+			} else {
+				args[depName+"_out"] = strings.Join(gen.outputs(), " ")
 			}
+
 			depfiles = append(depfiles, gen.outputs()...)
 			depfiles = append(depfiles, gen.implicitOutputs()...)
 		})
@@ -676,11 +673,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
-				if gc, ok := getGenerateCommon(m); ok {
-					srcs = append(srcs, gc.cmdOutputs()...)
-				} else {
-					srcs = append(srcs, gs.outputs()...)
-				}
+				srcs = append(srcs, gs.outputs()...)
 				srcs = append(srcs, gs.implicitOutputs()...)
 			} else {
 				panic(errors.New(ctx.OtherModuleName(m) + " does not have outputs"))
@@ -694,11 +687,9 @@ func getGeneratedEncapsulatedFiles(ctx blueprint.ModuleContext) (encapsulatedOut
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == encapsulatesTag },
 		func(m blueprint.Module) {
 			if gs, ok := getGenerateCommon(m); ok {
-				// Add output of our direct encapsulated dependencies
-				encapsulatedOuts = append(encapsulatedOuts, gs.cmdOutputs()...)
+				// Add output of encapsulated dependencies
+				encapsulatedOuts = append(encapsulatedOuts, gs.outputs()...)
 				encapsulatedOuts = append(encapsulatedOuts, gs.implicitOutputs()...)
-				// Add output of transitively encapsulated dependencies
-				encapsulatedOuts = append(encapsulatedOuts, gs.encapsulatedOutputs()...)
 			}
 		})
 	return

@@ -103,14 +103,9 @@ type encapsulatedOutputProducer struct {
 	encapsulatedMods []string
 }
 
-func (m *encapsulatedOutputProducer) cmdOutputs() []string {
-	// reuse outs as the outputs explicitly defined
-	return m.simpleOutputProducer.outputs()
-}
-
 func (m *encapsulatedOutputProducer) outputs() []string {
 	// for generated modules include encapsulated outputs
-	return utils.NewStringSlice(m.cmdOutputs(), m.encapsulatedOutputs())
+	return utils.NewStringSlice(m.simpleOutputProducer.outputs(), m.encapsulatedOutputs())
 }
 
 func (m *encapsulatedOutputProducer) encapsulatedOutputs() []string {

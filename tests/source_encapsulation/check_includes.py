@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2019 Arm Limited.
+# Copyright 2019-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script is intended to check the generated deps order of validate_source_encapsulation_complex
-# whose encapsulation look like:
+# This script is intended to check the generated deps order of
+# 'validate_source_encapsulation_mod_deps' whose encapsulation look like:
 #
-#         3
-#        / .
-#       /   .
-#      /     .
-#     2       4
-#    /         \
-#   1           5
+#                    3 (root module)
+#    (encapsulates) /
+#                  2
+#   (module_deps) /
+#                1
+#
 
 from __future__ import print_function
 
@@ -47,8 +46,13 @@ if not args.compile:
 
 includes = [os.path.basename(i) for i in args.includes]
 
-wanted_deps = ["encapsulation_source1", "encapsulation_source2", "encapsulation_source3_complex"]
-unwanted_deps = ["encapsulation_source4", "encapsulation_source5"]
+wanted_deps = [
+    "gen_srcs_two",
+    "encapsulation_source_mod_deps",
+]
+unwanted_deps = [
+    "gen_srcs_one",
+]
 
 have_unwanted = any(inc in unwanted_deps for inc in includes)
 have_wanted = all(inc in wanted_deps for inc in includes)
