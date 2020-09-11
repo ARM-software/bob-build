@@ -18,14 +18,39 @@
 from __future__ import print_function
 
 import argparse
+import os
 import sys
 
-parser = argparse.ArgumentParser(description='Generate fun3.c using function names from funcs.txt')
-parser.add_argument('--in', dest='input', action='store', required=True, help='Input file')
-parser.add_argument('--out', dest='output', action='store', required=True, help='Output file')
-args = parser.parse_args()
 
-s = '''
+def check_expected_input(input_files, expected_files):
+    if len(input_files) != len(expected_files):
+        print("Length mismatch! Input: {} Expected: {}".format(input_files, expected_files))
+        sys.exit(1)
+
+    for exp in expected_files:
+        found = False
+        for inp in input_files:
+            if inp.endswith(exp):
+                found = True
+                break
+        if not found:
+            print("Missed expected file '{}' within input {}".format(exp, input_files))
+            sys.exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='''Check whether provided input files match the \
+                                                    expected ones. Generate fun3.c using input \
+                                                    from funcs.txt''')
+    parser.add_argument('--in', dest='input', nargs='+', default=[], required=True,
+                        help='Input file list')
+    parser.add_argument('--expected', dest='expected', default=[], nargs='+',
+                        required=True, help='Expected input file list')
+    parser.add_argument('--out', dest='output', action='store', required=True, help='Output file',
+                        type=argparse.FileType('wt'))
+    args = parser.parse_args()
+
+    s = '''
 #define FUNCS "%(funcs)s"
 int fun3(void)
 {
@@ -33,15 +58,19 @@ int fun3(void)
 }
 '''.lstrip()
 
-try:
-    with open(args.input, 'r') as infile:
-        d = {'funcs': infile.read()}
-        try:
-            with open(args.output, 'w') as outfile:
-                outfile.write((s % d) + '\n')
-        except IOError as e:
-            print("Output file couldn't be created: " + str(e))
-            sys.exit(1)
-except IOError as e:
-    print("Input file couldn't be opened: " + str(e))
-    sys.exit(1)
+    check_expected_input(args.input, args.expected)
+
+    try:
+        for f in args.input:
+            filename = os.path.basename(f)
+            if filename == "funcs.txt":
+                with open(f, 'r') as infile:
+                    d = {'funcs': infile.read()}
+                    args.output.write((s % d) + '\n')
+    except IOError as e:
+        print("Input file couldn't be opened: " + str(e))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

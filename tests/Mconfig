@@ -302,11 +302,3 @@ config KERNEL_CC
 config KERNEL_CLANG_TRIPLE
 	string "Kernel Clang triple"
 	default "x86_64-linux-gnu" if ANDROID
-
-## Testing of unimplemented features
-config TEST_ENCAPSULATED_OUTPUTS
-	bool "Test `encapsulates` property"
-	default n
-	help
-	  When enabled, include tests which clarify the meaning of the
-	  `encapsulates` property. These currently do not pass.

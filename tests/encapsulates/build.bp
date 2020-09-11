@@ -16,7 +16,7 @@
  */
 
 /*
-*                 encapsulates_1_2_3
+ *                encapsulates_1_2_3
  *               /        |         \
  *              /   encapsulated2    encapsulated3
  * encapsulated1          |                 \ (module_deps)
@@ -97,10 +97,6 @@ bob_binary {
     name: "check_includes",
     generated_headers: ["encapsulates_1_2_3"],
     srcs: ["check_includes.c"],
-    enabled: false,
-    test_encapsulated_outputs: {
-        enabled: true,
-    },
 }
 
 // Check that ${modname_out} includes ${modname}'s encapsulated oututs
@@ -111,10 +107,6 @@ bob_generate_source {
     tool: "check_basenames.py",
     cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${encapsulates_1_2_3_out}",
     build_by_default: true,
-    enabled: false,
-    test_encapsulated_outputs: {
-        enabled: true,
-    },
 }
 
 // Check that module_srcs: [${modname}] includes ${modname}'s encapsulated oututs
@@ -125,10 +117,6 @@ bob_generate_source {
     tool: "check_basenames.py",
     cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${in}",
     build_by_default: true,
-    enabled: false,
-    test_encapsulated_outputs: {
-        enabled: true,
-    },
 }
 
 bob_alias {
