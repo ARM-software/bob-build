@@ -400,3 +400,24 @@ one of a few layouts, see [GDB documentation](https://sourceware.org/gdb/onlined
 The helper script `scripts/move_debug_files.py` can be used to move
 the debug files into a layout based on build IDs. This may need
 `-Wl,--build-id` to be passed to the linker.
+
+## Symbol versioning
+
+As software is developed, the interfaces exposed by a library may
+change. It is good practice to be backwards compatible with the
+previous release of the library. This allows code compiled against
+the old library to continue to run, and simplifies upgrading the
+library in the field.
+
+When an interface changes, it may be desirable to reuse the name of
+an existing interface rather than implementing a new interface with a
+slightly different name. This can be achieved by versioning the
+symbols that make up the library's interface. See [GNU Binutils
+documentation](https://sourceware.org/binutils/docs/ld/VERSION.html)
+for more information on symbol versioning. Also see [documentation on
+library versioning](versioning.md).
+
+Linkers support symbol versioning with version scripts. You can
+specify a version script to use by setting `version_script`. To refer
+to `bob_generate_source` module outputs use `${MODULE_out}` where
+MODULE is the module name.

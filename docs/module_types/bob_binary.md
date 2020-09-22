@@ -65,6 +65,8 @@ bob_binary {
     post_install_cmd: "${tool} ${args} ${out}",
     post_install_args: ["arg1", "arg2"],
 
+    version_script: "exports.map",
+
     // features available
 }
 ```

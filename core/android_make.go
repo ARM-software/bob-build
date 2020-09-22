@@ -241,6 +241,13 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 
 	writeListAssignment(sb, "LOCAL_SRC_FILES", srcs)
 
+	versionScript := m.getVersionScript(ctx)
+	if bt == binTypeShared || bt == binTypeExecutable {
+		if versionScript != nil {
+			additionalDeps = append(additionalDeps, *versionScript)
+		}
+	}
+
 	additionalDeps = append(additionalDeps, utils.PrefixDirs(nonCompiledDeps, "$(LOCAL_PATH)")...)
 	writeListAssignment(sb, "LOCAL_ADDITIONAL_DEPENDENCIES", additionalDeps)
 	writeListAssignment(sb, "LOCAL_C_INCLUDES", includes)
@@ -430,11 +437,18 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 
 	ldflags := utils.Filter(ccflags.AndroidLinkFlags, m.Properties.Ldflags)
 	ldflags = append(ldflags, copydtneeded)
+
+	if (bt == binTypeShared || bt == binTypeExecutable) && versionScript != nil {
+		ldflags = append(ldflags, tc.getLinker().setVersionScript(*versionScript))
+	}
+
 	if isMultiLib {
 		sb.WriteString("LOCAL_MULTILIB:=both\n")
 		writeListAssignment(sb, "LOCAL_LDFLAGS_32", ldflags)
+		writeListAssignment(sb, "LOCAL_LDFLAGS_64", ldflags)
+	} else {
+		writeListAssignment(sb, "LOCAL_LDFLAGS", ldflags)
 	}
-	writeListAssignment(sb, "LOCAL_LDFLAGS", ldflags)
 
 	if tgt == tgtTypeTarget {
 		writeListAssignment(sb, "LOCAL_LDLIBS", m.Properties.Ldlibs)

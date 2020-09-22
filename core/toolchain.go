@@ -36,6 +36,7 @@ type linker interface {
 	keepUnusedDependencies() string
 	dropUnusedDependencies() string
 	setRpathLink(string) string
+	setVersionScript(string) string
 	setRpath([]string) string
 	linkWholeArchives([]string) string
 	keepSharedLibraryTransitivity() string
@@ -83,6 +84,10 @@ func (l defaultLinker) getForwardingLibFlags() string {
 
 func (l defaultLinker) setRpathLink(path string) string {
 	return "-Wl,-rpath-link," + path
+}
+
+func (l defaultLinker) setVersionScript(path string) string {
+	return "-Wl,--version-script," + path
 }
 
 func (l defaultLinker) setRpath(paths []string) string {
@@ -799,6 +804,10 @@ func (l xcodeLinker) dropUnusedDependencies() string {
 }
 
 func (l xcodeLinker) setRpathLink(path string) string {
+	return ""
+}
+
+func (l xcodeLinker) setVersionScript(path string) string {
 	return ""
 }
 

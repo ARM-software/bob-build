@@ -90,5 +90,6 @@ bob_alias {
         "bob_test_static_libs",
         "bob_test_templates",
         "bob_test_transform_source",
+        "bob_test_version_script",
     ],
 }

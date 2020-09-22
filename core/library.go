@@ -18,8 +18,10 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -27,6 +29,8 @@ import (
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
+
+var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 
 type propertyExporter interface {
 	exportCflags() []string
@@ -62,6 +66,8 @@ type BuildProps struct {
 	Export_ldflags []string
 	// Shared library version
 	Library_version string
+	// Shared library version script
+	Version_script *string
 
 	// The list of shared lib modules that this library depends on.
 	// These are propagated to the closest linking object when specified on static libraries.
@@ -307,6 +313,8 @@ type library struct {
 		Build
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
+
+		VersionScriptModule *string `blueprint:"mutated"`
 	}
 }
 
@@ -593,8 +601,30 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 	return
 }
 
+func (l *library) getVersionScript(ctx blueprint.ModuleContext) *string {
+	if l.Properties.VersionScriptModule != nil {
+		module, _ := ctx.GetDirectDep(*l.Properties.VersionScriptModule)
+		outputs := module.(dependentInterface).outputs()
+		if len(outputs) != 1 {
+			panic(errors.New(ctx.OtherModuleName(module) + " must have exactly one output"))
+		}
+		return &outputs[0]
+	}
+	return l.Properties.Build.Version_script
+}
+
 func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	l.Properties.Build.processPaths(ctx, g)
+
+	versionScript := l.Properties.Build.Version_script
+	if versionScript != nil {
+		matches := depOutputsVarRegexp.FindStringSubmatch(*versionScript)
+		if len(matches) == 2 {
+			l.Properties.VersionScriptModule = &matches[1]
+		} else {
+			*versionScript = getBackendPathInSourceDir(getBackend(ctx), projectModuleDir(ctx), *versionScript)
+		}
+	}
 }
 
 func (m *library) filesToInstall(ctx blueprint.BaseModuleContext) []string {
@@ -777,6 +807,7 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 	} else if sl, ok := m.(*staticLibrary); ok {
 		props := sl.Properties
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
+		sl.checkField(props.Version_script == nil, "version_script")
 	}
 }
 

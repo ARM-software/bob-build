@@ -407,8 +407,9 @@ func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtTyp
 	return toolBin, toolTarget
 }
 
-// Returns the dependents of a generateSource module. This is used for more complex dependencies, where
-// the dependencies are not just a binary or a headers, but where the paths are used directly in a script
+// Returns the outputs of the generated dependencies of a module. This is used for more complex
+// dependencies, where the dependencies are not just binaries or headers, but where the paths are
+// used directly in a script
 func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]string) (depfiles []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
