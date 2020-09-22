@@ -1,0 +1,10 @@
+VERS_1 {
+  global:
+    _func1;
+  local:
+    *;
+};
+
+VERS_2 {
+  _func2;
+} VERS_1;

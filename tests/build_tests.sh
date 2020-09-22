@@ -260,6 +260,17 @@ UPDATE=(${build_dir}/target/executable/build_implicit_out
 check_dep_updated "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 if [ "$OS" != "OSX" ] ; then
+    # simple version script
+    SRC=tests/version_script/exports0.map
+    UPDATE=(${build_dir}/target/shared/libshared_vs_simple.so)
+    check_dep_updated "simple version script" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+    # generated version script
+    SRC=tests/version_script/exports1.map
+    UPDATE=(${build_dir}/gen/vs_version_map/exports2.map
+            ${build_dir}/target/shared/libshared_vs_gen.so)
+    check_dep_updated "generated version script" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
     # kernel module dependencies on sources
     SRC=tests/kernel_module/module1/test_module1.c
     UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)

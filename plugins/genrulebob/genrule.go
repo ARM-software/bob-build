@@ -121,6 +121,7 @@ var _ android.AndroidMkEntriesProvider = (*genrulebobCommon)(nil)
 var _ genruleInterface = (*genrulebobCommon)(nil)
 var _ android.Module = (*genrulebob)(nil)
 var _ android.Module = (*gensrcsbob)(nil)
+var _ android.SourceFileProducer = (*genrulebob)(nil)
 
 type generatedSourceTagType struct {
 	blueprint.BaseDependencyTag
@@ -260,6 +261,12 @@ func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 
 func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
 	return m.filterAllOutputs(utils.IsNotCompilableSource)
+}
+
+// Srcs implements the android.SourceFileProducer interface, which allows
+// the outputs of these modules to be referenced using the `:module` syntax.
+func (m *genrulebobCommon) Srcs() android.Paths {
+	return m.outputs().Paths()
 }
 
 func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {

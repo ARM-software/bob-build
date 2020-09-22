@@ -38,3 +38,4 @@
 ./static_libs/build.bp
 ./templates/build.bp
 ./transform_source/build.bp
+./version_script/build.bp

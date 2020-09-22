@@ -73,6 +73,8 @@ bob_shared_library {
     post_install_tool: "post_install.py",
     post_install_cmd: "${tool} ${args} ${out}",
     post_install_args: ["arg1", "arg2"],
+
+    version_script: "exports.map",
 }
 ```
 

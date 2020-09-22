@@ -479,6 +479,11 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
 	}
 
+	versionScript := l.getVersionScript(ctx)
+	if versionScript != nil {
+		ldflags = append(ldflags, tc.getLinker().setVersionScript(*versionScript))
+	}
+
 	sharedLibLdlibs, sharedLibLdflags := l.getSharedLibFlags(ctx)
 
 	linker := tc.getLinker().getTool()
@@ -530,7 +535,10 @@ func (b *binary) getLibArgs(ctx blueprint.ModuleContext) map[string]string {
 func (l *library) Implicits(ctx blueprint.ModuleContext) []string {
 	implicits := utils.NewStringSlice(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
 	implicits = append(implicits, l.getSharedLibLinkPaths(ctx)...)
-
+	versionScript := l.getVersionScript(ctx)
+	if versionScript != nil {
+		implicits = append(implicits, *versionScript)
+	}
 	return implicits
 }
 

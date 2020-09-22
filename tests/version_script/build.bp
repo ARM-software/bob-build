@@ -1,0 +1,49 @@
+bob_shared_library {
+    name: "libshared_vs_simple",
+    srcs: ["lib.c"],
+    version_script: "exports0.map",
+}
+
+bob_binary {
+    name: "vs_binary_simple",
+    srcs: ["main.c"],
+    shared_libs: ["libshared_vs_simple"],
+    install_group: "IG_binaries",
+    build_by_default: true, // Required on Android.mk
+    osx: {
+        enabled: false,
+    },
+}
+
+bob_generate_source {
+    name: "vs_version_map",
+    srcs: ["exports1.map"],
+    out: ["exports2.map"],
+    cmd: "sed s/_func/func/ ${in} > ${out}",
+}
+
+bob_shared_library {
+    name: "libshared_vs_gen",
+    srcs: ["lib.c"],
+    generated_deps: ["vs_version_map"],
+    version_script: "${vs_version_map_out}",
+}
+
+bob_binary {
+    name: "vs_binary_gen",
+    srcs: ["main.c"],
+    shared_libs: ["libshared_vs_gen"],
+    install_group: "IG_binaries",
+    build_by_default: true, // Required on Android.mk
+    osx: {
+        enabled: false,
+    },
+}
+
+bob_alias {
+    name: "bob_test_version_script",
+    srcs: [
+        "vs_binary_simple",
+        "vs_binary_gen",
+    ],
+}

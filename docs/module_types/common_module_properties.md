@@ -359,6 +359,11 @@ Arguments to insert into `post_install_cmd`. This allows arguments to
 added based on features and defaults. Not supported on Android.bp.
 
 ----
+### **bob_module.version_script** (optional)
+Linker script used for [symbol versioning](../user_guide/libraries_2.md#markdown-header-symbol-versioning).
+Only supported on binaries and shared libraries.
+
+----
 ### **bob_module.target_supported** (optional)
 If true, the module will be built using the target toolchain. `host_supported`
 and `target_supported` can both be enabled. In this case, the module will be

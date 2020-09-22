@@ -166,6 +166,14 @@ func addCFlags(m bpwriter.Module, cflags []string, conlyFlags []string, cxxFlags
 	return nil
 }
 
+func (g *androidBpGenerator) getVersionScript(l *library, ctx blueprint.ModuleContext) *string {
+	if l.Properties.VersionScriptModule != nil {
+		value := ":" + *l.Properties.VersionScriptModule
+		return &value
+	}
+	return l.Properties.Build.Version_script
+}
+
 func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	if len(l.Properties.Export_include_dirs) > 0 {
 		panic(fmt.Errorf("Module %s exports non-local include dirs %v - this is not supported",
@@ -332,6 +340,11 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 		m.AddBool("auto_gen_config", false)
 		m.AddBool("gtest", false)
 	}
+
+	versionScript := g.getVersionScript(&l.library, mctx)
+	if versionScript != nil {
+		m.AddString("version_script", *versionScript)
+	}
 }
 
 func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.ModuleContext) {
@@ -365,6 +378,11 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 	addStaticOrSharedLibraryProps(m, l.library, mctx)
 	if l.strip() {
 		addStripProp(m)
+	}
+
+	versionScript := g.getVersionScript(&l.library, mctx)
+	if versionScript != nil {
+		m.AddString("version_script", *versionScript)
 	}
 }
 
