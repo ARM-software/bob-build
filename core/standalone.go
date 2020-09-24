@@ -37,6 +37,8 @@ var (
 	configFile = os.Getenv("CONFIG_FILE")
 	configOpts = os.Getenv("BOB_CONFIG_OPTS")
 	srcdir     = os.Getenv("SRCDIR")
+
+	configJSONFile = "config.json"
 )
 
 type moduleBase struct {
@@ -79,7 +81,7 @@ func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
 	// specified in the config.
-	jsonPath := getPathInBuildDir("config.json")
+	jsonPath := getPathInBuildDir(configJSONFile)
 	config := &bobConfig{}
 	err := config.Properties.LoadConfig(jsonPath)
 	if err != nil {

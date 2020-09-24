@@ -234,7 +234,8 @@ func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 	var special = map[string]string{
-		"${bob_config}": configFile,
+		"${bob_config}":      configFile,
+		"${bob_config_json}": filepath.Join(getBuildDir(), configJSONFile),
 	}
 
 	// Look for special items. Remove from Srcs and add to Specials
