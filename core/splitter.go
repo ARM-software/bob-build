@@ -47,6 +47,14 @@ type splittable interface {
 	getSplittableProps() *SplittableProps
 }
 
+// targetSpecificLibrary extends splittable to allow retrieving specific data
+// for host and target.
+type targetSpecificLibrary interface {
+	// Get the target specific properties
+	getTargetSpecific(tgtType) *TargetSpecific
+	splittable
+}
+
 // Traverse the core properties of defaults to find out which variations are
 // supported.
 func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {

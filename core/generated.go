@@ -171,6 +171,12 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 	return split[0], strings.Join(split[1:], "/")
 }
 
+func (m *generateCommon) init(properties *configProperties, list ...interface{}) {
+	m.Properties.Features.Init(properties, list...)
+	m.Properties.FlagArgsBuild.Host.TargetProps.init(BuildProps{})
+	m.Properties.FlagArgsBuild.Target.TargetProps.init(BuildProps{})
+}
+
 func (m *generateCommon) shortName() string {
 	return m.Name()
 }
@@ -647,16 +653,18 @@ type transformSource struct {
 
 func generateSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
-	module.generateCommon.Properties.Features.Init(&config.Properties,
+	module.generateCommon.init(&config.Properties,
 		GenerateProps{}, GenerateSourceProps{})
+
 	return module, []interface{}{&module.generateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }
 
 func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &transformSource{}
-	module.generateCommon.Properties.Features.Init(&config.Properties,
+	module.generateCommon.init(&config.Properties,
 		GenerateProps{}, TransformSourceProps{})
+
 	return module, []interface{}{&module.generateCommon.Properties,
 		&module.Properties,
 		&module.SimpleName.Properties}

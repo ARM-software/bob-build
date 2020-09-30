@@ -59,8 +59,9 @@ func (m *generateStaticLibrary) outputFileName() string {
 
 func genStaticLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateStaticLibrary{}
-	module.generateCommon.Properties.Features.Init(&config.Properties, GenerateProps{},
+	module.generateCommon.init(&config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
+
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

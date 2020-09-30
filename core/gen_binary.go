@@ -59,7 +59,8 @@ func (m *generateBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func genBinaryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateBinary{}
-	module.generateCommon.Properties.Features.Init(&config.Properties, GenerateProps{})
+	module.generateCommon.init(&config.Properties, GenerateProps{})
+
 	return module, []interface{}{
 		&module.SimpleName.Properties,
 		&module.generateCommon.Properties,

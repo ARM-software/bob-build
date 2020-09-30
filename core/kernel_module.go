@@ -43,6 +43,10 @@ func (m *kernelModule) build() *Build {
 	return &m.Properties.Build
 }
 
+func (m *kernelModule) getTargetSpecific(tgt tgtType) *TargetSpecific {
+	return m.Properties.getTargetSpecific(tgt)
+}
+
 func (m *kernelModule) topLevelProperties() []interface{} {
 	return []interface{}{&m.Properties.Build.BuildProps}
 }
@@ -218,9 +222,8 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
+	module.Properties.Build.init(&config.Properties)
 	module.Properties.Features.Init(&config.Properties, BuildProps{})
-	module.Properties.Build.Target.Init(&config.Properties, BuildProps{})
-	module.Properties.Build.Host.Init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
