@@ -70,6 +70,10 @@ func (m *defaults) getTarget() tgtType {
 	return m.Properties.TargetType
 }
 
+func (m *defaults) getTargetSpecific(variant tgtType) *TargetSpecific {
+	return m.Properties.getTargetSpecific(variant)
+}
+
 func (m *defaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
 }
@@ -80,9 +84,8 @@ func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
+	module.Properties.Build.init(&config.Properties)
 	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
-	module.Properties.Build.Target.Init(&config.Properties, BuildProps{})
-	module.Properties.Build.Host.Init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }

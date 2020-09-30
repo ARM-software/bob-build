@@ -207,6 +207,22 @@ type Build struct {
 	SplittableProps
 }
 
+// Init initializes host and target specific data
+func (l *Build) init(properties *configProperties) {
+	l.getTargetSpecific(tgtTypeHost).init(properties)
+	l.getTargetSpecific(tgtTypeTarget).init(properties)
+}
+
+func (l *Build) getTargetSpecific(tgt tgtType) *TargetSpecific {
+	if tgt == tgtTypeHost {
+		return &l.Host
+	} else if tgt == tgtTypeTarget {
+		return &l.Target
+	} else {
+		panic(fmt.Errorf("Unsupported target type: %s", tgt))
+	}
+}
+
 // These function check the boolean pointers - which are only filled if someone sets them
 // If not, the default value is returned
 
@@ -257,39 +273,34 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 
 // Add module paths to srcs, exclude_srcs, local_include_dirs, export_local_include_dirs
 // and post_install_tool
-func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (l *BuildProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
+
 	l.SourceProps.processPaths(ctx, g)
 	l.InstallableProps.processPaths(ctx, g)
 	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)
 	l.Export_local_include_dirs = utils.PrefixDirs(l.Export_local_include_dirs, prefix)
 
-	// When prefixPaths is called we have collapsed features, but not
-	// targets, so we also need to expand paths in host and target
-	// specific properties as well.
-	l.Host.SourceProps.processPaths(ctx, g)
-	l.Host.Local_include_dirs = utils.PrefixDirs(l.Host.Local_include_dirs, prefix)
-	l.Host.Export_local_include_dirs = utils.PrefixDirs(l.Host.Export_local_include_dirs, prefix)
-
-	l.Target.SourceProps.processPaths(ctx, g)
-	l.Target.Local_include_dirs = utils.PrefixDirs(l.Target.Local_include_dirs, prefix)
-	l.Target.Export_local_include_dirs = utils.PrefixDirs(l.Target.Export_local_include_dirs, prefix)
-
 	// join module dir with relative kernel dir
 	if l.Kernel_dir != "" && !filepath.IsAbs(l.Kernel_dir) {
 		l.Kernel_dir = filepath.Join(prefix, l.Kernel_dir)
 	}
-	// do it also for host and target features
-	if l.Host.Kernel_dir != "" && !filepath.IsAbs(l.Host.Kernel_dir) {
-		l.Host.Kernel_dir = filepath.Join(prefix, l.Host.Kernel_dir)
-	}
-	if l.Target.Kernel_dir != "" && !filepath.IsAbs(l.Target.Kernel_dir) {
-		l.Target.Kernel_dir = filepath.Join(prefix, l.Target.Kernel_dir)
+
+	l.processBuildWrapper(ctx)
+}
+
+func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	// process paths for target specific data
+	for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {
+		tgtSpecific := l.getTargetSpecific(tgt)
+		tgtSpecificData := tgtSpecific.getTargetSpecificProps()
+
+		if tbp, ok := tgtSpecificData.(*BuildProps); ok {
+			tbp.processPaths(ctx, g)
+		}
 	}
 
-	l.BuildProps.processBuildWrapper(ctx)
-	l.Host.processBuildWrapper(ctx)
-	l.Target.processBuildWrapper(ctx)
+	l.BuildProps.processPaths(ctx, g)
 }
 
 // library is a base class for modules which are generated from sets of object files
@@ -379,6 +390,10 @@ func (l *library) setVariant(tgt tgtType) {
 
 func (l *library) getSplittableProps() *SplittableProps {
 	return &l.Properties.SplittableProps
+}
+
+func (l *library) getTargetSpecific(tgt tgtType) *TargetSpecific {
+	return l.Properties.getTargetSpecific(tgt)
 }
 
 func (l *library) outputName() string {
@@ -679,9 +694,8 @@ func (m *binary) outputFileName() string {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
+	l.Properties.Build.init(&config.Properties)
 	l.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
-	l.Properties.Build.Host.Features.Init(&config.Properties, BuildProps{})
-	l.Properties.Build.Target.Features.Init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }

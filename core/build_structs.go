@@ -45,10 +45,38 @@ type moduleWithBuildProps interface {
 	build() *Build
 }
 
+// TargetProps Type for generic target properties
+type TargetProps struct {
+	// 'BlueprintEmbed' is a special case in Blueprint which makes it interpret
+	// a runtime-generated type as being embedded in its parent struct.
+	BlueprintEmbed interface{}
+}
+
+// init Initilization of target specific properties
+func (t *TargetProps) init(list ...interface{}) {
+	if len(list) == 0 {
+		panic("List can't be empty")
+	}
+
+	propsType := coalesceTypes(typesOf(list...)...)
+	t.BlueprintEmbed = reflect.New(propsType).Interface()
+}
+
 // A TargetSpecific module is one that supports building on host and target.
 type TargetSpecific struct {
 	Features
-	BuildProps
+	TargetProps
+}
+
+// init initializes properties and features
+func (t *TargetSpecific) init(properties *configProperties) {
+	t.TargetProps.init(BuildProps{})
+	t.Features.Init(properties, BuildProps{})
+}
+
+// getTargetSpecificProps returns target specific property data as an empty interface
+func (t *TargetSpecific) getTargetSpecificProps() interface{} {
+	return t.TargetProps.BlueprintEmbed
 }
 
 // A type implementing dependentInterface can be depended upon by other modules.
@@ -298,9 +326,12 @@ func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	strippableProps := f.topLevelProperties()
 
-	if def, ok := mctx.Module().(targetable); ok {
-		strippableProps = append(strippableProps, []interface{}{&def.build().Host.BuildProps}...)
-		strippableProps = append(strippableProps, []interface{}{&def.build().Target.BuildProps}...)
+	if t, ok := mctx.Module().(targetable); ok {
+		for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {
+			tgtSpecific := t.build().getTargetSpecific(tgt)
+			tgtSpecificData := tgtSpecific.getTargetSpecificProps()
+			strippableProps = append(strippableProps, tgtSpecificData)
+		}
 	}
 
 	for _, props := range strippableProps {
@@ -429,18 +460,15 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 		return
 	}
 
-	var src *TargetSpecific
-	if tgt == tgtTypeHost {
-		src = &build.Host
-	} else if tgt == tgtTypeTarget {
-		src = &build.Target
-	} else {
+	if tgt != tgtTypeHost && tgt != tgtTypeTarget {
 		// This is fine - it can happen if the target is the default
 		return
 	}
 
+	targetProps := build.getTargetSpecific(tgt).getTargetSpecificProps()
+
 	// Copy the target-specific variables to the core set
-	err := proptools.AppendMatchingProperties([]interface{}{&build.BuildProps}, &src.BuildProps, nil)
+	err := proptools.AppendMatchingProperties([]interface{}{&build.BuildProps}, targetProps, nil)
 	if err != nil {
 		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())

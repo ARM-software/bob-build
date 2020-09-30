@@ -101,10 +101,15 @@ func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// need to apply templates with the core set, as well as
 		// host-specific and target-specific sets (where applicable).
 		props := append([]interface{}{}, m.topLevelProperties()...)
-		if m, ok := module.(moduleWithBuildProps); ok {
-			props = append(props, &m.build().Host.BuildProps)
-			props = append(props, &m.build().Target.BuildProps)
+
+		if ts, ok := module.(targetSpecificLibrary); ok {
+			host := ts.getTargetSpecific(tgtTypeHost)
+			target := ts.getTargetSpecific(tgtTypeTarget)
+
+			props = append(props, host.getTargetSpecificProps())
+			props = append(props, target.getTargetSpecificProps())
 		}
+
 		for _, p := range props {
 			ApplyTemplate(p, cfgProps)
 		}
@@ -130,12 +135,16 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// supported, the host-specific and target-specific set.
 		var props = []propmap{propmap{m.topLevelProperties(), m.features()}}
 
-		if m, ok := module.(moduleWithBuildProps); ok {
+		if ts, ok := module.(targetSpecificLibrary); ok {
+			host := ts.getTargetSpecific(tgtTypeHost)
+			target := ts.getTargetSpecific(tgtTypeTarget)
+
 			var tgtprops = []propmap{
-				propmap{[]interface{}{&m.build().Host.BuildProps}, &m.build().Host.Features},
-				propmap{[]interface{}{&m.build().Target.BuildProps}, &m.build().Target.Features},
+				propmap{[]interface{}{host.getTargetSpecificProps()}, &host.Features},
+				propmap{[]interface{}{target.getTargetSpecificProps()}, &target.Features},
 			}
 			props = append(props, tgtprops...)
+
 		}
 
 		for _, prop := range props {
