@@ -329,7 +329,8 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			dependents = append(dependents, gdep.outputs().Paths()...)
 			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
 			args[varName+"_dir"] = gdep.outputPath().String()
-			args[varName+"_out"] = strings.Join(gdep.outputs().Strings(), " ")
+			args[varName+"_out"] = utils.Join(gdep.outputs().Strings(), gdep.getEncapsulatedOuts().Strings())
+
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
@@ -338,11 +339,13 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			args[varName+"_out"] = out.String()
 		}
 	})
+
 	// add outputs of encapsulated modules
 	ctx.VisitDirectDepsWithTag(encapsulatesTag, func(dep android.Module) {
 		if gdep, ok := dep.(genruleInterface); ok {
 			dependents = append(dependents, gdep.outputs().Paths()...)
 			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
+			dependents = append(dependents, gdep.getEncapsulatedOuts()...)
 		}
 	})
 
@@ -354,6 +357,7 @@ func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []andr
 		if gdep, ok := dep.(genruleInterface); ok {
 			srcs = append(srcs, gdep.outputs().Paths()...)
 			srcs = append(srcs, gdep.implicitOutputs().Paths()...)
+			srcs = append(srcs, gdep.getEncapsulatedOuts()...)
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			srcs = append(srcs, ccmod.OutputFile().Path())
 		}
