@@ -186,7 +186,7 @@ bob_generate_source {
     out: ["message.h"],
     implicit_outs: ["impl/implicit.h"],
     export_gen_include_dirs: ["."],
-    cmd: "echo '#error \"Error!\"' > ${out} && echo '#define IMPL 1' > ${gen_dir}/impl/implicit.h",
+    cmd: "echo '#error \"Error!\"' > ${out} && mkdir -p ${gen_dir}/impl && echo '#define IMPL 1' > ${gen_dir}/impl/implicit.h",
 }
 
 bob_generate_source {
