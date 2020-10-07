@@ -95,6 +95,38 @@ func (g *androidBpGenerator) escapeFlag(s string) string {
 	return s
 }
 
+func addInstallProps(m bpwriter.Module, props *InstallableProps, proprietary bool) {
+	installBase, installRel, ok := getSoongInstallPath(props)
+	if ok {
+		switch installBase {
+		case "data":
+			m.AddBool("install_in_data", true)
+		case "tests":
+			/* Eventually we want to install in testcases,
+			 * but we can't put binaries there yet:
+			 * bpmod.AddBool("install_in_testcases", true)
+			 * So place resources in /data/nativetest to align with cc_test.
+			 *
+			 * `nativetest` has no corresponding `InstallIn...` method,
+			 * so request the `/data` partition and add the `nativetest`
+			 * part in as another relative component. */
+			m.AddBool("install_in_data", true)
+			if proprietary {
+				// Vendor modules need an additional path element to match cc_test
+				installRel = filepath.Join("nativetest", "vendor", installRel)
+			} else {
+				installRel = filepath.Join("nativetest", installRel)
+			}
+		default:
+			/* Paths like `lib/modules` are implicitly in /system, or /vendor, but
+			 * unlike e.g. a library, which would add the `lib` for us, we need to add
+			 * it ourselves here - so the whole path is used as the relative part. */
+			installRel = filepath.Join(installBase, installRel)
+		}
+		m.AddString("install_path", installRel)
+	}
+}
+
 type androidBpSingleton struct {
 }
 
