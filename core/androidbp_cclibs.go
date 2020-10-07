@@ -110,15 +110,6 @@ func (l *library) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (h
 	return
 }
 
-func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
-	if props.isProprietary() {
-		m.AddString("owner", props.Owner)
-		m.AddBool("vendor", true)
-		m.AddBool("proprietary", true)
-		m.AddBool("soc_specific", true)
-	}
-}
-
 func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
 	if props.Pgo.Profile_file == nil {
 		return

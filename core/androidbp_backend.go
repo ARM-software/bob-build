@@ -95,6 +95,15 @@ func (g *androidBpGenerator) escapeFlag(s string) string {
 	return s
 }
 
+func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
+	if props.isProprietary() {
+		m.AddString("owner", props.Owner)
+		m.AddBool("vendor", true)
+		m.AddBool("proprietary", true)
+		m.AddBool("soc_specific", true)
+	}
+}
+
 func addInstallProps(m bpwriter.Module, props *InstallableProps, proprietary bool) {
 	installBase, installRel, ok := getSoongInstallPath(props)
 	if ok {
