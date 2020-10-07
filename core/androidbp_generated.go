@@ -121,6 +121,9 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	m.AddStringList("implicit_outs", gs.Properties.Implicit_outs)
 
 	populateCommonProps(&gs.generateCommon, mctx, m)
+
+	// No AndroidProps in gen sources, so always in vendor for now
+	addInstallProps(m, gs.getInstallableProps(), true)
 }
 
 func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx blueprint.ModuleContext) {
@@ -142,4 +145,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 	gr.AddStringList("implicit_outs", ts.Properties.TransformSourceProps.Out.Implicit_outs)
 
 	populateCommonProps(&ts.generateCommon, mctx, m)
+
+	// No AndroidProps in gen sources, so always in vendor for now
+	addInstallProps(m, ts.getInstallableProps(), true)
 }
