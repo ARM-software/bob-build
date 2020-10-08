@@ -59,7 +59,7 @@ func (m *defaults) build() *Build {
 }
 
 func (m *defaults) topLevelProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps}
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
 }
 
 func (m *defaults) features() *Features {
@@ -80,7 +80,7 @@ func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
-	module.Properties.Features.Init(&config.Properties, BuildProps{})
+	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
 	module.Properties.Build.Target.Init(&config.Properties, BuildProps{})
 	module.Properties.Build.Host.Init(&config.Properties, BuildProps{})
 

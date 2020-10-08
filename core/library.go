@@ -150,7 +150,6 @@ type BuildProps struct {
 
 	InstallableProps
 	EnableableProps
-	SplittableProps
 	StripProps
 	AndroidProps
 	AndroidPGOProps
@@ -205,6 +204,7 @@ type Build struct {
 	BuildProps
 	Target TargetSpecific
 	Host   TargetSpecific
+	SplittableProps
 }
 
 // These function check the boolean pointers - which are only filled if someone sets them
@@ -316,7 +316,7 @@ func (l *library) build() *Build {
 }
 
 func (l *library) topLevelProperties() []interface{} {
-	return []interface{}{&l.Properties.Build.BuildProps}
+	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
 }
 
 func (l *library) features() *Features {
@@ -679,7 +679,7 @@ func (m *binary) outputFileName() string {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	l.Properties.Features.Init(&config.Properties, BuildProps{})
+	l.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
 	l.Properties.Build.Host.Features.Init(&config.Properties, BuildProps{})
 	l.Properties.Build.Target.Features.Init(&config.Properties, BuildProps{})
 

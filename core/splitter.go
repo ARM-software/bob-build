@@ -55,19 +55,6 @@ func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
 		return
 	}
 
-	// It's not valid to specify host_supported or target_supported in a
-	// target: {} or host: {} section
-	if moduleWithBuildProps, ok := mctx.Module().(moduleWithBuildProps); ok {
-		b := moduleWithBuildProps.build()
-		if b.Host.SplittableProps.Host_supported != nil ||
-			b.Host.SplittableProps.Target_supported != nil ||
-			b.Target.SplittableProps.Host_supported != nil ||
-			b.Target.SplittableProps.Target_supported != nil {
-			panic(fmt.Errorf("target-specific [host|target]_supported in module %s",
-				mctx.ModuleName()))
-		}
-	}
-
 	// Defaults are always split into both variants
 	if _, isDefaults := mctx.Module().(*defaults); isDefaults {
 		return
