@@ -7,6 +7,7 @@ Bob
 - [Build definitions](build_defs.md)
 - [Initial project setup](project_setup.md)
 - [Features](features.md)
+- [String Manipulation](strings.md)
 - [User Guide](user_guide/index.md)
 
 ## Reference info
