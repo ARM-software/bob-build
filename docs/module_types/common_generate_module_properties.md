@@ -38,6 +38,9 @@ line, they should be escaped with backslash (\) to get through the
 blueprint parser. Where a `$` needs to be evaluated by the shell (for
 example to expand an environment variable) use `$$`.
 
+The [`match_srcs`](../strings.md#match_srcs) function can be used in
+this property to reference files listed in `srcs`.
+
 ----
 ### **bob_generated.tool** (required)
 A path to the tool that is to be used in `cmd`. If `${tool}` is in
@@ -64,6 +67,9 @@ The dependencies will be added to the list of srcs.
 ----
 ### **bob_generated.args** (optional)
 A list of `args` that will be space separated and added to the `cmd`.
+
+The [`match_srcs`](../strings.md#match_srcs) function can be used in
+this property to reference files listed in `srcs`.
 
 ----
 ### **bob_generated.console** (optional)

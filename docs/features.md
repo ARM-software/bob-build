@@ -15,9 +15,9 @@ with the output of the config system. Each config option (e.g. `DEBUG`)
 generates a matching feature (`debug`).
 
 ## How a feature is set and referred to
-A feature added to [Mconfig](docs/config_system.md) (e.g. `FOO`)
+A feature added to [Mconfig](config_system.md) (e.g. `FOO`)
 becomes `CONFIG_xxx=value` (e.g. `CONFIG_FOO=value`) in
-`$OUT/build.config`. We can refer to it in Bob modules as follows:
+`$OUT/bob.config`. We can refer to it in Bob modules as follows:
 
 ```bp
 bob_module_type {
@@ -54,53 +54,14 @@ are required, then a new config option should be added to calculate this.
 
 Features must not have the same name as any Bob module property.
 
-## Templated parameters
-This feature allows for string replacements, using
-[Go's built-in template system](https://golang.org/pkg/text/template/).
+## Example
 
-Configuration values are provided to the Go templates as data (as a
-map), and can be accessed by using keys, so `{{.param}}` will be
-replaced with the value of `param` from the config. If `param` is a
-boolean value, `1` will be used for true and `0` for false.
+This example shows a choice group of mutually exclusive colors. Each
+value is a [boolean](config_system.md#booleans) property - here, if
+the choice is `RED`, the file `src/red_support.cpp` is compiled.
 
-A few custom functions are implemented by Bob:
-
-`{{to_upper .param}}` - return the parameter as upper case
-
-`{{to_lower .param}}` - return the parameter as lower case
-
-`{{split .param sep}}` - separate the parameter into an array on each occurence of `sep`
-
-`{{reg_match regexp .param}}` - test if the parameter matches a regular expression
-
-`{{reg_replace regexp .param replace_re}}` - regular expression replacement on parameter
-
-`{{match_srcs file_glob}}` - expand to matching files in the module's
-                             `srcs` property (only valid in `ldflags`,
-                             `cmd` and `args`)
-
-`{{add_if_supported compiler_flag}}` - return the parameter if the compiler used for
-                                     the module recognises it as a valid argument
-
-Go templates natively support more. [Check Go template package.](https://golang.org/pkg/text/template/)
-
-#### Example
-This example shows an enum-like config option, `COLOR`, which is chosen based on
-a choice group, where it can hold only the values of selected colors. The value
-of `COLOR` is substituted into a compiler flag using the Go template syntax
-`{{.color}}`. In the choice group, each value can also be used as a boolean
-property - here, if the color is `RED`, another source file is added (see
-section "Booleans").
-
-#### Example
 config file:
 ```
-config COLOR
-	string
-	default "blue" if BLUE
-	default "red" if RED
-	default "green" if GREEN
-
 choice
 	prompt "Favourite color"
 	default BLUE
@@ -117,10 +78,15 @@ endchoice
 ```bp
 bob_static_library {
     name: "libColor",
-    cflags: ["-pthread", "-DCOLOR={{.color}}"],
     srcs: ["src/main.cpp"],
     red: {
         srcs: ["src/red_support.cpp"],
+    },
+    green: {
+        srcs: ["src/green_support.cpp"],
+    },
+    blue: {
+        srcs: ["src/blue_support.cpp"],
     },
 }
 ```

@@ -76,8 +76,13 @@ The list of source files. Wildcards can be used, although they are suboptimal;
 each directory in which a wildcard is used will have to be rescanned at every
 build.
 
-Source files, given with the parameter `srcs`, are
-relative to the directory of the `build.bp` file.
+Source files, given with the parameter `srcs`, are relative to the
+directory of the `build.bp` file.
+
+An appropriate compiler will be invoked for each source file based on
+its file extension. Files with an unknown extension are only allowed
+if referenced by [`match_srcs`](../strings.md#match_srcs) usage within
+the module, otherwise an error will be raised.
 
 ----
 ### **bob_module.exclude_srcs** (optional)
@@ -104,6 +109,9 @@ templates can be used. Otherwise each flag should be written
 as the C compiler expects to see it in its argument list i.e. without
 shell escaping. Expansion of environment variables, ninja variables,
 or make variables is not possible.
+
+The [`add_if_supported`](../strings.md#add_if_supported) function can be
+used to add a compiler argument only if it is supported.
 
 For example to define a string literal:
 
@@ -153,6 +161,9 @@ templates can be used. Otherwise each flag should be written
 as the linker expects to see it in its argument list i.e. without
 shell escaping. Expansion of environment variables, ninja variables,
 or make variables is not possible.
+
+The [`match_srcs`](../strings.md#match_srcs) function can be used in
+this property to reference files listed in `srcs`.
 
 ---
 ### **bob_module.header_libs** (optional)
