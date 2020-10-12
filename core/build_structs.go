@@ -507,19 +507,15 @@ func collectReexportLibsDependenciesMutator(mctx blueprint.TopDownMutatorContext
 	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := mctx.OtherModuleDependencyTag(child)
 		if depTag == wholeStaticDepTag || depTag == staticDepTag || depTag == sharedDepTag {
-			var parentBuild *Build
-			if moduleWithBuildProps, ok := parent.(moduleWithBuildProps); ok {
-				parentBuild = moduleWithBuildProps.build()
-			} else {
+			parentModule, ok1 := parent.(moduleWithBuildProps)
+			childModule, ok2 := child.(moduleWithBuildProps)
+
+			if !ok1 || !ok2 {
 				return false
 			}
 
-			var childBuild *Build
-			if moduleWithBuildProps, ok := child.(moduleWithBuildProps); ok {
-				childBuild = moduleWithBuildProps.build()
-			} else {
-				return false
-			}
+			parentBuild := parentModule.build()
+			childBuild := childModule.build()
 
 			if len(childBuild.Reexport_libs) > 0 &&
 				(parent.Name() == mainModule.Name() || utils.Contains(parentBuild.Reexport_libs, child.Name())) {

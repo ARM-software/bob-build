@@ -154,6 +154,12 @@ type generateCommon struct {
 	}
 }
 
+// generateCommon support {{match_srcs}} on some properties
+var _ matchSourceInterface = (*generateCommon)(nil)
+
+// generateCommon have properties that require escaping
+var _ propertyEscapeInterface = (*generateCommon)(nil)
+
 // Modules implementing hostBin are able to supply a host binary that can be executed
 type hostBin interface {
 	hostBin() string
@@ -231,6 +237,27 @@ func (m *generateCommon) setVariant(variant tgtType) {
 
 func (m *generateCommon) getSplittableProps() *SplittableProps {
 	return &m.Properties.FlagArgsBuild.SplittableProps
+}
+
+func (m *generateCommon) getEscapeProperties() []*[]string {
+	return []*[]string{
+		&m.Properties.FlagArgsBuild.Asflags,
+		&m.Properties.FlagArgsBuild.Cflags,
+		&m.Properties.FlagArgsBuild.Conlyflags,
+		&m.Properties.FlagArgsBuild.Cxxflags,
+		&m.Properties.FlagArgsBuild.Ldflags}
+}
+
+func (m *generateCommon) getSourceProperties() *SourceProps {
+	return &m.Properties.GenerateProps.SourceProps
+}
+
+// {{match_srcs}} template is only applied in specific properties where we've
+// seen sensible use-cases and for `generateCommon` these are:
+//  - Args
+//  - Cmd
+func (m *generateCommon) getMatchSourcePropNames() []string {
+	return []string{"Cmd", "Args"}
 }
 
 // Populate the output from inout structures that have already been

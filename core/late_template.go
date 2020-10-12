@@ -29,6 +29,11 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
+type matchSourceInterface interface {
+	getSourceProperties() *SourceProps
+	getMatchSourcePropNames() []string
+}
+
 // Insert a function callback for a specific property.
 func addtoFuncmap(propfnmap map[string]template.FuncMap, propList []string, name string,
 	fn interface{}) {
@@ -131,17 +136,9 @@ func setupMatchSources(mctx blueprint.BaseModuleContext,
 	var sourceProps *SourceProps
 	var matchSrcProps []string
 
-	module := mctx.Module()
-
-	if gsc, ok := getGenerateCommon(module); ok {
-		sourceProps = &gsc.Properties.SourceProps
-		matchSrcProps = append(matchSrcProps, "Cmd")
-		matchSrcProps = append(matchSrcProps, "Args")
-
-	} else if buildProps, ok := module.(moduleWithBuildProps); ok {
-		sourceProps = &buildProps.build().SourceProps
-		matchSrcProps = append(matchSrcProps, "Ldflags")
-		// {{match_srcs}} not supported on export_ldflags
+	if m, ok := mctx.Module().(matchSourceInterface); ok {
+		sourceProps = m.getSourceProperties()
+		matchSrcProps = m.getMatchSourcePropNames()
 	}
 
 	nonCompiledSources := sourceProps.initializeNonCompiledSourceMap(mctx)

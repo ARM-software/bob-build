@@ -23,6 +23,10 @@ import (
 	"github.com/ARM-software/bob-build/internal/escape"
 )
 
+type propertyEscapeInterface interface {
+	getEscapeProperties() []*[]string
+}
+
 func escapeMutator(mctx blueprint.TopDownMutatorContext) {
 	// This mutator is not registered on the androidbp backend, as it
 	// doesn't need escaping
@@ -43,20 +47,12 @@ func escapeMutator(mctx blueprint.TopDownMutatorContext) {
 	}
 
 	// Escape libraries as well as generator modules
-	var build *Build
-	if b, ok := module.(moduleWithBuildProps); ok {
-		build = b.build()
-	} else if gsc, ok := getGenerateCommon(module); ok {
-		build = &gsc.Properties.FlagArgsBuild
-	} else {
-		return
-	}
+	if m, ok := module.(propertyEscapeInterface); ok {
+		escapeProps := m.getEscapeProperties()
 
-	// Escape each of asflags, cflags, conlyflags, cxxflags, and ldflags
-	// If the flags contain template sequences, we avoid escaping those
-	build.Asflags = escape.EscapeTemplatedStringList(build.Asflags, g.escapeFlag)
-	build.Cflags = escape.EscapeTemplatedStringList(build.Cflags, g.escapeFlag)
-	build.Conlyflags = escape.EscapeTemplatedStringList(build.Conlyflags, g.escapeFlag)
-	build.Cxxflags = escape.EscapeTemplatedStringList(build.Cxxflags, g.escapeFlag)
-	build.Ldflags = escape.EscapeTemplatedStringList(build.Ldflags, g.escapeFlag)
+		for _, prop := range escapeProps {
+			// If the flags contain template sequences, we avoid escaping those
+			*prop = escape.EscapeTemplatedStringList(*prop, g.escapeFlag)
+		}
+	}
 }
