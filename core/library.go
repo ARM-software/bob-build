@@ -318,6 +318,12 @@ type library struct {
 
 var _ propertyExporter = (*library)(nil)
 
+// library support {{match_srcs}} on some properties
+var _ matchSourceInterface = (*library)(nil)
+
+// library have properties that require escaping
+var _ propertyEscapeInterface = (*library)(nil)
+
 func (l *library) defaults() []string {
 	return l.Properties.Defaults
 }
@@ -428,6 +434,26 @@ func (l *library) altShortName() string {
 		return l.altName() + "__" + string(l.Properties.TargetType)
 	}
 	return l.altName()
+}
+
+func (l *library) getEscapeProperties() []*[]string {
+	return []*[]string{
+		&l.Properties.Asflags,
+		&l.Properties.Cflags,
+		&l.Properties.Conlyflags,
+		&l.Properties.Cxxflags,
+		&l.Properties.Ldflags}
+}
+
+func (l *library) getSourceProperties() *SourceProps {
+	return &l.Properties.SourceProps
+}
+
+// {{match_srcs}} template is only applied in specific properties where we've
+// seen sensible use-cases and for `BuildProps` this is:
+//  - Ldflags
+func (l *library) getMatchSourcePropNames() []string {
+	return []string{"Ldflags"}
 }
 
 // Returns the shortname for the output, which is used as a phony target. If it

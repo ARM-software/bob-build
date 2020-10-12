@@ -81,6 +81,26 @@ func (m *defaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBack
 func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
+func (m *defaults) getEscapeProperties() []*[]string {
+	return []*[]string{
+		&m.Properties.Asflags,
+		&m.Properties.Cflags,
+		&m.Properties.Conlyflags,
+		&m.Properties.Cxxflags,
+		&m.Properties.Ldflags}
+}
+
+func (m *defaults) getSourceProperties() *SourceProps {
+	return &m.Properties.SourceProps
+}
+
+// {{match_srcs}} template is only applied in specific properties where we've
+// seen sensible use-cases and for `BuildProps` this is:
+//  - Ldflags
+func (m *defaults) getMatchSourcePropNames() []string {
+	return []string{"Ldflags"}
+}
+
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
@@ -114,6 +134,12 @@ var _ featurable = (*defaults)(nil)
 
 // Defaults contain path fragments which need to be prefixes
 var _ pathProcessor = (*defaults)(nil)
+
+// Defaults support {{match_srcs}} on some properties
+var _ matchSourceInterface = (*defaults)(nil)
+
+// Defaults have properties that require escaping
+var _ propertyEscapeInterface = (*defaults)(nil)
 
 func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 	if l, ok := mctx.Module().(defaultable); ok {
