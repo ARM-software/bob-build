@@ -323,12 +323,13 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper")
 
-var wholeStaticScript = "${BobScriptsDir}/whole_static.py"
+var _ = pctx.StaticVariable("whole_static_tool", "${BobScriptsDir}/whole_static.py")
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
 		Command:     "$whole_static_tool --build-wrapper \"$build_wrapper\" --ar $ar --out $out $in $whole_static_libs",
+		CommandDeps: []string{"$whole_static_tool"},
 		Description: "$out",
-	}, "ar", "build_wrapper", "whole_static_libs", "whole_static_tool")
+	}, "ar", "build_wrapper", "whole_static_libs")
 
 func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
 
@@ -353,9 +354,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 
 	if len(wholeStaticLibs) > 0 {
 		rule = wholeStaticLibraryRule
-		args["whole_static_tool"] = wholeStaticScript
 		args["whole_static_libs"] = strings.Join(wholeStaticLibs, " ")
-		implicits = append(implicits, wholeStaticScript)
 	}
 
 	// The archiver rules do not allow adding arguments that the user can
@@ -680,11 +679,11 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		})
 }
 
-var stripScript = "${BobScriptsDir}/strip.py"
+var _ = pctx.StaticVariable("strip", "${BobScriptsDir}/strip.py")
 var stripRule = pctx.StaticRule("strip",
 	blueprint.RuleParams{
-		Command: stripScript +
-			" $args --tool $tool -o $out $in",
+		Command:     "$strip $args --tool $tool -o $out $in",
+		CommandDeps: []string{"$strip"},
 		Description: "strip $out",
 	}, "args", "tool")
 
@@ -776,12 +775,11 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 				}
 				ctx.Build(pctx,
 					blueprint.BuildParams{
-						Rule:      stripRule,
-						Outputs:   []string{strippedSrc},
-						Inputs:    []string{src},
-						Args:      stripArgs,
-						Implicits: []string{stripScript},
-						Optional:  true,
+						Rule:     stripRule,
+						Outputs:  []string{strippedSrc},
+						Inputs:   []string{src},
+						Args:     stripArgs,
+						Optional: true,
 					})
 				src = strippedSrc
 			}
