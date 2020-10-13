@@ -1011,62 +1011,6 @@ func copyFileIfExists(ctx blueprint.ModuleContext, source string, dest string) {
 		})
 }
 
-func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
-	return filepath.Join("${BuildDir}", "target", "kernel_modules", m.outputName())
-}
-
-var kbuildRule = pctx.StaticRule("kbuild",
-	blueprint.RuleParams{
-		Command: "python $kmod_build -o $out --depfile $depfile " +
-			"--common-root ${SrcDir} " +
-			"--module-dir $output_module_dir $extra_includes " +
-			"--sources $in " +
-			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
-			"$cc_flag $hostcc_flag $clang_triple_flag $ld_flag " +
-			"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
-		Depfile:     "$out.d",
-		Deps:        blueprint.DepsGCC,
-		Pool:        blueprint.Console,
-		Description: "$out",
-	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kernel_dir", "kernel_cross_compile",
-	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
-
-func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
-	// Calculate and record outputs
-	m.outputdir = g.kernelModOutputDir(m)
-	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
-
-	args := m.generateKbuildArgs(ctx).toDict()
-	sources := utils.NewStringSlice(
-		getBackendPathsInSourceDir(g, m.Properties.getSources(ctx)),
-		m.Properties.Build.SourceProps.Specials,
-		m.extraSymbolsFiles(ctx))
-
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:      kbuildRule,
-			Outputs:   m.outputs(),
-			Inputs:    sources,
-			Implicits: []string{args["kmod_build"]},
-			Optional:  false,
-			Args:      args,
-		})
-
-	// Add a dependency between Module.symvers and the kernel module. This
-	// should really be added to Outputs or ImplicitOutputs above, but
-	// Ninja doesn't support dependency files with multiple outputs yet.
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:     blueprint.Phony,
-			Inputs:   m.outputs(),
-			Outputs:  []string{filepath.Join(m.outputDir(), "Module.symvers")},
-			Optional: true,
-		})
-
-	installDeps := g.install(m, ctx)
-	addPhony(m, ctx, installDeps, false)
-}
-
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *bobConfig) {
 	g.toolchainSet.parseConfig(config)
 }
