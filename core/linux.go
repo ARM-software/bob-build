@@ -542,6 +542,31 @@ func (l *library) Implicits(ctx blueprint.ModuleContext) []string {
 	return implicits
 }
 
+var _ = pctx.StaticVariable("toc", "${BobScriptsDir}/library_toc.py")
+var tocRule = pctx.StaticRule("shared_library_toc",
+	blueprint.RuleParams{
+		Command:     "$toc $in -o $out $tocflags",
+		CommandDeps: []string{"$toc"},
+		Description: "Generate toc $out",
+		Restat:      true,
+	},
+	"tocflags")
+
+func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile string, tgt tgtType) {
+	tc := g.getToolchain(tgt)
+	tocFile := soFile + ".toc"
+	tocFlags := tc.getLibraryTocFlags()
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:     tocRule,
+			Outputs:  []string{tocFile},
+			Inputs:   []string{soFile},
+			Optional: true,
+			Args:     map[string]string{"tocflags": strings.Join(tocFlags, " ")},
+		})
+}
+
 // Get the size of the link pool, to limit the number of concurrent link jobs,
 // as these are often memory-intensive. This can be overridden with an
 // environment variable.
@@ -579,11 +604,13 @@ var symlinkRule = pctx.StaticRule("symlink",
 func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
 	m.outputdir = g.sharedLibOutputDir(m)
+	var soFile string
 	if m.library.Properties.Library_version == "" {
-		m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+m.fileNameExtension)}
+		soFile = filepath.Join(m.outputDir(), m.outputName()+m.fileNameExtension)
 	} else {
-		m.outs = []string{filepath.Join(m.outputDir(), m.getRealName())}
+		soFile = filepath.Join(m.outputDir(), m.getRealName())
 	}
+	m.outs = []string{soFile}
 
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
 
@@ -616,6 +643,8 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 			Optional:  true,
 			Args:      m.getLibArgs(ctx),
 		})
+
+	g.addSharedLibToc(ctx, soFile, m.getTarget())
 
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }

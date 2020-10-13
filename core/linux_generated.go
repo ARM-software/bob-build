@@ -163,13 +163,16 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 
 	// Create a rule to copy the generated library
 	// from gen_dir to the common library directory
+	soFile := getSharedLibLinkPath(m)
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     copyRule,
 			Inputs:   m.outputs(),
-			Outputs:  []string{getSharedLibLinkPath(m)},
+			Outputs:  []string{soFile},
 			Optional: true,
 		})
+
+	g.addSharedLibToc(ctx, soFile, m.getTarget())
 
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))

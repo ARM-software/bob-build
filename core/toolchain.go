@@ -123,6 +123,7 @@ type toolchain interface {
 	getCXXCompiler() (tool string, flags []string)
 	getLinker() linker
 	getStripFlags() []string
+	getLibraryTocFlags() []string
 	checkFlagIsSupported(language, flag string) bool
 }
 
@@ -342,6 +343,13 @@ func (tc toolchainGnuCommon) getStripFlags() []string {
 	}
 }
 
+func (tc toolchainGnuCommon) getLibraryTocFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objdump-tool", tc.objdumpBinary,
+	}
+}
+
 func (tc toolchainGnuCommon) getBinDirs() []string {
 	return []string{tc.binDir}
 }
@@ -532,6 +540,13 @@ func (tc toolchainClangCommon) getStripFlags() []string {
 	}
 }
 
+func (tc toolchainClangCommon) getLibraryTocFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objdump-tool", tc.objdumpBinary,
+	}
+}
+
 func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
@@ -708,6 +723,13 @@ func (tc toolchainArmClang) getStripFlags() []string {
 	}
 }
 
+func (tc toolchainArmClang) getLibraryTocFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objdump-tool", tc.objdumpBinary,
+	}
+}
+
 func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
@@ -855,6 +877,14 @@ func (tc toolchainXcode) getStripFlags() []string {
 		"--format", "macho",
 		"--dsymutil-tool", tc.dsymBinary,
 		"--strip-tool", tc.stripBinary,
+	}
+}
+
+func (tc toolchainXcode) getLibraryTocFlags() []string {
+	return []string{
+		"--format", "macho",
+		"--otool-tool", tc.otoolBinary,
+		"--nm-tool", tc.nmBinary,
 	}
 }
 
