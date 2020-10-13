@@ -71,6 +71,7 @@ bootstrap_go_package {
         "core/template.go",
         "core/toolchain.go",
         "core/linux.go",
+        "core/linux_generated.go",
         "core/linux_kernel_module.go",
     ],
     testSrcs: [
