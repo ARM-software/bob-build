@@ -25,21 +25,25 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
-var kbuildRule = pctx.StaticRule("kbuild",
-	blueprint.RuleParams{
-		Command: "python $kmod_build -o $out --depfile $depfile " +
-			"--common-root ${SrcDir} " +
-			"--module-dir $output_module_dir $extra_includes " +
-			"--sources $in " +
-			"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
-			"$cc_flag $hostcc_flag $clang_triple_flag $ld_flag " +
-			"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
-		Depfile:     "$out.d",
-		Deps:        blueprint.DepsGCC,
-		Pool:        blueprint.Console,
-		Description: "$out",
-	}, "kmod_build", "depfile", "extra_includes", "extra_cflags", "kernel_dir", "kernel_cross_compile",
-	"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
+var (
+	_          = pctx.StaticVariable("kmod_build", "${BobScriptsDir}/kmod_build.py")
+	kbuildRule = pctx.StaticRule("kbuild",
+		blueprint.RuleParams{
+			Command: "python $kmod_build -o $out --depfile $depfile " +
+				"--common-root ${SrcDir} " +
+				"--module-dir $output_module_dir $extra_includes " +
+				"--sources $in " +
+				"--kernel $kernel_dir --cross-compile '$kernel_cross_compile' " +
+				"$cc_flag $hostcc_flag $clang_triple_flag $ld_flag " +
+				"$kbuild_options --extra-cflags='$extra_cflags' $make_args",
+			CommandDeps: []string{"$kmod_build"},
+			Depfile:     "$out.d",
+			Deps:        blueprint.DepsGCC,
+			Pool:        blueprint.Console,
+			Description: "$out",
+		}, "depfile", "extra_includes", "extra_cflags", "kernel_dir", "kernel_cross_compile",
+		"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
+)
 
 func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
 	return filepath.Join("${BuildDir}", "target", "kernel_modules", m.outputName())
@@ -51,6 +55,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
 
 	args := m.generateKbuildArgs(ctx).toDict()
+	delete(args, "kmod_build")
 	sources := utils.NewStringSlice(
 		getBackendPathsInSourceDir(g, m.Properties.getSources(ctx)),
 		m.Properties.Build.SourceProps.Specials,
@@ -58,12 +63,11 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
-			Rule:      kbuildRule,
-			Outputs:   m.outputs(),
-			Inputs:    sources,
-			Implicits: []string{args["kmod_build"]},
-			Optional:  false,
-			Args:      args,
+			Rule:     kbuildRule,
+			Outputs:  m.outputs(),
+			Inputs:   sources,
+			Optional: false,
+			Args:     args,
 		})
 
 	// Add a dependency between Module.symvers and the kernel module. This
