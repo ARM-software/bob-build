@@ -993,24 +993,6 @@ func (g *linuxGenerator) resourceActions(m *resource, ctx blueprint.ModuleContex
 	addPhony(m, ctx, installDeps, false)
 }
 
-var copyIfExistsRule = pctx.StaticRule("cp_if_exists",
-	blueprint.RuleParams{
-		Command: "test -f $in && cp $in $out || (>&2 echo '" +
-			"Warning: $in was not built - it has most likely " +
-			"been disabled by your kernel config.' )",
-		Description: "$out",
-	})
-
-func copyFileIfExists(ctx blueprint.ModuleContext, source string, dest string) {
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:     copyIfExistsRule,
-			Outputs:  []string{dest},
-			Inputs:   []string{source},
-			Optional: true,
-		})
-}
-
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *bobConfig) {
 	g.toolchainSet.parseConfig(config)
 }
