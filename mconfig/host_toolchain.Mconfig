@@ -166,6 +166,16 @@ config HOST_OBJCOPY_BINARY
 	  The objcopy executable that we can use in post install scripts
 	  to manipulate host libraries and executables.
 
+config HOST_OBJDUMP_BINARY
+	string "Host objdump"
+	default HOST_GNU_PREFIX + "objdump" if HOST_TOOLCHAIN_GNU || (HOST_TOOLCHAIN_CLANG && HOST_CLANG_USE_GNU_BINUTILS)
+	default "llvm-objdump" if HOST_TOOLCHAIN_CLANG
+	default "objdump"
+	depends on !HOST_TOOLCHAIN_XCODE
+	help
+	  The objdump executable that we can use to extract information
+	  from shared libraries.
+
 config HOST_AR_BINARY
 	string "GNU and Clang Archiver binary"
 	default "ar"
@@ -187,3 +197,19 @@ config HOST_STRIP_BINARY
 	help
 	  The strip executable that we can use in post install scripts
 	  to strip symbols from host libraries and executables.
+
+config HOST_OTOOL_BINARY
+	string "Host otool"
+	default "otool"
+	depends on HOST_TOOLCHAIN_XCODE
+	help
+	  The otool executable that we can use to read information in
+	  host library section headers.
+
+config HOST_NM_BINARY
+	string "Host nm"
+	default "nm"
+	depends on HOST_TOOLCHAIN_XCODE
+	help
+	  The nm executable that we can use to read the dynamic symbol
+	  table in host libraries.

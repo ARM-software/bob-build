@@ -296,6 +296,7 @@ type toolchainGnuCommon struct {
 	arBinary      string
 	asBinary      string
 	objcopyBinary string
+	objdumpBinary string
 	gccBinary     string
 	gxxBinary     string
 	linker        linker
@@ -432,6 +433,7 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")
 
 	tc.gccBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cxx_binary")
@@ -468,6 +470,7 @@ type toolchainClangCommon struct {
 	arBinary       string
 	asBinary       string
 	objcopyBinary  string
+	objdumpBinary  string
 	clangBinary    string
 	clangxxBinary  string
 	linker         linker
@@ -543,6 +546,7 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")
 
 	tc.clangBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
 	tc.clangxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")
@@ -660,6 +664,7 @@ type toolchainArmClang struct {
 	arBinary      string
 	asBinary      string
 	objcopyBinary string
+	objdumpBinary string
 	ccBinary      string
 	cxxBinary     string
 	linker        linker
@@ -713,6 +718,7 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")
 	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cxx_binary")
 	tc.linker = newDefaultLinker(tc.cxxBinary, []string{}, []string{})
@@ -738,6 +744,8 @@ type toolchainXcode struct {
 	asBinary    string
 	dsymBinary  string
 	stripBinary string
+	otoolBinary string
+	nmBinary    string
 	ccBinary    string
 	cxxBinary   string
 	linker      linker
@@ -857,6 +865,8 @@ func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode)
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 	tc.dsymBinary = props.GetString(string(tgt) + "_dsymutil_binary")
 	tc.stripBinary = props.GetString(string(tgt) + "_strip_binary")
+	tc.otoolBinary = props.GetString(string(tgt) + "_otool_binary")
+	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
 
 	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")

@@ -163,6 +163,16 @@ config TARGET_OBJCOPY_BINARY
 	  The objcopy executable that we can use in post install scripts
 	  to manipulate target libraries and executables.
 
+config TARGET_OBJDUMP_BINARY
+	string "Target objdump"
+	default TARGET_GNU_PREFIX + "objdump" if TARGET_TOOLCHAIN_GNU || (TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_USE_GNU_BINUTILS)
+	default "llvm-objdump" if TARGET_TOOLCHAIN_CLANG
+	default "objdump"
+	depends on !TARGET_TOOLCHAIN_XCODE
+	help
+	  The objdump executable that we can use to extract information
+	  from shared libraries.
+
 config TARGET_AR_BINARY
 	string "GNU and Clang Archiver binary"
 	default "ar"
@@ -184,3 +194,19 @@ config TARGET_STRIP_BINARY
 	help
 	  The strip executable that we can use in post install scripts
 	  to strip symbols from target libraries and executables.
+
+config TARGET_OTOOL_BINARY
+	string "Target otool"
+	default "otool"
+	depends on TARGET_TOOLCHAIN_XCODE
+	help
+	  The otool executable that we can use to read information in
+	  target library section headers.
+
+config TARGET_NM_BINARY
+	string "Target nm"
+	default "nm"
+	depends on TARGET_TOOLCHAIN_XCODE
+	help
+	  The nm executable that we can use to read the dynamic symbol
+	  table in target libraries.
