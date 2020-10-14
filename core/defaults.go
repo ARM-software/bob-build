@@ -127,7 +127,7 @@ var _ defaultable = (*defaults)(nil)
 var _ moduleWithBuildProps = (*defaults)(nil)
 
 // Defaults have host and target variants
-var _ targetable = (*defaults)(nil)
+var _ targetSpecificLibrary = (*defaults)(nil)
 
 // Defaults support conditional properties via "features"
 var _ featurable = (*defaults)(nil)

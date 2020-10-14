@@ -52,6 +52,7 @@ type splittable interface {
 type targetSpecificLibrary interface {
 	// Get the target specific properties
 	getTargetSpecific(tgtType) *TargetSpecific
+	getTarget() tgtType
 	splittable
 }
 
