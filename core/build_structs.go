@@ -594,7 +594,8 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	// check if any direct dependency is disabled
-	any_dep_disabled := false
+	disabledDeps := []string{}
+
 	mctx.VisitDirectDeps(func(dep blueprint.Module) {
 		// ignore defaults - it's allowed for them to be disabled
 		if _, ok := dep.(*defaults); ok {
@@ -602,15 +603,15 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 		if e, ok := dep.(enableable); ok {
 			if !isEnabled(e) {
-				any_dep_disabled = true
+				disabledDeps = utils.AppendIfUnique(disabledDeps, dep.Name())
 			}
 		}
 	})
 
 	// disable current module if dependency is disabled, or panic if it's required
-	if any_dep_disabled {
+	if len(disabledDeps) > 0 {
 		if isRequired(ep) {
-			panic(fmt.Errorf("Module %s is required, cannot disable", module.Name()))
+			panic(fmt.Errorf("Module %s is required but depends on disabled modules %s", module.Name(), strings.Join(disabledDeps, ", ")))
 		} else {
 			ep.getEnableableProps().Enabled = proptools.BoolPtr(false)
 			return
