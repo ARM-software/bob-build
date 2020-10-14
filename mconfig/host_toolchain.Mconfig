@@ -160,8 +160,8 @@ config HOST_OBJCOPY_BINARY
 	string "Host objcopy"
 	default HOST_GNU_PREFIX + "objcopy" if HOST_TOOLCHAIN_GNU || (HOST_TOOLCHAIN_CLANG && HOST_CLANG_USE_GNU_BINUTILS)
 	default "llvm-objcopy" if HOST_TOOLCHAIN_CLANG
-	default "dsymutil" if HOST_TOOLCHAIN_XCODE
 	default "objcopy"
+	depends on !HOST_TOOLCHAIN_XCODE
 	help
 	  The objcopy executable that we can use in post install scripts
 	  to manipulate host libraries and executables.
@@ -171,3 +171,19 @@ config HOST_AR_BINARY
 	default "ar"
 	help
 	  The name of the archiver used to create host static libraries.
+
+config HOST_DSYMUTIL_BINARY
+	string "Host dsymutil"
+	default "dsymutil"
+	depends on HOST_TOOLCHAIN_XCODE
+	help
+	  The dsymutil executable that we can use in post install scripts
+	  to manipulate debug information in host libraries and executables.
+
+config HOST_STRIP_BINARY
+	string "Host strip"
+	default "strip"
+	depends on HOST_TOOLCHAIN_XCODE
+	help
+	  The strip executable that we can use in post install scripts
+	  to strip symbols from host libraries and executables.
