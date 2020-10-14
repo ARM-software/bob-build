@@ -326,9 +326,9 @@ func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	strippableProps := f.topLevelProperties()
 
-	if t, ok := mctx.Module().(targetable); ok {
+	if t, ok := mctx.Module().(targetSpecificLibrary); ok {
 		for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {
-			tgtSpecific := t.build().getTargetSpecific(tgt)
+			tgtSpecific := t.getTargetSpecific(tgt)
 			tgtSpecificData := tgtSpecific.getTargetSpecificProps()
 			strippableProps = append(strippableProps, tgtSpecificData)
 		}
@@ -396,14 +396,6 @@ var sharedDepTag = dependencyTag{name: "shared"}
 var reexportLibsTag = dependencyTag{name: "reexport_libs"}
 var kernelModuleDepTag = dependencyTag{name: "kernel_module"}
 
-// The targetable interface allows target-specific properties to be
-// retrieved and set on a module.
-type targetable interface {
-	build() *Build
-	features() *Features
-	getTarget() tgtType
-}
-
 func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
@@ -412,12 +404,9 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
-	if t, ok := mctx.Module().(targetable); ok {
-		build := t.build()
-		if _, ok := mctx.Module().(*defaults); ok {
-			// We do not want to add dependencies for defaults
-			return
-		}
+	if l, ok := getLibrary(mctx.Module()); ok {
+		build := l.build()
+
 		mctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
 		mctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
 
@@ -426,9 +415,11 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 	}
+
 	if km, ok := mctx.Module().(*kernelModule); ok {
 		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
 	}
+
 	if ins, ok := mctx.Module().(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
@@ -450,9 +441,12 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 	var build *Build
 	var tgt tgtType
 
-	if def, ok := mctx.Module().(targetable); ok {
-		build = def.build()
-		tgt = def.getTarget()
+	if l, ok := getLibrary(mctx.Module()); ok {
+		build = &l.Properties.Build
+		tgt = l.Properties.TargetType
+	} else if d, ok := mctx.Module().(*defaults); ok {
+		build = &d.Properties.Build
+		tgt = d.Properties.TargetType
 	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		build = &gsc.Properties.FlagArgsBuild
 		tgt = gsc.Properties.Target
