@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2019 Arm Limited.
+# Copyright 2019-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,28 +44,31 @@ def run(cmd):
         sys.exit(1)
 
 
-def create_debug_info(fname, dbg, tool):
+def elf_create_debug_info(fname, dbg, tool):
     # Retain the build-id in the debug object
-    if tool == "dsymutil":
-        cmd = [tool, fname, "-o", dbg]
-    else:
-        cmd = [tool, "--only-keep-debug", fname, dbg]
+    cmd = [tool, "--only-keep-debug", fname, dbg]
     run(cmd)
 
 
-def write_output(fname, output, dbg, strip, tool):
-    if os.path.basename(tool) == "dsymutil":
-        run(["strip", "-u", "-o", output, fname])
-    else:
-        cmd = [tool]
-        if dbg:
-            cmd.extend(["--strip-debug",
-                        "--add-gnu-debuglink=" + dbg])
-        if strip:
-            cmd.append("--strip-unneeded")
-        cmd.extend([fname, output])
+def macho_create_debug_info(fname, dbg, tool):
+    cmd = [tool, fname, "-o", dbg]
+    run(cmd)
 
-        run(cmd)
+
+def elf_write_output(fname, output, dbg, strip, tool):
+    cmd = [tool]
+    if dbg:
+        cmd.extend(["--strip-debug",
+                    "--add-gnu-debuglink=" + dbg])
+    if strip:
+        cmd.append("--strip-unneeded")
+    cmd.extend([fname, output])
+
+    run(cmd)
+
+
+def macho_write_output(fname, output, dbg, strip, tool):
+    run([tool, "-u", "-o", output, fname])
 
 
 def parse_args():
@@ -77,10 +80,19 @@ def parse_args():
                         help="Strip library of unnecessary symbols")
     parser.add_argument("--debug-file", default=None,
                         help="File to keep debug info in")
-    parser.add_argument("--tool", default="objcopy",
-                        help="Primary tool to use for stripping (including path if needed)."
-                             "This is expected to be objcopy on Linux platforms,"
-                             "and dsymutil on MacOS.")
+    parser.add_argument("--format", action="store",
+                        choices=["elf", "macho"], default="elf",
+                        help="Library format")
+    parser.add_argument("--objcopy-tool", default="objcopy",
+                        help="Tool to use with Elf libraries, including path if needed. "
+                             "This is expected to be objcopy on Linux platforms")
+    parser.add_argument("--dsymutil-tool", default="dsymutil",
+                        help="Tool used to manipulate debug info with Mach-O libraries, "
+                             "including path if needed. "
+                             "This is expected to be dsymutil on OSX")
+    parser.add_argument("--strip-tool", default="strip",
+                        help="Tool used to strip Mach-O libraries, including path if needed."
+                             "This is expected to be strip on OSX")
 
     args = parser.parse_args()
 
@@ -90,11 +102,22 @@ def parse_args():
 def main():
     args = parse_args()
 
+    if args.format == "macho":
+        create_debug_info = macho_create_debug_info
+        write_output = macho_write_output
+        debug_info_tool = args.dsymutil_tool
+        strip_tool = args.strip_tool
+    else:
+        create_debug_info = elf_create_debug_info
+        write_output = elf_write_output
+        debug_info_tool = args.objcopy_tool
+        strip_tool = args.objcopy_tool
+
     if args.debug_file:
         make_dir(os.path.dirname(args.debug_file))
-        create_debug_info(args.input, args.debug_file, args.tool)
+        create_debug_info(args.input, args.debug_file, debug_info_tool)
 
-    write_output(args.input, args.output, args.debug_file, args.strip, args.tool)
+    write_output(args.input, args.output, args.debug_file, args.strip, strip_tool)
 
 
 if __name__ == "__main__":

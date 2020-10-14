@@ -117,7 +117,7 @@ type toolchain interface {
 	getCCompiler() (tool string, flags []string)
 	getCXXCompiler() (tool string, flags []string)
 	getLinker() linker
-	getStripBinary() (tool string)
+	getStripFlags() []string
 	checkFlagIsSupported(language, flag string) bool
 }
 
@@ -329,8 +329,11 @@ func (tc toolchainGnuCommon) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainGnuCommon) getStripBinary() string {
-	return tc.objcopyBinary
+func (tc toolchainGnuCommon) getStripFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objcopy-tool", tc.objcopyBinary,
+	}
 }
 
 func (tc toolchainGnuCommon) getBinDirs() []string {
@@ -514,8 +517,11 @@ func (tc toolchainClangCommon) getLinker() linker {
 	return newDefaultLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs)
 }
 
-func (tc toolchainClangCommon) getStripBinary() string {
-	return tc.objcopyBinary
+func (tc toolchainClangCommon) getStripFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objcopy-tool", tc.objcopyBinary,
+	}
 }
 
 func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool {
@@ -685,8 +691,11 @@ func (tc toolchainArmClang) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainArmClang) getStripBinary() string {
-	return tc.objcopyBinary
+func (tc toolchainArmClang) getStripFlags() []string {
+	return []string{
+		"--format", "elf",
+		"--objcopy-tool", tc.objcopyBinary,
+	}
 }
 
 func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
@@ -720,15 +729,16 @@ func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClangCross) {
 }
 
 type toolchainXcode struct {
-	arBinary      string
-	asBinary      string
-	objcopyBinary string
-	ccBinary      string
-	cxxBinary     string
-	linker        linker
-	prefix        string
-	target        string
-	flagCache     *flagSupportedCache
+	arBinary    string
+	asBinary    string
+	dsymBinary  string
+	stripBinary string
+	ccBinary    string
+	cxxBinary   string
+	linker      linker
+	prefix      string
+	target      string
+	flagCache   *flagSupportedCache
 
 	cflags  []string
 	ldflags []string
@@ -823,8 +833,12 @@ func (tc toolchainXcode) getLinker() linker {
 	return tc.linker
 }
 
-func (tc toolchainXcode) getStripBinary() string {
-	return tc.objcopyBinary
+func (tc toolchainXcode) getStripFlags() []string {
+	return []string{
+		"--format", "macho",
+		"--dsymutil-tool", tc.dsymBinary,
+		"--strip-tool", tc.stripBinary,
+	}
 }
 
 func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode) {
@@ -832,7 +846,8 @@ func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode)
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
-	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
+	tc.dsymBinary = props.GetString(string(tgt) + "_dsymutil_binary")
+	tc.stripBinary = props.GetString(string(tgt) + "_strip_binary")
 
 	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")

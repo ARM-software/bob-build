@@ -682,10 +682,10 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 var _ = pctx.StaticVariable("strip", "${BobScriptsDir}/strip.py")
 var stripRule = pctx.StaticRule("strip",
 	blueprint.RuleParams{
-		Command:     "$strip $args --tool $tool -o $out $in",
+		Command:     "$strip $args -o $out $in",
 		CommandDeps: []string{"$strip"},
 		Description: "strip $out",
-	}, "args", "tool")
+	}, "args")
 
 var installRule = pctx.StaticRule("install",
 	blueprint.RuleParams{
@@ -758,9 +758,10 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 			}
 
 			if lib.strip() || separateDebugInfo {
+				tc := g.getToolchain(lib.getTarget())
 				basename := filepath.Base(src)
 				strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
-				stArgs := []string{}
+				stArgs := tc.getStripFlags()
 				if lib.strip() {
 					stArgs = append(stArgs, "--strip")
 				}
@@ -771,7 +772,6 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 				}
 				stripArgs := map[string]string{
 					"args": strings.Join(stArgs, " "),
-					"tool": g.getToolchain(lib.getTarget()).getStripBinary(),
 				}
 				ctx.Build(pctx,
 					blueprint.BuildParams{

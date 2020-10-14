@@ -157,8 +157,8 @@ config TARGET_OBJCOPY_BINARY
 	string "Target objcopy"
 	default TARGET_GNU_PREFIX + "objcopy" if TARGET_TOOLCHAIN_GNU || (TARGET_TOOLCHAIN_CLANG && TARGET_CLANG_USE_GNU_BINUTILS)
 	default "llvm-objcopy" if TARGET_TOOLCHAIN_CLANG
-	default "dsymutil" if TARGET_TOOLCHAIN_XCODE
 	default "objcopy"
+	depends on !TARGET_TOOLCHAIN_XCODE
 	help
 	  The objcopy executable that we can use in post install scripts
 	  to manipulate target libraries and executables.
@@ -168,3 +168,19 @@ config TARGET_AR_BINARY
 	default "ar"
 	help
 	  The name of the archiver used to create target static libraries.
+
+config TARGET_DSYMUTIL_BINARY
+	string "Target dsymutil"
+	default "dsymutil"
+	depends on TARGET_TOOLCHAIN_XCODE
+	help
+	  The dsymutil executable that we can use in post install scripts
+	  to manipulate debug information in target libraries and executables.
+
+config TARGET_STRIP_BINARY
+	string "Target strip"
+	default "strip"
+	depends on TARGET_TOOLCHAIN_XCODE
+	help
+	  The strip executable that we can use in post install scripts
+	  to strip symbols from target libraries and executables.
