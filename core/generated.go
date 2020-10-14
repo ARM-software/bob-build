@@ -179,8 +179,8 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 
 func (m *generateCommon) init(properties *configProperties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
-	m.Properties.FlagArgsBuild.Host.TargetProps.init(BuildProps{})
-	m.Properties.FlagArgsBuild.Target.TargetProps.init(BuildProps{})
+	m.Properties.FlagArgsBuild.Host.init(properties, BuildProps{})
+	m.Properties.FlagArgsBuild.Target.init(properties, BuildProps{})
 }
 
 func (m *generateCommon) shortName() string {

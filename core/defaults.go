@@ -104,8 +104,9 @@ func (m *defaults) getMatchSourcePropNames() []string {
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
-	module.Properties.Build.init(&config.Properties)
 	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
+	module.Properties.Host.init(&config.Properties, BuildProps{})
+	module.Properties.Target.init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }

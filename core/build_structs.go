@@ -45,38 +45,31 @@ type moduleWithBuildProps interface {
 	build() *Build
 }
 
-// TargetProps Type for generic target properties
-type TargetProps struct {
+// A TargetSpecific module is one that supports building on host and target,
+// with a set of properties in `host: {}` or `target: {}` blocks.
+type TargetSpecific struct {
+	Features
+
 	// 'BlueprintEmbed' is a special case in Blueprint which makes it interpret
 	// a runtime-generated type as being embedded in its parent struct.
 	BlueprintEmbed interface{}
 }
 
-// init Initilization of target specific properties
-func (t *TargetProps) init(list ...interface{}) {
+// init initializes properties and features
+func (t *TargetSpecific) init(properties *configProperties, list ...interface{}) {
 	if len(list) == 0 {
 		panic("List can't be empty")
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
 	t.BlueprintEmbed = reflect.New(propsType).Interface()
-}
 
-// A TargetSpecific module is one that supports building on host and target.
-type TargetSpecific struct {
-	Features
-	TargetProps
-}
-
-// init initializes properties and features
-func (t *TargetSpecific) init(properties *configProperties) {
-	t.TargetProps.init(BuildProps{})
-	t.Features.Init(properties, BuildProps{})
+	t.Features.Init(properties, list...)
 }
 
 // getTargetSpecificProps returns target specific property data as an empty interface
 func (t *TargetSpecific) getTargetSpecificProps() interface{} {
-	return t.TargetProps.BlueprintEmbed
+	return t.BlueprintEmbed
 }
 
 // A type implementing dependentInterface can be depended upon by other modules.

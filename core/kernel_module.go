@@ -222,8 +222,9 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
-	module.Properties.Build.init(&config.Properties)
 	module.Properties.Features.Init(&config.Properties, BuildProps{})
+	module.Properties.Host.init(&config.Properties, BuildProps{})
+	module.Properties.Target.init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
