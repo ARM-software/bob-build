@@ -207,12 +207,6 @@ type Build struct {
 	SplittableProps
 }
 
-// Init initializes host and target specific data
-func (l *Build) init(properties *configProperties) {
-	l.getTargetSpecific(tgtTypeHost).init(properties)
-	l.getTargetSpecific(tgtTypeTarget).init(properties)
-}
-
 func (l *Build) getTargetSpecific(tgt tgtType) *TargetSpecific {
 	if tgt == tgtTypeHost {
 		return &l.Host
@@ -720,8 +714,9 @@ func (m *binary) outputFileName() string {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	l.Properties.Build.init(&config.Properties)
 	l.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
+	l.Properties.Host.init(&config.Properties, BuildProps{})
+	l.Properties.Target.init(&config.Properties, BuildProps{})
 
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }
