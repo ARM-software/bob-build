@@ -29,6 +29,7 @@ type generateSharedLibrary struct {
 // Verify that the following interfaces are implemented
 var _ generateLibraryInterface = (*generateSharedLibrary)(nil)
 var _ singleOutputModule = (*generateSharedLibrary)(nil)
+var _ sharedLibProducer = (*generateSharedLibrary)(nil)
 var _ blueprint.Module = (*generateSharedLibrary)(nil)
 
 func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
@@ -54,6 +55,12 @@ func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext
 
 func (m *generateSharedLibrary) outputFileName() string {
 	return m.altName() + m.libExtension()
+}
+
+//// Support sharedLibProducer
+
+func (m *generateSharedLibrary) getTocName() string {
+	return m.outputFileName() + tocExt
 }
 
 //// Factory functions

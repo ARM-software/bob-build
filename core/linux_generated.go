@@ -171,7 +171,8 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 			Optional: true,
 		})
 
-	g.addSharedLibToc(ctx, soFile, m.getTarget())
+	tocFile := g.getSharedLibTocPath(m)
+	g.addSharedLibToc(ctx, soFile, tocFile, m.getTarget())
 
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
