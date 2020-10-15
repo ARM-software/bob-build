@@ -45,6 +45,8 @@ var (
 	_ = pctx.VariableFunc("BobScriptsDir", func(interface{}) (string, error) {
 		return getBobScriptsDir(), nil
 	})
+
+	enableToc = getTocUsageFromEnvironment()
 )
 
 type linuxGenerator struct {
@@ -53,6 +55,28 @@ type linuxGenerator struct {
 
 /* Compile time checks for interfaces that must be implemented by linuxGenerator */
 var _ generatorBackend = (*linuxGenerator)(nil)
+
+func getTocUsageFromEnvironment() bool {
+	enable := true // Default to using toc files
+	if str, ok := os.LookupEnv("BOB_ALWAYS_LINK_SHARED_LIBS"); ok {
+		// Disable according to the environment variable
+		//
+		// Be permissive in the values accepted to disable this
+		// feature. If someone is trying to set this variable, then by
+		// definition they are looking to disable it. Users who want
+		// the default behavior are unlikely to set it. So look for a
+		// few values which might be used to indicate "I'd like the
+		// default behavior", and take any other value to mean change
+		// behavior.
+		//
+		// This should reduce queries about what's the right setting
+		// to use to disable toc usage.
+		if !utils.Contains([]string{"n", "N", "0", ""}, str) {
+			enable = false
+		}
+	}
+	return enable
+}
 
 // Convert a path to a library into a compiler flag.
 // This needs to strip any path, file extension, lib prefix, and prepend -l
@@ -110,6 +134,12 @@ type singleOutputModule interface {
 type targetableModule interface {
 	singleOutputModule
 	getTarget() tgtType
+}
+
+// Modules implementing sharedLibProducer create a shared library
+type sharedLibProducer interface {
+	targetableModule
+	getTocName() string
 }
 
 // Modules implementing the linkableModule interface are linked
@@ -391,6 +421,23 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 	return
 }
 
+func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs []string) {
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
+		func(m blueprint.Module) {
+			if l, ok := m.(sharedLibProducer); ok {
+				libs = append(libs, g.getSharedLibTocPath(l))
+			} else if _, ok := m.(*externalLib); ok {
+				// Don't try and guess the path to external libraries,
+				// and as they are outside of the build we don't need to
+				// add a dependency on them anyway.
+			} else {
+				panic(errors.New(ctx.OtherModuleName(m) + " doesn't produce a shared library"))
+			}
+		})
+	return
+}
+
 func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
@@ -463,6 +510,12 @@ func (g *linuxGenerator) getSharedLibLinkPath(t targetableModule) string {
 	return filepath.Join(g.sharedLibsDir(t.getTarget()), t.outputFileName())
 }
 
+// Full path for shared library tables of content.
+// As long as the module is targetable, we can infer the library path.
+func (g *linuxGenerator) getSharedLibTocPath(l sharedLibProducer) string {
+	return filepath.Join(g.sharedLibsDir(l.getTarget()), l.getTocName())
+}
+
 func (g *linuxGenerator) getCommonLibArgs(l *library, ctx blueprint.ModuleContext) map[string]string {
 	tc := g.getToolchain(l.Properties.TargetType)
 
@@ -527,13 +580,19 @@ func (g *linuxGenerator) getBinaryArgs(b *binary, ctx blueprint.ModuleContext) m
 }
 
 // Returns the implicit dependencies for a library
-func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext) []string {
+// When useToc is set, replace shared libraries with their toc files.
+func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext, useToc bool) []string {
 	implicits := utils.NewStringSlice(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
-	implicits = append(implicits, g.getSharedLibLinkPaths(ctx)...)
+	if useToc {
+		implicits = append(implicits, g.getSharedLibTocPaths(ctx)...)
+	} else {
+		implicits = append(implicits, g.getSharedLibLinkPaths(ctx)...)
+	}
 	versionScript := l.getVersionScript(ctx)
 	if versionScript != nil {
 		implicits = append(implicits, *versionScript)
 	}
+
 	return implicits
 }
 
@@ -547,9 +606,8 @@ var tocRule = pctx.StaticRule("shared_library_toc",
 	},
 	"tocflags")
 
-func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile string, tgt tgtType) {
+func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt tgtType) {
 	tc := g.getToolchain(tgt)
-	tocFile := soFile + ".toc"
 	tocFlags := tc.getLibraryTocFlags()
 
 	ctx.Build(pctx,
@@ -623,18 +681,27 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 		installDeps = append(installDeps, symlink)
 	}
 
+	orderOnly := buildWrapperDeps
+	if enableToc {
+		// Add an order only dependecy on the actual libraries to cover
+		// the case where the .so is deleted but the toc is still
+		// present.
+		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
+	}
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      sharedLibraryRule,
 			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
-			Implicits: append(g.ccLinkImplicits(m, ctx), nonCompiledDeps...),
-			OrderOnly: buildWrapperDeps,
+			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
+			OrderOnly: orderOnly,
 			Optional:  true,
 			Args:      g.getSharedLibArgs(m, ctx),
 		})
 
-	g.addSharedLibToc(ctx, soFile, m.getTarget())
+	tocFile := g.getSharedLibTocPath(m)
+	g.addSharedLibToc(ctx, soFile, tocFile, m.getTarget())
 
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
@@ -669,13 +736,21 @@ func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 
 	_, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
+	orderOnly := buildWrapperDeps
+	if enableToc {
+		// Add an order only dependecy on the actual libraries to cover
+		// the case where the .so is deleted but the toc is still
+		// present.
+		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
+	}
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      executableRule,
 			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
-			Implicits: append(g.ccLinkImplicits(m, ctx), nonCompiledDeps...),
-			OrderOnly: buildWrapperDeps,
+			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
+			OrderOnly: orderOnly,
 			Optional:  true,
 			Args:      g.getBinaryArgs(m, ctx),
 		})

@@ -45,6 +45,7 @@ def hash_env():
         "PATH",
 
         # bob-build
+        "BOB_ALWAYS_LINK_SHARED_LIBS",
         "BOB_CPUPROFILE",
         "BOB_LINK_PARALLELISM",
         "BOB_VERSION",

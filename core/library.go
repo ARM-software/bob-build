@@ -30,6 +30,10 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
+const (
+	tocExt = ".toc"
+)
+
 var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 
 type propertyExporter interface {
@@ -671,6 +675,7 @@ type sharedLibrary struct {
 }
 
 var _ linkableModule = (*sharedLibrary)(nil)
+var _ sharedLibProducer = (*sharedLibrary)(nil)
 
 func (m *sharedLibrary) getLinkName() string {
 	return m.outputName() + m.fileNameExtension
@@ -730,6 +735,12 @@ func (m *sharedLibrary) outputFileName() string {
 	// -lmod, return the name of the link library here rather than the
 	// real, versioned library.
 	return m.getLinkName()
+}
+
+//// Support sharedLibProducer
+
+func (m *sharedLibrary) getTocName() string {
+	return m.getRealName() + tocExt
 }
 
 type binary struct {
