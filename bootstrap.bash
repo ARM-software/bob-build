@@ -81,7 +81,7 @@ fi
 # Calculate Bob directory relative to the working directory.
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
 CONFIG_FILE="${BUILDDIR}/${CONFIGNAME}"
-CONFIG_JSON="${BUILDDIR}/config.json"
+CONFIG_JSON="${BUILDDIR}/.bob.config.json"
 
 export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"

@@ -149,15 +149,6 @@ func (properties *configProperties) LoadConfig(filename string) error {
 		return fmt.Errorf("Unable to decode json configuration: %s", err.Error())
 	}
 
-	// Check for old format of config.json
-	if len(properties.properties) == 2 {
-		_, hasFeatures := properties.properties["Features"]
-		_, hasProperties := properties.properties["Properties"]
-		if hasFeatures && hasProperties {
-			utils.Exit(1, "Old style config.json detected. Please re-configure your build tree.")
-		}
-	}
-
 	properties.stringMap = make(map[string]string)
 	properties.features = make(map[string]bool)
 	for key, val := range properties.properties {

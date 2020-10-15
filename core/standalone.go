@@ -38,7 +38,7 @@ var (
 	configOpts = os.Getenv("BOB_CONFIG_OPTS")
 	srcdir     = os.Getenv("SRCDIR")
 
-	configJSONFile = "config.json"
+	configJSONFile = ".bob.config.json"
 )
 
 type moduleBase struct {
@@ -75,7 +75,7 @@ func getBobDir() string {
 
 // Main is the entry point for the bob primary builder.
 //
-// It loads the configuration from config.json, registers the module type
+// It loads the configuration from .bob.config.json, registers the module type
 // and mutators, initializes the backend, and finally calls into Blueprint.
 func Main() {
 	// Load the config first. This is needed because some of the module
