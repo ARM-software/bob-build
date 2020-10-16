@@ -761,52 +761,6 @@ func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClangCross) {
 	return
 }
 
-type toolchainXcode struct {
-	arBinary    string
-	asBinary    string
-	dsymBinary  string
-	stripBinary string
-	otoolBinary string
-	nmBinary    string
-	ccBinary    string
-	cxxBinary   string
-	linker      linker
-	prefix      string
-	target      string
-	flagCache   *flagSupportedCache
-
-	cflags  []string
-	ldflags []string
-}
-
-type toolchainXcodeNative struct {
-	toolchainXcode
-}
-
-type toolchainXcodeCross struct {
-	toolchainXcode
-}
-
-func (tc toolchainXcode) getArchiver() (string, []string) {
-	return tc.arBinary, []string{}
-}
-
-func (tc toolchainXcode) getAssembler() (string, []string) {
-	return tc.asBinary, []string{}
-}
-
-func (tc toolchainXcode) getCCompiler() (string, []string) {
-	return tc.ccBinary, tc.cflags
-}
-
-func (tc toolchainXcode) getCXXCompiler() (string, []string) {
-	return tc.cxxBinary, tc.cflags
-}
-
-func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
-	return tc.flagCache.checkFlag(tc, language, flag)
-}
-
 type xcodeLinker struct {
 	tool  string
 	flags []string
@@ -868,6 +822,48 @@ func newXcodeLinker(tool string, flags, libs []string) (linker xcodeLinker) {
 	return
 }
 
+type toolchainXcode struct {
+	arBinary    string
+	asBinary    string
+	dsymBinary  string
+	stripBinary string
+	otoolBinary string
+	nmBinary    string
+	ccBinary    string
+	cxxBinary   string
+	linker      linker
+	prefix      string
+	target      string
+	flagCache   *flagSupportedCache
+
+	cflags  []string
+	ldflags []string
+}
+
+type toolchainXcodeNative struct {
+	toolchainXcode
+}
+
+type toolchainXcodeCross struct {
+	toolchainXcode
+}
+
+func (tc toolchainXcode) getArchiver() (string, []string) {
+	return tc.arBinary, []string{}
+}
+
+func (tc toolchainXcode) getAssembler() (string, []string) {
+	return tc.asBinary, []string{}
+}
+
+func (tc toolchainXcode) getCCompiler() (string, []string) {
+	return tc.ccBinary, tc.cflags
+}
+
+func (tc toolchainXcode) getCXXCompiler() (string, []string) {
+	return tc.cxxBinary, tc.cflags
+}
+
 func (tc toolchainXcode) getLinker() linker {
 	return tc.linker
 }
@@ -886,6 +882,10 @@ func (tc toolchainXcode) getLibraryTocFlags() []string {
 		"--otool-tool", tc.otoolBinary,
 		"--nm-tool", tc.nmBinary,
 	}
+}
+
+func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
+	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
 func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode) {
