@@ -604,12 +604,7 @@ var symlinkRule = pctx.StaticRule("symlink",
 func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
 	m.outputdir = g.sharedLibOutputDir(m)
-	var soFile string
-	if m.library.Properties.Library_version == "" {
-		soFile = filepath.Join(m.outputDir(), m.outputName()+m.fileNameExtension)
-	} else {
-		soFile = filepath.Join(m.outputDir(), m.getRealName())
-	}
+	soFile := filepath.Join(m.outputDir(), m.getRealName())
 	m.outs = []string{soFile}
 
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)

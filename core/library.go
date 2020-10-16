@@ -671,7 +671,7 @@ type sharedLibrary struct {
 }
 
 func (m *sharedLibrary) getLinkName() string {
-	return m.outputFileName()
+	return m.outputName() + m.fileNameExtension
 }
 
 func (m *sharedLibrary) getSoname() string {
@@ -724,7 +724,10 @@ func (m *sharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 //// Support singleOutputModule
 
 func (m *sharedLibrary) outputFileName() string {
-	return m.outputName() + m.fileNameExtension
+	// Since we link against libraries using the library flag style,
+	// -lmod, return the name of the link library here rather than the
+	// real, versioned library.
+	return m.getLinkName()
 }
 
 type binary struct {
