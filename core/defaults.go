@@ -58,6 +58,10 @@ func (m *defaults) build() *Build {
 	return &m.Properties.Build
 }
 
+func (m *defaults) defaultableProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
+}
+
 func (m *defaults) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
 }
@@ -114,11 +118,12 @@ func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 var defaultDepTag = dependencyTag{name: "default"}
 
 // Modules implementing defaultable can refer to bob_defaults via the
-// `defaults` property
+// `defaults` or `flag_defaults` property
 type defaultable interface {
-	build() *Build
-	features() *Features
 	defaults() []string
+
+	// get properties for which defaults can be applied
+	defaultableProperties() []interface{}
 }
 
 // Defaults use other defaults, so are themselves `defaultable`
@@ -146,6 +151,7 @@ func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 	if l, ok := mctx.Module().(defaultable); ok {
 		mctx.AddDependency(mctx.Module(), defaultDepTag, l.defaults()...)
 	}
+
 	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
@@ -153,7 +159,6 @@ func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
 					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
 			}
-			mctx.AddDependency(mctx.Module(), defaultDepTag, gsc.Properties.Flag_defaults...)
 		}
 	}
 }

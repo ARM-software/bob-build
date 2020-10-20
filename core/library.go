@@ -330,6 +330,10 @@ func (l *library) defaults() []string {
 	return l.Properties.Defaults
 }
 
+func (l *library) defaultableProperties() []interface{} {
+	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
+}
+
 func (l *library) build() *Build {
 	return &l.Properties.Build
 }

@@ -39,6 +39,10 @@ func (m *kernelModule) defaults() []string {
 	return m.Properties.Defaults
 }
 
+func (m *kernelModule) defaultableProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps}
+}
+
 func (m *kernelModule) build() *Build {
 	return &m.Properties.Build
 }

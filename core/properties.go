@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -35,12 +36,10 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		return
 	}
 
-	var build *Build
+	var defaultableProps []interface{}
 
-	if target, ok := mctx.Module().(defaultable); ok {
-		build = target.build()
-	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		build = &gsc.Properties.FlagArgsBuild
+	if d, ok := mctx.Module().(defaultable); ok {
+		defaultableProps = d.defaultableProperties()
 	} else {
 		// Not defaultable.
 		return
@@ -69,7 +68,8 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 			// Note: when prepending (pointers to) bools we copy
 			// the value if the dst is nil, otherwise the dst
 			// value is left alone.
-			err := proptools.PrependMatchingProperties([]interface{}{&build.BuildProps}, &def.build().BuildProps, nil)
+			err := applyDefaults(defaultableProps, def.defaultableProperties())
+
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
@@ -82,6 +82,35 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		}
 		return false
 	})
+}
+
+func applyDefaults(dst []interface{}, src []interface{}) error {
+	// For every property in the destination module (defaultable),
+	// we search for the corresponding property within the available
+	// set of properties in the source `bob_defaults` module.
+	// To prepend them they need to be of the same type. If found,
+	// prepend them.
+	for _, defaultableProp := range dst {
+		propertyFound := false
+		for _, propToApply := range src {
+			if reflect.TypeOf(defaultableProp) == reflect.TypeOf(propToApply) {
+				err := proptools.PrependProperties(defaultableProp, propToApply, nil)
+
+				if err != nil {
+					return err
+				}
+
+				propertyFound = true
+				break
+			}
+		}
+
+		if !propertyFound {
+			return fmt.Errorf("Property of type '%T' was not found in `bob_defaults`", defaultableProp)
+		}
+	}
+
+	return nil
 }
 
 // Modules implementing featurable support the use of features and templates.
