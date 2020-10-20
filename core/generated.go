@@ -160,6 +160,9 @@ var _ matchSourceInterface = (*generateCommon)(nil)
 // generateCommon have properties that require escaping
 var _ propertyEscapeInterface = (*generateCommon)(nil)
 
+// generateCommon uses other defaults by `flag_defaults` property
+var _ defaultable = (*generateCommon)(nil)
+
 // Modules implementing hostBin are able to supply a host binary that can be executed
 type hostBin interface {
 	hostBin() string
@@ -314,6 +317,14 @@ func (m *generateCommon) getRspfile() (name string, rspfile bool) {
 		return
 	}
 	return "", rspfile
+}
+
+func (m *generateCommon) defaultableProperties() []interface{} {
+	return []interface{}{&m.Properties.FlagArgsBuild.BuildProps}
+}
+
+func (m *generateCommon) defaults() []string {
+	return m.Properties.Flag_defaults
 }
 
 // GenerateSourceProps are properties of 'bob_generate_source', i.e. a module
