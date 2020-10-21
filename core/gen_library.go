@@ -123,8 +123,8 @@ func (m *generateLibrary) getSplittableProps() *SplittableProps {
 	return &m.generateCommon.Properties.FlagArgsBuild.SplittableProps
 }
 
-func (m *generateLibrary) topLevelProperties() []interface{} {
-	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateLibraryProps)
+func (m *generateLibrary) featurableProperties() []interface{} {
+	return append(m.generateCommon.featurableProperties(), &m.Properties.GenerateLibraryProps)
 }
 
 //// Support singleOutputModule interface

@@ -243,7 +243,7 @@ func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 	}
 
 	// Generic template expansion
-	for _, p := range m.topLevelProperties() {
+	for _, p := range m.featurableProperties() {
 		propsVal := reflect.Indirect(reflect.ValueOf(p))
 
 		// Properties have already been expanded, so set stringvalues to nil

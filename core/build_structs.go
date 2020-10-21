@@ -317,7 +317,7 @@ func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
 		return
 	}
 
-	strippableProps := f.topLevelProperties()
+	strippableProps := f.featurableProperties()
 
 	if t, ok := mctx.Module().(targetSpecificLibrary); ok {
 		for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {

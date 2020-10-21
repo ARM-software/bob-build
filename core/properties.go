@@ -86,7 +86,7 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 
 // Modules implementing featurable support the use of features and templates.
 type featurable interface {
-	topLevelProperties() []interface{}
+	featurableProperties() []interface{}
 	features() *Features
 }
 
@@ -100,7 +100,7 @@ func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// TemplateApplier mutator is run before TargetApplier, so we
 		// need to apply templates with the core set, as well as
 		// host-specific and target-specific sets (where applicable).
-		props := append([]interface{}{}, m.topLevelProperties()...)
+		props := append([]interface{}{}, m.featurableProperties()...)
 
 		if ts, ok := module.(targetSpecificLibrary); ok {
 			host := ts.getTargetSpecific(tgtTypeHost)
@@ -133,7 +133,7 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where
 		// supported, the host-specific and target-specific set.
-		var props = []propmap{propmap{m.topLevelProperties(), m.features()}}
+		var props = []propmap{propmap{m.featurableProperties(), m.features()}}
 
 		if ts, ok := module.(targetSpecificLibrary); ok {
 			host := ts.getTargetSpecific(tgtTypeHost)

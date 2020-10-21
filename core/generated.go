@@ -201,7 +201,7 @@ func (m *generateCommon) getGenerateCommon() *generateCommon {
 	return m
 }
 
-func (m *generateCommon) topLevelProperties() []interface{} {
+func (m *generateCommon) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.GenerateProps}
 }
 
@@ -352,8 +352,8 @@ func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func (m *generateSource) topLevelProperties() []interface{} {
-	return append(m.generateCommon.topLevelProperties(), &m.Properties.GenerateSourceProps)
+func (m *generateSource) featurableProperties() []interface{} {
+	return append(m.generateCommon.featurableProperties(), &m.Properties.GenerateSourceProps)
 }
 
 func (gc *generateCommon) getHostBinModule(mctx blueprint.ModuleContext) (hostBinModule blueprint.Module) {
@@ -619,8 +619,8 @@ func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func (m *transformSource) topLevelProperties() []interface{} {
-	return append(m.generateCommon.topLevelProperties(), &m.Properties.TransformSourceProps)
+func (m *transformSource) featurableProperties() []interface{} {
+	return append(m.generateCommon.featurableProperties(), &m.Properties.TransformSourceProps)
 }
 
 func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {

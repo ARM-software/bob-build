@@ -165,7 +165,7 @@ func (m *installGroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// No build actions for a bob_install_group
 }
 
-func (m *installGroup) topLevelProperties() []interface{} {
+func (m *installGroup) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.InstallGroupProps}
 }
 
@@ -208,7 +208,7 @@ func (m *resource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func (m *resource) topLevelProperties() []interface{} {
+func (m *resource) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.ResourceProps}
 }
 

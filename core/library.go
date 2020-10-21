@@ -326,7 +326,7 @@ func (l *library) build() *Build {
 	return &l.Properties.Build
 }
 
-func (l *library) topLevelProperties() []interface{} {
+func (l *library) featurableProperties() []interface{} {
 	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
 }
 
