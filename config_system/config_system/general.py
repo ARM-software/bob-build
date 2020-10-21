@@ -468,7 +468,7 @@ def set_config_if_prompt(key, value, is_user_set=True, source="cmd_line"):
 def set_config_internal(key, value):
     # Internally most calls to set_config are not (directly) the result of the
     # user specifying the value, so this helper function avoids the need to
-    # explictly set is_user_set=False on every call
+    # explicitly set is_user_set=False on every call
     set_config(key, value, is_user_set=False)
 
 

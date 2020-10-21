@@ -41,7 +41,7 @@ When the code base contains lots of optional behaviour, it's important that:
   Bob's menuconfig is expected to solve this part of the problem,
   negating the need to document all the options somewhere else.
 
-* maintainance of the options is 'simple'
+* maintenance of the options is 'simple'
 
   Features and templates in the build definitions make clear where the
   configurability exists.
@@ -61,7 +61,7 @@ Bob builds happen in 3 phases:
 * Bootstrap
 
   The user sets up a build output directory, and Bob records some
-  information that it needs to retreive in subsequent phases.
+  information that it needs to retrieve in subsequent phases.
 
 * Configure
 

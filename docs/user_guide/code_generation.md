@@ -4,7 +4,7 @@ Code Generation
 Occasionally it's preferable to use a tool to generate source code,
 rather than manually write it. Bob has a few module types that support
 generating code at compile time (the collection of module types that
-do this are refered to as generators). In all cases generator output
+do this are referred to as generators). In all cases generator output
 is placed in an intermediate directory specific to the module.
 
 ```

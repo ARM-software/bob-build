@@ -15,7 +15,7 @@ choice
 	help
 	  A few different compilers are supported. They are classed by
 	  toolchain which allows a limited amount of flexibility to
-	  accomodate similar compilers.
+	  accommodate similar compilers.
 
 	  Select the compiler toolchain to be used when compiling for the target.
 

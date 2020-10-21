@@ -265,7 +265,7 @@ func IsExecutable(fname string) bool {
 // This means that using append has side-effect on the first list.
 // The purpose of this function is to avoid those side-effects.
 func NewStringSlice(lists ...[]string) []string {
-	// Checkout utils test for exmaple why this is different to append()
+	// Checkout utils test for example why this is different to append()
 	sumSize := 0
 	for _, list := range lists {
 		sumSize += len(list)

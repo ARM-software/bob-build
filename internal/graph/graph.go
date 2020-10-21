@@ -370,7 +370,7 @@ func (g *graph) DeleteProxyEdges(color string) {
 
 	attrVal := "\"" + color + "\""
 
-	// Re-evaluate the lists if we've removed edges to ensure we propogate multiple links
+	// Re-evaluate the lists if we've removed edges to ensure we propagate multiple links
 	removed := 1
 	for removed > 0 {
 		removed = 0
