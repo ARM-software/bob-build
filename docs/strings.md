@@ -44,7 +44,7 @@ Return the value of `.param`, with all characters lower cased.
 
     {{split .param sep}}
 
-Separate the value of `.param` into an array on each occurence of the
+Separate the value of `.param` into an array on each occurrence of the
 string `sep`.
 
 ### reg_match

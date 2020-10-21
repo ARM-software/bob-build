@@ -102,7 +102,7 @@ func newGeneratedFilePath(path string) filePath {
 	// $(HOST_OUT_GEN)/STATIC_LIBRARIES/m.Name()/file.ext
 	//
 	// Local path is anything from m.Name() (included)
-	// Module dir is everything upto and including m.Name().
+	// Module dir is everything up to and including m.Name().
 	pathElems := strings.Split(path, string(os.PathSeparator))
 	if len(pathElems) < 4 {
 		panic(fmt.Errorf("Path doesn't have as many elements as expected. %s", path))

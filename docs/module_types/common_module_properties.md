@@ -257,7 +257,7 @@ relative to `$ANDROID_TOP`.
 ### **bob_module.local_include_dirs** (optional)
 A list of include directories to use. These are relative to the
 `build.bp` containing the module definition, and expected to be within
-the source heirarchy.
+the source hierarchy.
 
 ----
 ### **bob_module.export_include_dirs** (optional)
