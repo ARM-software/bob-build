@@ -47,7 +47,7 @@ func (m *kernelModule) getTargetSpecific(tgt tgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(tgt)
 }
 
-func (m *kernelModule) topLevelProperties() []interface{} {
+func (m *kernelModule) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.Build.BuildProps}
 }
 

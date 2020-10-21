@@ -35,7 +35,7 @@ type externalLib struct {
 	}
 }
 
-func (m *externalLib) topLevelProperties() []interface{} {
+func (m *externalLib) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.ExternalLibProps}
 }
 

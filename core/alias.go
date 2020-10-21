@@ -59,7 +59,7 @@ func (m *alias) features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *alias) topLevelProperties() []interface{} {
+func (m *alias) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.AliasProps}
 }
 

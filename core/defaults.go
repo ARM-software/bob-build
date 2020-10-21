@@ -58,7 +58,7 @@ func (m *defaults) build() *Build {
 	return &m.Properties.Build
 }
 
-func (m *defaults) topLevelProperties() []interface{} {
+func (m *defaults) featurableProperties() []interface{} {
 	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
 }
 
