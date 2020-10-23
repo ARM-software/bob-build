@@ -19,7 +19,6 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -52,7 +51,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 	ldLibraryPath := ""
 	if _, ok := args["host_bin"]; ok {
-		ldLibraryPath += "LD_LIBRARY_PATH=" + filepath.Join("${BuildDir}", string(hostTarget), "shared") + ":$$LD_LIBRARY_PATH "
+		ldLibraryPath += "LD_LIBRARY_PATH=" + g.sharedLibsDir(hostTarget) + ":$$LD_LIBRARY_PATH "
 	}
 	utils.StripUnusedArgs(args, cmd)
 
@@ -163,7 +162,7 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 
 	// Create a rule to copy the generated library
 	// from gen_dir to the common library directory
-	soFile := getSharedLibLinkPath(m)
+	soFile := g.getSharedLibLinkPath(m)
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     copyRule,
@@ -188,7 +187,7 @@ func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.Modul
 		blueprint.BuildParams{
 			Rule:     copyRule,
 			Inputs:   m.outputs(),
-			Outputs:  []string{getBinaryPath(m)},
+			Outputs:  []string{g.getBinaryPath(m)},
 			Optional: true,
 		})
 
