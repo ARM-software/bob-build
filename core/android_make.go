@@ -326,7 +326,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == sharedDepTag },
 		func(p blueprint.Module) {
 			if sl, ok := p.(*sharedLibrary); ok {
-				b := sl.build()
+				b := &sl.library.Properties.Build
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
 				}

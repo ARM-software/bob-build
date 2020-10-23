@@ -874,7 +874,7 @@ func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bo
 
 // While traversing the static library dependency tree, propagate extra properties.
 func propagateOtherExportedProperties(l *library, depLib propertyExporter) {
-	props := l.build()
+	props := &l.Properties.Build
 	for _, shLib := range depLib.exportSharedLibs() {
 		if !utils.Contains(props.Shared_libs, shLib) {
 			props.Shared_libs = append(props.Shared_libs, shLib)
