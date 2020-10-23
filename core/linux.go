@@ -112,16 +112,12 @@ type targetableModule interface {
 	getTarget() tgtType
 }
 
-// Where to put generated shared libraries to simplify linking
-// As long as the module is targetable, we can infer the library path
-func getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", string(t.getTarget()), "shared", t.outputFileName())
-}
-
-// Where to put generated binaries in order to make sure generated binaries
-// are available in the same directory as compiled binaries
-func getBinaryPath(t targetableModule) string {
-	return filepath.Join("${BuildDir}", string(t.getTarget()), "executable", t.outputFileName())
+// Modules implementing the linkableModule interface are linked
+// by `ld` to produce a shared library or binary.
+type linkableModule interface {
+	getVersionScript(ctx blueprint.ModuleContext) *string
+	GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
+	GetStaticLibs(ctx blueprint.ModuleContext) []string
 }
 
 var asRule = pctx.StaticRule("as",
@@ -378,12 +374,12 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 
 // This section contains functions that are common for shared libraries and executables.
 
-func (l *library) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []string) {
+func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
-				libs = append(libs, getSharedLibLinkPath(t))
+				libs = append(libs, g.getSharedLibLinkPath(t))
 			} else if _, ok := m.(*externalLib); ok {
 				// Don't try and guess the path to external libraries,
 				// and as they are outside of the build we don't need to
@@ -457,21 +453,20 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 	return
 }
 
-func (l *library) getSharedLibraryDir() string {
-	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "shared")
-}
-
-func (g *linuxGenerator) sharedLibOutputDir(m *sharedLibrary) string {
-	return m.library.getSharedLibraryDir()
-}
-
 func (g *linuxGenerator) sharedLibsDir(tgt tgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "shared")
 }
 
-func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]string {
+// Full path for shared libraries, in a shared location to simplify linking.
+// As long as the module is targetable, we can infer the library path.
+func (g *linuxGenerator) getSharedLibLinkPath(t targetableModule) string {
+	return filepath.Join(g.sharedLibsDir(t.getTarget()), t.outputFileName())
+}
+
+func (g *linuxGenerator) getCommonLibArgs(l *library, ctx blueprint.ModuleContext) map[string]string {
+	tc := g.getToolchain(l.Properties.TargetType)
+
 	ldflags := l.Properties.Ldflags
-	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
 
 	if l.Properties.Build.isForwardingSharedLibrary() {
 		ldflags = append(ldflags, tc.getLinker().keepUnusedDependencies())
@@ -499,22 +494,22 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 			wholeStaticLibs))
 	}
 	staticLibFlags = append(staticLibFlags, staticLibs...)
-
+	sharedLibDir := g.sharedLibsDir(l.Properties.TargetType)
 	args := map[string]string{
 		"build_wrapper":   buildWrapper,
 		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
 		"linker":          linker,
-		"shared_libs_dir": l.getSharedLibraryDir(),
+		"shared_libs_dir": sharedLibDir,
 		"shared_libs_flags": utils.Join(append(sharedLibLdlibs,
-			tc.getLinker().setRpathLink(l.getSharedLibraryDir()))),
+			tc.getLinker().setRpathLink(sharedLibDir))),
 		"static_libs": utils.Join(staticLibFlags),
 		"ldlibs":      utils.Join(l.Properties.Ldlibs, tcLdlibs),
 	}
 	return args
 }
 
-func (l *sharedLibrary) getLibArgs(ctx blueprint.ModuleContext) map[string]string {
-	args := l.getCommonLibArgs(ctx)
+func (g *linuxGenerator) getSharedLibArgs(l *sharedLibrary, ctx blueprint.ModuleContext) map[string]string {
+	args := g.getCommonLibArgs(&l.library, ctx)
 	ldflags := []string{}
 
 	if l.Properties.Library_version != "" {
@@ -527,14 +522,14 @@ func (l *sharedLibrary) getLibArgs(ctx blueprint.ModuleContext) map[string]strin
 	return args
 }
 
-func (b *binary) getLibArgs(ctx blueprint.ModuleContext) map[string]string {
-	return b.getCommonLibArgs(ctx)
+func (g *linuxGenerator) getBinaryArgs(b *binary, ctx blueprint.ModuleContext) map[string]string {
+	return g.getCommonLibArgs(&b.library, ctx)
 }
 
 // Returns the implicit dependencies for a library
-func (l *library) Implicits(ctx blueprint.ModuleContext) []string {
+func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext) []string {
 	implicits := utils.NewStringSlice(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
-	implicits = append(implicits, l.getSharedLibLinkPaths(ctx)...)
+	implicits = append(implicits, g.getSharedLibLinkPaths(ctx)...)
 	versionScript := l.getVersionScript(ctx)
 	if versionScript != nil {
 		implicits = append(implicits, *versionScript)
@@ -603,7 +598,7 @@ var symlinkRule = pctx.StaticRule("symlink",
 
 func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = g.sharedLibOutputDir(m)
+	m.outputdir = g.sharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.outputDir(), m.getRealName())
 	m.outs = []string{soFile}
 
@@ -633,10 +628,10 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 			Rule:      sharedLibraryRule,
 			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
-			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
+			Implicits: append(g.ccLinkImplicits(m, ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
-			Args:      m.getLibArgs(ctx),
+			Args:      g.getSharedLibArgs(m, ctx),
 		})
 
 	g.addSharedLibToc(ctx, soFile, m.getTarget())
@@ -644,8 +639,14 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) binaryOutputDir(m *binary) string {
-	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "executable")
+func (g *linuxGenerator) binaryOutputDir(tgt tgtType) string {
+	return filepath.Join("${BuildDir}", string(tgt), "executable")
+}
+
+// Full path for a generated binary. This ensures generated binaries
+// are available in the same directory as compiled binaries
+func (g *linuxGenerator) getBinaryPath(t targetableModule) string {
+	return filepath.Join(g.binaryOutputDir(t.getTarget()), t.outputFileName())
 }
 
 var executableRule = pctx.StaticRule("executable",
@@ -659,7 +660,7 @@ var executableRule = pctx.StaticRule("executable",
 
 func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = g.binaryOutputDir(m)
+	m.outputdir = g.binaryOutputDir(m.Properties.TargetType)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}
 
 	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
@@ -673,10 +674,10 @@ func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 			Rule:      executableRule,
 			Outputs:   m.outputs(),
 			Inputs:    objectFiles,
-			Implicits: append(m.library.Implicits(ctx), nonCompiledDeps...),
+			Implicits: append(g.ccLinkImplicits(m, ctx), nonCompiledDeps...),
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
-			Args:      m.getLibArgs(ctx),
+			Args:      g.getBinaryArgs(m, ctx),
 		})
 	installDeps := g.install(m, ctx)
 	addPhony(m, ctx, installDeps, optional)

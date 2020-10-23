@@ -670,6 +670,8 @@ type sharedLibrary struct {
 	fileNameExtension string
 }
 
+var _ linkableModule = (*sharedLibrary)(nil)
+
 func (m *sharedLibrary) getLinkName() string {
 	return m.outputName() + m.fileNameExtension
 }
@@ -733,6 +735,8 @@ func (m *sharedLibrary) outputFileName() string {
 type binary struct {
 	library
 }
+
+var _ linkableModule = (*binary)(nil)
 
 func (l *binary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
