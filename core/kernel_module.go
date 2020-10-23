@@ -43,10 +43,6 @@ func (m *kernelModule) defaultableProperties() []interface{} {
 	return []interface{}{&m.Properties.Build.BuildProps}
 }
 
-func (m *kernelModule) build() *Build {
-	return &m.Properties.Build
-}
-
 func (m *kernelModule) getTargetSpecific(tgt tgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(tgt)
 }
@@ -157,14 +153,14 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 
 	g := getBackend(ctx)
 
-	extraCflags := m.build().BuildProps.Cflags
+	extraCflags := m.Properties.BuildProps.Cflags
 
-	for _, includeDir := range m.build().BuildProps.Local_include_dirs {
+	for _, includeDir := range m.Properties.Build.BuildProps.Local_include_dirs {
 		includeDir = "-I" + getBackendPathInSourceDir(g, includeDir)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
-	for _, includeDir := range m.build().BuildProps.Include_dirs {
+	for _, includeDir := range m.Properties.Build.BuildProps.Include_dirs {
 		includeDir = "-I" + includeDir
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
@@ -176,8 +172,8 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 	}
 
 	kbuildOptions := ""
-	if len(m.build().Kbuild_options) > 0 {
-		kbuildOptions = "--kbuild-options " + strings.Join(m.build().Kbuild_options, " ")
+	if len(m.Properties.Build.Kbuild_options) > 0 {
+		kbuildOptions = "--kbuild-options " + strings.Join(m.Properties.Build.Kbuild_options, " ")
 	}
 
 	hostToolchain := m.Properties.Build.Kernel_hostcc

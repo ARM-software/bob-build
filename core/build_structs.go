@@ -398,7 +398,7 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	if l, ok := getLibrary(mctx.Module()); ok {
-		build := l.build()
+		build := &l.Properties.Build
 
 		mctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
 		mctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)

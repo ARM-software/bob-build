@@ -398,7 +398,7 @@ func (l *library) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []str
 func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
-	useNoAsNeeded := !l.build().isForwardingSharedLibrary()
+	useNoAsNeeded := !l.Properties.Build.isForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
 	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
@@ -407,7 +407,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*sharedLibrary); ok {
-				b := sl.build()
+				b := &sl.library.Properties.Build
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
 					ldlibs = append(ldlibs, tc.getLinker().keepSharedLibraryTransitivity())
@@ -473,7 +473,7 @@ func (l *library) getCommonLibArgs(ctx blueprint.ModuleContext) map[string]strin
 	ldflags := l.Properties.Ldflags
 	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
 
-	if l.build().isForwardingSharedLibrary() {
+	if l.Properties.Build.isForwardingSharedLibrary() {
 		ldflags = append(ldflags, tc.getLinker().keepUnusedDependencies())
 	} else {
 		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
