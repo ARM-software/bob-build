@@ -216,7 +216,12 @@ func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []
 			// directory (not the working directory), so add it
 			// here, and remove it afterwards.
 			file = getPathInSourceDir(file)
-			matches, _ := ctx.GlobWithDeps(file, excludesFromSrcDir)
+			matches, err := ctx.GlobWithDeps(file, excludesFromSrcDir)
+
+			if err != nil {
+				ctx.ModuleErrorf("glob failed with: %s", err)
+			}
+
 			for _, match := range matches {
 				rel, err := filepath.Rel(getSourceDir(), match)
 				if err != nil {
