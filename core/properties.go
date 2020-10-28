@@ -164,6 +164,8 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// supported, the host-specific and target-specific set.
 		var props = []propmap{propmap{m.featurableProperties(), m.features()}}
 
+		// Apply features in target-specific properties.
+		// This should happen for all modules which support host:{} and target:{}
 		if ts, ok := module.(targetSpecificLibrary); ok {
 			host := ts.getTargetSpecific(tgtTypeHost)
 			target := ts.getTargetSpecific(tgtTypeTarget)

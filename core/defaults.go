@@ -29,6 +29,7 @@ type defaults struct {
 	Properties struct {
 		Features
 		Build
+		KernelProps
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
 	}
@@ -59,11 +60,15 @@ func (m *defaults) build() *Build {
 }
 
 func (m *defaults) defaultableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
 }
 
 func (m *defaults) featurableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps}
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
+}
+
+func (m *defaults) targetableProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
 }
 
 func (m *defaults) features() *Features {
@@ -80,6 +85,7 @@ func (m *defaults) getTargetSpecific(variant tgtType) *TargetSpecific {
 
 func (m *defaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
+	m.Properties.KernelProps.processPaths(ctx)
 }
 
 func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -108,7 +114,7 @@ func (m *defaults) getMatchSourcePropNames() []string {
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
-	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
+	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{}, KernelProps{})
 	module.Properties.Host.init(&config.Properties, BuildProps{})
 	module.Properties.Target.init(&config.Properties, BuildProps{})
 
