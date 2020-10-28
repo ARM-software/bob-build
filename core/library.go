@@ -20,7 +20,6 @@ package core
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -164,26 +163,6 @@ type BuildProps struct {
 	AndroidProps
 	AndroidPGOProps
 
-	// Linux kernel config options to emulate. These are passed to Kbuild in
-	// the 'make' command-line, and set in the source code via EXTRA_CFLAGS
-	Kbuild_options []string
-	// Kernel modules which this module depends on
-	Extra_symbols []string
-	// Arguments to pass to kernel make invocation
-	Make_args []string
-	// Kernel directory location
-	Kernel_dir string
-	// Compiler prefix for kernel build
-	Kernel_cross_compile string
-	// Kernel target compiler
-	Kernel_cc string
-	// Kernel host compiler
-	Kernel_hostcc string
-	// Kernel linker
-	Kernel_ld string
-	// Target triple when using clang as the compiler
-	Kernel_clang_triple string
-
 	TargetType tgtType `blueprint:"mutated"`
 }
 
@@ -284,12 +263,6 @@ func (l *BuildProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 	l.InstallableProps.processPaths(ctx, g)
 	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)
 	l.Export_local_include_dirs = utils.PrefixDirs(l.Export_local_include_dirs, prefix)
-
-	// join module dir with relative kernel dir
-	if l.Kernel_dir != "" && !filepath.IsAbs(l.Kernel_dir) {
-		l.Kernel_dir = filepath.Join(prefix, l.Kernel_dir)
-	}
-
 	l.processBuildWrapper(ctx)
 }
 
@@ -343,6 +316,10 @@ func (l *library) build() *Build {
 }
 
 func (l *library) featurableProperties() []interface{} {
+	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
+}
+
+func (l *library) targetableProperties() []interface{} {
 	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
 }
 

@@ -25,12 +25,44 @@ import (
 	"github.com/google/blueprint"
 )
 
+type KernelProps struct {
+	// Linux kernel config options to emulate. These are passed to Kbuild in
+	// the 'make' command-line, and set in the source code via EXTRA_CFLAGS
+	Kbuild_options []string
+	// Kernel modules which this module depends on
+	Extra_symbols []string
+	// Arguments to pass to kernel make invocation
+	Make_args []string
+	// Kernel directory location
+	Kernel_dir string
+	// Compiler prefix for kernel build
+	Kernel_cross_compile string
+	// Kernel target compiler
+	Kernel_cc string
+	// Kernel host compiler
+	Kernel_hostcc string
+	// Kernel linker
+	Kernel_ld string
+	// Target triple when using clang as the compiler
+	Kernel_clang_triple string
+}
+
+func (k *KernelProps) processPaths(ctx blueprint.BaseModuleContext) {
+	prefix := projectModuleDir(ctx)
+
+	// join module dir with relative kernel dir
+	if k.Kernel_dir != "" && !filepath.IsAbs(k.Kernel_dir) {
+		k.Kernel_dir = filepath.Join(prefix, k.Kernel_dir)
+	}
+}
+
 type kernelModule struct {
 	moduleBase
 	simpleOutputProducer
 	Properties struct {
 		Features
 		Build
+		KernelProps
 		Defaults []string
 	}
 }
@@ -40,15 +72,19 @@ func (m *kernelModule) defaults() []string {
 }
 
 func (m *kernelModule) defaultableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps}
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
+}
+
+func (m *kernelModule) targetableProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
+}
+
+func (m *kernelModule) featurableProperties() []interface{} {
+	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
 }
 
 func (m *kernelModule) getTargetSpecific(tgt tgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(tgt)
-}
-
-func (m *kernelModule) featurableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps}
 }
 
 func (m *kernelModule) features() *Features {
@@ -92,6 +128,7 @@ func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []st
 
 func (m *kernelModule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
+	m.Properties.KernelProps.processPaths(ctx)
 }
 
 func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*kernelModule) {
@@ -166,32 +203,32 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 	}
 
 	kmodBuild := getBackendPathInBobScriptsDir(g, "kmod_build.py")
-	kdir := m.Properties.Build.Kernel_dir
+	kdir := m.Properties.KernelProps.Kernel_dir
 	if kdir != "" && !filepath.IsAbs(kdir) {
 		kdir = getBackendPathInSourceDir(g, kdir)
 	}
 
 	kbuildOptions := ""
-	if len(m.Properties.Build.Kbuild_options) > 0 {
-		kbuildOptions = "--kbuild-options " + strings.Join(m.Properties.Build.Kbuild_options, " ")
+	if len(m.Properties.KernelProps.Kbuild_options) > 0 {
+		kbuildOptions = "--kbuild-options " + strings.Join(m.Properties.KernelProps.Kbuild_options, " ")
 	}
 
-	hostToolchain := m.Properties.Build.Kernel_hostcc
+	hostToolchain := m.Properties.KernelProps.Kernel_hostcc
 	if hostToolchain != "" {
 		hostToolchain = "--hostcc " + hostToolchain
 	}
 
-	kernelToolchain := m.Properties.Build.Kernel_cc
+	kernelToolchain := m.Properties.KernelProps.Kernel_cc
 	if kernelToolchain != "" {
 		kernelToolchain = "--cc " + kernelToolchain
 	}
 
-	clangTriple := m.Properties.Build.Kernel_clang_triple
+	clangTriple := m.Properties.KernelProps.Kernel_clang_triple
 	if clangTriple != "" {
 		clangTriple = "--clang-triple " + clangTriple
 	}
 
-	ld := m.Properties.Build.Kernel_ld
+	ld := m.Properties.KernelProps.Kernel_ld
 	if ld != "" {
 		ld = "--ld " + ld
 	}
@@ -201,9 +238,9 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		ExtraIncludes:      strings.Join(extraIncludePaths, " "),
 		ExtraCflags:        strings.Join(extraCflags, " "),
 		KernelDir:          kdir,
-		KernelCrossCompile: m.Properties.Build.Kernel_cross_compile,
+		KernelCrossCompile: m.Properties.KernelProps.Kernel_cross_compile,
 		KbuildOptions:      kbuildOptions,
-		MakeArgs:           strings.Join(m.Properties.Build.Make_args, " "),
+		MakeArgs:           strings.Join(m.Properties.KernelProps.Make_args, " "),
 		// The kernel module builder replicates the out-of-tree module's source tree structure.
 		// The kernel module will be at its equivalent position in the output tree.
 		OutputModuleDir: filepath.Join(m.outputDir(), projectModuleDir(ctx)),
@@ -222,7 +259,8 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
-	module.Properties.Features.Init(&config.Properties, BuildProps{})
+
+	module.Properties.Features.Init(&config.Properties, BuildProps{}, KernelProps{})
 	module.Properties.Host.init(&config.Properties, BuildProps{})
 	module.Properties.Target.init(&config.Properties, BuildProps{})
 

@@ -50,10 +50,17 @@ type splittable interface {
 // targetSpecificLibrary extends splittable to allow retrieving specific data
 // for host and target.
 type targetSpecificLibrary interface {
-	// Get the target specific properties
-	getTargetSpecific(tgtType) *TargetSpecific
-	getTarget() tgtType
 	splittable
+
+	// Get module target type
+	getTarget() tgtType
+
+	// Get the target specific properties i.e. host:{} or target:{}
+	getTargetSpecific(tgtType) *TargetSpecific
+
+	// Get the set of the module main properties for
+	// that target specific properties would be applied to
+	targetableProperties() []interface{}
 }
 
 // Traverse the core properties of defaults to find out which variations are

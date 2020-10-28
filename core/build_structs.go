@@ -436,36 +436,27 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 // Applies target specific properties within each module. Must be done
 // after the libraries have been split.
 func targetMutator(mctx blueprint.TopDownMutatorContext) {
-	var build *Build
-	var tgt tgtType
+	if t, ok := mctx.Module().(targetSpecificLibrary); ok {
 
-	if l, ok := getLibrary(mctx.Module()); ok {
-		build = &l.Properties.Build
-		tgt = l.Properties.TargetType
-	} else if d, ok := mctx.Module().(*defaults); ok {
-		build = &d.Properties.Build
-		tgt = d.Properties.TargetType
-	} else if gsc, ok := getGenerateCommon(mctx.Module()); ok {
-		build = &gsc.Properties.FlagArgsBuild
-		tgt = gsc.Properties.Target
-	} else {
-		return
-	}
+		tgt := t.getTarget()
 
-	if tgt != tgtTypeHost && tgt != tgtTypeTarget {
-		// This is fine - it can happen if the target is the default
-		return
-	}
+		if tgt != tgtTypeHost && tgt != tgtTypeTarget {
+			// This is fine if target is neither host or target,
+			// it can happen if the target is the default
+			return
+		}
 
-	targetProps := build.getTargetSpecific(tgt).getTargetSpecificProps()
+		dst := t.targetableProperties()
+		src := t.getTargetSpecific(tgt).getTargetSpecificProps()
 
-	// Copy the target-specific variables to the core set
-	err := proptools.AppendMatchingProperties([]interface{}{&build.BuildProps}, targetProps, nil)
-	if err != nil {
-		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
-		} else {
-			panic(err)
+		// Copy the target-specific variables to the core set
+		err := proptools.AppendMatchingProperties(dst, src, nil)
+		if err != nil {
+			if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
+				mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+			} else {
+				panic(err)
+			}
 		}
 	}
 }
