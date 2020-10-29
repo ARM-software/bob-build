@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,6 @@ include $(BUILD_SYSTEM)/ninja_config.mk
 # any shell command that begins with "out/"
 BOB_GEN_CMD:=NINJA=$(NINJA) \
     "$(BOB_$(PROJ)_DIR)/@@BOB_DIR@@/scripts/generate_android_inc.bash" \
-    -c "@@CONFIGNAME@@" \
     -o "./$(BOB_ANDROIDMK_DIR)" \
     -s "$(LOCAL_PATH)" \
     -v "$(PLATFORM_SDK_VERSION)"
