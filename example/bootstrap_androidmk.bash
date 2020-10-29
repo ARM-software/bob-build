@@ -96,7 +96,6 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 TMP_ANDROID_MK="$(mktemp)"
 sed -e "s#@@BOB_PROJ_NAME@@#$PROJ_NAME#" \
     -e "s#@@BOB_DIR@@#$BOB_DIR#" \
-    -e "s#@@CONFIGNAME@@#$CONFIGNAME#" \
     "${PROJ_DIR}/Android.mk.blueprint" > "$TMP_ANDROID_MK"
 rsync --checksum "$TMP_ANDROID_MK" "${PROJ_DIR}/Android.mk"
 rm -f "$TMP_ANDROID_MK"

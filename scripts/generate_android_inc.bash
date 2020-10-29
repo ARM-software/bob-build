@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,18 +30,17 @@ trap 'echo "*** Unexpected error in $0 ***"' ERR
 
 BOB_DIR=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 
-while getopts "c:o:s:v:" opt; do
+while getopts "o:s:v:" opt; do
     case $opt in
-        c) CONFIGNAME="$OPTARG";;
         o) BUILDDIR=`readlink -f "$OPTARG"`;;
         s) PATH_TO_PROJ="$OPTARG";;
         v) PLATFORM_SDK_VERSION="$OPTARG";;
     esac
 done
 
-if [[ -z $BUILDDIR || -z $CONFIGNAME || -z $PATH_TO_PROJ || -z $PLATFORM_SDK_VERSION ]]; then
+if [[ -z $BUILDDIR || -z $PATH_TO_PROJ || -z $PLATFORM_SDK_VERSION ]]; then
     echo "Error: Missing argument to $0"
-    echo "Usage: $0 -c CONFIGNAME -o BUILDDIR -s PATH_TO_PROJ -v PLATFORM_SDK_VERSION"
+    echo "Usage: $0 -o BUILDDIR -s PATH_TO_PROJ -v PLATFORM_SDK_VERSION"
     exit 1
 fi
 
@@ -49,9 +48,6 @@ source "${BOB_DIR}/pathtools.bash"
 
 if ! [[ -x ${BUILDDIR}/buildme ]]; then
     echo "${BUILDDIR}/buildme does not exist!"
-    exit 1
-elif ! [[ -f "${BUILDDIR}/${CONFIGNAME}" ]]; then
-    echo "${BUILDDIR}/${CONFIGNAME} does not exist!"
     exit 1
 elif [[ -z $NINJA ]]; then
     echo "\$NINJA not set!"
