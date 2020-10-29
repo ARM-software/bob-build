@@ -17,6 +17,7 @@
 
 # SRCDIR - Path to base of source tree. This can be relative to PWD or absolute.
 # BUILDDIR - Build output directory. This can be relative to PWD or absolute.
+# CONFIGDIR - Configuration directory. This can be relative to PWD or absolute.
 # CONFIGNAME - Name of the configuration file.
 # BLUEPRINT_LIST_FILE - Path to file listing all Blueprint input files.
 #                       This can be relative to PWD or absolute.
@@ -43,6 +44,12 @@ fi
 if [[ -z "$BUILDDIR" ]]; then
   echo "BUILDDIR is not set - using ."
   export BUILDDIR=.
+fi
+
+if [[ -z "$CONFIGDIR" ]]; then
+  CONFIGDIR="${BUILDDIR}"
+else
+  mkdir -p "${CONFIGDIR}"
 fi
 
 if [[ -z "$CONFIGNAME" ]]; then
@@ -80,8 +87,8 @@ fi
 
 # Calculate Bob directory relative to the working directory.
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
-CONFIG_FILE="${BUILDDIR}/${CONFIGNAME}"
-CONFIG_JSON="${BUILDDIR}/.bob.config.json"
+CONFIG_FILE="${CONFIGDIR}/${CONFIGNAME}"
+CONFIG_JSON="${CONFIGDIR}/.bob.config.json"
 
 export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"

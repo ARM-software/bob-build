@@ -33,12 +33,11 @@ import (
 )
 
 var (
-	bobdir     = os.Getenv("BOB_DIR")
-	configFile = os.Getenv("CONFIG_FILE")
-	configOpts = os.Getenv("BOB_CONFIG_OPTS")
-	srcdir     = os.Getenv("SRCDIR")
-
-	configJSONFile = ".bob.config.json"
+	bobdir         = os.Getenv("BOB_DIR")
+	configFile     = os.Getenv("CONFIG_FILE")
+	configOpts     = os.Getenv("BOB_CONFIG_OPTS")
+	srcdir         = os.Getenv("SRCDIR")
+	configJSONFile = os.Getenv("CONFIG_JSON")
 )
 
 type moduleBase struct {
@@ -81,9 +80,8 @@ func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
 	// specified in the config.
-	jsonPath := getPathInBuildDir(configJSONFile)
 	config := &bobConfig{}
-	err := config.Properties.LoadConfig(jsonPath)
+	err := config.Properties.LoadConfig(configJSONFile)
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +91,7 @@ func Main() {
 	builder_android_make := config.Properties.GetBool("builder_android_make")
 
 	// Depend on the config file
-	pctx.AddNinjaFileDeps(jsonPath, getPathInBuildDir(".env.hash"))
+	pctx.AddNinjaFileDeps(configJSONFile, getPathInBuildDir(".env.hash"))
 
 	var ctx = blueprint.NewContext()
 

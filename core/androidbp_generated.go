@@ -66,7 +66,7 @@ func expandCmd(s string, moduleDir string) string {
 		case "bob_config":
 			return configFile
 		case "bob_config_json":
-			return filepath.Join(getBuildDir(), configJSONFile)
+			return configJSONFile
 		case "bob_config_opts":
 			return configOpts
 		default:
