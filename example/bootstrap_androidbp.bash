@@ -40,6 +40,7 @@ Usage:
   profiles and explicit options (like DEBUG=y)
 
 Options
+  -c, --configdir   Set configuration directory
   -m, --menuconfig  Open configuration editor
   -h, --help        Help text
 
@@ -50,13 +51,18 @@ EOF
 }
 
 MENU=0
-PARAMS=$(getopt -o hm -l help,menuconfig --name $(basename "$0") -- "$@")
+PARAMS=$(getopt -o c:hm -l configdir:,help,menuconfig --name $(basename "$0") -- "$@")
 
 eval set -- "$PARAMS"
 unset PARAMS
 
 while true ; do
     case $1 in
+        -c | --configdir)
+            shift
+            CONFIG_DIR="$1"
+            shift
+            ;;
         -m | --menuconfig)
             MENU=1
             shift
@@ -85,6 +91,7 @@ cd "${ANDROID_BUILD_TOP}"
 ### Variables required for Bob and Android.mk bootstrap ###
 BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"
 export BUILDDIR="${BPBUILD_DIR}"
+export CONFIGDIR="${CONFIG_DIR}"
 export CONFIGNAME="bob.config"
 export SRCDIR="${PROJ_DIR}"
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
