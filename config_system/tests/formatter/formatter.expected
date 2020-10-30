@@ -21,6 +21,8 @@ config OPTION_B
 config OPTION_C
 	bool "C"
 	depends on MODE
+	help # Help with comment
+	  Help text can also have comments # This should be kept.
 
 endchoice
 choice

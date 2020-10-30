@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2020 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -112,7 +112,8 @@ def t_space(t):
 
 
 def t_commandhelp(t):
-    r"help[ \t]*\n"
+    r"help[ \t]*(?:\#.*)?\n"
+
     t.lexer.begin("HELP")
     t.type = "HELP"
     global help_indent
