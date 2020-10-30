@@ -11,10 +11,14 @@ choice
 
 config OPTION_A
   bool "A"
+  help
+    Cool choice A.
 
 config OPTION_B
   bool "B"
   depends on MODE
+  help # this choice is cooler
+    Cooler choice B.
 
 config OPTION_C
   bool "C"
