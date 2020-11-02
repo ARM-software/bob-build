@@ -106,28 +106,66 @@ func Main() {
 		ctx.RegisterModuleType(name, factory)
 	})
 
-	// Note that the order of mutators are important, since the
+	// Note that the order of mutators is important, since the
 	// contents of each module will be rewritten. The following
 	// describes the required orderring of mutators dealing with
 	// property propagation.
 	//
-	// Merge feature specific values to the level above in each
-	// module. This must be before defaults so that a feature specific
+	// On reading build.bp, the various properties will be set
+	// according to the build.bp structure:
+	//
+	//  .props.propA
+	//  .props.feature1.propA
+	//  .Host.props.propA
+	//  .Host.props.feature1.propA
+	//  .Target.props.propA
+	//  .Target.props.feature1.propA
+	//
+	//  default.props.propA
+	//  default.props.feature1.propA
+	//  default.Host.props.propA
+	//  default.Host.props.feature1.propA
+	//  default.Target.props.propA
+	//  default.Target.props.feature1.propA
+	//
+	// Merge feature-specific values to the level above in each
+	// module. This must be before defaults so that a feature-specific
 	// option set in a default does not override an option set in a
 	// module. Do this before templates so templates only need to
-	// operate on one level.
+	// operate on one level. The properties we care about are then:
+	//
+	//  .props.propA
+	//  .Host.props.propA
+	//  .Target.props.propA
+	//
+	//  default.props.propA
+	//  default.Host.props.propA
+	//  default.Target.props.propA
 	//
 	// Evaluate templates next, including in defaults. This avoids us
 	// having to re-evaluate templates after they have been copied
 	// around by defaults.
 	//
-	// Then apply defaults. Do this before the library splitter so that
-	// we can propagate target_supported and host_supported through
-	// defaults if needed.
+	// The supported_variants mutator runs next. This just propagates the
+	// host_supported and target_supported properties through the
+	// defaults, allowing us to identify whether each module supports
+	// host and target, and split the modules early.
 	//
-	// Next split libraries into host and target specific modules.
+	// Then split the libraries into host-specific and target-specific
+	// modules.
 	//
-	// After the libraries are split we can apply target specific options.
+	// After the libraries are split we can apply target-specific
+	// options, flattening the properties further:
+	//
+	//  .props.propA
+	//
+	//  default.props.propA
+	//
+	// Finally apply the remaining properties from defaults. This
+	// leaves the main property structure on each module holding all
+	// the settings for each property:
+	//
+	//  .props.propA
 	//
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
