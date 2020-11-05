@@ -20,6 +20,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -603,7 +604,13 @@ func (l *library) getVersionScript(ctx blueprint.ModuleContext) *string {
 		}
 		return &outputs[0]
 	}
-	return l.Properties.Build.Version_script
+
+	if l.Properties.Build.Version_script != nil {
+		path := getBackendPathInSourceDir(getBackend(ctx), *l.Properties.Build.Version_script)
+		return &path
+	}
+
+	return nil
 }
 
 func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -615,7 +622,7 @@ func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBacke
 		if len(matches) == 2 {
 			l.Properties.VersionScriptModule = &matches[1]
 		} else {
-			*versionScript = getBackendPathInSourceDir(getBackend(ctx), projectModuleDir(ctx), *versionScript)
+			*versionScript = filepath.Join(projectModuleDir(ctx), *versionScript)
 		}
 	}
 }
