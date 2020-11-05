@@ -248,6 +248,16 @@ type SourceProps struct {
 	Specials []string `blueprint:"mutated"`
 }
 
+// IncludeDirsProps defines a set of properties for including directories
+// by the module.
+type IncludeDirsProps struct {
+	// The list of include dirs to use that is relative to the source directory
+	Include_dirs []string
+
+	// The list of include dirs to use that is relative to the build.bp file
+	Local_include_dirs []string // These use relative instead of absolute paths
+}
+
 // Get a list of sources to compile.
 //
 // The sources are relative to the project directory (i.e. include

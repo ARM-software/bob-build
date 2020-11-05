@@ -44,16 +44,24 @@ type propertyExporter interface {
 	exportSharedLibs() []string
 }
 
-// BuildProps contains properties required by all modules that compile C/C++
-type BuildProps struct {
+// CommonProps defines a set of properties which are common
+// for multiple module types.
+type CommonProps struct {
 	SourceProps
+	IncludeDirsProps
+	InstallableProps
+	EnableableProps
+	AndroidProps
 	AliasableProps
 
+	// Flags used for C compilation
+	Cflags []string
+}
+
+// BuildProps contains properties required by all modules that compile C/C++
+type BuildProps struct {
 	// Alternate output name, used for the file name and Android rules
 	Out *string
-
-	// Flags used for C/C++ compilation
-	Cflags []string
 	// Flags exported for dependent modules
 	Export_cflags []string
 	// Flags used for C compilation
@@ -125,12 +133,6 @@ type BuildProps struct {
 	// The list of modules that generate output required by the build wrapper
 	Generated_deps []string
 
-	// The list of include dirs to use that is relative to the source directory
-	Include_dirs []string
-
-	// The list of include dirs to use that is relative to the build.bp file
-	Local_include_dirs []string // These use relative instead of absolute paths
-
 	// Include local dirs to be exported into dependent
 	Export_local_include_dirs []string
 
@@ -157,10 +159,7 @@ type BuildProps struct {
 	// requires the BFD linker.
 	Forwarding_shlib *bool
 
-	InstallableProps
-	EnableableProps
 	StripProps
-	AndroidProps
 	AndroidPGOProps
 
 	TargetType tgtType `blueprint:"mutated"`
@@ -190,6 +189,7 @@ func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 // A Build represents the whole tree of properties for a 'library' object,
 // including its host and target-specific properties
 type Build struct {
+	CommonProps
 	BuildProps
 	Target TargetSpecific
 	Host   TargetSpecific
@@ -259,25 +259,21 @@ func (l *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 func (l *BuildProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 
-	l.SourceProps.processPaths(ctx, g)
-	l.InstallableProps.processPaths(ctx, g)
-	l.Local_include_dirs = utils.PrefixDirs(l.Local_include_dirs, prefix)
 	l.Export_local_include_dirs = utils.PrefixDirs(l.Export_local_include_dirs, prefix)
 	l.processBuildWrapper(ctx)
 }
 
 func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	// process paths for target specific data
-	for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {
-		tgtSpecific := l.getTargetSpecific(tgt)
-		tgtSpecificData := tgtSpecific.getTargetSpecificProps()
-
-		if tbp, ok := tgtSpecificData.(*BuildProps); ok {
-			tbp.processPaths(ctx, g)
-		}
-	}
-
 	l.BuildProps.processPaths(ctx, g)
+	l.CommonProps.processPaths(ctx, g)
+}
+
+func (c *CommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	prefix := projectModuleDir(ctx)
+
+	c.SourceProps.processPaths(ctx, g)
+	c.InstallableProps.processPaths(ctx, g)
+	c.IncludeDirsProps.Local_include_dirs = utils.PrefixDirs(c.IncludeDirsProps.Local_include_dirs, prefix)
 }
 
 // library is a base class for modules which are generated from sets of object files
@@ -308,7 +304,11 @@ func (l *library) defaults() []string {
 }
 
 func (l *library) defaultableProperties() []interface{} {
-	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
+	return []interface{}{
+		&l.Properties.Build.CommonProps,
+		&l.Properties.Build.BuildProps,
+		&l.Properties.Build.SplittableProps,
+	}
 }
 
 func (l *library) build() *Build {
@@ -316,11 +316,19 @@ func (l *library) build() *Build {
 }
 
 func (l *library) featurableProperties() []interface{} {
-	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
+	return []interface{}{
+		&l.Properties.Build.CommonProps,
+		&l.Properties.Build.BuildProps,
+		&l.Properties.Build.SplittableProps,
+	}
 }
 
 func (l *library) targetableProperties() []interface{} {
-	return []interface{}{&l.Properties.Build.BuildProps, &l.Properties.Build.SplittableProps}
+	return []interface{}{
+		&l.Properties.Build.CommonProps,
+		&l.Properties.Build.BuildProps,
+		&l.Properties.Build.SplittableProps,
+	}
 }
 
 func (l *library) features() *Features {
@@ -743,9 +751,9 @@ func (m *binary) outputFileName() string {
 }
 
 func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	l.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{})
-	l.Properties.Host.init(&config.Properties, BuildProps{})
-	l.Properties.Target.init(&config.Properties, BuildProps{})
+	l.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})
+	l.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{})
+	l.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{})
 
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }
