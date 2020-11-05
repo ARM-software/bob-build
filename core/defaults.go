@@ -60,15 +60,30 @@ func (m *defaults) build() *Build {
 }
 
 func (m *defaults) defaultableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
+	return []interface{}{
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
+		&m.Properties.KernelProps,
+	}
 }
 
 func (m *defaults) featurableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
+	return []interface{}{
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
+		&m.Properties.KernelProps,
+	}
 }
 
 func (m *defaults) targetableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.Build.SplittableProps, &m.Properties.KernelProps}
+	return []interface{}{
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
+		&m.Properties.KernelProps,
+	}
 }
 
 func (m *defaults) features() *Features {
@@ -114,9 +129,9 @@ func (m *defaults) getMatchSourcePropNames() []string {
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
-	module.Properties.Features.Init(&config.Properties, BuildProps{}, SplittableProps{}, KernelProps{})
-	module.Properties.Host.init(&config.Properties, BuildProps{})
-	module.Properties.Target.init(&config.Properties, BuildProps{})
+	module.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, SplittableProps{})
+	module.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{})
+	module.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }

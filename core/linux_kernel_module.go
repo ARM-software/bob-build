@@ -58,7 +58,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	delete(args, "kmod_build")
 	sources := utils.NewStringSlice(
 		getBackendPathsInSourceDir(g, m.Properties.getSources(ctx)),
-		m.Properties.Build.SourceProps.Specials,
+		m.Properties.SourceProps.Specials,
 		m.extraSymbolsFiles(ctx))
 
 	ctx.Build(pctx,

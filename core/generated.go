@@ -182,8 +182,8 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 
 func (m *generateCommon) init(properties *configProperties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
-	m.Properties.FlagArgsBuild.Host.init(properties, BuildProps{})
-	m.Properties.FlagArgsBuild.Target.init(properties, BuildProps{})
+	m.Properties.FlagArgsBuild.Host.init(properties, CommonProps{}, BuildProps{})
+	m.Properties.FlagArgsBuild.Target.init(properties, CommonProps{}, BuildProps{})
 }
 
 func (m *generateCommon) shortName() string {
@@ -320,7 +320,10 @@ func (m *generateCommon) getRspfile() (name string, rspfile bool) {
 }
 
 func (m *generateCommon) defaultableProperties() []interface{} {
-	return []interface{}{&m.Properties.FlagArgsBuild.BuildProps}
+	return []interface{}{
+		&m.Properties.FlagArgsBuild.CommonProps,
+		&m.Properties.FlagArgsBuild.BuildProps,
+	}
 }
 
 func (m *generateCommon) defaults() []string {

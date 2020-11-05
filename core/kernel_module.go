@@ -61,7 +61,7 @@ type kernelModule struct {
 	simpleOutputProducer
 	Properties struct {
 		Features
-		Build
+		CommonProps
 		KernelProps
 		Defaults []string
 	}
@@ -72,19 +72,11 @@ func (m *kernelModule) defaults() []string {
 }
 
 func (m *kernelModule) defaultableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
-}
-
-func (m *kernelModule) targetableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
+	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
 func (m *kernelModule) featurableProperties() []interface{} {
-	return []interface{}{&m.Properties.Build.BuildProps, &m.Properties.KernelProps}
-}
-
-func (m *kernelModule) getTargetSpecific(tgt tgtType) *TargetSpecific {
-	return m.Properties.getTargetSpecific(tgt)
+	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
 func (m *kernelModule) features() *Features {
@@ -92,9 +84,6 @@ func (m *kernelModule) features() *Features {
 }
 
 func (m *kernelModule) outputName() string {
-	if m.Properties.Out != nil {
-		return *m.Properties.Out
-	}
 	return m.Name()
 }
 
@@ -127,7 +116,7 @@ func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []st
 }
 
 func (m *kernelModule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.Build.processPaths(ctx, g)
+	m.Properties.CommonProps.processPaths(ctx, g)
 	m.Properties.KernelProps.processPaths(ctx)
 }
 
@@ -190,14 +179,14 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 
 	g := getBackend(ctx)
 
-	extraCflags := m.Properties.BuildProps.Cflags
+	extraCflags := m.Properties.Cflags
 
-	for _, includeDir := range m.Properties.Build.BuildProps.Local_include_dirs {
+	for _, includeDir := range m.Properties.IncludeDirsProps.Local_include_dirs {
 		includeDir = "-I" + getBackendPathInSourceDir(g, includeDir)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
-	for _, includeDir := range m.Properties.Build.BuildProps.Include_dirs {
+	for _, includeDir := range m.Properties.IncludeDirsProps.Include_dirs {
 		includeDir = "-I" + includeDir
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
@@ -260,9 +249,7 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
 
-	module.Properties.Features.Init(&config.Properties, BuildProps{}, KernelProps{})
-	module.Properties.Host.init(&config.Properties, BuildProps{})
-	module.Properties.Target.init(&config.Properties, BuildProps{})
+	module.Properties.Features.Init(&config.Properties, CommonProps{}, KernelProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
