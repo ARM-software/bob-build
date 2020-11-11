@@ -12,7 +12,15 @@ bob_defaults {
 
 bob_install_group {
     name: "bin",
-    install_path: "out/bin",
+    builder_android_make: {
+        install_path: "$(TARGET_OUT)/bin",
+    },
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "out/bin",
+    },
 }
 
 bob_binary {
