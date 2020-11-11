@@ -112,7 +112,7 @@ ln -sf "bob" "${BUILDDIR}/buildme"
 
 if [ $MENU -ne 1 ] || [ ! -f "$ANDROIDMK_DIR/$CONFIGNAME" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "$ANDROIDMK_DIR/config" ANDROID=y BUILDER_ANDROID_MK=y "$@"
+    "$ANDROIDMK_DIR/config" ANDROID=y BUILDER_ANDROID_MAKE=y "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then
