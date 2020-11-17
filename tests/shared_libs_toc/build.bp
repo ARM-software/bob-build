@@ -1,0 +1,40 @@
+bob_shared_library {
+    name: "libsharedtest",
+    srcs: ["srcs/lib.c"],
+    cflags: ["-fPIC"],
+    host_supported: true,
+    target_supported: true,
+}
+
+bob_binary {
+    name: "utility",
+    srcs: ["srcs/main.c"],
+    shared_libs: [
+        "libsharedtest",
+    ],
+    host_supported: true,
+    target_supported: true,
+}
+
+bob_transform_source {
+    name: "gen_output",
+    srcs: [
+        "input/input_one.in",
+        "input/input_two.in",
+    ],
+    out: {
+        match: ".*/([^/]+)\\.(in)",
+        replace: ["$1.gen"],
+    },
+    host_bin: "utility",
+    cmd: "${tool} -u ${host_bin} -i ${in} -o ${out}",
+    tool: "transform.py",
+    target: "host",
+}
+
+bob_alias {
+    name: "bob_test_shared_libs_toc",
+    srcs: [
+        "gen_output",
+    ],
+}
