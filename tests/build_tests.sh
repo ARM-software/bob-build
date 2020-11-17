@@ -280,6 +280,12 @@ if [ "$OS" != "OSX" ] ; then
     SRC=tests/kernel_module/kdir/include/kernel_header.h
     UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
     check_dep_updated "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
+    # 'host_bin's shared libs dependency
+    SRC=tests/shared_libs_toc/srcs/lib.c
+    UPDATE=(${build_dir}/gen/gen_output/input_one.gen
+            ${build_dir}/gen/gen_output/input_two.gen)
+    check_dep_updated "host_bin toc linking" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
 
 # Clean up

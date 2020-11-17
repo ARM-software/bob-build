@@ -370,55 +370,79 @@ func (m *generateSource) featurableProperties() []interface{} {
 	return append(m.generateCommon.featurableProperties(), &m.Properties.GenerateSourceProps)
 }
 
-func (gc *generateCommon) getHostBinModule(mctx blueprint.ModuleContext) (hostBinModule blueprint.Module) {
+func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string) {
 	mctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
 			return mctx.OtherModuleDependencyTag(dep) == hostToolBinTag
 		},
-		func(dep blueprint.Module) {
-			hostBinModule = dep
+		func(module blueprint.Module) {
+			_, bin_ok := module.(*binary)
+			_, genbin_ok := module.(*generateBinary)
+			if bin_ok || genbin_ok {
+				name = module.Name()
+			} else {
+				mctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", module.Name())
+			}
 		})
-	if hostBinModule == nil {
-		panic(fmt.Errorf("Could not find module specified by `host_bin: %v`", *gc.Properties.Host_bin))
-	}
 
-	_, bin_ok := hostBinModule.(*binary)
-	_, genbin_ok := hostBinModule.(*generateBinary)
-
-	if !(bin_ok || genbin_ok) {
-		panic(fmt.Errorf("Host binary %s of module %s is not a bob_binary nor bob_generate_binary!", hostBinModule.Name(), gc.Name()))
-	}
 	return
 }
 
-// Returns the tool binary for a generateSource module. This is different from the "tool"
-// in that it used to depend on a bob_binary module
-func (m *generateCommon) getHostBin(ctx blueprint.ModuleContext) (string, tgtType) {
-	toolBin := ""
-	toolTarget := tgtTypeUnknown
+// hostBinOuts returns the tool binary ('host_bin') together with its
+// target type and shared library dependencies for a generator module.
+// This is different from the "tool" in that it used to depend on
+// a bob_binary module.
+func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, tgtType) {
+	// No host_bin provided
 	if m.Properties.Host_bin == nil {
-		return toolBin, toolTarget
+		return "", []string{}, tgtTypeUnknown
 	}
 
-	hostBinModule := m.getHostBinModule(ctx)
-	if b, ok := hostBinModule.(*binary); ok {
-		outputs := b.outputs()
-		if len(outputs) != 1 {
-			panic(fmt.Errorf("outputs() returned %d outputs for host_bin module %s",
-				len(outputs), hostBinModule.Name()))
+	hostBinOut := ""
+	hostBinSharedLibsDeps := []string{}
+	hostBinTarget := tgtTypeUnknown
+	hostBinFound := false
+
+	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+		depTag := mctx.OtherModuleDependencyTag(child)
+
+		if parent == mctx.Module() && depTag == hostToolBinTag {
+			var outputs []string
+			hostBinFound = true
+
+			if b, ok := child.(*binary); ok {
+				outputs = b.outputs()
+				hostBinTarget = b.getTarget()
+			} else if gb, ok := child.(*generateBinary); ok {
+				outputs = gb.outputs()
+			} else {
+				mctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
+				return false
+			}
+
+			if len(outputs) != 1 {
+				mctx.OtherModuleErrorf(child, "outputs() returned %d outputs", len(outputs))
+			} else {
+				hostBinOut = outputs[0]
+			}
+
+			return true // keep visiting
+		} else if parent != mctx.Module() && depTag == sharedDepTag {
+			if l, ok := child.(*sharedLibrary); ok {
+				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
+			}
+
+			return true // keep visiting
+		} else {
+			return false // stop visiting
 		}
-		toolBin = outputs[0]
-		toolTarget = b.getTarget()
-	} else if b, ok := hostBinModule.(*generateBinary); ok {
-		outputs := b.outputs()
-		if len(outputs) != 1 {
-			panic(fmt.Errorf("outputs() returned %d outputs for host_bin module %s",
-				len(outputs), hostBinModule.Name()))
-		}
-		toolBin = outputs[0]
+	})
+
+	if !hostBinFound {
+		mctx.ModuleErrorf("Could not find module specified by `host_bin: %v`", m.Properties.Host_bin)
 	}
 
-	return toolBin, toolTarget
+	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget
 }
 
 // Returns the outputs of the generated dependencies of a module. This is used for more complex
@@ -500,10 +524,11 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 		dependents = append(dependents, toolPath)
 	}
 
-	hostBin, hostTarget := m.getHostBin(ctx)
+	hostBin, hostBinSharedLibs, hostTarget := m.hostBinOuts(ctx)
 	if hostBin != "" {
 		args["host_bin"] = hostBin
 		dependents = append(dependents, hostBin)
+		dependents = append(dependents, hostBinSharedLibs...)
 	}
 
 	// Args can contain other parameters, so replace that immediately

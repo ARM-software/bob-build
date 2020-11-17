@@ -34,6 +34,7 @@
 ./resources/build.bp
 ./rsp/build.bp
 ./shared_libs/build.bp
+./shared_libs_toc/build.bp
 ./source_encapsulation/build.bp
 ./static_libs/build.bp
 ./templates/build.bp
