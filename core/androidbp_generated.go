@@ -115,7 +115,8 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 		panic(err.Error())
 	}
 
-	m.AddStringList("srcs", gs.generateCommon.Properties.getSources(mctx))
+	srcs := utils.NewStringSlice(gs.generateCommon.Properties.getSources(mctx), gs.generateCommon.Properties.Specials)
+	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
 	m.AddStringList("implicit_outs", gs.Properties.Implicit_outs)
@@ -136,7 +137,8 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 		panic(err.Error())
 	}
 
-	m.AddStringList("srcs", ts.generateCommon.Properties.getSources(mctx))
+	srcs := utils.NewStringSlice(ts.generateCommon.Properties.getSources(mctx), ts.generateCommon.Properties.Specials)
+	m.AddStringList("srcs", srcs)
 	gr := m.NewGroup("out")
 	// if REs had double slashes in original value, at parsing they got removed, so compensate for that
 	gr.AddString("match", strings.Replace(ts.Properties.TransformSourceProps.Out.Match, "\\", "\\\\", -1))
