@@ -228,7 +228,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	m.AddStringList("export_shared_lib_headers", reexportShared)
 	m.AddStringList("export_static_lib_headers", reexportStatic)
 	m.AddStringList("export_header_lib_headers", reexportHeaders)
-	m.AddStringList("ldflags", l.Properties.Ldflags)
+	m.AddStringList("ldflags", utils.Filter(ccflags.AndroidLinkFlags, l.Properties.Ldflags))
 
 	_, installRel, ok := getSoongInstallPath(l.getInstallableProps())
 	if ok && installRel != "" {
