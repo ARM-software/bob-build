@@ -67,6 +67,18 @@ type kernelModule struct {
 	}
 }
 
+// kernelModule supports the following functionality:
+// * sharing properties via defaults
+// * feature-specific properties
+// * installation
+// * module enabling/disabling
+// * appending to aliases
+var _ defaultable = (*kernelModule)(nil)
+var _ featurable = (*kernelModule)(nil)
+var _ installable = (*kernelModule)(nil)
+var _ enableable = (*kernelModule)(nil)
+var _ aliasable = (*kernelModule)(nil)
+
 func (m *kernelModule) defaults() []string {
 	return m.Properties.Defaults
 }
@@ -101,6 +113,10 @@ func (m *kernelModule) shortName() string {
 
 func (m *kernelModule) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
+}
+
+func (m *kernelModule) getAliasList() []string {
+	return m.Properties.getAliasList()
 }
 
 func (m *kernelModule) filesToInstall(ctx blueprint.BaseModuleContext) []string {

@@ -154,13 +154,18 @@ type generateCommon struct {
 	}
 }
 
-// generateCommon support {{match_srcs}} on some properties
+// generateCommon supports:
+// * feature-specific properties
+// * module enabling/disabling
+// * module splitting for targets
+// * use of {{match_srcs}} on some properties
+// * properties that require escaping
+// * sharing properties from defaults via `flag_defaults` property
+var _ featurable = (*generateCommon)(nil)
+var _ enableable = (*generateCommon)(nil)
+var _ splittable = (*generateCommon)(nil)
 var _ matchSourceInterface = (*generateCommon)(nil)
-
-// generateCommon have properties that require escaping
 var _ propertyEscapeInterface = (*generateCommon)(nil)
-
-// generateCommon uses other defaults by `flag_defaults` property
 var _ defaultable = (*generateCommon)(nil)
 
 // Modules implementing hostBin are able to supply a host binary that can be executed
@@ -358,6 +363,9 @@ type generateSource struct {
 		GenerateSourceProps
 	}
 }
+
+// generateSource supports installation
+var _ installable = (*generateSource)(nil)
 
 func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
@@ -717,6 +725,9 @@ type transformSource struct {
 		TransformSourceProps
 	}
 }
+
+// transformSource supports installation
+var _ installable = (*transformSource)(nil)
 
 func generateSourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
