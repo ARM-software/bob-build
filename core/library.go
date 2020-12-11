@@ -292,13 +292,25 @@ type library struct {
 	}
 }
 
+// library supports the following functionality:
+// * sharing properties via defaults
+// * feature-specific properties
+// * target-specific properties
+// * installation
+// * module enabling/disabling
+// * exporting properties to other modules
+// * use of {{match_srcs}} on some properties
+// * properties that require escaping
+// * appending to aliases
+var _ defaultable = (*library)(nil)
+var _ featurable = (*library)(nil)
+var _ targetSpecificLibrary = (*library)(nil)
+var _ installable = (*library)(nil)
+var _ enableable = (*library)(nil)
 var _ propertyExporter = (*library)(nil)
-
-// library support {{match_srcs}} on some properties
 var _ matchSourceInterface = (*library)(nil)
-
-// library have properties that require escaping
 var _ propertyEscapeInterface = (*library)(nil)
+var _ aliasable = (*library)(nil)
 
 func (l *library) defaults() []string {
 	return l.Properties.Defaults
@@ -666,8 +678,13 @@ type sharedLibrary struct {
 	fileNameExtension string
 }
 
+// sharedLibrary supports:
+// * producing output using the linker
+// * producing a shared library
+// * stripping symbols from output
 var _ linkableModule = (*sharedLibrary)(nil)
 var _ sharedLibProducer = (*sharedLibrary)(nil)
+var _ stripable = (*sharedLibrary)(nil)
 
 func (m *sharedLibrary) getLinkName() string {
 	return m.outputName() + m.fileNameExtension
@@ -739,7 +756,11 @@ type binary struct {
 	library
 }
 
+// binary supports:
+// * producing output using the linker
+// * stripping symbols from output
 var _ linkableModule = (*binary)(nil)
+var _ stripable = (*binary)(nil)
 
 func (l *binary) strip() bool {
 	return l.Properties.Strip != nil && *l.Properties.Strip
