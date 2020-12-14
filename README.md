@@ -1,6 +1,6 @@
 Bob Build System
 ================
-[![Build status for Travis](https://travis-ci.com/ARM-software/bob-build.svg?branch=master)](https://travis-ci.com/ARM-software/bob-build)
+[![CI](https://github.com/ARM-software/bob-build/workflows/CI/badge.svg)](https://github.com/ARM-software/bob-build/actions)
 
 ## Introduction
 
