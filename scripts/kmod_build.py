@@ -277,6 +277,18 @@ def main():
     extra_cflags = " ".join(includes) + " " + args.extra_cflags + " " + \
                    " ".join(kbuild_cflags)
 
+    # If kconfig.h is older than kernel config, the kernel needs to be rebuilt
+    # to update this file.
+    kconfig_file = os.path.join(abs_kdir, "include", "linux", "kconfig.h")
+    kernel_config_file = kernel_config_parser.get_config_file_path(abs_kdir)
+    if os.path.exists(kconfig_file):
+        if os.path.getmtime(kconfig_file) < os.path.getmtime(kernel_config_file):
+            msg = "%s is older than %s. make modules_prepare needs to be run."
+            logger.warning(msg, kconfig_file, kernel_config_file)
+    else:
+        msg = "%s not found. make modules_prepare needs to be run"
+        logger.warning(msg, kconfig_file)
+
     deps = []
 
     # Add commonly needed search paths for copy_with_deps
@@ -302,6 +314,10 @@ def main():
     # dependencies on every part of the kernel's build system - this is just
     # enough to ensure that incremental builds of the Bob tests work OK.
     deps.append(os.path.join(abs_kdir, "Makefile"))
+
+    # Add a dependency to kernel config because we are parsing it to
+    # populate CFLAGS.
+    deps.append(kernel_config_file)
 
     copy_with_deps.write_depfile(args.depfile, args.output, deps)
 

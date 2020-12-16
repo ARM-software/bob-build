@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,13 @@ logger = logging.getLogger(__name__)
 g_kernel_configs = dict()
 
 
+def get_config_file_path(kdir):
+    return os.path.join(kdir, '.config')
+
+
 def parse_kernel_config(kdir):
     """Parse kernel configuration from provided directory"""
-    config_file = os.path.join(kdir, '.config')
+    config_file = get_config_file_path(kdir)
     config = dict()
 
     try:
