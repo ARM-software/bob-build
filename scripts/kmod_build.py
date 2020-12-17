@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,7 +281,7 @@ def main():
 
     # Add commonly needed search paths for copy_with_deps
     search_path.extend([str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths])
-    kconfig = os.path.join(abs_kdir, "linux", "kconfig.h")
+    kconfig = os.path.join("linux", "kconfig.h")
     root = os.path.abspath(args.common_root)
     for src in args.module_sources:
         src_rel = os.path.relpath(os.path.abspath(src), root)
