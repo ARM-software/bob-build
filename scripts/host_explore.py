@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@ def pkg_config():
     Where no package information exists the default configuration value will be used.
     """
     if get_config_bool('PKG_CONFIG'):
-        cmd = ['pkg-config']
+        cmd = [get_config_string('PKG_CONFIG_BINARY')]
         pkg_config_flags = get_config_string('PKG_CONFIG_FLAGS')
         pkg_config_flags = pkg_config_flags.replace("%MCONFIGDIR%", get_mconfig_dir())
         cmd.extend(pkg_config_flags.split(' '))
