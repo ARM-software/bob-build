@@ -87,6 +87,9 @@ bob_binary {
 }
 ```
 
+If you need to use a particular `pkg-config` binary, then use the config
+`PKG_CONFIG_BINARY` to specify it.
+
 ## Android libraries
 
 When a Bob project is built as part of Android, the project may need

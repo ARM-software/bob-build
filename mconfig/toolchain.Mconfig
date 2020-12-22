@@ -1,4 +1,4 @@
-# Copyright 2016-2020 Arm Limited.
+# Copyright 2016-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,13 @@ config AS_BINARY
 	help
 	  The name of the assembly compiler used to compile
 	  hand-written assembly code.
+
+config PKG_CONFIG_BINARY
+	string "pkg-config binary"
+	default "pkg-config"
+	help
+	  The name of the pkg-config tool used to retrieve information
+	  on installed libraries.
 
 ###################################
 
