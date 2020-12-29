@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,7 @@ bob_transform_source {
         "f3.in",
         "f4.in",
     ],
-    module_srcs: ["generate_source_to_transform"],
+    generated_sources: ["generate_source_to_transform"],
     out: {
         match: "(.+)\\.in",
         replace: [
@@ -90,8 +90,8 @@ bob_generate_source {
 }
 
 bob_transform_source {
-    name: "transform_source_module_deps",
-    module_deps: ["generate_template_source_used_by_transform"],
+    name: "transform_source_generated_deps",
+    generated_deps: ["generate_template_source_used_by_transform"],
     srcs: [
         "f6.in",
     ],
@@ -108,14 +108,14 @@ bob_transform_source {
 }
 
 bob_generate_source {
-    name: "generate_source_module_srcs_only",
+    name: "generate_source_generated_sources_only",
     out: ["f7.in"],
     cmd: "echo '// Dummy File' > ${out}",
 }
 
 bob_transform_source {
-    name: "transform_source_module_srcs_only",
-    module_srcs: ["generate_source_module_srcs_only"],
+    name: "transform_source_generated_sources_only",
+    generated_sources: ["generate_source_generated_sources_only"],
     out: {
         match: "(.+)\\.in",
         replace: [
@@ -134,14 +134,14 @@ bob_binary {
         "transform_source_single_dir",
         "transform_source_single",
         "transform_source_multiple_in",
-        "transform_source_module_deps",
-        "transform_source_module_srcs_only",
+        "transform_source_generated_deps",
+        "transform_source_generated_sources_only",
     ],
     generated_headers: [
         "transform_source_single_dir",
         "transform_source_single",
         "transform_source_multiple_in",
-        "transform_source_module_deps",
+        "transform_source_generated_deps",
     ],
     srcs: ["main.cpp"],
 }

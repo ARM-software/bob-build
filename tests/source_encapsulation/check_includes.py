@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2019-2020 Arm Limited.
+# Copyright 2019-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 #                    3 (root module)
 #    (encapsulates) /
 #                  2
-#   (module_deps) /
+#   (generated_deps) /
 #                1
 #
 

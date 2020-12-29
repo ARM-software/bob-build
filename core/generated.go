@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,10 +108,10 @@ type GenerateProps struct {
 
 	// A list of other modules that this generator depends on. The dependencies can be used in the command through
 	// $name_of_dependency_dir .
-	Module_deps []string
+	Generated_deps []string
 
 	// A list of other modules that this generator depends on. The dependencies will be add to the list of srcs
-	Module_srcs []string
+	Generated_sources []string
 
 	// A list of args that will be spaceseparated and add to the cmd
 	Args []string
@@ -821,9 +821,9 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		// Generated sources can use the outputs of another generated
 		// source or library as a source file or dependency.
 		parseAndAddVariationDeps(mctx, generatedDepTag,
-			gsc.Properties.Module_deps...)
+			gsc.Properties.Generated_deps...)
 		parseAndAddVariationDeps(mctx, generatedSourceTag,
-			gsc.Properties.Module_srcs...)
+			gsc.Properties.Generated_sources...)
 		parseAndAddVariationDeps(mctx, encapsulatesTag,
 			gsc.Properties.Encapsulates...)
 	}

@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +40,8 @@ type commonProps struct {
 	Host_bin                string
 	Tool                    string
 	Depfile                 bool
-	Module_deps             []string
-	Module_srcs             []string
+	Generated_deps          []string
+	Generated_sources       []string
 	Encapsulates            []string
 	Cflags                  []string
 	Conlyflags              []string
@@ -275,15 +275,15 @@ func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
 			hostToolBinTag, m.Properties.Host_bin)
 	}
 
-	// `module_deps` and `module_srcs` can refer not only to source
+	// `generated_deps` and `generated_sources` can refer not only to source
 	// generation modules, but to binaries and libraries. In this case we
 	// need to handle multilib builds, where a 'target' library could be
 	// split into 32 and 64-bit variants. Use `AddFarVariationDependencies`
 	// here, because this will automatically choose the first available
 	// variant, rather than the other dependency-adding functions, which
 	// will error when multiple variants are present.
-	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Module_deps...)
-	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Module_srcs...)
+	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Generated_deps...)
+	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Generated_sources...)
 	// We can only encapsulate other generated/transformed source modules,
 	// so use the normal `AddDependency` function for these.
 	mctx.AddDependency(mctx.Module(), encapsulatesTag, m.Properties.Encapsulates...)

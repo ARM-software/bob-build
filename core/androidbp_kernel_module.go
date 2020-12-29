@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,9 +59,9 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 
 	sources_param := "${in}"
-	var module_deps []string
+	var generated_deps []string
 	for _, mod := range l.extraSymbolsModules(mctx) {
-		module_deps = append(module_deps, mod.Name())
+		generated_deps = append(generated_deps, mod.Name())
 		// reference all dependent modules outputs, needed for related symvers files
 		sources_param += " ${" + mod.Name() + "_dir}/Module.symvers"
 	}
@@ -73,7 +73,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 
 	addProvenanceProps(bpmod, l.Properties.AndroidProps)
 	bpmod.AddStringList("srcs", l.Properties.getSources(mctx))
-	bpmod.AddStringList("module_deps", module_deps)
+	bpmod.AddStringList("generated_deps", generated_deps)
 	bpmod.AddStringList("out", l.outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})
 	bpmod.AddString("tool", kmod_build)

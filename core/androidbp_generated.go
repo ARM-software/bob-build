@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,8 +93,8 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	}
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
-	m.AddStringList("module_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
-	m.AddStringList("module_srcs", getShortNamesForDirectDepsWithTags(mctx, generatedSourceTag))
+	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
+	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(mctx, generatedSourceTag))
 	m.AddStringList("encapsulates", gc.Properties.Encapsulates)
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)

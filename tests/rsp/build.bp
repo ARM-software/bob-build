@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ bob_transform_source {
 bob_generate_source {
     name: "merge_multiple_sources",
     srcs: ["first.in"],
-    module_srcs: ["generate_multiple_sources"],
+    generated_sources: ["generate_multiple_sources"],
     out: ["merged.c"],
     rsp_content: "${in}",
     tool: "rspcat.py",

@@ -11,7 +11,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "bob_test_module_dep_dir_and_outs",
-    module_deps: ["bob_test_generate_source_single"],
+    generated_deps: ["bob_test_generate_source_single"],
     out: [
         "dir_and_outs.c",
         "dir_and_outs.h",
