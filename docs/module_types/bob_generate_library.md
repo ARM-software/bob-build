@@ -52,8 +52,8 @@ bob_generate_shared_library {
     host_bin: "name_of_host_binary",
     tags: ["optional"],
 
-    module_deps: ["bob_generate_source.name"],
-    module_srcs: ["bob_generate_source.name"],
+    generated_deps: ["bob_generate_source.name"],
+    generated_sources: ["bob_generate_source.name"],
 
     args: ["-i graphic/ui.h"],
 

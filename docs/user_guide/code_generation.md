@@ -305,17 +305,17 @@ The output of a generator can be used by another generator. There are
 a few different ways to specify this depending on what needs to be used
 from the output.
 
-Use `module_srcs` when every output of a generator should be used as
+Use `generated_sources` when every output of a generator should be used as
 an input in the next generator.
 
-Use `module_deps` when you only want to use certain outputs from the
+Use `generated_deps` when you only want to use certain outputs from the
 earlier generator. The command(s) have access to the output directory
 of the earlier generator.
 
 Use `encapsulates` to make one generator wrap all the output of a set
 of other generators.
 
-The following example uses `module_srcs` to pass a generated source
+The following example uses `generated_sources` to pass a generated source
 file through a `bob_transform_source` as well.
 
 ```
@@ -336,7 +336,7 @@ bob_transform_source {
         "inc/a.hpp.source",
         "inc/b.hpp.source",
     ],
-    module_srcs: ["wayland_custom_protocol_code"],
+    generated_sources: ["wayland_custom_protocol_code"],
     outs: {
         match: "(.*)\.source",
         replace: "$1",
@@ -354,8 +354,8 @@ bob_static_library {
 }
 ```
 
-The next example shows how `module_deps` might be used. Note that for
-each module named in `module_deps` there are variables to get the
+The next example shows how `generated_deps` might be used. Note that for
+each module named in `generated_deps` there are variables to get the
 intermediate directory as well as all the outputs for that module. The
 variables are `${mod_dir}` and `${mod_outs}` where `mod` is the module
 name.
@@ -381,7 +381,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "x_code",
-    module_deps: ["templates"],
+    generated_deps: ["templates"],
     outs: [
         "src/x.cpp",
         "inc/x.h",
@@ -393,7 +393,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "y_code",
-    module_deps: ["templates"],
+    generated_deps: ["templates"],
     outs: [
         "src/y.cpp",
         "inc/y.h",
@@ -560,7 +560,7 @@ files on the command line:
 bob_generate_source {
     name: "combine_multiple_files",
     srcs: ["file1.in", ..., "file999.in"],
-    module_srcs: ["module_generating_many_files"],
+    generated_sources: ["module_generating_many_files"],
     out: ["combined.c"],
     tool: "combine.sh",
     rsp_content: "${in}",

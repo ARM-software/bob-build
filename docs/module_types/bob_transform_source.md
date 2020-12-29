@@ -46,8 +46,8 @@ bob_transform_source {
     host_bin: "clang-tblgen",
     tags: ["optional"],
 
-    module_deps: ["bob_generate_source.name"],
-    module_srcs: ["bob_generate_source.name"],
+    generated_deps: ["bob_generate_source.name"],
+    generated_sources: ["bob_generate_source.name"],
 
     args: ["-i graphic/ui.h"],
 

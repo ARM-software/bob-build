@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,7 +83,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_level1",
-    module_srcs: ["generate_source_single"],
+    generated_sources: ["generate_source_single"],
 
     out: ["level_1_single.cpp"],
 
@@ -93,7 +93,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_level2",
-    module_srcs: ["generate_source_single_level1"],
+    generated_sources: ["generate_source_single_level1"],
 
     out: ["level_2_single.cpp"],
 
@@ -103,7 +103,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_level3",
-    module_srcs: ["generate_source_single_level2"],
+    generated_sources: ["generate_source_single_level2"],
 
     out: ["level_3_single.cpp"],
 
@@ -113,7 +113,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_nested_with_extra",
-    module_srcs: ["generate_source_single_level2"],
+    generated_sources: ["generate_source_single_level2"],
 
     srcs: [
         "before_generate.in",
@@ -132,7 +132,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_dependend",
-    module_deps: ["generate_source_single"],
+    generated_deps: ["generate_source_single"],
 
     srcs: [
         "before_generate.in",
@@ -145,7 +145,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "generate_source_single_dependend_nested",
-    module_srcs: ["generate_source_single_dependend"],
+    generated_sources: ["generate_source_single_dependend"],
 
     srcs: [
         "before_generate.in",
@@ -277,7 +277,7 @@ bob_binary {
 bob_generate_source {
     name: "use_target_specific_library",
     out: ["libout.a"],
-    module_deps: ["host_and_target_supported_binary:host"],
+    generated_deps: ["host_and_target_supported_binary:host"],
     cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
     build_by_default: true,
 }

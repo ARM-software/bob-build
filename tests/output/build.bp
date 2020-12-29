@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Arm Limited.
+ * Copyright 2019-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,7 @@ bob_binary {
 
 bob_generate_source {
     name: "verify_output",
-    module_deps: [
+    generated_deps: [
         "binary_output",
         "lib_sh_output",
         "lib_st_output",

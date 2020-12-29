@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Arm Limited.
+ * Copyright 2019-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,9 +70,9 @@ bob_binary {
 
 //////////////////////////////////////////////////////////////////////////////
 // Case B - generated headers: direct encapsulation of outputs.
-// Test checks interaction of encapsulation with 'module_deps'.
+// Test checks interaction of encapsulation with 'generated_deps'.
 //
-// Module 2 depends on module 1 due to 'module_deps' property.
+// Module 2 depends on module 1 due to 'generated_deps' property.
 // Module 3 encapsulates module 2 which can see must_have.h but
 // not must_not_have.h
 //
@@ -84,7 +84,7 @@ bob_binary {
 //                    3 (root module)
 //    (encapsulates) /
 //                  2
-//   (module_deps) /
+//   (generated_deps) /
 //                1
 //
 bob_generate_source {
@@ -99,7 +99,7 @@ bob_generate_source {
     out: ["must_have.h"],
     export_gen_include_dirs: ["."],
     cmd: "cat ${gen_srcs_one_out} > ${out}",
-    module_deps: ["gen_srcs_one"],
+    generated_deps: ["gen_srcs_one"],
 }
 
 bob_generate_source {
@@ -121,9 +121,9 @@ bob_binary {
 
 //////////////////////////////////////////////////////////////////////////////
 // Case C - generated headers: direct encapsulation of outputs.
-// Test checks interaction of encapsulation with 'module_srcs'.
+// Test checks interaction of encapsulation with 'generated_sources'.
 //
-// Module 2 depends on module 1 due to 'module_srcs' property.
+// Module 2 depends on module 1 due to 'generated_sources' property.
 // Module 3 encapsulates module 2 which can see must_have.h but
 // not must_not_have.h
 //
@@ -135,7 +135,7 @@ bob_binary {
 //                    3 (root module)
 //    (encapsulates) /
 //                  2
-//   (module_srcs) /
+//   (generated_sources) /
 //                1
 //
 bob_generate_source {
@@ -150,7 +150,7 @@ bob_generate_source {
     out: ["must_have.h"],
     export_gen_include_dirs: ["."],
     cmd: "cat ${in} > ${out}",
-    module_srcs: ["gen_srcs_three"],
+    generated_sources: ["gen_srcs_three"],
 }
 
 bob_generate_source {
@@ -206,9 +206,9 @@ bob_binary {
 //////////////////////////////////////////////////////////////////////////////
 // Case E - generated sources: direct and transitive encapsulation of outputs.
 // Test should check complex case of direct and transitive encapsulation
-// together with use of 'module_srcs' property.
+// together with use of 'generated_sources' property.
 //
-// Module 3 uses output of module 4 through 'module_srcs' relation while module
+// Module 3 uses output of module 4 through 'generated_sources' relation while module
 // 4 encapsulates 5.
 // This way module 3 should have input of: encapsulation_generated_sources4/funcs.txt
 // and encapsulation_generated_sources5/fun5.c. Also it can see:
@@ -223,7 +223,7 @@ bob_binary {
 // 5 - encapsulation_generated_sources5
 //
 //                     3
-//     (encapsulates) / \ (module_srcs)
+//     (encapsulates) / \ (generated_sources)
 //                   2   4
 //   (encapsulates) /     \ (encapsulates)
 //                 1       5
@@ -270,7 +270,7 @@ bob_generate_source {
 
 bob_generate_source {
     name: "encapsulation_generated_sources3",
-    module_srcs: ["encapsulation_generated_sources4"],
+    generated_sources: ["encapsulation_generated_sources4"],
 
     out: ["fun3.c"],
 

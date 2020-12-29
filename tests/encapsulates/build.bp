@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
  *                encapsulates_1_2_3
  *               /        |         \
  *              /   encapsulated2    encapsulated3
- * encapsulated1          |                 \ (module_deps)
+ * encapsulated1          |                 \ (generated_deps)
  *              encapsulated2_actual     not_encapsulated
  */
 
@@ -70,8 +70,8 @@ bob_generate_source {
     name: "encapsulated3",
     out: ["3.h"],
     export_gen_include_dirs: ["."],
-    module_srcs: ["not_encapsulated"],
-    module_deps: ["not_encapsulated"],
+    generated_sources: ["not_encapsulated"],
+    generated_deps: ["not_encapsulated"],
     cmd: "echo '#define D3 3' > ${out}",
 }
 
@@ -88,7 +88,7 @@ bob_generate_source {
     // While we're here, ensure that ${outs} *doesn't* include the encapsulated
     // outputs - only downstream modules should include those. Also - we can't
     // test this, but this command should *not* have access to e.g.
-    // ${encapsulated1_out} - that should only be provided by module_deps.
+    // ${encapsulated1_out} - that should only be provided by generated_deps.
     tool: "check_basenames.py",
     cmd: "${tool} -o ${out} --expected unused.txt --actual ${out}",
 }
@@ -101,19 +101,19 @@ bob_binary {
 
 // Check that ${modname_out} includes ${modname}'s encapsulated oututs
 bob_generate_source {
-    name: "check_outputs_via_module_deps",
+    name: "check_outputs_via_generated_deps",
     out: ["unused.txt"],
-    module_deps: ["encapsulates_1_2_3"],
+    generated_deps: ["encapsulates_1_2_3"],
     tool: "check_basenames.py",
     cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${encapsulates_1_2_3_out}",
     build_by_default: true,
 }
 
-// Check that module_srcs: [${modname}] includes ${modname}'s encapsulated oututs
+// Check that generated_sources: [${modname}] includes ${modname}'s encapsulated oututs
 bob_generate_source {
-    name: "check_outputs_via_module_srcs",
+    name: "check_outputs_via_generated_sources",
     out: ["unused.txt"],
-    module_srcs: ["encapsulates_1_2_3"],
+    generated_sources: ["encapsulates_1_2_3"],
     tool: "check_basenames.py",
     cmd: "${tool} -o ${out} --expected encapsulates_1_2_3/unused.txt encapsulated2/unused2.txt subdir/1.h 2.h 3.h --actual ${in}",
     build_by_default: true,
@@ -123,7 +123,7 @@ bob_alias {
     name: "bob_test_encapsulates",
     srcs: [
         "check_includes",
-        "check_outputs_via_module_deps",
-        "check_outputs_via_module_srcs",
+        "check_outputs_via_generated_deps",
+        "check_outputs_via_generated_sources",
     ],
 }
