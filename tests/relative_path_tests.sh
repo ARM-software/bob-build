@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,7 +86,7 @@ test_relpath "a/b2/c" "a/b"  "../../b"
 # Check the special case where the common root is `/`
 test_relpath "/usr" "/bin" "../bin"
 test_relpath "/usr/local/bin" "/bin/bash" "../../../bin/bash"
-test_relpath "/" "/usr/include/stdio.h" "usr/include/stdio.h"
+test_relpath "/" "/bin/bash" "bin/bash"
 # On merged-usr systems, `/bin` is a symlink to `/usr/bin`, so needs an extra
 # `..` for this case.
 [[ -L /bin ]] && test_relpath "/bin" "/" "../.." || test_relpath "/bin" "/" ".."
