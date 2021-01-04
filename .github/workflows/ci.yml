@@ -156,11 +156,9 @@ jobs:
           - go: '1.11'
             os: ubuntu-latest
             python: '2.7'
-#       Disable macos for now. 10.15 has a problem with the rebootstrap with different directory
-#        include:
-#          - go: '1.13'
-#            os: macos-latest
-#            python: '3.x'
+          - go: '1.13'
+            os: macos-latest
+            python: '3.x'
     runs-on: ${{ matrix.os }}
 
     steps:

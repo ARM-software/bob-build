@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,10 @@ if [ -f "${BOOTSTRAP_GLOBFILE}" ]; then
         # BOOTSTRAP_GLOBFILE is invalid if BUILDDIR has changed
         # Invalidate it so that the bootstrap builder can be built
         cat /dev/null > "${BOOTSTRAP_GLOBFILE}"
+        # On OSX, also force a rebuild of microfactory
+        if [ "$(uname)" = "Darwin" ] ; then
+            rm -f "${BUILDDIR}/.minibootstrap/microfactory_$(uname)"
+        fi
     fi
 fi
 
