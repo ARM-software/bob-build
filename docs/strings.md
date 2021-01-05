@@ -67,8 +67,8 @@ Transform the value of `.param` as directed by `regexp` and
 
 Return paths of files that match the glob `file_glob` from the
 module's `srcs` property. This function can only be used in the
-`ldflags`, `cmd` or `args` properties. Other properties are not
-expected to reference files.
+`cflags`, `conlyflags`, `cxxflags`, `ldflags`, `cmd` or `args`
+properties. Other properties are not expected to reference files.
 
 It is an error if no files match.
 

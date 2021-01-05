@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,8 +122,11 @@ func (m *defaults) getSourceProperties() *SourceProps {
 // {{match_srcs}} template is only applied in specific properties where we've
 // seen sensible use-cases and for `BuildProps` this is:
 //  - Ldflags
+//  - Cflags
+//  - Conlyflags
+//  - Cxxflags
 func (m *defaults) getMatchSourcePropNames() []string {
-	return []string{"Ldflags"}
+	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
 
 func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
