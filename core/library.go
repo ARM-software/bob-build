@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -460,8 +460,11 @@ func (l *library) getSourceProperties() *SourceProps {
 // {{match_srcs}} template is only applied in specific properties where we've
 // seen sensible use-cases and for `BuildProps` this is:
 //  - Ldflags
+//  - Cflags
+//  - Conlyflags
+//  - Cxxflags
 func (l *library) getMatchSourcePropNames() []string {
-	return []string{"Ldflags"}
+	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
 
 // Returns the shortname for the output, which is used as a phony target. If it

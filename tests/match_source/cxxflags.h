@@ -1,0 +1,1 @@
+#define CXXFLAGS_TEST

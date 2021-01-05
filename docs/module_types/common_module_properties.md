@@ -119,6 +119,9 @@ For example to define a string literal:
     cflags: ["-DCOLOR_DEF=\"blue\""]
 ```
 
+The [`match_srcs`](../strings.md#match_srcs) function can be used in
+this property to reference files listed in `srcs`.
+
 ----
 ### **bob_module.export_cflags** (optional)
 Flags exported to modules which depend on the current one. These will
@@ -130,6 +133,8 @@ If `libB` wishes to propagate `libC`'s flags to `libA`, it should add
 `libC` to its `reexport_libs` list.
 
 Also see `cflags`.
+Note that we do not support [`match_srcs`](../strings.md#match_srcs)
+function for `export_cflags`.
 
 ----
 ### **bob_module.conlyflags** (optional)

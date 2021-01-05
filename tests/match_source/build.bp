@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Arm Limited.
+ * Copyright 2019-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,13 +32,19 @@ bob_generate_source {
 
 // Test that we can refer to specific files in the srcs list of a
 // bob_binary via {{match_srcs}}. The test case is to pass a filename
-// to the linker.
+// to the compiler and the linker.
 //
 // Also compile the output of match_source_gen, which checks that it
 // worked as expected.
 bob_binary {
     name: "match_source_bin",
-    srcs: ["source.c"],
+    srcs: [
+        "source.c",
+        "test_cpp.cpp",
+        "cflags.h",
+        "conlyflags.h",
+        "cxxflags.h",
+    ],
     generated_sources: ["match_source_gen"],
     not_osx: {
         srcs: ["exports.txt"],
@@ -48,6 +54,9 @@ bob_binary {
         srcs: ["order_file.txt"],
         ldflags: ["-Wl,-order_file,{{match_srcs \"*.txt\"}}"],
     },
+    cflags: ["-include {{match_srcs \"cflags.h\"}}"],
+    conlyflags: ["-include {{match_srcs \"conlyflags.h\"}}"],
+    cxxflags: ["-include {{match_srcs \"cxxflags.h\"}}"],
 }
 
 bob_alias {

@@ -1,0 +1,1 @@
+#define CONLYFLAGS_TEST
