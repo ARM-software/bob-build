@@ -3,7 +3,7 @@
 const char* output_hash(void);
 int getValue(void);
 
-int main(int argc, char **argv) {
+int main(void) {
 
     printf("%s%d\n", output_hash(), getValue());
 
