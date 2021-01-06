@@ -95,11 +95,11 @@ release and the one before that.
 
 | Version | Status |
 |---|---|
-| Nougat | Some features may no longer work |
-| Oreo | Supported |
+| Oreo | Not supported |
 | Pie | Supported |
-| Q | In progress |
-| earlier | not supported |
+| Android 10 | Supported |
+| Android 11 | Supported |
+| earlier | Not supported |
 
 Note that not all Bob features are supported on Android. This includes:
 

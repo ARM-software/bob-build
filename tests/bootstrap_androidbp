@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020 Arm Limited.
+# Copyright 2020-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,9 +113,11 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 # Pick up some info that bob has worked out
 source "${BUILDDIR}/.bob.bootstrap"
 
+ANDROID_VERSION="$("${SCRIPT_DIR}/${BOB_DIR}/scripts/android_version.py")"
+
 if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y "$@"
+    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION=${ANDROID_VERSION} "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then
