@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,12 +123,14 @@ rm -f "$TMP_ANDROID_MK"
 # Pick up some info that bob has worked out
 source "${BUILDDIR}/.bob.bootstrap"
 
+ANDROID_VERSION="$("${SCRIPT_DIR}/${BOB_DIR}/scripts/android_version.py")"
+
 # Setup the buildme script to just run bob
 ln -sf "bob" "${BUILDDIR}/buildme"
 
 if [ $MENU -ne 1 ] || [ ! -f "$ANDROIDMK_DIR/$CONFIGNAME" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "$ANDROIDMK_DIR/config" ANDROID=y "$@"
+    "$ANDROIDMK_DIR/config" ANDROID=y ANDROID_PLATFORM_VERSION=${ANDROID_VERSION} "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then

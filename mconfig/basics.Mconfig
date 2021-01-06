@@ -1,4 +1,4 @@
-# Copyright 2020 Arm Limited.
+# Copyright 2020-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,3 +61,7 @@ config BUILDER_NINJA
 	  Generate build.ninja output to use with ninja.
 
 endchoice
+
+config ANDROID_PLATFORM_VERSION
+	int "Android PLATFORM_VERSION"
+	depends on ANDROID
