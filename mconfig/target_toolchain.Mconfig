@@ -1,4 +1,4 @@
-# Copyright 2016-2020 Arm Limited.
+# Copyright 2016-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,10 @@
 
 config TARGET_CLANG_PREFIX
 	string "Target Clang compiler prefix"
+	default "prebuilts/clang/host/linux-x86/clang-4691093/bin/" if ANDROID_PLATFORM_VERSION = 9 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # pie-release
+	default "prebuilts/clang/host/linux-x86/clang-r353983c/bin/" if ANDROID_PLATFORM_VERSION = 10 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # android-10-release
+	default "prebuilts/clang/host/linux-x86/clang-r383902b/bin/" if ANDROID_PLATFORM_VERSION = 11 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # android-11-release
+	default "prebuilts/clang/host/linux-x86/clang-r399163b/bin/" if ANDROID_PLATFORM_VERSION > 11 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE)
 	default ""
 
 config TARGET_CLANG_CC_BINARY
