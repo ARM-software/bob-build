@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -491,24 +491,23 @@ def set_config(key, value, is_user_set=True):
         logger.warning("Ignoring unknown configuration option %s" % key)
         return
 
-    if is_user_set:
-        # Validate user input
-        if c['datatype'] == 'bool':
-            # Must be y or n
-            if value not in [True, False]:
-                logger.warning(
-                    "Ignoring boolean configuration option %s with non-boolean value '%s'." % (
-                        key, value))
-                return
-        elif c['datatype'] == 'int':
-            # Must convert to an integer
-            try:
-                value = int(value)
-            except ValueError:
-                logger.warning(
-                    "Ignoring integer configuration option %s with non-integer value '%s'" % (
-                        key, value))
-                return
+    # Validate input
+    if c['datatype'] == 'bool' and value not in [True, False]:
+        # This interface should always receive True/False.
+        logger.warning(
+            "Ignoring boolean configuration option %s with non-boolean value '%s'." % (
+                key, value))
+        return
+    elif c['datatype'] == 'int':
+        # We get a string from menus and file reading. Always convert
+        # to an integer. Output a warning if we can't convert to an integer
+        try:
+            value = int(value)
+        except ValueError:
+            logger.warning(
+                "Ignoring integer configuration option %s with non-integer value '%s'" % (
+                    key, value))
+            return
 
     # Record user specified value even if it is (currently) impossible
     c['is_user_set'] |= is_user_set
