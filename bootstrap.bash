@@ -65,6 +65,16 @@ if [[ -z "$BOB_CONFIG_PLUGINS" ]]; then
   BOB_CONFIG_PLUGINS=""
 fi
 
+# FIXME: It was found that using an absolute path for the build directory (inside srcdir)
+# could lead to dependency issues later, in part due to ninja not being able to handle well
+# absolute depfile paths (see https://github.com/ninja-build/ninja/issues/1251).
+# This issue only happens if the build directory is located in the source directory.
+# For now, let's warn users about this potential issue.
+if [ "${BUILDDIR:0:1}" = '/' ] && $(path_is_parent $(bob_abspath "${SRCDIR}") "${BUILDDIR}"); then
+  echo "WARNING! Using an absolute path for the build directory located inside the source directory" \
+" can lead to dependency issues. Recommend using a relative path for the build directory."
+fi
+
 if [ "${BUILDDIR}" = "." ] ; then
     WORKDIR=.
 else
