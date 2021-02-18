@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +53,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	// Calculate and record outputs
 	m.outputdir = g.kernelModOutputDir(m)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
+	optional := !isBuiltByDefault(m)
 
 	args := m.generateKbuildArgs(ctx).toDict()
 	delete(args, "kmod_build")
@@ -66,7 +67,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 			Rule:     kbuildRule,
 			Outputs:  m.outputs(),
 			Inputs:   sources,
-			Optional: false,
+			Optional: true,
 			Args:     args,
 		})
 
@@ -82,5 +83,5 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 		})
 
 	installDeps := g.install(m, ctx)
-	addPhony(m, ctx, installDeps, false)
+	addPhony(m, ctx, installDeps, optional)
 }
