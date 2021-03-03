@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,16 +51,16 @@ python "${BOB_DIR}/config_system/generate_config_json.py" \
 # regenerate the build.ninja
 python "${BOB_DIR}/scripts/env_hash.py" "${BUILDDIR}/.env.hash"
 
-# Source the pathtools script - we need bob_realpath for CCACHE_BASEDIR.
-source "${BOB_DIR}/pathtools.bash"
-
 # If enabled, the following environment variables optimize the performance
 # of ccache. Otherwise they have no effect.
 # To build with ccache, set the environment variable CCACHE_DIR to where the
 # cache is to reside and add CCACHE=y to the build config to enable.
-export CCACHE_BASEDIR="$(bob_realpath ${SRCDIR})"
 export CCACHE_CPP2=y
 export CCACHE_SLOPPINESS=file_macro,time_macros
+# Explicitly disable CCACHE_BASEDIR - when it's enabled, ccache will rewrite
+# paths in depfiles to be relative to it, but that will cause Ninja to miss
+# dependencies on builds where everything else is using absolute paths.
+export CCACHE_BASEDIR=
 
 # Build the builder if necessary
 BUILDDIR="${BUILDDIR}" SKIP_NINJA=true ${BOB_DIR}/blueprint/blueprint.bash
