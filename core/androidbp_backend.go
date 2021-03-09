@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -247,6 +248,95 @@ func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext
 		})
 }
 
+func getSoongCompatFile(config *bobConfig) string {
+	type compatVersion struct {
+		sha              string
+		android_versions []int
+		src              string
+	}
+
+	// List of compatibility layers, ordered from oldest Soong SHA to newest.
+	allSoongCompats := []compatVersion{
+		{
+			"0b0e1b98048a6d7a5efb699447253202f1d1d52a",
+			[]int{9, 10, 11, 12},
+			"soong_compat_00_pqr.go",
+		},
+		{
+			"aa2555387d214fc0292406d10714558054d794f3",
+			[]int{12},
+			"soong_compat_01_AndroidMkExtraEntries_ctx.go",
+		},
+	}
+
+	android_platform_version := config.Properties.GetInt("android_platform_version")
+
+	soongCompats := []compatVersion{}
+
+	// See if we can uniquely identify the required compatibility code based on the Android version
+	for _, soongCompat := range allSoongCompats {
+		android_versions := soongCompat.android_versions
+
+		for _, v := range android_versions {
+			if v == android_platform_version {
+				soongCompats = append(soongCompats, soongCompat)
+			}
+		}
+	}
+
+	if len(soongCompats) == 0 {
+		fmt.Fprintf(os.Stderr, "WARNING: Could not find an appropriate Soong "+
+			"compatibility layer for ANDROID_PLATFORM_VERSION = %d. Falling back to "+
+			"default. Compilation of Bob plugins may fail!\n", android_platform_version)
+		return allSoongCompats[len(soongCompats)-1].src
+	} else if len(soongCompats) == 1 {
+		return soongCompats[0].src
+	}
+
+	// If there are multiple potential options for this Android version, try to differentiate
+	// using Soong's git SHA. Search from newest to oldest - newer Soong versions will contain
+	// the older commits too, so going the other way would mean always incorrectly choosing the
+	// earliest version.
+	for i := len(soongCompats) - 1; i >= 0; i-- {
+		sha := soongCompats[i].sha
+		src := soongCompats[i].src
+
+		// See if Soong contains the current SHA. Bob should be executing in
+		// ANDROID_BUILD_TOP (see e.g. `tests/bootstrap_androidbp`), so the Soong code can
+		// be accessed trivially using its relative path within the Android source tree.
+		cmd := exec.Command("git", "-C", "build/soong", "merge-base", "--is-ancestor", sha, "HEAD")
+		out, err := cmd.CombinedOutput()
+
+		if err == nil {
+			// HEAD contains the commit; stop searching and use the most recent
+			// compatibility layer.
+			return src
+		} else if _, ok := err.(*exec.ExitError); ok {
+			// The command started running and completed, but exited with a non-zero
+			// exist status. Git returns 1 when it recognises the SHA but it isn't an
+			// ancestor, and 128 for most other stuff - even for valid git directories
+			// without that commit. Either way, just keep iterating until we find a
+			// match. On the last time (oldest supported Soong SHA), print the error, in
+			// case there is a git repo issue.
+
+			if i == 0 {
+				fmt.Fprintf(os.Stderr, "Command '%s' failed: stderr is:\n",
+					strings.Join(cmd.Args, " "))
+				os.Stderr.Write(out)
+			}
+		} else { // Invoking git failed for some other reason - don't bother trying again
+			fmt.Fprintf(os.Stderr, "Command '%s' failed: %s\n",
+				strings.Join(cmd.Args, " "), err)
+			break
+		}
+	}
+
+	fmt.Fprintf(os.Stderr, "WARNING: Could not find an appropriate Soong compatibility layer "+
+		"based on git SHA in build/soong.\nWARNING: Falling back to default for this "+
+		"Android version. Compilation of Bob plugins may fail!\n")
+	return soongCompats[len(soongCompats)-1].src
+}
+
 func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
 	sb := &strings.Builder{}
 
@@ -270,6 +360,7 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	text := string(content)
 	text = strings.Replace(text, "@@PROJ_UID@@", projUid, -1)
 	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
+	text = strings.Replace(text, "@@SOONG_COMPAT@@", getSoongCompatFile(getConfig(ctx)), -1)
 	sb.WriteString(text)
 	sb.WriteString("\n")
 

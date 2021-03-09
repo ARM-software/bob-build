@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@ package prebuilt
 import (
 	"android/soong/android"
 	"android/soong/etc"
+
+	"github.com/ARM-software/bob-build/internal/soong_compat"
 )
 
 func init() {
@@ -55,12 +57,12 @@ func (m *PrebuiltData) AndroidMkEntries() []android.AndroidMkEntries {
 		Class:      "DATA",
 		OutputFile: android.OptionalPathForPath(m.OutputFile()),
 		Include:    "$(BUILD_PREBUILT)",
-		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+		ExtraEntries: soong_compat.ConvertAndroidMkExtraEntriesFunc(
 			func(entries *android.AndroidMkEntries) {
 				entries.SetString("LOCAL_MODULE_PATH", m.InstallDirPath().ToMakePath().String())
 				entries.SetString("LOCAL_INSTALLED_MODULE_STEM", m.OutputFile().Base())
 			},
-		},
+		),
 	}}
 }
 
@@ -96,12 +98,12 @@ func (m *PrebuiltTestcase) AndroidMkEntries() []android.AndroidMkEntries {
 		Class:      "DATA",
 		OutputFile: android.OptionalPathForPath(m.OutputFile()),
 		Include:    "$(BUILD_PREBUILT)",
-		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+		ExtraEntries: soong_compat.ConvertAndroidMkExtraEntriesFunc(
 			func(entries *android.AndroidMkEntries) {
 				entries.SetString("LOCAL_MODULE_PATH", m.InstallDirPath().ToMakePath().String())
 				entries.SetString("LOCAL_INSTALLED_MODULE_STEM", m.OutputFile().Base())
 			},
-		},
+		),
 	}}
 }
 

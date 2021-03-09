@@ -28,6 +28,7 @@ import (
 	"android/soong/cc"
 	"android/soong/genrule"
 
+	"github.com/ARM-software/bob-build/internal/soong_compat"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -617,12 +618,12 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 			// if module has more than one output, keep LOCAL_MODULE unique
 			SubName: "__" + utils.FlattenPath(outfile.Path().Rel()),
 			Include: "$(BUILD_PREBUILT)",
-			ExtraEntries: []android.AndroidMkExtraEntriesFunc{
+			ExtraEntries: soong_compat.ConvertAndroidMkExtraEntriesFunc(
 				func(entries *android.AndroidMkEntries) {
 					// don't install in data partition (which is enforced behavior when class is DATA)
 					entries.SetBool("LOCAL_UNINSTALLABLE_MODULE", true)
 				},
-			},
+			),
 		})
 
 	}

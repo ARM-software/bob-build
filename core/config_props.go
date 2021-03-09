@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,6 +58,26 @@ func (properties configProperties) GetBool(name string) bool {
 		return ret
 	}
 	panic(fmt.Sprintf("Property %s is not a bool", name))
+}
+
+func (properties configProperties) GetInt(name string) int {
+	number, ok := properties.getProp(name).(json.Number)
+	if !ok {
+		panic(fmt.Sprintf("Property %s with value '%v' is not an int",
+			name, properties.getProp(name)))
+	}
+
+	ret, err := number.Int64()
+	if err != nil {
+		panic(fmt.Sprintf("Property %s contains invalid int value '%s': %v",
+			name, number.String(), err))
+	}
+
+	if int64(int(ret)) != ret {
+		panic(fmt.Sprintf("Property %s value out of `int` range: %d", name, ret))
+	}
+
+	return int(ret)
 }
 
 func (properties configProperties) GetString(name string) string {
