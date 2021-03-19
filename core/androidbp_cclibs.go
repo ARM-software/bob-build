@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,10 @@ import (
 // instead, we use the `shortName()` (which may include a `__host` or
 // `__target` suffix) to disambiguate, and use the `stem` property to fix up
 // the output filename.
-func ccModuleName(mctx blueprint.BaseModuleContext, name string) string {
+// Note that this function returns a list of names instead of a single name.
+// This is due to resource module that can generate multiple Blueprint modules.
+// All other bob modules only return one name.
+func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string {
 	var dep blueprint.Module
 
 	mctx.VisitDirectDeps(func(m blueprint.Module) {
@@ -48,21 +51,32 @@ func ccModuleName(mctx blueprint.BaseModuleContext, name string) string {
 		panic(fmt.Errorf("%s has no dependency '%s'", mctx.ModuleName(), name))
 	}
 
+	if r, ok := dep.(*resource); ok {
+		var modNames []string
+		for _, src := range r.Properties.getSources(mctx) {
+			modNames = append(modNames, r.getAndroidbpResourceName(src))
+		}
+		if len(modNames) == 0 {
+			panic(fmt.Errorf("bob_resource %s has empty srcs", name))
+		}
+		return modNames
+	}
+
 	if l, ok := getLibrary(dep); ok {
-		return l.shortName()
+		return []string{l.shortName()}
 	}
 
 	// Most cases should match the getLibrary() check above, but generated libraries,
 	// etc, do not, and they also do not require using shortName() (because of not
 	// being target-specific), so just use the original build.bp name.
-	return dep.Name()
+	return []string{dep.Name()}
 }
 
-func ccModuleNames(mctx blueprint.BaseModuleContext, nameLists ...[]string) []string {
+func bpModuleNamesForDeps(mctx blueprint.BaseModuleContext, nameLists ...[]string) []string {
 	ccModules := []string{}
 	for _, nameList := range nameLists {
 		for _, name := range nameList {
-			ccModules = append(ccModules, ccModuleName(mctx, name))
+			ccModules = append(ccModules, bpModuleNamesForDep(mctx, name)...)
 		}
 	}
 	return ccModules
@@ -138,7 +152,7 @@ func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
 func addRequiredModules(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	if _, _, ok := getSoongInstallPath(l.getInstallableProps()); ok {
 		requiredModuleNames := l.getInstallDepPhonyNames(mctx)
-		m.AddStringList("required", ccModuleNames(mctx, requiredModuleNames))
+		m.AddStringList("required", bpModuleNamesForDeps(mctx, requiredModuleNames))
 	}
 }
 
@@ -186,17 +200,17 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 
 	cflags := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags, exported_cflags)
 
-	sharedLibs := ccModuleNames(mctx, l.Properties.Shared_libs)
-	staticLibs := ccModuleNames(mctx, l.Properties.ResolvedStaticLibs)
+	sharedLibs := bpModuleNamesForDeps(mctx, l.Properties.Shared_libs)
+	staticLibs := bpModuleNamesForDeps(mctx, l.Properties.ResolvedStaticLibs)
 	// Exported header libraries must be mentioned in both header_libs
 	// *and* export_header_lib_headers - i.e., we can't export a header
 	// library which isn't actually being used.
-	headerLibs := ccModuleNames(mctx, l.Properties.Header_libs, l.Properties.Export_header_libs)
+	headerLibs := bpModuleNamesForDeps(mctx, l.Properties.Header_libs, l.Properties.Export_header_libs)
 
 	reexportShared := []string{}
 	reexportStatic := []string{}
-	reexportHeaders := ccModuleNames(mctx, l.Properties.Export_header_libs)
-	for _, lib := range ccModuleNames(mctx, l.Properties.Reexport_libs) {
+	reexportHeaders := bpModuleNamesForDeps(mctx, l.Properties.Export_header_libs)
+	for _, lib := range bpModuleNamesForDeps(mctx, l.Properties.Reexport_libs) {
 		if utils.Contains(sharedLibs, lib) {
 			reexportShared = append(reexportShared, lib)
 		} else if utils.Contains(staticLibs, lib) {
@@ -221,9 +235,9 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 	m.AddStringList("include_dirs", l.Properties.Include_dirs)
 	m.AddStringList("local_include_dirs", l.Properties.Local_include_dirs)
-	m.AddStringList("shared_libs", ccModuleNames(mctx, l.Properties.Shared_libs))
+	m.AddStringList("shared_libs", bpModuleNamesForDeps(mctx, l.Properties.Shared_libs))
 	m.AddStringList("static_libs", staticLibs)
-	m.AddStringList("whole_static_libs", ccModuleNames(mctx, l.Properties.Whole_static_libs))
+	m.AddStringList("whole_static_libs", bpModuleNamesForDeps(mctx, l.Properties.Whole_static_libs))
 	m.AddStringList("header_libs", headerLibs)
 	m.AddStringList("export_shared_lib_headers", reexportShared)
 	m.AddStringList("export_static_lib_headers", reexportStatic)
