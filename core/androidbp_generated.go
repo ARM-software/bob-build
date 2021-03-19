@@ -89,7 +89,11 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 		m.AddString("rsp_content", *gc.Properties.Rsp_content)
 	}
 	if gc.Properties.Host_bin != nil {
-		m.AddString("host_bin", ccModuleName(mctx, gc.hostBinName(mctx)))
+		hostBin := bpModuleNamesForDep(mctx, gc.hostBinName(mctx))
+		if len(hostBin) != 1 {
+			panic(fmt.Errorf("%s must have one host_bin entry (have %d)", gc.Name(), len(hostBin)))
+		}
+		m.AddString("host_bin", hostBin[0])
 	}
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 

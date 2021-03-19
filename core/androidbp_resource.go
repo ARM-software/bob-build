@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +39,10 @@ func writeCodeResourceModule(m bpwriter.Module, src, installRel string) {
 	m.AddStringList("srcs", []string{src})
 	m.AddString("stem", filepath.Base(src))
 	m.AddString("relative_install_path", installRel)
+}
+
+func (m *resource) getAndroidbpResourceName(src string) string {
+	return m.shortName() + "__" + strings.Replace(src, "/", "_", -1)
 }
 
 func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleContext) {
@@ -86,8 +90,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	// as prebuilt_etc module supports only single src, we have to split into N modules
 	for _, src := range r.Properties.getSources(mctx) {
 		// keep module name unique, remove slashes
-		modName := r.shortName() + "__" + strings.Replace(src, "/", "_", -1)
-		m, err := AndroidBpFile().NewModule(modType, modName)
+		m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(src))
 		if err != nil {
 			panic(err.Error())
 		}
