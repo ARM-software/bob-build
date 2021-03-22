@@ -325,7 +325,7 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 	}
 
 	// Add arguments providing information about other modules the current
-	// one depends on, accessible via ${module}_out and ${module}_dir.
+	// one depends on, accessible via ${module}_out.
 	ctx.VisitDirectDepsWithTag(generatedDepTag, func(dep android.Module) {
 		// If a generated module depends on a library/binary which was split
 		// into host/target variants by the Android.bp generator, they will
@@ -336,14 +336,11 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 		if gdep, ok := dep.(genruleInterface); ok {
 			dependents = append(dependents, gdep.outputs().Paths()...)
 			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
-			args[varName+"_dir"] = gdep.outputPath().String()
 			args[varName+"_out"] = utils.Join(gdep.outputs().Strings(), gdep.getEncapsulatedOuts().Strings())
 
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
-			// We only expect to use the output from static/shared libraries
-			// and binaries, so `_dir' is not supported on these.
 			args[varName+"_out"] = out.String()
 		}
 	})

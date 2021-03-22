@@ -26,7 +26,6 @@ available substitutions are:
 - `${host_bin}` - the path to the binary specified by `host_bin`
 - `${module_dir}` - the path this module's source directory
 - `${gen_dir}` - the path to the output directory for this module
-- `${(name)_dir}` - the output directory for the `generated_deps` dependency with `name`
 - `${(name)_out}` - the outputs of the `generated_deps` dependency with `name`
 - `${src_dir}` - the path to the project source directory - this will be different
   than the build source directory for Android.
@@ -56,8 +55,8 @@ be built before the `bob_generated`.
 ----
 ### **bob_generated.generated_deps** (optional)
 A list of other modules that this generator depends on. The dependencies can be
-used in the command through `${(name_of_dependency)_dir}` (that is, the variable's
-name is the name of the dependency, with the `_dir` suffix).
+used in the command through `${(name_of_dependency)_out}` (that is, the variable's
+name is the name of the dependency, with the `_out` suffix).
 
 ----
 ### **bob_generated.generated_sources** (optional)

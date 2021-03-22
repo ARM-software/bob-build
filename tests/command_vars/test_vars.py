@@ -9,7 +9,6 @@ def parse_args():
     ap = argparse.ArgumentParser()
 
     ap.add_argument("--check-basename", nargs="+", action="append", metavar=("PATH ...", "BASE"))
-    ap.add_argument("--check-in-dir", nargs="+", action="append", metavar=("DIR", "PATH"))
     ap.add_argument("--copy", nargs="+", action="append", metavar=("SRC", "DEST"))
 
     return ap.parse_args()
@@ -17,14 +16,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-
-    for check in args.check_in_dir:
-        assert len(check) >= 2, "Path and directory required"
-        check_dir = os.path.normpath(check[0])
-        for path in check[1:]:
-            path = os.path.normpath(path)
-            assert path.startswith(check_dir), \
-                "'%s' is not inside directory '%s'" % (path, check_dir)
 
     for check in args.check_basename:
         # The first half of the arguments are paths, the second are basenames
