@@ -1,24 +1,23 @@
 bob_generate_source {
     name: "bob_test_generate_source_single",
     out: [
-        "dir_and_outs.c",
-        "dir_and_outs.h",
+        "single.c",
+        "single.h",
     ],
     tool: "generate_trivial_function.py",
-    cmd: "${tool} module_dir_and_outs ${srcs_generated} ${headers_generated}",
+    cmd: "${tool} testfn ${srcs_generated} ${headers_generated}",
     build_by_default: true,
 }
 
 bob_generate_source {
-    name: "bob_test_module_dep_dir_and_outs",
+    name: "bob_test_module_dep_outs",
     generated_deps: ["bob_test_generate_source_single"],
     out: [
-        "dir_and_outs.c",
-        "dir_and_outs.h",
+        "single.c",
+        "single.h",
     ],
     tool: "test_vars.py",
-    cmd: "${tool} --check-in-dir ${bob_test_generate_source_single_dir} ${bob_test_generate_source_single_out} " +
-        "--check-basename ${bob_test_generate_source_single_out} dir_and_outs.c dir_and_outs.h " +
+    cmd: "${tool} --check-basename ${bob_test_generate_source_single_out} single.c single.h " +
         "--copy ${bob_test_generate_source_single_out} ${gen_dir}",
     export_gen_include_dirs: ["."],
     build_by_default: true,
@@ -28,6 +27,6 @@ bob_alias {
     name: "bob_test_command_vars",
     srcs: [
         "bob_test_generate_source_single",
-        "bob_test_module_dep_dir_and_outs",
+        "bob_test_module_dep_outs",
     ]
 }

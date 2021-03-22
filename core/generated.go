@@ -88,7 +88,7 @@ type GenerateProps struct {
 	 * $args       - the value of "args" - space-delimited
 	 * $tool       - the path to the tool
 	 * $host_bin   - the path to the binary that is produced by the host_bin module
-	 * $(name)_dir - the build directory for each dep in generated_dep
+	 * $(dep)_out  - the outputs of the generated_dep `dep`
 	 * $src_dir    - the path to the project source directory - this will be different than the build source directory
 	 *               for Android.
 	 * $module_dir - the path to the module directory */
@@ -468,11 +468,10 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			}
 
 			depName := ctx.OtherModuleName(m)
-			// When the dependent module is another Bob generated module, provide
-			// the location of its output dir so the using module can pick and
-			// choose what it uses.
+			// When the dependent module is another Bob generated
+			// module, provide all its outputs so the using module can
+			// pick and choose what it uses.
 			if gc, ok := getGenerateCommon(m); ok {
-				args[depName+"_dir"] = gc.outputDir()
 				args[depName+"_out"] = strings.Join(gc.outputs(), " ")
 			} else {
 				args[depName+"_out"] = strings.Join(gen.outputs(), " ")

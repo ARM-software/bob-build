@@ -63,7 +63,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	for _, mod := range l.extraSymbolsModules(mctx) {
 		generated_deps = append(generated_deps, mod.Name())
 		// reference all dependent modules outputs, needed for related symvers files
-		sources_param += " ${" + mod.Name() + "_dir}/Module.symvers"
+		sources_param += " $$(dirname ${" + mod.Name() + "_out})/Module.symvers"
 	}
 
 	kdir := l.Properties.Kernel_dir

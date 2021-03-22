@@ -354,11 +354,13 @@ bob_static_library {
 }
 ```
 
-The next example shows how `generated_deps` might be used. Note that for
-each module named in `generated_deps` there are variables to get the
-intermediate directory as well as all the outputs for that module. The
-variables are `${mod_dir}` and `${mod_outs}` where `mod` is the module
-name.
+The next example shows how `generated_deps` might be used. For each
+module named in `generated_deps` there is a variable to get the
+outputs for that module. The variable is `${mod_outs}` where `mod` is
+the module name. For compatibility with Soong, it is not possible to
+get the intermediate output directory for the module, to prevent
+modules using undeclared outputs. This forces the script to do some
+filtering to find the desired input.
 
 ```
 bob_generate_source {
@@ -388,7 +390,7 @@ bob_generate_source {
     ],
 
     tool: "x_generator.py",
-    cmd: "${tool} -c ${gen_dir}/src/x.cpp -h ${gen_dir}/src/x.h ${templates_dir}/x.in",
+    cmd: "${tool} -c ${gen_dir}/src/x.cpp -h ${gen_dir}/src/x.h ${templates_out} --use x.in",
 }
 
 bob_generate_source {
@@ -400,7 +402,7 @@ bob_generate_source {
     ],
 
     tool: "y_generator.py",
-    cmd: "${tool} -c ${gen_dir}/src/y.cpp -h ${gen_dir}/src/y.h ${templates_dir}/y.in",
+    cmd: "${tool} -c ${gen_dir}/src/y.cpp -h ${gen_dir}/src/y.h ${templates_out} --use y.in",
 }
 
 bob_static_library {
