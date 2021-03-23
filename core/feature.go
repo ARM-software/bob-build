@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2019, 2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/google/blueprint/proptools"
 )
 
 // featurePropertyName returns name of feature. Name needs to start from capital letter because
@@ -183,7 +181,7 @@ func (f *Features) AppendProps(dst []interface{}, properties *configProperties) 
 			// If featureProps is nil then we've determined that we can skip this,
 			// so avoid calling AppendProperties
 			if featureStructPointer != nil {
-				err := proptools.AppendMatchingProperties(dst, featureStructPointer, nil)
+				err := AppendMatchingProperties(dst, featureStructPointer)
 				if err != nil {
 					return err
 				}

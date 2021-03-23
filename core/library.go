@@ -85,7 +85,7 @@ type BuildProps struct {
 	// These are propagated to the closest linking object when specified on static libraries.
 	// shared_libs is an indication that this module is using a shared library, and
 	// users of this module need to link against it.
-	Shared_libs []string
+	Shared_libs []string `bob:"first_overrides"`
 	// The libraries mentioned here will be appended to shared_libs of the modules that use
 	// this library (via static_libs, whole_static_libs or shared_libs).
 	ExtraSharedLibs []string `blueprint:"mutated"`
@@ -94,11 +94,11 @@ type BuildProps struct {
 	// These are propagated to the closest linking object when specified on static libraries.
 	// static_libs is an indication that this module is using a static library, and
 	// users of this module need to link against it.
-	Static_libs []string
+	Static_libs []string `bob:"first_overrides"`
 
 	// This list of dependencies that exported cflags and exported include dirs
 	// should be propagated 1-level higher
-	Reexport_libs []string
+	Reexport_libs []string `bob:"first_overrides"`
 	// Internal property for collecting libraries with reexported flags and include paths
 	ResolvedReexportedLibs []string `blueprint:"mutated"`
 
@@ -108,25 +108,25 @@ type BuildProps struct {
 	// This will include all the objects in the library (as opposed to normal static linking)
 	// If this is set for a static library, any shared library will also include objects
 	// from dependent libraries
-	Whole_static_libs []string
+	Whole_static_libs []string `bob:"first_overrides"`
 
 	// List of libraries to import headers from, but not link to
-	Header_libs []string
+	Header_libs []string `bob:"first_overrides"`
 
 	// List of libraries that users of the current library should import
 	// headers from, but not link to
-	Export_header_libs []string
+	Export_header_libs []string `bob:"first_overrides"`
 
 	// Linker flags required to link to the necessary system libraries
 	// These are propagated to the closest linking object when specified on static libraries.
-	Ldlibs []string
+	Ldlibs []string `bob:"first_overrides"`
 
 	// The list of modules that generate extra headers for this module
-	Generated_headers []string
+	Generated_headers []string `bob:"first_overrides"`
 
 	// The list of modules that generate extra headers for this module,
 	// which should be made available to linking modules
-	Export_generated_headers []string
+	Export_generated_headers []string `bob:"first_overrides"`
 
 	// The list of modules that generate extra source files for this module
 	Generated_sources []string
@@ -135,10 +135,10 @@ type BuildProps struct {
 	Generated_deps []string
 
 	// Include local dirs to be exported into dependent
-	Export_local_include_dirs []string
+	Export_local_include_dirs []string `bob:"first_overrides"`
 
 	// Include dirs (path relative to root) to be exported into dependent
-	Export_include_dirs []string // TODO: Hide this in Android-specific properties
+	Export_include_dirs []string `bob:"first_overrides"`
 
 	// Wrapper for all build commands (object file compilation *and* linking)
 	Build_wrapper *string

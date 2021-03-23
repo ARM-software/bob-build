@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,22 +63,24 @@ type targetSpecificLibrary interface {
 	targetableProperties() []interface{}
 }
 
-// Traverse the core properties of defaults to find out which variations are
-// supported.
-func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
+// Propagate Host_supported and Target_supported from defaults to
+// splittable modules to find out which variations are supported.
+func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
+
+	// No need to do this on defaults modules, as we've flattened the
+	// hierarchy
+	_, isDefaults := mctx.Module().(*defaults)
+	if isDefaults {
+		return
+	}
+
 	sp, ok := mctx.Module().(splittable)
 	if !ok {
 		return
 	}
 
-	// Defaults are always split into both variants
-	if _, isDefaults := mctx.Module().(*defaults); isDefaults {
-		return
-	}
-
-	visited := map[string]bool{}
-
-	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	accumulatedProps := SplittableProps{}
+	mctx.VisitDirectDeps(func(dep blueprint.Module) {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*defaults)
 			if !ok {
@@ -86,14 +88,8 @@ func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
 					dep.Name(), mctx.ModuleName()))
 			}
 
-			// Only visit each default once
-			if _, ok := visited[dep.Name()]; ok {
-				return false
-			}
-			visited[dep.Name()] = true
-
-			err := proptools.PrependMatchingProperties([]interface{}{sp.getSplittableProps()},
-				&def.Properties.SplittableProps, nil)
+			// Append at the same level, so later siblings take precedence
+			err := AppendProperties(&accumulatedProps, &def.Properties.SplittableProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
@@ -101,10 +97,18 @@ func supportedVariantsMutator(mctx blueprint.TopDownMutatorContext) {
 					panic(err)
 				}
 			}
-			return true
 		}
-		return false
 	})
+
+	// Core setting should take precedence over defaults, so prepend
+	err := PrependProperties(sp.getSplittableProps(), &accumulatedProps)
+	if err != nil {
+		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
+			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+		} else {
+			panic(err)
+		}
+	}
 }
 
 func tgtToString(tgts []tgtType) []string {

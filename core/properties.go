@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,12 +25,72 @@ import (
 	"github.com/google/blueprint/proptools"
 )
 
+// Property concatenation.
+//
+// Most properties have the behavior that later values override earlier
+// values. For example if we passed the compiler "-DVALUE=0
+// -DVALUE=1", then the macro VALUE would end up as "1".
+//
+// A few properties have the opposite behaviour. In particular, since
+// include search paths specify a set of directories to look for
+// headers, the first directory searched overrides all the others.
+//
+// Since in Features, Defaults and Targets we copy properties from one
+// set to another, we want to be consistent in the way we prepend and
+// append arguments so that overrides behave as expected.
+//
+// Fields in property structs can be tagged with
+// `bob:"first_overrides"` to get include search path ordering.
+// Otherwise they will get cflag ordering.
+//
+// The function naming assumes cflag ordering, i.e.
+// Append: src cflag properties override dst cflag properties
+// Prepend: dst cflag properties override src cflag properties
+
+func orderNormal(property string, dstField, srcField reflect.StructField,
+	dstValue, srcValue interface{}) (proptools.Order, error) {
+	order := proptools.Append
+	if proptools.HasTag(srcField, "bob", "first_overrides") {
+		order = proptools.Prepend
+	}
+	return order, nil
+}
+
+func orderReverse(property string, dstField, srcField reflect.StructField,
+	dstValue, srcValue interface{}) (proptools.Order, error) {
+	order := proptools.Prepend
+	if proptools.HasTag(srcField, "bob", "first_overrides") {
+		order = proptools.Append
+	}
+	return order, nil
+}
+
+func AppendProperties(dst interface{}, src interface{}) error {
+	return proptools.ExtendProperties(dst, src, nil, orderNormal)
+}
+
+func AppendMatchingProperties(dst []interface{}, src interface{}) error {
+	return proptools.ExtendMatchingProperties(dst, src, nil, orderNormal)
+}
+
+func PrependProperties(dst interface{}, src interface{}) error {
+	return proptools.ExtendProperties(dst, src, nil, orderReverse)
+}
+
+func PrependMatchingProperties(dst []interface{}, src interface{}) error {
+	return proptools.ExtendMatchingProperties(dst, src, nil, orderReverse)
+}
+
 // Applies default options
-func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	// This method walks down the dependency list to include all defaults that include other defaults
-	// with the ones further down the tree being applied first.
-	// Walkdeps is a preorder depth-first search - meaning a parent is visited before children, and children
-	// is visited before siblings.
+func defaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
+	// The mutator is run bottom up, so modules without dependencies
+	// will be processed first.
+	//
+	// This mutator propagates the properties from the direct default
+	// dependencies to the current module.
+
+	// No need to do this on defaults modules, as we've flattened the
+	// hierarchy
 	_, isDefaults := mctx.Module().(*defaults)
 	if isDefaults {
 		return
@@ -45,31 +105,19 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		return
 	}
 
-	visited := map[string]bool{}
-
-	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	// Accumulate properties from direct dependencies into an empty defaults
+	accumulatedDef := defaults{}
+	accumulatedProps := accumulatedDef.defaultableProperties()
+	mctx.VisitDirectDeps(func(dep blueprint.Module) {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
-			//print("Visiting " + mctx.OtherModuleName(dep) + " for dependency " + mctx.ModuleName() + "\n")
 			def, ok := dep.(*defaults)
 			if !ok {
 				panic(fmt.Errorf("module %s in %s's defaults is not a default",
 					dep.Name(), mctx.ModuleName()))
 			}
 
-			// Only visit each default once
-			if _, ok := visited[dep.Name()]; ok {
-				return false
-			}
-			visited[dep.Name()] = true
-
-			// Defaults are more generic, so we prepend to the
-			// core module properties.
-			//
-			// Note: when prepending (pointers to) bools we copy
-			// the value if the dst is nil, otherwise the dst
-			// value is left alone.
-			err := applyDefaults(defaultableProps, def.defaultableProperties())
-
+			// Append defaults at the same level to maintain cflag order
+			err := appendDefaults(accumulatedProps, def.defaultableProperties())
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
@@ -77,24 +125,64 @@ func defaultApplierMutator(mctx blueprint.TopDownMutatorContext) {
 					panic(err)
 				}
 			}
-
-			return true // This return value indicates if we want to continue visiting children.
 		}
-		return false
 	})
+
+	// Now apply the defaults to the core module
+	// Defaults are more generic, so we prepend to the
+	// core module properties.
+	//
+	// Note: when prepending (pointers to) bools we copy
+	// the value if the dst is nil, otherwise the dst
+	// value is left alone.
+	err := prependDefaults(defaultableProps, accumulatedProps)
+	if err != nil {
+		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
+			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+		} else {
+			panic(err)
+		}
+	}
 }
 
-func applyDefaults(dst []interface{}, src []interface{}) error {
+func prependDefaults(dst []interface{}, src []interface{}) error {
 	// For every property in the destination module (defaultable),
 	// we search for the corresponding property within the available
 	// set of properties in the source `bob_defaults` module.
-	// To prepend them they need to be of the same type. If found,
-	// prepend them.
+	// To prepend them they need to be of the same type.
 	for _, defaultableProp := range dst {
 		propertyFound := false
 		for _, propToApply := range src {
 			if reflect.TypeOf(defaultableProp) == reflect.TypeOf(propToApply) {
-				err := proptools.PrependProperties(defaultableProp, propToApply, nil)
+				err := PrependProperties(defaultableProp, propToApply)
+
+				if err != nil {
+					return err
+				}
+
+				propertyFound = true
+				break
+			}
+		}
+
+		if !propertyFound {
+			return fmt.Errorf("Property of type '%T' was not found in `bob_defaults`", defaultableProp)
+		}
+	}
+
+	return nil
+}
+
+func appendDefaults(dst []interface{}, src []interface{}) error {
+	// For every property in the destination module (defaultable),
+	// we search for the corresponding property within the available
+	// set of properties in the source `bob_defaults` module.
+	// To append them they need to be of the same type.
+	for _, defaultableProp := range dst {
+		propertyFound := false
+		for _, propToApply := range src {
+			if reflect.TypeOf(defaultableProp) == reflect.TypeOf(propToApply) {
+				err := AppendProperties(defaultableProp, propToApply)
 
 				if err != nil {
 					return err
