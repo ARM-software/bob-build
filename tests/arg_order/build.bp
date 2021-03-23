@@ -1,0 +1,189 @@
+// Test property ordering
+// Check cflag and local_include_path
+// Use a build wrapper
+
+bob_defaults {
+    name: "aa_defaults",
+
+    cflags: [
+        "-aa_flag1",
+        "-aa_flag2",
+    ],
+    local_include_dirs: [
+        "aa_include1",
+        "aa_include2",
+    ],
+}
+
+bob_defaults {
+    name: "ab_defaults",
+
+    cflags: [
+        "-ab_flag1",
+        "-ab_flag2",
+    ],
+    local_include_dirs: [
+        "ab_include1",
+        "ab_include2",
+    ],
+}
+
+bob_defaults {
+    name: "ba_defaults",
+
+    target: {
+        always_enabled_feature: {
+            cflags: [
+                "-batf1_flag",
+                "-batf2_flag",
+            ],
+            local_include_dirs: [
+                "batf1_include",
+                "batf2_include",
+            ],
+        },
+        cflags: [
+            "-batarg1_flag",
+            "-batarg2_flag",
+        ],
+        local_include_dirs: [
+            "batarg1_include",
+            "batarg2_include",
+        ],
+    },
+
+    cflags: [
+        "-ba_flag1",
+        "-ba_flag2",
+    ],
+    local_include_dirs: [
+        "ba_include1",
+        "ba_include2",
+    ],
+}
+
+bob_defaults {
+    name: "bb_defaults",
+
+    target: {
+        always_enabled_feature: {
+            cflags: [
+                "-bbtf1_flag",
+                "-bbtf2_flag",
+            ],
+            local_include_dirs: [
+                "bbtf1_include",
+                "bbtf2_include",
+            ],
+        },
+        cflags: [
+            "-bbtarg1_flag",
+            "-bbtarg2_flag",
+        ],
+        local_include_dirs: [
+            "bbtarg1_include",
+            "bbtarg2_include",
+        ],
+    },
+
+    cflags: [
+        "-bb_flag1",
+        "-bb_flag2",
+    ],
+    local_include_dirs: [
+        "bb_include1",
+        "bb_include2",
+    ],
+}
+
+bob_defaults {
+    name: "a_defaults",
+    defaults: [
+        "aa_defaults",
+        "ab_defaults",
+    ],
+
+    cflags: [
+        "-a_flag1",
+        "-a_flag2",
+    ],
+    local_include_dirs: [
+        "a_include1",
+        "a_include2",
+    ],
+}
+
+bob_defaults {
+    name: "b_defaults",
+    defaults: [
+        "ba_defaults",
+        "bb_defaults",
+    ],
+
+    cflags: [
+        "-b_flag1",
+        "-b_flag2",
+    ],
+    local_include_dirs: [
+        "b_include1",
+        "b_include2",
+    ],
+}
+
+bob_binary {
+    name: "bob_test_arg_order",
+    srcs: ["main.c"],
+    build_wrapper: "arg_order/check_flags.py",
+
+    defaults: [
+        "a_defaults",
+        "b_defaults",
+    ],
+
+    always_enabled_feature: {
+        cflags: [
+            "-binfeat1_flag",
+            "-binfeat2_flag",
+        ],
+        local_include_dirs: [
+            "binfeat1_include",
+            "binfeat2_include",
+        ],
+    },
+
+    target: {
+        always_enabled_feature: {
+            cflags: [
+                "-bintf1_flag",
+                "-bintf2_flag",
+            ],
+            local_include_dirs: [
+                "bintf1_include",
+                "bintf2_include",
+            ],
+        },
+        cflags: [
+            "-bintarg1_flag",
+            "-bintarg2_flag",
+        ],
+        local_include_dirs: [
+            "bintarg1_include",
+            "bintarg2_include",
+        ],
+    },
+
+    cflags: [
+        "-bin_flag1",
+        "-bin_flag2",
+    ],
+    local_include_dirs: [
+        "bin_include1",
+        "bin_include2",
+    ],
+    android: {
+        // Soong checks that all the local_include_dirs exist, so
+        // disable this test on Android. The logic is in generic
+        // code, so testing on Linux should be sufficient.
+        enabled: false,
+    },
+}

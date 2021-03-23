@@ -19,8 +19,11 @@ package core
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 type defaults struct {
@@ -48,7 +51,7 @@ func (m *defaults) setVariant(variant tgtType) {
 }
 
 func (m *defaults) getSplittableProps() *SplittableProps {
-	return &SplittableProps{}
+	return &m.Properties.SplittableProps
 }
 
 func (m *defaults) defaults() []string {
@@ -171,9 +174,27 @@ var _ matchSourceInterface = (*defaults)(nil)
 // Defaults have properties that require escaping
 var _ propertyEscapeInterface = (*defaults)(nil)
 
-func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
+var (
+	// Map of defaults for each module.
+	//
+	// This duplicates the information available from Blueprint for
+	// each module, but allows us to access the information without
+	// having the blueprint.Module available.
+	//
+	// Populated by defaultDepsStage1Mutator.
+	// Used in defaultDepsStage2Mutator.
+	defaultsMap     = map[string][]string{}
+	defaultsMapLock sync.RWMutex
+)
+
+// Locally store defaults in defaultsMap
+func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
+
 	if l, ok := mctx.Module().(defaultable); ok {
-		mctx.AddDependency(mctx.Module(), defaultDepTag, l.defaults()...)
+		defaultsMapLock.Lock()
+		defer defaultsMapLock.Unlock()
+
+		defaultsMap[mctx.ModuleName()] = l.defaults()
 	}
 
 	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
@@ -184,5 +205,68 @@ func defaultDepsMutator(mctx blueprint.BottomUpMutatorContext) {
 					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
 			}
 		}
+	}
+}
+
+// Take a single defaults module, and recursively expand it to list
+// all the hierarchical defaults it depends on (not including itself).
+// It's important that the ordering is maintained.
+//
+//        a
+//      /   \
+//    b       c
+//  /  \     /  \
+// d    e   f    g
+//
+// ==> d e b f g c
+//
+// This function is recursive. To prevent getting into an infinite
+// loop on encountering a cycle, we pass a list of already visited
+// modules in.
+func expandDefault(d string, visited []string) []string {
+	var defaults []string
+	if len(defaultsMap[d]) > 0 {
+		for _, def := range defaultsMap[d] {
+			if utils.Find(visited, def) >= 0 {
+				panic(fmt.Errorf("Defaults module %s depends upon itself", def))
+			}
+			defaults = append(defaults, expandDefault(def, append(visited, def))...)
+			defaults = append(defaults, def)
+		}
+	}
+	return defaults
+}
+
+// Adds dependency links for defaults to all modules (but not defaults
+// modules). Rather than creating a dependency hierarchy, flatten the
+// hierarchy for each module. This allows us to remove duplication of
+// defaults modules, while respecting ordering of defaults specified
+// on each module, and between hierarchies. Without flattening the
+// hierarchy we would need more control over the module visitation
+// order in WalkDeps.
+func defaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
+
+	_, isDefaults := mctx.Module().(*defaults)
+	if isDefaults {
+		return
+	}
+
+	if _, ok := mctx.Module().(defaultable); ok {
+
+		// Get a flattened list of the default hierarchy
+		flattenedDefaults := expandDefault(mctx.ModuleName(), []string{})
+
+		var defaults []string
+
+		// Remove duplicates. Defaults that are later in the list
+		// override those earlier in the list, so keep the last
+		// occurrence of each default.
+		for i, el := range flattenedDefaults {
+			if utils.Find(flattenedDefaults[i+1:], el) == -1 {
+				defaults = append(defaults, el)
+			}
+		}
+
+		mctx.AddDependency(mctx.Module(), defaultDepTag, defaults...)
 	}
 }

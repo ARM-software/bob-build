@@ -4,9 +4,10 @@ Features
 The feature system allows for the possibility of changing aspects of the build
 depending on the configuration.
 
-It provides a way to select flags, source files, includes and others
-by indicating that they should only be included when a certain
-configuration option is enabled.
+It provides a way to select flags, source files, includes and other
+settings by indicating that they should only be included when a
+certain configuration option is enabled. In most cases, the settings
+apply cumulatively.
 
 ## Connection to config system
 
@@ -15,6 +16,7 @@ with the output of the config system. Each config option (e.g. `DEBUG`)
 generates a matching feature (`debug`).
 
 ## How a feature is set and referred to
+
 A feature added to [Mconfig](config_system.md) (e.g. `FOO`)
 becomes `CONFIG_xxx=value` (e.g. `CONFIG_FOO=value`) in
 `$OUT/bob.config`. We can refer to it in Bob modules as follows:
@@ -30,8 +32,14 @@ bob_module_type {
 }
 ```
 
-Where the properties inside `feature_name` are only set if `CONFIG_FOO` is
-enabled in the current configuration.
+Where the properties inside `feature_name` are only set if
+`CONFIG_FOO` is enabled in the current configuration. Feature-specific
+properties have priority over non-feature-specific properties. Note
+that where the same property is specified in multiple feature blocks,
+there is no priority between the blocks. If the property is
+single-valued (like `enabled`) the result is undefined. If the
+property is a list then all elements will be present, but the order is
+undefined.
 
 Here's a more concrete example, with a `DEBUG` option:
 

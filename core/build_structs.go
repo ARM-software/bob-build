@@ -252,10 +252,11 @@ type SourceProps struct {
 // by the module.
 type IncludeDirsProps struct {
 	// The list of include dirs to use that is relative to the source directory
-	Include_dirs []string
+	Include_dirs []string `bob:"first_overrides"`
 
 	// The list of include dirs to use that is relative to the build.bp file
-	Local_include_dirs []string // These use relative instead of absolute paths
+	// These use relative instead of absolute paths
+	Local_include_dirs []string `bob:"first_overrides"`
 }
 
 // Get a list of sources to compile.
@@ -460,7 +461,7 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 		src := t.getTargetSpecific(tgt).getTargetSpecificProps()
 
 		// Copy the target-specific variables to the core set
-		err := proptools.AppendMatchingProperties(dst, src, nil)
+		err := AppendMatchingProperties(dst, src)
 		if err != nil {
 			if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 				mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())

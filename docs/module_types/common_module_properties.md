@@ -36,8 +36,30 @@ Shared library names must begin with `lib`.
 ----
 ### **bob_module.defaults** (optional)
 
-The list of default properties that should prepended
-to all configuration.
+A list of [`bob_defaults`](bob_defaults.md) modules containing
+configuration required by this module.
+
+The configuration specified by a listed `bob_defaults` module is
+allowed to conflict with another listed module, though this should
+generally be avoided. A conflict can be for a single-valued property
+like `enabled` or `build_wrapper`, or in a list property where a
+particular element may have an opposite meaning (in `cflags`) or
+modify search behaviour (in `include_dirs`).
+
+Configuration in later `bob_defaults` will take priority over
+configuration in earlier ones. In the following example, any conflicts
+between the `generic` and `specific` modules will end up following
+what is set by `specific`.
+
+    defaults: [
+        "generic",
+        "specific",
+    ],
+
+Configuration in the current module will override configuration set
+within a `bob_defaults`. A consequence of this is that where
+`bob_defaults` are nested, the leaf modules have least priority and
+get overriden.
 
 #### Examples:
 
@@ -63,12 +85,8 @@ bob_binary {
 }
 ```
 
-In this example, the `bob_binary` will
-have the flags `-DGLOBAL_FLAG=1 -DMYFLAG=2 -DBINARY_FLAG=3`. The ordering is
-from least to most-specific: Bob will traverse the graph of defaults which a
-module (like `my_binary`) depends on, and prepend flags in breadth-first order.
-This means that flags specified in the actual module can override options set
-in defaults, because later flags usually take precedence.
+In this example, `my_binary` will have the flags `-DGLOBAL_FLAG=1
+-DMYFLAG=2 -DBINARY_FLAG=3`.
 
 ----
 ### **bob_module.srcs** (optional)

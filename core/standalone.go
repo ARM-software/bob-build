@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -168,16 +168,17 @@ func Main() {
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
 	// The generated depender mutator add dependencies to generated source modules.
-	ctx.RegisterBottomUpMutator("default_deps", defaultDepsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps1", defaultDepsStage1Mutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps2", defaultDepsStage2Mutator).Parallel()
 	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
 	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
-	ctx.RegisterTopDownMutator("supported_variants", supportedVariantsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("supported_variants", supportedVariantsMutator).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
-	ctx.RegisterTopDownMutator("default_applier", defaultApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_applier", defaultApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
