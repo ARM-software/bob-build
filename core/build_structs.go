@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,11 +134,11 @@ type AndroidProps struct {
 	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
 	Tags []string
 	// Value to use on Android for LOCAL_MODULE_OWNER
-	Owner string
+	Owner *string
 }
 
 func (p *AndroidProps) isProprietary() bool {
-	return p.Owner != ""
+	return p.Owner != nil
 }
 
 // AndroidPGOProps defines properties used to support profile-guided optimization.

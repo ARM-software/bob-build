@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -150,7 +150,7 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 
 // InstallGroupProps describes the properties of bob_install_group modules
 type InstallGroupProps struct {
-	Install_path string
+	Install_path *string
 }
 
 type installGroup struct {
@@ -296,7 +296,7 @@ func getInstallGroupPathFromTag(mctx blueprint.TopDownMutatorContext, tag depend
 				panic(fmt.Sprintf("Multiple %s dependencies for %s",
 					tag.name, mctx.ModuleName()))
 			}
-			installGroupPath = &insg.Properties.Install_path
+			installGroupPath = insg.Properties.Install_path
 		})
 
 	return installGroupPath
