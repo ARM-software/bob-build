@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -66,7 +67,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 		sources_param += " $$(dirname ${" + mod.Name() + "_out})/Module.symvers"
 	}
 
-	kdir := l.Properties.Kernel_dir
+	kdir := proptools.String(l.Properties.Kernel_dir)
 	if !filepath.IsAbs(kdir) {
 		kdir = getPathInSourceDir(kdir)
 	}
@@ -94,11 +95,11 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"--extra-cflags='" + utils.Join(l.Properties.Cflags) + "'",
 		},
 		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
-		stringParam("--cross-compile", l.Properties.Kernel_cross_compile),
-		stringParam("--cc", l.Properties.Kernel_cc),
-		stringParam("--hostcc", l.Properties.Kernel_hostcc),
-		stringParam("--clang-triple", l.Properties.Kernel_clang_triple),
-		stringParam("--ld", l.Properties.Kernel_ld),
+		stringParam("--cross-compile", proptools.String(l.Properties.Kernel_cross_compile)),
+		stringParam("--cc", proptools.String(l.Properties.Kernel_cc)),
+		stringParam("--hostcc", proptools.String(l.Properties.Kernel_hostcc)),
+		stringParam("--clang-triple", proptools.String(l.Properties.Kernel_clang_triple)),
+		stringParam("--ld", proptools.String(l.Properties.Kernel_ld)),
 		stringParams("-I",
 			l.Properties.Include_dirs,
 			getPathsInSourceDir(l.Properties.Local_include_dirs)),

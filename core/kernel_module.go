@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 )
 
 type KernelProps struct {
@@ -34,25 +35,27 @@ type KernelProps struct {
 	// Arguments to pass to kernel make invocation
 	Make_args []string
 	// Kernel directory location
-	Kernel_dir string
+	Kernel_dir *string
 	// Compiler prefix for kernel build
-	Kernel_cross_compile string
+	Kernel_cross_compile *string
 	// Kernel target compiler
-	Kernel_cc string
+	Kernel_cc *string
 	// Kernel host compiler
-	Kernel_hostcc string
+	Kernel_hostcc *string
 	// Kernel linker
-	Kernel_ld string
+	Kernel_ld *string
 	// Target triple when using clang as the compiler
-	Kernel_clang_triple string
+	Kernel_clang_triple *string
 }
 
 func (k *KernelProps) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 
 	// join module dir with relative kernel dir
-	if k.Kernel_dir != "" && !filepath.IsAbs(k.Kernel_dir) {
-		k.Kernel_dir = filepath.Join(prefix, k.Kernel_dir)
+	kdir := proptools.String(k.Kernel_dir)
+	if kdir != "" && !filepath.IsAbs(kdir) {
+		kdir = filepath.Join(prefix, kdir)
+		k.Kernel_dir = proptools.StringPtr(kdir)
 	}
 }
 
@@ -208,7 +211,7 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 	}
 
 	kmodBuild := getBackendPathInBobScriptsDir(g, "kmod_build.py")
-	kdir := m.Properties.KernelProps.Kernel_dir
+	kdir := proptools.String(m.Properties.KernelProps.Kernel_dir)
 	if kdir != "" && !filepath.IsAbs(kdir) {
 		kdir = getBackendPathInSourceDir(g, kdir)
 	}
@@ -218,22 +221,22 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		kbuildOptions = "--kbuild-options " + strings.Join(m.Properties.KernelProps.Kbuild_options, " ")
 	}
 
-	hostToolchain := m.Properties.KernelProps.Kernel_hostcc
+	hostToolchain := proptools.String(m.Properties.KernelProps.Kernel_hostcc)
 	if hostToolchain != "" {
 		hostToolchain = "--hostcc " + hostToolchain
 	}
 
-	kernelToolchain := m.Properties.KernelProps.Kernel_cc
+	kernelToolchain := proptools.String(m.Properties.KernelProps.Kernel_cc)
 	if kernelToolchain != "" {
 		kernelToolchain = "--cc " + kernelToolchain
 	}
 
-	clangTriple := m.Properties.KernelProps.Kernel_clang_triple
+	clangTriple := proptools.String(m.Properties.KernelProps.Kernel_clang_triple)
 	if clangTriple != "" {
 		clangTriple = "--clang-triple " + clangTriple
 	}
 
-	ld := m.Properties.KernelProps.Kernel_ld
+	ld := proptools.String(m.Properties.KernelProps.Kernel_ld)
 	if ld != "" {
 		ld = "--ld " + ld
 	}
@@ -243,7 +246,7 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 		ExtraIncludes:      strings.Join(extraIncludePaths, " "),
 		ExtraCflags:        strings.Join(extraCflags, " "),
 		KernelDir:          kdir,
-		KernelCrossCompile: m.Properties.KernelProps.Kernel_cross_compile,
+		KernelCrossCompile: proptools.String(m.Properties.KernelProps.Kernel_cross_compile),
 		KbuildOptions:      kbuildOptions,
 		MakeArgs:           strings.Join(m.Properties.KernelProps.Make_args, " "),
 		// The kernel module builder replicates the out-of-tree module's source tree structure.
