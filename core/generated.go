@@ -117,7 +117,7 @@ type GenerateProps struct {
 	Args []string
 
 	// Used to indicate that the console should be used.
-	Console bool
+	Console *bool
 
 	// A list of source modules that this bob_generated_source will encapsulate.
 	// When this module is used with generated_headers, the named modules' export_gen_include_dirs will be forwarded.

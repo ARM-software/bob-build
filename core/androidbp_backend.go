@@ -29,6 +29,7 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
@@ -97,7 +98,7 @@ func (g *androidBpGenerator) escapeFlag(s string) string {
 
 func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
 	if props.isProprietary() {
-		m.AddString("owner", props.Owner)
+		m.AddString("owner", proptools.String(props.Owner))
 		m.AddBool("vendor", true)
 		m.AddBool("proprietary", true)
 		m.AddBool("soc_specific", true)

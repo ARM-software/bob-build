@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -56,7 +57,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 	utils.StripUnusedArgs(args, cmd)
 
 	var pool blueprint.Pool
-	if m.Properties.Console {
+	if proptools.Bool(m.Properties.Console) {
 		// Console can be used to run longrunning jobs (even interactive jobs).
 		pool = blueprint.Console
 	}
