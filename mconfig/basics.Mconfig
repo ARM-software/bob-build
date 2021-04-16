@@ -31,6 +31,9 @@ config OSX
 config WINDOWS
 	bool "Windows"
 
+config FUCHSIA
+	bool "Fuchsia"
+
 endchoice
 
 
