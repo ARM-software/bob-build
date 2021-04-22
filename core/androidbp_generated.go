@@ -47,7 +47,7 @@ func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blu
 	}
 }
 
-func expandCmd(s string, moduleDir string) string {
+func expandCmd(gc *generateCommon, s string, moduleDir string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
@@ -64,8 +64,16 @@ func expandCmd(s string, moduleDir string) string {
 			// included in a `srcs` field which would be processed further.
 			return filepath.Join("${module_dir}", moduleDir)
 		case "bob_config":
+			if !proptools.Bool(gc.Properties.Depfile) {
+				panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name()))
+			}
 			return configFile
 		case "bob_config_json":
+			if !proptools.Bool(gc.Properties.Depfile) {
+				panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name()))
+			}
 			return configJSONFile
 		case "bob_config_opts":
 			return configOpts
@@ -79,7 +87,7 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
-	cmd = expandCmd(cmd, mctx.ModuleDir())
+	cmd = expandCmd(gc, cmd, mctx.ModuleDir())
 	m.AddString("cmd", cmd)
 
 	if gc.Properties.Tool != nil {
@@ -95,6 +103,10 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 		}
 		m.AddString("host_bin", hostBin[0])
 	}
+	if proptools.Bool(gc.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
+		panic(fmt.Errorf("%s depfile is true, but ${depfile} not used in cmd", gc.Name()))
+	}
+
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
 	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
@@ -119,7 +131,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 		panic(err.Error())
 	}
 
-	srcs := utils.NewStringSlice(gs.generateCommon.Properties.getSources(mctx), gs.generateCommon.Properties.Specials)
+	srcs := gs.generateCommon.Properties.getSources(mctx)
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
@@ -141,7 +153,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 		panic(err.Error())
 	}
 
-	srcs := utils.NewStringSlice(ts.generateCommon.Properties.getSources(mctx), ts.generateCommon.Properties.Specials)
+	srcs := ts.generateCommon.Properties.getSources(mctx)
 	m.AddStringList("srcs", srcs)
 	gr := m.NewGroup("out")
 	// if REs had double slashes in original value, at parsing they got removed, so compensate for that

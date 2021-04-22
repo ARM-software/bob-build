@@ -234,7 +234,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 	} else {
 		sb.WriteString("LOCAL_CLANG := false\n")
 	}
-	srcs := utils.NewStringSlice(m.Properties.getSources(ctx), m.Properties.Build.SourceProps.Specials)
+	srcs := m.Properties.getSources(ctx)
 
 	// Remove sources which are not compiled
 	nonCompiledDeps := utils.Filter(utils.IsNotCompilableSource, srcs)
@@ -364,8 +364,6 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		if m.Properties.Post_install_cmd != nil {
 			// Setup args like we do for bob_generated_*
 			args := map[string]string{}
-			args["bob_config"] = configFile
-			args["bob_config_json"] = configJSONFile
 			if m.Properties.Post_install_tool != nil {
 				args["tool"] = *m.Properties.Post_install_tool
 			}
