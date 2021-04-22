@@ -541,8 +541,14 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	// Args can contain other parameters, so replace that immediately
 	cmd := strings.Replace(proptools.String(m.Properties.Cmd), "${args}", strings.Join(m.Properties.Args, " "), -1)
 
-	if proptools.Bool(m.Properties.Depfile) && !strings.Contains(cmd, "${depfile}") {
+	if proptools.Bool(m.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
 		panic(fmt.Errorf("%s depfile is true, but ${depfile} not used in cmd", m.Name()))
+	}
+	if utils.ContainsArg(cmd, "bob_config") || utils.ContainsArg(cmd, "bob_config_json") {
+		if !proptools.Bool(m.Properties.Depfile) {
+			panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
+				"Config dependencies must be declared via a depfile!", m.Name()))
+		}
 	}
 
 	return cmd, args, dependents, hostTarget
@@ -589,8 +595,7 @@ func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generat
 // GenerateBuildAction()
 func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.in = append(append(getBackendPathsInSourceDir(g, m.getSources(ctx)),
-		m.generateCommon.Properties.SourceProps.Specials...),
+	io.in = append(getBackendPathsInSourceDir(g, m.getSources(ctx)),
 		getGeneratedFiles(ctx)...)
 	io.out = m.Properties.Out
 	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
@@ -674,9 +679,6 @@ func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBac
 	var sourceList []filePath
 	for _, src := range m.getSources(ctx) {
 		sourceList = append(sourceList, newSourceFilePath(src, ctx, g))
-	}
-	for _, src := range m.generateCommon.Properties.Specials {
-		sourceList = append(sourceList, newSpecialFilePath(src))
 	}
 	for _, src := range getGeneratedFiles(ctx) {
 		sourceList = append(sourceList, newGeneratedFilePath(src))

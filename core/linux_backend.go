@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -252,8 +252,6 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		// Expand args immediately
 		cmd = strings.Replace(cmd, "${args}", strings.Join(props.Post_install_args, " "), -1)
 
-		args["bob_config"] = configFile
-		args["bob_config_json"] = configJSONFile
 		if props.Post_install_tool != nil {
 			args["tool"] = *props.Post_install_tool
 			deps = append(deps, *props.Post_install_tool)

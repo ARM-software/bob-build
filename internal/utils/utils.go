@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -208,13 +208,22 @@ func Reversed(in []string) []string {
 	return out
 }
 
+// `cmd` is the command that will be executed
+// Return true if it contains a reference to the argument expansion `arg`
+func ContainsArg(cmd string, k string) bool {
+	// argument ref can be done as ${arg} or $arg
+	if strings.Contains(cmd, "${"+k+"}") || strings.Contains(cmd, "$"+k) {
+		return true
+	}
+	return false
+}
+
 // cmd is the command that will be executed
 // args contains potential argument that may occur in ${}
 // This function will remove unused arguments from the map
 func StripUnusedArgs(args map[string]string, cmd string) {
 	for k := range args {
-		// argument ref can be done as ${arg} or $arg
-		if !strings.Contains(cmd, "${"+k+"}") && !strings.Contains(cmd, "$"+k) {
+		if !ContainsArg(cmd, k) {
 			delete(args, k)
 		}
 	}

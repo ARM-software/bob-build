@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -160,7 +160,6 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 // Returns all the source files for a C/C++ library. This includes any sources that are generated.
 func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
 	srcs := l.Properties.getSources(ctx)
-	srcs = append(srcs, l.Properties.Build.SourceProps.Specials...)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },

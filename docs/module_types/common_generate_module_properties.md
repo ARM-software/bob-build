@@ -29,6 +29,14 @@ available substitutions are:
 - `${(name)_out}` - the outputs of the `generated_deps` dependency with `name`
 - `${src_dir}` - the path to the project source directory - this will be different
   than the build source directory for Android.
+- `${bob_config}` - the Bob configuration file. When used, a depfile must be
+  generated naming the config file as a dependency to ensure the rule is
+  correctly rerun when the configuration changes.
+- `${bob_config_json}` - the Bob configuration JSON file, intended for use
+  by tools that just need to read configuration values without having to know
+  about the config system. When used, a depfile must be generated naming the
+  config file as a dependency to ensure the rule is correctly rerun when the
+  configuration changes.
 
 The value in `cmd` is executed by the shell. Compound shell
 expressions and expansions can be used, though we recommend keeping

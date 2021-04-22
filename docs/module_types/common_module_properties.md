@@ -368,10 +368,6 @@ are substituted into the command:
 
 - `${tool}` - the tool specified in `bob_module.post_install_tool`.
 - `${out}` - the output file(s) of the current module.
-- `${bob_config}` - the Bob configuration file.
-- `${bob_config_json}` - the Bob configuration JSON file, intended for use
-  by tools that just need to read configuration values without having to
-  know about the config system.
 - `${args}` - arguments from `post_install_args`
 
 Not supported on Android.bp.

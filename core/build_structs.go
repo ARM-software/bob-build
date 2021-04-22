@@ -243,9 +243,6 @@ type SourceProps struct {
 	Srcs []string
 	// The list of source files that should not be included. Use with care.
 	Exclude_srcs []string
-
-	// Sources that we need to treat specially
-	Specials []string `blueprint:"mutated"`
 }
 
 // IncludeDirsProps defines a set of properties for including directories
@@ -270,27 +267,7 @@ func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
-	var special = map[string]string{
-		"${bob_config}":      configFile,
-		"${bob_config_json}": configJSONFile,
-	}
-
-	// Look for special items. Remove from Srcs and add to Specials
-	srcs := []string{}
-	for _, src := range s.Srcs {
-		if value, ok := special[src]; !ok {
-			srcs = append(srcs, src)
-		} else {
-			// Only append if not in Excluded.
-			// Users shouldn't rely on how any special is expanded, so
-			// no need to check the expanded case.
-			if !utils.Contains(s.Exclude_srcs, src) {
-				s.Specials = append(s.Specials, value)
-			}
-		}
-	}
-
-	s.Srcs = utils.PrefixDirs(srcs, prefix)
+	s.Srcs = utils.PrefixDirs(s.Srcs, prefix)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
 
