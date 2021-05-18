@@ -1,0 +1,39 @@
+bob_static_library {
+    name: "libonly_works_on_target",
+    srcs: ["fail_when_FAIL_is_1.c"],
+    host_supported: true,
+    target_supported: true,
+    host: {
+        cflags: ["-DFAIL=1"],
+    },
+    target: {
+        cflags: ["-DFAIL=0"],
+    },
+}
+
+bob_static_library {
+    name: "libuses_target_specific_link",
+    srcs: ["dummy.c"],
+    host_supported: true,
+    target_supported: true,
+    target: {
+        static_libs: ["libonly_works_on_target"],
+    },
+}
+
+bob_binary {
+    name: "bob_test_target_specific_link",
+    srcs: ["main.c"],
+    static_libs: ["libuses_target_specific_link"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}
+
+bob_alias {
+    name: "bob_test_target_specific_static_libs",
+    srcs: [
+        "bob_test_target_specific_link:host",
+        "bob_test_target_specific_link:target",
+    ],
+}

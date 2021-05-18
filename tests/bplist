@@ -38,6 +38,7 @@
 ./shared_libs_toc/build.bp
 ./source_encapsulation/build.bp
 ./static_libs/build.bp
+./target_specific_static_libs/build.bp
 ./templates/build.bp
 ./transform_source/build.bp
 ./version_script/build.bp

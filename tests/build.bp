@@ -90,6 +90,7 @@ bob_alias {
         "bob_test_simple_binary",
         "bob_test_source_encapsulation",
         "bob_test_static_libs",
+        "bob_test_target_specific_static_libs",
         "bob_test_templates",
         "bob_test_transform_source",
         "bob_test_version_script",
