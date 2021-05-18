@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ type generateBinary struct {
 // Verify that the following interfaces are implemented
 var _ generateLibraryInterface = (*generateBinary)(nil)
 var _ singleOutputModule = (*generateBinary)(nil)
+var _ splittable = (*generateBinary)(nil)
 var _ blueprint.Module = (*generateBinary)(nil)
 
 func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {

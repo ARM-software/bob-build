@@ -43,6 +43,9 @@ type splittable interface {
 	// Set the particular variant
 	setVariant(tgtType)
 
+	// Retrieve the module target type variant as set by setVariant
+	getTarget() tgtType
+
 	// Get the properties related to which variants are available
 	getSplittableProps() *SplittableProps
 }
@@ -51,9 +54,6 @@ type splittable interface {
 // for host and target.
 type targetSpecificLibrary interface {
 	splittable
-
-	// Get module target type
-	getTarget() tgtType
 
 	// Get the target specific properties i.e. host:{} or target:{}
 	getTargetSpecific(tgtType) *TargetSpecific
