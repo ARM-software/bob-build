@@ -310,6 +310,7 @@ var _ enableable = (*library)(nil)
 var _ propertyExporter = (*library)(nil)
 var _ matchSourceInterface = (*library)(nil)
 var _ propertyEscapeInterface = (*library)(nil)
+var _ splittable = (*library)(nil)
 var _ aliasable = (*library)(nil)
 
 func (l *library) defaults() []string {

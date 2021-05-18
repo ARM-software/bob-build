@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Arm Limited.
+ * Copyright 2019-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,8 @@ type ExternalLibProps struct {
 	Export_cflags  []string
 	Export_ldflags []string
 	Ldlibs         []string
+
+	TargetType tgtType `blueprint:"mutated"`
 }
 
 type externalLib struct {
@@ -55,7 +57,8 @@ func (m *externalLib) implicitOutputs() []string { return []string{} }
 // Implement the splittable interface so "normal" libraries can depend on external ones.
 func (m *externalLib) supportedVariants() []tgtType         { return []tgtType{tgtTypeHost, tgtTypeTarget} }
 func (m *externalLib) disable()                             {}
-func (m *externalLib) setVariant(tgtType)                   {}
+func (m *externalLib) setVariant(tgt tgtType)               { m.Properties.TargetType = tgt }
+func (m *externalLib) getTarget() tgtType                   { return m.Properties.TargetType }
 func (m *externalLib) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
 // Implement the propertyExporter interface so that external libraries can pass
@@ -69,6 +72,7 @@ func (m *externalLib) exportLdlibs() []string           { return m.Properties.Ld
 func (m *externalLib) exportSharedLibs() []string       { return []string{} }
 
 var _ propertyExporter = (*externalLib)(nil)
+var _ splittable = (*externalLib)(nil)
 
 // External libraries have no actions - they are already built.
 func (m *externalLib) GenerateBuildActions(ctx blueprint.ModuleContext) {}

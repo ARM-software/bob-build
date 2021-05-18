@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ type generateSharedLibrary struct {
 var _ generateLibraryInterface = (*generateSharedLibrary)(nil)
 var _ singleOutputModule = (*generateSharedLibrary)(nil)
 var _ sharedLibProducer = (*generateSharedLibrary)(nil)
+var _ splittable = (*generateSharedLibrary)(nil)
 var _ blueprint.Module = (*generateSharedLibrary)(nil)
 
 func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
