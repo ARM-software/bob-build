@@ -988,7 +988,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 }
 
 type graphMutatorHandler struct {
-	graph graph.Graph
+	graphs map[tgtType]graph.Graph
 }
 
 const (
@@ -1009,7 +1009,11 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 
 	mainModuleName := mainModule.Name()
 
-	handler.graph.AddNode(mainModuleName)
+	if sp, ok := mainModule.(splittable); ok {
+		if sp.getTarget() != "" {
+			handler.graphs[sp.getTarget()].AddNode(mainModuleName)
+		}
+	}
 
 	var mainBuild *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
@@ -1018,18 +1022,25 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 		return // ignore not a build
 	}
 
+	// This mutator is run after host/target splitting, so TargetType should have been set.
+	if !(mainBuild.TargetType == tgtTypeTarget || mainBuild.TargetType == tgtTypeHost) {
+		panic(fmt.Errorf("Cannot process dependencies on module '%s' with target type '%s'", mainModuleName, mainBuild.TargetType))
+	}
+
+	g := handler.graphs[mainBuild.TargetType]
+
 	for _, lib := range mainBuild.Static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
+		if _, err := g.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
 			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
 		}
-		handler.graph.SetEdgeColor(mainModuleName, lib, "blue")
+		g.SetEdgeColor(mainModuleName, lib, "blue")
 	}
 
 	for _, lib := range mainBuild.Whole_static_libs {
-		if _, err := handler.graph.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
+		if _, err := g.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
 			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
 		}
-		handler.graph.SetEdgeColor(mainModuleName, lib, "red")
+		g.SetEdgeColor(mainModuleName, lib, "red")
 	}
 
 	temporaryPaths := map[string][]string{} // For preserving order in declaration
@@ -1037,21 +1048,21 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 	for i, previous := range mainBuild.Static_libs {
 		for j := i + 1; j < len(mainBuild.Static_libs); j++ {
 			lib := mainBuild.Static_libs[j]
-			if !handler.graph.IsReachable(lib, previous) {
-				if handler.graph.AddEdge(previous, lib) {
+			if !g.IsReachable(lib, previous) {
+				if g.AddEdge(previous, lib) {
 					temporaryPaths[previous] = append(temporaryPaths[previous], lib)
-					handler.graph.SetEdgeColor(previous, lib, "pink")
+					g.SetEdgeColor(previous, lib, "pink")
 				}
 			}
 		}
 	}
 
-	sub := graph.GetSubgraph(handler.graph, mainModuleName)
+	sub := graph.GetSubgraph(g, mainModuleName)
 
 	// Remove temporary path
 	for key, list := range temporaryPaths {
 		for _, value := range list {
-			handler.graph.DeleteEdge(key, value)
+			g.DeleteEdge(key, value)
 		}
 	}
 

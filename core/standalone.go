@@ -190,7 +190,12 @@ func Main() {
 	} else {
 
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
-		dependencyGraphHandler := graphMutatorHandler{graph.NewGraph("All")}
+		dependencyGraphHandler := graphMutatorHandler{
+			map[tgtType]graph.Graph{
+				tgtTypeHost:   graph.NewGraph("All"),
+				tgtTypeTarget: graph.NewGraph("All"),
+			},
+		}
 		ctx.RegisterBottomUpMutator("sort_resolved_static_libs",
 			dependencyGraphHandler.ResolveDependencySortMutator) // This can't be parallel
 		ctx.RegisterTopDownMutator("find_required_modules",
