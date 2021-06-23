@@ -26,8 +26,10 @@ config TARGET_CLANG_PREFIX
 	default "prebuilts/clang/host/linux-x86/clang-4691093/bin/" if ANDROID_PLATFORM_VERSION = 9 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # pie-release
 	default "prebuilts/clang/host/linux-x86/clang-r353983c/bin/" if ANDROID_PLATFORM_VERSION = 10 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # android-10-release
 	default "prebuilts/clang/host/linux-x86/clang-r383902b/bin/" if ANDROID_PLATFORM_VERSION = 11 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE) # android-11-release
-	default "prebuilts/clang/host/linux-x86/clang-r407598b/bin/" if ANDROID_PLATFORM_VERSION > 11 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE)
+	default "prebuilts/clang/host/linux-x86/clang-r416183b1/bin/" if ANDROID_PLATFORM_VERSION > 11 && (BUILDER_ANDROID_BP || BUILDER_ANDROID_MAKE)
 	default ""
+	help
+	  This is typically the value of ClangDefaultVersion declared in <aosp>/soong/cc/config/global.go
 
 config TARGET_CLANG_CC_BINARY
 	string "Target Clang C compiler binary"
