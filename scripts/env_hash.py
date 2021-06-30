@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,9 +46,19 @@ def hash_env():
 
         # bob-build
         "BOB_ALWAYS_LINK_SHARED_LIBS",
+        "BOB_BOOTSTRAP_VERSION",
+        "BOB_CONFIG_OPTS",
+        "BOB_CONFIG_PLUGIN_OPTS",
         "BOB_CPUPROFILE",
+        "BOB_DIR",
         "BOB_LINK_PARALLELISM",
         "BOB_VERSION",
+        "BUILDDIR",
+        "CONFIG_FILE",
+        "CONFIG_JSON",
+        "SRCDIR",
+        "TOPNAME",
+        "WORKDIR",
 
         # go
         "GO386",
