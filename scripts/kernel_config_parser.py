@@ -59,6 +59,21 @@ def option_enabled(kdir, option):
     return get_value(kdir, option) == 'y'
 
 
+def check_arch_kconfig(kdir, arch):
+    """Check if there is a Kconfig file inside arch directory"""
+    if os.path.isfile(os.path.join(kdir, "arch", arch, "Kconfig")):
+        return True
+
+    # In case kernel output directory is different than its source
+    # directory (built with 'make O=output/dir') there is a link
+    # 'source' created which points to kernel sources.
+    if (os.path.islink(os.path.join(kdir, "source")) and
+            os.path.isfile(os.path.join(kdir, "source/arch", arch, "Kconfig"))):
+        return True
+
+    return False
+
+
 def get_arch(kdir):
     arch_dir = os.path.join(kdir, "arch")
     if not os.path.exists(arch_dir):
@@ -67,7 +82,7 @@ def get_arch(kdir):
 
     # Each directory in $KDIR/arch has a config option with the same name.
     for arch in os.listdir(arch_dir):
-        if not os.path.isfile(os.path.join(arch_dir, arch, "Kconfig")):
+        if not check_arch_kconfig(kdir, arch):
             continue
 
         if option_enabled(kdir, "CONFIG_" + arch.upper()):
