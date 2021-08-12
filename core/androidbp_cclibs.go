@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/ccflags"
@@ -147,6 +148,23 @@ func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
 	g.AddOptionalBool("enable_profile_use", props.Pgo.Enable_profile_use)
 
 	g.AddStringList("cflags", props.Pgo.Cflags)
+}
+
+func addMTEProps(m bpwriter.Module, props AndroidMTEProps) {
+	memtagHeap := proptools.Bool(props.Mte.Memtag_heap)
+	diagMemtagHeap := proptools.Bool(props.Mte.Diag_memtag_heap)
+
+	if !memtagHeap {
+		return
+	}
+
+	g := m.NewGroup("sanitize")
+	g.AddBool("memtag_heap", true)
+
+	if diagMemtagHeap {
+		diag := g.NewGroup("diag")
+		diag.AddBool("memtag_heap", true)
+	}
 }
 
 func addRequiredModules(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
@@ -280,6 +298,8 @@ func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
 			g.NewGroup("lib64").AddString("relative_install_path", installRel+"64")
 		}
 	}
+
+	addMTEProps(m, l.Properties.Build.AndroidMTEProps)
 }
 
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {

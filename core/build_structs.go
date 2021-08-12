@@ -151,6 +151,14 @@ type AndroidPGOProps struct {
 	}
 }
 
+// AndroidMTEProps defines properties used to enable the Arm Memory Tagging Extension
+type AndroidMTEProps struct {
+	Mte struct {
+		Memtag_heap      *bool
+		Diag_memtag_heap *bool
+	}
+}
+
 func getBobScriptsDir() string {
 	return filepath.Join(getBobDir(), "scripts")
 }
