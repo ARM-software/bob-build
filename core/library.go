@@ -162,6 +162,7 @@ type BuildProps struct {
 
 	StripProps
 	AndroidPGOProps
+	AndroidMTEProps
 
 	TargetType tgtType `blueprint:"mutated"`
 }
@@ -843,10 +844,14 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 	} else if sl, ok := m.(*sharedLibrary); ok {
 		props := sl.Properties
 		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
+		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
+		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
 	} else if sl, ok := m.(*staticLibrary); ok {
 		props := sl.Properties
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 		sl.checkField(props.Version_script == nil, "version_script")
+		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
+		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
 	}
 }
 
