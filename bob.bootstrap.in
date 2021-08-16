@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2019, 2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 # to `ninja`. Do this in the bootstrap template so that it can be easily
 # accessed from multiple places - most scripts will already need to source this
 # file.
-[[ -z $NINJA ]] && export NINJA=ninja
+[[ -z "${NINJA-}" ]] && export NINJA=ninja
 
 export WORKDIR="@@WorkDir@@"
 export SRCDIR="@@SrcDir@@"
