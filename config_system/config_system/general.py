@@ -354,6 +354,9 @@ def set_initial_values():
     for k in config_list:
         update_defaults(k)
 
+    for k in config_list:
+        update_bob_ignore(k)
+
 
 def update_choice_default(c):
     """Update a choice group to select the best default"""
@@ -406,6 +409,17 @@ def update_choice_default(c):
 
     if selection != choice_group.get("selected"):
         set_config_internal(selection, True)
+
+
+def update_bob_ignore(k):
+    """Checks whether an option should be ignored by bob"""
+    c = data.get_config(k)
+
+    if 'bob_ignore' not in c:
+        c['bob_ignore'] = 'n'
+
+    if c['bob_ignore'] not in ['y', 'n']:
+        logger.error("bob_ignore for %s needs to be boolean ('y' or 'n')" % k)
 
 
 def update_defaults(k):

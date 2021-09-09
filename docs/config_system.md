@@ -113,6 +113,7 @@ config OPTION_NAME
 	depends on (A && B) || C
 	default n|y|"hello"|1234 if D || E
 	default n
+	bob_ignore n|y
 	select ANOTHER_OPTION
 	warning "warning text when option enabled"
 	help
@@ -187,6 +188,52 @@ config OS_NAME
 	default "Android" if ANDROID
 	default "Linux" if LINUX
 	default "Unknown"
+```
+
+#### Ignore configuration options by bob
+
+There is a possibility to mark a config option as `bob_ignore y` to point
+Bob that it should ignore such option while gathering parameters for templates
+and features. This will prevent from accidentally exposing options by `cflags`.
+
+```
+config PLATFORM_VERBOSE_MODE
+	bool "Enable verbose mode"
+	default y
+	bob_ignore y
+
+config PLATFORM_VERBOSE_TYPE
+	string "verbose mode type"
+	default "all"
+	bob_ignore y
+```
+
+Options are stored in `.bob.config.json` as:
+```
+{
+	"platform_verbose_mode" : {
+		"ignore" : true,
+		"value" : true
+	},
+	"platform_verbose_type" : {
+		"ignore" : true,
+		"value" : "all"
+	}
+}
+```
+
+This way Bob will not be able to recognize at all of those options:
+
+```
+bob_defaults {
+	...
+	platform_verbose_mode: {
+        cflags: [
+			"-DVERBOSE_MODE=1",
+			"-DVERBOSE_TYPE={{.platform_verbose_type}}",
+		],
+	},
+}
 ```
 
 #### Negated values

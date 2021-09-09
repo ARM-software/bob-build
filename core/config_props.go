@@ -164,21 +164,36 @@ func (properties *configProperties) LoadConfig(filename string) error {
 	// Decode numbers in JSON as json.Numbers instead of float64.
 	// This is actually a string, which is what we want.
 	d.UseNumber()
-	err = d.Decode(&properties.properties)
+
+	properties.properties = make(map[string]interface{})
+	properties.stringMap = make(map[string]string)
+	properties.features = make(map[string]bool)
+
+	var configData map[string]interface{}
+	err = d.Decode(&configData)
 	if err != nil {
 		return fmt.Errorf("Unable to decode json configuration: %s", err.Error())
 	}
 
-	properties.stringMap = make(map[string]string)
-	properties.features = make(map[string]bool)
-	for key, val := range properties.properties {
-		// Create a mapping of properties to values that will be used
-		// by templates
-		properties.stringMap[key] = convertToString(val)
+	for key, val := range configData {
 
-		// Identify features and whether they are enabled
-		if v, ok := boolValue(val); ok {
-			properties.features[key] = v
+		// get configuration option as a map with interface{}
+		configMap := val.(map[string]interface{})
+
+		// Identify that configuration is ignored or not
+		if ignore, ok := boolValue(configMap["ignore"]); ok {
+			if !ignore {
+				properties.properties[key] = configMap["value"]
+
+				// Create a mapping of properties to values that will be used
+				// by templates
+				properties.stringMap[key] = convertToString(configMap["value"])
+
+				// Identify features and whether they are enabled
+				if v, ok := boolValue(configMap["value"]); ok {
+					properties.features[key] = v
+				}
+			}
 		}
 	}
 
