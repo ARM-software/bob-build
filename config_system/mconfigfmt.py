@@ -41,7 +41,7 @@ def perform_formatting(file_path, output):
 # Sets grouping tokens into types
 set_config_props = {"BOOL", "INT", "STRING", "PROMPT",
                     "DEFAULT", "DEPENDS", "SELECT",
-                    "VISIBLE", "HELP", "WARNING"}
+                    "VISIBLE", "HELP", "WARNING", "BOB_IGNORE"}
 set_binary_ops = {"ANDAND", "OROR",
                   "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
                   "PLUS", "MINUS"}

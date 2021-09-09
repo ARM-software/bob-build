@@ -285,6 +285,7 @@ def p_config_options(p):
     """config_options : config_options config_type
                       | config_options config_select
                       | config_options config_default
+                      | config_options config_bob_ignore
                       | config_options config_depends
                       | config_options config_help
                       | config_options config_prompt
@@ -324,6 +325,13 @@ def p_config_default(p):
     p[0] = {"default": p[2]}
     if len(p) > 4:
         p[0] = {"default_cond": [{"cond": p[4], "expr": p[2]}]}
+
+
+def p_config_bob_ignore(p):
+    """config_bob_ignore : BOB_IGNORE YES EOL
+                         | BOB_IGNORE NO EOL
+    """
+    p[0] = {"bob_ignore" : p[2]}
 
 
 def p_config_depends(p):

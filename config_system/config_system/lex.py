@@ -27,6 +27,7 @@ class TokenizeError(Exception):
 
 tokens = (
     "ANDAND", "OROR", "NOT",
+    "BOB_IGNORE",
     "BOOL",
     "CHOICE", "ENDCHOICE",
     "CONFIG",
@@ -62,6 +63,7 @@ states = (
 )
 
 commands = (
+    "bob_ignore",
     "bool",
     "choice",
     "config",
