@@ -44,7 +44,7 @@ def get_platform_version():
 
     if platform_version.isalpha():
         # aosp master may have a single letter for PLATFORM_VERSION eg. 'Q' for Android 10
-        platform_version = ord(platform_version) - 71
+        platform_version = ord(platform_version[0]) - 71
     return int(platform_version)
 
 
