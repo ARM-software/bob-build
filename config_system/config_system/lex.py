@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@ class TokenizeError(Exception):
 
 tokens = (
     "ANDAND", "OROR", "NOT",
+    "BOB_IGNORE",
     "BOOL",
     "CHOICE", "ENDCHOICE",
     "CONFIG",
@@ -62,6 +63,7 @@ states = (
 )
 
 commands = (
+    "bob_ignore",
     "bool",
     "choice",
     "config",

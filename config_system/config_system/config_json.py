@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2019, 2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,14 +32,16 @@ def config_to_json():
         datatype = c["datatype"]
         value = c["value"]
 
-        if datatype == "bool":
-            properties[key] = value
-        elif datatype == "int":
-            properties[key] = int(value)
-        elif datatype == "string":
-            properties[key] = value
-        else:
+        if datatype not in ["bool", "int", "string"]:
             logger.error("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
+
+        if datatype == "int":
+            value = int(value)
+
+        properties[key] = {
+            "ignore": c["bob_ignore"] == 'y',
+            "value": value
+        }
 
     return properties
 
