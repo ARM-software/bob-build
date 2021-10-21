@@ -1,4 +1,4 @@
-#include "lib.h"
+int bob_test_implicit_out();
 
 int main() {
 	return bob_test_implicit_out() == 88 ? 0 : 1;

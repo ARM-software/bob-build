@@ -17,31 +17,39 @@
 
 // Check implicit output is compiled by bob binary (with explicit output as well)
 bob_generate_source {
-    name: "implicit_out_generator",
+    name: "implicit_source_generator",
 
     srcs: ["input.in"],
     out: ["main.c"],
-    implicit_outs: [
-        "lib.c",
-        "lib.h",
-    ],
+    implicit_outs: ["lib.c"],
 
+    tool: "generate.py",
+    cmd: "python ${tool} ${in} --source -o=${out}",
+}
+
+bob_generate_source {
+    name: "implicit_header_generator",
+
+    srcs: ["input.in"],
+    out: ["main.c"],
+    implicit_outs: ["lib.h"],
     export_gen_include_dirs: ["."],
 
     tool: "generate.py",
-    cmd: "python ${tool} ${in} -o=${out}",
+    cmd: "python ${tool} ${in} --header -o=${out}",
 }
 
 bob_binary {
     name: "build_implicit_out",
-    generated_sources: ["implicit_out_generator"],
+    generated_headers: ["implicit_header_generator"],
+    generated_sources: ["implicit_source_generator"],
 }
 
 // Check implicit header is found by bob binary and touching input file rebuilds binary
 bob_binary {
     name: "include_implicit_header",
     srcs: ["main.c"],
-    generated_headers: ["implicit_out_generator"],
+    generated_headers: ["implicit_header_generator"],
 }
 
 bob_alias {

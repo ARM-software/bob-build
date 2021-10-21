@@ -22,17 +22,14 @@ import os
 import shutil
 
 SOURCE_CONTENT = """
-#include "lib.h"
-
 int bob_test_implicit_out() {
-    return A;
+    return 88;
 }
 """
 
 HEADER_CONTENT = """
 #define A 88
 
-int bob_test_implicit_out();
 """
 
 
@@ -40,6 +37,10 @@ def main():
     parser = argparse.ArgumentParser(description="Test generator.")
     parser.add_argument("input", help="Input files")
     parser.add_argument("-o", "--output", help="Output file")
+    parser.add_argument("--header", action="store_true",
+                        help="Generate implicit header")
+    parser.add_argument("--source", action="store_true",
+                        help="Generate implicit source")
 
     implicit = "lib"
     args = parser.parse_args()
@@ -54,13 +55,15 @@ def main():
 
     path = os.path.join(os.path.dirname(out), implicit)
 
-    # create lib.h
-    with open(path + ".h", "w") as hf:
-        hf.write(HEADER_CONTENT)
+    if args.header:
+        # create lib.h
+        with open(path + ".h", "w") as hf:
+            hf.write(HEADER_CONTENT)
 
-    # create lib.c
-    with open(path + ".c", "w") as cf:
-        cf.write(SOURCE_CONTENT)
+    if args.source:
+        # create lib.c
+        with open(path + ".c", "w") as cf:
+            cf.write(SOURCE_CONTENT)
 
 
 if __name__ == "__main__":

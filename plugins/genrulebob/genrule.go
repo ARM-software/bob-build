@@ -208,25 +208,12 @@ func (m *genrulebobCommon) getEncapsulatedOuts() android.Paths {
 	return m.encapsulatedOuts
 }
 
-func (m *genrulebobCommon) filterAllOutputs(predicate func(string) bool) (ret android.Paths) {
+func (m *genrulebobCommon) allOutputs() (ret android.WritablePaths) {
 	for _, io := range m.inouts {
-		for _, p := range io.out {
-			if predicate(p.String()) {
-				ret = append(ret, p)
-			}
-		}
-		for _, p := range io.implicitOuts {
-			if predicate(p.String()) {
-				ret = append(ret, p)
-			}
-		}
+		ret = append(ret, io.out...)
+		ret = append(ret, io.implicitOuts...)
 	}
-	// filter also outputs of encapsulated modules
-	for _, p := range m.encapsulatedOuts {
-		if predicate(p.String()) {
-			ret = append(ret, p)
-		}
-	}
+	ret = append(ret, m.encapsulateOuts...)
 	return
 }
 
@@ -253,7 +240,7 @@ func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.W
 // genrule.SourceFileGenerator interface, which allows these modules to be used
 // to generate inputs for cc_library and cc_binary modules.
 func (m *genrulebobCommon) GeneratedSourceFiles() android.Paths {
-	return m.filterAllOutputs(utils.IsCompilableSource)
+	return m.allOutputs().Paths()
 }
 
 func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
@@ -261,7 +248,7 @@ func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 }
 
 func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
-	return m.filterAllOutputs(utils.IsNotCompilableSource)
+	return m.allOutputs().Paths()
 }
 
 // Srcs implements the android.SourceFileProducer interface, which allows
@@ -376,9 +363,6 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 		Restat:  true,
 	}
 
-	args["headers_generated"] = ""
-	args["srcs_generated"] = ""
-
 	if m.Properties.Rsp_content != nil {
 		args["rspfile"] = ""
 		ruleparams.Rspfile = "${rspfile}"
@@ -402,8 +386,6 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 		if m.Properties.Rsp_content != nil {
 			args["rspfile"] = io.rspfile.String()
 		}
-		args["headers_generated"] = strings.Join(utils.Filter(utils.IsHeader, io.out.Strings()), " ")
-		args["srcs_generated"] = strings.Join(utils.Filter(utils.IsNotHeader, io.out.Strings()), " ")
 
 		ctx.Build(pctx,
 			android.BuildParams{
