@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,20 +27,46 @@ def basename_no_ext(fname):
 def parse_args():
     ap = argparse.ArgumentParser(description='Test generator.')
     ap.add_argument("--in", dest="input", action="store", help="Input file", required=True)
-    ap.add_argument("--gen-src", action="store", help="Source file to generate", required=True)
+    ap.add_argument("--gen", action="store", nargs="+", type=str, default=[],
+                    help="Files to generate", required=True)
     ap.add_argument("--src-template", type=argparse.FileType("rt"),
                     help="Template file to use for source file generation")
 
-    header = ap.add_mutually_exclusive_group(required=True)
-    header.add_argument("--gen-header", action="store", help="Header to generate")
-    header.add_argument("--gen-implicit-header", action="store_true",
-                        help="Generate a header alongside the generated source")
+    ap.add_argument("--gen-implicit-header", action="store_true",
+                    help="Generate a header alongside the generated source")
 
     args = ap.parse_args()
 
+    args.gen_src = None
+    args.gen_header = None
+
+    for fname in args.gen:
+        ext = os.path.splitext(fname)[1].lower()
+        if ext in (".c", ".cc", ".cpp", ".cxx"):
+            if not args.gen_src:
+                args.gen_src = fname
+            else:
+                ap.error("Multiple source files specified: {}".format(args.gen))
+        elif ext in (".h", ".hh", ".hpp", ".hxx"):
+            if not args.gen_header:
+                args.gen_header = fname
+            else:
+                ap.error("Multiple header files specified: {}".format(args.gen))
+        else:
+            ap.error("Unknown output file type: {}".format(ext))
+
+    if not args.gen_src:
+        ap.error("No source file to generate specified")
+
     if args.gen_implicit_header:
+        # We might have filled in the generated header path already if ${out}
+        # contained it, but it can be overwritten by the implicit header path
+        # if desired.
         args.gen_header = os.path.join(os.path.dirname(args.gen_src),
                                        basename_no_ext(args.gen_src) + ".h")
+
+    if not args.gen_header:
+        ap.error("No header file to generate specified")
 
     # Do some basic checks to ensure the transform source regexp replacement
     # worked as expected.

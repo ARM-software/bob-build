@@ -5,7 +5,7 @@ bob_generate_source {
         "single.h",
     ],
     tool: "generate_trivial_function.py",
-    cmd: "${tool} testfn ${srcs_generated} ${headers_generated}",
+    cmd: "${tool} testfn ${out}",
     build_by_default: true,
 }
 
@@ -28,5 +28,5 @@ bob_alias {
     srcs: [
         "bob_test_generate_source_single",
         "bob_test_module_dep_outs",
-    ]
+    ],
 }

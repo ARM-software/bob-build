@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-# Copyright 2019 Arm Limited.
+# Copyright 2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,20 @@
 # limitations under the License.
 
 
-gen_dir="$1"
+import argparse
+import os
 
-c_src="$2"
-h_src="$3"
 
-mkdir -p ${gen_dir}/foo/src
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", type=argparse.FileType("wt"), required=True)
+    ap.add_argument("input", nargs="+", type=argparse.FileType("rt"))
+    args = ap.parse_args()
 
-cat ${c_src} > ${gen_dir}/foo/src/foo.c
-cat ${h_src} > ${gen_dir}/foo/foo.h
+    for i in args.input:
+        if os.path.splitext(i.name)[1].lower() in (".c", ".cpp", ".cxx"):
+            args.out.write(i.read())
+
+
+if __name__ == "__main__":
+    main()

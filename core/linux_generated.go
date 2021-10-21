@@ -19,7 +19,6 @@ package core
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -89,15 +88,6 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 		if inout.rspfile != "" {
 			args["rspfile"] = inout.rspfile
-		}
-
-		if _, ok := args["headers_generated"]; ok {
-			headers := utils.Filter(utils.IsHeader, inout.out)
-			args["headers_generated"] = strings.Join(headers, " ")
-		}
-		if _, ok := args["srcs_generated"]; ok {
-			sources := utils.Filter(utils.IsNotHeader, inout.out)
-			args["srcs_generated"] = strings.Join(sources, " ")
 		}
 
 		buildparams := blueprint.BuildParams{

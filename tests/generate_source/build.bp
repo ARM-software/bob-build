@@ -182,28 +182,6 @@ bob_binary {
 }
 
 bob_generate_source {
-    name: "gen_sources_and_headers",
-    srcs: [
-        "lib.c.txt",
-        "lib.h.txt",
-    ],
-    out: [
-        "foo/src/foo.c",
-        "foo/foo.h",
-    ],
-    export_gen_include_dirs: ["."],
-    tool: "gen.sh",
-    cmd: "${tool} ${gen_dir} ${in}",
-}
-
-bob_binary {
-    name: "bin_gen_sources_and_headers",
-    generated_headers: ["gen_sources_and_headers"],
-    generated_sources: ["gen_sources_and_headers"],
-    srcs: ["main.c"],
-}
-
-bob_generate_source {
     name: "gen_source_depfile",
     srcs: ["depgen1.in"],
     out: ["output.txt"],
@@ -246,7 +224,10 @@ bob_generate_source {
 bob_generate_source {
     name: "gen_source_globbed_exclude_implicit_sources",
     implicit_srcs: ["*.src"],
-    exclude_implicit_srcs: ["an.implicit.src", "bn.src"],
+    exclude_implicit_srcs: [
+        "an.implicit.src",
+        "bn.src",
+    ],
     out: ["validate_globbed_exclude_implicit_dependency.c"],
     tool: "join_srcs.py",
     cmd: "python ${tool} --src-dir ${module_dir} --use-c --out ${out}",
@@ -287,7 +268,6 @@ bob_alias {
     srcs: [
         "validate_link_generate_sources",
         "validate_install_generate_sources",
-        "bin_gen_sources_and_headers",
         "gen_source_depfile",
         "gen_source_depfile_with_implicit_outs",
         "use_miscellaneous_generated_source_tests",

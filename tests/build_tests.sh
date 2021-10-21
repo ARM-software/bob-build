@@ -214,11 +214,8 @@ UPDATE=(${build_dir}/gen/generate_source_single/single.cpp
 check_dep_updated "generated sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources tool update
-SRC=tests/generate_source/gen.sh
-UPDATE=(${build_dir}/gen/gen_sources_and_headers/foo/src/foo.c
-        ${build_dir}/gen/gen_sources_and_headers/foo/foo.h
-        ${build_dir}/gen/gen_sources_and_headers/foo/src/foo.c
-        ${build_dir}/target/executable/bin_gen_sources_and_headers)
+SRC=tests/generate_source/gen_with_dep.py
+UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
 check_dep_updated "generated source tool" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources host_bin update
