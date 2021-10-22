@@ -312,9 +312,6 @@ Use `generated_deps` when you only want to use certain outputs from the
 earlier generator. The command(s) have access to the output directory
 of the earlier generator.
 
-Use `encapsulates` to make one generator wrap all the output of a set
-of other generators.
-
 The following example uses `generated_sources` to pass a generated source
 file through a `bob_transform_source` as well.
 
@@ -480,20 +477,17 @@ bob_generate_source {
         "${depfile}",
     ],
     cmd: "tblgen ${args} -o ${out} ${in}",
-
-    // Pure encapsulation (no cmd or output file) is not currently supported.
-    // Make this module encapsulate the others.
-    encapsulates: [
-        "backend_emitter",
-        "backend_registers",
-        "backend_instructions",
-    ],
 }
 
 bob_shared_library {
     name: "libbackend",
     srcs: ["src/backend.cpp"],
-    generated_headers: ["backend_interface"],
+    generated_headers: [
+        "backend_emitter",
+        "backend_instructions",
+        "backend_interface",
+        "backend_registers",
+    ],
 }
 ```
 

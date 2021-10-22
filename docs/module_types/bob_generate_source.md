@@ -47,7 +47,6 @@ bob_generate_source {
     console: true,
 
     export_gen_include_dirs: ["."],
-    encapsulates: ["bob_generate_source.name"],
 
     flag_defaults: ["bob_default.name"],
 

@@ -89,12 +89,6 @@ Additional include paths to add for modules that use `generated_headers`. This
 will be defined relative to the module-specific build directory.
 
 ----
-### **bob_generated.encapsulates** (optional)
-A list of source modules that this bob_generated_source will encapsulate.
-When this module is used with generated_headers, the named modules' export_gen_include_dirs will be forwarded.
-When this module is used with generated_sources, the named modules' outputs will be supplied as sources.
-
-----
 ### **bob_generated.flag_defaults** (optional)
 Generated sources may wish to access the build flags being used for "normal"
 library or executable modules. `flag_defaults` should contain the name of a

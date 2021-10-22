@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
  */
 
 bob_generate_source {
-    name: "encapsulated_generated_header",
+    name: "generated_header_single",
     out: ["h2.h"],
     export_gen_include_dirs: ["."],
     cmd: "echo '#define H2 2' > ${out}",
@@ -27,13 +27,15 @@ bob_generate_source {
     out: ["h1.h"],
     cmd: "echo '#define H1 1' > ${out}",
     export_gen_include_dirs: ["."],
-    encapsulates: ["encapsulated_generated_header"],
 }
 
 bob_static_library {
     name: "public_interface_uses_generated_headers",
     srcs: ["null.c"],
-    export_generated_headers: ["generated_header"],
+    export_generated_headers: [
+        "generated_header",
+        "generated_header_single"
+    ],
 }
 
 /* Test the "basic" case - a binary using a library which exports some
@@ -42,10 +44,8 @@ bob_static_library {
  *                   uses_partially_generated_library
  *                                 |                      (static_libs)
  *               public_interface_uses_generated_headers
- *                                 |                      (export_generated_headers)
- *                          generated_header
- *                                 |                      (encapsulates)
- *                   encapsulated_generated_header
+ *                       /                    \           (export_generated_headers)
+ *                generated_header     generated_header_single
  */
 
 bob_binary {
@@ -62,10 +62,8 @@ bob_binary {
  *                reexports_partially_generated_library
  *                                 |                      (reexport_libs)
  *               public_interface_uses_generated_headers
- *                                 |                      (export_generated_headers)
- *                          generated_header
- *                                 |                      (encapsulates)
- *                   encapsulated_generated_header
+ *                       /                    \           (export_generated_headers)
+ *                generated_header     generated_header_single
  */
 
 bob_static_library {
@@ -88,8 +86,6 @@ bob_binary {
  *                   uses_private_generated_headers
  *                                 |                      (generated_headers)
  *                          generated_header
- *                                 |                      (encapsulates)
- *                   encapsulated_generated_header
  */
 
 bob_static_library {

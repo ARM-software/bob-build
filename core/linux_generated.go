@@ -45,7 +45,6 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
 	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
-	m.encapsulatedOuts = getGeneratedEncapsulatedFiles(ctx)
 
 	cmd, args, implicits, hostTarget := m.getArgs(ctx)
 

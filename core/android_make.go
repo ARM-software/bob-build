@@ -752,8 +752,6 @@ func (g *androidMkGenerator) generateCommonActions(sb *strings.Builder, m *gener
 	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
 	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
-	m.encapsulatedMods = getGeneratedEncapsulatedModules(ctx)
-	m.encapsulatedOuts = getGeneratedEncapsulatedFiles(ctx)
 
 	sb.WriteString("##########################\ninclude $(CLEAR_VARS)\n\n")
 
