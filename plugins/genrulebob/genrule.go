@@ -92,7 +92,6 @@ type genruleInterface interface {
 	outputs() android.WritablePaths
 	implicitOutputs() android.WritablePaths
 	outputPath() android.Path
-	getEncapsulatedOuts() android.Paths
 }
 
 type genrulebobCommon struct {
@@ -102,7 +101,6 @@ type genrulebobCommon struct {
 
 	genDir               android.Path
 	exportGenIncludeDirs android.Paths
-	encapsulatedOuts     android.Paths
 	inouts               []soongInout
 	installedOuts        []android.InstallPath
 }
@@ -132,10 +130,6 @@ type generatedDepTagType struct {
 	blueprint.BaseDependencyTag
 }
 
-type encapsulatesTagType struct {
-	blueprint.BaseDependencyTag
-}
-
 type hostToolBinTagType struct {
 	blueprint.BaseDependencyTag
 }
@@ -153,7 +147,6 @@ var (
 
 	generatedSourceTag generatedSourceTagType
 	generatedDepTag    generatedDepTagType
-	encapsulatesTag    encapsulatesTagType
 	hostToolBinTag     hostToolBinTagType
 )
 
@@ -204,16 +197,11 @@ func (m *genrulebobCommon) implicitOutputs() (ret android.WritablePaths) {
 	return
 }
 
-func (m *genrulebobCommon) getEncapsulatedOuts() android.Paths {
-	return m.encapsulatedOuts
-}
-
-func (m *genrulebobCommon) allOutputs() (ret android.Paths) {
+func (m *genrulebobCommon) allOutputs() (ret android.WritablePaths) {
 	for _, io := range m.inouts {
-		ret = append(ret, io.out.Paths()...)
-		ret = append(ret, io.implicitOuts.Paths()...)
+		ret = append(ret, io.out...)
+		ret = append(ret, io.implicitOuts...)
 	}
-	ret = append(ret, m.encapsulatedOuts...)
 	return
 }
 
@@ -240,7 +228,7 @@ func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.W
 // genrule.SourceFileGenerator interface, which allows these modules to be used
 // to generate inputs for cc_library and cc_binary modules.
 func (m *genrulebobCommon) GeneratedSourceFiles() android.Paths {
-	return m.allOutputs()
+	return m.allOutputs().Paths()
 }
 
 func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
@@ -248,7 +236,7 @@ func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 }
 
 func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
-	return m.allOutputs()
+	return m.allOutputs().Paths()
 }
 
 // Srcs implements the android.SourceFileProducer interface, which allows
@@ -272,9 +260,6 @@ func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
 	// will error when multiple variants are present.
 	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Generated_deps...)
 	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Generated_sources...)
-	// We can only encapsulate other generated/transformed source modules,
-	// so use the normal `AddDependency` function for these.
-	mctx.AddDependency(mctx.Module(), encapsulatesTag, m.Properties.Encapsulates...)
 }
 
 func (m *genrulebobCommon) getHostBin(ctx android.ModuleContext) android.OptionalPath {
@@ -323,21 +308,12 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 		if gdep, ok := dep.(genruleInterface); ok {
 			dependents = append(dependents, gdep.outputs().Paths()...)
 			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
-			args[varName+"_out"] = utils.Join(gdep.outputs().Strings(), gdep.getEncapsulatedOuts().Strings())
+			args[varName+"_out"] = utils.Join(gdep.outputs().Strings())
 
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
 			args[varName+"_out"] = out.String()
-		}
-	})
-
-	// add outputs of encapsulated modules
-	ctx.VisitDirectDepsWithTag(encapsulatesTag, func(dep android.Module) {
-		if gdep, ok := dep.(genruleInterface); ok {
-			dependents = append(dependents, gdep.outputs().Paths()...)
-			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
-			dependents = append(dependents, gdep.getEncapsulatedOuts()...)
 		}
 	})
 
@@ -349,7 +325,6 @@ func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []andr
 		if gdep, ok := dep.(genruleInterface); ok {
 			srcs = append(srcs, gdep.outputs().Paths()...)
 			srcs = append(srcs, gdep.implicitOutputs().Paths()...)
-			srcs = append(srcs, gdep.getEncapsulatedOuts()...)
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			srcs = append(srcs, ccmod.OutputFile().Path())
 		}
@@ -418,9 +393,6 @@ func (m *genrulebobCommon) calcExportGenIncludeDirs(mctx android.ModuleContext) 
 
 	// Add include dirs of our all dependencies
 	mctx.WalkDeps(func(child android.Module, parent android.Module) bool {
-		if mctx.OtherModuleDependencyTag(child) != encapsulatesTag {
-			return false
-		}
 		if cmod, ok := child.(genruleInterface); ok {
 			for _, dir := range cmod.GeneratedHeaderDirs() {
 				allIncludeDirs = append(allIncludeDirs, dir)
@@ -431,19 +403,6 @@ func (m *genrulebobCommon) calcExportGenIncludeDirs(mctx android.ModuleContext) 
 
 	// Make unique items as for recursive passes it may contain redundant ones
 	return android.FirstUniquePaths(allIncludeDirs)
-}
-
-func (m *genrulebobCommon) calcEncapsulatedOuts(mctx android.ModuleContext) (encapsulatedOuts android.Paths) {
-	mctx.VisitDirectDepsWithTag(encapsulatesTag, func(dep android.Module) {
-		if gdep, ok := dep.(genruleInterface); ok {
-			// Add output of our direct encapsulated dependencies
-			encapsulatedOuts = append(encapsulatedOuts, gdep.outputs().Paths()...)
-			encapsulatedOuts = append(encapsulatedOuts, gdep.implicitOutputs().Paths()...)
-			// Add output of transitively encapsulated dependencies
-			encapsulatedOuts = append(encapsulatedOuts, gdep.getEncapsulatedOuts()...)
-		}
-	})
-	return
 }
 
 func getDepfileName(s string) string {
@@ -562,14 +521,12 @@ func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args ma
 func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
 	m.inouts = m.createInouts(ctx, implicits)
-	m.encapsulatedOuts = m.calcEncapsulatedOuts(ctx)
 	m.writeNinjaRules(ctx, args)
 }
 
 func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	args, implicits := m.setupBuildActions(ctx)
 	m.inouts = m.createInouts(ctx, implicits)
-	m.encapsulatedOuts = m.calcEncapsulatedOuts(ctx)
 	m.writeNinjaRules(ctx, args)
 }
 

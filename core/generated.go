@@ -36,7 +36,6 @@ var (
 	exportGeneratedHeaderTag = dependencyTag{name: "export_generated_headers"}
 	generatedSourceTag       = dependencyTag{name: "generated_sources"}
 	generatedDepTag          = dependencyTag{name: "generated_dep"}
-	encapsulatesTag          = dependencyTag{name: "source_encapsulation"}
 	hostToolBinTag           = dependencyTag{name: "host_tool_bin"}
 )
 
@@ -145,7 +144,7 @@ type GenerateProps struct {
 
 type generateCommon struct {
 	moduleBase
-	encapsulatedOutputProducer
+	simpleOutputProducer
 	headerProducer
 	Properties struct {
 		GenerateProps
@@ -768,33 +767,6 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 	return srcs
 }
 
-func getGeneratedEncapsulatedFiles(ctx blueprint.ModuleContext) (encapsulatedOuts []string) {
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == encapsulatesTag },
-		func(m blueprint.Module) {
-			if gs, ok := getGenerateCommon(m); ok {
-				// Add output of encapsulated dependencies
-				encapsulatedOuts = append(encapsulatedOuts, gs.outputs()...)
-				encapsulatedOuts = append(encapsulatedOuts, gs.implicitOutputs()...)
-			}
-		})
-	return
-}
-
-func getGeneratedEncapsulatedModules(ctx blueprint.ModuleContext) (encapsulatedMods []string) {
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == encapsulatesTag },
-		func(m blueprint.Module) {
-			if gs, ok := getGenerateCommon(m); ok {
-				// Add our own name
-				encapsulatedMods = append(encapsulatedMods, m.Name())
-				// Add transitively encapsulated module names
-				encapsulatedMods = append(encapsulatedMods, gs.encapsulatedModules()...)
-			}
-		})
-	return
-}
-
 func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
@@ -823,7 +795,5 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 			gsc.Properties.Generated_deps...)
 		parseAndAddVariationDeps(mctx, generatedSourceTag,
 			gsc.Properties.Generated_sources...)
-		parseAndAddVariationDeps(mctx, encapsulatesTag,
-			gsc.Properties.Encapsulates...)
 	}
 }

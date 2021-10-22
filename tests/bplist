@@ -6,7 +6,6 @@
 ./build.bp
 ./command_vars/build.bp
 ./cxx11_simple/build.bp
-./encapsulates/build.bp
 ./escaping/build.bp
 ./export_cflags/liba/build.bp
 ./export_cflags/libb/build.bp
@@ -36,7 +35,6 @@
 ./rsp/build.bp
 ./shared_libs/build.bp
 ./shared_libs_toc/build.bp
-./source_encapsulation/build.bp
 ./static_libs/build.bp
 ./target_specific_static_libs/build.bp
 ./templates/build.bp

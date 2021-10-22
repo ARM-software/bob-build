@@ -496,10 +496,6 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 		 * module, i.e. from static_libs and shared_libs, as well as
 		 * export_generated_headers from the main module itself.
 		 *
-		 * Any time we visit a generated module, we must also visit its children, in case
-		 * they are encapsulated. At this point, the only subsequent modules visited will be
-		 * other generated modules via the `encapsulates` property.
-		 *
 		 * Note that generated_header and export_generated_header tags can't have child
 		 * generated_header, export_generated_header, static_libs or shared_libs tags,
 		 * because these are only added by libraries.
@@ -510,8 +506,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 		if parent == mainModule {
 			if tag == generatedHeaderTag || tag == exportGeneratedHeaderTag {
 				importHeaderDirs = true
-				// Check top level generated header modules for encapsulated modules
-				visitChildren = true
+				visitChildren = false
 			} else if tag == staticDepTag || tag == sharedDepTag || tag == reexportLibsTag {
 				/* Try to import generated header dirs from static|shared_libs too:
 				 * - The library could be a bob_generate_shared_library or
@@ -519,8 +514,6 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 				 *   any generated header dirs it exports.
 				 * - If it's a bob_static_library or bob_shared_library, it may
 				 *   export generated header dirs, so it's children need visiting.
-				 * In either case we need to keep recursing in case of encapsulated
-				 * modules.
 				 */
 				importHeaderDirs = true
 				visitChildren = true
@@ -530,13 +523,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 		} else {
 			if tag == exportGeneratedHeaderTag {
 				importHeaderDirs = true
-				// Visit children of exported gen header dirs
-				// in case the module encapsulates anything.
-				visitChildren = true
-			} else if tag == encapsulatesTag {
-				importHeaderDirs = true
-				// Keep walking encapsulated modules indefinitely
-				visitChildren = true
+				visitChildren = false
 			}
 		}
 
@@ -579,8 +566,6 @@ func (l *library) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (mod
 			if gs, ok := getGenerateCommon(m); ok {
 				// Add our own name
 				modules = append(modules, gs.Name())
-				// Add transitively encapsulated module names (if any)
-				modules = append(modules, gs.encapsulatedModules()...)
 			}
 		})
 	return

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,6 @@
  */
 
 package core
-
-import "github.com/ARM-software/bob-build/internal/utils"
 
 // Modules that produce content in the build output directory that may
 // be referenced by other modules must implement the outputs() and
@@ -88,30 +86,4 @@ type headerProducer struct {
 
 func (m *headerProducer) genIncludeDirs() []string {
 	return m.includeDirs
-}
-
-// Generated modules implement this interface to provide all encapsulated
-// module names.
-type encapsulatedOutputProducer struct {
-	simpleOutputProducer
-
-	// List of all outputs of all modules encapsulated by this module,
-	// gathered recursively from dependencies (including implicit outputs).
-	encapsulatedOuts []string
-	// List of all module names encapsulated module by this module,
-	// gathered recursively from dependencies.
-	encapsulatedMods []string
-}
-
-func (m *encapsulatedOutputProducer) outputs() []string {
-	// for generated modules include encapsulated outputs
-	return utils.NewStringSlice(m.simpleOutputProducer.outputs(), m.encapsulatedOutputs())
-}
-
-func (m *encapsulatedOutputProducer) encapsulatedOutputs() []string {
-	return m.encapsulatedOuts
-}
-
-func (m *encapsulatedOutputProducer) encapsulatedModules() []string {
-	return m.encapsulatedMods
 }

@@ -111,7 +111,6 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 
 	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
 	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(mctx, generatedSourceTag))
-	m.AddStringList("encapsulates", gc.Properties.Encapsulates)
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)
 	m.AddStringList("conlyflags", gc.Properties.FlagArgsBuild.Conlyflags)
