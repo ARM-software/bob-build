@@ -208,12 +208,12 @@ func (m *genrulebobCommon) getEncapsulatedOuts() android.Paths {
 	return m.encapsulatedOuts
 }
 
-func (m *genrulebobCommon) allOutputs() (ret android.WritablePaths) {
+func (m *genrulebobCommon) allOutputs() (ret android.Paths) {
 	for _, io := range m.inouts {
-		ret = append(ret, io.out...)
-		ret = append(ret, io.implicitOuts...)
+		ret = append(ret, io.out.Paths()...)
+		ret = append(ret, io.implicitOuts.Paths()...)
 	}
-	ret = append(ret, m.encapsulateOuts...)
+	ret = append(ret, m.encapsulatedOuts...)
 	return
 }
 
@@ -240,7 +240,7 @@ func pathsForModuleGen(ctx android.ModuleContext, paths []string) (ret android.W
 // genrule.SourceFileGenerator interface, which allows these modules to be used
 // to generate inputs for cc_library and cc_binary modules.
 func (m *genrulebobCommon) GeneratedSourceFiles() android.Paths {
-	return m.allOutputs().Paths()
+	return m.allOutputs()
 }
 
 func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
@@ -248,7 +248,7 @@ func (m *genrulebobCommon) GeneratedHeaderDirs() android.Paths {
 }
 
 func (m *genrulebobCommon) GeneratedDeps() (srcs android.Paths) {
-	return m.allOutputs().Paths()
+	return m.allOutputs()
 }
 
 // Srcs implements the android.SourceFileProducer interface, which allows
