@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +65,7 @@ def init_attr():
 class MenuBar(object):
     def __init__(self, options):
         self.options = options
+        self.selection_pos = (0, 0)
         self.selection = 0
 
     def left(self):
