@@ -23,6 +23,8 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // Property concatenation.
@@ -112,8 +114,8 @@ func defaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*defaults)
 			if !ok {
-				panic(fmt.Errorf("module %s in %s's defaults is not a default",
-					dep.Name(), mctx.ModuleName()))
+				utils.Die("module %s in %s's defaults is not a default",
+					dep.Name(), mctx.ModuleName())
 			}
 
 			// Append defaults at the same level to maintain cflag order
@@ -122,7 +124,7 @@ func defaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
-					panic(err)
+					utils.Die("%s", err)
 				}
 			}
 		}
@@ -140,7 +142,7 @@ func defaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 		} else {
-			panic(err)
+			utils.Die("%s", err)
 		}
 	}
 }
@@ -276,7 +278,7 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
-					panic(err)
+					utils.Die("%s", err)
 				}
 			}
 		}

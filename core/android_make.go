@@ -18,7 +18,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -60,7 +59,7 @@ func androidMkWriteString(ctx blueprint.ModuleContext, name string, sb *strings.
 	filename := getPathInBuildDir(name + ".inc")
 	err := fileutils.WriteIfChanged(filename, sb)
 	if err != nil {
-		utils.Exit(1, err.Error())
+		utils.Die("%v", err.Error())
 	}
 }
 
@@ -167,11 +166,11 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 		m = &real.library
 		libname = real.outputFileName()
 	default:
-		panic(fmt.Errorf("Unexpected module type %T", real))
+		utils.Die("Unexpected module type %T", real)
 	}
 
 	if m.Properties.Build_wrapper != nil {
-		panic(errors.New("build_wrapper not supported on Android"))
+		utils.Die("build_wrapper not supported on Android")
 	}
 
 	// Calculate and record outputs
@@ -336,7 +335,7 @@ func androidLibraryBuildAction(sb *strings.Builder, mod blueprint.Module, ctx bl
 			} else if _, ok := p.(*externalLib); ok {
 				// External libraries are never forwarding libraries
 			} else {
-				panic(errors.New(ctx.OtherModuleName(p) + " is not a shared library"))
+				utils.Die("%s is not a shared library", ctx.OtherModuleName(p))
 			}
 		})
 	if hasForwardingLib {
@@ -848,7 +847,7 @@ func (g *androidMkGenerator) genStaticActions(m *generateStaticLibrary, ctx blue
 		// Add prebuilt outputs
 		outputs := m.outputs()
 		if len(outputs) != 1 {
-			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_static_lib %s", len(outputs), m.Name()))
+			utils.Die("outputs() returned %d objects for bob_generate_static_lib %s", len(outputs), m.Name())
 		}
 		library := outputs[0]
 		declarePrebuiltStaticLib(sb, m.altShortName(), library,
@@ -868,7 +867,7 @@ func (g *androidMkGenerator) genSharedActions(m *generateSharedLibrary, ctx blue
 		// Add prebuilt outputs
 		outputs := m.outputs()
 		if len(outputs) != 1 {
-			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_shared_lib %s", len(outputs), m.Name()))
+			utils.Die("outputs() returned %d objects for bob_generate_shared_lib %s", len(outputs), m.Name())
 		}
 		library := outputs[0]
 		declarePrebuiltSharedLib(sb, m.altShortName(), library,
@@ -888,7 +887,7 @@ func (g *androidMkGenerator) genBinaryActions(m *generateBinary, ctx blueprint.M
 		// Add prebuilt outputs
 		outputs := m.outputs()
 		if len(outputs) != 1 {
-			panic(fmt.Errorf("outputs() returned %d objects for bob_generate_binary %s", len(outputs), m.Name()))
+			utils.Die("outputs() returned %d objects for bob_generate_binary %s", len(outputs), m.Name())
 		}
 		binary := outputs[0]
 		declarePrebuiltBinary(sb, m.altShortName(), binary,
@@ -967,7 +966,7 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 				}
 			}
 
-			panic(fmt.Errorf("unmet or circular dependency. %d remaining.\n%s", len(order), deps))
+			utils.Die("unmet or circular dependency. %d remaining.\n%s", len(order), deps)
 		}
 
 		sb.WriteString("include $(BOB_ANDROIDMK_DIR)/" + order[lowindex].Name + ".inc\n")
@@ -986,7 +985,7 @@ func (s *androidMkOrderer) GenerateBuildActions(ctx blueprint.SingletonContext) 
 	androidmkFile := getPathInBuildDir("Android.inc")
 	err := fileutils.WriteIfChanged(androidmkFile, sb)
 	if err != nil {
-		utils.Exit(1, err.Error())
+		utils.Die("%v", err.Error())
 	}
 
 	// Blueprint does not output package context dependencies unless
@@ -1167,8 +1166,8 @@ func mapAndroidNames(ctx blueprint.BottomUpMutatorContext) {
 
 			if existing, ok := androidModuleReverseMap[m.altName()]; ok {
 				if existing != ctx.ModuleName() {
-					panic(fmt.Errorf("out name collision. Both %s and %s are required and map to %s",
-						ctx.ModuleName(), existing, m.altName()))
+					utils.Die("out name collision. Both %s and %s are required and map to %s",
+						ctx.ModuleName(), existing, m.altName())
 				}
 			}
 			androidModuleNameMap[ctx.ModuleName()] = m.altName()

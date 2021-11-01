@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -58,7 +57,7 @@ type TargetSpecific struct {
 // init initializes properties and features
 func (t *TargetSpecific) init(properties *configProperties, list ...interface{}) {
 	if len(list) == 0 {
-		panic("List can't be empty")
+		utils.Die("List can't be empty")
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
@@ -368,7 +367,7 @@ func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 				} else if vn == "target" {
 					variations = append(variations, targetVariation...)
 				} else {
-					panic("Invalid variation: " + vn + " in module name " + dep)
+					utils.Die("Invalid variation: %s in module name %s", vn, dep)
 				}
 			}
 
@@ -596,7 +595,7 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 	// disable current module if dependency is disabled, or panic if it's required
 	if len(disabledDeps) > 0 {
 		if isRequired(ep) {
-			panic(fmt.Errorf("Module %s is required but depends on disabled modules %s", module.Name(), strings.Join(disabledDeps, ", ")))
+			utils.Die("Module %s is required but depends on disabled modules %s", module.Name(), strings.Join(disabledDeps, ", "))
 		} else {
 			ep.getEnableableProps().Enabled = proptools.BoolPtr(false)
 			return

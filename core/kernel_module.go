@@ -18,12 +18,13 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 type KernelProps struct {
@@ -146,7 +147,7 @@ func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (mod
 			if km, ok := m.(*kernelModule); ok {
 				modules = append(modules, km)
 			} else {
-				panic(fmt.Errorf("invalid extra_symbols, %s not a kernel module", ctx.OtherModuleName(m)))
+				utils.Die("invalid extra_symbols, %s not a kernel module", ctx.OtherModuleName(m))
 			}
 		})
 

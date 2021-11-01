@@ -18,8 +18,6 @@
 package core
 
 import (
-	"errors"
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -178,7 +176,7 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 	split := strings.Split(comp, "/")
 
 	if len(split) < 2 {
-		panic(errors.New("Generated component " + comp + " does not specify module and lib"))
+		utils.Die("Generated component %s does not specify module and lib", comp)
 	}
 
 	return split[0], strings.Join(split[1:], "/")
@@ -238,7 +236,7 @@ func (m *generateCommon) disable() {
 
 func (m *generateCommon) setVariant(variant tgtType) {
 	if variant != m.Properties.Target {
-		panic(fmt.Errorf("Variant mismatch: %s != %s", variant, m.Properties.Target))
+		utils.Die("Variant mismatch: %s != %s", variant, m.Properties.Target)
 	}
 }
 
@@ -463,7 +461,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 		func(m blueprint.Module) {
 			gen, ok := m.(dependentInterface)
 			if !ok {
-				panic(errors.New(reflect.TypeOf(m).String() + " is not a valid dependent interface"))
+				utils.Die("%s is not a valid dependent interface", reflect.TypeOf(m).String())
 			}
 
 			depName := ctx.OtherModuleName(m)
@@ -539,12 +537,12 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	cmd := strings.Replace(proptools.String(m.Properties.Cmd), "${args}", strings.Join(m.Properties.Args, " "), -1)
 
 	if proptools.Bool(m.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
-		panic(fmt.Errorf("%s depfile is true, but ${depfile} not used in cmd", m.Name()))
+		utils.Die("%s depfile is true, but ${depfile} not used in cmd", m.Name())
 	}
 	if utils.ContainsArg(cmd, "bob_config") || utils.ContainsArg(cmd, "bob_config_json") {
 		if !proptools.Bool(m.Properties.Depfile) {
-			panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
-				"Config dependencies must be declared via a depfile!", m.Name()))
+			utils.Die("%s references Bob config but depfile not enabled. "+
+				"Config dependencies must be declared via a depfile!", m.Name())
 		}
 	}
 
@@ -761,7 +759,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 				srcs = append(srcs, gs.outputs()...)
 				srcs = append(srcs, gs.implicitOutputs()...)
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " does not have outputs"))
+				utils.Die("%s does not have outputs", ctx.OtherModuleName(m))
 			}
 		})
 	return srcs

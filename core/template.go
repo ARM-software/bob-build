@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2021 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +23,13 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func applyTemplateString(elem reflect.Value, stringvalues map[string]string, funcmap map[string]interface{}) {
 	if elem.Kind() != reflect.String {
-		panic("elem is not a string")
+		utils.Die("elem is not a string")
 	}
 
 	t := template.New("TemplateProps")
@@ -36,12 +38,12 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 
 	tmpl, err := t.Parse(elem.String())
 	if err != nil {
-		panic("Error parsing string '" + elem.String() + "': " + err.Error())
+		utils.Die("Error parsing string '%s': %s", elem.String(), err.Error())
 	}
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, stringvalues)
 	if err != nil {
-		panic("Error executing string '" + elem.String() + "': " + err.Error())
+		utils.Die("Error executing string '%s': %s", elem.String(), err.Error())
 	}
 	elem.SetString(buf.String())
 }

@@ -18,10 +18,11 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/google/blueprint"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // EnableableProps allow a module to be disabled or only built when explicitly requested
@@ -126,7 +127,7 @@ func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,
 					ret = append(ret, dep.shortName())
 				}
 			} else {
-				panic(fmt.Errorf("install_dep on non-dependendable module %s", m.Name()))
+				utils.Die("install_dep on non-dependendable module %s", m.Name())
 			}
 			visited[m.Name()] = true
 		})
@@ -289,12 +290,12 @@ func getInstallGroupPathFromTag(mctx blueprint.TopDownMutatorContext, tag depend
 		func(m blueprint.Module) {
 			insg, ok := m.(*installGroup)
 			if !ok {
-				panic(fmt.Sprintf("%s dependency of %s not an install group",
-					tag.name, mctx.ModuleName()))
+				utils.Die("%s dependency of %s not an install group",
+					tag.name, mctx.ModuleName())
 			}
 			if installGroupPath != nil {
-				panic(fmt.Sprintf("Multiple %s dependencies for %s",
-					tag.name, mctx.ModuleName()))
+				utils.Die("Multiple %s dependencies for %s",
+					tag.name, mctx.ModuleName())
 			}
 			installGroupPath = insg.Properties.Install_path
 		})
@@ -307,7 +308,7 @@ func installGroupMutator(mctx blueprint.TopDownMutatorContext) {
 		path := getInstallGroupPathFromTag(mctx, installGroupTag)
 		if path != nil {
 			if *path == "" {
-				panic(fmt.Sprintf("Module %s has empty install path", mctx.ModuleName()))
+				utils.Die("Module %s has empty install path", mctx.ModuleName())
 			}
 
 			props := ins.getInstallableProps()

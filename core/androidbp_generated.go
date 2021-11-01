@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -31,19 +30,19 @@ import (
 
 func (g *androidBpGenerator) genBinaryActions(m *generateBinary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		panic(fmt.Errorf("Generated binaries are not supported (%s)", m.Name()))
+		utils.Die("Generated binaries are not supported (%s)", m.Name())
 	}
 }
 
 func (g *androidBpGenerator) genSharedActions(m *generateSharedLibrary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		panic(fmt.Errorf("Generated shared libraries are not supported (%s)", m.Name()))
+		utils.Die("Generated shared libraries are not supported (%s)", m.Name())
 	}
 }
 
 func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
-		panic(fmt.Errorf("Generated static libraries are not supported (%s)", m.Name()))
+		utils.Die("Generated static libraries are not supported (%s)", m.Name())
 	}
 }
 
@@ -65,14 +64,14 @@ func expandCmd(gc *generateCommon, s string, moduleDir string) string {
 			return filepath.Join("${module_dir}", moduleDir)
 		case "bob_config":
 			if !proptools.Bool(gc.Properties.Depfile) {
-				panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
-					"Config dependencies must be declared via a depfile!", gc.Name()))
+				utils.Die("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name())
 			}
 			return configFile
 		case "bob_config_json":
 			if !proptools.Bool(gc.Properties.Depfile) {
-				panic(fmt.Errorf("%s references Bob config but depfile not enabled. "+
-					"Config dependencies must be declared via a depfile!", gc.Name()))
+				utils.Die("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name())
 			}
 			return configJSONFile
 		case "bob_config_opts":
@@ -99,12 +98,12 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	if gc.Properties.Host_bin != nil {
 		hostBin := bpModuleNamesForDep(mctx, gc.hostBinName(mctx))
 		if len(hostBin) != 1 {
-			panic(fmt.Errorf("%s must have one host_bin entry (have %d)", gc.Name(), len(hostBin)))
+			utils.Die("%s must have one host_bin entry (have %d)", gc.Name(), len(hostBin))
 		}
 		m.AddString("host_bin", hostBin[0])
 	}
 	if proptools.Bool(gc.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
-		panic(fmt.Errorf("%s depfile is true, but ${depfile} not used in cmd", gc.Name()))
+		utils.Die("%s depfile is true, but ${depfile} not used in cmd", gc.Name())
 	}
 
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
@@ -127,7 +126,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 
 	m, err := AndroidBpFile().NewModule("genrule_bob", gs.shortName())
 	if err != nil {
-		panic(err.Error())
+		utils.Die("%v", err.Error())
 	}
 
 	srcs := gs.generateCommon.Properties.getSources(mctx)
@@ -149,7 +148,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 
 	m, err := AndroidBpFile().NewModule("gensrcs_bob", ts.shortName())
 	if err != nil {
-		panic(err.Error())
+		utils.Die(err.Error())
 	}
 
 	srcs := ts.generateCommon.Properties.getSources(mctx)
