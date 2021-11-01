@@ -204,8 +204,9 @@ func (l *Build) getTargetSpecific(tgt tgtType) *TargetSpecific {
 	} else if tgt == tgtTypeTarget {
 		return &l.Target
 	} else {
-		panic(fmt.Errorf("Unsupported target type: %s", tgt))
+		utils.Die("Unsupported target type: %s", tgt)
 	}
+	return nil
 }
 
 // These function check the boolean pointers - which are only filled if someone sets them
@@ -544,13 +545,13 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 					// (by aliasing another header).
 					ds, ok := child.(dependentInterface)
 					if !ok {
-						panic(fmt.Errorf("generated_headers %s must have outputs()", child.Name()))
+						utils.Die("generated_headers %s must have outputs()", child.Name())
 					}
 
 					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
 			} else if childMustBeGenerated {
-				panic(fmt.Errorf("%s dependency on non-generated module %s", tag.(dependencyTag).name, child.Name()))
+				utils.Die("%s dependency on non-generated module %s", tag.(dependencyTag).name, child.Name())
 			}
 		}
 
@@ -635,7 +636,7 @@ func (m *library) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 
 func (l *library) checkField(cond bool, fieldName string) {
 	if !cond {
-		panic(fmt.Sprintf("%s has field %s set", l.Name(), fieldName))
+		utils.Die("%s has field %s set", l.Name(), fieldName)
 	}
 }
 
@@ -710,9 +711,9 @@ func (m *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]
 		soname := m.getSoname()
 		realName := m.getRealName()
 		if soname == realName {
-			panic(fmt.Errorf("module %s has invalid library_version '%s'",
+			utils.Die("module %s has invalid library_version '%s'",
 				m.Name(),
-				m.library.Properties.Library_version))
+				m.library.Properties.Library_version)
 		}
 		symlinks[m.getLinkName()] = soname
 		symlinks[soname] = realName
@@ -850,7 +851,7 @@ func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
 				l.Properties.Header_libs,
 				l.Properties.Whole_static_libs,
 				l.Properties.Export_header_libs) {
-				panic(fmt.Errorf("%s reexports unused library %s", mctx.ModuleName(), lib))
+				utils.Die("%s re-exports unused library %s", mctx.ModuleName(), lib)
 			}
 		}
 	}
@@ -893,7 +894,7 @@ func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bo
 			msg += fmt.Sprintf("  * %s, but also %s, which includes %s as a whole_static_lib\n",
 				dep, insideWholeLibs[dep], dep)
 		}
-		panic(msg)
+		utils.Die(msg)
 	}
 }
 
@@ -942,9 +943,9 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 		if depLib, ok := dep.(*staticLibrary); ok {
 			for _, subLib := range depLib.Properties.Whole_static_libs {
 				if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
-					panic(fmt.Sprintf("%s links with %s and %s, which both contain %s as whole_static_libs",
+					utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",
 						mctx.Module().Name(), firstContainingLib,
-						depLib.Name(), subLib))
+						depLib.Name(), subLib)
 				} else {
 					insideWholeLibs[subLib] = depLib.Name()
 				}
@@ -963,14 +964,14 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 		} else if depLib, ok := dep.(*externalLib); ok {
 			propagateOtherExportedProperties(l, depLib)
 		} else {
-			panic(fmt.Sprintf("%s is not a staticLibrary", dep.Name()))
+			utils.Die("%s is not a staticLibrary", dep.Name())
 		}
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
 		if mctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag && mctx.OtherModuleDependencyTag(dep) != staticDepTag {
-			panic(fmt.Sprintf("Non WholeStatic or Static dep tag encountered visiting %s from %s",
-				dep.Name(), mctx.ModuleName()))
+			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
+				dep.Name(), mctx.ModuleName())
 		}
 	})
 
@@ -1014,21 +1015,21 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 
 	// This mutator is run after host/target splitting, so TargetType should have been set.
 	if !(mainBuild.TargetType == tgtTypeTarget || mainBuild.TargetType == tgtTypeHost) {
-		panic(fmt.Errorf("Cannot process dependencies on module '%s' with target type '%s'", mainModuleName, mainBuild.TargetType))
+		utils.Die("Cannot process dependencies on module '%s' with target type '%s'", mainModuleName, mainBuild.TargetType)
 	}
 
 	g := handler.graphs[mainBuild.TargetType]
 
 	for _, lib := range mainBuild.Static_libs {
 		if _, err := g.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
+			utils.Die("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib)
 		}
 		g.SetEdgeColor(mainModuleName, lib, "blue")
 	}
 
 	for _, lib := range mainBuild.Whole_static_libs {
 		if _, err := g.AddEdgeToExistingNodes(mainModuleName, lib); err != nil {
-			panic(fmt.Errorf("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib))
+			utils.Die("'%s' depends on '%s', but '%s' is either not defined or disabled", mainModuleName, lib, lib)
 		}
 		g.SetEdgeColor(mainModuleName, lib, "red")
 	}
@@ -1099,7 +1100,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 	sortedStaticLibs = sortedStaticLibs[1:]
 
 	if !isDAG {
-		panic("We have detected cycle: " + mainModuleName)
+		utils.Die("We have detected cycle: %s", mainModuleName)
 	} else {
 		mainBuild.ResolvedStaticLibs = sortedStaticLibs
 	}

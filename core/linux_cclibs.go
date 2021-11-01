@@ -18,8 +18,6 @@
 package core
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -167,7 +165,7 @@ func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
 			if gs, ok := m.(dependentInterface); ok {
 				srcs = append(srcs, getSourcesGenerated(gs)...)
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " does not have outputs"))
+				utils.Die("%s does not have outputs", ctx.OtherModuleName(m))
 			}
 		})
 	return srcs
@@ -184,10 +182,9 @@ func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 			} else if sl, ok := m.(*generateStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)
 			} else if _, ok := m.(*externalLib); ok {
-				panic(errors.New(ctx.OtherModuleName(m) +
-					" is external, so cannot be used in whole_static_libs"))
+				utils.Die("%s is external, so cannot be used in whole_static_libs", ctx.OtherModuleName(m))
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " is not a static library"))
+				utils.Die("%s is not a static library", ctx.OtherModuleName(m))
 			}
 		})
 
@@ -200,7 +197,7 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 	for _, moduleName := range l.Properties.ResolvedStaticLibs {
 		dep, _ := ctx.GetDirectDep(moduleName)
 		if dep == nil {
-			panic(fmt.Errorf("%s has no dependency on static lib %s", l.Name(), moduleName))
+			utils.Die("%s has no dependency on static lib %s", l.Name(), moduleName)
 		}
 		if sl, ok := dep.(*staticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
@@ -211,7 +208,7 @@ func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			// exported by their ldlibs and ldflags properties, rather than by
 			// specifying the filename here.
 		} else {
-			panic(errors.New(ctx.OtherModuleName(dep) + " is not a static library"))
+			utils.Die("%s is not a static library", ctx.OtherModuleName(dep))
 		}
 	}
 
@@ -288,7 +285,7 @@ func pathToLibFlag(path string) string {
 	ext := filepath.Ext(base)
 	base = strings.TrimSuffix(base, ext)
 	if !strings.HasPrefix(base, "lib") {
-		panic(errors.New("Shared library name must start with 'lib' prefix"))
+		utils.Die("Shared library name must start with 'lib' prefix")
 	}
 	base = strings.TrimPrefix(base, "lib")
 	return "-l" + base
@@ -305,7 +302,7 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 				// and as they are outside of the build we don't need to
 				// add a dependency on them anyway.
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " doesn't support targets"))
+				utils.Die("%s doesn't support targets", ctx.OtherModuleName(m))
 			}
 		})
 	return
@@ -322,7 +319,7 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 				// and as they are outside of the build we don't need to
 				// add a dependency on them anyway.
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " doesn't produce a shared library"))
+				utils.Die("%s doesn't produce a shared library", ctx.OtherModuleName(m))
 			}
 		})
 	return
@@ -367,7 +364,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 				ldlibs = append(ldlibs, el.exportLdlibs()...)
 				ldflags = append(ldflags, el.exportLdflags()...)
 			} else {
-				panic(errors.New(ctx.OtherModuleName(m) + " is not a shared library"))
+				utils.Die("%s is not a shared library", ctx.OtherModuleName(m))
 			}
 		})
 
@@ -380,7 +377,7 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
 				if err != nil {
-					panic(fmt.Errorf("Could not find relative path for: %s due to: %s", path, err))
+					utils.Die("Could not find relative path for: %s due to: %s", path, err)
 				}
 				rpaths = append(rpaths, "'$$ORIGIN/"+out+"'")
 			}

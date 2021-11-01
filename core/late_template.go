@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"text/template"
@@ -160,7 +159,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 	for _, src := range s.getSources(ctx) {
 		matched, err := pathtools.Match("**/"+arg, src)
 		if err != nil {
-			panic("Error during matching filepath pattern")
+			utils.Die("Error during matching filepath pattern")
 		}
 		if matched {
 			matchedNonCompiledSources[src] = true
@@ -168,7 +167,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 		}
 	}
 	if len(matchedSources) == 0 {
-		panic(fmt.Errorf("Could not match '%s' for module '%s'", arg, ctx.ModuleName()))
+		utils.Die("Could not match '%s' for module '%s'", arg, ctx.ModuleName())
 	}
 
 	return strings.Join(matchedSources, " ")
@@ -179,7 +178,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 func verifyMatchSources(matchedNonCompiledSources map[string]bool) {
 	for src, matched := range matchedNonCompiledSources {
 		if !matched {
-			panic(fmt.Errorf("Non-compiled source %s is not used by match_srcs.", src))
+			utils.Die("Non-compiled source %s is not used by match_srcs.", src)
 		}
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"runtime/pprof"
 
 	"github.com/ARM-software/bob-build/core"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func main() {
@@ -34,7 +35,7 @@ func main() {
 	if present && cpuprofile != "" {
 		f, err := os.Create(cpuprofile)
 		if err != nil {
-			panic(err)
+			utils.Die("%v", err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()

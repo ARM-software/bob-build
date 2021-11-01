@@ -157,7 +157,7 @@ func collectBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
 func extractDeps(depfile string) []string {
 	file, err := os.Open(depfile)
 	if err != nil {
-		panic(fmt.Errorf("Could not open depfile %s: %v", depfile, err))
+		utils.Die("Could not open depfile %s: %v", depfile, err)
 	}
 	defer file.Close()
 
@@ -167,7 +167,7 @@ func extractDeps(depfile string) []string {
 		lines = append(lines, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		panic(fmt.Errorf("Error reading depfile %s: %v", depfile, err))
+		utils.Die("Error reading depfile %s: %v", depfile, err)
 	}
 
 	if len(lines) == 0 {
@@ -185,7 +185,7 @@ func extractDeps(depfile string) []string {
 func hashFileAtPath(path string) []byte {
 	file, err := os.Open(path)
 	if err != nil {
-		panic(fmt.Errorf("Could not open %s for hashing: %v", path, err))
+		utils.Die("Could not open %s for hashing: %v", path, err)
 	}
 	defer file.Close()
 
@@ -374,7 +374,7 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	ctx.AddNinjaFileDeps(pluginTemplate)
 	content, err := ioutil.ReadFile(pluginTemplate)
 	if err != nil {
-		utils.Exit(1, err.Error())
+		utils.Die("%v", err.Error())
 	}
 
 	// use source dir to get project-unique identifier,
@@ -401,7 +401,7 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	androidbpFile := getPathInSourceDir("Android.bp")
 	err = fileutils.WriteIfChanged(androidbpFile, sb)
 	if err != nil {
-		utils.Exit(1, err.Error())
+		utils.Die("%v", err.Error())
 	}
 
 	// Blueprint does not output package context dependencies unless

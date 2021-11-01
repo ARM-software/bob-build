@@ -18,8 +18,6 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
@@ -82,7 +80,7 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 	for _, inout := range inouts {
 		if inout.depfile != "" && len(inout.out) > 1 {
-			panic(fmt.Errorf("Module %s uses a depfile with multiple outputs", ctx.ModuleName()))
+			utils.Die("Module %s uses a depfile with multiple outputs", ctx.ModuleName())
 		}
 
 		if inout.rspfile != "" {

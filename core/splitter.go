@@ -19,10 +19,11 @@ package core
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // SplittableProps are embedded by modules which can be split into multiple variants
@@ -84,8 +85,8 @@ func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*defaults)
 			if !ok {
-				panic(fmt.Errorf("module %s in %s's defaults is not a default",
-					dep.Name(), mctx.ModuleName()))
+				utils.Die("module %s in %s's defaults is not a default",
+					dep.Name(), mctx.ModuleName())
 			}
 
 			// Append at the same level, so later siblings take precedence
@@ -94,7 +95,7 @@ func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
-					panic(err)
+					utils.Die("%v", err)
 				}
 			}
 		}
@@ -106,7 +107,7 @@ func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
 		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
 			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 		} else {
-			panic(err)
+			utils.Die("%v", err)
 		}
 	}
 }

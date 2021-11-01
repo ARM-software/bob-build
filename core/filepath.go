@@ -18,11 +18,11 @@
 package core
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
 
@@ -105,7 +105,7 @@ func newGeneratedFilePath(path string) filePath {
 	// Module dir is everything up to and including m.Name().
 	pathElems := strings.Split(path, string(os.PathSeparator))
 	if len(pathElems) < 4 {
-		panic(fmt.Errorf("Path doesn't have as many elements as expected. %s", path))
+		utils.Die("Path doesn't have as many elements as expected. %s", path)
 	}
 	lclPath := filepath.Join(pathElems[2:]...)
 	modDir := filepath.Join(pathElems[:3]...)

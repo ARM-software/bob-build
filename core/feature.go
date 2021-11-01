@@ -18,9 +18,10 @@
 package core
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // featurePropertyName returns name of feature. Name needs to start from capital letter because
@@ -75,7 +76,7 @@ func typesOf(list ...interface{}) []reflect.Type {
 // Only exported properties can be set so property name MUST start from capital letter.
 func (f *Features) Init(properties *configProperties, list ...interface{}) {
 	if len(list) == 0 {
-		panic("List can't be empty")
+		utils.Die("List can't be empty")
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
@@ -135,7 +136,7 @@ func (f *Features) Init(properties *configProperties, list ...interface{}) {
 // }
 func coalesceTypes(list ...reflect.Type) reflect.Type {
 	if len(list) == 0 {
-		panic("List can't be empty")
+		utils.Die("List can't be empty")
 	}
 	if len(list) == 1 {
 		return list[0]
@@ -149,7 +150,7 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 			field := elementType.Field(i)
 			fieldName := field.Name
 			if _, ok := fieldsKeys[fieldName]; ok {
-				panic(fmt.Sprintf("Name collision: '%v'\n", fieldName))
+				utils.Die("Name collision: '%v'\n", fieldName)
 			} else {
 				fieldsKeys[fieldName] = true
 				fields = append(fields, field)
@@ -173,7 +174,7 @@ func (f *Features) AppendProps(dst []interface{}, properties *configProperties) 
 			featureFieldName := featurePropertyName(featureKey)
 			featureStruct := featuresData.FieldByName(featureFieldName)
 			if !featureStruct.IsValid() {
-				panic(fmt.Sprintf("Field returned for property %s isn't valid\n", featureFieldName))
+				utils.Die("Field returned for property %s isn't valid\n", featureFieldName)
 			}
 			// AppendProperties expects a pointer to a struct.
 			featureStructPointer := featureStruct.FieldByName("BlueprintEmbed").Interface()
