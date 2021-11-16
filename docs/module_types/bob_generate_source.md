@@ -1,9 +1,10 @@
 Module: bob_generate_source
 ===========================
 
-This target generates source code (headers or C files). A single
-module can generate multiple outputs from common inputs, by running a
-custom command.
+This target generates files via a custom shell command. This is usually source
+code (headers or C files), but it could be anything. A single module will
+generate multiple outputs from common inputs, and the command is run exactly
+once.
 
 The command will be run once - with `$in` being the paths in
 `srcs` and `$out` being the paths in `out`.
