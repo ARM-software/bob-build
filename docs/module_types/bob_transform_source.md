@@ -1,9 +1,10 @@
 Module: bob_transform_source
 ============================
 
-This target generates source code (headers or C files). A single
-module generates output from each input (i.e. it runs the command
-separately on each input file).
+This target generates files via a custom shell command. This is usually source
+code (headers or C files), but it could be anything. A single module generates
+an output from each input (i.e. it runs the command separately on each input
+file).
 
 The command will be run once per source file with `$in` being the
 path in `srcs` and `$out` being the path transformed
