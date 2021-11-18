@@ -20,6 +20,7 @@ package main
 import (
 	"flag"
 	"os"
+	"runtime"
 	"runtime/pprof"
 
 	"github.com/ARM-software/bob-build/core"
@@ -42,4 +43,14 @@ func main() {
 	}
 
 	core.Main()
+
+	memprofile, present := os.LookupEnv("BOB_MEMPROFILE")
+	if present && memprofile != "" {
+		f, err := os.Create(memprofile)
+		if err != nil {
+			utils.Die("%v", err)
+		}
+		runtime.GC()
+		pprof.WriteHeapProfile(f)
+	}
 }
