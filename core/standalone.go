@@ -23,13 +23,13 @@
 package core
 
 import (
-	"errors"
 	"os"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
 	"github.com/ARM-software/bob-build/internal/graph"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 var (
@@ -83,7 +83,7 @@ func Main() {
 	config := &bobConfig{}
 	err := config.Properties.LoadConfig(configJSONFile)
 	if err != nil {
-		panic(err)
+		utils.Die("%v", err)
 	}
 
 	builder_ninja := config.Properties.GetBool("builder_ninja")
@@ -225,7 +225,7 @@ func Main() {
 	} else if builder_android_make {
 		config.Generator = &androidMkGenerator{}
 	} else {
-		panic(errors.New("unknown builder backend"))
+		utils.Die("Unknown builder backend")
 	}
 
 	config.Generator.init(ctx, config)

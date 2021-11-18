@@ -288,9 +288,13 @@ func NewStringSlice(lists ...[]string) []string {
 
 // Exit the program, printing a message to stderr.
 // Deferred functions will not execute.
-func Exit(exitCode int, err string) {
-	fmt.Fprintf(os.Stderr, err+"\n")
+func Exit(exitCode int, err string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, err+"\n", a...)
 	os.Exit(exitCode)
+}
+
+func Die(err string, a ...interface{}) {
+	Exit(1, err, a...)
 }
 
 // FlattenPath produces a filename containing no slashes from a path.

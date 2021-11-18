@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/internal/bpwriter"
+	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 func writeDataResourceModule(m bpwriter.Module, src, installRel string) {
@@ -92,7 +93,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 		// keep module name unique, remove slashes
 		m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(src))
 		if err != nil {
-			panic(err.Error())
+			utils.Die(err.Error())
 		}
 
 		addProvenanceProps(m, r.Properties.AndroidProps)

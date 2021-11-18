@@ -50,31 +50,34 @@ func (properties configProperties) getProp(name string) interface{} {
 	if elem, ok := properties.properties[name]; ok {
 		return elem
 	}
-	panic(fmt.Sprintf("No property found: %s", name))
+	utils.Die("No property found: %s", name)
+	return nil
 }
 
 func (properties configProperties) GetBool(name string) bool {
-	if ret, ok := properties.getProp(name).(bool); ok {
+	ret, ok := properties.getProp(name).(bool)
+	if ok {
 		return ret
 	}
-	panic(fmt.Sprintf("Property %s is not a bool", name))
+	utils.Die("Property %s is not a bool", name)
+	return !ret
 }
 
 func (properties configProperties) GetInt(name string) int {
 	number, ok := properties.getProp(name).(json.Number)
 	if !ok {
-		panic(fmt.Sprintf("Property %s with value '%v' is not an int",
-			name, properties.getProp(name)))
+		utils.Die("Property %s with value '%v' is not an int",
+			name, properties.getProp(name))
 	}
 
 	ret, err := number.Int64()
 	if err != nil {
-		panic(fmt.Sprintf("Property %s contains invalid int value '%s': %v",
-			name, number.String(), err))
+		utils.Die("Property %s contains invalid int value '%s': %v",
+			name, number.String(), err)
 	}
 
 	if int64(int(ret)) != ret {
-		panic(fmt.Sprintf("Property %s value out of `int` range: %d", name, ret))
+		utils.Die("Property %s value out of `int` range: %d", name, ret)
 	}
 
 	return int(ret)
@@ -84,7 +87,8 @@ func (properties configProperties) GetString(name string) string {
 	if ret, ok := properties.getProp(name).(string); ok {
 		return ret
 	}
-	panic(fmt.Sprintf("Property %s is not a string", name))
+	utils.Die("Property %s is not a string", name)
+	return ""
 }
 
 func (properties configProperties) StringMap() map[string]string {
@@ -98,7 +102,7 @@ func (properties configProperties) StringMap() map[string]string {
 //  - Slices of booleans,strings and ints are converted into a space-separated string
 //  - Pointers to booleans,strings and ints are converted into the referenced value
 //
-// Any other type might panic.
+// Any other type might Exit().
 func convertToString(thing interface{}) string {
 	field := reflect.ValueOf(thing)
 	var value string
@@ -133,7 +137,7 @@ func convertToString(thing interface{}) string {
 		value = strings.Join(values, " ")
 
 	default:
-		panic(fmt.Sprintf("Can't convert type %s to string!", field.Type().String()))
+		utils.Die("Can't convert type %s to string!", field.Type().String())
 	}
 	return value
 }

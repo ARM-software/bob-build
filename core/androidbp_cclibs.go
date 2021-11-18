@@ -49,7 +49,7 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 	})
 
 	if dep == nil {
-		panic(fmt.Errorf("%s has no dependency '%s'", mctx.ModuleName(), name))
+		utils.Die("%s has no dependency '%s'", mctx.ModuleName(), name)
 	}
 
 	if r, ok := dep.(*resource); ok {
@@ -58,7 +58,7 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 			modNames = append(modNames, r.getAndroidbpResourceName(src))
 		}
 		if len(modNames) == 0 {
-			panic(fmt.Errorf("bob_resource %s has empty srcs", name))
+			utils.Die("bob_resource %s has empty srcs", name)
 		}
 		return modNames
 	}
@@ -208,8 +208,8 @@ func (g *androidBpGenerator) getVersionScript(l *library, ctx blueprint.ModuleCo
 
 func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	if len(l.Properties.Export_include_dirs) > 0 {
-		panic(fmt.Errorf("Module %s exports non-local include dirs %v - this is not supported",
-			mctx.ModuleName(), l.Properties.Export_include_dirs))
+		utils.Die("Module %s exports non-local include dirs %v - this is not supported",
+			mctx.ModuleName(), l.Properties.Export_include_dirs)
 	}
 
 	// Soong deals with exported include directories between library
@@ -249,7 +249,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	m.AddStringList("exclude_srcs", l.Properties.Exclude_srcs)
 	err := addCFlags(m, cflags, l.Properties.Conlyflags, l.Properties.Cxxflags)
 	if err != nil {
-		panic(fmt.Errorf("Module %s: %s", mctx.ModuleName(), err.Error()))
+		utils.Die("Module %s: %s", mctx.ModuleName(), err.Error())
 	}
 	m.AddStringList("include_dirs", l.Properties.Include_dirs)
 	m.AddStringList("local_include_dirs", l.Properties.Local_include_dirs)
@@ -274,8 +274,8 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	if l.Properties.Post_install_cmd != nil ||
 		l.Properties.Post_install_args != nil ||
 		l.Properties.Post_install_tool != nil {
-		panic(fmt.Errorf("Module %s has post install actions - this is not supported on Android.bp",
-			mctx.ModuleName()))
+		utils.Die("Module %s has post install actions - this is not supported on Android.bp",
+			mctx.ModuleName())
 	}
 }
 

@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/google/blueprint"
@@ -201,8 +200,8 @@ func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
 			if !(tgt == tgtTypeHost || tgt == tgtTypeTarget) {
-				panic(fmt.Errorf("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
-					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt))
+				utils.Die("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
+					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt)
 			}
 		}
 	}
@@ -228,7 +227,7 @@ func expandDefault(d string, visited []string) []string {
 	if len(defaultsMap[d]) > 0 {
 		for _, def := range defaultsMap[d] {
 			if utils.Find(visited, def) >= 0 {
-				panic(fmt.Errorf("Defaults module %s depends upon itself", def))
+				utils.Die("Defaults module %s depends upon itself", def)
 			}
 			defaults = append(defaults, expandDefault(def, append(visited, def))...)
 			defaults = append(defaults, def)
