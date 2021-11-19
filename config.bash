@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ done
 # Move to the working directory
 cd -P "${WORKDIR}"
 
-"${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
+eval "${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
     ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
     -j "${CONFIG_JSON}" \
     -c "${CONFIG_FILE}" \

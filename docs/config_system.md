@@ -393,7 +393,7 @@ Config plugins are included in the build system by adding them to the
 `BOB_CONFIG_PLUGINS` variable during bootstrap:
 
 ```bash
-export BOB_CONFIG_PLUGINS="path/to/config_plugin" # No .py extension
+export BOB_CONFIG_PLUGINS="path/to/config_plugin:path/to/other_config_plugin" # No .py extension
 ... # Other exports for Bob bootstrap
 bob/bootstrap_linux.bash # or bootstrap_androidmk.bash
 ```

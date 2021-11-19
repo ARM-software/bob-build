@@ -78,7 +78,7 @@ expected. This is expected to be relative to the working directory
 `BOB_CONFIG_OPTS` is a list of options passed to the configuration
 system. This can usually be left empty.
 
-`BOB_CONFIG_PLUGINS` is a space separated list of plugins that the
+`BOB_CONFIG_PLUGINS` is a ':' separated list of plugins that the
 configuration system should run before saving the configuration file.
 
 ### Linux bootstrap

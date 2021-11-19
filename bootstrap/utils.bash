@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2021 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,10 @@ function write_bootstrap() {
     local BOB_CONFIG_PLUGIN_OPTS="-p ${BOB_DIR}/scripts/host_explore"
 
     # Add any other plugins requested by the caller
-    for i in ${BOB_CONFIG_PLUGINS}; do
-        BOB_CONFIG_PLUGIN_OPTS="${BOB_CONFIG_PLUGIN_OPTS} -p ${i}"
+    # Split ':' separated paths and store them in a PLUGINS array
+    IFS=':' read -ra PLUGINS <<< "$BOB_CONFIG_PLUGINS"
+    for i in "${PLUGINS[@]}"; do
+        BOB_CONFIG_PLUGIN_OPTS="${BOB_CONFIG_PLUGIN_OPTS} -p \'${i}\'"
     done
 
     source "${BOB_DIR}/bob.bootstrap.version"
