@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -419,13 +419,9 @@ func nonRelPathString(path android.Path) string {
 }
 
 func pathsForImplicitSrcs(ctx android.ModuleContext, source android.Path, props []string) (paths android.Paths) {
-	if _, ok := source.(android.ModuleGenPath); ok {
-		// Remove the build directory from the path since android.PathForOutput is going to add it
-		nonRelString := android.Rel(ctx, ctx.Config().BuildDir(), nonRelPathString(source))
-		// Convert to android.OutputPath
-		nonRel := android.PathForOutput(ctx, nonRelString)
+	if mgp, ok := source.(android.ModuleGenPath); ok {
 		for _, prop := range props {
-			paths = append(paths, nonRel.Join(ctx, prop))
+			paths = append(paths, mgp.InSameDir(ctx, prop))
 		}
 	} else {
 		nonRel := nonRelPathString(source)
