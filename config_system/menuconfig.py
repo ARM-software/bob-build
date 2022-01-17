@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -447,7 +447,7 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
             return (True, value)
         elif c == 27:
             return (False, None)
-        elif c == curses.KEY_BACKSPACE:
+        elif c in (curses.KEY_BACKSPACE, 127):
             if cursor_pos > 0:
                 cursor_pos -= 1
                 value = value[:cursor_pos] + value[cursor_pos + 1:]
