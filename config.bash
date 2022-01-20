@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ for arg in "$@"
 do
 
     if [[ $arg =~ "=" ]];then
-        ARG_TARGET+=("${arg}")
+        ARG_TARGET+=(\'${arg}\')
     elif [ "${arg:0:1}" == "/" ];then
         ARG_TARGET+=("${arg}")
     else
