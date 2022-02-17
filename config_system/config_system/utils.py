@@ -1,4 +1,4 @@
-# Copyright 2019 Arm Limited.
+# Copyright 2019, 2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,7 @@
 import contextlib
 import logging
 import os
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 
 logger = logging.getLogger(__name__)
