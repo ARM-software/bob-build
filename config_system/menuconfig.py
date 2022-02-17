@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0

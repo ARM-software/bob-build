@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '2.7', '3.x' ]
+        python: [ '3.x' ]
         os: [ ubuntu-latest ]
         include:
           - python: '3.x'
@@ -153,9 +153,6 @@ jobs:
         os: [ ubuntu-latest ]
         python: [ '3.x' ]
         include:
-          - go: '1.11'
-            os: ubuntu-latest
-            python: '2.7'
           - go: '1.13'
             os: macos-latest
             python: '3.x'
