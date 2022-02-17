@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,13 +43,13 @@ fi
 # Refresh the configuration. This means that options changed or added since the
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
-python "${BOB_DIR}/config_system/generate_config_json.py" \
+python3 "${BOB_DIR}/config_system/generate_config_json.py" \
        "${CONFIG_FILE}" --database "${SRCDIR}/Mconfig" \
        --json "${CONFIG_JSON}" ${BOB_CONFIG_OPTS}
 
 # Get a hash of the environment so we can detect if we need to
 # regenerate the build.ninja
-python "${BOB_DIR}/scripts/env_hash.py" "${BUILDDIR}/.env.hash"
+python3 "${BOB_DIR}/scripts/env_hash.py" "${BUILDDIR}/.env.hash"
 
 # If enabled, the following environment variables optimize the performance
 # of ccache. Otherwise they have no effect.

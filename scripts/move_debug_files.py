@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# Copyright 2019 Arm Limited.
+# Copyright 2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,6 @@ file. You may need to set -Wl,--build-id on the link command line. For
 more information see
 https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
 """
-
-from __future__ import print_function
 
 import argparse
 import errno
