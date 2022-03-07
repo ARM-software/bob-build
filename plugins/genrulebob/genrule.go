@@ -531,7 +531,8 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	outs := []android.OptionalPath{}
 
 	// reference installed files instead of built files will ensure triggering install rule after build rule
-	if m.Properties.Install_path != nil {
+	// but only for A12 and below. A13 Soong handles the install rules.
+	if m.Properties.Install_path != nil && !soong_compat.SoongSupportsMkInstallTargets() {
 		for _, outfile := range m.installedOuts {
 			outs = append(outs, android.OptionalPathForPath(outfile))
 		}
@@ -544,11 +545,18 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	}
 
 	for _, outfile := range outs {
+		subname := ""
+
+		// if module has more than one output, keep LOCAL_MODULE unique
+		if len(outs) > 1 {
+			subname = "__" + utils.FlattenPath(outfile.Path().Rel())
+		}
+
 		entries = append(entries, android.AndroidMkEntries{
 			Class:      "DATA",
 			OutputFile: outfile,
 			// if module has more than one output, keep LOCAL_MODULE unique
-			SubName: "__" + utils.FlattenPath(outfile.Path().Rel()),
+			SubName: subname,
 			Include: "$(BUILD_PREBUILT)",
 			ExtraEntries: soong_compat.ConvertAndroidMkExtraEntriesFunc(
 				func(entries *android.AndroidMkEntries) {

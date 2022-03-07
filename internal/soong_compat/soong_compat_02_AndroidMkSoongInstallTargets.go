@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2021-2022 Arm Limited.
+ * Copyright 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,17 +23,16 @@ import (
 	"android/soong/android"
 )
 
-// This definition is compatible with Soong SHAs _before_ `aa2555387 Add ctx to
-// AndroidMkExtraEntriesFunc` It requires Soong SHA `0b0e1b980 AndroidMkEntries()
-// returns multiple AndroidMkEntries structs` or later.
+// This definition is compatible with Soong SHAs after `aa2555387 Add ctx to
+// AndroidMkExtraEntriesFunc`
 func ConvertAndroidMkExtraEntriesFunc(f AndroidMkExtraEntriesFunc) []android.AndroidMkExtraEntriesFunc {
 	return []android.AndroidMkExtraEntriesFunc{
-		func(entries *android.AndroidMkEntries) {
+		func(ctx android.AndroidMkExtraEntriesContext, entries *android.AndroidMkEntries) {
 			f(entries)
 		},
 	}
 }
 
 func SoongSupportsMkInstallTargets() bool {
-	return false
+	return true
 }
