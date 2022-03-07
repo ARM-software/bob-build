@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -293,6 +293,11 @@ func getSoongCompatFile(config *bobConfig) string {
 		text:     "\ntype AndroidMkExtraEntriesContext interface {\n",
 	}
 
+	androidMkSoongInstallTargetsMatcher := codeMatcher{
+		filename: "build/soong/android/androidmk.go",
+		text:     "a.SetPath(\"LOCAL_SOONG_INSTALLED_MODULE\", base.katiInstalls[len(base.katiInstalls)-1].to)\n",
+	}
+
 	// List of compatibility layers, ordered from oldest Soong version
 	// support to newest.
 	allSoongCompats := []compatVersion{
@@ -312,6 +317,16 @@ func getSoongCompatFile(config *bobConfig) string {
 			},
 			[]int{12},
 			"soong_compat_01_AndroidMkExtraEntries_ctx.go",
+		},
+		// Soong install Mk targets have been added in 6301c3c
+		{
+			[]codeMatcher{
+				listOfAndroidMkEntriesMatcher,
+				androidMkExtraEntriesContextMatcher,
+				androidMkSoongInstallTargetsMatcher,
+			},
+			[]int{13},
+			"soong_compat_02_AndroidMkSoongInstallTargets.go",
 		},
 	}
 

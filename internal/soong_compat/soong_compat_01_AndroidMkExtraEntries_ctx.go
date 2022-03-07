@@ -1,7 +1,7 @@
 // +build soong
 
 /*
- * Copyright 2021 Arm Limited.
+ * Copyright 2021-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,4 +31,8 @@ func ConvertAndroidMkExtraEntriesFunc(f AndroidMkExtraEntriesFunc) []android.And
 			f(entries)
 		},
 	}
+}
+
+func SoongSupportsMkInstallTargets() bool {
+	return false
 }
