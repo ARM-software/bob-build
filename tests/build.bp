@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,7 +75,6 @@ bob_alias {
         "bob_test_generate_source",
         "bob_test_generated_headers",
         "bob_test_globs",
-        "bob_test_implicit_outs",
         "bob_test_install_deps",
         "bob_test_kernel_module",
         "bob_test_match_source",

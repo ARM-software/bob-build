@@ -250,12 +250,6 @@ SRC=tests/resources/main.c
 UPDATE=(${build_dir}/install/testcases/y/main.c)
 check_dep_updated "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
-# implicit output
-SRC=tests/implicit_outs/input.in
-UPDATE=(${build_dir}/target/executable/build_implicit_out
-        ${build_dir}/target/executable/include_implicit_header)
-check_dep_updated "implicit output" "${build_dir}" "${SRC}" "${UPDATE[@]}"
-
 if [ "$OS" != "OSX" ] ; then
     # simple version script
     SRC=tests/version_script/exports0.map

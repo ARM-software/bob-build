@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -133,7 +133,6 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
-	m.AddStringList("implicit_outs", gs.Properties.Implicit_outs)
 
 	populateCommonProps(&gs.generateCommon, mctx, m)
 
@@ -158,7 +157,6 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 	gr.AddString("match", strings.Replace(ts.Properties.TransformSourceProps.Out.Match, "\\", "\\\\", -1))
 	gr.AddStringList("replace", ts.Properties.TransformSourceProps.Out.Replace)
 	gr.AddStringList("implicit_srcs", ts.Properties.TransformSourceProps.Out.Implicit_srcs)
-	gr.AddStringList("implicit_outs", ts.Properties.TransformSourceProps.Out.Implicit_outs)
 
 	populateCommonProps(&ts.generateCommon, mctx, m)
 

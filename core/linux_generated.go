@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,44 +76,51 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 	//print("Keys:" + strings.Join(argkeys, ",") + "\n")
 	rule := ctx.Rule(pctx, "gen_"+m.Name(), ruleparams,
-		append(utils.SortedKeys(args), "depfile", "rspfile")...)
+		append(utils.SortedKeys(args), "depfile", "rspfile", "_out_")...)
 
 	for _, inout := range inouts {
-		if inout.depfile != "" && len(inout.out) > 1 {
-			utils.Die("Module %s uses a depfile with multiple outputs", ctx.ModuleName())
-		}
-
+		args["_out_"] = utils.Join(inout.out)
 		if inout.rspfile != "" {
 			args["rspfile"] = inout.rspfile
 		}
 
-		buildparams := blueprint.BuildParams{
-			Rule:      rule,
-			Inputs:    inout.in,
-			Outputs:   inout.out,
-			Implicits: append(inout.implicitSrcs, implicits...),
-			Args:      args,
-			Optional:  true,
+		mainRuleOuts := inout.out
+		mainRuleImplicitOuts := inout.implicitOuts
+		deps := blueprint.DepsNone
+
+		// ninja currently does not support the case when depfile is
+		// defined and multiple outputs at the same time. So adjust the
+		// main rule to have a single output, and link the remaining
+		// outputs using a separate rule.
+		if inout.depfile != "" && (len(inout.out)+len(inout.implicitOuts)) > 1 {
+			// No-op rule linking the extra outputs to the main
+			// output. Update the extra outputs' mtime in case the
+			// script actually creates the extra outputs first.
+
+			allOutputs := append(mainRuleOuts, mainRuleImplicitOuts...)
+			mainRuleOuts = allOutputs[0:1]
+			mainRuleImplicitOuts = []string{}
+
+			ctx.Build(pctx,
+				blueprint.BuildParams{
+					Rule:     touchRule,
+					Inputs:   mainRuleOuts,
+					Outputs:  allOutputs[1:],
+					Optional: true,
+				})
+			deps = blueprint.DepsGCC
 		}
 
-		// ninja currently does not support case when depfile is defined and
-		// multiple outputs at the same time. For implicit outputs fallback to using a separate rule.
-		if inout.depfile != "" {
-			if len(inout.implicitOuts) > 0 {
-				// No-op rule linking implicit outputs to the main output. Touch the implicit
-				// outputs in case the script actually creates the implicit outputs first.
-				ctx.Build(pctx,
-					blueprint.BuildParams{
-						Rule:     touchRule,
-						Inputs:   inout.out,
-						Outputs:  inout.implicitOuts,
-						Optional: true,
-					})
-			}
-			buildparams.Depfile = inout.depfile
-			buildparams.Deps = blueprint.DepsGCC
-		} else {
-			buildparams.ImplicitOutputs = inout.implicitOuts
+		buildparams := blueprint.BuildParams{
+			Rule:            rule,
+			Inputs:          inout.in,
+			Outputs:         mainRuleOuts,
+			ImplicitOutputs: mainRuleImplicitOuts,
+			Implicits:       append(inout.implicitSrcs, implicits...),
+			Args:            args,
+			Optional:        true,
+			Depfile:         inout.depfile,
+			Deps:            deps,
 		}
 
 		ctx.Build(pctx, buildparams)

@@ -332,6 +332,12 @@ func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []andr
 	return
 }
 
+var touchRule = pctx.StaticRule("touch",
+	blueprint.RuleParams{
+		Command:     "touch -c $out",
+		Description: "touch $out",
+	})
+
 func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[string]string) {
 	ruleparams := blueprint.RuleParams{
 		Command: m.Properties.Cmd,
@@ -362,14 +368,38 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 			args["rspfile"] = io.rspfile.String()
 		}
 
+		mainRuleOuts := io.out
+		mainRuleImplicitOuts := io.implicitOuts
+
+		// ninja currently does not support the case when depfile is
+		// defined and multiple outputs at the same time. So adjust the
+		// main rule to have a single output, and link the remaining
+		// outputs using a separate rule.
+		if m.Properties.Depfile && (len(io.out)+len(io.implicitOuts)) > 1 {
+			// No-op rule linking the extra outputs to the main
+			// output. Update the extra outputs' mtime in case the
+			// script actually creates the extra outputs first.
+
+			allOutputs := append(mainRuleOuts, mainRuleImplicitOuts...)
+			mainRuleOuts = allOutputs[0:1]
+			mainRuleImplicitOuts = []android.WritablePath{}
+
+			ctx.Build(pctx,
+				android.BuildParams{
+					Rule:    touchRule,
+					Inputs:  mainRuleOuts.Paths(),
+					Outputs: allOutputs[1:],
+				})
+		}
+
 		ctx.Build(pctx,
 			android.BuildParams{
 				Rule:            rule,
 				Description:     "gen " + ctx.ModuleName(),
 				Inputs:          io.in,
 				Implicits:       io.implicitSrcs,
-				Outputs:         io.out,
-				ImplicitOutputs: io.implicitOuts,
+				Outputs:         mainRuleOuts,
+				ImplicitOutputs: mainRuleImplicitOuts,
 				Args:            args,
 				Depfile:         io.depfile,
 			})

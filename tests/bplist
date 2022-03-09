@@ -21,7 +21,6 @@
 ./generate_source/build.bp
 ./generated_headers/build.bp
 ./globs/build.bp
-./implicit_outs/build.bp
 ./install_deps/build.bp
 ./kernel_module/build.bp
 ./kernel_module/module1/build.bp

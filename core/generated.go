@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -345,9 +345,6 @@ type GenerateSourceProps struct {
 	Implicit_srcs []string
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
-	// List of implicit outputs. Implicit outputs are output files that do not get
-	// mentioned on the command line.
-	Implicit_outs []string
 }
 
 func (g *GenerateSourceProps) getImplicitSources(ctx blueprint.BaseModuleContext) []string {
@@ -535,6 +532,9 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 
 	// Args can contain other parameters, so replace that immediately
 	cmd := strings.Replace(proptools.String(m.Properties.Cmd), "${args}", strings.Join(m.Properties.Args, " "), -1)
+	// Ninja reserves the `${out}` property, but Bob needs it to contain all
+	// outputs, not just explicit ones. So replace that too.
+	cmd = strings.Replace(cmd, "${out}", "${_out_}", -1)
 
 	if proptools.Bool(m.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
 		utils.Die("%s depfile is true, but ${depfile} not used in cmd", m.Name())
@@ -585,16 +585,14 @@ func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generat
 // The inputs are full paths (possibly using build system variables).
 //
 // The outputs are relative to the output directory. This applies
-// to out, implicitOuts, depfile and rspfile. The output directory (if
-// needed) needs to be added in by the backend specific
-// GenerateBuildAction()
+// to out, depfile and rspfile. The output directory (if needed) needs to be
+// added in by the backend specific GenerateBuildAction()
 func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
 	io.in = append(getBackendPathsInSourceDir(g, m.getSources(ctx)),
 		getGeneratedFiles(ctx)...)
 	io.out = m.Properties.Out
 	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
-	io.implicitOuts = m.Properties.Implicit_outs
 
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile
@@ -624,9 +622,6 @@ type TransformSourceProps struct {
 		// List of implicit sources. Implicit sources are input files that do not get mentioned on the command line,
 		// and are not specified in the explicit sources.
 		Implicit_srcs []string
-		// List of implicit outputs, which can use capture groups from match.
-		// Implicit outputs are output files that do not get mentioned on the command line.
-		Implicit_outs []string
 	}
 }
 
@@ -636,11 +631,6 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 	for _, rep := range tsp.Out.Replace {
 		out := filepath.Join(re.ReplaceAllString(source.localPath(), rep))
 		io.out = append(io.out, out)
-	}
-
-	for _, implOut := range tsp.Out.Implicit_outs {
-		implOut = filepath.Join(re.ReplaceAllString(source.localPath(), implOut))
-		io.implicitOuts = append(io.implicitOuts, implOut)
 	}
 
 	if proptools.Bool(depfile) {
@@ -687,9 +677,8 @@ func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBac
 // The inputs are full paths (possibly using build system variables).
 //
 // The outputs are relative to the output directory. This applies
-// to out, implicitOuts, depfile and rspfile. The output directory (if
-// needed) needs to be added in by the backend specific
-// GenerateBuildAction()
+// to out, depfile and rspfile. The output directory (if needed) needs to be
+// added in by the backend specific GenerateBuildAction()
 func (m *transformSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var inouts []inout
 	re := regexp.MustCompile(m.Properties.Out.Match)
@@ -746,8 +735,8 @@ func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{})
 
 // ModuleContext Helpers
 
-// Return the outputs() and implicitOutputs() of all GeneratedSource dependencies of
-// the current module. The current module can be generated or a library, and the
+// Return the outputs() of all GeneratedSource dependencies of the current
+// module. The current module can be generated or a library, and the
 // dependencies can be anything implementing DependentInterface (so "generated"
 // is a misnomer, because this includes libraries, too).
 func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
