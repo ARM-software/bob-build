@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020,2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ package bpwriter
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -66,6 +67,14 @@ type Group interface {
 	AddOptionalBool(name string, value *bool)
 	AddStringList(name string, list []string)
 	AddStringCmd(name string, argLists ...[]string)
+	AddInt(name string, value int)
+	NewGroup(name string) Group
+	NewGroupList(name string) GroupList
+}
+
+// Group list cannot have inner list. Only group is able
+// to have inner group list
+type GroupList interface {
 	NewGroup(name string) Group
 }
 
@@ -81,9 +90,32 @@ type group struct {
 	props []property
 	// Nested properties
 	groups []*group
+	// A list of groups
+	groupsList []*groupList
+}
+
+// Represent groups in a list.
+// Note that group will be rendered without group name.
+//
+// gropupListName: [
+//     {
+//          key1: value1,
+//     },
+//     {
+//          key2: value2,
+//     },
+// ]
+type groupList struct {
+	// The name of this group list
+	name string
+	// Depth
+	depth int
+	// A list of groups
+	groups []*group
 }
 
 var _ Group = (*group)(nil)
+var _ GroupList = (*groupList)(nil)
 
 func (g *group) addProp(key, value string) {
 	p := property{
@@ -146,6 +178,10 @@ func (g *group) AddStringCmd(name string, argLists ...[]string) {
 	g.AddString(name, utils.Join(argLists...))
 }
 
+func (g *group) AddInt(name string, value int) {
+	g.addProp(name, strconv.Itoa(value))
+}
+
 // Create a nested group
 func (g *group) NewGroup(name string) Group {
 	g0 := group{}
@@ -153,6 +189,32 @@ func (g *group) NewGroup(name string) Group {
 	g0.depth = g.depth + 1
 	g.groups = append(g.groups, &g0)
 	return &g0
+}
+
+// Create a nested list of groups
+func (g *group) NewGroupList(name string) GroupList {
+	gl := groupList{}
+	gl.name = name
+	gl.depth = g.depth + 1
+	g.groupsList = append(g.groupsList, &gl)
+	return &gl
+}
+
+func (gl *groupList) NewGroup(name string) Group {
+	g := group{}
+	g.name = name
+	g.depth = gl.depth + 1
+	gl.groups = append(gl.groups, &g)
+	return &g
+}
+
+func (gl *groupList) render(b *strings.Builder) {
+	indent := indentString(gl.depth)
+	for _, g := range gl.groups {
+		b.WriteString(indent + "{\n")
+		g.render(b)
+		b.WriteString(indent + "},\n")
+	}
 }
 
 // Render the property group into a string
@@ -165,6 +227,11 @@ func (g *group) render(b *strings.Builder) {
 		b.WriteString(indent + group.name + ": {\n")
 		group.render(b)
 		b.WriteString(indent + "},\n")
+	}
+	for _, gl := range g.groupsList {
+		b.WriteString(indent + gl.name + ": [\n")
+		gl.render(b)
+		b.WriteString(indent + "],\n")
 	}
 }
 
@@ -217,8 +284,16 @@ func (m *module) AddStringCmd(name string, argLists ...[]string) {
 	m.group.AddStringCmd(name, argLists...)
 }
 
+func (m *module) AddInt(name string, value int) {
+	m.group.AddInt(name, value)
+}
+
 func (m *module) NewGroup(name string) Group {
 	return m.group.NewGroup(name)
+}
+
+func (m *module) NewGroupList(name string) GroupList {
+	return m.group.NewGroupList(name)
 }
 
 // Render the module into a string
