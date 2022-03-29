@@ -46,7 +46,7 @@ func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blu
 	}
 }
 
-func expandCmd(gc *generateCommon, s string, moduleDir string) string {
+func expandCmd(gc *generateCommon, mctx blueprint.ModuleContext, s string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
@@ -61,7 +61,7 @@ func expandCmd(gc *generateCommon, s string, moduleDir string) string {
 			// directory (= the root of the Android tree). This is required because
 			// the result will be used directly in `cmd`, rather than being
 			// included in a `srcs` field which would be processed further.
-			return filepath.Join("${module_dir}", moduleDir)
+			return filepath.Join("${module_dir}", mctx.ModuleDir())
 		case "bob_config":
 			if !proptools.Bool(gc.Properties.Depfile) {
 				utils.Die("%s references Bob config but depfile not enabled. "+
@@ -77,6 +77,11 @@ func expandCmd(gc *generateCommon, s string, moduleDir string) string {
 		case "bob_config_opts":
 			return configOpts
 		default:
+			if strings.HasPrefix(s, "tool ") {
+				toolPath := strings.TrimSpace(strings.TrimPrefix(s, "tool "))
+				toolPath = filepath.Join(projectModuleDir(mctx), toolPath)
+				return "${tool " + toolPath + "}"
+			}
 			return "${" + s + "}"
 		}
 	})
@@ -86,11 +91,11 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
-	cmd = expandCmd(gc, cmd, mctx.ModuleDir())
+	cmd = expandCmd(gc, mctx, cmd)
 	m.AddString("cmd", cmd)
 
-	if gc.Properties.Tool != nil {
-		m.AddString("tool", *gc.Properties.Tool)
+	if len(gc.Properties.Tools) > 0 {
+		m.AddStringList("tools", gc.Properties.Tools)
 	}
 	if gc.Properties.Rsp_content != nil {
 		m.AddString("rsp_content", *gc.Properties.Rsp_content)

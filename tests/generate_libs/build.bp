@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,7 +178,7 @@ bob_generate_source {
     name: "check_renamed_gen_library",
     out: ["success.txt"],
     generated_sources: ["binary_linked_to_gen_shared_rename"],
-    tool: "check_library_link.py",
+    tools: ["check_library_link.py"],
     cmd: "${tool} --links-to libblah_shared2 ${args} ${in} && touch ${out}",
     osx: {
         args: ["--read-deps-method otool"],

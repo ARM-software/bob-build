@@ -42,7 +42,7 @@ bob_generate_source {
     name: "wrapcc_config",
     outs: ["wrapcc_config.json"],
 
-    tool: "wrapcc_config.py",
+    tools: ["wrapcc_config.py"],
     cmd: "${tool}",
 }
 

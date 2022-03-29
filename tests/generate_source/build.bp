@@ -28,7 +28,7 @@ bob_generate_source {
     ],
     out: ["single.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
@@ -41,7 +41,7 @@ bob_generate_source {
     ],
     out: ["multiple_in.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
@@ -55,7 +55,7 @@ bob_generate_source {
         "multiple_out2.cpp",
     ],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
@@ -71,7 +71,7 @@ bob_generate_source {
         out: ["multiple_in_out2.cpp"],
     },
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
@@ -87,7 +87,7 @@ bob_generate_source {
 
     out: ["level_1_single.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in single.cpp",
 }
 
@@ -97,7 +97,7 @@ bob_generate_source {
 
     out: ["level_2_single.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_1_single.cpp",
 }
 
@@ -107,7 +107,7 @@ bob_generate_source {
 
     out: ["level_3_single.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_2_single.cpp",
 }
 
@@ -120,7 +120,7 @@ bob_generate_source {
     ],
     out: ["extra_single.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in level_2_single.cpp",
 }
 
@@ -139,7 +139,7 @@ bob_generate_source {
     ],
     out: ["deps.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} ${generate_source_single_out} --out ${out} --expect-in before_generate.in single.cpp",
 }
 
@@ -152,7 +152,7 @@ bob_generate_source {
     ],
     out: ["deps2.cpp"],
 
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
 }
 
@@ -186,7 +186,7 @@ bob_generate_source {
     srcs: ["depgen1.in"],
     out: ["output.txt"],
     depfile: true,
-    tool: "gen_with_dep.py",
+    tools: ["gen_with_dep.py"],
     cmd: "${tool} -o ${out} -d ${depfile} ${in}",
     build_by_default: true,
 }
@@ -199,7 +199,7 @@ bob_generate_source {
         "out.h"
     ],
     depfile: true,
-    tool: "gen_with_dep.py",
+    tools: ["gen_with_dep.py"],
     cmd: "${tool} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} ${in}",
     build_by_default: true,
 }
@@ -216,7 +216,7 @@ bob_generate_source {
     name: "gen_source_globbed_implicit_sources",
     implicit_srcs: ["*.implicit.src"],
     out: ["validate_globbed_implicit_dependency.c"],
-    tool: "join_srcs.py",
+    tools: ["join_srcs.py"],
     cmd: "python ${tool} --src-dir ${module_dir} --use-a --out ${out}",
     build_by_default: true,
 }
@@ -229,7 +229,7 @@ bob_generate_source {
         "bn.src",
     ],
     out: ["validate_globbed_exclude_implicit_dependency.c"],
-    tool: "join_srcs.py",
+    tools: ["join_srcs.py"],
     cmd: "python ${tool} --src-dir ${module_dir} --use-c --out ${out}",
     build_by_default: true,
 }

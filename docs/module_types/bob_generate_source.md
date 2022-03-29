@@ -35,7 +35,7 @@ bob_generate_source {
     add_to_alias: ["bob_alias.name"],
 
     cmd: "python ${tool} ${args} ${in} -d ${depfile}",
-    tool: "my_script.py",
+    tools: ["my_script.py"],
 
     host_bin: "clang-tblgen",
     tags: ["optional"],

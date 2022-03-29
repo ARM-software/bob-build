@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,7 @@ bob_transform_source {
         replace: ["out$1.txt"],
     },
     rsp_content: "${out}",
-    tool: "rspcat.py",
+    tools: ["rspcat.py"],
     cmd: "${tool} --input ${in} --output_list ${rspfile}",
 }
 
@@ -42,7 +42,7 @@ bob_generate_source {
     generated_sources: ["generate_multiple_sources"],
     out: ["merged.c"],
     rsp_content: "${in}",
-    tool: "rspcat.py",
+    tools: ["rspcat.py"],
     cmd: "${tool} --input_list ${rspfile} --output ${out}",
 }
 

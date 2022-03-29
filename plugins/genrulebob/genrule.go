@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"android/soong/android"
@@ -39,7 +40,7 @@ type commonProps struct {
 	Export_gen_include_dirs []string
 	Cmd                     string
 	Host_bin                string
-	Tool                    string
+	Tools                   []string
 	Depfile                 bool
 	Generated_deps          []string
 	Generated_sources       []string
@@ -535,13 +536,72 @@ func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args ma
 		implicits = append(implicits, hostBin.Path())
 	}
 
-	if m.Properties.Tool != "" {
-		tool := android.PathForModuleSrc(ctx, m.Properties.Tool)
-		args["tool"] = tool.String()
-		implicits = append(implicits, tool)
+	cmd, toolArgs, dependentTools := m.processCmdTools(ctx, m.Properties.Cmd)
+
+	m.Properties.Cmd = cmd
+	for k, v := range toolArgs {
+		args[k] = v
 	}
 
+	implicits = append(implicits, dependentTools...)
+
 	return
+}
+
+func (m *genrulebobCommon) processCmdTools(ctx android.ModuleContext, cmd string) (string, map[string]string, []android.Path) {
+
+	dependentTools := []android.Path{}
+	toolsLabels := map[string]android.Path{}
+	args := map[string]string{}
+	firstTool := ""
+
+	addToolsLabel := func(label string, tool android.Path) {
+		if firstTool == "" {
+			firstTool = label
+		}
+		if _, exists := toolsLabels[label]; !exists {
+			toolsLabels[label] = tool
+		} else {
+			ctx.ModuleErrorf("multiple locations for label %q: %q and %q (do you have duplicate tools entries?)",
+				label, toolsLabels[label], tool)
+		}
+	}
+
+	if len(m.Properties.Tools) > 0 {
+
+		for _, tool := range m.Properties.Tools {
+			toolPath := android.PathForModuleSrc(ctx, tool)
+			addToolsLabel(tool, toolPath)
+			dependentTools = append(dependentTools, toolPath)
+		}
+	}
+
+	// add first tool for ${tool}
+	if utils.ContainsArg(cmd, "tool") {
+		args["tool"] = toolsLabels[firstTool].String()
+	}
+
+	r := regexp.MustCompile(`\${tool ([^{}]+)}`)
+
+	matches := r.FindAllString(cmd, -1)
+	var idx = 1
+
+	for _, match := range matches {
+		submatch := r.FindStringSubmatch(match)
+
+		label := submatch[1]
+
+		if toolPath, ok := toolsLabels[label]; ok {
+			toolKey := "tool_" + strconv.Itoa(idx)
+			cmd = strings.Replace(cmd, match, "${"+toolKey+"}", -1)
+			args[toolKey] = toolPath.String()
+			idx++
+		} else {
+			ctx.ModuleErrorf("unknown tool %q in tools.", submatch[1])
+		}
+	}
+
+	return cmd, args, dependentTools
 }
 
 func (m *genrulebob) GenerateAndroidBuildActions(ctx android.ModuleContext) {

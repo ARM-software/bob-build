@@ -1,5 +1,5 @@
 /*
- * Copyright 2018,2020 Arm Limited.
+ * Copyright 2018,2020,2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ bob_generate_source {
     name: "bob_test_flag_defaults_host",
     flag_defaults: ["bob_test_flag_defaults_second"],
     cmd: check_cmd,
-    tool: "check_cflags.py",
+    tools: ["check_cflags.py"],
     args: ["--check-host"],
     out: ["flags.txt"],
     target: "host",
@@ -55,7 +55,7 @@ bob_generate_source {
     name: "bob_test_flag_defaults_target",
     flag_defaults: ["bob_test_flag_defaults_second"],
     cmd: check_cmd,
-    tool: "check_cflags.py",
+    tools: ["check_cflags.py"],
     args: ["--check-target"],
     out: ["flags.txt"],
     target: "target",

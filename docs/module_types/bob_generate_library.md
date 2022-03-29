@@ -47,7 +47,7 @@ bob_generate_shared_library {
     add_to_alias: ["bob_alias.name"],
 
     cmd: "python ${tool} ${args} ${in}",
-    tool: "my_script.py",
+    tools: ["my_script.py"],
 
     host_bin: "name_of_host_binary",
     tags: ["optional"],

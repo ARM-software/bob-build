@@ -1,0 +1,6 @@
+#include <stdio.h>
+
+int main() {
+    printf("\'%s\' created!\n", "%%template%%");
+    return 0;
+}
