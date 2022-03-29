@@ -38,7 +38,7 @@ Note that the above module does not create a dependency on
 on the compilers and linkers used in C compilation.
 
 When scripts within the project are used to generate code, use the
-`tool` property to add a dependency on the script.
+`tools` property to add a dependency on the script.
 
 ```
 bob_generate_source {
@@ -46,7 +46,7 @@ bob_generate_source {
     srcs: ["custom_protocol.xml"],
     outs: ["code/wayland_server_custom_protocol.c"],
 
-    tool: "gen_wayland.py",
+    tools: ["gen_wayland.py"],
     args: ["code"],
     cmd: ["${tool} ${args} ${in} ${out}"],
 }
@@ -170,7 +170,7 @@ bob_transform_source {
 
     export_gen_include_dirs: ["inc"],
 
-    tool: "obfuscate.py",
+    tools: ["obfuscate.py"],
     cmd: "${tool} -o ${out} ${in}",
 }
 
@@ -256,7 +256,7 @@ bob_generate_source {
     outs: ["code/wayland_server_custom_protocol.c"],
     depfile: true,
 
-    tool: "gen_wayland.py",
+    tools: ["gen_wayland.py"],
     args: [
         "code",
         "-d",
@@ -289,7 +289,7 @@ bob_transform_source {
     depfile: true,
     export_gen_include_dirs: ["inc"],
 
-    tool: "obfuscate.py",
+    tools: ["obfuscate.py"],
     cmd: "${tool} -d ${depfile} -o ${out} ${in}",
 }
 
@@ -341,7 +341,7 @@ bob_transform_source {
     depfile: true,
     export_gen_include_dirs: ["inc"],
 
-    tool: "obfuscate.py",
+    tools: ["obfuscate.py"],
     cmd: "${tool} -d ${depfile} -o ${out} ${in}",
 }
 
@@ -386,7 +386,7 @@ bob_generate_source {
         "inc/x.h",
     ],
 
-    tool: "x_generator.py",
+    tools: ["x_generator.py"],
     cmd: "${tool} -c ${gen_dir}/src/x.cpp -h ${gen_dir}/src/x.h ${templates_out} --use x.in",
 }
 
@@ -398,7 +398,7 @@ bob_generate_source {
         "inc/y.h",
     ],
 
-    tool: "y_generator.py",
+    tools: ["y_generator.py"],
     cmd: "${tool} -c ${gen_dir}/src/y.cpp -h ${gen_dir}/src/y.h ${templates_out} --use y.in",
 }
 
@@ -558,7 +558,7 @@ bob_generate_source {
     srcs: ["file1.in", ..., "file999.in"],
     generated_sources: ["module_generating_many_files"],
     out: ["combined.c"],
-    tool: "combine.sh",
+    tools: ["combine.sh"],
     rsp_content: "${in}",
     cmd: "${tool} --input_list ${rspfile} --out ${out}",
 }

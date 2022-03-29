@@ -250,6 +250,12 @@ SRC=tests/resources/main.c
 UPDATE=(${build_dir}/install/testcases/y/main.c)
 check_dep_updated "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
+# using multiple tools for source generation
+SRC=tests/multiple_tools/template.in
+UPDATE=(${build_dir}/gen/multiple_tools_generate_sources/tool_first_out.c
+        ${build_dir}/gen/multiple_tools_generate_sources/tool_second_out.c)
+check_dep_updated "generate source with multiple tools" "${build_dir}" "${SRC}" "${UPDATE[@]}"
+
 if [ "$OS" != "OSX" ] ; then
     # simple version script
     SRC=tests/version_script/exports0.map

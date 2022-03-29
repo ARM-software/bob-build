@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Arm Limited.
+ * Copyright 2019-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ bob_generate_source {
         "lib_st_output",
     ],
     out: ["generated_output"],
-    tool: "verify.py",
+    tools: ["verify.py"],
     args: [
         "python ${tool} --out='${binary_output_out}' --expected='bob_output'",
         "&& python ${tool} --out='${lib_sh_output_out}' --expected='libshared_output' --shared",

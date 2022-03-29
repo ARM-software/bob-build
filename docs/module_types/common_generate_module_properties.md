@@ -22,7 +22,8 @@ available substitutions are:
 - `${depfile}` - the path for the generated dependency file
 - `${rspfile}` - the path to the RSP file, if `rsp_content` is set
 - `${args}` - the value of `args` - space-delimited
-- `${tool}` - the path to the script specified by `tool`
+- `${tool}` - the path to the first script specified in `tools`
+- `${tool <label>}` - the path to the script with name `<label>` specified in `tools`
 - `${host_bin}` - the path to the binary specified by `host_bin`
 - `${module_dir}` - the path this module's source directory
 - `${gen_dir}` - the path to the output directory for this module
@@ -49,10 +50,11 @@ The [`match_srcs`](../strings.md#match_srcs) function can be used in
 this property to reference files listed in `srcs`.
 
 ----
-### **bob_generated.tool** (required)
-A path to the tool that is to be used in `cmd`. If `${tool}` is in
+### **bob_generated.tools** (required)
+A path to the tools that are to be used in `cmd`. If `${tool}` is in
 the command variable, then this will be replaced with the path to
-this tool.
+the first tool on the list. To refer to the other tools provide its name
+as `${tool example.sh}` for the `example.sh` specified in the list.
 
 ----
 ### **bob_generated.host_bin** (optional)

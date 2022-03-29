@@ -26,6 +26,7 @@
 ./kernel_module/module1/build.bp
 ./kernel_module/module2/build.bp
 ./match_source/build.bp
+./multiple_tools/build.bp
 ./output/build.bp
 ./pgo/build.bp
 ./properties/build.bp

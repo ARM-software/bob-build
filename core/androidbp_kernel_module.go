@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +77,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	bpmod.AddStringList("generated_deps", generated_deps)
 	bpmod.AddStringList("out", l.outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})
-	bpmod.AddString("tool", kmod_build)
+	bpmod.AddStringList("tools", []string{kmod_build})
 	bpmod.AddBool("depfile", true)
 
 	// Generate the build command. Use the `stringParam` helper for options which

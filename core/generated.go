@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -78,22 +79,24 @@ type GenerateProps struct {
 
 	/* The command that is to be run for this source generation.
 	 * Substitutions can be made in the command, by using $name_of_var. A list of substitutions that can be used:
-	 * $gen_dir    - the path to the directory which belongs to this source generator
-	 * $in         - the path to the sources - space-delimited
-	 * $out        - the path to the targets - space-delimited
-	 * $depfile    - the path to generated dependency file
-	 * $args       - the value of "args" - space-delimited
-	 * $tool       - the path to the tool
-	 * $host_bin   - the path to the binary that is produced by the host_bin module
-	 * $(dep)_out  - the outputs of the generated_dep `dep`
-	 * $src_dir    - the path to the project source directory - this will be different than the build source directory
-	 *               for Android.
-	 * $module_dir - the path to the module directory */
+	 * $gen_dir      - the path to the directory which belongs to this source generator
+	 * $in           - the path to the sources - space-delimited
+	 * $out          - the path to the targets - space-delimited
+	 * $depfile      - the path to generated dependency file
+	 * $args         - the value of "args" - space-delimited
+	 * $tool         - the path to the tool
+	 * $tool <label> - the path to the tool with name <label>
+	 * $host_bin     - the path to the binary that is produced by the host_bin module
+	 * $(dep)_out    - the outputs of the generated_dep `dep`
+	 * $src_dir      - the path to the project source directory - this will be different than the build source directory
+	 *                 for Android.
+	 * $module_dir   - the path to the module directory */
 	Cmd *string
 
-	// A path to the tool that is to be used in cmd. If $tool is in the command variable, then this will be replaced.
-	// with the path to this tool
-	Tool *string
+	// A paths to the tool that are to be used in cmd. If $tool is in the command variable, then this will be replaced
+	// with the path to this tool. ${tool} refers to the first tool in a list. To reference
+	// other tool use index syntax ${tool <label>} (e.g. ${tool fixer.py} for `fixer.py` tool from list).
+	Tools []string
 
 	// Adds a dependency on a binary with `host_supported: true` which is used by this module.
 	// The path can be referenced in cmd as ${host_bin}.
@@ -517,12 +520,6 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 
 	dependents := getDependentArgsAndFiles(ctx, args)
 
-	if m.Properties.Tool != nil {
-		toolPath := getBackendPathInSourceDir(g, proptools.String(m.Properties.Tool))
-		args["tool"] = toolPath
-		dependents = append(dependents, toolPath)
-	}
-
 	hostBin, hostBinSharedLibs, hostTarget := m.hostBinOuts(ctx)
 	if hostBin != "" {
 		args["host_bin"] = hostBin
@@ -535,6 +532,13 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	// Ninja reserves the `${out}` property, but Bob needs it to contain all
 	// outputs, not just explicit ones. So replace that too.
 	cmd = strings.Replace(cmd, "${out}", "${_out_}", -1)
+	cmd, toolArgs, dependentTools := m.processCmdTools(ctx, cmd)
+
+	for k, v := range toolArgs {
+		args[k] = v
+	}
+
+	dependents = append(dependents, dependentTools...)
 
 	if proptools.Bool(m.Properties.Depfile) && !utils.ContainsArg(cmd, "depfile") {
 		utils.Die("%s depfile is true, but ${depfile} not used in cmd", m.Name())
@@ -549,6 +553,62 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	return cmd, args, dependents, hostTarget
 }
 
+func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string) (string, map[string]string, []string) {
+
+	dependentTools := []string{}
+	toolsLabels := map[string]string{}
+	args := map[string]string{}
+	firstTool := ""
+
+	addToolsLabel := func(label string, tool string) {
+		if firstTool == "" {
+			firstTool = label
+		}
+		if _, exists := toolsLabels[label]; !exists {
+			toolsLabels[label] = tool
+		} else {
+			ctx.ModuleErrorf("multiple locations for label %q: %q and %q (do you have duplicate tools entries?)",
+				label, toolsLabels[label], tool)
+		}
+	}
+
+	if len(m.Properties.Tools) > 0 {
+		g := getBackend(ctx)
+		for _, tool := range m.Properties.Tools {
+			toolPath := getBackendPathInSourceDir(g, tool)
+			addToolsLabel(tool, toolPath)
+			dependentTools = append(dependentTools, toolPath)
+		}
+	}
+
+	// add first tool for ${tool}
+	if utils.ContainsArg(cmd, "tool") {
+		args["tool"] = toolsLabels[firstTool]
+	}
+
+	r := regexp.MustCompile(`\${tool ([^{}]+)}`)
+
+	matches := r.FindAllString(cmd, -1)
+	var idx = 1
+
+	for _, match := range matches {
+		submatch := r.FindStringSubmatch(match)
+
+		label := filepath.Join(projectModuleDir(ctx), submatch[1])
+
+		if toolPath, ok := toolsLabels[label]; ok {
+			toolKey := "tool_" + strconv.Itoa(idx)
+			cmd = strings.Replace(cmd, match, "${"+toolKey+"}", -1)
+			args[toolKey] = toolPath
+			idx++
+		} else {
+			ctx.ModuleErrorf("unknown tool %q in tools.", submatch[1])
+		}
+	}
+
+	return cmd, args, dependentTools
+}
+
 func (m *generateCommon) getSources(ctx blueprint.BaseModuleContext) []string {
 	return m.Properties.getSources(ctx)
 }
@@ -556,8 +616,13 @@ func (m *generateCommon) getSources(ctx blueprint.BaseModuleContext) []string {
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
-	if m.Properties.Tool != nil {
-		*m.Properties.Tool = filepath.Join(projectModuleDir(ctx), *m.Properties.Tool)
+
+	if len(m.Properties.Tools) > 0 {
+		toolPaths := []string{}
+		for _, tool := range m.Properties.Tools {
+			toolPaths = append(toolPaths, filepath.Join(projectModuleDir(ctx), tool))
+		}
+		m.Properties.Tools = toolPaths
 	}
 }
 

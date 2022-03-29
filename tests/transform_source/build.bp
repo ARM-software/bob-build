@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ bob_transform_source {
         ],
     },
     export_gen_include_dirs: ["single/transform_source"],
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
 }
 
@@ -50,7 +50,7 @@ bob_transform_source {
         },
     },
     export_gen_include_dirs: ["transform_source"],
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
 }
 
@@ -78,14 +78,14 @@ bob_transform_source {
         "generate_source_to_transform",
         "transform_source",
     ],
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
 }
 
 bob_generate_source {
     name: "generate_template_source_used_by_transform",
     out: ["test_src.tmpl"],
-    tool: "write_tmpl.py",
+    tools: ["write_tmpl.py"],
     cmd: "python ${tool} ${out}",
 }
 
@@ -103,7 +103,7 @@ bob_transform_source {
         ],
     },
     export_gen_include_dirs: ["."],
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
 }
 
@@ -123,7 +123,7 @@ bob_transform_source {
             "$1.h",
         ],
     },
-    tool: "generator.py",
+    tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
     build_by_default: true,
 }
@@ -141,7 +141,7 @@ bob_generate_source {
         "transform_source_generated_sources_only",
     ],
     out: ["combined_source.cpp"],
-    tool: "combine_sources.py",
+    tools: ["combine_sources.py"],
     cmd: "${tool} --out ${out} ${in}",
 }
 

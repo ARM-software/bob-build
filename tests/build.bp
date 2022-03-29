@@ -78,6 +78,7 @@ bob_alias {
         "bob_test_install_deps",
         "bob_test_kernel_module",
         "bob_test_match_source",
+        "bob_test_multiple_tools",
         "bob_test_output",
         "bob_test_pgo",
         "bob_test_properties",
