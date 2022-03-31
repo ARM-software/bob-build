@@ -53,7 +53,51 @@ func AndroidBpFile() bpwriter.File {
 	return outputFile
 }
 
-func (g *androidBpGenerator) aliasActions(*alias, blueprint.ModuleContext) {}
+// Translate `bob_alias` to `phony` rules in Android.bp
+func (g *androidBpGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
+	srcs := []string{}
+
+	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+		// If either the child or parent are not required/enabled, stop
+		// traversing. Alias rules are enabled and required by default.
+		if !enabledAndRequired(parent) || !enabledAndRequired(child) {
+			return false
+		}
+
+		switch ctx.OtherModuleType(child) {
+		case "bob_resource":
+			if r, ok := child.(*resource); ok {
+				for _, src := range r.Properties.getSources(ctx) {
+					srcs = append(srcs, r.getAndroidbpResourceName(src))
+				}
+			}
+			return false
+		case "bob_alias":
+			// For alias type, do not add it, instead continue
+			// recursing to find the non-alias deps.
+			return true
+		default:
+			name := ctx.OtherModuleName(child)
+			if lib, ok := child.(phonyInterface); ok {
+				name = lib.shortName()
+			}
+			srcs = append(srcs, name)
+		}
+		return false
+	})
+
+	// Cannot have phony rules with no deps
+	if len(srcs) == 0 {
+		return
+	}
+
+	mod, err := AndroidBpFile().NewModule("phony", m.Name())
+	if err != nil {
+		panic(err)
+	}
+
+	mod.AddStringList("required", srcs)
+}
 
 func (g *androidBpGenerator) buildDir() string {
 	// The androidbp backend writes an Android.bp file, which should
