@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,6 +167,17 @@ func addMTEProps(m bpwriter.Module, props AndroidMTEProps) {
 	}
 }
 
+func addHWASANProps(m bpwriter.Module, l binary) {
+	memtagHeap := proptools.Bool(l.Properties.Build.AndroidMTEProps.Mte.Memtag_heap)
+	if memtagHeap {
+		return
+	}
+	if proptools.Bool(l.Properties.Build.Hwasan_enabled) {
+		g := m.NewGroup("sanitize")
+		g.AddBool("hwaddress", true)
+	}
+}
+
 func addRequiredModules(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	if _, _, ok := getSoongInstallPath(l.getInstallableProps()); ok {
 		requiredModuleNames := l.getInstallDepPhonyNames(mctx)
@@ -300,6 +311,7 @@ func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
 	}
 
 	addMTEProps(m, l.Properties.Build.AndroidMTEProps)
+	addHWASANProps(m, l)
 }
 
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {

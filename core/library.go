@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,6 +163,8 @@ type BuildProps struct {
 	StripProps
 	AndroidPGOProps
 	AndroidMTEProps
+
+	Hwasan_enabled *bool
 
 	TargetType tgtType `blueprint:"mutated"`
 }
@@ -832,12 +834,14 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
 		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
+		sl.checkField(props.Hwasan_enabled == nil, "hwasan_enabled")
 	} else if sl, ok := m.(*staticLibrary); ok {
 		props := sl.Properties
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 		sl.checkField(props.Version_script == nil, "version_script")
 		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
 		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
+		sl.checkField(props.Hwasan_enabled == nil, "hwasan_enabled")
 	}
 }
 
