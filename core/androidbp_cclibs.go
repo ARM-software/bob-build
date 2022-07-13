@@ -167,12 +167,12 @@ func addMTEProps(m bpwriter.Module, props AndroidMTEProps) {
 	}
 }
 
-func addHWASANProps(m bpwriter.Module, l binary) {
-	memtagHeap := proptools.Bool(l.Properties.Build.AndroidMTEProps.Mte.Memtag_heap)
+func addHWASANProps(m bpwriter.Module, props Build) {
+	memtagHeap := proptools.Bool(props.AndroidMTEProps.Mte.Memtag_heap)
 	if memtagHeap {
 		return
 	}
-	if proptools.Bool(l.Properties.Build.Hwasan_enabled) {
+	if proptools.Bool(props.Hwasan_enabled) {
 		g := m.NewGroup("sanitize")
 		g.AddBool("hwaddress", true)
 	}
@@ -311,7 +311,7 @@ func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
 	}
 
 	addMTEProps(m, l.Properties.Build.AndroidMTEProps)
-	addHWASANProps(m, l)
+	addHWASANProps(m, l.Properties.Build)
 }
 
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
@@ -328,6 +328,7 @@ func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.
 	if l.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
 		m.AddString("compile_multilib", "both")
 	}
+	addHWASANProps(m, l.Properties.Build)
 }
 
 func addStripProp(m bpwriter.Module) {

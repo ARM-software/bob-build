@@ -1,3 +1,4 @@
+//go:build soong
 // +build soong
 
 /*
