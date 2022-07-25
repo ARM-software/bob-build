@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -223,6 +223,15 @@ var staticLibraryRule = pctx.StaticRule("static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper")
 
+// Creates an empty static library, no objects are specified in this case. Required on OSX as
+// a workaround to ar failing to create a library without objects. On linux `!<arch>` as the content
+// is sufficient, this is not the case on OSX where ld checks the size of the file.
+var emptyStaticLibraryRule = pctx.StaticRule("empty_static_library",
+	blueprint.RuleParams{
+		Command:     "rm -f $out $out.o && echo \"\" | $ccompiler -o $out.o -c -xc - && $build_wrapper $ar -rcs $out $out.o",
+		Description: "$out",
+	}, "ccompiler", "ar", "build_wrapper")
+
 var _ = pctx.StaticVariable("whole_static_tool", "${BobScriptsDir}/whole_static.py")
 var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 	blueprint.RuleParams{
@@ -260,6 +269,15 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 	// The archiver rules do not allow adding arguments that the user can
 	// set, so does not support nonCompiledDeps
 	objectFiles, _ := m.library.CompileObjs(ctx)
+
+	// OSX workaround, see rule for details.
+	if len(objectFiles) == 0 && len(wholeStaticLibs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
+		rule = emptyStaticLibraryRule
+		// To create an empty lib, we require a dummy object file,
+		// we use the detected compiler to emit it.
+		cc, _ := tc.getCCompiler()
+		args["ccompiler"] = cc
+	}
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{

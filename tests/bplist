@@ -1,8 +1,8 @@
 ./aliases/build.bp
 ./arg_order/build.bp
 ./binary/build.bp
-./bob/Blueprints
 ./bob/blueprint/Blueprints
+./bob/Blueprints
 ./build.bp
 ./command_vars/build.bp
 ./cxx11_simple/build.bp
@@ -14,13 +14,14 @@
 ./external_libs/build.bp
 ./flag_defaults/build.bp
 ./flag_supported/build.bp
-./forwarding_libs/forwarding/build.bp
 ./forwarding_libs/forwarding_impl/build.bp
 ./forwarding_libs/forwarding_user/build.bp
+./forwarding_libs/forwarding/build.bp
 ./generate_libs/build.bp
 ./generate_source/build.bp
 ./generated_headers/build.bp
 ./globs/build.bp
+./header_libs/build.bp
 ./install_deps/build.bp
 ./kernel_module/build.bp
 ./kernel_module/module1/build.bp
@@ -33,8 +34,8 @@
 ./reexport_libs/build.bp
 ./resources/build.bp
 ./rsp/build.bp
-./shared_libs/build.bp
 ./shared_libs_toc/build.bp
+./shared_libs/build.bp
 ./static_libs/build.bp
 ./target_specific_static_libs/build.bp
 ./templates/build.bp

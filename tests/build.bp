@@ -59,8 +59,8 @@ bob_install_group {
 bob_alias {
     name: "bob_tests",
     srcs: [
-        "bob_test_aliases",
         "bob_test_aliases_all_variants",
+        "bob_test_aliases",
         "bob_test_arg_order",
         "bob_test_command_vars",
         "bob_test_cxx11simple",
@@ -75,6 +75,7 @@ bob_alias {
         "bob_test_generate_source",
         "bob_test_generated_headers",
         "bob_test_globs",
+        "bob_test_header_libs",
         "bob_test_install_deps",
         "bob_test_kernel_module",
         "bob_test_match_source",
@@ -84,8 +85,8 @@ bob_alias {
         "bob_test_properties",
         "bob_test_reexport_libs",
         "bob_test_resources",
-        "bob_test_shared_libs",
         "bob_test_shared_libs_toc",
+        "bob_test_shared_libs",
         "bob_test_simple_binary",
         "bob_test_static_libs",
         "bob_test_target_specific_static_libs",
