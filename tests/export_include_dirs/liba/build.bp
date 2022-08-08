@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +20,6 @@ bob_static_library {
     export_local_include_dirs: [
         "include",
     ],
-    builder_android_make: {
-        // export_include_dirs are absolute. On Android, it may also
-        // be the root of the Android tree. So $(LOCAL_PATH) needs to be
-        // included here to test absolute path.
-        export_include_dirs: [
-            "$(LOCAL_PATH)/export_include_dirs/liba/include2",
-        ],
-    },
     builder_ninja: {
         // include2 is intended to test export_include_dirs, but on
         // linux this must be an absolute directory. This leaves

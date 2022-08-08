@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020, 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 package core
 
-// Logic common to the Android.mk and Android.bp backends
+// Android utilities
 
 import (
 	"path/filepath"
@@ -222,4 +222,30 @@ func getSoongInstallPath(props *InstallableProps) (string, string, bool) {
 	}
 
 	return base, rel, true
+}
+
+// Identifies if a module links to a generated library. Generated
+// libraries only support a single architecture
+func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
+	seenGeneratedLib := false
+	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
+		// Only consider dependencies that get linked
+		tag := ctx.OtherModuleDependencyTag(dep)
+		if tag == staticDepTag ||
+			tag == sharedDepTag ||
+			tag == wholeStaticDepTag {
+			_, staticLib := dep.(*generateStaticLibrary)
+			_, sharedLib := dep.(*generateSharedLibrary)
+			if sharedLib || staticLib {
+				// We depend on a generated library
+				seenGeneratedLib = true
+				// No need to continue walking
+				return false
+			}
+			// Keep walking this part of the tree
+			return true
+		}
+		return false
+	})
+	return seenGeneratedLib
 }

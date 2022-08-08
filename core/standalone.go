@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 /*
  * This file is included when Bob is being run as a standalone binary, i.e. for
- * the Ninja and Android Make generators.
+ * the Ninja generator.
  */
 
 package core
@@ -88,7 +88,6 @@ func Main() {
 
 	builder_ninja := config.Properties.GetBool("builder_ninja")
 	builder_android_bp := config.Properties.GetBool("builder_android_bp")
-	builder_android_make := config.Properties.GetBool("builder_android_make")
 
 	// Depend on the config file
 	pctx.AddNinjaFileDeps(configJSONFile, getPathInBuildDir(".env.hash"))
@@ -222,8 +221,6 @@ func Main() {
 		config.Generator = &linuxGenerator{}
 	} else if builder_android_bp {
 		config.Generator = &androidBpGenerator{}
-	} else if builder_android_make {
-		config.Generator = &androidMkGenerator{}
 	} else {
 		utils.Die("Unknown builder backend")
 	}

@@ -71,14 +71,13 @@ directory. It's recommended to set up a directory containing all the
 files to be installed, so that they can be copied to the target
 filesystem in one command.
 
-On Android `install_path` has to start with an Android make variable defined in
-[envsetup.mk](https://android.googlesource.com/platform/build/+/master/core/envsetup.mk), e.g.
+On Android `install_path` should not include the build output directory, e.g.
 
 ```
 bob_install_group {
     name: "IG_libs",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
+    builder_not_ninja: {
+        install_path: "lib",
     },
     builder_ninja: {
         install_path: "install/lib",

@@ -74,7 +74,7 @@ def process_file(args, f):
         new_filename = os.path.join(new_filedir, build_id[2:]+".debug")
         if args.dry_run or args.verbose:
             print("Moving {} => {}".format(f, new_filename))
-        if not(args.dry_run):
+        if not args.dry_run:
             make_dir(new_filedir)
             shutil.move(f, new_filename)
 

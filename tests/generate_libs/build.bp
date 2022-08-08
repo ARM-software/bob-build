@@ -17,10 +17,6 @@
 
 bob_install_group {
     name: "IG_genlib_lib",
-    builder_android_make: {
-        /* On Android make install_path is not respected for generated libraries. */
-        install_path: "$(TARGET_OUT)/gen_sh_lib",
-    },
     builder_android_bp: {
         install_path: "gen_sh_lib",
     },
@@ -31,9 +27,6 @@ bob_install_group {
 
 bob_install_group {
     name: "IG_genlib_bin",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT)/gen_sh_bin",
-    },
     builder_android_bp: {
         install_path: "gen_sh_lib",
     },

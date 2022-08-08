@@ -1,8 +1,5 @@
 bob_install_group {
     name: "IG_resources",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT)/data/resources",
-    },
     builder_android_bp: {
         install_path: "data/resources",
     },

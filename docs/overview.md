@@ -20,9 +20,9 @@ targets and 500 configuration options.
 
 ### Building on Android
 
-On small projects it is easy enough to maintain a separate Android.mk
-(or Android.bp) in addition to a set of makefiles. As the project gets
-larger you might start to generate these using CMake.
+On small projects it is easy enough to maintain a separate Android.bp
+in addition to a set of makefiles. As the project gets larger you might
+start to generate these using CMake.
 
 If the project is tightly tied to Android, like a driver, then it
 matters that the meta-build system keeps up with changes in Android.
@@ -95,10 +95,9 @@ release and the one before that.
 
 | Version | Status |
 |---|---|
-| Oreo | Not supported |
-| Pie | Supported |
-| Android 10 | Supported |
 | Android 11 | Supported |
+| Android 12 | Supported |
+| Android 13 | Supported |
 | earlier | Not supported |
 
 Note that not all Bob features are supported on Android. This includes:

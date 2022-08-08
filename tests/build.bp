@@ -19,9 +19,6 @@ subname = "build.bp"
 
 bob_install_group {
     name: "IG_gensrc",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT)/gen_sh_src",
-    },
     builder_android_bp: {
         install_path: "gen_sh_src",
     },
@@ -32,9 +29,6 @@ bob_install_group {
 
 bob_install_group {
     name: "IG_host_libs",
-    builder_android_make: {
-        install_path: "$(HOST_OUT_SHARED_LIBRARIES)",
-    },
     builder_android_bp: {
         install_path: "lib",
     },
@@ -45,9 +39,6 @@ bob_install_group {
 
 bob_install_group {
     name: "IG_libs",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT_SHARED_LIBRARIES)",
-    },
     builder_android_bp: {
         install_path: "lib",
     },

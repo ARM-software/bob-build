@@ -43,6 +43,8 @@ func stringParams(optName string, optValueLists ...[]string) (opts []string) {
 	return
 }
 
+const prebuiltMake = "prebuilts/build-tools/linux-x86/bin/make"
+
 func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(l) {
 		return

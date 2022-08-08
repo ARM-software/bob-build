@@ -1,4 +1,4 @@
-# Copyright 2016-2020 Arm Limited.
+# Copyright 2016-2020, 2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -285,7 +285,6 @@ config STATIC_LIB_TOGGLE
 ## GEN_ config needed to do compilation for generator modules
 config GEN_CC
 	string "Compiler"
-	default "$(CLANG) -fuse-ld=lld" if BUILDER_ANDROID_MAKE
 	default HOST_CLANG_PREFIX + HOST_CLANG_CC_BINARY + " -fuse-ld=lld" if BUILDER_ANDROID_BP
 	default HOST_GNU_PREFIX + HOST_GNU_CC_BINARY
 
@@ -296,7 +295,6 @@ config GEN_AR
 ## KERNEL_ config needed for testing kernel modules
 config KERNEL_CC
 	string "Kernel compiler"
-	default "$(CLANG)" if BUILDER_ANDROID_MAKE
 	default HOST_CLANG_PREFIX + HOST_CLANG_CC_BINARY if BUILDER_ANDROID_BP
 
 config KERNEL_CLANG_TRIPLE
