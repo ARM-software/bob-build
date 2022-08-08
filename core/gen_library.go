@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,8 +136,7 @@ func (m *generateLibrary) outputName() string {
 	return m.Name()
 }
 
-// Other naming functions, which need to reflect the output name, e.g. for the
-// module name map to work correctly on Android.mk.
+// Other naming functions, which need to reflect the output name
 func (l *generateLibrary) altName() string {
 	return l.outputName()
 }

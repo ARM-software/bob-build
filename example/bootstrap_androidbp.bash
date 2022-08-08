@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020-2021 Arm Limited.
+# Copyright 2020-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,7 +88,7 @@ PROJ_DIR=$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")
 # Change to the working directory
 cd "${ANDROID_BUILD_TOP}"
 
-### Variables required for Bob and Android.mk bootstrap ###
+### Variables required for Bob and Android.bp bootstrap ###
 BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"
 export BUILDDIR="${BPBUILD_DIR}"
 export CONFIGDIR="${CONFIG_DIR}"

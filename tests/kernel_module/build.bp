@@ -5,9 +5,6 @@ bob_alias {
 
 bob_install_group {
     name: "IG_modules",
-    builder_android_make: {
-        install_path: "$(TARGET_OUT)/lib/modules",
-    },
     builder_android_bp: {
         install_path: "lib/modules",
     },

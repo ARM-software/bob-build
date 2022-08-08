@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 /*
  * This file is included when Bob is being run as a standalone binary, i.e. for
- * the Ninja and Android Make generators.
+ * the Ninja generator.
  */
 
 package core

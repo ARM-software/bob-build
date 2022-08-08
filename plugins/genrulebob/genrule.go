@@ -208,12 +208,12 @@ func (m *genrulebobCommon) allOutputs() (ret android.WritablePaths) {
 }
 
 // Soong's gen dirs are generally of the form `/path/to/module/gen`. However, the
-// Android.mk and Linux backends use the form `build/gen/module_name`. Normally this
-// doesn't matter, as everything is contained within the gen dir, except when chaining
-// multiple generated modules. In this case, bob_transform_source used on Android.mk or
-// Linux may expect the module name to be included when doing the regex replacement, and
-// be exporting include directories accordingly. We therefore need to add a subdirectory
-// named after the module inside Soong's gen dir for compatibility.
+// Linux backend uses the form `build/gen/module_name`. Normally this doesn't matter,
+// as everything is contained within the gen dir, except when chaining multiple
+// generated modules. In this case, bob_transform_source used on Linux may expect the
+// module name to be included when doing the regex replacement, and be exporting
+// include directories accordingly. We therefore need to add a subdirectory named after
+// the module inside Soong's gen dir for compatibility.
 func pathForModuleGen(ctx android.ModuleContext, paths ...string) android.WritablePath {
 	prefix := []string{ctx.ModuleName()}
 	return android.PathForModuleGen(ctx, append(prefix, paths...)...)

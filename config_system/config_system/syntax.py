@@ -1,4 +1,4 @@
-# Copyright 2018-2019, 2021 Arm Limited.
+# Copyright 2018-2019, 2021-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ def merge(a, b):
     for k in b:
         if k in c:
             if isinstance(c[k], list):
-                assert(isinstance(b[k], list))
+                assert isinstance(b[k], list)
                 c[k] += b[k]
             elif isinstance(c[k], dict):
                 c[k] = merge(c[k], b[k])

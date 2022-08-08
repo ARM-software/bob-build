@@ -25,14 +25,12 @@ order to use Bob. It contains the following files:
 
 |File|Description|
 |---|---|
-|bootstrap_androidmk.bash | Android Make bootstrap script |
 |bootstrap_androidbp.bash | Android BP bootstrap script |
 |bootstrap_linux.bash     | Linux bootstrap script |
 |bplist                   | Blueprint list file |
 |Mconfig                  | Project configuration database |
 |build.bp                 | Root build description |
 |buildme.bash             | Build script |
-|Android.mk.blueprint     | Template Android makefile |
 
 If you want to make this build, just add a `hello_world.cpp`, and, if
 necessary, update the path in any `source` statements in `example/Mconfig` to
@@ -62,7 +60,7 @@ variables to be setup.
 
 `SRCDIR` must be set to the directory under which all source files can
 be found. At the moment, this must be an absolute path. Bob will not
-modify this directory except to create an Android.mk (for Android), or
+modify this directory except to create an Android.bp (for Android), or
 if a script executed by the build definitions creates something in
 this directory.
 
@@ -108,7 +106,7 @@ On Android the output directory is determined by the project name.
   which to find the Bob repository.
 
 * Update `PROJ_NAME` to be a short string that is unique in the
-  Android makefile namespace.
+  required namespace.
 
 * Update `SRCDIR`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
   `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` as done for Linux.
@@ -157,11 +155,8 @@ enough to kick off the build - you may want to customize it to do more.
 If you want to generate the bplist file, you should do this here,
 before calling `bob.bash`.
 
-## Android.mk.blueprint
+## Android and symlinks
 
-The Android makefile template is used to hook the project into the
-Android build system. This should not require modification.
-
-Note: when building for Android your project must be within the
-Android tree. Generally you can't use a symlink from the Android tree
-to your project (though you can use `bindfs` or `mount --bind`).
+When building for Android your project must be within the Android tree.
+Generally you can't use a symlink from the Android tree to your project
+(though you can use `bindfs` or `mount --bind`).

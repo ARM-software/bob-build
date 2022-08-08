@@ -1,4 +1,4 @@
-# Copyright 2020-2021 Arm Limited.
+# Copyright 2020-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,21 +39,15 @@ endchoice
 
 choice
 	prompt "Builder"
-	default BUILDER_ANDROID_MAKE if ANDROID
+	default BUILDER_ANDROID_BP if ANDROID
 	default BUILDER_NINJA
 	help
 	  Bob supports generating output for different build systems.
 
 	  Select the desired build system.
 
-config BUILDER_ANDROID_MAKE
-	bool "Android make"
-	depends on ANDROID
-	help
-	  Generate Android.mk fragments for use with Android make.
-
 config BUILDER_ANDROID_BP
-	bool "Android.bp (EXPERIMENTAL)"
+	bool "Android.bp"
 	depends on ANDROID
 	help
 	  Generate Android.bp fragments for use with Android.

@@ -9,7 +9,6 @@ bob_binary {
     srcs: ["main.c"],
     shared_libs: ["libshared_vs_simple"],
     install_group: "IG_binaries",
-    build_by_default: true, // Required on Android.mk
     osx: {
         enabled: false,
     },
@@ -34,7 +33,6 @@ bob_binary {
     srcs: ["main.c"],
     shared_libs: ["libshared_vs_gen"],
     install_group: "IG_binaries",
-    build_by_default: true, // Required on Android.mk
     osx: {
         enabled: false,
     },
