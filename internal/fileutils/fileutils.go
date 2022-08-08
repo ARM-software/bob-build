@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Arm Limited.
+ * Copyright 2020, 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ func WriteIfChanged(filename string, sb *strings.Builder) error {
 	}
 
 	if mustWrite {
-		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 		if err != nil {
 			return err
 		}
