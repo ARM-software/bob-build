@@ -63,6 +63,7 @@ type property struct {
 // Adjacent properties within an Android.bp file
 type Group interface {
 	AddString(name, value string)
+	AddOptionalString(name string, value *string)
 	AddBool(name string, value bool)
 	AddOptionalBool(name string, value *bool)
 	AddStringList(name string, list []string)
@@ -128,6 +129,14 @@ func (g *group) addProp(key, value string) {
 // Add a string property to the property group
 func (g *group) AddString(name, value string) {
 	g.addProp(name, "\""+Escape(value)+"\"")
+}
+
+// Add a string property to the property group if string exists
+func (g *group) AddOptionalString(name string, value *string) {
+	if value == nil {
+		return
+	}
+	g.addProp(name, "\""+Escape(*value)+"\"")
 }
 
 // Add a boolean property to the property group

@@ -19,6 +19,7 @@
 ./forwarding_libs/forwarding/build.bp
 ./generate_libs/build.bp
 ./generate_source/build.bp
+./generate_source_new/build.bp
 ./generated_headers/build.bp
 ./globs/build.bp
 ./header_libs/build.bp
