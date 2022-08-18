@@ -18,6 +18,8 @@
 package core
 
 import (
+	"strings"
+
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
@@ -125,6 +127,43 @@ func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.
 
 		ctx.Build(pctx, buildparams)
 	}
+}
+
+func transformCmdAndroidToOld(cmd string) (retCmd *string) {
+	// $(location) <label> -> ${tool} <label>
+	// $(in) -> ${in}
+	// $(out) -> ${out}
+	// $(depfile) -> ${depfile}
+	// $(genDir) -> ${gen_dir}
+	newCmd := strings.Replace(cmd, "$(in)", "${in}", -1)
+	newCmd = strings.Replace(newCmd, "$(out)", "${out}", -1)
+	newCmd = strings.Replace(newCmd, "$(locations)", "${tool}", -1)
+	newCmd = strings.Replace(newCmd, "$(location)", "${tool}", -1)
+	newCmd = strings.Replace(newCmd, "$(depfile)", "${depfile}", -1)
+	newCmd = strings.Replace(newCmd, "$(genDir)", "${gen_dir}", -1)
+	return &newCmd
+}
+
+func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mctx blueprint.ModuleContext) {
+
+	// Re-use old Bob Code during transition by creating a proxy generateSource object to pass to the old generator
+	var proxyGenerateSource generateSource
+	proxyGenerateSource.SimpleName.Properties.Name = ag.androidGenerateCommon.Properties.Name
+	proxyGenerateSource.generateCommon.Properties.Cmd = transformCmdAndroidToOld(*ag.androidGenerateCommon.Properties.Cmd)
+	proxyGenerateSource.generateCommon.Properties.Tools = ag.androidGenerateCommon.Properties.Tool_files
+	proxyGenerateSource.generateCommon.Properties.Export_gen_include_dirs = ag.androidGenerateCommon.Properties.Export_include_dirs
+	proxyGenerateSource.generateCommon.Properties.Srcs = ag.androidGenerateCommon.Properties.Srcs
+	proxyGenerateSource.generateCommon.Properties.Exclude_srcs = ag.androidGenerateCommon.Properties.Exclude_srcs
+	proxyGenerateSource.generateCommon.Properties.Depfile = ag.androidGenerateCommon.Properties.Depfile
+	proxyGenerateSource.Properties.Implicit_srcs = ag.androidGenerateCommon.Properties.Tool_files
+	proxyGenerateSource.Properties.Out = ag.Properties.Out
+
+	// Adds the correct prefixes to all paths for the linux backend
+	proxyGenerateSource.processPaths(mctx, g)
+	g.generateSourceActions(&proxyGenerateSource, mctx)
+
+	// This is the generated paths for the outs, needed to correctly depend upon these rules
+	ag.androidGenerateCommon.outs = proxyGenerateSource.generateCommon.outs
 }
 
 func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {

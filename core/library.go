@@ -552,6 +552,26 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 
 					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
+			} else if gs, ok := getAndroidGenerateCommon(child); ok {
+				// WalkDeps will visit a module once for each
+				// dependency tag. Only list the headers once.
+				if _, seen := visited[child.Name()]; !seen {
+					visited[child.Name()] = true
+
+					includeDirs = append(includeDirs, gs.genIncludeDirs()...)
+
+					// Generated headers are "order-only". That means that a source file does not need to rebuild
+					// if a generated header changes, just that it must be built after a generated header.
+					// The source file _will_ be rebuilt if it uses the header (since that is registered in the
+					// depfile). Note that this means that generated headers cannot change which headers are used
+					// (by aliasing another header).
+					ds, ok := child.(dependentInterface)
+					if !ok {
+						utils.Die("generated_headers %s must have outputs()", child.Name())
+					}
+
+					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
+				}
 			} else if childMustBeGenerated {
 				utils.Die("%s dependency on non-generated module %s", tag.(dependencyTag).name, child.Name())
 			}

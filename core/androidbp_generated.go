@@ -124,6 +124,27 @@ func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpw
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
+func (g *androidBpGenerator) androidGenerateCommonActions(ag *androidGenerateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
+	m.AddStringList("srcs", ag.Properties.Srcs)
+	m.AddStringList("exclude_srcs", ag.Properties.Exclude_srcs)
+	m.AddOptionalString("cmd", ag.Properties.Cmd)
+	m.AddOptionalBool("depfile", ag.Properties.Depfile)
+	m.AddOptionalBool("enabled", ag.Properties.Enabled)
+	m.AddStringList("export_include_dirs", ag.Properties.Export_include_dirs)
+	m.AddStringList("tool_files", ag.Properties.Tool_files)
+	m.AddStringList("tools", ag.Properties.Tools)
+}
+
+func (g *androidBpGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mctx blueprint.ModuleContext) {
+	m, err := AndroidBpFile().NewModule("genrule", ag.shortName())
+	if err != nil {
+		utils.Die("%v", err.Error())
+	}
+	ag.androidGenerateCommon.Properties.processPaths(mctx, g)
+	g.androidGenerateCommonActions(&ag.androidGenerateCommon, mctx, m)
+	m.AddStringList("out", ag.Properties.Out)
+}
+
 func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(gs) {
 		return

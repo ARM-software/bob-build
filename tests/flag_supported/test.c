@@ -6,7 +6,7 @@ void useless(void)
     printf("I am not used\n");
 }
 
-const char main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     (void)argc;
     (void)argv;

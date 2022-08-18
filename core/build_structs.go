@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,6 +96,7 @@ type generatorBackend interface {
 	aliasActions(*alias, blueprint.ModuleContext)
 	binaryActions(*binary, blueprint.ModuleContext)
 	generateSourceActions(*generateSource, blueprint.ModuleContext)
+	androidGenerateRuleActions(*androidGenerateRule, blueprint.ModuleContext)
 	transformSourceActions(*transformSource, blueprint.ModuleContext)
 	genSharedActions(*generateSharedLibrary, blueprint.ModuleContext)
 	genStaticActions(*generateStaticLibrary, blueprint.ModuleContext)
@@ -276,6 +277,23 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorB
 	prefix := projectModuleDir(ctx)
 	s.Srcs = utils.PrefixDirs(s.Srcs, prefix)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
+}
+
+func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	prefix := projectModuleDir(ctx)
+	// We don't want to process module dependencies as paths, we must filter them out first.
+	var dependencyList []string
+	var directPathList []string
+	for _, s := range ag.Srcs {
+		if s[0] == ':' {
+			dependencyList = append(dependencyList, s)
+		} else {
+			directPathList = append(directPathList, s)
+		}
+	}
+	ag.Srcs = append(utils.PrefixDirs(directPathList, prefix), dependencyList...)
+	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
+	ag.Tool_files = utils.PrefixDirs(ag.Tool_files, prefix)
 }
 
 type tgtType string
@@ -621,6 +639,9 @@ func registerModuleTypes(register func(string, factoryWithConfig)) {
 	register("bob_generate_static_library", genStaticLibFactory)
 	register("bob_generate_shared_library", genSharedLibFactory)
 	register("bob_generate_binary", genBinaryFactory)
+
+	// Swapping to new rules that are more strict and adhere to the Android Modules
+	register("bob_genrule", generateRuleAndroidFactory)
 
 	register("bob_alias", aliasFactory)
 	register("bob_kernel_module", kernelModuleFactory)

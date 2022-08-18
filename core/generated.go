@@ -154,6 +154,47 @@ type generateCommon struct {
 	}
 }
 
+/* We are swapping from bob_generate_source to bob_genrule
+bob_genrule is made to be a stricter version that is compatible with Android.
+For easiest compatibility, we are using Androids format for genrule.
+Some properties in the struct may not be useful, but it is better to expose as many
+features as possible rather than too few. Some are commented out as they would take special
+implementation for features we do not already have in place.
+*/
+type AndroidGenerateRuleProps struct {
+	Out []string
+}
+
+type AndroidGenerateCommonProps struct {
+	// See https://ci.android.com/builds/submitted/8928481/linux/latest/view/soong_build.html
+	Name                string
+	Srcs                []string
+	Exclude_srcs        []string
+	Cmd                 *string
+	Depfile             *bool
+	Enabled             *bool
+	Export_include_dirs []string
+	Tool_files          []string
+	Tools               []string
+}
+
+type androidGenerateCommon struct {
+	moduleBase
+	EnableableProps
+	simpleOutputProducer
+	headerProducer
+	Properties struct {
+		AndroidGenerateCommonProps
+	}
+}
+
+type androidGenerateRule struct {
+	androidGenerateCommon
+	Properties struct {
+		AndroidGenerateRuleProps
+	}
+}
+
 // generateCommon supports:
 // * feature-specific properties
 // * module enabling/disabling
@@ -185,6 +226,10 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 	return split[0], strings.Join(split[1:], "/")
 }
 
+func (m *androidGenerateRule) shortName() string {
+	return m.Name()
+}
+
 func (m *generateCommon) init(properties *configProperties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 	m.Properties.FlagArgsBuild.Host.init(properties, CommonProps{}, BuildProps{})
@@ -206,6 +251,10 @@ func (m *generateCommon) altShortName() string {
 // Workaround for Golang not having a way of querying superclasses
 
 func (m *generateCommon) getGenerateCommon() *generateCommon {
+	return m
+}
+
+func (m *androidGenerateCommon) getAndroidGenerateCommon() *androidGenerateCommon {
 	return m
 }
 
@@ -293,6 +342,11 @@ type getGenerateCommonInterface interface {
 	getGenerateCommon() *generateCommon
 }
 
+// Module implementing getGenerateCommonInterface are able to generate output files
+type getAndroidGenerateCommonInterface interface {
+	getAndroidGenerateCommon() *androidGenerateCommon
+}
+
 func getGenerateCommon(i interface{}) (*generateCommon, bool) {
 	var gsc *generateCommon
 	gsd, ok := i.(getGenerateCommonInterface)
@@ -302,8 +356,21 @@ func getGenerateCommon(i interface{}) (*generateCommon, bool) {
 	return gsc, ok
 }
 
+func getAndroidGenerateCommon(i interface{}) (*androidGenerateCommon, bool) {
+	var gsc *androidGenerateCommon
+	gsd, ok := i.(getAndroidGenerateCommonInterface)
+	if ok {
+		gsc = gsd.getAndroidGenerateCommon()
+	}
+	return gsc, ok
+}
+
 func (m *generateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
+}
+
+func (m *androidGenerateRule) getEnableableProps() *EnableableProps {
+	return &m.EnableableProps
 }
 
 func (m *generateCommon) getDepfile() (name string, depfile bool) {
@@ -721,6 +788,13 @@ func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+func (m *androidGenerateRule) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	if isEnabled(m) {
+		g := getBackend(ctx)
+		g.androidGenerateRuleActions(m, ctx)
+	}
+}
+
 func (m *transformSource) featurableProperties() []interface{} {
 	return append(m.generateCommon.featurableProperties(), &m.Properties.TransformSourceProps)
 }
@@ -798,6 +872,13 @@ func transformSourceFactory(config *bobConfig) (blueprint.Module, []interface{})
 		&module.SimpleName.Properties}
 }
 
+func generateRuleAndroidFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+	module := &androidGenerateRule{}
+
+	return module, []interface{}{&module.androidGenerateCommon.Properties, &module.Properties,
+		&module.SimpleName.Properties}
+}
+
 // ModuleContext Helpers
 
 // Return the outputs() of all GeneratedSource dependencies of the current
@@ -848,4 +929,38 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		parseAndAddVariationDeps(mctx, generatedSourceTag,
 			gsc.Properties.Generated_sources...)
 	}
+
+	// New Android Genrules can depend on source of other modules with a different format.
+	// We must transform the format if we are not generating for Android.
+	if _, ok := getBackend(mctx).(*linuxGenerator); ok {
+		if agsc, ok := getAndroidGenerateCommon(mctx.Module()); ok {
+			var removeList []string
+			for _, s := range agsc.Properties.Srcs {
+				if s[0] == ':' {
+					parseAndAddVariationDeps(mctx, generatedSourceTag,
+						s[1:])
+					removeList = append(removeList, s)
+				}
+			}
+			for i, _ := range removeList {
+				agsc.Properties.Srcs = append(agsc.Properties.Srcs[:i], agsc.Properties.Srcs[i+1:]...)
+			}
+		}
+	}
+	// These rules also need to support variants when depending on tools. This strictly breaks android's genrule definition.
+	// However, if a colon appears at the end of a module name with a text string, we assume there is a variant
+	// called <module_name>__<variant_name> generated. Which bob currently does.
+	if agsc, ok := getAndroidGenerateCommon((mctx.Module())); ok {
+		var removeList []string
+		for _, s := range agsc.Properties.Tools {
+			if strings.Contains(s, ":") {
+				agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))
+				removeList = append(removeList, s)
+			}
+		}
+		for i, _ := range removeList {
+			agsc.Properties.Tools = append(agsc.Properties.Tools[:i], agsc.Properties.Tools[i+1:]...)
+		}
+	}
+
 }
