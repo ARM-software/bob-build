@@ -30,10 +30,6 @@ import (
 
 // Types implementing phonyInterface support the creation of phony targets.
 type phonyInterface interface {
-	// A list of the outputs to be built when shortName is specified as the target
-	outputs() []string
-	implicitOutputs() []string
-
 	// The name of the target that can be used
 	shortName() string
 }
@@ -74,6 +70,9 @@ func (t *TargetSpecific) getTargetSpecificProps() interface{} {
 // A type implementing dependentInterface can be depended upon by other modules.
 type dependentInterface interface {
 	phonyInterface
+
+	outputs() []string
+	implicitOutputs() []string
 	outputDir() string
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,15 +76,17 @@ func getTocUsageFromEnvironment() bool {
 func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 	installDeps []string, optional bool) {
 
-	deps := utils.NewStringSlice(p.outputs(), p.implicitOutputs(), installDeps)
-
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
-			Inputs:   deps,
+			Inputs:   installDeps,
 			Outputs:  []string{p.shortName()},
 			Optional: optional,
 		})
+}
+
+func (g *linuxGenerator) getPhonyFiles(p dependentInterface) []string {
+	return utils.NewStringSlice(p.outputs(), p.implicitOutputs())
 }
 
 func (g *linuxGenerator) escapeFlag(s string) string {

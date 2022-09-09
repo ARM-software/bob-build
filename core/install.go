@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -235,17 +235,6 @@ func (m *resource) altShortName() string {
 
 func (m *resource) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
-}
-
-// Resources don't have any outputs (i.e. stuff generated in the build
-// directory) - they only copy source files to the installation dir. This
-// method exists to implement PhonyInterface.
-func (m *resource) outputs() []string {
-	return []string{}
-}
-
-func (m *resource) implicitOutputs() []string {
-	return []string{}
 }
 
 func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) []string {

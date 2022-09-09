@@ -290,7 +290,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 			Args:      args,
 		})
 
-	installDeps := g.install(m, ctx)
+	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -568,6 +568,7 @@ func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleCon
 	tocFile := g.getSharedLibTocPath(m)
 	g.addSharedLibToc(ctx, soFile, tocFile, m.getTarget())
 
+	installDeps = append(installDeps, g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -609,6 +610,7 @@ func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
 			Optional:  true,
 			Args:      g.getBinaryArgs(m, ctx),
 		})
-	installDeps := g.install(m, ctx)
+
+	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, optional)
 }
