@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -135,6 +136,10 @@ type AndroidProps struct {
 	// Value to use on Android for LOCAL_MODULE_OWNER
 	Owner *string
 }
+
+// For bob_genrule, we require the ability to extract substrings of the form
+// "$(location <tag>)", this regular expression enables this.
+var locationTagRegex = regexp.MustCompile(`\$\(location ([a-zA-Z0-9\.:_-]+)\)`)
 
 func (p *AndroidProps) isProprietary() bool {
 	return p.Owner != nil
@@ -293,6 +298,21 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	ag.Srcs = append(utils.PrefixDirs(directPathList, prefix), dependencyList...)
 	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
 	ag.Tool_files = utils.PrefixDirs(ag.Tool_files, prefix)
+
+	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
+	// we must fix this by iterating through the command.
+	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
+	for _, v := range matches {
+		tag := v[1]
+		if tag[0] == ':' {
+			continue
+		}
+		newTag := prefix + "/" + tag
+		// Replacing with space allows us to not replace the same basename more than once if it appears
+		// multiple times.
+		newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
+		ag.Cmd = &newCmd
+	}
 }
 
 type tgtType string
