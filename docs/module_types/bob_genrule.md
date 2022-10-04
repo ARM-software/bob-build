@@ -88,7 +88,7 @@ substitutions in the command, by using `${name_of_var}`. The
 available substitutions are:
 
  - `$(location)`: the path to the first entry in tools or tool_files.
- - `$(location <label>)`: the path to the tool, tool_file, input or output with name `<label>`. Use `$(location)` if `<label>` refers to a rule that outputs exactly one file.
+ - `$(location <label>)`: the path to the tool, tool_file, or src with name `<label>`. Use `$(location)` if `<label>` refers to a rule that outputs exactly one file.
  - `$(in)`: one or more input files.
  - `$(out)`: a single output file.
  - `$(depfile)`: a file to which dependencies will be written, if the depfile property is set to true.

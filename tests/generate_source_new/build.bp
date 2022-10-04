@@ -229,6 +229,30 @@ bob_genrule {
     cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
 }
 
+bob_genrule {
+    name: "multi_tool_file",
+    srcs: ["depgen2.in",],
+    out: [
+        "output.txt",
+        "out.h"
+    ],
+    tool_files: ["gen_with_dep.py", "depgen1.in",],
+    depfile: true,
+    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
+}
+
+bob_genrule {
+    name: "multi_src_tag",
+    srcs: [
+        ":generate_source_single_new",
+        "before_generate.in",
+    ],
+    out: ["deps.cpp"],
+
+    tool_files: ["generator.py"],
+    cmd: "python $(location generator.py) --in $(in) --out $(out) --expect-in before_generate.in $(location :generate_source_single_new)",
+}
+
 bob_alias {
     name: "bob_test_generate_source_new",
     srcs: [
@@ -236,5 +260,8 @@ bob_alias {
         "validate_install_generate_sources_new",
         "gen_source_depfile_new",
         "gen_source_depfile_with_implicit_outs_new",
+        "multi_tool_file",
+        "multi_src_tag",
+        "use_target_specific_library_new",
     ],
 }

@@ -939,6 +939,8 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 				if s[0] == ':' {
 					parseAndAddVariationDeps(mctx, generatedSourceTag,
 						s[1:])
+					parseAndAddVariationDeps(mctx, generatedDepTag,
+						s[1:])
 					removeList = append(removeList, s)
 				}
 			}
@@ -949,13 +951,19 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 	// These rules also need to support variants when depending on tools. This strictly breaks android's genrule definition.
 	// However, if a colon appears at the end of a module name with a text string, we assume there is a variant
-	// called <module_name>__<variant_name> generated. Which bob currently does.
+	// called <module_name>__<variant_name> generated. Which bob currently does. This will fix behaviour on Android, to
+	// ensure it works on Linux, the backend must see this as a generated_dep which is processing done in the linux backend.
 	if agsc, ok := getAndroidGenerateCommon((mctx.Module())); ok {
 		var removeList []string
 		for _, s := range agsc.Properties.Tools {
 			if strings.Contains(s, ":") {
-				agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))
-				removeList = append(removeList, s)
+				if _, ok := getBackend(mctx).(*linuxGenerator); ok {
+					parseAndAddVariationDeps(mctx, generatedDepTag,
+						s)
+				} else {
+					agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))
+					removeList = append(removeList, s)
+				}
 			}
 		}
 		for i, _ := range removeList {

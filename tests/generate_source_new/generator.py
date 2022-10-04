@@ -29,7 +29,7 @@ args = parser.parse_args()
 
 if args.expect_in:
     received_basenames = sorted(os.path.basename(i) for i in args.input)
-    expected_basenames = sorted(args.expect_in)
+    expected_basenames = sorted(os.path.basename(i) for i in args.expect_in)
     if received_basenames != expected_basenames:
         print("Expected the following files:", ", ".join(expected_basenames))
         print("But received these:", ", ".join(received_basenames))
