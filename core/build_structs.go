@@ -139,7 +139,7 @@ type AndroidProps struct {
 
 // For bob_genrule, we require the ability to extract substrings of the form
 // "$(location <tag>)", this regular expression enables this.
-var locationTagRegex = regexp.MustCompile(`\$\(location ([a-zA-Z0-9\.:_-]+)\)`)
+var locationTagRegex = regexp.MustCompile(`\$\(location ([a-zA-Z0-9\/\.:_-]+)\)`)
 
 func (p *AndroidProps) isProprietary() bool {
 	return p.Owner != nil
