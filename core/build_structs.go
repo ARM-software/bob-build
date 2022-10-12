@@ -307,7 +307,7 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 		if tag[0] == ':' {
 			continue
 		}
-		newTag := prefix + "/" + tag
+		newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
 		// Replacing with space allows us to not replace the same basename more than once if it appears
 		// multiple times.
 		newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
