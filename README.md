@@ -1,3 +1,16 @@
+# ⚠ Deprecation Notice ⚠
+
+_Bob will be deprecated_ when [Android moves to Bazel][aosp-bazel].
+
+We recommend that new projects use [Bazel][bazel] instead.
+
+We will be introducing stricter build rules in Bob to improve Bazel alignment.
+
+This may cause existing builds to break.
+
+[aosp-bazel]: https://developers.googleblog.com/2020/11/welcome-android-open-source-project.html
+[bazel]: https://bazel.build/
+
 Bob Build System
 ================
 [![CI](https://github.com/ARM-software/bob-build/workflows/CI/badge.svg)](https://github.com/ARM-software/bob-build/actions)
