@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,8 @@ function write_bootstrap() {
         -e "s|@@BobConfigOpts@@|${BOB_CONFIG_OPTS}|" \
         -e "s|@@BobConfigPluginOpts@@|${BOB_CONFIG_PLUGIN_OPTS}|" \
         -e "s|@@BobBootstrapVersion@@|${BOB_VERSION}|" \
+        -e "s|@@BobLogWarningsFile@@|${BOB_LOG_WARNINGS_FILE}|" \
+        -e "s|@@BobLogWarnings@@|${BOB_LOG_WARNINGS}|" \
         "${BOB_DIR}/bob.bootstrap.in" > "${BUILDDIR}/.bob.bootstrap.tmp"
     rsync -c "${BUILDDIR}/.bob.bootstrap.tmp" "${BUILDDIR}/.bob.bootstrap"
 }

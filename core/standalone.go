@@ -30,14 +30,16 @@ import (
 
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
-	bobdir         = os.Getenv("BOB_DIR")
-	configFile     = os.Getenv("CONFIG_FILE")
-	configOpts     = os.Getenv("BOB_CONFIG_OPTS")
-	srcdir         = os.Getenv("SRCDIR")
-	configJSONFile = os.Getenv("CONFIG_JSON")
+	bobdir          = os.Getenv("BOB_DIR")
+	configFile      = os.Getenv("CONFIG_FILE")
+	configOpts      = os.Getenv("BOB_CONFIG_OPTS")
+	srcdir          = os.Getenv("SRCDIR")
+	configJSONFile  = os.Getenv("CONFIG_JSON")
+	logWarningsFile = os.Getenv("BOB_LOG_WARNINGS_FILE")
 )
 
 type moduleBase struct {
@@ -219,10 +221,26 @@ func Main() {
 		ctx.RegisterTopDownMutator("late_template_mutator", lateTemplateMutator).Parallel()
 	}
 
+	f, err := os.OpenFile(logWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		utils.Die("error opening '%s' file: %v", logWarningsFile, err)
+	}
+
+	logger := warnings.New(f, os.Getenv("BOB_LOG_WARNINGS"))
+
+	defer func() {
+		errCnt := logger.ErrorWarnings()
+		f.Close()
+
+		if errCnt > 0 {
+			utils.Die("%d error(s) ocurred!\n", errCnt)
+		}
+	}()
+
 	if builder_ninja {
-		config.Generator = &linuxGenerator{}
+		config.Generator = &linuxGenerator{logger: logger}
 	} else if builder_android_bp {
-		config.Generator = &androidBpGenerator{}
+		config.Generator = &androidBpGenerator{logger: logger}
 	} else {
 		utils.Die("Unknown builder backend")
 	}

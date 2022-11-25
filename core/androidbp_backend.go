@@ -34,6 +34,7 @@ import (
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
@@ -43,6 +44,7 @@ var (
 
 type androidBpGenerator struct {
 	toolchainSet
+	logger *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by androidBpGenerator */
@@ -480,6 +482,10 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 			Outputs:  []string{androidbpFile},
 			Optional: true,
 		})
+}
+
+func (g *androidBpGenerator) getLogger() *warnings.WarningLogger {
+	return g.logger
 }
 
 func (g *androidBpGenerator) init(ctx *blueprint.Context, config *bobConfig) {
