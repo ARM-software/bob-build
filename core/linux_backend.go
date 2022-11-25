@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
@@ -46,6 +47,7 @@ var (
 
 type linuxGenerator struct {
 	toolchainSet
+	logger *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by linuxGenerator */
@@ -363,6 +365,10 @@ func (g *linuxGenerator) resourceActions(m *resource, ctx blueprint.ModuleContex
 
 func (g *linuxGenerator) filegroupActions(m *filegroup, ctx blueprint.ModuleContext) {
 
+}
+
+func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
+	return g.logger
 }
 
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *bobConfig) {

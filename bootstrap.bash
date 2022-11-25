@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2022 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,6 +93,12 @@ fi
 BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
 CONFIG_FILE="${CONFIGDIR}/${CONFIGNAME}"
 CONFIG_JSON="${CONFIGDIR}/.bob.config.json"
+
+# Bob warnings log file
+BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
+
+# space separated values, e.g. "*:W RelativeUpLinkWarning:E"
+BOB_LOG_WARNINGS=""
 
 export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"

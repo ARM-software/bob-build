@@ -36,6 +36,7 @@ bootstrap_go_package {
         "bob-fileutils",
         "bob-graph",
         "bob-utils",
+        "bob-warnings",
     ],
     srcs: [
         "core/android.go",
@@ -148,4 +149,15 @@ bootstrap_go_package {
         "internal/utils/utils_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/utils",
+}
+
+bootstrap_go_package {
+    name: "bob-warnings",
+    srcs: [
+        "internal/warnings/warnings.go",
+    ],
+    testSrcs: [
+        "internal/warnings/warnings_test.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/warnings",
 }

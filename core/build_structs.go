@@ -27,6 +27,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
@@ -121,6 +122,8 @@ type generatorBackend interface {
 
 	// Access to backend configuration
 	getToolchain(tgt tgtType) toolchain
+
+	getLogger() *warnings.WarningLogger
 }
 
 // The bobConfig type is stored against the Blueprint context, and allows us to
@@ -283,6 +286,7 @@ func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
+
 	s.Srcs = utils.PrefixDirs(s.Srcs, prefix)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
