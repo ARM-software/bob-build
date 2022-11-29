@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Arm Limited.
+ * Copyright 2019-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,7 +177,7 @@ func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 // {{match_srcs}} instance.
 func verifyMatchSources(matchedNonCompiledSources map[string]bool) {
 	for src, matched := range matchedNonCompiledSources {
-		if !matched {
+		if !matched && src[0] != ':' {
 			utils.Die("Non-compiled source %s is not used by match_srcs.", src)
 		}
 	}

@@ -105,6 +105,7 @@ type generatorBackend interface {
 	sharedActions(*sharedLibrary, blueprint.ModuleContext)
 	staticActions(*staticLibrary, blueprint.ModuleContext)
 	resourceActions(*resource, blueprint.ModuleContext)
+	filegroupActions(*filegroup, blueprint.ModuleContext)
 
 	// Backend specific info for module types
 	buildDir() string
@@ -255,6 +256,9 @@ type SourceProps struct {
 	Srcs []string
 	// The list of source files that should not be included. Use with care.
 	Exclude_srcs []string
+	// A list of filegroup modules that provide srcs, these are directly added to Srcs.
+	// We do not currently re-use Srcs for this.
+	Filegroup_srcs []string
 }
 
 // IncludeDirsProps defines a set of properties for including directories
@@ -274,7 +278,7 @@ type IncludeDirsProps struct {
 // the module directory but not the base source directory), and
 // excludes have been handled.
 func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
-	return glob(ctx, s.Srcs, s.Exclude_srcs)
+	return glob(ctx, append(s.Srcs, getFileGroupDeps(ctx)...), s.Exclude_srcs)
 }
 
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -417,6 +421,19 @@ func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 			mctx.AddDependency(mctx.Module(), tag, dep)
 		}
 	}
+}
+
+func getFileGroupDeps(mctx blueprint.BaseModuleContext) (srcs []string) {
+	mctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool {
+			return mctx.OtherModuleDependencyTag(m) == filegroupTag
+		},
+		func(m blueprint.Module) {
+			if fg, ok := m.(*filegroup); ok {
+				srcs = append(srcs, fg.getSources(mctx)...)
+			}
+		})
+	return
 }
 
 var wholeStaticDepTag = dependencyTag{name: "whole_static"}
@@ -661,6 +678,7 @@ func registerModuleTypes(register func(string, factoryWithConfig)) {
 
 	// Swapping to new rules that are more strict and adhere to the Android Modules
 	register("bob_genrule", generateRuleAndroidFactory)
+	register("bob_filegroup", filegroupFactory)
 
 	register("bob_alias", aliasFactory)
 	register("bob_kernel_module", kernelModuleFactory)
