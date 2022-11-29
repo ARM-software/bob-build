@@ -29,6 +29,7 @@ import (
 type Category string
 
 const (
+	DefaultSrcsWarning    Category = "DefaultSrcsWarning"
 	DeprecationWarning    Category = "DeprecationWarning"
 	DirectPathsWarning    Category = "DirectPathsWarning"
 	GenerateRuleWarning   Category = "GenerateRuleWarning"
@@ -38,6 +39,7 @@ const (
 )
 
 var categoriesMap = map[string]Category{
+	string(DefaultSrcsWarning):    DefaultSrcsWarning,
 	string(DeprecationWarning):    DeprecationWarning,
 	string(DirectPathsWarning):    DirectPathsWarning,
 	string(GenerateRuleWarning):   GenerateRuleWarning,
