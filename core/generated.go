@@ -28,6 +28,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
@@ -902,6 +903,12 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 }
 
 func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
+
+	if _, ok := mctx.Module().(*generateSource); ok {
+		msg := "`bob_generate_source` is deprecated, use `bob_genrule` instead"
+		getBackend(mctx).getLogger().Warn(warnings.GenerateRuleWarning, mctx.BlueprintsFile(), mctx.ModuleName(), msg)
+	}
+
 	if e, ok := mctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
