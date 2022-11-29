@@ -36,6 +36,7 @@ var (
 	generatedSourceTag       = dependencyTag{name: "generated_sources"}
 	generatedDepTag          = dependencyTag{name: "generated_dep"}
 	hostToolBinTag           = dependencyTag{name: "host_tool_bin"}
+	filegroupTag             = dependencyTag{name: "filegroup"}
 )
 
 // For bob_transform_source each src in the glob will get its own
@@ -949,6 +950,7 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 			}
 		}
 	}
+
 	// These rules also need to support variants when depending on tools. This strictly breaks android's genrule definition.
 	// However, if a colon appears at the end of a module name with a text string, we assume there is a variant
 	// called <module_name>__<variant_name> generated. Which bob currently does. This will fix behaviour on Android, to
@@ -968,6 +970,15 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 		for i, _ := range removeList {
 			agsc.Properties.Tools = append(agsc.Properties.Tools[:i], agsc.Properties.Tools[i+1:]...)
+		}
+	}
+
+	// Convert any filegroup dependencies into the correct format
+	if _, ok := getBackend(mctx).(*androidBpGenerator); ok {
+		if l, ok := getLibrary(mctx.Module()); ok {
+			for _, s := range l.Properties.Filegroup_srcs {
+				l.Properties.Srcs = append(l.Properties.Srcs, ":"+s)
+			}
 		}
 	}
 

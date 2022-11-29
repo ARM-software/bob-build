@@ -181,6 +181,8 @@ func Main() {
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
+	ctx.RegisterBottomUpMutator("filegroup_deps1", prepFilegroupMapMutator).Parallel()
+	ctx.RegisterBottomUpMutator("filegroup_deps2", propogateFilegroupData).Parallel()
 
 	if handler := initGrapvizHandler(); handler != nil {
 		ctx.RegisterBottomUpMutator("graphviz_output", handler.graphvizMutator)

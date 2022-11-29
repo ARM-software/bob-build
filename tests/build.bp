@@ -77,6 +77,7 @@ bob_alias {
         "bob_test_properties",
         "bob_test_reexport_libs",
         "bob_test_resources",
+        "bob_test_filegroups",
         "bob_test_shared_libs_toc",
         "bob_test_shared_libs",
         "bob_test_simple_binary",
