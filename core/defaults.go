@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import (
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 type defaults struct {
@@ -188,6 +189,16 @@ var (
 
 // Locally store defaults in defaultsMap
 func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
+
+	if d, ok := mctx.Module().(*defaults); ok {
+		srcs := d.getSourceProperties()
+
+		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
+		if len(srcs.Srcs) > 0 || len(srcs.Exclude_srcs) > 0 {
+			msg := "`srcs`/`exclude_srcs` property should not be used in defaults. Specify target sources explicitly or use `bob_filegroup`"
+			getBackend(mctx).getLogger().Warn(warnings.DefaultSrcsWarning, mctx.BlueprintsFile(), mctx.ModuleName(), msg)
+		}
+	}
 
 	if l, ok := mctx.Module().(defaultable); ok {
 		defaultsMapLock.Lock()
