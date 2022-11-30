@@ -18,6 +18,7 @@
 package core
 
 import (
+	"fmt"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -286,6 +287,13 @@ func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
 
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
+
+	for _, s := range s.Srcs {
+		if strings.HasPrefix(filepath.Clean(s), "../") {
+			msg := fmt.Sprintf("Path '%s' contains relative up-links, this is not allowed. Please use `bob_filegroup` instead.", s)
+			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName(), msg)
+		}
+	}
 
 	s.Srcs = utils.PrefixDirs(s.Srcs, prefix)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
