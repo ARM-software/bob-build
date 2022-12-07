@@ -60,6 +60,8 @@ bob_shared_library {
     local_include_dirs: ["include/"],
     export_local_include_dirs: ["include/"],
     export_include_dirs: ["include/"],
+    export_local_system_include_dirs: ["include/"],
+    export_system_include_dirs: ["include/"],
 
     build_wrapper: "ccache",
 

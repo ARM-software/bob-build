@@ -225,9 +225,14 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 			mctx.ModuleName(), l.Properties.Export_include_dirs)
 	}
 
+	if len(l.Properties.Export_system_include_dirs) > 0 {
+		utils.Die("Module %s exports non-local system include dirs %v - this is not supported",
+			mctx.ModuleName(), l.Properties.Export_system_include_dirs)
+	}
+
 	// Soong deals with exported include directories between library
 	// modules, but it doesn't export cflags.
-	_, _, exported_cflags := l.GetExportedVariables(mctx)
+	_, _, _, _, exported_cflags := l.GetExportedVariables(mctx)
 
 	cflags := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags, exported_cflags)
 
@@ -265,7 +270,11 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 		utils.Die("Module %s: %s", mctx.ModuleName(), err.Error())
 	}
 	m.AddStringList("include_dirs", l.Properties.Include_dirs)
-	m.AddStringList("local_include_dirs", l.Properties.Local_include_dirs)
+
+	/* Despite the documentation Export_local_system_include_dirs is not added to local includes for the current module, and only
+	propagated to downstream deps. To remedy this, we add those paths to local includes also. */
+	localIncludeDirs := append(l.Properties.Local_include_dirs, l.Properties.Export_local_system_include_dirs...)
+	m.AddStringList("local_include_dirs", localIncludeDirs)
 	m.AddStringList("shared_libs", bpModuleNamesForDeps(mctx, l.Properties.Shared_libs))
 	m.AddStringList("static_libs", staticLibs)
 	m.AddStringList("whole_static_libs", bpModuleNamesForDeps(mctx, l.Properties.Whole_static_libs))
@@ -319,9 +328,10 @@ func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
 	// Soong's `export_include_dirs` field is relative to the module
 	// dir. The Android.bp backend writes the file into the project
-	// root, so we can use the Export_local_include_dirs property
-	// unchanged.
+	// root, so we can use the Export_local_include_dirs and its system counter part
+	// property unchanged.
 	m.AddStringList("export_include_dirs", l.Properties.Export_local_include_dirs)
+	m.AddStringList("export_system_include_dirs ", l.Properties.Export_local_system_include_dirs)
 
 	// Only setup multilib for target modules.
 	// This part handles the target libraries.

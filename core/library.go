@@ -39,9 +39,11 @@ var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 type propertyExporter interface {
 	exportCflags() []string
 	exportIncludeDirs() []string
+	exportSystemIncludeDirs() []string
 	exportLdflags() []string
 	exportLdlibs() []string
 	exportLocalIncludeDirs() []string
+	exportLocalSystemIncludeDirs() []string
 	exportSharedLibs() []string
 }
 
@@ -134,11 +136,17 @@ type BuildProps struct {
 	// The list of modules that generate output required by the build wrapper
 	Generated_deps []string
 
-	// Include local dirs to be exported into dependent
-	Export_local_include_dirs []string `bob:"first_overrides"`
+	// Include local dirs to be exported into dependent.
+	// The system variant will propagate includes using `-isystem`, but use `-I` for
+	// current module.
+	Export_local_include_dirs        []string `bob:"first_overrides"`
+	Export_local_system_include_dirs []string `bob:"first_overrides"`
 
-	// Include dirs (path relative to root) to be exported into dependent
-	Export_include_dirs []string `bob:"first_overrides"`
+	// Include dirs (path relative to root) to be exported into dependent.
+	// The system variant will propagate includes using `-isystem`, but use `-I` for
+	// current module.
+	Export_include_dirs        []string `bob:"first_overrides"`
+	Export_system_include_dirs []string `bob:"first_overrides"`
 
 	// Wrapper for all build commands (object file compilation *and* linking)
 	Build_wrapper *string
@@ -265,6 +273,8 @@ func (l *BuildProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 	prefix := projectModuleDir(ctx)
 
 	l.Export_local_include_dirs = utils.PrefixDirs(l.Export_local_include_dirs, prefix)
+	l.Export_local_system_include_dirs = utils.PrefixDirs(l.Export_local_system_include_dirs, prefix)
+
 	l.processBuildWrapper(ctx)
 }
 
@@ -594,7 +604,7 @@ func (l *library) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (mod
 	return
 }
 
-func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalIncludes, expIncludes, expCflags []string) {
+func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, expCflags []string) {
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
@@ -612,7 +622,9 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expLocalInc
 
 		if pe, ok := dep.(propertyExporter); ok {
 			expLocalIncludes = append(expLocalIncludes, pe.exportLocalIncludeDirs()...)
+			expLocalSystemIncludes = append(expLocalIncludes, pe.exportLocalSystemIncludeDirs()...)
 			expIncludes = append(expIncludes, pe.exportIncludeDirs()...)
+			expSystemIncludes = append(expSystemIncludes, pe.exportSystemIncludeDirs()...)
 			expCflags = append(expCflags, pe.exportCflags()...)
 		}
 	})
@@ -663,12 +675,16 @@ func (l *library) checkField(cond bool, fieldName string) {
 }
 
 // All libraries must implement `propertyExporter`
-func (l *library) exportCflags() []string           { return l.Properties.Export_cflags }
-func (l *library) exportIncludeDirs() []string      { return l.Properties.Export_include_dirs }
-func (l *library) exportLocalIncludeDirs() []string { return l.Properties.Export_local_include_dirs }
-func (l *library) exportLdflags() []string          { return l.Properties.Export_ldflags }
-func (l *library) exportLdlibs() []string           { return l.Properties.Ldlibs }
-func (l *library) exportSharedLibs() []string       { return l.Properties.Shared_libs }
+func (l *library) exportCflags() []string            { return l.Properties.Export_cflags }
+func (l *library) exportIncludeDirs() []string       { return l.Properties.Export_include_dirs }
+func (l *library) exportLocalIncludeDirs() []string  { return l.Properties.Export_local_include_dirs }
+func (l *library) exportLdflags() []string           { return l.Properties.Export_ldflags }
+func (l *library) exportLdlibs() []string            { return l.Properties.Ldlibs }
+func (l *library) exportSharedLibs() []string        { return l.Properties.Shared_libs }
+func (l *library) exportSystemIncludeDirs() []string { return l.Properties.Export_system_include_dirs }
+func (l *library) exportLocalSystemIncludeDirs() []string {
+	return l.Properties.Export_local_system_include_dirs
+}
 
 type staticLibrary struct {
 	library
@@ -847,6 +863,8 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		b.checkField(len(props.Export_include_dirs) == 0, "export_include_dirs")
 		b.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		b.checkField(len(props.Export_local_include_dirs) == 0, "export_local_include_dirs")
+		b.checkField(len(props.Export_local_system_include_dirs) == 0, "export_local_system_include_dirs")
+		b.checkField(len(props.Export_system_include_dirs) == 0, "export_system_include_dirs")
 		b.checkField(len(props.Reexport_libs) == 0, "reexport_libs")
 		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	} else if sl, ok := m.(*sharedLibrary); ok {
