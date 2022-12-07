@@ -294,11 +294,27 @@ A list of include directories, similar to `include_dirs`. These
 directories also get added to the include paths of any module that
 links to the current library.
 
+Not supported on Android. Use `export_local_include_dirs` instead.
+
 ----
 ### **bob_module.export_local_include_dirs** (optional)
 A list of include directories to use, similar to
 `local_include_dirs`. These directories also get added to the include
 paths of any module that links to the current library.
+
+----
+### **bob_module.export_system_include_dirs** (optional)
+The same as `export_include_dirs` except downstream
+dependencies use `-isystem` instead of `-I` for paths specified in this
+attribute.
+
+Not supported on Android. Use `export_local_system_include_dirs` instead.
+
+----
+### **bob_module.export_local_system_include_dirs** (optional)
+The same as `export_local_include_dirs` except downstream
+dependencies use `-isystem` instead of `-I` for paths specified in this
+attribute.
 
 ----
 ### **bob_module.build_wrapper** (optional)

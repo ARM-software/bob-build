@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Arm Limited.
+ * Copyright 2019-2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,12 +64,14 @@ func (m *externalLib) getSplittableProps() *SplittableProps { return &Splittable
 // Implement the propertyExporter interface so that external libraries can pass
 // on properties e.g. from pkg-config
 
-func (m *externalLib) exportCflags() []string           { return m.Properties.Export_cflags }
-func (m *externalLib) exportIncludeDirs() []string      { return []string{} }
-func (m *externalLib) exportLocalIncludeDirs() []string { return []string{} }
-func (m *externalLib) exportLdflags() []string          { return m.Properties.Export_ldflags }
-func (m *externalLib) exportLdlibs() []string           { return m.Properties.Ldlibs }
-func (m *externalLib) exportSharedLibs() []string       { return []string{} }
+func (m *externalLib) exportCflags() []string                 { return m.Properties.Export_cflags }
+func (m *externalLib) exportIncludeDirs() []string            { return []string{} }
+func (m *externalLib) exportLocalIncludeDirs() []string       { return []string{} }
+func (m *externalLib) exportLdflags() []string                { return m.Properties.Export_ldflags }
+func (m *externalLib) exportLdlibs() []string                 { return m.Properties.Ldlibs }
+func (m *externalLib) exportSharedLibs() []string             { return []string{} }
+func (m *externalLib) exportSystemIncludeDirs() []string      { return []string{} }
+func (m *externalLib) exportLocalSystemIncludeDirs() []string { return []string{} }
 
 var _ propertyExporter = (*externalLib)(nil)
 var _ splittable = (*externalLib)(nil)

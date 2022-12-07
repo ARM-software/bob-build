@@ -63,29 +63,35 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 	g := getBackend(ctx)
 	srcs := l.GetSrcs(ctx)
 
-	expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
+	expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
 	// There are 2 sets of include dirs - "global" and "local".
 	// Local acts on the root source directory.
 
 	// The order we want is  local_include_dirs, export_local_include_dirs,
 	//                       include_dirs, export_include_dirs
-	localIncludeDirs := utils.NewStringSlice(l.Properties.Local_include_dirs,
-		l.Properties.Export_local_include_dirs)
+	localIncludeDirs := utils.NewStringSlice(l.Properties.Local_include_dirs, l.Properties.Export_local_include_dirs,
+		l.Properties.Export_local_system_include_dirs)
 
 	// Prefix all local includes with SrcDir
 	localIncludeDirs = utils.PrefixDirs(localIncludeDirs, "${SrcDir}")
 	expLocalIncludes = utils.PrefixDirs(expLocalIncludes, "${SrcDir}")
+	expLocalSystemIncludes = utils.PrefixDirs(expLocalSystemIncludes, "${SrcDir}")
+
+	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
 
 	includeDirs := append(localIncludeDirs, l.Properties.Include_dirs...)
 	includeDirs = append(includeDirs, l.Properties.Export_include_dirs...)
+	includeDirs = append(includeDirs, l.Properties.Export_system_include_dirs...)
 	includeDirs = append(includeDirs, expLocalIncludes...)
 	includeDirs = append(includeDirs, expIncludes...)
-
-	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
 	includeDirs = append(includeDirs, gendirs...)
 	includeFlags := utils.PrefixAll(includeDirs, "-I")
+
+	includeSystemDirs := append(expLocalSystemIncludes, expSystemIncludes...)
+	systemIncludeFlags := utils.PrefixAll(includeSystemDirs, "-isystem ")
+
 	cflagsList := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags,
-		exportedCflags, includeFlags)
+		exportedCflags, systemIncludeFlags, includeFlags)
 
 	tc := g.getToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.getAssembler()
