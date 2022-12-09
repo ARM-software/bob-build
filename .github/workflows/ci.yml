@@ -17,18 +17,18 @@ jobs:
 
     steps:
       - name: Setup Go ${{ matrix.go }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
         id: go
 
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: 'true'
@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.10', '1.11', '1.12', '1.13', '1.14' ]
+        go: [ '1.10', '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
         os: [ ubuntu-latest ]
         include:
           - go: '1.13'
@@ -73,20 +73,20 @@ jobs:
 
     steps:
       - name: Setup Go ${{ matrix.go }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
         id: go
 
       - name: Get testify
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: stretchr/testify
           ref: v1.6.1
           path: ${{ env.GOPATH }}/src/github.com/stretchr/testify
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
           path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
@@ -120,12 +120,12 @@ jobs:
 
     steps:
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install python dependencies
         run: |
@@ -149,7 +149,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.10', '1.11', '1.12', '1.13', '1.14' ]
+        go: [ '1.10', '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
         os: [ ubuntu-latest ]
         python: [ '3.x' ]
         include:
@@ -160,13 +160,13 @@ jobs:
 
     steps:
       - name: Setup Go ${{ matrix.go }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
         id: go
 
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
@@ -182,7 +182,7 @@ jobs:
           fi
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: 'true'
