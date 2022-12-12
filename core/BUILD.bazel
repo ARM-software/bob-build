@@ -38,6 +38,8 @@ go_library(
         "properties.go",
         "splitter.go",
         "standalone.go",
+        "strict_library.go",
+        "strict_linux_cclibs.go",
         "strip.go",
         "template.go",
         "toolchain.go",

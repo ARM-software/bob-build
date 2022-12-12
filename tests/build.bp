@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,7 @@ bob_alias {
         "bob_test_shared_libs",
         "bob_test_simple_binary",
         "bob_test_static_libs",
+        "bob_test_strict_libs",
         "bob_test_target_specific_static_libs",
         "bob_test_templates",
         "bob_test_transform_source",

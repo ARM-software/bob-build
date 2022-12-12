@@ -1,0 +1,18 @@
+// Stub
+
+// TODO: Fix shared library dep propogation
+// bob_binary {
+//     name: "shared_strict_lib_binary",
+//     srcs: ["main.cpp"],
+//     shared_libs: [
+//         "lib_simple",
+//     ],
+//     host_supported: true,
+//     target_supported: false,
+//     build_by_default: true,
+// }
+
+
+bob_alias {
+    name: "bob_test_strict_shared_libs",
+}

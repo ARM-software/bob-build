@@ -1,0 +1,24 @@
+// Very strong interopability test
+bob_static_library {
+    name: "lib_transitive_define",
+    static_libs: ["lib_forward_defines"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
+bob_binary {
+    name: "strict_lib_binary_with_transitive_define",
+    filegroup_srcs: ["static_bin_srcs"],
+    static_libs: ["lib_transitive_define"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
+bob_alias {
+    name: "bob_test_strict_libs_interopt",
+    srcs: [
+    "strict_lib_binary_with_transitive_define",
+    ],
+}
