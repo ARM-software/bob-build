@@ -1,0 +1,8 @@
+bob_alias {
+    name: "bob_test_strict_libs",
+    srcs: [
+        "bob_test_strict_static_libs",
+        "bob_test_strict_libs_interopt",
+        "bob_test_strict_shared_libs",
+    ],
+}

@@ -41,6 +41,10 @@
 ./static_libs/build.bp
 ./system_includes/libconsumer/build.bp
 ./system_includes/libpublic/build.bp
+./strict_libs/build.bp
+./strict_libs/interopt/build.bp
+./strict_libs/shared/build.bp
+./strict_libs/static/build.bp
 ./target_specific_static_libs/build.bp
 ./templates/build.bp
 ./transform_source/build.bp

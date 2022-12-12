@@ -107,6 +107,7 @@ type generatorBackend interface {
 	staticActions(*staticLibrary, blueprint.ModuleContext)
 	resourceActions(*resource, blueprint.ModuleContext)
 	filegroupActions(*filegroup, blueprint.ModuleContext)
+	strictLibraryActions(*strictLibrary, blueprint.ModuleContext)
 
 	// Backend specific info for module types
 	buildDir() string
@@ -475,6 +476,11 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		mctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 	}
 
+	// TODO: Shared Lib dependencies
+	if sl, ok := mctx.Module().(*strictLibrary); ok {
+		mctx.AddVariationDependencies(nil, staticDepTag, sl.Properties.Deps...)
+	}
+
 	if km, ok := mctx.Module().(*kernelModule); ok {
 		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
 	}
@@ -692,6 +698,7 @@ func registerModuleTypes(register func(string, factoryWithConfig)) {
 	register("bob_genrule", generateRuleAndroidFactory)
 	register("bob_filegroup", filegroupFactory)
 	register("bob_glob", globFactory)
+	register("bob_library", LibraryFactory)
 
 	register("bob_alias", aliasFactory)
 	register("bob_kernel_module", kernelModuleFactory)

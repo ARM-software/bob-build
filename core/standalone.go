@@ -181,6 +181,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
 	ctx.RegisterBottomUpMutator("default_applier", defaultApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
+	ctx.RegisterBottomUpMutator("library_defines", propogateLibraryDefinesMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("filegroup_deps1", prepFilegroupMapMutator).Parallel()

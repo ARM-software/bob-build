@@ -298,6 +298,7 @@ type library struct {
 
 	Properties struct {
 		Features
+		TransitiveLibraryProps
 		Build
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
@@ -1003,6 +1004,8 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			// libraries.
 		} else if depLib, ok := dep.(*externalLib); ok {
 			propagateOtherExportedProperties(l, depLib)
+		} else if _, ok := dep.(*strictLibrary); ok {
+			// TODO: Propogate flags here?
 		} else {
 			utils.Die("%s is not a staticLibrary", dep.Name())
 		}
