@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -346,12 +346,8 @@ def main():
     if args.jobs:
         make_args.append("-j" + str(args.jobs))
     else:
-        # If the following env var is set, we are running in a build
-        # farm where we should avoid increasing thread
-        # count. Therefore leave make to run with a single core.
-        # If not, build kernel modules with the number of CPUs we have.
-        if os.getenv("MPDTI_BUILD_PARALLELISM") is None:
-            make_args.append("-j" + str(multiprocessing.cpu_count()))
+        nproc = os.getenv("NPROC", multiprocessing.cpu_count())
+        make_args.append("-j" + str(nproc))
 
     module_ko = os.path.basename(args.output)
     abs_module_dir = os.path.abspath(args.module_dir)
