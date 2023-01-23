@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -233,7 +233,7 @@ func Main() {
 		f.Close()
 
 		if errCnt > 0 {
-			utils.Die("%d error(s) ocurred!\n", errCnt)
+			utils.Die("%d error(s) ocurred!\n\n%s\n", errCnt, logger.InfoMessage())
 		}
 	}()
 

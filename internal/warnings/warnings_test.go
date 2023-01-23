@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Arm Limited.
+ * Copyright 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,50 +51,49 @@ func captureStderr(f func()) string {
 }
 
 func TestWarningDefault(t *testing.T) {
-	const expected string = `BpFile,BpModule,WarningAction,WarningMessage,WarningCategory
-A/build.bp,gen_table,ignore,"Warning ocurred, will warn!",UserWarning
-`
+	const expected string = "BpFile,BpModule,WarningAction,WarningMessage,WarningCategory\n" +
+		"A/build.bp,gen_table,ignore,Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.,relative-up-link\n"
 	var msg strings.Builder
 
 	wr := New(&msg, "")
-	wr.Warn(UserWarning, "A/build.bp", "gen_table", "Warning ocurred, will warn!")
+	wr.Warn(RelativeUpLinkWarning, "A/build.bp", "gen_table")
 
 	assert.Equal(t, expected, msg.String())
 }
 
 func TestWarning(t *testing.T) {
-	const expected string = `BpFile,BpModule,WarningAction,WarningMessage,WarningCategory
-A/build.bp,gen_table,warning,Warning ocurred!,UserWarning
-B/build.bp,gen_binary,ignore,Warning ocurred!,RelativeUpLinkWarning
-`
-	const expectedStderr string = "A/build.bp:gen_table: warning: Warning ocurred! [UserWarning]\n"
+	const expected string = "BpFile,BpModule,WarningAction,WarningMessage,WarningCategory\n" +
+		"A/build.bp,gen_table,warning,`bob_generate_source` should not be used. Use `bob_genrule` instead.,generate-rule\n" +
+		"B/build.bp,gen_binary,ignore,Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.,relative-up-link\n"
+
+	const expectedStderr string = "A/build.bp:gen_table: warning: `bob_generate_source` should not be used. Use `bob_genrule` instead. [generate-rule]\n"
 	var msg strings.Builder
 
-	wr := New(&msg, "UserWarning:W")
+	wr := New(&msg, "GenerateRuleWarning:W")
 
 	stderrOutput := captureStderr(func() {
-		wr.Warn(UserWarning, "A/build.bp", "gen_table", "Warning ocurred!")
-		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary", "Warning ocurred!")
+		wr.Warn(GenerateRuleWarning, "A/build.bp", "gen_table")
+		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary")
 	})
 
-	//assert.Equal(t, expected, msg.String())
+	assert.Equal(t, expected, msg.String())
 	assert.Equal(t, expectedStderr, stderrOutput)
 }
 
 func TestErrorWarning(t *testing.T) {
-	const expected string = `BpFile,BpModule,WarningAction,WarningMessage,WarningCategory
-A/build.bp,gen_table,error,Wrong target!,UserWarning
-B/build.bp,gen_binary,warning,Warning ocurred!,RelativeUpLinkWarning
-`
-	const expectedStderr string = `A/build.bp:gen_table: error: Wrong target! [UserWarning]
-B/build.bp:gen_binary: warning: Warning ocurred! [RelativeUpLinkWarning]
-`
+	const expected string = "BpFile,BpModule,WarningAction,WarningMessage,WarningCategory\n" +
+		"A/build.bp,gen_table,error,`bob_generate_source` should not be used. Use `bob_genrule` instead.,generate-rule\n" +
+		"B/build.bp,gen_binary,warning,Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.,relative-up-link\n"
+
+	const expectedStderr string = "A/build.bp:gen_table: error: `bob_generate_source` should not be used. Use `bob_genrule` instead. [generate-rule]\n" +
+		"B/build.bp:gen_binary: warning: Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead. [relative-up-link]\n"
+
 	var msg strings.Builder
 
-	wr := New(&msg, "UserWarning:E RelativeUpLinkWarning:W")
+	wr := New(&msg, "GenerateRuleWarning:E RelativeUpLinkWarning:W")
 	stderrOutput := captureStderr(func() {
-		wr.Warn(UserWarning, "A/build.bp", "gen_table", "Wrong target!")
-		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary", "Warning ocurred!")
+		wr.Warn(GenerateRuleWarning, "A/build.bp", "gen_table")
+		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary")
 	})
 
 	assert.Equal(t, expected, msg.String())
@@ -102,11 +101,11 @@ B/build.bp:gen_binary: warning: Warning ocurred! [RelativeUpLinkWarning]
 }
 
 func TestFilterOverwriteCategory(t *testing.T) {
-	const expected string = "Overriding warning category not allowed: 'UserWarning:W'\n"
+	const expected string = "Overriding warning category not allowed: 'GenerateRuleWarning:W'\n"
 	var msg strings.Builder
 
 	stderrOutput := captureStderr(func() {
-		New(&msg, "UserWarning:E RelativeUpLinkWarning:W UserWarning:W")
+		New(&msg, "GenerateRuleWarning:E RelativeUpLinkWarning:W GenerateRuleWarning:W")
 	})
 
 	assert.Equal(t, expected, stderrOutput)
@@ -124,19 +123,19 @@ func TestFilterOverwriteWildcard(t *testing.T) {
 }
 
 func TestErrorAllWarnings(t *testing.T) {
-	const expectedStderr string = `A/build.bp:gen_table: error: Wrong target! [UserWarning]
-B/build.bp:gen_binary: warning: Warning ocurred! [RelativeUpLinkWarning]
-`
-	const expected string = `BpFile,BpModule,WarningAction,WarningMessage,WarningCategory
-A/build.bp,gen_table,error,Wrong target!,UserWarning
-B/build.bp,gen_binary,warning,Warning ocurred!,RelativeUpLinkWarning
-`
+	const expectedStderr string = "A/build.bp:gen_table: error: `bob_generate_source` should not be used. Use `bob_genrule` instead. [generate-rule]\n" +
+		"B/build.bp:gen_binary: warning: Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead. [relative-up-link]\n"
+
+	const expected string = "BpFile,BpModule,WarningAction,WarningMessage,WarningCategory\n" +
+		"A/build.bp,gen_table,error,`bob_generate_source` should not be used. Use `bob_genrule` instead.,generate-rule\n" +
+		"B/build.bp,gen_binary,warning,Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.,relative-up-link\n"
+
 	var msg strings.Builder
 
 	wr := New(&msg, "*:E RelativeUpLinkWarning:W")
 	stderrOutput := captureStderr(func() {
-		wr.Warn(UserWarning, "A/build.bp", "gen_table", "Wrong target!")
-		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary", "Warning ocurred!")
+		wr.Warn(GenerateRuleWarning, "A/build.bp", "gen_table")
+		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary")
 	})
 
 	assert.Equal(t, expected, msg.String())
@@ -179,13 +178,77 @@ func TestWrongFilter(t *testing.T) {
 func TestCheckIfErrors(t *testing.T) {
 	var msg strings.Builder
 
-	wr := New(&msg, "UserWarning:E RelativeUpLinkWarning:W")
+	wr := New(&msg, "GenerateRuleWarning:E RelativeUpLinkWarning:W")
 	captureStderr(func() {
-		wr.Warn(UserWarning, "A/build.bp", "gen_table", "Wrong target!")
-		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary", "Warning ocurred!")
+		wr.Warn(GenerateRuleWarning, "A/build.bp", "gen_table")
+		wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary")
 		assert.Equal(t, 1, wr.ErrorWarnings())
-		wr.Warn(UserWarning, "ABC/build.bp", "gen_lib", "Another wrong target!")
-		wr.Warn(RelativeUpLinkWarning, "BCD/build.bp", "gen_binary_two", "Warning ocurred!")
+		wr.Warn(GenerateRuleWarning, "ABC/build.bp", "gen_lib")
+		wr.Warn(RelativeUpLinkWarning, "BCD/build.bp", "gen_binary_two")
 		assert.Equal(t, 2, wr.ErrorWarnings())
 	})
+}
+
+func TestHyperlinks(t *testing.T) {
+	const expectedHyperlink string = "A/build.bp:gen_table: error: `bob_generate_source` should not be used. Use `bob_genrule` instead. " +
+		"[\x1b]8;;https://github.com/ARM-software/bob-build/tree/master/docs/warnings/generate-rule.md\agenerate-rule\x1b]8;;\a]\n" +
+		"B/build.bp:gen_binary: warning: Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead. [\x1b]8;;" +
+		"https://github.com/ARM-software/bob-build/tree/master/docs/warnings/relative-up-link.md\arelative-up-link\x1b]8;;\a]\n"
+
+	const expected string = "A/build.bp:gen_table: error: `bob_generate_source` should not be used. Use `bob_genrule` instead. [generate-rule]\n" +
+		"B/build.bp:gen_binary: warning: Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead. [relative-up-link]\n"
+
+	var msg strings.Builder
+
+	type Tuple struct {
+		a, b, exp interface{}
+	}
+
+	config := [4]Tuple{
+		{"DOMTERM", "DOMTERM_PRESENT", expectedHyperlink},
+		{"VTE_VERSION", "6003", expectedHyperlink},
+		{"VTE_VERSION", "3405", expected},
+		{"TERM", "xterm-256color", expectedHyperlink},
+	}
+
+	var wr *WarningLogger
+
+	for _, item := range config {
+		os.Setenv(item.a.(string), item.b.(string))
+		wr = New(&msg, "GenerateRuleWarning:E RelativeUpLinkWarning:W")
+
+		stderrOutput := captureStderr(func() {
+			wr.Warn(GenerateRuleWarning, "A/build.bp", "gen_table")
+			wr.Warn(RelativeUpLinkWarning, "B/build.bp", "gen_binary")
+			assert.Equal(t, 1, wr.ErrorWarnings())
+		})
+
+		assert.Equal(t, item.exp.(string), stderrOutput)
+
+		os.Unsetenv(item.a.(string))
+	}
+}
+
+func TestInfoMessage(t *testing.T) {
+	const expectedHyperlink string = "For more information on Bob warnings, see: [\x1b]8;;https://github.com/ARM-software/bob-build/" +
+		"tree/master/docs/warnings/warnings.md\ahttps://github.com/ARM-software/bob-build/tree/master/docs/warnings/warnings.md\x1b]8;;\a]"
+
+	const expected string = "For more information on Bob warnings, see: " +
+		"[https://github.com/ARM-software/bob-build/tree/master/docs/warnings/warnings.md]"
+
+	os.Setenv("TERM", "xterm")
+
+	var msg strings.Builder
+
+	wr := New(&msg, "*:E")
+	str := wr.InfoMessage()
+
+	assert.Equal(t, expectedHyperlink, str)
+
+	os.Unsetenv("TERM")
+
+	wr = New(&msg, "*:W")
+	str = wr.InfoMessage()
+
+	assert.Equal(t, expected, str)
 }

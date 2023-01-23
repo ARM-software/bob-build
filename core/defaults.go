@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,8 +195,7 @@ func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 
 		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
 		if len(srcs.Srcs) > 0 || len(srcs.Exclude_srcs) > 0 {
-			msg := "`srcs`/`exclude_srcs` property should not be used in defaults. Specify target sources explicitly or use `bob_filegroup`"
-			getBackend(mctx).getLogger().Warn(warnings.DefaultSrcsWarning, mctx.BlueprintsFile(), mctx.ModuleName(), msg)
+			getBackend(mctx).getLogger().Warn(warnings.DefaultSrcsWarning, mctx.BlueprintsFile(), mctx.ModuleName())
 		}
 	}
 

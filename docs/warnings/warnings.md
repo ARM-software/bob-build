@@ -1,6 +1,34 @@
 WarningLogger
 ==================
 
+# Preface
+
+`Bob` is based on Google's [Blueprint](https://github.com/google/blueprint)
+repository which has been archived some time ago.
+Beside it implements few handy features it breaks some core rules
+which new solid build system should have like hermeticity.
+
+The main feature of `Bob` is to building for both Android and Linux.
+Constant evolution of _Android_ makes things harder and forces `Bob`
+to implement things which are not necessarily features but rather
+workarounds. That causes more breakage of build system principles.
+
+Apart of that an Android will be switching to
+[Bazel](https://bazel.build) with incoming releases.
+
+Thus `Bob` will be deprecated when Android will move to Bazel.
+
+All above makes us to _adjust_ `Bob` to the form its `build.bp` files
+will be easily convertible to Bazel.
+
+`WarningLogger` is a first step to help with such transition and warn
+about all the issues currently implemented in `build.bp` files that does
+not conform to the new approach.
+When all risen issues become fixed, particular warnings will be
+promoted to error to prevent using all prohibited `Bob`'s functionality.
+
+# WarningLogger
+
 `WarningLogger` allows to write out the warnings to any `io.Writer`
 with the CSV format of:
 ```
@@ -14,11 +42,10 @@ action will be printed to `os.Stderr`.
 
 There are few types to categorize a warning:
 
-- `DirectPathsWarning`
-- `GenerateRuleWarning`
-- `PropertyWarning`
-- `RelativeUpLinkWarning`
-- `UserWarning`
+- [DefaultSrcsWarning](default-srcs.md) - `[default-srcs]`
+- [GenerateRuleWarning](generate-rule.md) - `[generate-rule]`
+- [PropertyWarning](property.md) - `[property]`
+- [RelativeUpLinkWarning](relative-up-link.md) - `[relative-up-link]`
 
 
 ## Warning actions

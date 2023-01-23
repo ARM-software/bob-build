@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -905,8 +905,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	if _, ok := mctx.Module().(*generateSource); ok {
-		msg := "`bob_generate_source` is deprecated, use `bob_genrule` instead"
-		getBackend(mctx).getLogger().Warn(warnings.GenerateRuleWarning, mctx.BlueprintsFile(), mctx.ModuleName(), msg)
+		getBackend(mctx).getLogger().Warn(warnings.GenerateRuleWarning, mctx.BlueprintsFile(), mctx.ModuleName())
 	}
 
 	if e, ok := mctx.Module().(enableable); ok {
