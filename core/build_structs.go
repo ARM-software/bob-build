@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -290,8 +289,7 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorB
 
 	for _, s := range s.Srcs {
 		if strings.HasPrefix(filepath.Clean(s), "../") {
-			msg := fmt.Sprintf("Path '%s' contains relative up-links, this is not allowed. Please use `bob_filegroup` instead.", s)
-			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName(), msg)
+			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 

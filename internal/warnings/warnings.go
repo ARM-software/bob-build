@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Arm Limited.
+ * Copyright 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,30 +22,31 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
 
+const URL string = "https://github.com/ARM-software/bob-build/tree/master/docs/warnings/"
+
 type Category string
 
 const (
-	DefaultSrcsWarning    Category = "DefaultSrcsWarning"
-	DeprecationWarning    Category = "DeprecationWarning"
-	DirectPathsWarning    Category = "DirectPathsWarning"
-	GenerateRuleWarning   Category = "GenerateRuleWarning"
-	PropertyWarning       Category = "PropertyWarning"
-	RelativeUpLinkWarning Category = "RelativeUpLinkWarning"
-	UserWarning           Category = "UserWarning"
+	DefaultSrcsWarning    Category = "default-srcs"
+	GenerateRuleWarning   Category = "generate-rule"
+	RelativeUpLinkWarning Category = "relative-up-link"
 )
 
 var categoriesMap = map[string]Category{
-	string(DefaultSrcsWarning):    DefaultSrcsWarning,
-	string(DeprecationWarning):    DeprecationWarning,
-	string(DirectPathsWarning):    DirectPathsWarning,
-	string(GenerateRuleWarning):   GenerateRuleWarning,
-	string(PropertyWarning):       PropertyWarning,
-	string(RelativeUpLinkWarning): RelativeUpLinkWarning,
-	string(UserWarning):           UserWarning,
+	"DefaultSrcsWarning":    DefaultSrcsWarning,
+	"GenerateRuleWarning":   GenerateRuleWarning,
+	"RelativeUpLinkWarning": RelativeUpLinkWarning,
+}
+
+var categoriesMessages = map[Category]string{
+	DefaultSrcsWarning:    "`srcs`/`exclude_srcs` property should not be used in defaults. Specify target sources explicitly or use `bob_filegroup`.",
+	GenerateRuleWarning:   "`bob_generate_source` should not be used. Use `bob_genrule` instead.",
+	RelativeUpLinkWarning: "Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.",
 }
 
 type Action string
@@ -68,6 +69,7 @@ type WarningLogger struct {
 	filters      map[Category]Action
 	globalAction Action
 	errors       int
+	hypelinks    bool
 }
 
 func New(out io.Writer, filters string) *WarningLogger {
@@ -77,7 +79,7 @@ func New(out io.Writer, filters string) *WarningLogger {
 
 	f, g := parseFilters(filters)
 
-	return &WarningLogger{out: w, filters: f, globalAction: g}
+	return &WarningLogger{out: w, filters: f, globalAction: g, hypelinks: checkIfHyperlinks()}
 }
 
 func parseFilters(f string) (filters map[Category]Action, globalAction Action) {
@@ -134,11 +136,32 @@ func parseFilters(f string) (filters map[Category]Action, globalAction Action) {
 	return
 }
 
+func (w *WarningLogger) getLink(category Category) string {
+	if w.hypelinks {
+		return fmt.Sprintf("\x1b]8;;%[1]s%[2]s.md\x07%[2]s\x1b]8;;\x07", URL, category)
+	} else {
+		return string(category)
+	}
+}
+
+func (w *WarningLogger) InfoMessage() string {
+	var head = "For more information on Bob warnings, see:"
+	if w.hypelinks {
+		return fmt.Sprintf("%[1]s [\x1b]8;;%[2]swarnings.md\x07%[2]swarnings.md\x1b]8;;\x07]", head, URL)
+	} else {
+		return fmt.Sprintf("%[1]s [%[2]swarnings.md]", head, URL)
+	}
+}
+
 func (w *WarningLogger) ErrorWarnings() int {
 	return w.errors
 }
 
-func (w *WarningLogger) Warn(category Category, bpFile string, bpModule string, message string) error {
+func (w *WarningLogger) getMessage(category Category, args ...interface{}) string {
+	return fmt.Sprintf(categoriesMessages[category], args...)
+}
+
+func (w *WarningLogger) Warn(category Category, bpFile string, bpModule string, args ...interface{}) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -153,11 +176,33 @@ func (w *WarningLogger) Warn(category Category, bpFile string, bpModule string, 
 	}
 
 	if action != IgnoreAction {
-		io.WriteString(os.Stderr, fmt.Sprintf("%s:%s: %s: %s [%s]\n", bpFile, bpModule, action, message, category))
+		io.WriteString(os.Stderr, fmt.Sprintf("%s:%s: %s: %s [%s]\n", bpFile, bpModule, action, w.getMessage(category, args...), w.getLink(category)))
 	}
 
-	w.out.Write([]string{bpFile, bpModule, string(action), message, string(category)})
+	w.out.Write([]string{bpFile, bpModule, string(action), w.getMessage(category, args...), string(category)})
 	w.out.Flush()
 
 	return w.out.Error()
+}
+
+func checkIfHyperlinks() bool {
+	if _, ok := os.LookupEnv("DOMTERM"); ok {
+		return true
+	}
+
+	if v, ok := os.LookupEnv("VTE_VERSION"); ok {
+		ver, err := strconv.ParseInt(v, 10, 0)
+
+		if err == nil && ver >= 5000 {
+			return true
+		}
+	}
+
+	if t, ok := os.LookupEnv("TERM"); ok {
+		if strings.HasPrefix(t, "xterm") {
+			return true
+		}
+	}
+
+	return false
 }
