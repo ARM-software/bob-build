@@ -24,7 +24,8 @@ if git diff --name-only ${PARENT} ${COMMIT} | grep -q "bob.bootstrap.version" ; 
     echo "Bob version file has changed between parent and current commit. Skipping verification step"
 else
     build_dir=bootstrap_test
-    git checkout ${PARENT}
+
+    git checkout -f ${PARENT}
     cd "${BOB_ROOT}/tests"
     rm -rf ${build_dir} # Cleanup test directory
     ./bootstrap_linux -o ${build_dir}
@@ -33,7 +34,9 @@ else
     # Wait for filesystems with low timestamp resolution
     sleep 1
 
-    git checkout ${COMMIT}
+    # Prevent CI from failing when changes would overwrite local (such as go.mod)
+    git checkout -f ${COMMIT}
+
     rm ${build_dir}/build.ninja
     ${build_dir}/buildme bob_tests
 fi

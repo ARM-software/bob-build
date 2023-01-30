@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "graph",
+    srcs = ["graph.go"],
+    importpath = "github.com/ARM-software/bob-build/internal/graph",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/utils"],
+)
+
+go_test(
+    name = "graph_test",
+    srcs = ["graph_test.go"],
+    embed = [":graph"],
+    deps = [
+        "//internal/utils",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

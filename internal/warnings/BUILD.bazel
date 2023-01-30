@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "warnings",
+    srcs = ["warnings.go"],
+    importpath = "github.com/ARM-software/bob-build/internal/warnings",
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "warnings_test",
+    srcs = ["warnings_test.go"],
+    embed = [":warnings"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

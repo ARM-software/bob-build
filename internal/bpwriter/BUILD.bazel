@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "bpwriter",
+    srcs = ["bpwriter.go"],
+    importpath = "github.com/ARM-software/bob-build/internal/bpwriter",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/utils"],
+)
