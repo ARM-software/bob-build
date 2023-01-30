@@ -40,3 +40,6 @@ highlight.css
 
 # Ignore Android.bp files
 Android.bp
+
+# Bazel
+bazel-*

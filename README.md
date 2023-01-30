@@ -133,6 +133,29 @@ export GOPATH=<workspace>
 bob/scripts/setup_workspace_for_bob.bash
 ```
 
+## Bazel
+Bob has the minimal support for building with Bazel via Gazelle.
+
+To build Bob:
+```sh
+bazelisk build //...
+```
+
+To run the Go unit tests:
+```sh
+bazelisk test //...
+```
+
+To update build files:
+```sh
+bazelisk run //:gazelle
+```
+
+To update `deps.bzl`:
+```sh
+bazelisk run //:gazelle-update-repos
+```
+
 ## Documentation
 
 Detailed [documentation](docs/index.md) is in the docs directory of
