@@ -203,3 +203,24 @@ jobs:
 
       - name: Bootstrap version test
         run: .github/run_bootstrap_test.sh
+
+  bazel-tests:
+    name: "Bazel ${{matrix.bazel}} ${{ matrix.os }}"
+    env:
+      USE_BAZEL_VERSION: ${{ matrix.bazel }}
+    strategy:
+      fail-fast: false
+      matrix:
+        bazel: [ 'latest', '6.0.0', '5.4.0' ]
+        os: [ ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bazelbuild/setup-bazelisk@v2
+      - name: Mount bazel cache  # Optional
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
+      - run: bazel build --config=ci //...
+      - run: bazel test --config=ci //...
