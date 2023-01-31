@@ -1,0 +1,13 @@
+# CI configuration
+common:ci --noshow_progress
+common:ci --announce_rc
+common:ci --attempt_to_print_relative_paths
+common:ci --curses=no
+common:ci --color=no
+common:ci --show_timestamps
+common:ci --terminal_columns=0
+common:ci --spawn_strategy=local
+
+build:ci --verbose_failures
+test:ci --test_output=errors
+test:ci --test_verbose_timeout_warnings
