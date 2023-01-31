@@ -1,0 +1,51 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+
+go_library(
+    name = "plugin",
+    srcs = [
+        "config.go",
+        "fix.go",
+        "flags.go",
+        "generate.go",
+        "imports.go",
+        "kinds.go",
+        "plugin.go",
+        "resolve.go",
+    ],
+    importpath = "github.com/ARM-software/bob-build/gazelle",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@bazel_gazelle//config:go_default_library",
+        "@bazel_gazelle//label:go_default_library",
+        "@bazel_gazelle//language:go_default_library",
+        "@bazel_gazelle//repo:go_default_library",
+        "@bazel_gazelle//resolve:go_default_library",
+        "@bazel_gazelle//rule:go_default_library",
+    ],
+)
+
+gazelle_binary(
+    name = "gazelle_bin",
+    languages = [":plugin"],
+    visibility = ["//tests:__pkg__"],
+)
+
+# Run this target to run the plugin.
+# This is a seperate target to the root level plugin to test the bob_build
+# lang implemenation in isolation.
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle_bin",
+)
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+        "-build_file_proto_mode=disable_global",
+    ],
+    command = "update-repos",
+)

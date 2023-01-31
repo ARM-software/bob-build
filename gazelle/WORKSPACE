@@ -41,28 +41,16 @@ http_archive(
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")  # keep
+go_rules_dependencies()
 
-# keep
-go_repository(
-    name = "com_github_google_blueprint",
-    commit = "6957a46d",
-    importpath = "github.com/google/blueprint",
-)
 
 load("//:deps.bzl", "go_dependencies")
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
 
-go_rules_dependencies()
 
 # 1.18 for latest rules_go and Gazelle.
-# Bob itself supports >=1.11
 go_register_toolchains(version = "1.18")
 
 gazelle_dependencies()
-
-local_repository(
-    name = "plugin",
-    path = "gazelle",
-)
