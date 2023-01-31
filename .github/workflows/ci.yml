@@ -55,16 +55,10 @@ jobs:
 
   go-tests:
     name: Go ${{ matrix.go }} tests ${{ matrix.os }}
-    env:
-      GOPATH: ${{ github.workspace }}
-      GO111MODULE: off
-    defaults:
-      run:
-        working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.10', '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
+        go: [ '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
         os: [ ubuntu-latest ]
         include:
           - go: '1.13'
@@ -72,36 +66,25 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
       - name: Setup Go ${{ matrix.go }}
         uses: actions/setup-go@v3
         with:
           go-version: ${{matrix.go}}
         id: go
 
-      - name: Get testify
-        uses: actions/checkout@v3
-        with:
-          repository: stretchr/testify
-          ref: v1.6.1
-          path: ${{ env.GOPATH }}/src/github.com/stretchr/testify
+      - name: Install dependencies
+        run: go mod download
 
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-          path: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
-
-      - name: Setup testify dependencies
-        run: |
-          cd ${GOPATH}/src/github.com/stretchr/testify && go get -d ./...
-
-      - name: Setup Go workspace
-        run: |
-          mkdir -p ${GOPATH}/src/github.com/google/
-          ln -s ${GOPATH}/src/github.com/ARM-software/bob-build/blueprint ${GOPATH}/src/github.com/google/blueprint
+      - name: Build
+        run: go build -v ./...
 
       - name: Test
-        run: .github/run_go_tests.sh
+        run: go test -v ./...
 
       - name: Run go vet
         run: go vet ./...
@@ -149,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.10', '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
+        go: [ '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19' ]
         os: [ ubuntu-latest ]
         python: [ '3.x' ]
         include:
@@ -203,24 +186,3 @@ jobs:
 
       - name: Bootstrap version test
         run: .github/run_bootstrap_test.sh
-
-  bazel-tests:
-    name: "Bazel ${{matrix.bazel}} ${{ matrix.os }}"
-    env:
-      USE_BAZEL_VERSION: ${{ matrix.bazel }}
-    strategy:
-      fail-fast: false
-      matrix:
-        bazel: [ 'latest', '6.0.0', '5.4.0' ]
-        os: [ ubuntu-latest, macos-latest ]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bazelbuild/setup-bazelisk@v2
-      - name: Mount bazel cache  # Optional
-        uses: actions/cache@v3
-        with:
-          path: "~/.cache/bazel"
-          key: bazel
-      - run: bazel build --config=ci //...
-      - run: bazel test --config=ci //...
