@@ -56,6 +56,8 @@ go_dependencies()
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.18.3")
+# 1.18 for latest rules_go and Gazelle.
+# Bob itself supports >=1.11
+go_register_toolchains(version = "1.18")
 
 gazelle_dependencies()

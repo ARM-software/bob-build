@@ -34,7 +34,7 @@ do the heavy lifting. As such it has similarities with
 ## Requirements
 
 To use Bob you will need:
--  golang (>=1.10)
+-  golang (>=1.11)
 -  ninja-build (>=1.8)
 -  python3
 -  python3-ply
