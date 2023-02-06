@@ -1,4 +1,4 @@
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
 # limitations under the License.
 
 import ply.lex as lex
+
+from pathlib import Path
 
 
 verbose_flag = False
@@ -246,10 +248,12 @@ def report_error(msg, t, err_type=TokenizeError):
     raise err_type()
 
 
-def create_mconfig_lexer(fname, verbose=False):
+def create_mconfig_lexer(fname, verbose=False, root_dir=Path(".")):
     lexer = lex.lex()
     global verbose_flag
     verbose_flag = verbose
     lexer.lineno = 1
     lexer.fname = fname
+    lexer.relPath = Path(fname).relative_to(root_dir).parent
+
     return lexer

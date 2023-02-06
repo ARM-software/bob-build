@@ -94,11 +94,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.x' ]
+        python: [ '3.7', '3.8', '3.9' ]
         os: [ ubuntu-latest ]
         include:
-          - python: '3.x'
+          - python: '3.7'
             os: macos-latest
+          - python: '3.6'
+            os: ubuntu-20.04
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -134,11 +136,14 @@ jobs:
       matrix:
         go: [ '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19', '1.20' ]
         os: [ ubuntu-latest ]
-        python: [ '3.x' ]
+        python: [ '3.7', '3.8', '3.9' ]
         include:
           - go: '1.13'
             os: macos-latest
-            python: '3.x'
+            python: '3.7'
+          - go: '1.13'
+            os: ubuntu-20.04
+            python: '3.6'
     runs-on: ${{ matrix.os }}
 
     steps:

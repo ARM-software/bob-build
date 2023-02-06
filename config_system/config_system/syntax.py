@@ -1,4 +1,4 @@
-# Copyright 2018-2019, 2021-2022 Arm Limited.
+# Copyright 2018-2019, 2021-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,7 +142,9 @@ def p_config_stmt(p):
     "config_stmt : CONFIG IDENTIFIER EOL config_options"
     global order_count
     order_count += 1
-    config_options = merge(p[4], {"type": "config", "position": order_count})
+    # `p.slice[2]` is the IDENTIFIER token
+    relPath = p.slice[2].lexer.relPath
+    config_options = merge(p[4], {"type": "config", "position": order_count, "relPath": relPath})
     p[0] = {"config": {p[2]: config_options},
             "order": {order_count: ("config", p[2])}}
 
@@ -220,16 +222,18 @@ def p_choice_default(p):
 
 def p_source_stmt_first(p):
     """source_stmt_first : SOURCE QUOTED_STRING dummy"""
-    p.lexer.source(p[2])
+    if not parser.ignore_source:
+        p.lexer.source(p[2])
     p[0] = {}
 
 
 def p_source_local_stmt_first(p):
     """source_local_stmt_first : SOURCE_LOCAL QUOTED_STRING dummy"""
-    fname = p.lexer.current_lexer().fname
-    dname = os.path.dirname(fname)
-    mname = os.path.join(dname, p[2])
-    p.lexer.open(mname)
+    if not parser.ignore_source:
+        fname = p.lexer.current_lexer().fname
+        dname = os.path.dirname(fname)
+        mname = os.path.join(dname, p[2])
+        p.lexer.open(mname)
     p[0] = {}
 
 
@@ -479,3 +483,4 @@ def p_error(p):
 
 
 parser = yacc.yacc(debug=False, write_tables=False)
+parser.ignore_source = False
