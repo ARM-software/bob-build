@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-202, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
 # limitations under the License.
 
 import os
+
+from pathlib import Path
 
 from config_system import lex
 
@@ -37,7 +39,7 @@ class LexWrapper:
         with open(fname, "rt") as fp:
             file_contents = fp.read()
 
-        lexer = lex.create_mconfig_lexer(fname, verbose=self.verbose)
+        lexer = lex.create_mconfig_lexer(fname, verbose=self.verbose, root_dir=Path(self.root_dir))
 
         self.push_lexer(lexer)
         self.input(file_contents)
@@ -74,6 +76,11 @@ class LexWrapper:
         if t is None:
             self.pop_lexer()
             t = self.token()
+
+        # Inject lexer for every "IDENTIFIER" token
+        # to allow the parser read lexer's `relPath`
+        if t is not None and t.type == "IDENTIFIER":
+            t.lexer = self.current_lexer()
 
         return t
 
