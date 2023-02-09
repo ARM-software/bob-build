@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,21 @@ SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
 source "${SCRIPT_DIR}/pathtools.bash"
 source "${SCRIPT_DIR}/bootstrap/utils.bash"
+
+if ! command -v go &> /dev/null
+then
+    >&2 echo "ERROR: Go is required for Bob, please install and try again."
+    exit 1
+fi
+
+go_version=$(go version | { read _ _ v _; echo ${v#go}; })
+if [ "$(printf "%s\n1.20\n" "$go_version" | sort -t '.' -k 1,1 -k 2,2 -g | head -n 1)" == "1.20" ]; then
+  # Since go 1.20, std modules are not installed by default. This breaks Blueprint.
+  # Pre-install these modules before proceeding.
+  # Should the GOPATH change or be deleted this script may have to be re-run.
+  GODEBUG=installgoroot=all go install std
+fi
+
 
 # Use defaults where we can. Generally the caller should set these.
 if [ -z "${SRCDIR}" ] ; then
