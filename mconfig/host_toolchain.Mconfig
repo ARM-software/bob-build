@@ -1,4 +1,4 @@
-# Copyright 2016-2022 Arm Limited.
+# Copyright 2016-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,9 @@ config HOST_GNU_CXX_BINARY
 config HOST_CLANG_PREFIX
 	string "Host Clang compiler prefix"
 	default "prebuilts/clang/host/linux-x86/clang-r383902b/bin/" if ANDROID_PLATFORM_VERSION = 11 && BUILDER_ANDROID_BP # android-11-release
-	default "prebuilts/clang/host/linux-x86/clang-r416183b1/bin/" if ANDROID_PLATFORM_VERSION > 11 && BUILDER_ANDROID_BP
+	default "prebuilts/clang/host/linux-x86/clang-r416183b1/bin/" if ANDROID_PLATFORM_VERSION = 12 && BUILDER_ANDROID_BP #android-12-release
+        default "prebuilts/clang/host/linux-x86/clang-r450784d/bin/" if ANDROID_PLATFORM_VERSION = 13 && BUILDER_ANDROID_BP # android-13-release
+        default "prebuilts/clang/host/linux-x86/clang-r475365b/bin/" if ANDROID_PLATFORM_VERSION > 13 && BUILDER_ANDROID_BP
 	default ""
 	help
 	  This is typically the value of ClangDefaultVersion declared in <aosp>/soong/cc/config/global.go
