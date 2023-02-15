@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Arm Limited.
+ * Copyright 2019, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
+bob_glob {
+    name: "src_glob",
+    srcs: ["**/*.c"],
+}
+
 bob_binary {
     name: "glob_test",
-    srcs: ["**/*.c"],
+    filegroup_srcs: ["src_glob"]
 }
 
 bob_binary {
@@ -26,15 +31,22 @@ bob_binary {
     exclude_srcs: ["src/**/exclude_*.cpp"],
 }
 
+bob_glob {
+    name: "src_glob_exclude",
+    srcs: ["src/**/*.cpp"],
+    exclude: [
+        "src/**/main.cpp",
+        "**/exclude_this_file.cpp",
+        "src/inside/a/exclude_this_too.cpp",
+    ],
+}
+
 bob_binary {
     name: "test_exclude_srcs",
     srcs: [
         "src/inside/a/namespace/main.cpp",
-        "src/inside/a/exclude_this_too.cpp",
     ],
-    exclude_srcs: [
-        "src/inside/a/exclude_this_too.cpp",
-    ],
+    filegroup_srcs: ["src_glob_exclude"],
 }
 
 bob_alias {

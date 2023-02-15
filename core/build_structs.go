@@ -441,6 +441,8 @@ func getFileGroupDeps(mctx blueprint.BaseModuleContext) (srcs []string) {
 		func(m blueprint.Module) {
 			if fg, ok := m.(*filegroup); ok {
 				srcs = append(srcs, fg.getSources(mctx)...)
+			} else if mg, ok := m.(*moduleGlob); ok {
+				srcs = append(srcs, mg.getSources(mctx)...)
 			}
 		})
 	return
@@ -689,6 +691,7 @@ func registerModuleTypes(register func(string, factoryWithConfig)) {
 	// Swapping to new rules that are more strict and adhere to the Android Modules
 	register("bob_genrule", generateRuleAndroidFactory)
 	register("bob_filegroup", filegroupFactory)
+	register("bob_glob", globFactory)
 
 	register("bob_alias", aliasFactory)
 	register("bob_kernel_module", kernelModuleFactory)

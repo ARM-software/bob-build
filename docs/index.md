@@ -29,3 +29,4 @@ Bob
 - [bob_shared_library](module_types/bob_shared_library.md)
 - [bob_static_library](module_types/bob_static_library.md)
 - [bob_transform_source](module_types/bob_transform_source.md)
+- [bob_glob](module_types/bob_glob.md)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Arm Limited.
+ * Copyright 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,12 @@ bob_filegroup {
     srcs: ["src/impl.cpp"],
 }
 
+bob_glob {
+    name: "glob_main",
+    srcs: ["**/main.cpp"],
+    allow_empty: false,
+}
+
 bob_filegroup {
     name: "forward_filegroup",
     filegroup_srcs: ["filegroup_impl"],
@@ -27,8 +33,8 @@ bob_filegroup {
 
 bob_binary {
     name: "test_filegroup_simple",
-    srcs: ["src/main.cpp",],
-    filegroup_srcs: ["forward_filegroup"],
+    srcs: [],
+    filegroup_srcs: ["forward_filegroup", "glob_main"],
 }
 
 bob_alias {
