@@ -2,7 +2,7 @@
 // +build soong
 
 /*
- * Copyright 2020-2022 Arm Limited.
+ * Copyright 2020-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -620,6 +620,7 @@ func (m *gensrcsbob) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 	entries := []android.AndroidMkEntries{}
 	outs := []android.OptionalPath{}
+	reqs := []string{}
 
 	// reference installed files instead of built files will ensure triggering install rule after build rule
 	// but only for A12 and below. A13 Soong handles the install rules.
@@ -641,6 +642,7 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 		// if module has more than one output, keep LOCAL_MODULE unique
 		if len(outs) > 1 {
 			subname = "__" + utils.FlattenPath(outfile.Path().Rel())
+			reqs = append(reqs, m.Name()+subname)
 		}
 
 		entries = append(entries, android.AndroidMkEntries{
@@ -656,8 +658,19 @@ func (m *genrulebobCommon) AndroidMkEntries() []android.AndroidMkEntries {
 				},
 			),
 		})
-
 	}
+
+	// If we have more than one output, we need a final target which groups all of the others.
+	// Mimic what the native genrule generates using the ETC class.
+	if len(outs) > 1 {
+		entries = append(entries, android.AndroidMkEntries{
+			SubName:    "",
+			OutputFile: outs[0], // The entry needs an output file, otherwise it won't be emitted.
+			Include:    "$(BUILD_PHONY_PACKAGE)",
+			Required:   reqs,
+		})
+	}
+
 	return entries
 }
 
