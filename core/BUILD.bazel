@@ -24,6 +24,7 @@ go_library(
         "gen_shared.go",
         "gen_static.go",
         "generated.go",
+        "glob.go",
         "graphviz.go",
         "install.go",
         "kernel_module.go",

@@ -1,3 +1,5 @@
+int funcX(void);
+
 int main(void) {
-    return 0;
+    return funcX() == 123 ? 0 : 1;
 }
