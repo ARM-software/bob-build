@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Arm Limited.
+ * Copyright 2019-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -125,10 +125,11 @@ func (s *SourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseModuleCo
 // This template is only applied in specific properties where we've
 // seen sensible use-cases:
 // - Build Props:
-//  - Ldflags
+//   - Ldflags
+//
 // - Generated Common:
-//  - Args
-//  - Cmd
+//   - Args
+//   - Cmd
 func setupMatchSources(mctx blueprint.BaseModuleContext,
 	propfnmap map[string]template.FuncMap) map[string]bool {
 

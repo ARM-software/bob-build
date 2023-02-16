@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2020, 2022 Arm Limited.
+# Copyright 2018-2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,14 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description='Test generator.')
-parser.add_argument('--in', nargs='*', dest='input', action='store', help='Input files')
-parser.add_argument('--out', nargs='*', dest='output', action='store', help='Output file')
-parser.add_argument("--expect-in", nargs='*', action='store',
-                    help='Basenames of expected input files')
+parser = argparse.ArgumentParser(description="Test generator.")
+parser.add_argument("--in", nargs="*", dest="input", action="store", help="Input files")
+parser.add_argument(
+    "--out", nargs="*", dest="output", action="store", help="Output file"
+)
+parser.add_argument(
+    "--expect-in", nargs="*", action="store", help="Basenames of expected input files"
+)
 
 args = parser.parse_args()
 
@@ -43,5 +46,5 @@ for input_file in args.input:
 for out in args.output:
     file_name = os.path.basename(out)
     without_extension = os.path.splitext(file_name)[0]
-    with open(out, 'w') as outfile:
+    with open(out, "w") as outfile:
         outfile.write("void output_%s(){}\n" % (without_extension))

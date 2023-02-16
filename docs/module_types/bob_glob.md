@@ -1,5 +1,4 @@
-Module: bob_glob
-====================
+# Module: bob_glob
 
 Glob is a helper module that finds all files that match certain path patterns
 and returns a list of their paths.
@@ -16,29 +15,34 @@ bob_glob {
 }
 ```
 
-----
+---
+
 ### **bob_glob.name** (required)
 
 The unique identifier that can be used to refer to this module.
 
-----
+---
+
 ### **bob_glob.srcs** (required)
 
 Path patterns that are relative to the current module.
 
-----
+---
+
 ### **bob_glob.exclude** (optional)
 
 Path patterns that are relative to the current module
 to exclude from `srcs`.
 
-----
+---
+
 ### **bob_glob.exclude_directories** (optional)
 
 If the `exclude_directories` argument is set to `true` (default),
 the directories will be omitted from the results.
 
-----
+---
+
 ### **bob_glob.allow_empty** (optional)
 
 If the `allow_empty` argument is set to `false`, the glob function will

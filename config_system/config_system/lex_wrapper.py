@@ -39,7 +39,9 @@ class LexWrapper:
         with open(fname, "rt") as fp:
             file_contents = fp.read()
 
-        lexer = lex.create_mconfig_lexer(fname, verbose=self.verbose, root_dir=Path(self.root_dir))
+        lexer = lex.create_mconfig_lexer(
+            fname, verbose=self.verbose, root_dir=Path(self.root_dir)
+        )
 
         self.push_lexer(lexer)
         self.input(file_contents)

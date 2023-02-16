@@ -124,10 +124,10 @@ func (m *defaults) getSourceProperties() *SourceProps {
 
 // {{match_srcs}} template is only applied in specific properties where we've
 // seen sensible use-cases and for `BuildProps` this is:
-//  - Ldflags
-//  - Cflags
-//  - Conlyflags
-//  - Cxxflags
+//   - Ldflags
+//   - Cflags
+//   - Conlyflags
+//   - Cxxflags
 func (m *defaults) getMatchSourcePropNames() []string {
 	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
@@ -221,10 +221,11 @@ func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 // all the hierarchical defaults it depends on (not including itself).
 // It's important that the ordering is maintained.
 //
-//        a
-//      /   \
-//    b       c
-//  /  \     /  \
+//	      a
+//	    /   \
+//	  b       c
+//	/  \     /  \
+//
 // d    e   f    g
 //
 // ==> d e b f g c

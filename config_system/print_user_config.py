@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020, 2022 Arm Limited.
+# Copyright 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,9 @@ root_logger.setLevel(logging.WARNING)
 
 # Add StreamHandler with color Formatter
 stream = logging.StreamHandler()
-formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s", stream.stream.isatty())
+formatter = log_handlers.ColorFormatter(
+    "%(levelname)s: %(message)s", stream.stream.isatty()
+)
 stream.setFormatter(formatter)
 root_logger.addHandler(stream)
 
@@ -50,19 +52,31 @@ def print_user_config():
 
     for key in configs:
         print("#\n# %s\n#" % (key if key else "no source"))
-        for (name, value) in configs[key]:
+        for name, value in configs[key]:
             print("%s=%s" % (name, value))
         print("")
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", required=True,
-                        help="Path to the configuration file (*.config)")
-    parser.add_argument("-d", "--database", default="Mconfig",
-                        help="Path to the configuration database (Mconfig)")
-    parser.add_argument("--ignore-missing", action="store_true", default=False,
-                        help="Ignore missing database files included with 'source'")
+    parser.add_argument(
+        "-c",
+        "--config",
+        required=True,
+        help="Path to the configuration file (*.config)",
+    )
+    parser.add_argument(
+        "-d",
+        "--database",
+        default="Mconfig",
+        help="Path to the configuration database (Mconfig)",
+    )
+    parser.add_argument(
+        "--ignore-missing",
+        action="store_true",
+        default=False,
+        help="Ignore missing database files included with 'source'",
+    )
     return parser.parse_args()
 
 

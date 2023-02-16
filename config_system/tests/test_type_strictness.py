@@ -1,4 +1,4 @@
-# Copyright 2020 Arm Limited.
+# Copyright 2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,63 +36,63 @@ config OPTION
 type_strictness_default_testdata = [
     (
         {  # default with the wrong type (string)
-            "expr": "default \"string_1\"",
+            "expr": 'default "string_1"',
         },
-        "Type mismatch in config OPTION: expected bool but got string"
+        "Type mismatch in config OPTION: expected bool but got string",
     ),
     (
         {  # default with the wrong type (int)
             "expr": "default 1",
         },
-        "Type mismatch in config OPTION: expected bool but got int"
+        "Type mismatch in config OPTION: expected bool but got int",
     ),
     (
         {  # default with the right type (boolean true)
             "expr": "default y",
         },
-        None
+        None,
     ),
     (
         {  # default with the right type (boolean false)
             "expr": "default n",
         },
-        None
+        None,
     ),
     (
         {  # default with the wrong type (string)
             "expr": "default TEXT",
         },
-        "Type mismatch in config OPTION: expected bool but got string"
+        "Type mismatch in config OPTION: expected bool but got string",
     ),
     (
         {  # default with the right type (boolean true)
             "expr": "default TRUE",
         },
-        None
+        None,
     ),
     (
         {  # default_cond with with the wrong type (string)
-            "expr": "default \"y\" if y",
+            "expr": 'default "y" if y',
         },
-        "Type mismatch in config OPTION: expected bool but got string"
+        "Type mismatch in config OPTION: expected bool but got string",
     ),
     (
         {  # default_cond with the right type
             "expr": "default y if y",
         },
-        None
+        None,
     ),
     (
         {  # two default conds: one with the right type and one with the wrong type
-            "expr": "\n".join(["default n if y", "default \"y\" if n"]),
+            "expr": "\n".join(["default n if y", 'default "y" if n']),
         },
-        "Type mismatch in config OPTION: expected bool but got string"
+        "Type mismatch in config OPTION: expected bool but got string",
     ),
     (
         {  # two default conds: both with the right types
             "expr": "\n".join(["default n if y", "default y if n"]),
         },
-        None
+        None,
     ),
 ]
 
@@ -133,52 +133,56 @@ type_strictness_select_testdata = [
         {  # select with the wrong type (string)
             "expr": "select OPTION_2",
         },
-        "Select option must have type bool but got type string instead"
+        "Select option must have type bool but got type string instead",
     ),
     (
         {  # select with the right type (bool)
             "expr": "select OPTION_1",
         },
-        None
+        None,
     ),
     (
         {  # select with the wrong type (string)
             "expr": "select OPTION_2 if OPTION_1",
         },
-        "Select option must have type bool but got type string instead"
+        "Select option must have type bool but got type string instead",
     ),
     (
         {  # select with the wrong type (int)
             "expr": "select OPTION_3 if !OPTION_1",
         },
-        "Select option must have type bool but got type int instead"
+        "Select option must have type bool but got type int instead",
     ),
     (
         {  # select with the right type (bool)
             "expr": "select OPTION_1 if OPTION_3 = 4",
         },
-        None
+        None,
     ),
     (
         {  # select with the wrong type (int)
-            "expr": "\n".join(["select OPTION_1 if OPTION_3 = 4", "select OPTION_3 if OPTION_1"]),
+            "expr": "\n".join(
+                ["select OPTION_1 if OPTION_3 = 4", "select OPTION_3 if OPTION_1"]
+            ),
         },
-        "Select option must have type bool but got type int instead"
+        "Select option must have type bool but got type int instead",
     ),
     (
         {  # select with the wrong type (int)
             "expr": "\n".join(["select OPTION_1 if OPTION_3 = 4", "select OPTION_3"]),
         },
-        "Select option must have type bool but got type int instead"
+        "Select option must have type bool but got type int instead",
     ),
     (
         {  # select with the right type (bool)
-            "expr": "\n".join([
-                "select OPTION_1 if OPTION_3 = 4",
-                "select OPTION_1 if OPTION_2 = \"str\""
-            ]),
+            "expr": "\n".join(
+                [
+                    "select OPTION_1 if OPTION_3 = 4",
+                    'select OPTION_1 if OPTION_2 = "str"',
+                ]
+            ),
         },
-        None
+        None,
     ),
 ]
 

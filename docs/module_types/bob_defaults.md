@@ -1,5 +1,4 @@
-Module: bob_defaults
-====================
+# Module: bob_defaults
 
 Defaults are used to share common settings between multiple modules.
 
@@ -7,6 +6,7 @@ Defaults are used to share common settings between multiple modules.
 and `bob_kernel_module`.
 
 ## Full specification of `bob_defaults` properties
+
 Most properties are optional.
 
 `bob_defaults` supports [features](../features.md)
@@ -94,7 +94,8 @@ bob_defaults {
 }
 ```
 
-----
+---
+
 # Examples
 
 Here, the `-lncurses` flag is used with linking the `less` binary,

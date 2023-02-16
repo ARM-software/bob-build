@@ -1,5 +1,4 @@
-Module: bob_alias
-=================
+# Module: bob_alias
 
 This target is used to trigger builds of multiple other targets.
 This target itself does not build anything, it just ensures all
@@ -16,6 +15,7 @@ replicate the enable conditions on the target to avoid errors.
 `bob_alias` supports [features](../features.md)
 
 ## Full specification of `bob_alias` properties
+
 ```bp
 bob_alias {
     name: "custom_name",
@@ -27,15 +27,21 @@ bob_alias {
 }
 ```
 
-----
+---
+
 ### **bob_alias.name** (required)
+
 The unique identifier that can be used to refer to this module.
 
-----
+---
+
 ### **bob_alias.srcs** (optional)
+
 Modules that this alias will cause to build.
 
-----
+---
+
 ### **bob_alias.add_to_alias** (optional)
+
 Allows this alias to add itself to another alias.
 `bob_alias_module_name` should refer to existing `bob_alias`.

@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Arm Limited.
+# Copyright 2019-2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,14 +25,13 @@ ignored_option_testdata = [
     (
         """
 config NON_USER_SETTABLE
-	bool
-	default n
+    bool
+    default n
 """,
         ["NON_USER_SETTABLE=y"],
-        "NON_USER_SETTABLE=y was ignored; it has no title, so is not user-settable " + \
-        "(NON_USER_SETTABLE has no unmet dependencies)",
+        "NON_USER_SETTABLE=y was ignored; it has no title, so is not user-settable "
+        + "(NON_USER_SETTABLE has no unmet dependencies)",
     ),
-
     # Specify the same option multiple times with different values
     (
         """
@@ -45,70 +44,65 @@ config BLA
         ["USER_SETTABLE_INT_VALUE=3", "BLA=n", "USER_SETTABLE_INT_VALUE=4"],
         "USER_SETTABLE_INT_VALUE=3 was overridden by later argument USER_SETTABLE_INT_VALUE=4",
     ),
-
     # Test the formatting of a simple unmet dependency
     (
         """
 config FALSE
-	bool
+    bool
 
 config SIMPLE_DEPENDENCIES_NOT_MET
-	bool "Is this simple dependency met?"
-	depends on FALSE
+    bool "Is this simple dependency met?"
+    depends on FALSE
 """,
         ["SIMPLE_DEPENDENCIES_NOT_MET=y"],
         "SIMPLE_DEPENDENCIES_NOT_MET=y was ignored; its dependencies were not met: FALSE[=n]",
     ),
-
     # Test the formatting of a more complex dependency
     (
         """
 config STRING_VALUE
-	string
-	default "string"
+    string
+    default "string"
 
 config FALSE
-	bool
+    bool
 
 config COMPLEX_DEPENDENCIES_NOT_MET
-	bool "Something with a non-trivial dependency"
-	depends on STRING_VALUE = "not_string" && !FALSE
+    bool "Something with a non-trivial dependency"
+    depends on STRING_VALUE = "not_string" && !FALSE
 """,
         ["COMPLEX_DEPENDENCIES_NOT_MET=y"],
-        "COMPLEX_DEPENDENCIES_NOT_MET=y was ignored; its dependencies were not met: " + \
-        "(STRING_VALUE[=string] = \"not_string\") && !FALSE[=n]",
+        "COMPLEX_DEPENDENCIES_NOT_MET=y was ignored; its dependencies were not met: "
+        + '(STRING_VALUE[=string] = "not_string") && !FALSE[=n]',
     ),
-
-
     # Test the formatting of an integer expression, including all the
     # comparison operators
     (
         """
 config INT_VALUE
-	int
-	default 60221409
+    int
+    default 60221409
 
 config ANOTHER_INT_VALUE
-	int
-	default 31415926
+    int
+    default 31415926
 
 config INT_DEPENDENCIES_NOT_MET
-	bool "Check some integer ranges"
-	depends on (INT_VALUE >= 3 && INT_VALUE <= 25) || (INT_VALUE > 100 && INT_VALUE < 200) || INT_VALUE = ANOTHER_INT_VALUE || INT_VALUE != 60221409
+    bool "Check some integer ranges"
+    depends on (INT_VALUE >= 3 && INT_VALUE <= 25) || (INT_VALUE > 100 && INT_VALUE < 200) || INT_VALUE = ANOTHER_INT_VALUE || INT_VALUE != 60221409
 """,
         ["INT_DEPENDENCIES_NOT_MET=y"],
-        "INT_DEPENDENCIES_NOT_MET=y was ignored; its dependencies were not met: " + \
-        "((((INT_VALUE[=60221409] >= 3) && (INT_VALUE[=60221409] <= 25)) || " + \
-        "((INT_VALUE[=60221409] > 100) && (INT_VALUE[=60221409] < 200))) || " + \
-        "(INT_VALUE[=60221409] = ANOTHER_INT_VALUE[=31415926])) || " + \
-        "(INT_VALUE[=60221409] != 60221409)",
+        "INT_DEPENDENCIES_NOT_MET=y was ignored; its dependencies were not met: "
+        + "((((INT_VALUE[=60221409] >= 3) && (INT_VALUE[=60221409] <= 25)) || "
+        + "((INT_VALUE[=60221409] > 100) && (INT_VALUE[=60221409] < 200))) || "
+        + "(INT_VALUE[=60221409] = ANOTHER_INT_VALUE[=31415926])) || "
+        + "(INT_VALUE[=60221409] != 60221409)",
     ),
-
     # Check we get the right error message when trying to set an unknown option
     (
         "",
         ["UNKNOWN_CONFIGURATION_OPTION=n"],
-        "unknown configuration option \"UNKNOWN_CONFIGURATION_OPTION\"",
+        'unknown configuration option "UNKNOWN_CONFIGURATION_OPTION"',
     ),
 ]
 
@@ -125,16 +119,19 @@ def test_ignored_config_option(caplog, mocker, tmpdir, mconfig, args, error):
     mconfig_fname = tmpdir.join("Mconfig")
     mconfig_fname.write(mconfig, "wt")
 
-    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
-        config=str(config_fname),
-        database=str(mconfig_fname),
-        json=None,
-        new=True,
-        plugin=[],
-        depfile=None,
-        ignore_missing=False,
-        args=args,
-    ))
+    mocker.patch(
+        "update_config.parse_args",
+        new=lambda: argparse.Namespace(
+            config=str(config_fname),
+            database=str(mconfig_fname),
+            json=None,
+            new=True,
+            plugin=[],
+            depfile=None,
+            ignore_missing=False,
+            args=args,
+        ),
+    )
 
     update_config.counter.reset()
     returncode = update_config.main()
@@ -202,7 +199,9 @@ config FORCE
         ["FORCE=y"],
         [],
         [],
-        ["Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"],
+        [
+            "Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"
+        ],
     ),
     # Input contains an inconsistency on read, fix up on read,
     # Error still produced
@@ -225,9 +224,15 @@ CONFIG_OPTION=y
 CONFIG_FORCE=y
         """,
         [],
-        ["Inconsistency prior to plugins: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."],
-        ["Inconsistent input, correcting: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."],
-        ["Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"],
+        [
+            "Inconsistency prior to plugins: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."
+        ],
+        [
+            "Inconsistent input, correcting: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]."
+        ],
+        [
+            "Inconsistent values: unmet direct dependencies: OPTION depends on GATE, but is selected by [FORCE]. Update the Mconfig so that this can't happen"
+        ],
     ),
     # Input contains an inconsistency on read, fix up on read,
     # No error.
@@ -251,10 +256,22 @@ CONFIG_OPTION=y
     ),
 ]
 
-@pytest.mark.parametrize("mconfig,config,args,expected_infos,expected_warnings,expected_errors", select_depend_testdata)
-def test_select_depend(caplog, mocker, tmpdir,
-                       mconfig, config, args, expected_infos,
-                       expected_warnings, expected_errors):
+
+@pytest.mark.parametrize(
+    "mconfig,config,args,expected_infos,expected_warnings,expected_errors",
+    select_depend_testdata,
+)
+def test_select_depend(
+    caplog,
+    mocker,
+    tmpdir,
+    mconfig,
+    config,
+    args,
+    expected_infos,
+    expected_warnings,
+    expected_errors,
+):
     """
     For each test case, run update_config's `main()` function with the
     provided Mconfig and command-line arguments. No errors
@@ -265,19 +282,22 @@ def test_select_depend(caplog, mocker, tmpdir,
     config_fname = tmpdir.join("bob.config")
     mconfig_fname = tmpdir.join("Mconfig")
     mconfig_fname.write(mconfig, "wt")
-    if config != None:
+    if config is not None:
         config_fname.write(config)
 
-    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
-        config=str(config_fname),
-        database=str(mconfig_fname),
-        json=None,
-        new=(config==None),
-        plugin=[],
-        depfile=None,
-        ignore_missing=False,
-        args=args,
-    ))
+    mocker.patch(
+        "update_config.parse_args",
+        new=lambda: argparse.Namespace(
+            config=str(config_fname),
+            database=str(mconfig_fname),
+            json=None,
+            new=(config is None),
+            plugin=[],
+            depfile=None,
+            ignore_missing=False,
+            args=args,
+        ),
+    )
 
     update_config.counter.reset()
     returncode = update_config.main()
@@ -302,6 +322,7 @@ def test_select_depend(caplog, mocker, tmpdir,
         assert returncode == 0
     else:
         assert returncode != 0
+
 
 option_depends_on_plugin_testdata = [
     # Attempt to set an option that depends on something set by a plugin
@@ -341,16 +362,19 @@ def test_option_depends_on_plugin(caplog, mocker, tmpdir, plugin, mconfig, args)
     mconfig_fname.write(mconfig, "wt")
     plugin_fname.write(plugin, "wt")
 
-    mocker.patch("update_config.parse_args", new=lambda: argparse.Namespace(
-        config=str(config_fname),
-        database=str(mconfig_fname),
-        json=None,
-        new=True,
-        plugin=[os.path.splitext(str(plugin_fname))[0]],
-        depfile=None,
-        ignore_missing=False,
-        args=args,
-    ))
+    mocker.patch(
+        "update_config.parse_args",
+        new=lambda: argparse.Namespace(
+            config=str(config_fname),
+            database=str(mconfig_fname),
+            json=None,
+            new=True,
+            plugin=[os.path.splitext(str(plugin_fname))[0]],
+            depfile=None,
+            ignore_missing=False,
+            args=args,
+        ),
+    )
 
     update_config.counter.reset()
     returncode = update_config.main()

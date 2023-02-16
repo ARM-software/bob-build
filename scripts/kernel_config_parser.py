@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2021, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ g_kernel_configs = dict()
 
 
 def get_config_file_path(kdir):
-    return os.path.join(kdir, '.config')
+    return os.path.join(kdir, ".config")
 
 
 def parse_kernel_config(kdir):
@@ -38,7 +38,7 @@ def parse_kernel_config(kdir):
                     config[key.strip()] = val.strip().strip('"')
                 except ValueError:
                     pass
-    except IOError as e:
+    except IOError as _:  # noqa: F841
         logger.error("Failed to open kernel config file in %s:", config_file)
 
     return config
@@ -56,7 +56,7 @@ def get_value(kdir, option):
 
 def option_enabled(kdir, option):
     """Return true if a given kernel config option is enabled"""
-    return get_value(kdir, option) == 'y'
+    return get_value(kdir, option) == "y"
 
 
 def check_arch_kconfig(kdir, arch):
@@ -67,8 +67,9 @@ def check_arch_kconfig(kdir, arch):
     # In case kernel output directory is different than its source
     # directory (built with 'make O=output/dir') there is a link
     # 'source' created which points to kernel sources.
-    if (os.path.islink(os.path.join(kdir, "source")) and
-            os.path.isfile(os.path.join(kdir, "source/arch", arch, "Kconfig"))):
+    if os.path.islink(os.path.join(kdir, "source")) and os.path.isfile(
+        os.path.join(kdir, "source/arch", arch, "Kconfig")
+    ):
         return True
 
     return False
@@ -96,8 +97,11 @@ def get_arch(kdir):
         return "x86_64"
     elif option_enabled(kdir, "CONFIG_PPC32") or option_enabled(kdir, "CONFIG_PPC64"):
         return "powerpc"
-    elif (option_enabled(kdir, "CONFIG_SUPERH") or option_enabled(kdir, "CONFIG_SUPERH32") or
-          option_enabled(kdir, "CONFIG_SUPERH64")):
+    elif (
+        option_enabled(kdir, "CONFIG_SUPERH")
+        or option_enabled(kdir, "CONFIG_SUPERH32")
+        or option_enabled(kdir, "CONFIG_SUPERH64")
+    ):
         return "sh"
 
     logger.error("Couldn't get ARCH for kernel %s", kdir)

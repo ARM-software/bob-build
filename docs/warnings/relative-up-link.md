@@ -1,9 +1,9 @@
-`relative-up-link` warning
-==================
+# `relative-up-link` warning
 
 ## Warns when target name contains up-level references `'..'`
 
 ## Problematic code:
+
 ```bp
 bob_generate_source {
     name: "my_generate",
@@ -15,6 +15,7 @@ bob_generate_source {
 ```
 
 ## Correct code:
+
 ```bp
 bob_filegroup {
     name: "my_filegroup",
@@ -34,6 +35,7 @@ bob_generate_source {
 ```
 
 ## Rationale:
+
 Use of up-level references (`..`) breaks the concept of hermeticity.
 Sources for a module should be relative to its current directory or
 its subdirectories.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,11 +96,11 @@ func (properties configProperties) StringMap() map[string]string {
 }
 
 // This function converts a config value into a string, using the following rules:
-//  - booleans are converted into "0" or "1"
-//  - Strings are used as-is
-//  - Ints are converted into 10-base form
-//  - Slices of booleans,strings and ints are converted into a space-separated string
-//  - Pointers to booleans,strings and ints are converted into the referenced value
+//   - booleans are converted into "0" or "1"
+//   - Strings are used as-is
+//   - Ints are converted into 10-base form
+//   - Slices of booleans,strings and ints are converted into a space-separated string
+//   - Pointers to booleans,strings and ints are converted into the referenced value
 //
 // Any other type might Exit().
 func convertToString(thing interface{}) string {

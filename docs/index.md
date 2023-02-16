@@ -1,7 +1,7 @@
-Bob
-===
+# Bob
 
 ## Contents
+
 - [Overview](overview.md)
 - [Config system](config_system.md)
 - [Build definitions](build_defs.md)
@@ -11,6 +11,7 @@ Bob
 - [User Guide](user_guide/index.md)
 
 ## Reference info
+
 - [Common module properties](module_types/common_module_properties.md)
 - [Common generate module properties](module_types/common_generate_module_properties.md)
 - [bob_alias](module_types/bob_alias.md)

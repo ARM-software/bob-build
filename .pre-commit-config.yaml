@@ -1,0 +1,55 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.7.1
+    hooks:
+      - id: prettier
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        language: python
+        minimum_pre_commit_version: 2.9.2
+        require_serial: true
+        types: [file, python]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: flake8
+        args: # arguments to configure flake8
+          - "--max-line-length=88"
+          - "--max-complexity=18"
+          - "--select=B,C,E,F,W,T4,B9"
+
+          # https://flake8.pycqa.org/en/latest/user/error-codes.html
+          - "--ignore=E203,E266,E501,W503,F403,F401,E402"
+
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: Go Format
+        language: golang
+        types: [file, go]
+        entry: gofmt
+        args: ["-w", "-s"]
+
+      - id: buildifier
+        name: Buildifier
+        description: Formatting Bazel files
+        language: golang
+        additional_dependencies:
+          - github.com/bazelbuild/buildtools/buildifier@6.0.1
+        files: (BUILD|WORKSPACE|.+\.bazel|.+\.bzl)$
+        entry: buildifier
+        args: ["--lint=fix"]

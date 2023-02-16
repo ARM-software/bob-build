@@ -1,4 +1,4 @@
-# Copyright 2019 Arm Limited.
+# Copyright 2019, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,163 +51,185 @@ expr_testdata = [
             "type": "int",
             "expr": "3+4",
         },
-        7, None
+        7,
+        None,
     ),
     (
         {  # addition of identifier and literal
             "type": "int",
             "expr": "NUMBER_A+4",
         },
-        11, None
+        11,
+        None,
     ),
     (
         {  # addition of literal and identifier
             "type": "int",
             "expr": "5+NUMBER_A",
         },
-        12, None
+        12,
+        None,
     ),
     (
         {  # addition of identifiers
             "type": "int",
             "expr": "NUMBER_A+NUMBER_A",
         },
-        14, None
+        14,
+        None,
     ),
     (
         {  # literal subtraction
             "type": "int",
             "expr": "10-4",
         },
-        6, None
+        6,
+        None,
     ),
     (
         {  # subtraction of identifier and literal
             "type": "int",
             "expr": "NUMBER_A-4",
         },
-        3, None
+        3,
+        None,
     ),
     (
         {  # subtraction of literal and identifier
             "type": "int",
             "expr": "20-NUMBER_A",
         },
-        13, None
+        13,
+        None,
     ),
     (
         {  # subtraction of identifiers
             "type": "int",
             "expr": "NUMBER_B-NUMBER_A",
         },
-        120, None
+        120,
+        None,
     ),
     (
         {  # parenthesis in expression
             "type": "int",
             "expr": "NUMBER_B - (NUMBER_A + 10)",
         },
-        110, None
+        110,
+        None,
     ),
     (
         {  # parenthesis in expression (on LHS)
             "type": "int",
             "expr": "(NUMBER_B + NUMBER_A) - 10",
         },
-        124, None
+        124,
+        None,
     ),
     (
         {  # string literal concatenation
             "type": "string",
             "expr": '"ban"+"ana"',
         },
-        "banana", None
+        "banana",
+        None,
     ),
     (
         {  # string and literal concatenation
             "type": "string",
             "expr": 'PREFIX+"ana"',
         },
-        "abraana", None
+        "abraana",
+        None,
     ),
     (
         {  # string and literal concatenation
             "type": "string",
             "expr": '"ban"+SUFFIX',
         },
-        "bancadabra", None
+        "bancadabra",
+        None,
     ),
     (
         {  # string concatenation
             "type": "string",
             "expr": "PREFIX+SUFFIX",
         },
-        "abracadabra", None
+        "abracadabra",
+        None,
     ),
     (
         {  # string concatenation with 'y' (not a bool)
             "type": "string",
             "expr": 'PREFIX+"y"',
         },
-        "abray", None
+        "abray",
+        None,
     ),
     (
         {  # string concatenation with 'n' (not a bool)
             "type": "string",
             "expr": '"n"+SUFFIX',
         },
-        "ncadabra", None
+        "ncadabra",
+        None,
     ),
     (
         {  # string concatenation with parens (for completeness)
             "type": "string",
             "expr": 'PREFIX+(SUFFIX+"boo")',
         },
-        "abracadabraboo", None
+        "abracadabraboo",
+        None,
     ),
     (
         {  # string subtraction
             "type": "string",
             "expr": "PREFIX-SUFFIX",
         },
-        "", "'-' operator is not valid on strings"
+        "",
+        "'-' operator is not valid on strings",
     ),
     (
         {  # expression with bools (+)
             "type": "bool",
             "expr": "y+n",
         },
-        "", "'+' operator is not valid on booleans"
+        "",
+        "'+' operator is not valid on booleans",
     ),
     (
         {  # expression with bools (-)
             "type": "bool",
             "expr": "TRUE-n",
         },
-        "", "'-' operator is not valid on booleans"
+        "",
+        "'-' operator is not valid on booleans",
     ),
     (
         {  # mixed expression '+'
             "type": "string",
             "expr": "PREFIX+NUMBER_A",
         },
-        "", "'+' operator is not valid with mixed types"
+        "",
+        "'+' operator is not valid with mixed types",
     ),
     (
         {  # mixed expression '-'
             "type": "string",
             "expr": "PREFIX-NUMBER_A",
         },
-        "", "'-' operator is not valid with mixed types"
+        "",
+        "'-' operator is not valid with mixed types",
     ),
     (
         {  # mixed expression with boolean.
             "type": "string",
             "expr": "PREFIX-TRUE",
         },
-        "", "'-' operator is not valid with mixed types"
+        "",
+        "'-' operator is not valid with mixed types",
     ),
-
 ]
 
 
@@ -222,7 +244,7 @@ def test_expr_evaluation(caplog, tmpdir, inputdata, result, error):
     c = data.get_config("OPTION")
     general.set_initial_values()
 
-    val = expr.expr_value(c['default'])
+    val = expr.expr_value(c["default"])
 
     if error is not None:
         assert error in caplog.text
@@ -266,247 +288,262 @@ condexpr_testdata = [
         {  # literal AND
             "expr": "y && y",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # literal AND
             "expr": "n && y",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # literal AND
             "expr": "y && n",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # literal AND
             "expr": "n && n",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # AND
             "expr": "TRUE && TRUE",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # AND
             "expr": "FALSE && TRUE",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # AND
             "expr": "TRUE && FALSE",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # AND
             "expr": "FALSE && FALSE",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # literal OR
             "expr": "y || y",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # literal OR
             "expr": "n || y",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # literal OR
             "expr": "y || n",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # literal OR
             "expr": "n || n",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # OR
             "expr": "TRUE || TRUE",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # OR
             "expr": "FALSE || TRUE",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # OR
             "expr": "TRUE || FALSE",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # OR
             "expr": "FALSE || FALSE",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # NOT
             "expr": "!TRUE",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # NOT
             "expr": "!FALSE",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Greater than
             "expr": "NUMBER_B > 126",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Greater than
             "expr": "NUMBER_B > 127",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Greater than eq
             "expr": "NUMBER_B >= 127",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Greater than eq
             "expr": "NUMBER_B >= 128",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Less than
             "expr": "NUMBER_B < 128",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Less than
             "expr": "NUMBER_B < 127",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Less than eq
             "expr": "NUMBER_B <= 127",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Less than eq
             "expr": "NUMBER_B <= 126",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 127",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 126",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Equal
             "expr": "NUMBER_B = 128",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 127",
         },
-        False, None
+        False,
+        None,
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 126",
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Not equal
             "expr": "NUMBER_B != 128",
         },
-        True, None
+        True,
+        None,
     ),
     (
-        {  # Comparison with numeric expression
-            "expr": "NUMBER_B < (121 + NUMBER_A)"
-        },
-        True, None
+        {"expr": "NUMBER_B < (121 + NUMBER_A)"},  # Comparison with numeric expression
+        True,
+        None,
     ),
+    ({"expr": '"abracadabra" = PREFIX+SUFFIX'}, True, None),  # Comparison with string
+    ({"expr": "FALSE || NUMBER_B < 128"}, True, None),  # Precedence of || vs <
+    ({"expr": "TRUE && NUMBER_B < 128"}, True, None),  # Precedence of && vs <
     (
-        {  # Comparison with string
-            "expr": '"abracadabra" = PREFIX+SUFFIX'
-        },
-        True, None
-    ),
-    (
-        {  # Precedence of || vs <
-            "expr": "FALSE || NUMBER_B < 128"
-        },
-        True, None
-    ),
-    (
-        {  # Precedence of && vs <
-            "expr": "TRUE && NUMBER_B < 128"
-        },
-        True, None
-    ),
-    (
-        {  # Precedence of && vs < vs +
-            "expr": "TRUE && NUMBER_B < 121 + NUMBER_A"
-        },
-        True, None
+        {"expr": "TRUE && NUMBER_B < 121 + NUMBER_A"},  # Precedence of && vs < vs +
+        True,
+        None,
     ),
     (
         {  # Precedence of && vs || - && has higher precedence
             "expr": "FALSE && TRUE || TRUE"
         },
-        True, None
+        True,
+        None,
     ),
     (
         {  # Precedence of && vs || - && has higher precedence
             "expr": "TRUE || FALSE && FALSE"
         },
-        True, None
+        True,
+        None,
     ),
     (
-        {  # Parenthesis to give || precedence
-            "expr": "FALSE && (TRUE || TRUE)"
-        },
-        False, None
+        {"expr": "FALSE && (TRUE || TRUE)"},  # Parenthesis to give || precedence
+        False,
+        None,
     ),
     (
-        {  # Parenthesis to give || precedence
-            "expr": "(TRUE || FALSE) && FALSE"
-        },
-        False, None
+        {"expr": "(TRUE || FALSE) && FALSE"},  # Parenthesis to give || precedence
+        False,
+        None,
     ),
 ]
 
@@ -522,7 +559,7 @@ def test_condexpr_evaluation(caplog, tmpdir, inputdata, result, error):
     c = data.get_config("OPTION")
     general.set_initial_values()
 
-    val = expr.condexpr_value(c['default_cond'][0]['cond'])
+    val = expr.condexpr_value(c["default_cond"][0]["cond"])
 
     if error is not None:
         assert error in caplog.text

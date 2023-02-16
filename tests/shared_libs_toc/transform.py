@@ -2,7 +2,7 @@
 
 # This confidential and proprietary software may be used only as
 # authorised by a licensing agreement from ARM Limited
-# (C) COPYRIGHT 2020, 2022 ARM Limited
+# (C) COPYRIGHT 2020, 2022-2023 ARM Limited
 # ALL RIGHTS RESERVED
 # The entire notice above must be reproduced on all authorised
 # copies and copies may only be made to the extent permitted
@@ -20,12 +20,19 @@ def generate_out_file(utility):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', required=True,
-                        type=argparse.FileType('rt'), help="Input file")
-    parser.add_argument('-o', '--out', required=True,
-                        type=argparse.FileType('wt'), help="Output file name to be generated")
-    parser.add_argument('-u', '--utility', required=True,
-                        help="Binary utility to produce output")
+    parser.add_argument(
+        "-i", "--input", required=True, type=argparse.FileType("rt"), help="Input file"
+    )
+    parser.add_argument(
+        "-o",
+        "--out",
+        required=True,
+        type=argparse.FileType("wt"),
+        help="Output file name to be generated",
+    )
+    parser.add_argument(
+        "-u", "--utility", required=True, help="Binary utility to produce output"
+    )
 
     return parser.parse_args()
 

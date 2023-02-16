@@ -1,5 +1,4 @@
-String Manipulation
-===================
+# String Manipulation
 
 Most strings in build definitions can use Go's built-in
 [template system](https://golang.org/pkg/text/template/). Exceptions:
@@ -103,6 +102,7 @@ The warning flag `-Wno-unreachable-code-loop-increment` is added if
 supported by the compiler.
 
 config file:
+
 ```
 config COLOR
 	string
@@ -110,6 +110,7 @@ config COLOR
 ```
 
 .bp file:
+
 ```bp
 bob_shared_library {
     name: "libColor",

@@ -1,5 +1,4 @@
-Building Particular Targets
-==========================
+# Building Particular Targets
 
 As you add build objects and configurations, you may find that you
 don't want certain objects to build in particular configurations, or

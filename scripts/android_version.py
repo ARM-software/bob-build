@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,8 +36,9 @@ def get_platform_version():
         cmd = [soong_ui, "--dumpvar-mode", "PLATFORM_VERSION"]
         # Ignore soong_ui's stderr output by redirecting it. This does not end
         # up in the captured output.
-        platform_version = subprocess.check_output(cmd,
-                                                   stderr=subprocess.PIPE).decode().strip()
+        platform_version = (
+            subprocess.check_output(cmd, stderr=subprocess.PIPE).decode().strip()
+        )
     except (OSError, subprocess.CalledProcessError) as e:
         logger.error("%s", str(e))
         return None

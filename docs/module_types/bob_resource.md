@@ -1,5 +1,4 @@
-Module: bob_resource
-====================
+# Module: bob_resource
 
 This target identifies files in the source tree which should be copied to
 the installation directory, e.g. files which the project may
@@ -47,22 +46,26 @@ bob_resource {
 }
 ```
 
-----
+---
+
 ### **bob_resource.name** (required)
 
 The unique identifier that can be used to refer to this module.
 
-----
+---
+
 ### **bob_resource.srcs** (optional)
 
 Source files to copy to the installation directory.
 
-----
+---
+
 ### **bob_resource.add_to_alias** (optional)
 
 Adds this module to an alias.
 
-----
+---
+
 ### **bob_module.owner** (optional)
 
 Value to use on Android for `LOCAL_MODULE_OWNER`

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018, 2020, 2022 Arm Limited.
+# Copyright 2018, 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,6 @@ deps = {
     "sl_libd.a": ["sl_libg.a", "sl_libh.a"],
     "sl_libf.a": ["sl_libg.a"],
     "sl_libh.a": ["sl_libe.a"],
-
     # Implicit dependencies in static_libs are not followed
     # "sl_libe.a" : ["sl_libf.a"],
     # "sl_libg.a" : ["sl_libh.a"],
@@ -71,7 +70,7 @@ if not compile_obj:
     for idx, lib in enumerate(libs):
         if lib in deps:
             for dep in deps[lib]:
-                if dep not in libs[idx+1:]:
+                if dep not in libs[idx + 1 :]:
                     print("Error:", dep, "not after", lib)
                     error = True
 

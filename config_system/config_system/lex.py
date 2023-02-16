@@ -26,25 +26,39 @@ class TokenizeError(Exception):
 
 
 tokens = (
-    "ANDAND", "OROR", "NOT",
+    "ANDAND",
+    "OROR",
+    "NOT",
     "BOB_IGNORE",
     "BOOL",
-    "CHOICE", "ENDCHOICE",
+    "CHOICE",
+    "ENDCHOICE",
     "CONFIG",
     "DEFAULT",
     "DEPENDS",
     "DUMMY",
     "EOL",
-    "EQUAL", "UNEQUAL", "LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL",
-    "HELP", "HELPTEXT",
+    "EQUAL",
+    "UNEQUAL",
+    "LESS",
+    "LESS_EQUAL",
+    "GREATER",
+    "GREATER_EQUAL",
+    "HELP",
+    "HELPTEXT",
     "IDENTIFIER",
-    "IF", "ON",
+    "IF",
+    "ON",
     "INT",
-    "LBRACKET", "RBRACKET",
-    "MENU", "ENDMENU", "MAINMENU",
+    "LBRACKET",
+    "RBRACKET",
+    "MENU",
+    "ENDMENU",
+    "MAINMENU",
     "MENUCONFIG",
     "NUMBER",
-    "PLUS", "MINUS",
+    "PLUS",
+    "MINUS",
     "PROMPT",
     "QUOTED_STRING",
     "SELECT",
@@ -53,7 +67,8 @@ tokens = (
     "STRING",
     "VISIBLE",
     "WARNING",
-    "YES", "NO",
+    "YES",
+    "NO",
     "COMMENT",
 )
 
@@ -159,9 +174,9 @@ def t_PARAM_identifier(t):
     r"[A-Za-z][A-Za-z0-9_]*"
     if t.value in params:
         t.type = t.value.upper()
-    elif t.value == 'y':
+    elif t.value == "y":
         t.type = "YES"
-    elif t.value == 'n':
+    elif t.value == "n":
         t.type = "NO"
     else:
         t.type = "IDENTIFIER"
@@ -235,6 +250,7 @@ def report_error(msg, t, err_type=TokenizeError):
     lexer = t.lexer
 
     from .lex_wrapper import LexWrapper
+
     if isinstance(lexer, LexWrapper):
         lexer = lexer.current_lexer()
     print("%s:%d: %s" % (lexer.fname, lexer.lineno, msg))
@@ -242,8 +258,8 @@ def report_error(msg, t, err_type=TokenizeError):
     next_cr = lexer.lexdata.find("\n", t.lexpos)
     if last_cr < 0:
         last_cr = 0
-    column = len(lexer.lexdata[last_cr:t.lexpos].expandtabs())
-    print(lexer.lexdata[last_cr: next_cr])
+    column = len(lexer.lexdata[last_cr : t.lexpos].expandtabs())
+    print(lexer.lexdata[last_cr:next_cr])
     print((" " * (column)) + "^")
     raise err_type()
 

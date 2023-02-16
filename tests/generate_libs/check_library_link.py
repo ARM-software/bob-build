@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020, 2022 Arm Limited.
+# Copyright 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,12 +39,14 @@ def match_lines(cmd, regex):
     return matched
 
 
-OBJDUMP_RE = re.compile(r'\s*NEEDED\s+([a-zA-Z0-9_-]+).so[0-9.]*')
-OTOOL_RE = re.compile(r'\s+(.*?)(?:\.dylib)?\s+\(.*\)')
+OBJDUMP_RE = re.compile(r"\s*NEEDED\s+([a-zA-Z0-9_-]+).so[0-9.]*")
+OTOOL_RE = re.compile(r"\s+(.*?)(?:\.dylib)?\s+\(.*\)")
 
 READ_DEPS_METHODS = {
     "objdump": lambda lib: match_lines(["objdump", "-p", lib], OBJDUMP_RE),
-    "otool": lambda lib: [os.path.basename(i) for i in match_lines(["otool", "-L", lib], OTOOL_RE)],
+    "otool": lambda lib: [
+        os.path.basename(i) for i in match_lines(["otool", "-L", lib], OTOOL_RE)
+    ],
 }
 
 
@@ -53,18 +55,30 @@ def check_links(lib, links_to, read_deps):
     for link in links_to:
         if link not in all_links:
             print("ERROR: {} does not link to {}".format(lib, link))
-            print("ERROR: The following dependencies were detected: " +
-                  ", ".join(sorted(all_links)))
+            print(
+                "ERROR: The following dependencies were detected: "
+                + ", ".join(sorted(all_links))
+            )
             sys.exit(1)
 
 
 def parse_args():
     ap = argparse.ArgumentParser()
 
-    ap.add_argument("--read-deps-method", choices=READ_DEPS_METHODS.keys(), default="objdump",
-                    help="Program used to read library dependencies")
-    ap.add_argument("--links-to", "-l", metavar="LIBNAME", default=[], action="append",
-                    help="Check that LIBRARY links to LIBNAME")
+    ap.add_argument(
+        "--read-deps-method",
+        choices=READ_DEPS_METHODS.keys(),
+        default="objdump",
+        help="Program used to read library dependencies",
+    )
+    ap.add_argument(
+        "--links-to",
+        "-l",
+        metavar="LIBNAME",
+        default=[],
+        action="append",
+        help="Check that LIBRARY links to LIBNAME",
+    )
     ap.add_argument("library")
 
     return ap.parse_args()
