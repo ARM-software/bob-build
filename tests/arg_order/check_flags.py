@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021-2022 Arm Limited.
+# Copyright 2021-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,13 +46,13 @@ def parse_args():
         if arg == "-c":
             link = False
         elif arg == "-o":
-            output = sys.argv[i+2]
+            output = sys.argv[i + 2]
         elif arg.startswith("-I"):
             if len(arg) > 2:
                 includedir = arg[2:]
             else:
                 # Handle "-I includedir", merging to a single arg
-                includedir = sys.argv[i+2]
+                includedir = sys.argv[i + 2]
                 skiparg = True
 
             arg = "-I{}".format(os.path.basename(includedir))
@@ -89,11 +89,10 @@ def check_set1_before_set2(args, set1, set2):
 
 
 class mod:
-
     def __init__(self, name, cflags, includes, defaults, **kwargs):
         self.name = name
         self.cflags = cflags
-        self.includes = ['-I'+inc for inc in includes]
+        self.includes = ["-I" + inc for inc in includes]
         self.defaults = defaults
         self.feature_cflags = []
         self.feature_includes = []
@@ -102,32 +101,44 @@ class mod:
         self.target_feature_cflags = []
         self.target_feature_includes = []
 
-        if 'feature_cflags' in kwargs:
-            self.feature_cflags = kwargs['feature_cflags']
-        if 'target_cflags' in kwargs:
-            self.target_cflags = kwargs['target_cflags']
-        if 'target_feature_cflags' in kwargs:
-            self.target_feature_cflags = kwargs['target_feature_cflags']
-        if 'feature_includes' in kwargs:
-            self.feature_includes = ['-I'+inc for inc in kwargs['feature_includes']]
-        if 'target_includes' in kwargs:
-            self.target_includes = ['-I'+inc for inc in kwargs['target_includes']]
-        if 'target_feature_includes' in kwargs:
-            self.target_feature_includes = ['-I'+inc for inc in kwargs['target_feature_includes']]
+        if "feature_cflags" in kwargs:
+            self.feature_cflags = kwargs["feature_cflags"]
+        if "target_cflags" in kwargs:
+            self.target_cflags = kwargs["target_cflags"]
+        if "target_feature_cflags" in kwargs:
+            self.target_feature_cflags = kwargs["target_feature_cflags"]
+        if "feature_includes" in kwargs:
+            self.feature_includes = ["-I" + inc for inc in kwargs["feature_includes"]]
+        if "target_includes" in kwargs:
+            self.target_includes = ["-I" + inc for inc in kwargs["target_includes"]]
+        if "target_feature_includes" in kwargs:
+            self.target_feature_includes = [
+                "-I" + inc for inc in kwargs["target_feature_includes"]
+            ]
 
     def find_flags(self, args):
         """
         Return the range (inclusive) for this module's cflags
         """
-        return find_range(args, self.cflags + self.feature_cflags +
-                          self.target_cflags + self.target_feature_cflags)
+        return find_range(
+            args,
+            self.cflags
+            + self.feature_cflags
+            + self.target_cflags
+            + self.target_feature_cflags,
+        )
 
     def find_includes(self, args):
         """
         Return the range (inclusive) for this module's includes
         """
-        return find_range(args, self.includes + self.feature_includes +
-                          self.target_includes + self.target_feature_includes)
+        return find_range(
+            args,
+            self.includes
+            + self.feature_includes
+            + self.target_includes
+            + self.target_feature_includes,
+        )
 
     def find_flags_recursive(self, args):
         """
@@ -170,14 +181,16 @@ class mod:
                 result = False
                 continue
 
-            for f2 in args[i+1:]:
+            for f2 in args[i + 1 :]:
                 if f2 not in all_args:
                     logger.error("%s not in args", f2)
                     result = False
                     continue
 
                 if all_args[f1] >= all_args[f2]:
-                    logger.error("Module %s arguments out of order %s vs %s", self.name, f1, f2)
+                    logger.error(
+                        "Module %s arguments out of order %s vs %s", self.name, f1, f2
+                    )
                     result = False
 
         return result
@@ -196,43 +209,57 @@ class mod:
 
         # Feature-specific cflags
         if not self.check_order_maintained(args, self.feature_cflags):
-            logger.error("Module %s feature-specific flag order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s feature-specific flag order not maintained", self.name
+            )
             result = False
         if not check_set1_before_set2(args, self.cflags, self.feature_cflags):
-            logger.error("Module %s feature-specific flags not overriding normal flags",
-                         self.name)
+            logger.error(
+                "Module %s feature-specific flags not overriding normal flags",
+                self.name,
+            )
             result = False
 
         # Target-specific cflags
         if not self.check_order_maintained(args, self.target_cflags):
-            logger.error("Module %s target-specific flag order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s target-specific flag order not maintained", self.name
+            )
             result = False
         if not check_set1_before_set2(args, self.cflags, self.target_cflags):
-            logger.error("Module %s target-specific flags not overriding normal flags",
-                         self.name)
+            logger.error(
+                "Module %s target-specific flags not overriding normal flags", self.name
+            )
             result = False
 
         # Target-and-feature-specific cflags
         if not self.check_order_maintained(args, self.target_feature_cflags):
-            logger.error("Module %s target-and-feature-specific flag order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s target-and-feature-specific flag order not maintained",
+                self.name,
+            )
             result = False
         if not check_set1_before_set2(args, self.cflags, self.target_feature_cflags):
             logger.error(
                 "Module %s flags target-and-feature-specific not overriding normal",
-                self.name)
+                self.name,
+            )
             result = False
-        if not check_set1_before_set2(args, self.feature_cflags, self.target_feature_cflags):
+        if not check_set1_before_set2(
+            args, self.feature_cflags, self.target_feature_cflags
+        ):
             logger.error(
                 "Module %s flags target-and-feature-specific not overriding feature-specific",
-                self.name)
+                self.name,
+            )
             result = False
-        if not check_set1_before_set2(args, self.target_cflags, self.target_feature_cflags):
+        if not check_set1_before_set2(
+            args, self.target_cflags, self.target_feature_cflags
+        ):
             logger.error(
                 "Module %s flags target-and-feature-specific not overriding target-specific",
-                self.name)
+                self.name,
+            )
             result = False
 
         # Check each child module's flags
@@ -246,18 +273,23 @@ class mod:
             (sub1_first, sub1_last) = sub1.find_flags_recursive(args)
             if sub1_last > last_sub_flag:
                 last_sub_flag = sub1_last
-            for sub2 in self.defaults[i+1:]:
+            for sub2 in self.defaults[i + 1 :]:
                 (sub2_first, sub2_last) = sub2.find_flags_recursive(args)
                 if sub1_last >= sub2_first:
-                    logger.error("Module %s submodules %s and %s flags out of order",
-                                 self.name, sub1.name, sub2.name)
+                    logger.error(
+                        "Module %s submodules %s and %s flags out of order",
+                        self.name,
+                        sub1.name,
+                        sub2.name,
+                    )
                     result = False
 
         # Check this module's flags are after all submodule flags
         first_flag, _ = self.find_flags(args)
         if first_flag <= last_sub_flag:
-            logger.error("Module %s module flags not overriding submodule flags",
-                         self.name)
+            logger.error(
+                "Module %s module flags not overriding submodule flags", self.name
+            )
             result = False
 
         return result
@@ -276,43 +308,60 @@ class mod:
 
         # Feature-specific includes
         if not self.check_order_maintained(args, self.feature_includes):
-            logger.error("Module %s feature-specific include order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s feature-specific include order not maintained", self.name
+            )
             result = False
         if not check_set1_before_set2(args, self.feature_includes, self.includes):
-            logger.error("Module %s feature-specific includes not overriding normal includes",
-                         self.name)
+            logger.error(
+                "Module %s feature-specific includes not overriding normal includes",
+                self.name,
+            )
             result = False
 
         # Target-specific includes
         if not self.check_order_maintained(args, self.target_includes):
-            logger.error("Module %s target-specific include order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s target-specific include order not maintained", self.name
+            )
             result = False
         if not check_set1_before_set2(args, self.target_includes, self.includes):
-            logger.error("Module %s target-specific includes not overriding normal includes",
-                         self.name)
+            logger.error(
+                "Module %s target-specific includes not overriding normal includes",
+                self.name,
+            )
             result = False
 
         # Target-and-feature-specific includes
         if not self.check_order_maintained(args, self.target_feature_includes):
-            logger.error("Module %s target-and-feature-specific include order not maintained",
-                         self.name)
+            logger.error(
+                "Module %s target-and-feature-specific include order not maintained",
+                self.name,
+            )
             result = False
-        if not check_set1_before_set2(args, self.target_feature_includes, self.includes):
+        if not check_set1_before_set2(
+            args, self.target_feature_includes, self.includes
+        ):
             logger.error(
                 "Module %s includes target-and-feature-specific not overriding normal",
-                self.name)
+                self.name,
+            )
             result = False
-        if not check_set1_before_set2(args, self.target_feature_includes, self.feature_includes):
+        if not check_set1_before_set2(
+            args, self.target_feature_includes, self.feature_includes
+        ):
             logger.error(
                 "Module %s includes target-and-feature-specific not overriding feature-specific",
-                self.name)
+                self.name,
+            )
             result = False
-        if not check_set1_before_set2(args, self.target_feature_includes, self.target_includes):
+        if not check_set1_before_set2(
+            args, self.target_feature_includes, self.target_includes
+        ):
             logger.error(
                 "Module %s includes target-and-feature-specific not overriding target-specific",
-                self.name)
+                self.name,
+            )
             result = False
 
         # Check each child module's includes
@@ -326,19 +375,24 @@ class mod:
             (sub1_first, sub1_last) = sub1.find_includes_recursive(args)
             if sub1_first < first_sub_include:
                 first_sub_include = sub1_first
-            for sub2 in self.defaults[i+1:]:
+            for sub2 in self.defaults[i + 1 :]:
                 (sub2_first, sub2_last) = sub2.find_includes_recursive(args)
                 # sub2 includes must be before sub1 includes
                 if sub1_first <= sub2_last:
-                    logger.error("Module %s submodules %s and %s includes out of order",
-                                 self.name, sub1.name, sub2.name)
+                    logger.error(
+                        "Module %s submodules %s and %s includes out of order",
+                        self.name,
+                        sub1.name,
+                        sub2.name,
+                    )
                     result = False
 
         # Check this module's includes are before all submodule includes
         last_include, _ = self.find_includes(args)
         if last_include >= first_sub_include:
-            logger.error("Module %s module includes not overriding submodule includes",
-                         self.name)
+            logger.error(
+                "Module %s module includes not overriding submodule includes", self.name
+            )
             result = False
 
         return result
@@ -361,48 +415,42 @@ def check_args(args):
     # defaults higher in the hierarchy have precedence, so bin's
     # cflags must come last, and a's cflags before aa and ab's.
     #
-    aa = mod("aa",
-             ["-aa_flag1", "-aa_flag2"],
-             ["aa_include1", "aa_include2"],
-             [])
-    ab = mod("ab",
-             ["-ab_flag1", "-ab_flag2"],
-             ["ab_include1", "ab_include2"],
-             [])
-    ba = mod("ba",
-             ["-ba_flag1", "-ba_flag2"],
-             ["ba_include1", "ba_include2"],
-             [],
-             target_flags=["-batarg1_flag", "-batarg2_flag"],
-             target_feature_flags=["-batf1_flag", "batf2_flag"],
-             target_includes=["batarg1_include", "batarg2_include"],
-             target_feature_includes=["batf1_include", "batf2_include"])
-    bb = mod("bb",
-             ["-bb_flag1", "-bb_flag2"],
-             ["bb_include1", "bb_include2"],
-             [],
-             target_flags=["-bbtarg1_flag", "-bbtarg2_flag"],
-             target_feature_flags=["-bbtf1_flag", "bbtf2_flag"],
-             target_includes=["bbtarg1_include", "bbtarg2_include"],
-             target_feature_includes=["bbtf1_include", "bbtf2_include"])
-    a = mod("a",
-            ["-a_flag1", "-a_flag2"],
-            ["a_include1", "a_include2"],
-            [aa, ab])
-    b = mod("b",
-            ["-b_flag1", "-b_flag2"],
-            ["b_include1", "b_include2"],
-            [ba, bb])
-    bin = mod("bin",
-              ["-bin_flag1", "-bin_flag2"],
-              ["bin_include1", "bin_include2"],
-              [a, b],
-              feature_flags=["-binfeat1_flag", "-binfeat2_flag"],
-              target_flags=["-bintarg1_flag", "-bintarg2_flag"],
-              target_feature_flags=["-bintf1_flag", "bintf2_flag"],
-              feature_includes=["binfeat1_include", "binfeat2_include"],
-              target_includes=["bintarg1_include", "bintarg2_include"],
-              target_feature_includes=["bintf1_include", "bintf2_include"])
+    aa = mod("aa", ["-aa_flag1", "-aa_flag2"], ["aa_include1", "aa_include2"], [])
+    ab = mod("ab", ["-ab_flag1", "-ab_flag2"], ["ab_include1", "ab_include2"], [])
+    ba = mod(
+        "ba",
+        ["-ba_flag1", "-ba_flag2"],
+        ["ba_include1", "ba_include2"],
+        [],
+        target_flags=["-batarg1_flag", "-batarg2_flag"],
+        target_feature_flags=["-batf1_flag", "batf2_flag"],
+        target_includes=["batarg1_include", "batarg2_include"],
+        target_feature_includes=["batf1_include", "batf2_include"],
+    )
+    bb = mod(
+        "bb",
+        ["-bb_flag1", "-bb_flag2"],
+        ["bb_include1", "bb_include2"],
+        [],
+        target_flags=["-bbtarg1_flag", "-bbtarg2_flag"],
+        target_feature_flags=["-bbtf1_flag", "bbtf2_flag"],
+        target_includes=["bbtarg1_include", "bbtarg2_include"],
+        target_feature_includes=["bbtf1_include", "bbtf2_include"],
+    )
+    a = mod("a", ["-a_flag1", "-a_flag2"], ["a_include1", "a_include2"], [aa, ab])
+    b = mod("b", ["-b_flag1", "-b_flag2"], ["b_include1", "b_include2"], [ba, bb])
+    bin = mod(
+        "bin",
+        ["-bin_flag1", "-bin_flag2"],
+        ["bin_include1", "bin_include2"],
+        [a, b],
+        feature_flags=["-binfeat1_flag", "-binfeat2_flag"],
+        target_flags=["-bintarg1_flag", "-bintarg2_flag"],
+        target_feature_flags=["-bintf1_flag", "bintf2_flag"],
+        feature_includes=["binfeat1_include", "binfeat2_include"],
+        target_includes=["bintarg1_include", "bintarg2_include"],
+        target_feature_includes=["bintf1_include", "bintf2_include"],
+    )
     r1 = bin.check_flags(args)
     r2 = bin.check_includes(args)
     return r1 and r2
@@ -427,11 +475,11 @@ def main():
         try:
             os.utime(output, None)
         except OSError:
-            open(output, 'a').close()
+            open(output, "a").close()
     return result
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
 
     sys.exit(main())

@@ -1,5 +1,4 @@
-Contributing to Bob
-===================
+# Contributing to Bob
 
 Contributions are welcomed! Please read the following to get started.
 
@@ -39,6 +38,7 @@ Bob has three kinds of tests:
     ./build/config
     ./build/buildme
     ```
+
     (thereafter just run `buildme`)
 
   - Android: (substitute variables appropriately - `$ANDROID_TOP` is a full
@@ -52,6 +52,7 @@ Bob has three kinds of tests:
     ./bootstrap_androidbp
     mm
     ```
+
     (thereafter just run `mm`)
 
 - Go unit tests, which can be run using `go test` after running

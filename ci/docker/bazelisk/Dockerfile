@@ -31,4 +31,3 @@ ENV BAZELISK_HOME /home/ci/.cache/bazelisk
 RUN USE_BAZEL_VERSION=latest bazelisk --version && \
 	USE_BAZEL_VERSION=6.0.0 bazelisk --version && \
 	USE_BAZEL_VERSION=5.4.0 bazelisk --version
-

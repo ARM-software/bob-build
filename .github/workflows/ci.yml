@@ -1,18 +1,27 @@
 name: CI
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - uses: actions/setup-go@v3
+      - run: echo "PATH=$PATH:/home/runner/go/bin" >> $GITHUB_ENV
+      - uses: pre-commit/action@v3.0.0
+
   commit-check:
     name: Commit checks
     strategy:
       matrix:
-        go: [ '1.13' ]
-        os: [ ubuntu-latest ]
-        python: [ '3.x' ]
+        go: ["1.13"]
+        os: [ubuntu-latest]
+        python: ["3.x"]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -31,37 +40,37 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          submodules: 'true'
+          submodules: "true"
 
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r .github/pip_requirements.txt
 
-      - name: Run gofmt
-        run: .github/checks/check-code-format.sh
-
-      - name: Run pycodestyle
-        run: .github/checks/check-pycodestyle.sh
-
-      - name: Run pylint
-        run: .github/checks/check-pylint.sh
-
       - name: Check copyright
         run: .github/checks/check-copyright.sh
-
-      - name: Check signoff
-        run: .github/checks/check-signoff.py
 
   go-tests:
     name: Go ${{ matrix.go }} tests ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19', '1.20' ]
-        os: [ ubuntu-latest ]
+        go:
+          [
+            "1.11",
+            "1.12",
+            "1.13",
+            "1.14",
+            "1.15",
+            "1.16",
+            "1.17",
+            "1.18",
+            "1.19",
+            "1.20",
+          ]
+        os: [ubuntu-latest]
         include:
-          - go: '1.13'
+          - go: "1.13"
             os: macos-latest
     runs-on: ${{ matrix.os }}
 
@@ -69,7 +78,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          submodules: 'true'
+          submodules: "true"
 
       - name: Setup Go ${{ matrix.go }}
         uses: actions/setup-go@v3
@@ -94,12 +103,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.7', '3.8', '3.9' ]
-        os: [ ubuntu-latest ]
+        python: ["3.7", "3.8", "3.9"]
+        os: [ubuntu-latest]
         include:
-          - python: '3.7'
+          - python: "3.7"
             os: macos-latest
-          - python: '3.6'
+          - python: "3.6"
             os: ubuntu-20.04
     runs-on: ${{ matrix.os }}
 
@@ -134,16 +143,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: [ '1.11', '1.12', '1.13', '1.14', '1.15', '1.16', '1.17', '1.18', '1.19', '1.20' ]
-        os: [ ubuntu-latest ]
-        python: [ '3.7', '3.8', '3.9' ]
-        include:
-          - go: '1.13'
-            os: macos-latest
-            python: '3.7'
-          - go: '1.13'
-            os: ubuntu-20.04
-            python: '3.6'
+        go:
+          [
+            "1.11",
+            "1.12",
+            "1.13",
+            "1.14",
+            "1.15",
+            "1.16",
+            "1.17",
+            "1.18",
+            "1.19",
+            "1.20",
+          ]
+        os: [ubuntu-latest]
+        python: ["3.x"]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -173,7 +187,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          submodules: 'true'
+          submodules: "true"
 
       - name: Install python dependencies
         run: |
@@ -199,16 +213,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazel: [ 'latest', '6.0.0', '5.4.0' ]
-        os: [ ubuntu-latest ]
+        bazel: ["latest", "6.0.0", "5.4.0"]
+        os: [ubuntu-latest]
         include:
-          - bazel: '5.4.0'
+          - bazel: "5.4.0"
             os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: bazelbuild/setup-bazelisk@v2
-      - name: Mount bazel cache  # Optional
+      - name: Mount bazel cache # Optional
         uses: actions/cache@v3
         with:
           path: "~/.cache/bazel"

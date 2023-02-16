@@ -1,5 +1,4 @@
-Module: bob_external_header_library, bob_external_shared_library, bob_external_static_library
-=============================================================================================
+# Module: bob_external_header_library, bob_external_shared_library, bob_external_static_library
 
 External libraries are a method of linking with Android libraries defined
 outside of Bob.

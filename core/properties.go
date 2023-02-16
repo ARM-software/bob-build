@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -252,7 +252,7 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where
 		// supported, the host-specific and target-specific set.
-		var props = []propmap{propmap{m.featurableProperties(), m.features()}}
+		var props = []propmap{{m.featurableProperties(), m.features()}}
 
 		// Apply features in target-specific properties.
 		// This should happen for all modules which support host:{} and target:{}
@@ -261,8 +261,8 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 			target := ts.getTargetSpecific(tgtTypeTarget)
 
 			var tgtprops = []propmap{
-				propmap{[]interface{}{host.getTargetSpecificProps()}, &host.Features},
-				propmap{[]interface{}{target.getTargetSpecificProps()}, &target.Features},
+				{[]interface{}{host.getTargetSpecificProps()}, &host.Features},
+				{[]interface{}{target.getTargetSpecificProps()}, &target.Features},
 			}
 			props = append(props, tgtprops...)
 

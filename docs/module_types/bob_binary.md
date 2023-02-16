@@ -1,9 +1,9 @@
-Module: bob_binary
-==================
+# Module: bob_binary
 
 Target is an executable.
 
 ## Full specification of `bob_binary` properties
+
 Most properties are optional.
 
 `bob_binary` supports [features](../features.md)

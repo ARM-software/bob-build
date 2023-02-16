@@ -1,5 +1,4 @@
-Code Generation
-===============
+# Code Generation
 
 Occasionally it's preferable to use a tool to generate source code,
 rather than manually write it. Bob has a few module types that support
@@ -130,8 +129,7 @@ outputs `${tool} -i ${in} -o ${out}` can work, as long as the tool is
 taught to parse the command line appropriately.
 
 Commands that use specific flags to identify a particular output are
-not well catered for. For inputs, the template `{{match_srcs
-\"file.txt\"}}` can be used to name a particular file from the
+not well catered for. For inputs, the template `{{match_srcs \"file.txt\"}}` can be used to name a particular file from the
 module's `src` list.
 
 The `${in}` variable contains all source files from `srcs` and

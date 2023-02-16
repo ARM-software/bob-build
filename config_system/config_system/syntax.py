@@ -34,8 +34,9 @@ def merge(a, b):
             elif isinstance(c[k], dict):
                 c[k] = merge(c[k], b[k])
             else:
-                raise Exception("Duplicate definition for " +
-                                k+" when merging %r and %r" % (a, b))
+                raise Exception(
+                    "Duplicate definition for " + k + " when merging %r and %r" % (a, b)
+                )
         else:
             c[k] = b[k]
     return c
@@ -53,12 +54,12 @@ def p_null_input(p):
 
 def p_stmt(p):
     """stmt : menuconfig_stmt
-            | menu_stmt
-            | config_stmt
-            | choice_stmt
-            | source_stmt
-            | source_local_stmt
-            | mainmenu_stmt
+    | menu_stmt
+    | config_stmt
+    | choice_stmt
+    | source_stmt
+    | source_local_stmt
+    | mainmenu_stmt
     """
     p[0] = p[1]
 
@@ -74,10 +75,11 @@ def p_menuconfig_stmt(p):
 
     title = p[4].get("title")
 
-    p[0] = {"config": {p[2]: merge(p[4], {"type": "menuconfig",
-                                          "position": order_count})},
-            "order": {order_count: ("menuconfig", p[2])},
-            "menu": {p[2]: {"title": title}}}
+    p[0] = {
+        "config": {p[2]: merge(p[4], {"type": "menuconfig", "position": order_count})},
+        "order": {order_count: ("menuconfig", p[2])},
+        "menu": {p[2]: {"title": title}},
+    }
 
 
 def add_inmenu(data, i, depends):
@@ -106,8 +108,10 @@ def p_menu_stmt(p):
     if "choice" in p[2]:
         add_inmenu(p[2]["choice"], menu_number, depends)
 
-    menu_data = {"menu": {menu_number: p[1]},
-                 "order": {menu_number: ("menu", menu_number)}}
+    menu_data = {
+        "menu": {menu_number: p[1]},
+        "order": {menu_number: ("menu", menu_number)},
+    }
 
     p[0] = merge(menu_data, p[2])
 
@@ -123,8 +127,8 @@ def p_menu_stmt_begin(p):
 
 def p_menu_options(p):
     """menu_options : menu_options menu_visible
-                    | menu_options config_depends
-                    | menu_options config_help"""
+    | menu_options config_depends
+    | menu_options config_help"""
     p[0] = merge(p[1], p[2])
 
 
@@ -144,9 +148,10 @@ def p_config_stmt(p):
     order_count += 1
     # `p.slice[2]` is the IDENTIFIER token
     relPath = p.slice[2].lexer.relPath
-    config_options = merge(p[4], {"type": "config", "position": order_count, "relPath": relPath})
-    p[0] = {"config": {p[2]: config_options},
-            "order": {order_count: ("config", p[2])}}
+    config_options = merge(
+        p[4], {"type": "config", "position": order_count, "relPath": relPath}
+    )
+    p[0] = {"config": {p[2]: config_options}, "order": {order_count: ("config", p[2])}}
 
 
 def p_choice_stmt_begin(p):
@@ -161,8 +166,11 @@ def p_choice_stmt(p):
 
     config = p[1]
     choice_id = config["id"]
-    p[0] = {"choice": {choice_id: config}, "config": {},
-            "order": {choice_id: ("choice", choice_id)}}
+    p[0] = {
+        "choice": {choice_id: config},
+        "config": {},
+        "order": {choice_id: ("choice", choice_id)},
+    }
     p[0]["choice"][choice_id]["configs"] = []
     for k in p[2]["config"]:
         p[0]["config"][k] = {"choice_group": choice_id}
@@ -176,20 +184,25 @@ def p_choice_stmt(p):
         for k in p[0]["config"]:
             if "depends" in p[0]["config"][k]:
                 old_depends = p[0]["config"][k]["depends"]
-                p[0]["config"][k]["depends"] = ("and", old_depends,
-                                                config["depends"])
+                p[0]["config"][k]["depends"] = ("and", old_depends, config["depends"])
             else:
                 p[0]["config"][k]["depends"] = config["depends"]
 
     for d in config.get("default_cond", []):
-        assert d["expr"][0] == "identifier", "Expressions not supported in choice default"
+        assert (
+            d["expr"][0] == "identifier"
+        ), "Expressions not supported in choice default"
         for k in p[0]["config"]:
             if k == d["expr"][1]:
-                p[0]["config"][k] = merge(p[0]["config"][k],
-                                          {"default_cond": [{"cond": d["cond"], "expr": expr.YES}]})
+                p[0]["config"][k] = merge(
+                    p[0]["config"][k],
+                    {"default_cond": [{"cond": d["cond"], "expr": expr.YES}]},
+                )
 
     if "default" in config:
-        assert config["default"][0] == "identifier", "Expressions not supported in choice default"
+        assert (
+            config["default"][0] == "identifier"
+        ), "Expressions not supported in choice default"
         for k in p[0]["config"]:
             if k == config["default"][1]:
                 d = {"default": expr.YES}
@@ -198,11 +211,11 @@ def p_choice_stmt(p):
 
 def p_choice_options(p):
     """choice_options : choice_options config_type
-                      | choice_options choice_default
-                      | choice_options config_depends
-                      | choice_options config_help
-                      | choice_options config_prompt
-                      """
+    | choice_options choice_default
+    | choice_options config_depends
+    | choice_options config_help
+    | choice_options config_prompt
+    """
     p[0] = merge(p[1], p[2])
 
 
@@ -213,7 +226,7 @@ def p_choice_options_empty(p):
 
 def p_choice_default(p):
     """choice_default : DEFAULT identifier EOL
-                      | DEFAULT identifier IF condexpr EOL
+    | DEFAULT identifier IF condexpr EOL
     """
     p[0] = {"default": p[2]}
     if len(p) > 4:
@@ -241,6 +254,7 @@ def p_mainmenu_stmt_first(p):
     """mainmenu_stmt_first : MAINMENU QUOTED_STRING dummy"""
     p[0] = p[2]
 
+
 # Force the parser to fetch the next token (even though the lexer will never
 # actually return it). This stops it applying the "default reduction"
 # optimization, which could cause it to delay lookahead until after the rule
@@ -249,8 +263,8 @@ def p_mainmenu_stmt_first(p):
 
 def p_dummy(p):
     """dummy :
-             | DUMMY
-             | COMMENT"""
+    | DUMMY
+    | COMMENT"""
     p[0] = {}
 
 
@@ -260,7 +274,7 @@ def p_source_stmt(p):
 
 
 def p_source_local_stmt(p):
-    'source_local_stmt : source_local_stmt_first EOL'
+    "source_local_stmt : source_local_stmt_first EOL"
     p[0] = {}
 
 
@@ -271,7 +285,7 @@ def p_mainmenu_stmt(p):
 
 def p_config_stmts(p):
     """config_stmts :
-                    | config_stmts config_stmt"""
+    | config_stmts config_stmt"""
     if len(p) > 1:
         p[0] = merge(p[1], p[2])
     else:
@@ -280,21 +294,21 @@ def p_config_stmts(p):
 
 def p_type(p):
     """type : BOOL
-            | INT
-            | STRING"""
+    | INT
+    | STRING"""
     p[0] = p[1]
 
 
 def p_config_options(p):
     """config_options : config_options config_type
-                      | config_options config_select
-                      | config_options config_default
-                      | config_options config_bob_ignore
-                      | config_options config_depends
-                      | config_options config_help
-                      | config_options config_prompt
-                      | config_options config_warning
-                      """
+    | config_options config_select
+    | config_options config_default
+    | config_options config_bob_ignore
+    | config_options config_depends
+    | config_options config_help
+    | config_options config_prompt
+    | config_options config_warning
+    """
     p[0] = merge(p[1], p[2])
 
 
@@ -305,7 +319,7 @@ def p_config_option_empty(p):
 
 def p_config_type(p):
     """config_type : type QUOTED_STRING EOL
-                   | type EOL"""
+    | type EOL"""
     if len(p) == 4:
         p[0] = {"datatype": p[1], "title": p[2]}
     else:
@@ -324,7 +338,7 @@ def p_config_select_if(p):
 
 def p_config_default(p):
     """config_default : DEFAULT expr EOL
-                      | DEFAULT expr IF condexpr EOL
+    | DEFAULT expr IF condexpr EOL
     """
     p[0] = {"default": p[2]}
     if len(p) > 4:
@@ -333,7 +347,7 @@ def p_config_default(p):
 
 def p_config_bob_ignore(p):
     """config_bob_ignore : BOB_IGNORE YES EOL
-                         | BOB_IGNORE NO EOL
+    | BOB_IGNORE NO EOL
     """
     p[0] = {"bob_ignore": p[2]}
 
@@ -345,7 +359,7 @@ def p_config_depends(p):
 
 def p_config_prompt(p):
     """config_prompt : PROMPT QUOTED_STRING EOL
-                     | PROMPT QUOTED_STRING IF condexpr EOL"""
+    | PROMPT QUOTED_STRING IF condexpr EOL"""
     if len(p) > 4:
         p[0] = {"title": p[2], "visible_cond": p[4]}
     else:
@@ -354,7 +368,7 @@ def p_config_prompt(p):
 
 def p_condexpr(p):
     """condexpr : condexpr2
-                | condexpr OROR condexpr2"""
+    | condexpr OROR condexpr2"""
     if len(p) > 2:
         p[0] = ("or", p[1], p[3])
     else:
@@ -363,7 +377,7 @@ def p_condexpr(p):
 
 def p_condexpr2(p):
     """condexpr2 : condexpr3
-                 | condexpr2 ANDAND condexpr3"""
+    | condexpr2 ANDAND condexpr3"""
     if len(p) > 2:
         p[0] = ("and", p[1], p[3])
     else:
@@ -372,7 +386,7 @@ def p_condexpr2(p):
 
 def p_condexpr3(p):
     """condexpr3 : condexpr4
-                 | condexpr4 comparison condexpr4"""
+    | condexpr4 comparison condexpr4"""
     if len(p) > 2:
         p[0] = (p[2], p[1], p[3])
     else:
@@ -381,11 +395,11 @@ def p_condexpr3(p):
 
 def p_comparison(p):
     """comparison : EQUAL
-                  | UNEQUAL
-                  | LESS
-                  | LESS_EQUAL
-                  | GREATER
-                  | GREATER_EQUAL"""
+    | UNEQUAL
+    | LESS
+    | LESS_EQUAL
+    | GREATER
+    | GREATER_EQUAL"""
     p[0] = p[1]
 
 
@@ -426,7 +440,7 @@ def p_expr2_term(p):
 
 def p_combination(p):
     """combination : PLUS
-                   | MINUS"""
+    | MINUS"""
     p[0] = p[1]
 
 
@@ -442,9 +456,9 @@ def p_lit_or_ident_number(p):
 
 def p_lit_or_ident_boolean(p):
     """literal_or_identifier : YES
-                             | NO"""
+    | NO"""
     value = False
-    if p[1] == 'y':
+    if p[1] == "y":
         value = True
     p[0] = ("boolean", value)
 
@@ -466,7 +480,7 @@ def p_config_help(p):
 
 def p_helptext(p):
     """helptext :
-                | helptext HELPTEXT"""
+    | helptext HELPTEXT"""
     if len(p) == 1:
         p[0] = ""
     else:

@@ -1,5 +1,4 @@
-Module: bob_genrule
-===========================
+# Module: bob_genrule
 
 This target generates files via a custom shell command. This is usually source
 code (headers or C files), but it could be anything. A single module will
@@ -24,6 +23,7 @@ All names must be unique for the whole of the build system.
 Shared library names must begin with `lib`.
 
 ### **bob_genrule.srcs** (required)
+
 The list of input files or 'source' files. Wildcards can be used, although they are suboptimal;
 each directory in which a wildcard is used will have to be rescanned at every
 build.
@@ -35,6 +35,7 @@ you may choose to do this by adding the module.name of the module you wish to
 depend upon as a src with a `:` added prefix.
 
 #### Example
+
 ```bp
 bob_genrule {
     name: "generate_source_single_dependend_new",
@@ -73,6 +74,7 @@ If the module you are depending on has variants, to depend upon a specific varia
 you may affix the variant with `:<variant_name>`.
 
 ####Example
+
 ```bp
 bob_genrule {
     name: "use_target_specific_library_new",
@@ -83,17 +85,18 @@ bob_genrule {
 ```
 
 ### **bob_genrule.cmd** (required)
+
 The command that is to be run for this module. bob_genrule supports various
 substitutions in the command, by using `${name_of_var}`. The
 available substitutions are:
 
- - `$(location)`: the path to the first entry in tools or tool_files.
- - `$(location <label>)`: the path to the tool, tool_file, or src with name `<label>`. Use `$(location)` if `<label>` refers to a rule that outputs exactly one file.
- - `$(in)`: one or more input files.
- - `$(out)`: a single output file.
- - `$(depfile)`: a file to which dependencies will be written, if the depfile property is set to true.
- - `$(genDir)`: the sandbox directory for this tool; contains `$(out)`.
- - `$$`: a literal $
+- `$(location)`: the path to the first entry in tools or tool_files.
+- `$(location <label>)`: the path to the tool, tool_file, or src with name `<label>`. Use `$(location)` if `<label>` refers to a rule that outputs exactly one file.
+- `$(in)`: one or more input files.
+- `$(out)`: a single output file.
+- `$(depfile)`: a file to which dependencies will be written, if the depfile property is set to true.
+- `$(genDir)`: the sandbox directory for this tool; contains `$(out)`.
+- `$$`: a literal $
 
 ## Transition from `bob_generate_sources` to `bob_genrule` guide
 
@@ -111,6 +114,7 @@ The available substitutions is lower and some names have changed. You must remov
 inside of your old rule that relies on substitutions no longer available.
 
 ### Examples
+
 Below are some examples pairing old rules with their new counterpart.
 
 ```bp

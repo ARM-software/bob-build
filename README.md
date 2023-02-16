@@ -11,8 +11,8 @@ This may cause existing builds to break.
 [aosp-bazel]: https://developers.googleblog.com/2020/11/welcome-android-open-source-project.html
 [bazel]: https://bazel.build/
 
-Bob Build System
-================
+# Bob Build System
+
 [![CI](https://github.com/ARM-software/bob-build/workflows/CI/badge.svg)](https://github.com/ARM-software/bob-build/actions)
 
 ## Introduction
@@ -34,10 +34,11 @@ do the heavy lifting. As such it has similarities with
 ## Requirements
 
 To use Bob you will need:
--  golang (>=1.11)
--  ninja-build (>=1.8)
--  python3 (>=3.6)
--  python3-ply
+
+- golang (>=1.11)
+- ninja-build (>=1.8)
+- python3 (>=3.6)
+- python3-ply
 
 ## License
 
@@ -134,24 +135,29 @@ bob/scripts/setup_workspace_for_bob.bash
 ```
 
 ## Bazel
+
 Bob has the minimal support for building with Bazel via Gazelle.
 
 To build Bob:
+
 ```sh
 bazelisk build //...
 ```
 
 To run the Go unit tests:
+
 ```sh
 bazelisk test //...
 ```
 
 To update build files:
+
 ```sh
 bazelisk run //:gazelle
 ```
 
 To update `deps.bzl`:
+
 ```sh
 bazelisk run //:gazelle-update-repos
 ```

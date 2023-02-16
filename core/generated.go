@@ -59,7 +59,7 @@ type inout struct {
 
 // Add a prefix to all output paths
 func prefixInoutsWithOutputDir(inouts []inout, dir string) {
-	for i, _ := range inouts {
+	for i := range inouts {
 		inouts[i].out = utils.PrefixDirs(inouts[i].out, dir)
 		inouts[i].implicitOuts = utils.PrefixDirs(inouts[i].implicitOuts, dir)
 		if inouts[i].depfile != "" {
@@ -156,7 +156,9 @@ type generateCommon struct {
 	}
 }
 
-/* We are swapping from bob_generate_source to bob_genrule
+/*
+	We are swapping from bob_generate_source to bob_genrule
+
 bob_genrule is made to be a stricter version that is compatible with Android.
 For easiest compatibility, we are using Androids format for genrule.
 Some properties in the struct may not be useful, but it is better to expose as many
@@ -313,8 +315,8 @@ func (m *generateCommon) getSourceProperties() *SourceProps {
 
 // {{match_srcs}} template is only applied in specific properties where we've
 // seen sensible use-cases and for `generateCommon` these are:
-//  - Args
-//  - Cmd
+//   - Args
+//   - Cmd
 func (m *generateCommon) getMatchSourcePropNames() []string {
 	return []string{"Cmd", "Args"}
 }
@@ -951,7 +953,7 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 					removeList = append(removeList, s)
 				}
 			}
-			for i, _ := range removeList {
+			for i := range removeList {
 				agsc.Properties.Srcs = append(agsc.Properties.Srcs[:i], agsc.Properties.Srcs[i+1:]...)
 			}
 		}
@@ -974,7 +976,7 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 				}
 			}
 		}
-		for i, _ := range removeList {
+		for i := range removeList {
 			agsc.Properties.Tools = append(agsc.Properties.Tools[:i], agsc.Properties.Tools[i+1:]...)
 		}
 	}

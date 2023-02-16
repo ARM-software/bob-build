@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019, 2022 Arm Limited.
+# Copyright 2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,14 +33,26 @@ root_logger.addHandler(counter)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('config',
-                        help="Path to the configuration file (*.config)")
-    parser.add_argument('-d', '--database', default="Mconfig",
-                        help='Path to the configuration database (Mconfig)')
-    parser.add_argument('--ignore-missing', action='store_true', default=False,
-                        help="Ignore missing database files included with 'source'")
-    parser.add_argument('-j', '--json', metavar="OUT", required=True,
-                        help="Write JSON configuration file")
+    parser.add_argument("config", help="Path to the configuration file (*.config)")
+    parser.add_argument(
+        "-d",
+        "--database",
+        default="Mconfig",
+        help="Path to the configuration database (Mconfig)",
+    )
+    parser.add_argument(
+        "--ignore-missing",
+        action="store_true",
+        default=False,
+        help="Ignore missing database files included with 'source'",
+    )
+    parser.add_argument(
+        "-j",
+        "--json",
+        metavar="OUT",
+        required=True,
+        help="Write JSON configuration file",
+    )
     return parser.parse_args()
 
 

@@ -1,5 +1,4 @@
-Features
-========
+# Features
 
 The feature system allows for the possibility of changing aspects of the build
 depending on the configuration.
@@ -53,9 +52,11 @@ bob_static_library {
     src: ["src/foo.cpp"],
 }
 ```
+
 So if `debug` is enabled we will have `cflags = ["-pthread", "-DUI_DEBUG"]`
 
 ## Limitations
+
 The feature system only supports a single level of features, and no boolean
 operations (so no way to say `!release` or `debug && instrumentation`). If these
 are required, then a new config option should be added to calculate this.
@@ -69,6 +70,7 @@ value is a [boolean](config_system.md#booleans) property - here, if
 the choice is `RED`, the file `src/red_support.cpp` is compiled.
 
 config file:
+
 ```
 choice
 	prompt "Favourite color"
@@ -83,6 +85,7 @@ endchoice
 ```
 
 .bp file:
+
 ```bp
 bob_static_library {
     name: "libColor",

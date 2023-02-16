@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2019, 2022 Arm Limited.
+# Copyright 2018-2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,8 +36,8 @@ def get_include_statements(fname):
     # characters, so force utf-8.
     # This should only affect comments.
     with open(fname, "rb") as fp:
-        content = fp.read().decode('utf-8')
-        lines = content.split('\n')
+        content = fp.read().decode("utf-8")
+        lines = content.split("\n")
 
     ret = []
     for line in lines:
@@ -91,7 +91,9 @@ def parse_args():
     ap.add_argument("--include", "-i", metavar="FILE", action="append", default=[])
     ap.add_argument("--target-dir", "-t", metavar="DIR", required=True)
     ap.add_argument("--target-name", "-n", metavar="NAME", required=True)
-    ap.add_argument("--include-dir", "-I", metavar="INCLUDE_DIR", action="append", default=[])
+    ap.add_argument(
+        "--include-dir", "-I", metavar="INCLUDE_DIR", action="append", default=[]
+    )
     ap.add_argument("source", nargs="+")
     return ap.parse_args()
 
@@ -128,7 +130,7 @@ def copy_with_deps(src, dest, search_path, includes):
 
 
 def main():
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
 
     args = parse_args()
 

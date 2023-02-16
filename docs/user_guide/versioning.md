@@ -1,5 +1,4 @@
-Shared Library Versioning
-=========================
+# Shared Library Versioning
 
 When the API of a shared library changes in a backwards incompatible
 way, it is useful to be have both versions of the library installed on
@@ -36,14 +35,14 @@ with the same MAJOR.
 
 Examples:
 
-|Version|Description|
-|---|---|
-|1.0.0|First production release|
-|1.0.1|Bugfix release|
-|1.1.0-alpha|New functionality added (compared to 1.0.0), early test|
-|1.1.0-rc3|New functionality added (compared to 1.0.0), 3rd release candidate|
-|1.1.0|Production release, new functionality compared to 1.0.0|
-|2.0.0|Production release, incompatible with 1.x series|
+| Version     | Description                                                        |
+| ----------- | ------------------------------------------------------------------ |
+| 1.0.0       | First production release                                           |
+| 1.0.1       | Bugfix release                                                     |
+| 1.1.0-alpha | New functionality added (compared to 1.0.0), early test            |
+| 1.1.0-rc3   | New functionality added (compared to 1.0.0), 3rd release candidate |
+| 1.1.0       | Production release, new functionality compared to 1.0.0            |
+| 2.0.0       | Production release, incompatible with 1.x series                   |
 
 ```
 bob_shared_library {

@@ -31,11 +31,12 @@ logger = logging.getLogger(__name__)
 kernel_search_paths = [
     "{kdir}/arch/{arch}/include",
     "{kdir}/arch/{arch}/include/generated",
-    "{kdir}/arch/{arch}/include/generated", "uapi",
+    "{kdir}/arch/{arch}/include/generated",
+    "uapi",
     "{kdir}/arch/{arch}/include/uapi",
     "{kdir}/include",
     "{kdir}/include/generated/uapi",
-    "{kdir}/include/uapi"
+    "{kdir}/include/uapi",
 ]
 
 
@@ -60,11 +61,13 @@ def check_kbuild_option_conflicts(kdir, option, value):
     causing conflicts by overriding them in EXTRA_CFLAGS
     :return: Zero(0) if there is no conflict, one(1) otherwise
     """
-    message = "Overridden '{0}' option in EXTRA_CFLAGS. " \
-              "Bob was asked to set the kernel option '{0}={1}', " \
-              "which is already present in the kernel's config. " \
-              "Please disable this option in the kernel " \
-              "or disable out-of-tree kernel module builds in Bob to continue."
+    message = (
+        "Overridden '{0}' option in EXTRA_CFLAGS. "
+        "Bob was asked to set the kernel option '{0}={1}', "
+        "which is already present in the kernel's config. "
+        "Please disable this option in the kernel "
+        "or disable out-of-tree kernel module builds in Bob to continue."
+    )
 
     # There are few cases when Bob is allowed to override a kernel option:
     #
@@ -78,7 +81,9 @@ def check_kbuild_option_conflicts(kdir, option, value):
     k_option_val = kernel_config_parser.get_value(kdir, option)
 
     if k_option_val:
-        if not (k_option_val == value) and not (k_option_val == 'n' and value in ['y', 'm']):
+        if not (k_option_val == value) and not (
+            k_option_val == "n" and value in ["y", "m"]
+        ):
             logger.error(message.format(option, value))
             return 1
 
@@ -86,9 +91,9 @@ def check_kbuild_option_conflicts(kdir, option, value):
 
 
 def kbuild_to_cflag(option, value):
-    if value in ['m', 'y']:
+    if value in ["m", "y"]:
         cflag = str.format("-D{}=1", option)
-    elif value == 'n':
+    elif value == "n":
         cflag = str.format("-U{}", option)
     elif value.isdigit():
         cflag = str.format("-D{}={}", option, value)
@@ -100,7 +105,9 @@ def kbuild_to_cflag(option, value):
     return cflag
 
 
-def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_args, extra_cflags):
+def build_module(
+    output_dir, module_ko, kdir, module_dir, make_command, make_args, extra_cflags
+):
     """
     Invoke an out of tree kernel build.
     """
@@ -111,8 +118,15 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
     # Sanitize the environment - we should only use build options passed in via
     # the command line.
     env = dict(os.environ)
-    for var in ["ARCH", "CROSS_COMPILE", "CC", "HOSTCC",
-                "CLANG_TRIPLE", "KBUILD_EXTRA_SYMBOLS", "LD"]:
+    for var in [
+        "ARCH",
+        "CROSS_COMPILE",
+        "CC",
+        "HOSTCC",
+        "CLANG_TRIPLE",
+        "KBUILD_EXTRA_SYMBOLS",
+        "LD",
+    ]:
         env.pop(var, None)
 
     try:
@@ -130,9 +144,11 @@ def build_module(output_dir, module_ko, kdir, module_dir, make_command, make_arg
                 abs_built_file = os.path.join(module_dir, built_file)
                 shutil.copy(abs_built_file, output_dir)
         except (OSError, IOError) as e:
-            msg = "Copy file from input path: {}\n" \
-                  "to output path: {}\n" \
-                  "finished with error: {}"
+            msg = (
+                "Copy file from input path: {}\n"
+                "to output path: {}\n"
+                "finished with error: {}"
+            )
             logger.error(msg.format(abs_built_file, output_dir, e))
             sys.exit(1)
 
@@ -172,16 +188,24 @@ def parse_output_list(parser, outputs):
     for output in outputs:
         if os.path.basename(output) == "Module.symvers":
             if module_symvers:
-                parser.error("Module.symvers specified multiple times: {} and {}".format(
-                             module_symvers, output))
+                parser.error(
+                    "Module.symvers specified multiple times: {} and {}".format(
+                        module_symvers, output
+                    )
+                )
             module_symvers = output
         elif os.path.splitext(output)[1] == ".ko":
             if module_output:
-                parser.error(".ko output specified multiple times: {} and {}".format(
-                             module_output, output))
+                parser.error(
+                    ".ko output specified multiple times: {} and {}".format(
+                        module_output, output
+                    )
+                )
             module_output = output
         else:
-            parser.error("Unknown output file type: {}".format(os.path.basename(output)))
+            parser.error(
+                "Unknown output file type: {}".format(os.path.basename(output))
+            )
 
     if not module_output:
         parser.error("No .ko output file specified")
@@ -190,49 +214,85 @@ def parse_output_list(parser, outputs):
 
 
 def parse_args():
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
 
-    cli_description = "Encapsulate an out-of-tree kernel module build, " \
-                      "where the build does not modify the source directory"
+    cli_description = (
+        "Encapsulate an out-of-tree kernel module build, "
+        "where the build does not modify the source directory"
+    )
     parser = argparse.ArgumentParser(description=cli_description)
-    parser.add_argument("--output", "-o", required=True, nargs="+",
-                        help="Kernel module to build (including output path)")
-    parser.add_argument("--sources", "-s", metavar="FILE", nargs="+", required=True,
-                        help="Kernel module source files")
-    parser.add_argument("--depfile", "-d", metavar="DEPFILE", required=True,
-                        help="Dependency file to generate")
-    parser.add_argument("--common-root", "-r", required=True,
-                        help="Common root directory that can be stripped from source paths")
-    parser.add_argument("--module-dir", "-m",
-                        help="Module output directory in kernel build")
-    parser.add_argument("--jobs", "-j", metavar="N", default=None, type=int,
-                        help="Allow N jobs at once")
-    parser.add_argument("--make-command", "-M", default="make",
-                        help="Path to `make` command")
+    parser.add_argument(
+        "--output",
+        "-o",
+        required=True,
+        nargs="+",
+        help="Kernel module to build (including output path)",
+    )
+    parser.add_argument(
+        "--sources",
+        "-s",
+        metavar="FILE",
+        nargs="+",
+        required=True,
+        help="Kernel module source files",
+    )
+    parser.add_argument(
+        "--depfile",
+        "-d",
+        metavar="DEPFILE",
+        required=True,
+        help="Dependency file to generate",
+    )
+    parser.add_argument(
+        "--common-root",
+        "-r",
+        required=True,
+        help="Common root directory that can be stripped from source paths",
+    )
+    parser.add_argument(
+        "--module-dir", "-m", help="Module output directory in kernel build"
+    )
+    parser.add_argument(
+        "--jobs", "-j", metavar="N", default=None, type=int, help="Allow N jobs at once"
+    )
+    parser.add_argument(
+        "--make-command", "-M", default="make", help="Path to `make` command"
+    )
 
     group = parser.add_argument_group("Kernel options")
-    group.add_argument("--kernel", "-k", metavar="KDIR", required=True,
-                       help="Kernel directory")
-    group.add_argument("--cc", default=None,
-                       help="Target C compiler")
-    group.add_argument("--hostcc", default=None,
-                       help="Host C compiler")
-    group.add_argument("--cross-compile", default=None,
-                       help="Kernel CROSS_COMPILE")
-    group.add_argument("--clang-triple", default=None,
-                       help="Kernel CLANG_TRIPLE")
-    group.add_argument("--ld", default=None,
-                       help="Kernel LD")
-    group.add_argument("--kbuild-options", nargs="+", default=[],
-                       help="Kernel config options to enable, that get added to EXTRA_CFLAGS too")
-    group.add_argument("--extra-cflags", default="",
-                       help="Options to add to EXTRA_CFLAGS as a string")
-    group.add_argument("make_args", nargs=argparse.REMAINDER, default=[],
-                       help="Make variables to be set")
+    group.add_argument(
+        "--kernel", "-k", metavar="KDIR", required=True, help="Kernel directory"
+    )
+    group.add_argument("--cc", default=None, help="Target C compiler")
+    group.add_argument("--hostcc", default=None, help="Host C compiler")
+    group.add_argument("--cross-compile", default=None, help="Kernel CROSS_COMPILE")
+    group.add_argument("--clang-triple", default=None, help="Kernel CLANG_TRIPLE")
+    group.add_argument("--ld", default=None, help="Kernel LD")
+    group.add_argument(
+        "--kbuild-options",
+        nargs="+",
+        default=[],
+        help="Kernel config options to enable, that get added to EXTRA_CFLAGS too",
+    )
+    group.add_argument(
+        "--extra-cflags", default="", help="Options to add to EXTRA_CFLAGS as a string"
+    )
+    group.add_argument(
+        "make_args",
+        nargs=argparse.REMAINDER,
+        default=[],
+        help="Make variables to be set",
+    )
 
     group = parser.add_argument_group("Dependency checking")
-    group.add_argument("--include-dir", "-I", metavar="INCLUDE_DIR", action="append", default=[],
-                       help="Include file search path")
+    group.add_argument(
+        "--include-dir",
+        "-I",
+        metavar="INCLUDE_DIR",
+        action="append",
+        default=[],
+        help="Include file search path",
+    )
 
     args = parser.parse_args()
 
@@ -248,7 +308,6 @@ def main():
     # The build is run in $KDIR, rather than the usual build workdir, so
     # parameters need to be absolute so they are accessible with a different CWD.
     output_dir = os.path.dirname(args.output)
-    abs_output_dir = os.path.abspath(output_dir)
     abs_kdir = os.path.abspath(args.kernel)
     search_path = [os.path.abspath(d) for d in args.include_dir]
 
@@ -274,8 +333,9 @@ def main():
 
     # Prepend EXTRA_CFLAGS with modified include paths
     includes = ["-I" + s for s in search_path]
-    extra_cflags = " ".join(includes) + " " + args.extra_cflags + " " + \
-                   " ".join(kbuild_cflags)
+    extra_cflags = (
+        " ".join(includes) + " " + args.extra_cflags + " " + " ".join(kbuild_cflags)
+    )
 
     # If autoconf.h is older than kernel config, the kernel needs to be rebuilt
     # to update this file.
@@ -292,7 +352,9 @@ def main():
     deps = []
 
     # Add commonly needed search paths for copy_with_deps
-    search_path.extend([str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths])
+    search_path.extend(
+        [str.format(d, kdir=abs_kdir, arch=arch) for d in kernel_search_paths]
+    )
     kconfig = os.path.join("linux", "kconfig.h")
     root = os.path.abspath(args.common_root)
     for src in args.module_sources:
@@ -351,8 +413,15 @@ def main():
 
     module_ko = os.path.basename(args.output)
     abs_module_dir = os.path.abspath(args.module_dir)
-    build_module(output_dir, module_ko, abs_kdir, abs_module_dir,
-                 make_command, make_args, extra_cflags)
+    build_module(
+        output_dir,
+        module_ko,
+        abs_kdir,
+        abs_module_dir,
+        make_command,
+        make_args,
+        extra_cflags,
+    )
 
 
 if __name__ == "__main__":

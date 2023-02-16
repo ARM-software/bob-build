@@ -1,5 +1,4 @@
-Module: bob_generate_shared_library, bob_generate_static_library, bob_generate_binary
-========================================================================================
+# Module: bob_generate_shared_library, bob_generate_static_library, bob_generate_binary
 
 This target generates a shared library, a static library, or a binary
 using a custom command instead of via the default compiler and linker.
@@ -75,19 +74,22 @@ bob_generate_shared_library {
 }
 ```
 
-----
-### **bob_generate_*.implicit_srcs** (optional)
+---
+
+### **bob*generate*\*.implicit_srcs** (optional)
 
 List of implicit sources. Implicit sources are input files that do not get
 mentioned on the command line, and are not specified in the explicit sources.
 
-----
-### **bob_generate_*.exclude_implicit_srcs** (optional)
+---
+
+### **bob*generate*\*.exclude_implicit_srcs** (optional)
 
 Used in combination with glob patterns in `implicit_srcs` to exclude
 files that are not sources.
 
-----
-### **bob_generate_*.headers** (optional)
+---
+
+### **bob*generate*\*.headers** (optional)
 
 List of headers that are created (if any).

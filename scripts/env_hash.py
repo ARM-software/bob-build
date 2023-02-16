@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,6 @@ def hash_env():
     relevant_env = [
         "LD_LIBRARY_PATH",
         "PATH",
-
         # bob-build
         "BOB_ALWAYS_LINK_SHARED_LIBS",
         "BOB_BOOTSTRAP_VERSION",
@@ -59,7 +58,6 @@ def hash_env():
         "SRCDIR",
         "TOPNAME",
         "WORKDIR",
-
         # go
         "GO386",
         "GOARCH",
@@ -68,7 +66,6 @@ def hash_env():
         "GOMIPS",
         "GOPATH",
         "GOROOT",
-
         # gcc
         "C_INCLUDE_PATH",
         "COMPILER_PATH",
@@ -81,11 +78,9 @@ def hash_env():
         "OBJC_INCLUDE_PATH",
         "SOURCE_DATE_EPOCH",
         "SUNPRO_DEPENDENCIES",
-
         # clang
         "MACOSX_DEPLOYMENT_TARGET",
         "OBJCPLUS_INCLUDE_PATH",
-
         # armclang
         "ARM_PRODUCT_PATH",
         "ARM_TOOL_VARIANT",
@@ -93,7 +88,7 @@ def hash_env():
         "ARMCOMPILER6_CLANGOPT",
         "ARMCOMPILER6_FROMELFOPT",
         "ARMCOMPILER6_LINKOPT",
-        "ARMROOT"
+        "ARMROOT",
     ]
 
     m = hashlib.sha256()
@@ -102,9 +97,9 @@ def hash_env():
             val = os.environ[k]
             # When Python 2 is used make sure that utf-8 encoding
             # is used to prevent non-ASCII errors
-            if hasattr(os.environ[k], 'decode'):
-                val = val.decode('utf-8')
-            m.update(u"{}={}\n".format(k, val).encode('utf-8'))
+            if hasattr(os.environ[k], "decode"):
+                val = val.decode("utf-8")
+            m.update("{}={}\n".format(k, val).encode("utf-8"))
     return m.hexdigest()
 
 
@@ -122,21 +117,21 @@ def test_hash_env_relevant():
 
     # PATH is one of the option that bob cares about
     if "PATH" in os.environ.keys():
-        old_path_env = os.environ['PATH']
+        old_path_env = os.environ["PATH"]
     else:
         no_path_env = True
 
     # change PATH
-    os.environ['PATH'] = "/new/fake/bob/directory"
+    os.environ["PATH"] = "/new/fake/bob/directory"
 
     # hash should change
     assert org_hash != hash_env()
 
     # restore previous state and check hash
     if no_path_env:
-        del os.environ['PATH']
+        del os.environ["PATH"]
     else:
-        os.environ['PATH'] = old_path_env
+        os.environ["PATH"] = old_path_env
 
     # hash should be the same again
     assert org_hash == hash_env()
@@ -147,7 +142,7 @@ def test_hash_env_irrelevant():
     org_hash = hash_env()
 
     # set FAKE_ENV environment option which should not change the hash
-    os.environ['FAKE_ENV'] = "/fake/environment/set"
+    os.environ["FAKE_ENV"] = "/fake/environment/set"
 
     # hash should not change
     assert org_hash == hash_env()
@@ -155,8 +150,9 @@ def test_hash_env_irrelevant():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("output",
-                        help="Output file to write containing environment hash")
+    parser.add_argument(
+        "output", help="Output file to write containing environment hash"
+    )
     args = parser.parse_args()
 
     write_env_hash(args.output)

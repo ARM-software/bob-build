@@ -1,5 +1,4 @@
-Build Output
-============
+# Build Output
 
 The layout of the build tree is arranged so that the compilation for
 each module is independent. In general it's not necessary to know the

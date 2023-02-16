@@ -30,7 +30,7 @@ option_config = [
     (
         "other_relative_path",
         "external/crypto/tool",
-    )
+    ),
 ]
 
 
@@ -54,8 +54,11 @@ def test_option_config_relPath(capfd, monkeypatch, tmp_path, relativePath, submo
     should be "relativePath/submodule".
     """
 
-    input_json = f"{{\"root_path\": \"{tmp_path}\",\"rel_package_path\": \"{relativePath}\"," + \
-        f"\"file_name\": \"Mconfig\"}}"
+    # fmt: off
+    input_json = (
+        f'{{"root_path": "{tmp_path}","rel_package_path": "{relativePath}","file_name": "Mconfig"}}'
+    )
+    # fmt: on
 
     monkeypatch.setattr("sys.stdin", io.StringIO(input_json))
 

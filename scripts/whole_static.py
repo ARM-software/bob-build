@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019, 2022 Arm Limited.
+# Copyright 2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,8 +95,8 @@ def main():
             os.remove(args.out)
         except OSError as e:
             sys.stderr.write(
-                "Error: Couldn't remove file '%s': %s\n",
-                args.out, e.strerror)
+                "Error: Couldn't remove file '%s': %s\n", args.out, e.strerror
+            )
             sys.exit(1)
 
     for i in args.inputs:
@@ -106,13 +106,13 @@ def main():
         elif ext == ".a":
             archives.append(i)
         else:
-            sys.stderr.write(
-                "Error: %s is not an object file or archive.\n" % i)
+            sys.stderr.write("Error: %s is not an object file or archive.\n" % i)
             sys.exit(1)
 
     args_out_dirname, args_out_basename = os.path.split(args.out)
-    tmpdir = tempfile.mkdtemp(dir=args_out_dirname, prefix=args_out_basename + ".",
-                              suffix=".tmp.d")
+    tmpdir = tempfile.mkdtemp(
+        dir=args_out_dirname, prefix=args_out_basename + ".", suffix=".tmp.d"
+    )
 
     try:
         extracted_objects = extract_archives(args.ar, tmpdir, archives)
@@ -127,8 +127,8 @@ def main():
         sys.exit(e.returncode)
     except OSError as e:
         sys.stderr.write(
-                "Error: Couldn't execute command '%s': %s\n" %
-                (' '.join(cmd), e.strerror))
+            "Error: Couldn't execute command '%s': %s\n" % (" ".join(cmd), e.strerror)
+        )
         sys.exit(1)
     finally:
         shutil.rmtree(tmpdir)

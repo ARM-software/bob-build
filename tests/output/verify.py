@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019, 2022 Arm Limited.
+# Copyright 2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,24 +20,24 @@ import sys
 import os
 import platform
 
-parser = argparse.ArgumentParser(description='Test generator.')
-parser.add_argument('--out')
-parser.add_argument('--expected')
+parser = argparse.ArgumentParser(description="Test generator.")
+parser.add_argument("--out")
+parser.add_argument("--expected")
 group = parser.add_mutually_exclusive_group()
-group.add_argument('--shared', help='use .so or .dylib extension', action='store_true')
-group.add_argument('--static', help='use .a extension', action='store_true')
+group.add_argument("--shared", help="use .so or .dylib extension", action="store_true")
+group.add_argument("--static", help="use .a extension", action="store_true")
 
 args = parser.parse_args()
 
 if args.shared:
-    if platform.system() == 'Darwin':
-        extension = '.dylib'
+    if platform.system() == "Darwin":
+        extension = ".dylib"
     else:
-        extension = '.so'
+        extension = ".so"
 elif args.static:
-    extension = '.a'
+    extension = ".a"
 else:
-    extension = ''
+    extension = ""
 
 expected = args.expected + extension
 

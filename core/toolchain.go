@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -224,8 +224,9 @@ func getFileNameDir(tc toolchain, basename string) (dirs []string) {
 
 // Type for caching the supported flags of a compiler
 // Cache maps flags+compiler+language to an boolean:
-//    false - not supported
-//    true  - supported
+//
+//	false - not supported
+//	true  - supported
 type flagSupportedCache struct {
 	m    map[string]bool
 	lock sync.RWMutex

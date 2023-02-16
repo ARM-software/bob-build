@@ -1,9 +1,9 @@
-Module: bob_shared_library
-==========================
+# Module: bob_shared_library
 
 Used to create a shared library i.e. `.so` file.
 
 ## Full specification of `bob_shared_library` properties
+
 `bob_shared_library` supports [features](../features.md)
 
 Most properties are optional. For detailed documentation
@@ -80,7 +80,8 @@ bob_shared_library {
 }
 ```
 
-----
+---
+
 ### **bob_shared_library.whole_static_libs** (optional)
 
 Static libraries linked with a shared library using `whole_static_libs` will be

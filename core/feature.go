@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, 2021 Arm Limited.
+ * Copyright 2018-2019, 2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,11 +66,13 @@ func typesOf(list ...interface{}) []reflect.Type {
 // decide what properties can be set inside features in each module type.
 //
 // An example generated type:
-// type BlueprintEmbedType struct {
-//         Debug PropsType
-//         Enable_something PropsType
-//         Some_other_feature PropsType
-// }
+//
+//	type BlueprintEmbedType struct {
+//	        Debug PropsType
+//	        Enable_something PropsType
+//	        Some_other_feature PropsType
+//	}
+//
 // Name of each property in this struct is custom feature name.
 // Blueprint will inflate this structure with data read from .bp files.
 // Only exported properties can be set so property name MUST start from capital letter.
@@ -105,35 +107,40 @@ func (f *Features) Init(properties *configProperties, list ...interface{}) {
 // than Go composition of structs.
 //
 // Example (go composition):
-// type compositeStruct struct {
-//     testPropsGroupA
-//     testPropsGroupB
-// }
-// Debug print:
-// {
-//     testPropsGroupA: core.testPropsGroupA
-//     {
-//       Field_a: string
-//       Field_c: string
-//       Field_f: string
-//     }
-//     testPropsGroupB: core.testPropsGroupB
-//     {
-//       Field_b: string
-//     }
-// }
 //
-// Example for: coalesceTypes([]reflect.Type{
-//    testPropsGroupA{},
-//    testPropsGroupB{},
-// })
+//	type compositeStruct struct {
+//	    testPropsGroupA
+//	    testPropsGroupB
+//	}
+//
 // Debug print:
-// {
-//     Field_a: string
-//     Field_c: string
-//     Field_f: string
-//     Field_b: string
-// }
+//
+//	{
+//	    testPropsGroupA: core.testPropsGroupA
+//	    {
+//	      Field_a: string
+//	      Field_c: string
+//	      Field_f: string
+//	    }
+//	    testPropsGroupB: core.testPropsGroupB
+//	    {
+//	      Field_b: string
+//	    }
+//	}
+//
+//	Example for: coalesceTypes([]reflect.Type{
+//	   testPropsGroupA{},
+//	   testPropsGroupB{},
+//	})
+//
+// Debug print:
+//
+//	{
+//	    Field_a: string
+//	    Field_c: string
+//	    Field_f: string
+//	    Field_b: string
+//	}
 func coalesceTypes(list ...reflect.Type) reflect.Type {
 	if len(list) == 0 {
 		utils.Die("List can't be empty")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019, 2022 Arm Limited.
+# Copyright 2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ import mconfigfmt  # nopep8: E402 module level import not at top of file
 
 
 def run_test(name, expected_output):
-    """ Test function to verify difference between two file contents"""
+    """Test function to verify difference between two file contents"""
 
     passed = True
 
@@ -74,5 +74,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

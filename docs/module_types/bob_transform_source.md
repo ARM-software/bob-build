@@ -1,5 +1,4 @@
-Module: bob_transform_source
-============================
+# Module: bob_transform_source
 
 This target generates files via a custom shell command. This is usually source
 code (headers or C files), but it could be anything. A single module generates
@@ -17,6 +16,7 @@ will be relative to the source directory if not else noted.
 The module type is `bob_transform_source`.
 
 ## Full specification of `bob_transform_source` properties
+
 For general common properties please
 [check detailed documentation](common_module_properties.md).
 
@@ -70,21 +70,29 @@ bob_transform_source {
 }
 ```
 
-----
+---
+
 ### **bob_transform_source.out.match** (required)
+
 Regular expression to capture groups from srcs. There is support for catching groups.
 
-----
+---
+
 ### **bob_transform_source.out.replace** (required)
+
 Names of outputs, which can use capture groups from match.
 We can use catch groups e.g. `$1` for first group.
 
-----
+---
+
 ### **bob_transform_source.out.implicit_srcs** (optional)
+
 List of implicit sources. Implicit sources are input files that do not get mentioned on
 the command line and are not specified in the explicit sources.
 
-----
+---
+
 ### **bob_generate_source.out.implicit_outs** (optional)
+
 List of implicit outputs. Implicit outputs are output files that do not get mentioned on
 the command line, which can use capture groups from match.

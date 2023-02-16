@@ -1,5 +1,4 @@
-Android Specifics
-=================
+# Android Specifics
 
 There are a few properties that are specific to Android builds,
 that map to information that the Android build system wants.
@@ -22,8 +21,7 @@ minimal. Notably, if something links against a forwarding library,
 the resultant binary will have `DT_NEEDED` symbols propagated from all
 shared libraries it links against.
 
-Android.bp Backend Install Paths
-===
+# Android.bp Backend Install Paths
 
 Soong restricts the install locations of its module types. In addition,
 use of the system and vendor partitions is controlled via the
@@ -33,14 +31,14 @@ The Android.bp backend will recognize the identifiers below at the
 beginning of the install path. The first three are chosen to agree
 with what might be used in the Linux backend, to simplify configuration.
 
-| Identifier | Description |
-| --- | --- |
-| `bin` | Executables to be installed in `<partition>/bin` |
-| `lib` | Shared libraries to be installed in `<partition>/lib` |
-| `etc` | Configuration to be installed in `<partition>/etc` |
-| `firmware` | Firmware to be installed in `<partition>/etc/firmware` |
-| `data` | Resources to be installed in `data` |
-| `tests` | Test executables will be installed in an appropriate directory[1] |
+| Identifier | Description                                                       |
+| ---------- | ----------------------------------------------------------------- |
+| `bin`      | Executables to be installed in `<partition>/bin`                  |
+| `lib`      | Shared libraries to be installed in `<partition>/lib`             |
+| `etc`      | Configuration to be installed in `<partition>/etc`                |
+| `firmware` | Firmware to be installed in `<partition>/etc/firmware`            |
+| `data`     | Resources to be installed in `data`                               |
+| `tests`    | Test executables will be installed in an appropriate directory[1] |
 
 [1] Ideally `tests` should be installed in `testcases`, which is not
 in any of the Android images. This is not currently possible, so they
@@ -49,8 +47,7 @@ that tests are not flashed to the board, and they are copied to the
 board when you want to run them. Please avoid relying on tests being
 in the userdata image.
 
-Android.mk Transition Support
-===
+# Android.mk Transition Support
 
 Bob contains support to translate Android.mk install paths (using
 Android make variables) to Android.bp backend install paths. This is

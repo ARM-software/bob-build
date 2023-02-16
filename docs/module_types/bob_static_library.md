@@ -1,14 +1,13 @@
-Module: bob_static_lib
-======================
+# Module: bob_static_lib
 
 Used to create a static library, i.e. `.a` file.
 
 ## Static library dependencies
 
 Static libraries may depend on functionality in other static libraries
-(e.g. if `libA` calls function `b()` in `libB`, `libA` *depends on* `libB`).
+(e.g. if `libA` calls function `b()` in `libB`, `libA` _depends on_ `libB`).
 Dependencies add restrictions on order the static libraries must appear in the
-linker command-line - in this example, `libA` must appear *before* `libB`.
+linker command-line - in this example, `libA` must appear _before_ `libB`.
 
 With shared libraries, this is handled automatically by the linker, because
 dependencies can be encoded in the shared library file itself. However,
@@ -21,6 +20,7 @@ the link commands of binaries and shared libraries that use the static library.
 `whole_static_libs` can also be used to aggregate static libraries.
 
 ## Full specification of `bob_static_library` properties
+
 `bob_static_library` supports [features](../features.md)
 
 Most properties are optional. For detailed documentation
@@ -91,12 +91,16 @@ bob_static_library {
 }
 ```
 
-----
+---
+
 ### **bob_module.export_ldflags** (optional)
+
 Linker flags to be propagated to the top-level shared library or binary.
 
-----
+---
+
 ### **bob_static_lib.static_libs** (optional)
+
 Static libraries can use the `static_libs` property to tell Bob about any other
 static libraries they depend on. Bob ensures that all static libraries are
 placed earlier in the link order than their dependents. The earlier example
@@ -123,7 +127,8 @@ bob_binary {
 The link command for `binary_using_libA` would contain `libA` first, then
 `libB`.
 
-----
+---
+
 ### **bob_static_lib.whole_static_libs** (optional)
 
 The `whole_static_libs` property allows a library to completely include the
@@ -137,17 +142,19 @@ bob_static_library {
 }
 ```
 
-...then `libA.a` would contain *two* object files - `a.o` and `b.o`. The link
-command for `binary_using_libA` would then *only* mention `libA`.
+...then `libA.a` would contain _two_ object files - `a.o` and `b.o`. The link
+command for `binary_using_libA` would then _only_ mention `libA`.
 
 #### Circular dependencies
+
 The main reason for a 'parent' library to use `whole_static_libs` is circular
 dependencies.
 
 Suppose something inside `libB` now calls function `a()` in `libA`. The link
 order needs to be such that:
- - `libA` is before `libB`, because `libA` requires function `b()`, AND:
- - `libB` is before `libA`, because `libB` requires function `a()`.
+
+- `libA` is before `libB`, because `libA` requires function `b()`, AND:
+- `libB` is before `libA`, because `libB` requires function `a()`.
 
 This is clearly impossible. The situation can be resolved by creating a new
 static library, which can hold the contents of `libA` and `libB`
@@ -161,15 +168,18 @@ bob_static_library {
 }
 ```
 
-----
+---
+
 ### **bob_static_lib.shared_libs** (optional)
+
 The libraries mentioned here will be appended to `shared_libs` of the top-level
 build object (shared library or binary) linking with this module.
 `shared_libs` is an indication that this module is using a shared
 library, and users of this module need to link it.
 
+---
 
-----
 ### **bob_static_lib.ldlibs** (optional)
+
 Library dependency-related linker flags which should be added to the link
 command of the top-level build object (shared library or binary).

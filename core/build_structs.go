@@ -403,15 +403,15 @@ const splitterMutatorName string = "bob_splitter"
 func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
-	hostVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
-	targetVariation := []blueprint.Variation{blueprint.Variation{Mutator: splitterMutatorName, Variation: string(tgtTypeTarget)}}
+	hostVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
+	targetVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(tgtTypeTarget)}}
 
 	for _, dep := range deps {
 		var variations []blueprint.Variation
 
 		idx := strings.LastIndex(dep, ":")
 		if idx > 0 {
-			variationNames := strings.Split(dep[idx+1:len(dep)], ",")
+			variationNames := strings.Split(dep[idx+1:], ",")
 			for _, vn := range variationNames {
 				if vn == "host" {
 					variations = append(variations, hostVariation...)
