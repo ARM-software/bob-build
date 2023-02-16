@@ -34,15 +34,14 @@ def config_to_json():
         value = c["value"]
 
         if datatype not in ["bool", "int", "string"]:
-            logger.error("Invalid config type: %s (with value '%s')\n" % (datatype, str(value)))
+            logger.error(
+                "Invalid config type: %s (with value '%s')\n" % (datatype, str(value))
+            )
 
         if datatype == "int":
             value = int(value)
 
-        properties[key] = {
-            "ignore": c["bob_ignore"] == 'y',
-            "value": value
-        }
+        properties[key] = {"ignore": c["bob_ignore"] == "y", "value": value}
 
     return properties
 

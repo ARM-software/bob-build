@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2021, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,12 @@ import logging
 import subprocess
 import re
 
-from config_system import get_config_bool, get_config_string, set_config, get_mconfig_dir
+from config_system import (
+    get_config_bool,
+    get_config_string,
+    set_config,
+    get_mconfig_dir,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +36,7 @@ def check_output(command, dir=None):
     The 'command' needs to be an array of arguments.
     """
 
-    output = ''
+    output = ""
     try:
         output = subprocess.check_output(command, cwd=dir).strip()
         output = output.decode(sys.getdefaultencoding())
@@ -52,57 +57,61 @@ def pkg_config():
     alphanumeric letters replaced by '_'.
     Where no package information exists the default configuration value will be used.
     """
-    if get_config_bool('PKG_CONFIG'):
-        cmd = [get_config_string('PKG_CONFIG_BINARY')]
-        pkg_config_flags = get_config_string('PKG_CONFIG_FLAGS')
+    if get_config_bool("PKG_CONFIG"):
+        cmd = [get_config_string("PKG_CONFIG_BINARY")]
+        pkg_config_flags = get_config_string("PKG_CONFIG_FLAGS")
         pkg_config_flags = pkg_config_flags.replace("%MCONFIGDIR%", get_mconfig_dir())
-        cmd.extend(pkg_config_flags.split(' '))
+        cmd.extend(pkg_config_flags.split(" "))
 
         # clean already existing env vars, as leaving them may be erroneous
-        for k in ('PKG_CONFIG_PATH', 'PKG_CONFIG_SYSROOT_DIR'):
+        for k in ("PKG_CONFIG_PATH", "PKG_CONFIG_SYSROOT_DIR"):
             if k in os.environ:
-                logger.warning("Environment variable %s is already defined. "
-                               "It will be ignored." % k)
+                logger.warning(
+                    "Environment variable %s is already defined. "
+                    "It will be ignored." % k
+                )
                 del os.environ[k]
 
-        pkg_config_path = get_config_string('PKG_CONFIG_PATH')
-        if pkg_config_path != '':
+        pkg_config_path = get_config_string("PKG_CONFIG_PATH")
+        if pkg_config_path != "":
             pkg_config_path = pkg_config_path.replace("%MCONFIGDIR%", get_mconfig_dir())
-            os.putenv('PKG_CONFIG_PATH', pkg_config_path)
+            os.putenv("PKG_CONFIG_PATH", pkg_config_path)
 
-        pkg_config_sys_root = get_config_string('PKG_CONFIG_SYSROOT_DIR')
-        if pkg_config_sys_root != '':
-            pkg_config_sys_root = pkg_config_sys_root.replace("%MCONFIGDIR%", get_mconfig_dir())
-            os.putenv('PKG_CONFIG_SYSROOT_DIR', pkg_config_sys_root)
+        pkg_config_sys_root = get_config_string("PKG_CONFIG_SYSROOT_DIR")
+        if pkg_config_sys_root != "":
+            pkg_config_sys_root = pkg_config_sys_root.replace(
+                "%MCONFIGDIR%", get_mconfig_dir()
+            )
+            os.putenv("PKG_CONFIG_SYSROOT_DIR", pkg_config_sys_root)
 
-        pkg_config_packages = get_config_string('PKG_CONFIG_PACKAGES')
+        pkg_config_packages = get_config_string("PKG_CONFIG_PACKAGES")
 
-        pkg_config_packages_list = pkg_config_packages.split(',')
+        pkg_config_packages_list = pkg_config_packages.split(",")
 
         for pkg in pkg_config_packages_list:
             pkg = pkg.strip()
-            if pkg == '':
+            if pkg == "":
                 continue
             # convert library name to upper case alpha numeric
-            pkg_uc_alnum = re.sub('[^a-zA-Z0-9_]', '_', pkg.upper())
+            pkg_uc_alnum = re.sub("[^a-zA-Z0-9_]", "_", pkg.upper())
 
-            pkg_config_cflags = "%s%s" % (pkg_uc_alnum, '_CFLAGS')
-            pkg_config_ldflags = "%s%s" % (pkg_uc_alnum, '_LDFLAGS')
-            pkg_config_libs = "%s%s" % (pkg_uc_alnum, '_LDLIBS')
+            pkg_config_cflags = "%s%s" % (pkg_uc_alnum, "_CFLAGS")
+            pkg_config_ldflags = "%s%s" % (pkg_uc_alnum, "_LDFLAGS")
+            pkg_config_libs = "%s%s" % (pkg_uc_alnum, "_LDLIBS")
 
-            cflags = check_output(cmd + [pkg, '--cflags'])
-            if cflags != '':
+            cflags = check_output(cmd + [pkg, "--cflags"])
+            if cflags != "":
                 set_config(pkg_config_cflags, cflags)
 
-            ldflags = check_output(cmd + [pkg, '--libs-only-L'])
-            if ldflags != '':
+            ldflags = check_output(cmd + [pkg, "--libs-only-L"])
+            if ldflags != "":
                 set_config(pkg_config_ldflags, ldflags)
 
-            libs = check_output(cmd + [pkg, '--libs-only-l'])
-            if libs != '':
+            libs = check_output(cmd + [pkg, "--libs-only-l"])
+            if libs != "":
                 set_config(pkg_config_libs, libs)
 
 
 def plugin_exec():
-    if get_config_bool('ALLOW_HOST_EXPLORE'):
+    if get_config_bool("ALLOW_HOST_EXPLORE"):
         pkg_config()

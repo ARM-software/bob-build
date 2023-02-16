@@ -1,5 +1,4 @@
-Module: bob_install_group
-=========================
+# Module: bob_install_group
 
 This target is used to identify a common directory in which to
 copy outputs after the build completes.
@@ -18,12 +17,14 @@ bob_install_group {
 }
 ```
 
-----
+---
+
 ### **bob_install_group.name** (required)
 
 The unique identifier that can be used to refer to this module.
 
-----
+---
+
 ### **bob_install_group.install_path** (optional)
 
 Path to install output of aggregated targets.

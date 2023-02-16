@@ -1,5 +1,4 @@
-Build file format
-=================
+# Build file format
 
 The build files are very simple. There are no conditional or control
 flow statements.
@@ -76,11 +75,11 @@ formats.
 The type of a variable is determined by the assignment. The type of a
 property is determined by the module type.
 
-* Bool (`true` or `false`)
-* Integers
-* Strings (`"string"`)
-* Lists of strings(`["string1", "string2"]`)
-* Maps (`{ key1: "value1", key2: 10, key3: ["value3"] }`)
+- Bool (`true` or `false`)
+- Integers
+- Strings (`"string"`)
+- Lists of strings(`["string1", "string2"]`)
+- Maps (`{ key1: "value1", key2: 10, key3: ["value3"] }`)
 
 Maps may contain values of any type. Lists and maps may have trailing
 commas after the last value.
@@ -92,7 +91,7 @@ that getting literal `{{` or `}}` is implementation dependent.
 
 ## Operators
 
-Strings, lists  of strings,  and maps  can be  appended using  the `+`
+Strings, lists of strings, and maps can be appended using the `+`
 operator.
 
 ## Defaults

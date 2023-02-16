@@ -1,5 +1,4 @@
-Advanced Library Use
-====================
+# Advanced Library Use
 
 This section covers a few more advanced use cases associated with
 libraries.
@@ -38,8 +37,7 @@ bob_shared_library {
 }
 ```
 
-In the above, both the `less` and `gzip` compiles will have `-DHELP=1
--Ihelper/include` because each binary is using `libhelper` which has
+In the above, both the `less` and `gzip` compiles will have `-DHELP=1 -Ihelper/include` because each binary is using `libhelper` which has
 exported these properties. The `libhelper` compile will also have
 `-DDEBUG=1 -Ihelper/private/include` specified, but since these aren't
 exported, neither `less` nor `gzip` would get it. The non-`export`
@@ -283,8 +281,7 @@ compiler versions that might have different behaviours between each
 generation. One common usage is to avoid new warnings being introduced
 by more modern compilers.
 
-In that case you can use the template `{{add_if_supported
-"<compiler_flag>"}}` in the `cflags`, `cxxflags` or `conlyflags` to
+In that case you can use the template `{{add_if_supported "<compiler_flag>"}}` in the `cflags`, `cxxflags` or `conlyflags` to
 instruct Bob to add the given compiler flag to the compiler arguments,
 but only if the compiler recognises that flag. If the compiler doesn't
 recognise the `<compiler_flag>` it will be silently discarded from

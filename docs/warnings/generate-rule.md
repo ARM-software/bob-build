@@ -1,9 +1,9 @@
-`generate-rule` warning
-==================
+# `generate-rule` warning
 
 ## Warns when deprecated `bob_generate_source` module is used
 
 ## Problematic code:
+
 ```bp
 bob_generate_source {
     name: "my_generate",
@@ -17,6 +17,7 @@ bob_generate_source {
 ```
 
 ## Correct code:
+
 ```bp
 bob_genrule {
     name: "generate_source_single_new",
@@ -30,6 +31,7 @@ bob_genrule {
 ```
 
 ## Rationale:
+
 `bob_generate_source` contains some functionality which cannot be moved
 straightforward to Android's native rules, which in turn makes the
 transition to other build systems (e.g. `Bazel`) impossible.

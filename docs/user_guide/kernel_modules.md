@@ -1,5 +1,4 @@
-Kernel Modules
-==============
+# Kernel Modules
 
 Bob supports building out-of-tree kernel modules. This invokes the
 kernel build system to do the actual build.
@@ -33,13 +32,13 @@ is not expected to be part of your project).
 
 The other `kernel_*` options set corresponding kernel make variables.
 
-|Property|Make variable|Description|
-|---|---|---|
-|kernel_arch|ARCH|Target architecture|
-|kernel_cc|CC|C compiler for target|
-|kernel_hostcc|HOST_CC|C compiler for host|
-|kernel_cross_compile|CROSS_COMPILE|Toolchain prefix for GNU target tools|
-|kernel_clang_triple|CLANG_TRIPLE|Target triple for clang|
+| Property             | Make variable | Description                           |
+| -------------------- | ------------- | ------------------------------------- |
+| kernel_arch          | ARCH          | Target architecture                   |
+| kernel_cc            | CC            | C compiler for target                 |
+| kernel_hostcc        | HOST_CC       | C compiler for host                   |
+| kernel_cross_compile | CROSS_COMPILE | Toolchain prefix for GNU target tools |
+| kernel_clang_triple  | CLANG_TRIPLE  | Target triple for clang               |
 
 `kbuild_options` can be used to set module specific CONFIG
 options. These are expected to be in the out-of-tree module's `Kconfig`

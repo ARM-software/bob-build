@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020, 2022 Arm Limited.
+# Copyright 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,26 +38,39 @@ This is expected to work on Linux and OSX.
 # Environment to use for processes we parse output from.
 # Force the C locale.
 child_env = os.environ.copy()
-child_env['LC_ALL'] = "C"
+child_env["LC_ALL"] = "C"
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate table of contents for a shared library")
-    parser.add_argument("-o", "--output", default=None,
-                        help=".toc file to create")
-    parser.add_argument("--format", action="store",
-                        choices=["elf", "macho"], default="elf",
-                        help="Library format")
-    parser.add_argument("--objdump-tool", default="objdump",
-                        help="Tool used to generate TOCs for Elf libraries. "
-                             "This is expected to be objdump on Linux platforms")
-    parser.add_argument("--otool-tool", default="otool",
-                        help="Tool used to read library section headers of Mach-O libraries. "
-                             "This is expected to be otool on OSX")
-    parser.add_argument("--nm-tool", default="nm",
-                        help="Tool used to read the dynamic symbol table of Mach-O libraries. "
-                             "This is expected to be nm on OSX")
+        description="Generate table of contents for a shared library"
+    )
+    parser.add_argument("-o", "--output", default=None, help=".toc file to create")
+    parser.add_argument(
+        "--format",
+        action="store",
+        choices=["elf", "macho"],
+        default="elf",
+        help="Library format",
+    )
+    parser.add_argument(
+        "--objdump-tool",
+        default="objdump",
+        help="Tool used to generate TOCs for Elf libraries. "
+        "This is expected to be objdump on Linux platforms",
+    )
+    parser.add_argument(
+        "--otool-tool",
+        default="otool",
+        help="Tool used to read library section headers of Mach-O libraries. "
+        "This is expected to be otool on OSX",
+    )
+    parser.add_argument(
+        "--nm-tool",
+        default="nm",
+        help="Tool used to read the dynamic symbol table of Mach-O libraries. "
+        "This is expected to be nm on OSX",
+    )
     parser.add_argument("input", help="Shared library")
     args = parser.parse_args()
 
@@ -120,7 +133,7 @@ def elf_toc(lib, tool):
 
     # `objdump -p` outputs a header per line, and some version information.
     # Just pick up the lines containing the symbols we're interested in.
-    regexp = re.compile(r'\s+SONAME\s')
+    regexp = re.compile(r"\s+SONAME\s")
     toc.extend(line_filter(regexp, result_arr))
 
     # Get dynamic symbol table from objdump
@@ -156,19 +169,28 @@ def elf_toc(lib, tool):
     # See https://sourceware.org/binutils/docs/binutils/objdump.html
     #
     # Filter out undefined symbols, indicated with *UND* as the section name
-    flags_re = r'[lgu! ][w ][C ][W ][Ii ][dD ][FfO ]'
-    lax_flags_re = r'.{7}'
-    section_re = r'\S+'
-    hexdigits_re = r'[\da-f]+'
+    flags_re = r"[lgu! ][w ][C ][W ][Ii ][dD ][FfO ]"
+    lax_flags_re = r".{7}"
+    section_re = r"\S+"
+    hexdigits_re = r"[\da-f]+"
 
-    filter_undefined_re = re.compile(hexdigits_re + r'\s' + lax_flags_re + r'\s\*UND\*')
-    transform_re = re.compile(r'^' + hexdigits_re + r'\s(' +
-                              flags_re + r'\s' +
-                              section_re + r')\s+' +
-                              hexdigits_re + r'(\s+.+)$')
-    repl = r'\1\2'
+    filter_undefined_re = re.compile(hexdigits_re + r"\s" + lax_flags_re + r"\s\*UND\*")
+    transform_re = re.compile(
+        r"^"
+        + hexdigits_re
+        + r"\s("
+        + flags_re
+        + r"\s"
+        + section_re
+        + r")\s+"
+        + hexdigits_re
+        + r"(\s+.+)$"
+    )
+    repl = r"\1\2"
 
-    toc.extend(line_filter_and_transform(filter_undefined_re, transform_re, repl, result_arr))
+    toc.extend(
+        line_filter_and_transform(filter_undefined_re, transform_re, repl, result_arr)
+    )
 
     return toc
 
@@ -191,7 +213,7 @@ def macho_toc(lib, otool, nm):
         logger.error("Command failed: %s", str(e.cmd))
         sys.exit(e.returncode)
 
-    result_arr = result.decode(sys.getdefaultencoding()).split('\n')
+    result_arr = result.decode(sys.getdefaultencoding()).split("\n")
     toc.extend(result_arr)
 
     # Get global symbols, portable format
@@ -202,13 +224,13 @@ def macho_toc(lib, otool, nm):
         logger.error("Command failed: %s", str(e.cmd))
         sys.exit(e.returncode)
 
-    result_arr = result.decode(sys.getdefaultencoding()).split('\n')
+    result_arr = result.decode(sys.getdefaultencoding()).split("\n")
 
     # The output of `nm -gP` is 4 columns: symbol, type, address?, size?
     # Only keep the first 2 columns, and drop undefined symbols (type 'U')
-    filter_re = re.compile(r'\S+\sU\s')
-    transform_re = re.compile(r'^(\S+\s[UATDBC\-SI])\s.*')
-    repl = r'\1'
+    filter_re = re.compile(r"\S+\sU\s")
+    transform_re = re.compile(r"^(\S+\s[UATDBC\-SI])\s.*")
+    repl = r"\1"
 
     toc.extend(line_filter_and_transform(filter_re, transform_re, repl, result_arr))
 
@@ -234,7 +256,7 @@ def write_if_changed(filename, data):
 
 
 def main():
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
 
     args = parse_args()
 
@@ -244,7 +266,7 @@ def main():
         lines = macho_toc(args.input, args.otool_tool, args.nm_tool)
 
     toc = "\n".join(lines)
-    toc += "\n"            # Include a newline at the end of the file
+    toc += "\n"  # Include a newline at the end of the file
     if args.output:
         write_if_changed(args.output, toc)
     else:

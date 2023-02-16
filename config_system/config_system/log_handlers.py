@@ -1,4 +1,4 @@
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,24 +82,22 @@ class ErrorCounterHandler(logging.Handler):
 
 class ColorFormatter(logging.Formatter):
     """Formatter that provide colored messages for console logging when possible"""
+
     color_fmt = "\033[1;3{}m"
     reset = "\033[0m"
 
     def __init__(self, fmt, enabled=False):
         super(ColorFormatter, self).__init__(fmt)
         self.enabled = enabled
-        self.colors = {
-            "WARNING": 3,
-            "CRITICAL": 1,
-            "ERROR": 1,
-            "DEBUG": 6,
-            "INFO": 2
-        }
+        self.colors = {"WARNING": 3, "CRITICAL": 1, "ERROR": 1, "DEBUG": 6, "INFO": 2}
 
     def format(self, log_msg):
         paint = self.colors.get(log_msg.levelname)
         if paint and self.enabled:
             log_msg = deepcopy(log_msg)
-            log_msg.levelname = ColorFormatter.color_fmt.format(paint) + \
-                log_msg.levelname + ColorFormatter.reset
+            log_msg.levelname = (
+                ColorFormatter.color_fmt.format(paint)
+                + log_msg.levelname
+                + ColorFormatter.reset
+            )
         return logging.Formatter.format(self, log_msg)

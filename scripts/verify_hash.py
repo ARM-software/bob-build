@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020, 2022 Arm Limited.
+# Copyright 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,15 +24,27 @@ import sys
 def parse_args():
     ap = argparse.ArgumentParser()
 
-    ap.add_argument("--hash", type=str, required=True,
-                    help="Combined hash of the build.bp and Mconfig files")
+    ap.add_argument(
+        "--hash",
+        type=str,
+        required=True,
+        help="Combined hash of the build.bp and Mconfig files",
+    )
     # We have to create an output file to stop the check being run on every
     # build. FileType("wt") will automatically create one, so there's no need
     # for any extra code.
-    ap.add_argument("--out", type=argparse.FileType("wt"),
-                    help="Dummy output file name. This is written, but not used")
-    ap.add_argument("inputs", nargs="+", type=str, default=[],
-                    help="build.bp and Mconfig files to check")
+    ap.add_argument(
+        "--out",
+        type=argparse.FileType("wt"),
+        help="Dummy output file name. This is written, but not used",
+    )
+    ap.add_argument(
+        "inputs",
+        nargs="+",
+        type=str,
+        default=[],
+        help="build.bp and Mconfig files to check",
+    )
 
     return ap.parse_args()
 

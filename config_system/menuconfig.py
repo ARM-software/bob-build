@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,7 +104,7 @@ def lit_border(window, h, w, y=0, x=0, raised=True, bar=None):
         # The lower right corner can cause an exception, but the character is
         # written anyway
         window.addch(y + h - 1, x + w - 1, curses.ACS_LRCORNER)
-    except _curses.error as e:
+    except _curses.error as _:  # noqa: F841
         pass
 
     if bar:
@@ -156,7 +156,7 @@ def wrap_text(window, text, y, x, w, max_y=None, y_offset=0):
                     b = w
             else:
                 b = line_break
-            next_text = text[b + 1:]
+            next_text = text[b + 1 :]
             text = text[:b]
 
         if window and ypos >= y and (max_y is None or ypos < max_y):
@@ -180,7 +180,7 @@ def prepare_wrap_text(text, width):
                     b = width
             else:
                 b = line_break
-            next_text = text[b + 1:]
+            next_text = text[b + 1 :]
             text = text[:b]
 
         wrapped_text += text
@@ -254,7 +254,9 @@ def draw_legend(window, y, x, width):
         position = text_line.find("@")
         if position != -1:
             # override char
-            window.addch(legend_draw_start, x + position, " ", attr["option_set_by_user"])
+            window.addch(
+                legend_draw_start, x + position, " ", attr["option_set_by_user"]
+            )
         legend_draw_start += 1
     return y
 
@@ -322,7 +324,7 @@ def draw_main_menu(stdscr, window, menu, menu_bar):
         window.addstr(menu_bottom, min(7, win_w - 3), " v ", attr["scroll"])
 
     for menu_pos in menu_items:
-        menu_option = menu[menu_pos]
+        _ = menu[menu_pos]
 
         is_selected = False
         if menu.selection == menu_pos:
@@ -344,8 +346,16 @@ def draw_main_menu(stdscr, window, menu, menu_bar):
     return menu_height
 
 
-def draw_prompt(stdscr, window, menu_bar, prompt, input_box=None, title=None,
-                cursor_pos=0, scroll_pos=0):
+def draw_prompt(
+    stdscr,
+    window,
+    menu_bar,
+    prompt,
+    input_box=None,
+    title=None,
+    cursor_pos=0,
+    scroll_pos=0,
+):
     draw_background(stdscr)
 
     (height, width) = stdscr.getmaxyx()
@@ -368,7 +378,7 @@ def draw_prompt(stdscr, window, menu_bar, prompt, input_box=None, title=None,
             trim_amt = len(input_box) + 3 - text_box_width
             if trim_amt > cursor_pos - 10:
                 trim_amt = max(cursor_pos - 10, 0)
-                input_box = input_box[trim_amt: trim_amt + text_box_width - 2]
+                input_box = input_box[trim_amt : trim_amt + text_box_width - 2]
             else:
                 input_box = input_box[trim_amt:]
             cursor_pos -= trim_amt
@@ -376,7 +386,9 @@ def draw_prompt(stdscr, window, menu_bar, prompt, input_box=None, title=None,
 
     (win_h, win_w) = draw_window(stdscr, window, title, menu_bar, text_height, win_w)
 
-    wrap_text(window, prompt, 1, x_padding, text_width, max_y=win_h - 3, y_offset=scroll_pos)
+    wrap_text(
+        window, prompt, 1, x_padding, text_width, max_y=win_h - 3, y_offset=scroll_pos
+    )
 
     if input_box is not None:
         lit_border(window, 3, text_box_width, win_h - 6, 2)
@@ -392,7 +404,9 @@ def prompt(stdscr, window, text, options=["OK"]):
     scroll_pos = 0
 
     while True:
-        (max_scroll, page_size) = draw_prompt(stdscr, window, menu_bar, text, scroll_pos=scroll_pos)
+        (max_scroll, page_size) = draw_prompt(
+            stdscr, window, menu_bar, text, scroll_pos=scroll_pos
+        )
         window.move(*menu_bar.selection_pos)
 
         stdscr.noutrefresh()
@@ -433,9 +447,15 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
     cursor_pos = len(value)
 
     while True:
-        draw_prompt(stdscr, window, menu_bar, prompt,
-                    input_box=value, title=title,
-                    cursor_pos=cursor_pos)
+        draw_prompt(
+            stdscr,
+            window,
+            menu_bar,
+            prompt,
+            input_box=value,
+            title=title,
+            cursor_pos=cursor_pos,
+        )
 
         stdscr.noutrefresh()
         window.noutrefresh()
@@ -450,9 +470,9 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
         elif c in (curses.KEY_BACKSPACE, 127):
             if cursor_pos > 0:
                 cursor_pos -= 1
-                value = value[:cursor_pos] + value[cursor_pos + 1:]
+                value = value[:cursor_pos] + value[cursor_pos + 1 :]
         elif c == curses.KEY_DC:
-            value = value[:cursor_pos] + value[cursor_pos + 1:]
+            value = value[:cursor_pos] + value[cursor_pos + 1 :]
         elif 32 <= c < 256:
             value = value[:cursor_pos] + chr(c) + value[cursor_pos:]
             cursor_pos += 1
@@ -469,8 +489,9 @@ def inputbox(stdscr, window, value="", title="", prompt="Please enter a value"):
 
 
 def item_inputbox(stdscr, window, menu_item):
-    (success, value) = inputbox(stdscr, window, value=menu_item.get_value(),
-                                title=menu_item.get_title())
+    (success, value) = inputbox(
+        stdscr, window, value=menu_item.get_value(), title=menu_item.get_title()
+    )
     if success:
         menu_item.set_value(value)
 
@@ -486,17 +507,20 @@ def get_menu_location(value):
 
 
 def search(stdscr, window):
-    (success, string) = inputbox(stdscr, window, title="Search",
-                                 prompt="Enter substring to search for")
+    (success, string) = inputbox(
+        stdscr, window, title="Search", prompt="Enter substring to search for"
+    )
     if not success:
         return
     string = string.lower()
     results = ""
     for i in data.get_config_list():
         config = data.get_config(i)
-        if (string in i.lower() or
-                string in (config.get("title") or "").lower() or
-                string in (config.get("help") or "").lower()):
+        if (
+            string in i.lower()
+            or string in (config.get("title") or "").lower()
+            or string in (config.get("help") or "").lower()
+        ):
             results += "Symbol: %s [=%s]\n" % (i, config["value"])
             results += "Type  : %s\n" % (config["datatype"],)
             if "title" in config:
@@ -516,8 +540,8 @@ def search(stdscr, window):
     prompt(stdscr, window, results)
 
 
-def gui_main(stdscr):
-    (height, width) = stdscr.getmaxyx()
+def gui_main(stdscr):  # noqa: C901
+    (_, width) = stdscr.getmaxyx()
 
     init_attr()
 
@@ -532,7 +556,7 @@ def gui_main(stdscr):
         try:
             menu_height = draw_main_menu(stdscr, window, menu, menu_bar)
         except _curses.error:
-            (height, width) = stdscr.getmaxyx()
+            (_, width) = stdscr.getmaxyx()
             stdscr.bkgd(" ", attr["bg"])
             stdscr.erase()
             try:
@@ -619,18 +643,37 @@ def gui_main(stdscr):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("config", help="Path to the input configuration file (*.config)")
-    parser.add_argument("-d", "--database", default="Mconfig",
-                        help="Path to the configuration database (Mconfig)")
-    parser.add_argument("-j", "--json", default=None,
-                        help="Write JSON configuration file")
-    parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debug logging")
-    parser.add_argument("-p", "--plugin", action="append",
-                        help="Post configuration plugin to execute", default=[])
-    parser.add_argument('--depfile', default=None,
-                        help='Write dependencies to named file')
-    parser.add_argument("--ignore-missing", action="store_true", default=False,
-                        help="Ignore missing database files included with 'source'")
+    parser.add_argument(
+        "config", help="Path to the input configuration file (*.config)"
+    )
+    parser.add_argument(
+        "-d",
+        "--database",
+        default="Mconfig",
+        help="Path to the configuration database (Mconfig)",
+    )
+    parser.add_argument(
+        "-j", "--json", default=None, help="Write JSON configuration file"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", dest="debug", help="Enable debug logging"
+    )
+    parser.add_argument(
+        "-p",
+        "--plugin",
+        action="append",
+        help="Post configuration plugin to execute",
+        default=[],
+    )
+    parser.add_argument(
+        "--depfile", default=None, help="Write dependencies to named file"
+    )
+    parser.add_argument(
+        "--ignore-missing",
+        action="store_true",
+        default=False,
+        help="Ignore missing database files included with 'source'",
+    )
     return parser.parse_args()
 
 
@@ -640,8 +683,9 @@ def main():
 
     # The eventual destination is stdout with the above formatting
     errHandler = logging.StreamHandler(sys.stderr)
-    formatter = log_handlers.ColorFormatter("%(levelname)s: %(message)s",
-                                            errHandler.stream.isatty())
+    formatter = log_handlers.ColorFormatter(
+        "%(levelname)s: %(message)s", errHandler.stream.isatty()
+    )
     errHandler.setFormatter(formatter)
 
     # Setup a buffer to store messages
@@ -669,8 +713,9 @@ def main():
         # from selects enabling options with disabled dependencies. The
         # user generally does not need to know about bool inconsistencies,
         # but log them to INFO so they can see if we're seeing them.
-        general.enforce_dependent_values("Inconsistency prior to plugins: ",
-                                         error_level=logging.INFO)
+        general.enforce_dependent_values(
+            "Inconsistency prior to plugins: ", error_level=logging.INFO
+        )
         for plugin in args.plugin:
             path, name = os.path.split(plugin)
             if path.startswith("/"):
@@ -686,11 +731,13 @@ def main():
             except Exception as err:
                 logger.error("Problem encountered in %s plugin: %s" % (name, repr(err)))
                 import traceback
+
                 traceback.print_tb(sys.exc_info()[2])
 
         # If any bool values are still inconsistent, force the user to fix
-        general.enforce_dependent_values("Inconsistent values: ",
-                                         error_level=logging.ERROR)
+        general.enforce_dependent_values(
+            "Inconsistent values: ", error_level=logging.ERROR
+        )
         general.write_config(args.config)
         if args.json is not None:
             config_json.write_config(args.json)
@@ -710,7 +757,7 @@ def main():
             except OSError:
                 pass
         else:
-            with open(error_path, 'w'):
+            with open(error_path, "w"):
                 pass
             if args.json is not None:
                 try:

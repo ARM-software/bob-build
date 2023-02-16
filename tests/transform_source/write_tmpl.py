@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020, 2022 Arm Limited.
+# Copyright 2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    with open(args.out, 'wt') as outfile:
+    with open(args.out, "wt") as outfile:
         outfile.write("void output_{func}() {{}}\n")
 
 

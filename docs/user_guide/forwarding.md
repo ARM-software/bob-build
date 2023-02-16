@@ -1,5 +1,4 @@
-Forwarding Libraries
-====================
+# Forwarding Libraries
 
 Consider a project implementing multiple APIs which share a lot of
 common code in their implementations. This might be done as follows:
@@ -97,48 +96,44 @@ with stable interfaces for the common library.
 
 ## Some History
 
-* Previously Linux distributions were in a position that dependencies
+- Previously Linux distributions were in a position that dependencies
   were badly specified, the usual breakage happening where a binary
   assumed `lib1` depended on `lib2` and linked against both. Then the
   dependencies of `lib1` changed and swapped `lib2` for `lib3`, and
   the system would not work after `lib1` was updated.
 
-* The community have settled on binaries (and shared libraries)
+- The community have settled on binaries (and shared libraries)
   explicitly depending on the libraries that resolve the symbols that
   they use. So nowadays the binary will only depend on `lib1`.
 
-* Originally the default BFD linker behaviour was equivalent to
+- Originally the default BFD linker behaviour was equivalent to
   `--copy-dt-needed-entries --no-as-needed`.
 
-* `--copy-dt-needed-entries` has the following behaviour:
+- `--copy-dt-needed-entries` has the following behaviour:
 
-  * The linker will recursively search libraries to resolve symbols. A
+  - The linker will recursively search libraries to resolve symbols. A
     binary depending on `lib1` that depends on `lib2` will pick up
     symbols from `lib2`.
 
-  * A binary depending on `lib1` that depends on `lib2` gets a `DT_NEEDED
-    lib2.so` entry.
+  - A binary depending on `lib1` that depends on `lib2` gets a `DT_NEEDED lib2.so` entry.
 
-* `--no-as-needed` has the following behaviour:
+- `--no-as-needed` has the following behaviour:
 
-  * add `DT_NEEDED` for all libraries on the command line even if no
+  - add `DT_NEEDED` for all libraries on the command line even if no
     symbols from the library are used.
 
-* The default linker behaviour changed to `--no-copy-dt-needed-entries
-  --as-needed`. This avoids adding unnecessary library dependencies in
+- The default linker behaviour changed to `--no-copy-dt-needed-entries --as-needed`. This avoids adding unnecessary library dependencies in
   the system.
 
-* Neither `lld` nor `gold` support `--copy-dt-needed-entries`. They do
+- Neither `lld` nor `gold` support `--copy-dt-needed-entries`. They do
   support `--no-as-needed`.
 
-* To implement forwarding libraries:
+- To implement forwarding libraries:
 
-  * The link of the forwarding library needs to use `--no-as-needed` so
+  - The link of the forwarding library needs to use `--no-as-needed` so
     that `liba.so` retains `DT_NEEDED libcommon.so`
 
-  * The link of the binary using the forwarding library needs to use
-    `--no-as-needed` so that the binary retains `DT_NEEDED
-    liba.so`. It also needs `--copy-dt-needed-entries` so that the
+  - The link of the binary using the forwarding library needs to use
+    `--no-as-needed` so that the binary retains `DT_NEEDED liba.so`. It also needs `--copy-dt-needed-entries` so that the
     linker searches `libcommon.so` for the symbols needed by the
-    binary. This has the unfortunate effect of also adding `DT_NEEDED
-    libcommon.so` to the binary.
+    binary. This has the unfortunate effect of also adding `DT_NEEDED libcommon.so` to the binary.

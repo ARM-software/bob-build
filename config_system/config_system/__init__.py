@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2019, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,22 +24,25 @@ if os.path.isfile("build/make/core/envsetup.mk"):
     if os.path.isdir("external/ply/ply"):
         sys.path.insert(0, "external/ply/ply")
 
-from config_system.general import \
-    can_enable, \
-    get_config_bool, \
-    get_config_int, \
-    get_config_string, \
-    get_options_depending_on, \
-    get_options_selecting, \
-    get_warning, \
-    init_config, \
-    read_config, \
-    set_config  # nopep8: E402 module level import not at top of file
+from config_system.general import (
+    can_enable,
+    get_config_bool,
+    get_config_int,
+    get_config_string,
+    get_options_depending_on,
+    get_options_selecting,
+    get_warning,
+    init_config,
+    read_config,
+    set_config,
+)  # nopep8: E402 module level import not at top of file
 
-from config_system.data import \
-    get_config, \
-    get_config_list, \
-    get_mconfig_dir  # nopep8: E402 module level import not at top of file
+from config_system.data import (
+    get_config,
+    get_config_list,
+    get_mconfig_dir,
+)  # nopep8: E402 module level import not at top of file
 
-from config_system.expr import \
-    format_dependency_list  # nopep8: E402 module level import not at top of file
+from config_system.expr import (
+    format_dependency_list,
+)  # nopep8: E402 module level import not at top of file

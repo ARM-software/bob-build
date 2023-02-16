@@ -76,7 +76,7 @@ def main() -> int:
             lexer.source(root_file)
 
             syntax.parser.ignore_source = ignore_source
-            cfg = syntax.parser.parse(None, debug=False, lexer=lexer)['config']
+            cfg = syntax.parser.parse(None, debug=False, lexer=lexer)["config"]
 
             for k, v in cfg.items():
                 cfg[k]["relPath"] = rel_path / v["relPath"]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2022 Arm Limited.
+# Copyright 2018-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,15 +25,30 @@ def basename_no_ext(fname):
 
 
 def parse_args():
-    ap = argparse.ArgumentParser(description='Test generator.')
-    ap.add_argument("--in", dest="input", action="store", help="Input file", required=True)
-    ap.add_argument("--gen", action="store", nargs="+", type=str, default=[],
-                    help="Files to generate", required=True)
-    ap.add_argument("--src-template", type=argparse.FileType("rt"),
-                    help="Template file to use for source file generation")
+    ap = argparse.ArgumentParser(description="Test generator.")
+    ap.add_argument(
+        "--in", dest="input", action="store", help="Input file", required=True
+    )
+    ap.add_argument(
+        "--gen",
+        action="store",
+        nargs="+",
+        type=str,
+        default=[],
+        help="Files to generate",
+        required=True,
+    )
+    ap.add_argument(
+        "--src-template",
+        type=argparse.FileType("rt"),
+        help="Template file to use for source file generation",
+    )
 
-    ap.add_argument("--gen-implicit-header", action="store_true",
-                    help="Generate a header alongside the generated source")
+    ap.add_argument(
+        "--gen-implicit-header",
+        action="store_true",
+        help="Generate a header alongside the generated source",
+    )
 
     args = ap.parse_args()
 
@@ -62,8 +77,9 @@ def parse_args():
         # We might have filled in the generated header path already if ${out}
         # contained it, but it can be overwritten by the implicit header path
         # if desired.
-        args.gen_header = os.path.join(os.path.dirname(args.gen_src),
-                                       basename_no_ext(args.gen_src) + ".h")
+        args.gen_header = os.path.join(
+            os.path.dirname(args.gen_src), basename_no_ext(args.gen_src) + ".h"
+        )
 
     if not args.gen_header:
         ap.error("No header file to generate specified")
@@ -74,18 +90,32 @@ def parse_args():
         ap.error("Input file does not have `.in` extension: {}".format(args.input))
 
     if os.path.splitext(args.gen_src)[1] != ".cpp":
-        ap.error("Generated source file does not have `.cpp` extension: {}".format(args.gen_src))
+        ap.error(
+            "Generated source file does not have `.cpp` extension: {}".format(
+                args.gen_src
+            )
+        )
 
     if basename_no_ext(args.gen_header) != basename_no_ext(args.input):
-        ap.error("Basename of generated output {} does not match input {}".format(args.gen_header,
-                                                                                  args.input))
+        ap.error(
+            "Basename of generated output {} does not match input {}".format(
+                args.gen_header, args.input
+            )
+        )
 
     if basename_no_ext(args.gen_src) != basename_no_ext(args.input):
-        ap.error("Basename of generated output {} does not match input {}".format(args.gen_src,
-                                                                                  args.input))
+        ap.error(
+            "Basename of generated output {} does not match input {}".format(
+                args.gen_src, args.input
+            )
+        )
 
     if os.path.splitext(args.gen_header)[1] != ".h":
-        ap.error("Generated header file does not have `.h` extension: {}".format(args.gen_src))
+        ap.error(
+            "Generated header file does not have `.h` extension: {}".format(
+                args.gen_src
+            )
+        )
 
     return args
 
@@ -102,10 +132,10 @@ def main():
 
     header_template = "void output_{func}();\n"
 
-    with open(args.gen_src, 'wt') as outfile:
+    with open(args.gen_src, "wt") as outfile:
         outfile.write(src_template.format(func=func))
 
-    with open(args.gen_header, 'wt') as outfile:
+    with open(args.gen_header, "wt") as outfile:
         outfile.write(header_template.format(func=func))
 
 

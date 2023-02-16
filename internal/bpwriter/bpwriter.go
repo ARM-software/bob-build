@@ -1,5 +1,5 @@
 /*
- * Copyright 2020,2022 Arm Limited.
+ * Copyright 2020, 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,12 +99,14 @@ type group struct {
 // Note that group will be rendered without group name.
 //
 // gropupListName: [
-//     {
-//          key1: value1,
-//     },
-//     {
-//          key2: value2,
-//     },
+//
+//	{
+//	     key1: value1,
+//	},
+//	{
+//	     key2: value2,
+//	},
+//
 // ]
 type groupList struct {
 	// The name of this group list
@@ -358,7 +360,7 @@ func (f *file) NewModule(modType, name string) (Module, error) {
 func (f *file) Render(b *strings.Builder) {
 	modNames := make([]string, len(f.modules))
 	i := 0
-	for name, _ := range f.modules {
+	for name := range f.modules {
 		modNames[i] = name
 		i = i + 1
 	}

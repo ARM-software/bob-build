@@ -1,5 +1,4 @@
-Module: bob_generate_source
-===========================
+# Module: bob_generate_source
 
 This target generates files via a custom shell command. This is usually source
 code (headers or C files), but it could be anything. A single module will
@@ -12,6 +11,7 @@ The source and tool paths should be relative to the directory of the
 `build.bp` containing the `bob_generate_source`.
 
 ## Full specification of `bob_generate_source` properties
+
 For general common properties please
 [check detailed documentation](common_module_properties.md).
 
@@ -63,21 +63,29 @@ bob_generate_source {
 }
 ```
 
-----
+---
+
 ### **bob_generate_source.out** (required)
+
 The list of files that will be output.
 
-----
+---
+
 ### **bob_generate_source.implicit_srcs** (optional)
+
 List of implicit sources. Implicit sources are input files that do not get
 mentioned on the command line, and are not specified in the explicit sources.
 
-----
+---
+
 ### **bob_generate_source.exclude_implicit_srcs** (optional)
+
 Used in combination with glob patterns in `implicit_srcs` to exclude
 files that are not sources.
 
-----
+---
+
 ### **bob_generate_source.implicit_outs** (optional)
+
 List of implicit outputs. Implicit outputs are output files that do not get
 mentioned on the command line.

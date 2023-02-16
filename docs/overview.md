@@ -1,5 +1,4 @@
-Overview
-========
+# Overview
 
 ## Rationale
 
@@ -11,9 +10,9 @@ why not just use one of them?
 There are 2 issues that Bob solves that we think other build systems
 don't address well.
 
-* Building for both Android and Linux.
+- Building for both Android and Linux.
 
-* Codebase configurability
+- Codebase configurability
 
 For the primary codebase Bob is used with, there are roughly 5000
 targets and 500 configuration options.
@@ -36,17 +35,17 @@ build environment that we don't want imposed on Linux builds.
 
 When the code base contains lots of optional behaviour, it's important that:
 
-* users can identify what options there are and select them
+- users can identify what options there are and select them
 
   Bob's menuconfig is expected to solve this part of the problem,
   negating the need to document all the options somewhere else.
 
-* maintenance of the options is 'simple'
+- maintenance of the options is 'simple'
 
   Features and templates in the build definitions make clear where the
   configurability exists.
 
-* discourage superfluous configurability
+- discourage superfluous configurability
 
   The fact that features can't be combined using boolean operators is
   a technical restriction based on how they are implemented (and the
@@ -58,12 +57,12 @@ When the code base contains lots of optional behaviour, it's important that:
 
 Bob builds happen in 3 phases:
 
-* Bootstrap
+- Bootstrap
 
   The user sets up a build output directory, and Bob records some
   information that it needs to retrieve in subsequent phases.
 
-* Configure
+- Configure
 
   The user sets up the configuration of the current build
   directory. This is expected to remain constant.
@@ -73,7 +72,7 @@ Bob builds happen in 3 phases:
   work correctly and the only fix is to delete ninja's stored
   dependency information.
 
-* Build
+- Build
 
   The build phase is where the main build is done.
 
@@ -93,20 +92,20 @@ The Android build system changes with each Android release, which can
 break some features in Bob. In general Bob will support the current
 release and the one before that.
 
-| Version | Status |
-|---|---|
-| Android 11 | Supported |
-| Android 12 | Supported |
-| Android 13 | Supported |
-| earlier | Not supported |
+| Version    | Status        |
+| ---------- | ------------- |
+| Android 11 | Supported     |
+| Android 12 | Supported     |
+| Android 13 | Supported     |
+| earlier    | Not supported |
 
 Note that not all Bob features are supported on Android. This includes:
 
-* Aliases
+- Aliases
 
-* Versioned libraries
+- Versioned libraries
 
-* Generated library modules only support a single target, so any
+- Generated library modules only support a single target, so any
   library/binary that uses them will only build for the main target.
   i.e. Multilib is disabled on them.
 
@@ -115,6 +114,6 @@ Note that not all Bob features are supported on Android. This includes:
 Building on macOS is supported, however, some features are not available,
 namely:
 
-* Forwarding libraries
-* Static libraries containing multiple objects with the same basename
-* Building Linux Kernel modules
+- Forwarding libraries
+- Static libraries containing multiple objects with the same basename
+- Building Linux Kernel modules

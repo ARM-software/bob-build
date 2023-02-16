@@ -1,5 +1,4 @@
-Bob Configuration System
-========================
+# Bob Configuration System
 
 Bob's "features" allow module definitions to be changed depending on
 configuration options, e.g.:
@@ -37,6 +36,7 @@ $BUILDDIR/config ANDROID=y TARGET_TOOLCHAIN_CLANG=y ALLOW_HOST_EXPLORE=n
 
 If incompatible options are requested, an error will be printed and the config
 file will not be written:
+
 ```bash
 $BUILDDIR/config TARGET_TOOLCHAIN_CLANG=y TARGET_TOOLCHAIN_GNU=y
 ERROR: TARGET_TOOLCHAIN_CLANG=y was ignored or overridden. Value is n
@@ -52,7 +52,7 @@ preserved if `$BUILDDIR/config` is run a subsequent time without specifying
 This is an ncurses-based graphical tool to enable and disable options, and is
 invoked by simply running `$BUILDDIR/menuconfig`.
 
-Unlike `config`, `menuconfig` *will* remember previously user-set options, so
+Unlike `config`, `menuconfig` _will_ remember previously user-set options, so
 can be used to incrementally change the build configuration.
 
 Note that running `config` after `menuconfig` will clear any any previously set
@@ -67,8 +67,8 @@ directory.
 
 Furthermore, `Mconfig` files can include other ones using the `source` or
 `source_local` statements. For compatibility with kernel Kconfig files, the
-argument to `source` is a directory *relative to the project root, not relative
-to the Mconfig file containing the `source` statement*. `source_local` takes a
+argument to `source` is a directory _relative to the project root, not relative
+to the Mconfig file containing the `source` statement_. `source_local` takes a
 path relative to the current file. E.g., for the following layout:
 
 ```
@@ -124,10 +124,12 @@ config OPTION_NAME
 #### Types
 
 ##### Booleans
+
 In Mconfig, these have values `y` and `n`, which are translated into `1` and
 `0` when used in a `build.bp`.
 
 ##### Strings
+
 String processing is limited, but options can contain constant string values
 chosen using defaults, or be overridden by the user if user-visible:
 
@@ -138,10 +140,10 @@ config INSTALL_PATH
 	default "$(TARGET_OUT)/bin" if ANDROID
 ```
 
-String values can also be compared in expressions (`default if` and `depends
-on`) using the `=` and `!=` operators.
+String values can also be compared in expressions (`default if` and `depends on`) using the `=` and `!=` operators.
 
 ##### Integers
+
 Like strings, int options can contain constant values chosen using defaults, or
 be overridden by the user if user-visible. They can also be compared in
 expressions using the `=`, `!=`, `<`, `>`, `<=` and `>=` operators.
@@ -209,6 +211,7 @@ config PLATFORM_VERBOSE_TYPE
 ```
 
 Options are stored in `.bob.config.json` as:
+
 ```
 {
 	"platform_verbose_mode" : {
@@ -329,12 +332,12 @@ Putting options between `menu` and `endmenu` keywords will make them appear in
 a separate menu within `menuconfig`. Menus also support `visible if` and
 `depends on`:
 
- - `visible if`: If the associated condition is not satisfied, the menu will
-   not appear in `menuconfig`. However, options within the menu may still
-   become enabled.
+- `visible if`: If the associated condition is not satisfied, the menu will
+  not appear in `menuconfig`. However, options within the menu may still
+  become enabled.
 
- - `depends on`: If the associated condition is not satisfied, none of the
-   options within the menu will be able to be enabled.
+- `depends on`: If the associated condition is not satisfied, none of the
+  options within the menu will be able to be enabled.
 
 ##### `menuconfig`
 
@@ -377,6 +380,7 @@ Not all options can be determined statically, or from user settings. The
 configuration system allows Python plugins to inspect and change options.
 
 A configuration plugin is a Python script containing the following:
+
 ```python
 import config_system
 

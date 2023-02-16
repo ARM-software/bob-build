@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -283,12 +283,12 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	assert.Equalf(t, "gProps_g+D_g+D_g", module.FieldG, "module.FieldG incorrect")
 }
 
-//  It is important that names start from uppercase, otherwise they aren't exported (when nested)
+// It is important that names start from uppercase, otherwise they aren't exported (when nested)
 type TestSourceProps struct {
 	A string
 }
 
-//  It is important that names start from uppercase, otherwise they aren't exported (when nested)
+// It is important that names start from uppercase, otherwise they aren't exported (when nested)
 type TestInstallProps struct {
 	B string
 }

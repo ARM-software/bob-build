@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2020, 2022 Arm Limited.
+# Copyright 2018-2020, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,12 +27,13 @@ CFG_DIR = os.path.join(BOB_DIR, "config_system")
 sys.path.append(CFG_DIR)
 import config_system  # nopep8: E402 module level import not at top of file
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
 # This script will read the config file and output a minimal json file
 # containing just the user settable options.
+
 
 def config_to_json(database_fname, config_fname, ignore_missing):
     config_system.read_config(database_fname, config_fname, ignore_missing)
@@ -43,13 +44,13 @@ def config_to_json(database_fname, config_fname, ignore_missing):
     for key in config_list:
         c = config_system.get_config(key)
         key = key.lower()
-        datatype = c['datatype']
-        value = c['value']
+        datatype = c["datatype"]
+        value = c["value"]
 
-        if 'title' in c and config_system.can_enable(c):
-            if datatype in ['bool', 'string']:
+        if "title" in c and config_system.can_enable(c):
+            if datatype in ["bool", "string"]:
                 configs[key] = value
-            elif datatype == 'int':
+            elif datatype == "int":
                 configs[key] = int(value)
             else:
                 msg = "Invalid config type: %s (with value '%s')\n"
@@ -61,16 +62,29 @@ def config_to_json(database_fname, config_fname, ignore_missing):
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="Path to the configuration file (*.config)")
-    parser.add_argument("-d", "--database", default="Mconfig",
-                        help="Path to the configuration database (Mconfig)")
-    parser.add_argument("-o", "--output", required=True,
-                        help="Path to the config JSON file")
-    parser.add_argument("--ignore-missing", default=False, action="store_true",
-                        help="Ignore missing database files included with 'source'")
-    parser.add_argument("--depfile", type=argparse.FileType("wt"),
-                        help="Write dependencies to a depfile")
+    parser.add_argument(
+        "-d",
+        "--database",
+        default="Mconfig",
+        help="Path to the configuration database (Mconfig)",
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Path to the config JSON file"
+    )
+    parser.add_argument(
+        "--ignore-missing",
+        default=False,
+        action="store_true",
+        help="Ignore missing database files included with 'source'",
+    )
+    parser.add_argument(
+        "--depfile",
+        type=argparse.FileType("wt"),
+        help="Write dependencies to a depfile",
+    )
     args = parser.parse_args()
 
     if not os.path.isfile(args.database):
@@ -82,7 +96,7 @@ def main():
 
     json_config = config_to_json(args.database, args.config, args.ignore_missing)
     with config_system.utils.open_and_write_if_changed(args.output) as fp:
-        json.dump(json_config, fp, sort_keys=True, indent=4, separators=(',', ': '))
+        json.dump(json_config, fp, sort_keys=True, indent=4, separators=(",", ": "))
 
     if args.depfile:
         args.depfile.write("{output}: {config} {database}\n".format(**vars(args)))

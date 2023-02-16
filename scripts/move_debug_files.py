@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019, 2022 Arm Limited.
+# Copyright 2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,12 +40,13 @@ RE_ID = re.compile(r"Build ID:\s+([a-f0-9]+)")
 def get_build_id(f):
     cmd = ["readelf", "-n", f]
     try:
-        with open(os.devnull, 'w') as devnull:
+        with open(os.devnull, "w") as devnull:
             output = subprocess.check_output(cmd, stderr=devnull)
             output = output.decode(sys.getdefaultencoding())
     except subprocess.CalledProcessError as e:
-        sys.stderr.write("Error: Command %s failed with exit code %d" %
-                         (str(cmd), e.returncode))
+        sys.stderr.write(
+            "Error: Command %s failed with exit code %d" % (str(cmd), e.returncode)
+        )
         sys.exit(e.returncode)
 
     # Look for Build ID
@@ -71,7 +72,7 @@ def process_file(args, f):
     build_id = get_build_id(f)
     if build_id is not None:
         new_filedir = os.path.join(args.output, build_id[0:2])
-        new_filename = os.path.join(new_filedir, build_id[2:]+".debug")
+        new_filename = os.path.join(new_filedir, build_id[2:] + ".debug")
         if args.dry_run or args.verbose:
             print("Moving {} => {}".format(f, new_filename))
         if not args.dry_run:
@@ -83,18 +84,26 @@ def process_file(args, f):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(epilog=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        epilog=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
-    parser.add_argument("input", nargs="+",
-                        help="Path to input debug files. Directories will be assumed to "
-                        "only contain debug files. Files will be handled individually.")
-    parser.add_argument("-o", "--output", default="/usr/lib/debug/.build-id",
-                        help="Target debug file directory")
-    parser.add_argument("-n", "--dry-run", action="store_true",
-                        help="Dry run")
-    parser.add_argument("--verbose", action="store_true",
-                        help="List all moves on console")
+    parser.add_argument(
+        "input",
+        nargs="+",
+        help="Path to input debug files. Directories will be assumed to "
+        "only contain debug files. Files will be handled individually.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="/usr/lib/debug/.build-id",
+        help="Target debug file directory",
+    )
+    parser.add_argument("-n", "--dry-run", action="store_true", help="Dry run")
+    parser.add_argument(
+        "--verbose", action="store_true", help="List all moves on console"
+    )
 
     return parser.parse_args()
 
@@ -104,7 +113,7 @@ def main():
 
     for i in args.input:
         if os.path.isdir(i):
-            for (dirpath, dirnames, filenames) in os.walk(args.input):
+            for dirpath, dirnames, filenames in os.walk(args.input):
                 for f in filenames:
                     f = os.path.join(dirpath, f)
                     process_file(args, f)

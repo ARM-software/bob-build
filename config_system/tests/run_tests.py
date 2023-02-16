@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018-2019, 2022 Arm Limited.
+# Copyright 2018-2019, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ def runtest(name):
     tests_run, tests_failed = 0, 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = os.path.splitext(name)[0] + '.config'
+    config_file = os.path.splitext(name)[0] + ".config"
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
@@ -51,16 +51,18 @@ def runtest(name):
                 tests_run += 1
                 config = config_system.get_config(key)
                 actual_value = config.get("value")
-                if config['datatype'] == 'bool':
-                    actual_value = 'y' if actual_value else 'n'
+                if config["datatype"] == "bool":
+                    actual_value = "y" if actual_value else "n"
                 if actual_value != value:
-                    print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
-                          % (name, line_number, key, actual_value, value))
+                    print(
+                        "ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
+                        % (name, line_number, key, actual_value, value)
+                    )
                     tests_failed += 1
             elif action == "SET":
-                if value == 'y':
+                if value == "y":
                     value = True
-                elif value == 'n':
+                elif value == "n":
                     value = False
                 config_system.set_config(key, value)
             else:
@@ -89,7 +91,7 @@ def runkconftest(name):
     tests_run, tests_failed = 0, 0
 
     # Remove ".test" and replace with ".config" to find the input configuration
-    config_file = os.path.splitext(name)[0] + '.config'
+    config_file = os.path.splitext(name)[0] + ".config"
 
     if not os.path.exists(config_file):
         config_file = "empty_file"
@@ -111,8 +113,10 @@ def runkconftest(name):
                 tests_run += 1
                 actual_value = config.get(key, "n")
                 if actual_value != value:
-                    print("ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
-                          % (name, line_number, key, actual_value, value))
+                    print(
+                        "ERROR: %s:%d: assertion failed: %s=%s (should be %s)"
+                        % (name, line_number, key, actual_value, value)
+                    )
                     tests_failed += 1
             elif action == "SET":
                 with open(".config", "a") as f:
@@ -129,9 +133,14 @@ def runkconftest(name):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--kconf", dest="use_kconf", action="store_true", default=False,
-                        help="Run using the kernel's configuration system."
-                             "'conf' must be in the path")
+    parser.add_argument(
+        "--kconf",
+        dest="use_kconf",
+        action="store_true",
+        default=False,
+        help="Run using the kernel's configuration system."
+        "'conf' must be in the path",
+    )
     parser.add_argument("-C", "--directory", type=str, default=TEST_DIR)
     args = parser.parse_args()
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2018, 2022 Arm Limited.
+# Copyright 2018, 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,8 +31,7 @@ class Configs:
 
     # Record a new config
     def append(self, config, file, line):
-        self._configs[config] = {'file': file,
-                                 'line': line}
+        self._configs[config] = {"file": file, "line": line}
 
     # Return a list of all configs
     def keys(self):
@@ -40,12 +39,21 @@ class Configs:
 
     # Return the file where a config is defined
     def file(self, config):
-        return self._configs[config]['file']
+        return self._configs[config]["file"]
 
     # Print an issue to stdout
     def print_issue(self, type, config, file, line):
-        print("%s,%s,%d,%s,%d,%s" % (config, file, line, self._configs[config]['file'],
-                                     self._configs[config]['line'], type))
+        print(
+            "%s,%s,%d,%s,%d,%s"
+            % (
+                config,
+                file,
+                line,
+                self._configs[config]["file"],
+                self._configs[config]["line"],
+                type,
+            )
+        )
 
 
 # Find files matching pattern under the directory top
@@ -77,7 +85,7 @@ def get_config_definitions(mconfigs):
     re_configdef = re.compile(r"^config ([A-z_][A-z0-9_]*)")
 
     for mconfig in mconfigs:
-        with open(mconfig, 'r') as f:
+        with open(mconfig, "r") as f:
             lineno = 0
             for line in f:
                 lineno += 1
@@ -95,71 +103,73 @@ def get_config_definitions(mconfigs):
 
 # Look for all occurrences of defined configs in Mconfig files.
 def check_mconfig_refs(mconfigs, configs):
-    keyre = str.join('|', configs.keys())
+    keyre = str.join("|", configs.keys())
     re_configs = re.compile(r"\b(" + keyre + ")\b")
     for mconfig in mconfigs:
-        with open(mconfig, 'r') as f:
+        with open(mconfig, "r") as f:
             lineno = 0
             for line in f:
                 lineno += 1
 
                 # Strip out single line comments
-                line = line.split('#')[0]
+                line = line.split("#")[0]
 
                 matches = re_configs.findall(line)
                 for key in matches:
                     if not same_subtree(configs.file(key), mconfig):
-                        configs.print_issue('Mconfig', key, mconfig, lineno)
+                        configs.print_issue("Mconfig", key, mconfig, lineno)
 
 
 # Look for all occurrences of defined configs in Blueprint files.
 # In blueprint the reference can only occur in a feature or a template
 def check_blueprint_refs(blueprints, configs):
-    keyre = str.join('|', configs.keys())
+    keyre = str.join("|", configs.keys())
     keyre = keyre.lower()
     re_featureref = re.compile(r"[ \t]*(" + keyre + ")[ \t]*:")
     re_templateref = re.compile(r"{{(?:.+ *)?\.(" + keyre + ")}}")
     for blueprint in blueprints:
-        with open(blueprint, 'r') as f:
+        with open(blueprint, "r") as f:
             lineno = 0
             for line in f:
                 lineno += 1
 
                 # Strip out single line comments
-                line = line.split('//')[0]
+                line = line.split("//")[0]
 
                 m = re_featureref.match(line)
                 if m:
                     key = m.group(1).upper()
                     if not same_subtree(configs.file(key), blueprint):
-                        configs.print_issue('bp feature', key, blueprint, lineno)
+                        configs.print_issue("bp feature", key, blueprint, lineno)
 
                 matches = re_templateref.findall(line)
                 for key in matches:
                     key = key.upper()
                     if not same_subtree(configs.file(key), blueprint):
-                        configs.print_issue('bp template', key, blueprint, lineno)
+                        configs.print_issue("bp template", key, blueprint, lineno)
 
 
 def main():
-    summary = \
-        """
+    summary = """
         Detect usage of config variables outside of the tree they are
         defined in.  This script can be used to help detect potential
         issues if subtrees can be excluded.
         """
-    epilog = \
-        """
+    epilog = """
         The output is comma separated text of with a header row describing
         the fields. The header row starts with '#' to allow sorting.
         """
 
     parser = argparse.ArgumentParser(description=summary, epilog=epilog)
-    parser.add_argument('path', nargs='?', default=os.getcwd(), help="Directory to scan")
-    parser.add_argument('--nom', default=False, action='store_true',
-                        help="Don't check Mconfig files")
-    parser.add_argument('--nob', default=False, action='store_true',
-                        help="Don't check Blueprint files")
+    parser.add_argument(
+        "path", nargs="?", default=os.getcwd(), help="Directory to scan"
+    )
+    parser.add_argument(
+        "--nom", default=False, action="store_true", help="Don't check Mconfig files"
+    )
+    parser.add_argument(
+        "--nob", default=False, action="store_true", help="Don't check Blueprint files"
+    )
 
     args = parser.parse_args()
 
@@ -167,7 +177,7 @@ def main():
     check_mc = not args.nom
 
     # Find all Mconfig files
-    mconfigs = find_files(args.path, 'Mconfig')
+    mconfigs = find_files(args.path, "Mconfig")
 
     # Table header
     print("# Config, Referenced from, Ref line, Defined in, Def line, Type")
@@ -181,7 +191,7 @@ def main():
 
     if check_bp:
         # Find all bp files
-        blueprints = find_files(args.path, '*.bp')
+        blueprints = find_files(args.path, "*.bp")
 
         # Check bps for where configs are referenced
         check_blueprint_refs(blueprints, defs)

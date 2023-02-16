@@ -1,9 +1,9 @@
-`default-srcs` warning
-==================
+# `default-srcs` warning
 
 ## Warns when `srcs`/`exclude_srcs` property is used in `bob_defaults`.
 
 ## Problematic code:
+
 ```bp
 bob_defaults {
     name: "my_defaults",
@@ -19,6 +19,7 @@ bob_binary {
 ```
 
 ## Correct code:
+
 ```bp
 bob_defaults {
     name: "my_defaults",
@@ -39,6 +40,7 @@ bob_binary {
 ```
 
 ## Rationale:
+
 Bazel build system does not support such concept of `defaults`.
 Including sources through `bob_defaults` across the modules makes
 things really hard to convert and is contrary to Bazel principles.

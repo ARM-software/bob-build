@@ -1,5 +1,4 @@
-Project Setup
-=============
+# Project Setup
 
 In order to use Bob your project needs to be setup appropriately. The
 easiest way to do this is to clone the Bob repository, copy in some
@@ -23,14 +22,14 @@ directory if desired.
 The `example` directory contains the basic files a project needs in
 order to use Bob. It contains the following files:
 
-|File|Description|
-|---|---|
-|bootstrap_androidbp.bash | Android BP bootstrap script |
-|bootstrap_linux.bash     | Linux bootstrap script |
-|bplist                   | Blueprint list file |
-|Mconfig                  | Project configuration database |
-|build.bp                 | Root build description |
-|buildme.bash             | Build script |
+| File                     | Description                    |
+| ------------------------ | ------------------------------ |
+| bootstrap_androidbp.bash | Android BP bootstrap script    |
+| bootstrap_linux.bash     | Linux bootstrap script         |
+| bplist                   | Blueprint list file            |
+| Mconfig                  | Project configuration database |
+| build.bp                 | Root build description         |
+| buildme.bash             | Build script                   |
 
 If you want to make this build, just add a `hello_world.cpp`, and, if
 necessary, update the path in any `source` statements in `example/Mconfig` to
@@ -88,27 +87,27 @@ are used by Bob.
 
 You should update the following:
 
-* Update `BOB_DIR` to be a path relative to the bootstrap script at
+- Update `BOB_DIR` to be a path relative to the bootstrap script at
   which to find the Bob repository.
 
-* Set `SRCDIR` based on `SCRIPT_DIR`. If the bootstrap script is in
+- Set `SRCDIR` based on `SCRIPT_DIR`. If the bootstrap script is in
   the root directory, this can be set to `SCRIPT_DIR`.
 
-* Tweak `BLUEPRINT_LIST_FILE` and `CONFIGNAME` as needed.
+- Tweak `BLUEPRINT_LIST_FILE` and `CONFIGNAME` as needed.
 
-* Tweak `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` if needed.
+- Tweak `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` if needed.
 
 ### Android
 
 On Android the output directory is determined by the project name.
 
-* Update `BOB_DIR` to be a path relative to the bootstrap script at
+- Update `BOB_DIR` to be a path relative to the bootstrap script at
   which to find the Bob repository.
 
-* Update `PROJ_NAME` to be a short string that is unique in the
+- Update `PROJ_NAME` to be a short string that is unique in the
   required namespace.
 
-* Update `SRCDIR`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
+- Update `SRCDIR`, `BLUEPRINT_LIST_FILE`, `CONFIGNAME`,
   `BOB_CONFIG_OPTS` and `BOB_CONFIG_PLUGINS` as done for Linux.
 
 ## Blueprint file list (bplist)

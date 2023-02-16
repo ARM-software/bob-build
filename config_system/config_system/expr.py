@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Arm Limited.
+# Copyright 2019-2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,8 @@ logger.addHandler(logging.NullHandler())
 
 
 # Expression tuple for 'y' and 'n'
-YES = ('boolean', True)
-NO = ('boolean', False)
+YES = ("boolean", True)
+NO = ("boolean", False)
 
 
 def check_depends(depends, value):
@@ -40,13 +40,11 @@ def check_depends(depends, value):
     assert type(depends) == tuple
     assert len(depends) in [2, 3]
 
-    if depends[0] == 'and':
-        return (check_depends(depends[1], value) or
-                check_depends(depends[2], value))
-    elif depends[0] == 'or':
-        return (check_depends(depends[1], value) and
-                check_depends(depends[2], value))
-    elif depends[0] == 'identifier':
+    if depends[0] == "and":
+        return check_depends(depends[1], value) or check_depends(depends[2], value)
+    elif depends[0] == "or":
+        return check_depends(depends[1], value) and check_depends(depends[2], value)
+    elif depends[0] == "identifier":
         return depends[1] == value
     return False
 
@@ -68,17 +66,17 @@ def _expr_value(e):
             raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
         elif type(left) == bool:
             raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
-        elif e[0] == '+':
+        elif e[0] == "+":
             return left + right
-        elif e[0] == '-':
+        elif e[0] == "-":
             if type(left) is str:
                 raise TypeError("'-' operator is not valid on strings")
                 return left
             return left - right
-    elif e[0] in ['string', 'number', 'boolean']:
+    elif e[0] in ["string", "number", "boolean"]:
         return e[1]
-    elif e[0] == 'identifier':
-        return get_config(e[1])['value']
+    elif e[0] == "identifier":
+        return get_config(e[1])["value"]
 
     raise Exception("Unexpected depend list: " + str(e))
 
@@ -87,15 +85,16 @@ def expr_value(e):
     try:
         result = _expr_value(e)
     except TypeError as err:
-        logger.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
+        logger.error(
+            "{} in expression '{}'".format(str(err), format_dependency_list(e))
+        )
         result = ""
 
     return result
 
 
 def _condexpr_value(e):
-    """Evaluate the value of the input expression.
-    """
+    """Evaluate the value of the input expression."""
     assert type(e) == tuple
     assert len(e) in [2, 3]
 
@@ -108,28 +107,28 @@ def _condexpr_value(e):
         if type(left) != type(right):
             # Boolean result expected
             return False
-        elif e[0] == 'and':
+        elif e[0] == "and":
             return left and right
-        elif e[0] == 'or':
+        elif e[0] == "or":
             return left or right
-        elif e[0] == '=':
+        elif e[0] == "=":
             return left == right
-        elif e[0] == '!=':
+        elif e[0] == "!=":
             return left != right
-        elif e[0] == '>':
+        elif e[0] == ">":
             return left > right
-        elif e[0] == '>=':
+        elif e[0] == ">=":
             return left >= right
-        elif e[0] == '<':
+        elif e[0] == "<":
             return left < right
-        elif e[0] == '<=':
+        elif e[0] == "<=":
             return left <= right
-    elif e[0] == 'not':
+    elif e[0] == "not":
         return not _condexpr_value(e[1])
-    elif e[0] in ['string', 'number', 'boolean']:
+    elif e[0] in ["string", "number", "boolean"]:
         return e[1]
-    elif e[0] == 'identifier':
-        return get_config(e[1])['value']
+    elif e[0] == "identifier":
+        return get_config(e[1])["value"]
 
     raise Exception("Unexpected depend list: " + str(e))
 
@@ -139,11 +138,16 @@ def condexpr_value(e):
     try:
         result = _condexpr_value(e)
         if type(result) is not bool:
-            logger.error("Conditional expression '{}' does not return a boolean '{}'".format(
-                format_dependency_list(e), str(result)))
+            logger.error(
+                "Conditional expression '{}' does not return a boolean '{}'".format(
+                    format_dependency_list(e), str(result)
+                )
+            )
             result = False
     except TypeError as err:
-        logger.error("{} in expression '{}'".format(str(err), format_dependency_list(e)))
+        logger.error(
+            "{} in expression '{}'".format(str(err), format_dependency_list(e))
+        )
         result = False
 
     return result
@@ -160,22 +164,22 @@ def expr_type(e):
         right = expr_type(e[2])
         if left != right:
             raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
-        elif left == 'bool':
+        elif left == "bool":
             raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
-        elif e[0] == '+':
+        elif e[0] == "+":
             return left
-        elif e[0] == '-':
-            if left == 'string':
+        elif e[0] == "-":
+            if left == "string":
                 raise TypeError("'-' operator is not valid on strings")
             return left
-    elif e[0] == 'string':
-        return 'string'
-    elif e[0] == 'number':
-        return 'int'
-    elif e[0] == 'boolean':
-        return 'bool'
-    elif e[0] == 'identifier':
-        return get_config(e[1])['datatype']
+    elif e[0] == "string":
+        return "string"
+    elif e[0] == "number":
+        return "int"
+    elif e[0] == "boolean":
+        return "bool"
+    elif e[0] == "identifier":
+        return get_config(e[1])["datatype"]
 
     raise Exception("Unexpected depend list: " + str(e))
 
@@ -190,14 +194,14 @@ def dependency_list(e):
         return set()
     assert type(e) == tuple
 
-    if e[0] in ['and', 'or', '=', '!=', '<', '<=', '>', '>=', '+', '-']:
+    if e[0] in ["and", "or", "=", "!=", "<", "<=", ">", ">=", "+", "-"]:
         return dependency_list(e[1]) | dependency_list(e[2])
-    elif e[0] == 'not':
+    elif e[0] == "not":
         return dependency_list(e[1])
-    elif e[0] in ['string', 'number', 'boolean']:
+    elif e[0] in ["string", "number", "boolean"]:
         # Quoted string, number or boolean
         return set()
-    elif e[0] == 'identifier':
+    elif e[0] == "identifier":
         return {e[1]}
     raise Exception("Unexpected depend list: " + str(e))
 
@@ -219,17 +223,17 @@ def format_dependency_list(depends, skip_parens=False):
         operator = OPERATOR_FORMAT_MAP.get(depends[0], depends[0])
         result = left + " " + operator + " " + right
         return result if skip_parens else "(" + result + ")"
-    elif depends[0] == 'not':
+    elif depends[0] == "not":
         return "!" + format_dependency_list(depends[1])
-    elif depends[0] == 'string':
+    elif depends[0] == "string":
         return '"' + depends[1] + '"'
-    elif depends[0] == 'number':
+    elif depends[0] == "number":
         return str(depends[1])
-    elif depends[0] == 'boolean':
-        return 'y' if depends[1] else 'n'
-    elif depends[0] == 'identifier':
+    elif depends[0] == "boolean":
+        return "y" if depends[1] else "n"
+    elif depends[0] == "identifier":
         config = get_config(depends[1])
-        value = config['value']
-        if config['datatype'] == 'bool':
-            value = 'y' if value else 'n'
+        value = config["value"]
+        if config["datatype"] == "bool":
+            value = "y" if value else "n"
         return depends[1] + "[=" + str(value) + "]"

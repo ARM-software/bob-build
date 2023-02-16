@@ -24,8 +24,10 @@ def parse_args():
 def main():
     args = parse_args()
 
-    for fname, template in [(args.source, SOURCE_TEMPLATE),
-                            (args.header, HEADER_TEMPLATE)]:
+    for fname, template in [
+        (args.source, SOURCE_TEMPLATE),
+        (args.header, HEADER_TEMPLATE),
+    ]:
         with open(fname, "wt") as fp:
             fp.write(template.format(name=args.function_name))
 

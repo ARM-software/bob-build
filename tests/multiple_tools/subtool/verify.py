@@ -1,6 +1,6 @@
 #!/bin/python
 
-# Copyright 2022 Arm Limited.
+# Copyright 2022-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ import errno
 import os
 
 
-parser = argparse.ArgumentParser(description='Test generator.')
-parser.add_argument('--in', nargs='*', dest='input', action='store', help='Input file')
+parser = argparse.ArgumentParser(description="Test generator.")
+parser.add_argument("--in", nargs="*", dest="input", action="store", help="Input file")
 
 
 def main():

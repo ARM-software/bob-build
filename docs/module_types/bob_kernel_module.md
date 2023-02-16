@@ -1,5 +1,4 @@
-Module: bob_kernel_module
-=========================
+# Module: bob_kernel_module
 
 This target is a kernel module (.ko) that will be built as an
 external kernel module.
@@ -12,7 +11,7 @@ the module in question.
 
 To avoid cluttering the source directory, the `bob_kernel_module` will
 copy all of its sources to the build directory before invoking Kbuild.
-This means that *all* files in the module directory, including
+This means that _all_ files in the module directory, including
 `Kbuild`, `Makefile`, and `.h` files, must be included in the
 `bob_kernel_module.srcs` list.
 
@@ -21,6 +20,7 @@ definition must be in the same directory as the main `Kbuild` file for
 that module.
 
 ## Full specification of `bob_kernel_module` properties
+
 Most properties are optional.
 
 For general common properties please [check detailed documentation](common_module_properties.md).
@@ -66,38 +66,54 @@ bob_kernel_module {
 }
 ```
 
-----
+---
+
 ### **bob_kernel_module.kbuild_options** (optional)
+
 Linux kernel config options to emulate. These are passed to Kbuild in
 the `make` command-line, and set in the source code via
 `EXTRA_CFLAGS`. These should usually include the `CONFIG_` prefix,
 although it is possible to omit this if required.
 
-----
+---
+
 ### **bob_kernel_module.extra_symbols** (optional)
+
 Kernel modules which this module depends on.
 
-----
+---
+
 ### **bob_kernel_module.make_args** (optional)
+
 Arguments to pass to kernel make invocation.
 
-----
+---
+
 ### **bob_kernel_module.kernel_dir** (optional)
+
 Kernel directory location. This must either be absolute or relative to
 the top level source directory.
 
-----
+---
+
 ### **bob_kernel_module.kernel_cross_compile** (optional)
+
 Compiler prefix for kernel build.
 
-----
+---
+
 ### **bob_kernel_module.kernel_cc** (optional)
+
 Kernel target compiler.
 
-----
+---
+
 ### **bob_kernel_module.kernel_hostcc** (optional)
+
 Kernel host compiler.
 
-----
+---
+
 ### **bob_kernel_module.kernel_clang_triple** (optional)
+
 Target triple when using clang as the compiler.

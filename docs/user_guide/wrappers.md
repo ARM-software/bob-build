@@ -1,5 +1,4 @@
-Build Wrappers
-==============
+# Build Wrappers
 
 In some circumstances you need to be able to intercept all calls to
 the compiler and linker. Examples of this are `ccache` and

@@ -1,5 +1,4 @@
-Module: bob_filegroup
-====================
+# Module: bob_filegroup
 
 This target lists a collection of source files that can be re-used in other targets. It exists
 to enforce no relative uplinks and to closer align to Bazel.
@@ -18,17 +17,20 @@ bob_filegroup {
 }
 ```
 
-----
+---
+
 ### **bob_filegroup.name** (required)
 
 The unique identifier that can be used to refer to this module.
 
-----
+---
+
 ### **bob_filegroup.srcs** (optional)
 
 Source files to add to other modules that depend upon this.
 
-----
+---
+
 ### **bob_filegroup.filegroup_srcs** (optional)
 
 Other filegroups this filegroup depends on. Their sources are also
