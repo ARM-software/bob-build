@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Arm Limited.
+ * Copyright 2020-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,13 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 	mctx.VisitDirectDeps(func(m blueprint.Module) {
 		if m.Name() == name {
 			dep = m
+		} else if l, ok := getLibrary(m); ok {
+			// Shared libraries may already have their shortname as name
+			if l.shortName() == name {
+				dep = m
+			}
 		}
+
 	})
 
 	if dep == nil {
