@@ -13,10 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
 import pytest
 
-from config_system import data, expr, general
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+CFG_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(CFG_DIR)
 
+from config_system import general
 
 template_type_strictness_default_mconfig = """
 config TRUE
@@ -200,3 +205,7 @@ def test_type_strictness_select(caplog, tmpdir, inputdata, error):
         assert error in caplog.text
     else:
         assert caplog.text == ""
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main(sys.argv))

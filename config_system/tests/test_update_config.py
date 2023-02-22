@@ -17,6 +17,11 @@ import argparse
 import logging
 import os
 import pytest
+import sys
+
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+CFG_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(CFG_DIR)
 
 import update_config
 
@@ -386,3 +391,7 @@ def test_option_depends_on_plugin(caplog, mocker, tmpdir, plugin, mconfig, args)
 
     assert returncode == 0
     assert len(errors) == 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main(sys.argv))

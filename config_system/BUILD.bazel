@@ -1,0 +1,64 @@
+load("@config_deps//:requirements.bzl", "requirement")
+
+exports_files(
+    srcs = ["pytest.ini"],
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "config_system",
+    srcs = glob(["config_system/*.py"]),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("ply"),
+    ],
+)
+
+py_library(
+    name = "libmconfigfmt",
+    srcs = ["mconfigfmt.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+py_library(
+    name = "libupdate_config",
+    srcs = ["update_config.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+py_library(
+    name = "libget_configs_gazelle",
+    srcs = ["get_configs_gazelle.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+py_binary(
+    name = "mconfigfmt",
+    srcs = ["mconfigfmt.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+py_binary(
+    name = "update_config",
+    srcs = ["update_config.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+py_binary(
+    name = "get_configs_gazelle",
+    srcs = ["get_configs_gazelle.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)

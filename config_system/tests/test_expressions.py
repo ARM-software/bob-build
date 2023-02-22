@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import pytest
-
+import sys
 from config_system import data, expr, general
 
 
@@ -566,3 +566,7 @@ def test_condexpr_evaluation(caplog, tmpdir, inputdata, result, error):
     else:
         assert val == result
         assert caplog.text == ""
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main(sys.argv))
