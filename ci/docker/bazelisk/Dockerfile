@@ -14,6 +14,10 @@ RUN apt update \
       ca-certificates \
       build-essential \
       git \
+      python3 \
+      python3-dev \
+      python3-pip \
+      python3-ply \
  && rm -rf /var/lib/apt/lists/*
 
 

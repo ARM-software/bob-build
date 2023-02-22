@@ -31,13 +31,26 @@ http_archive(
     ],
 )
 
-rules_python_version = "740825b7f74930c62f44af95c9a4c1bd428d2c53"  # Latest @ 2021-06-23
+rules_python_version = "0.18.1"
 
 http_archive(
     name = "rules_python",
+    sha256 = "29a801171f7ca190c543406f9894abf2d483c206e14d6acbd695623662320097",
     strip_prefix = "rules_python-{}".format(rules_python_version),
-    url = "https://github.com/bazelbuild/rules_python/archive/{}.zip".format(rules_python_version),
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/{}.tar.gz".format(rules_python_version),
 )
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
+# TODO: Fix config system import structure
+# http_archive(
+#     name = "rules_python_gazelle_plugin",
+#     sha256 = "29a801171f7ca190c543406f9894abf2d483c206e14d6acbd695623662320097",
+#     strip_prefix = "rules_python-{}/gazelle".format(rules_python_version),
+#     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/{}.tar.gz".format(rules_python_version),
+# )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")  # keep
@@ -60,7 +73,22 @@ go_rules_dependencies()
 # Bob itself supports >=1.11
 go_register_toolchains(version = "1.18")
 
+# TODO: Fix config system import structure
+# load("@rules_python_gazelle_plugin//:deps.bzl", _py_gazelle_deps = "gazelle_deps")
+# _py_gazelle_deps()
+
 gazelle_dependencies()
+
+load("@rules_python//python:pip.bzl", "pip_parse")
+
+pip_parse(
+    name = "config_deps",
+    requirements_lock = "//config_system:requirements_lock.txt",
+)
+
+load("@config_deps//:requirements.bzl", "install_deps")
+
+install_deps()
 
 local_repository(
     name = "plugin",

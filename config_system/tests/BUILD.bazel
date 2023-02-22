@@ -1,0 +1,75 @@
+load("@config_deps//:requirements.bzl", "requirement")
+
+[
+    py_test(
+        name = test,
+        srcs = [
+            "{}.py".format(test),
+        ],
+        data = ["//config_system:pytest.ini"],
+        legacy_create_init = 0,
+        deps = [
+            requirement("pytest"),
+            requirement("pytest-mock"),
+            "//config_system",
+        ],
+    )
+    for test in [
+        "test_type_strictness",
+        "test_expressions",
+    ]
+]
+
+py_test(
+    name = "test_get_configs_gazelle",
+    srcs = [
+        "test_get_configs_gazelle.py",
+    ],
+    data = ["//config_system:pytest.ini"],
+    legacy_create_init = 0,
+    deps = [
+        requirement("pytest"),
+        requirement("pytest-mock"),
+        "//config_system",
+        "//config_system:libget_configs_gazelle",
+    ],
+)
+
+py_test(
+    name = "test_update_config",
+    srcs = [
+        "test_update_config.py",
+    ],
+    data = ["//config_system:pytest.ini"],
+    legacy_create_init = 0,
+    deps = [
+        requirement("pytest"),
+        requirement("pytest-mock"),
+        "//config_system",
+        "//config_system:libupdate_config",
+    ],
+)
+
+py_test(
+    name = "run_tests_formatter",
+    srcs = [
+        "run_tests_formatter.py",
+    ],
+    data = glob(["formatter/*"]),
+    legacy_create_init = 0,
+    deps = [
+        "//config_system:libmconfigfmt",
+    ],
+)
+
+py_test(
+    name = "run_tests",
+    srcs = [
+        "run_tests.py",
+    ],
+    data = glob(["*.test"]),
+    legacy_create_init = 0,
+    deps = [
+        "//config_system",
+    ],
+)

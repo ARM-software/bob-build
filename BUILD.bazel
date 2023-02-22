@@ -1,9 +1,29 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+
+# TODO: Fix config system import structure
+# load("@rules_python_gazelle_plugin//:def.bzl", "GAZELLE_PYTHON_RUNTIME_DEPS")
 
 # gazelle:exclude blueprint
 # gazelle:exclude example
 # gazelle:prefix github.com/ARM-software/bob-build/
-gazelle(name = "gazelle")
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = [
+        "@bazel_gazelle//language/go",
+        "@bazel_gazelle//language/proto",
+        # TODO: Fix config system import structure
+        # "@rules_python_gazelle_plugin//python",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+gazelle(
+    name = "gazelle",
+    # TODO: Fix config system import structure
+    # data = GAZELLE_PYTHON_RUNTIME_DEPS,
+    gazelle = ":gazelle_binary",
+)
 
 gazelle(
     name = "gazelle-update-repos",

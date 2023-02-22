@@ -26,6 +26,7 @@ from argparse import ArgumentParser
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 CFG_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(CFG_DIR)
+
 import config_system  # nopep8: E402 module level import not at top of file
 
 

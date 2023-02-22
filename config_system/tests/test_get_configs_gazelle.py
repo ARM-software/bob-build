@@ -15,9 +15,15 @@
 
 import json
 import io
+import os
+import sys
 import pytest
 
 from pathlib import Path
+
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+CFG_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(CFG_DIR)
 
 import get_configs_gazelle
 
@@ -104,3 +110,7 @@ config OPTION_B
         assert configuration[cfg]["relPath"] == str(Path(relativePath, submodule))
 
     assert returncode == 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main(sys.argv))
