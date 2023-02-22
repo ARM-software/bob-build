@@ -2,7 +2,6 @@ gazelle: RegisterFlags() - NOT IMPLEMENTED
 gazelle: CheckFlags() - NOT IMPLEMENTED
 gazelle: Kinds() - NOT IMPLEMENTED
 gazelle: Loads() - NOT IMPLEMENTED
-gazelle: KnownDirectives() - NOT IMPLEMENTED
-gazelle: Configure() - NOT IMPLEMENTED
+gazelle: Configure() - Parsing - NOT IMPLEMENTED
 gazelle: Fix() - NOT IMPLEMENTED
 gazelle: GenerateRules() - NOT IMPLEMENTED

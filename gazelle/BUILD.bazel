@@ -16,6 +16,7 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/gazelle",
     visibility = ["//visibility:public"],
     deps = [
+        "//config",
         "@bazel_gazelle//config:go_default_library",
         "@bazel_gazelle//label:go_default_library",
         "@bazel_gazelle//language:go_default_library",

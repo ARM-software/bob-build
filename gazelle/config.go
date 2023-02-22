@@ -3,16 +3,22 @@ package plugin
 import (
 	"log"
 
+	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
+)
+
+const (
+	BobRootDirective = "bob_root" // Directive used to mark the root module of the Bob workspace
 )
 
 // KnownDirectives returns a list of directive keys that this Configurer can
 // interpret. Gazelle prints errors for directives that are not recoginized by
 // any Configurer.
 func (e *BobExtension) KnownDirectives() []string {
-	log.Printf("KnownDirectives() - NOT IMPLEMENTED\n")
-	return nil
+	return []string{
+		BobRootDirective,
+	}
 }
 
 // Configure modifies the configuration using directives and other information
@@ -27,5 +33,37 @@ func (e *BobExtension) KnownDirectives() []string {
 // f is the build file for the current directory or nil if there is no
 // existing build file.
 func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
-	log.Printf("Configure() - NOT IMPLEMENTED\n")
+
+	isBobRoot := false
+
+	if _, exists := c.Exts[BobExtensionName]; !exists {
+		rootCfg := pluginConfig.NewRootConfig(c.RepoRoot)
+		c.Exts[BobExtensionName] = pluginConfig.ConfigMap{"": rootCfg}
+	}
+
+	configs := c.Exts[BobExtensionName].(pluginConfig.ConfigMap)
+
+	// Get plugin configuration for this path, if none exists, create it.
+	pc, exists := configs[rel]
+	if !exists {
+		parent := configs.ParentForModulePath(rel)
+		pc = parent.NewChild()
+		configs[rel] = pc
+	}
+
+	// Handle directives
+	if f != nil {
+		for _, d := range f.Directives {
+			switch d.Key {
+			case BobRootDirective:
+				pc.BobWorkspaceRootRelPath = rel
+				isBobRoot = true
+			}
+		}
+	}
+
+	if isBobRoot {
+		// TODO: implement parsing
+		log.Printf("Configure() - Parsing - NOT IMPLEMENTED\n")
+	}
 }
