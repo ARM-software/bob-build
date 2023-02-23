@@ -16,8 +16,8 @@
 import json
 import io
 import os
-import sys
 import pytest
+import sys
 
 from pathlib import Path
 
@@ -97,11 +97,12 @@ config OPTION_B
     submconfig_fname = submconfig_dir / "Mconfig"
     submconfig_fname.write_text(submconfig_data)
 
-    returncode = get_configs_gazelle.main()
+    returncode = get_configs_gazelle.main(sys.stdin, sys.stdout)
 
     out = capfd.readouterr()
+    data = out.out[: len(out.out) - 1]
 
-    configuration = json.loads(out.out.strip())
+    configuration = json.loads(data.strip())
 
     for cfg in ["SUB_FEATURE_X", "SUB_FEATURE_Y"]:
         assert configuration[cfg]["relPath"] == relativePath

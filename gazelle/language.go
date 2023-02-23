@@ -31,6 +31,3 @@ func (e *BobExtension) Embeds(r *rule.Rule, from label.Label) []label.Label {
 	log.Printf("Embeds() - NOT IMPLEMENTED\n")
 	return nil
 }
-
-func init() {
-}

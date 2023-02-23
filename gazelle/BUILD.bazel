@@ -10,8 +10,12 @@ go_library(
         "generate.go",
         "imports.go",
         "kinds.go",
-        "plugin.go",
+        "language.go",
+        "mconfig_parser.go",
         "resolve.go",
+    ],
+    data = [
+        "@bob//config_system:get_configs_gazelle",
     ],
     importpath = "github.com/ARM-software/bob-build/gazelle",
     visibility = ["//visibility:public"],
@@ -23,6 +27,7 @@ go_library(
         "@bazel_gazelle//repo:go_default_library",
         "@bazel_gazelle//resolve:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
     ],
 )
 

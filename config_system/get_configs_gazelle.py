@@ -56,9 +56,9 @@ class SetEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def main() -> int:
+def main(stdin, stdout) -> int:
     if not sys.stdin.isatty():
-        for request in sys.stdin.read().splitlines():
+        for request in stdin:
             r = json.loads(request.strip())
             ignore_source = r.get("ignore_source", False)
             root_path = Path(r["root_path"])
@@ -81,10 +81,19 @@ def main() -> int:
             for k, v in cfg.items():
                 cfg[k]["relPath"] = rel_path / v["relPath"]
 
-            print(f"{json.dumps(cfg, indent=4, cls=SetEncoder)}")
+            print(
+                f"{json.dumps(cfg, indent=4, cls=SetEncoder)}",
+                end="",
+                file=stdout,
+                flush=True,
+            )
+
+            # write delimiter
+            stdout.buffer.write(bytes([0]))
+            stdout.flush()
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main(sys.stdin, sys.stdout))

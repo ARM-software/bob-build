@@ -2,6 +2,8 @@ package plugin
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -13,7 +15,7 @@ const (
 )
 
 // KnownDirectives returns a list of directive keys that this Configurer can
-// interpret. Gazelle prints errors for directives that are not recoginized by
+// interpret. Gazelle prints errors for directives that are not recognized by
 // any Configurer.
 func (e *BobExtension) KnownDirectives() []string {
 	return []string{
@@ -63,7 +65,18 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	}
 
 	if isBobRoot {
-		// TODO: implement parsing
-		log.Printf("Configure() - Parsing - NOT IMPLEMENTED\n")
+		if _, err := os.Stat(filepath.Join(c.RepoRoot, rel, "Mconfig")); err != nil {
+			log.Fatalf("No root Mconfig file: %v\n", err)
+		}
+
+		fileNames := []string{"Mconfig"}
+
+		parser := newMconfigParser(c.RepoRoot, rel)
+
+		// TODO use returned configs from `mconfigParser.parse()`
+		_, err := parser.parse(&fileNames)
+		if err != nil {
+			log.Fatalf("Parse failed: %v\n", err)
+		}
 	}
 }
