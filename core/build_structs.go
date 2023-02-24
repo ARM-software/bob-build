@@ -119,7 +119,7 @@ type generatorBackend interface {
 	escapeFlag(string) string
 
 	// Backend initialisation
-	init(*blueprint.Context, *bobConfig)
+	init(*blueprint.Context, *BobConfig)
 
 	// Access to backend configuration
 	getToolchain(tgt tgtType) toolchain
@@ -127,9 +127,9 @@ type generatorBackend interface {
 	getLogger() *warnings.WarningLogger
 }
 
-// The bobConfig type is stored against the Blueprint context, and allows us to
+// The `BobConfig` type is stored against the Blueprint context, and allows us to
 // retrieve the backend and configuration values from within Blueprint callbacks.
-type bobConfig struct {
+type BobConfig struct {
 	Generator  generatorBackend
 	Properties configProperties
 }
@@ -675,7 +675,7 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-type factoryWithConfig func(*bobConfig) (blueprint.Module, []interface{})
+type factoryWithConfig func(*BobConfig) (blueprint.Module, []interface{})
 
 func registerModuleTypes(register func(string, factoryWithConfig)) {
 	register("bob_binary", binaryFactory)

@@ -30,12 +30,12 @@ import (
 
 // enabledFeatures is just wrapper function to easily enable features that we want
 func enabledFeatures(featuresList ...string) (properties configProperties) {
-	properties.features = make(map[string]bool)
+	properties.Features = make(map[string]bool)
 	for _, feature := range featuresList {
 		// Features keys should be in lowercase
-		properties.features[feature] = true
+		properties.Features[feature] = true
 	}
-	properties.featureList = utils.SortedKeysBoolMap(properties.features)
+	properties.FeatureList = utils.SortedKeysBoolMap(properties.Features)
 	return
 }
 
@@ -162,10 +162,10 @@ func createTestModuleAndFeatures() (testProps, configProperties) {
 func Test_should_return_expected_default_values_when_using_setup_function(t *testing.T) {
 	module, properties := createTestModuleAndFeatures()
 
-	assert.True(t, properties.features["feature_a"], "feature_a should be enabled by default")
-	assert.True(t, properties.features["feature_b"], "feature_b should be enabled by default")
-	assert.True(t, properties.features["feature_c"], "feature_c should be enabled by default")
-	assert.True(t, properties.features["feature_d"], "feature_d should be enabled by default")
+	assert.True(t, properties.Features["feature_a"], "feature_a should be enabled by default")
+	assert.True(t, properties.Features["feature_b"], "feature_b should be enabled by default")
+	assert.True(t, properties.Features["feature_c"], "feature_c should be enabled by default")
+	assert.True(t, properties.Features["feature_d"], "feature_d should be enabled by default")
 
 	assert.Equalf(t, "a", module.FieldA, "module.FieldA should be equal to default value")
 	assert.Equalf(t, "b", module.FieldB, "module.FieldB should be equal to default value")
@@ -194,11 +194,11 @@ func Test_should_not_change_when_appending_empty_features(t *testing.T) {
 
 func Test_should_append_matching_properties_when_one_feature_is_enabled(t *testing.T) {
 	module, properties := createTestModuleAndFeatures()
-	properties.features["feature_a"] = false
-	properties.features["feature_c"] = false
-	properties.features["feature_d"] = false
+	properties.Features["feature_a"] = false
+	properties.Features["feature_c"] = false
+	properties.Features["feature_d"] = false
 
-	assert.True(t, properties.features["feature_b"], "Feature should be enabled")
+	assert.True(t, properties.Features["feature_b"], "Feature should be enabled")
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
 	}
@@ -217,7 +217,7 @@ func Test_should_not_modify_when_no_feature_is_enabled(t *testing.T) {
 	// The current implementation allows for properties.Features to contain
 	// a subset of the features Init was called with - check that this works.
 	// However, this functionality is not actually required by Bob.
-	properties.features = map[string]bool{} // all disabled (when key isn't present it should be treated as disabled)
+	properties.Features = map[string]bool{} // all disabled (when key isn't present it should be treated as disabled)
 
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
@@ -234,10 +234,10 @@ func Test_should_not_modify_when_no_feature_is_enabled(t *testing.T) {
 
 func Test_should_append_properties_in_desired_order_when_using_append_props(t *testing.T) {
 	module, properties := createTestModuleAndFeatures()
-	properties.features["feature_a"] = true
-	properties.features["feature_b"] = true
-	properties.features["feature_c"] = false
-	properties.features["feature_d"] = false
+	properties.Features["feature_a"] = true
+	properties.Features["feature_b"] = true
+	properties.Features["feature_c"] = false
+	properties.Features["feature_d"] = false
 
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
@@ -250,10 +250,10 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	assert.Equalf(t, "f", module.FieldF, "module.FieldF incorrect")
 	assert.Equalf(t, "gProps_g", module.FieldG, "module.FieldG incorrect")
 
-	properties.features["feature_a"] = false
-	properties.features["feature_b"] = false
-	properties.features["feature_c"] = false
-	properties.features["feature_d"] = true
+	properties.Features["feature_a"] = false
+	properties.Features["feature_b"] = false
+	properties.Features["feature_c"] = false
+	properties.Features["feature_d"] = true
 
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)
@@ -266,10 +266,10 @@ func Test_should_append_properties_in_desired_order_when_using_append_props(t *t
 	assert.Equalf(t, "f+D_f", module.FieldF, "module.FieldF incorrect")
 	assert.Equalf(t, "gProps_g+D_g", module.FieldG, "module.FieldG incorrect")
 
-	properties.features["feature_a"] = false
-	properties.features["feature_b"] = true
-	properties.features["feature_c"] = false
-	properties.features["feature_d"] = true
+	properties.Features["feature_a"] = false
+	properties.Features["feature_b"] = true
+	properties.Features["feature_c"] = false
+	properties.Features["feature_d"] = true
 
 	if err := module.AppendProps([]interface{}{&module}, &properties); err != nil {
 		panic(err)

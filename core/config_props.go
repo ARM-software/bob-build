@@ -32,22 +32,22 @@ import (
 type configProperties struct {
 	// Map of all available features (e.g. noasserts: { cflags: ["-DNDEBUG]" }),
 	// and whether they are enabled or not.
-	features map[string]bool
+	Features map[string]bool
 
 	// Map of all available properties which can be used in templates. Features are
 	// not automatically included in this by Bob, so should be added explicitly by the
 	// config system if required. These are converted to strings, then made available
 	// for use in templates.
-	properties map[string]interface{}
+	Properties map[string]interface{}
 
 	// Sorted array of available features
-	featureList []string
+	FeatureList []string
 
 	stringMap map[string]string
 }
 
 func (properties configProperties) getProp(name string) interface{} {
-	if elem, ok := properties.properties[name]; ok {
+	if elem, ok := properties.Properties[name]; ok {
 		return elem
 	}
 	utils.Die("No property found: %s", name)
@@ -169,9 +169,9 @@ func (properties *configProperties) LoadConfig(filename string) error {
 	// This is actually a string, which is what we want.
 	d.UseNumber()
 
-	properties.properties = make(map[string]interface{})
+	properties.Properties = make(map[string]interface{})
 	properties.stringMap = make(map[string]string)
-	properties.features = make(map[string]bool)
+	properties.Features = make(map[string]bool)
 
 	var configData map[string]interface{}
 	err = d.Decode(&configData)
@@ -187,7 +187,7 @@ func (properties *configProperties) LoadConfig(filename string) error {
 		// Identify that configuration is ignored or not
 		if ignore, ok := boolValue(configMap["ignore"]); ok {
 			if !ignore {
-				properties.properties[key] = configMap["value"]
+				properties.Properties[key] = configMap["value"]
 
 				// Create a mapping of properties to values that will be used
 				// by templates
@@ -195,14 +195,14 @@ func (properties *configProperties) LoadConfig(filename string) error {
 
 				// Identify features and whether they are enabled
 				if v, ok := boolValue(configMap["value"]); ok {
-					properties.features[key] = v
+					properties.Features[key] = v
 				}
 			}
 		}
 	}
 
 	// Calculate the plain list of features once.
-	properties.featureList = utils.SortedKeysBoolMap(properties.features)
+	properties.FeatureList = utils.SortedKeysBoolMap(properties.Features)
 
 	return nil
 }

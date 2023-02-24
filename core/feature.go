@@ -82,9 +82,9 @@ func (f *Features) Init(properties *configProperties, list ...interface{}) {
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
-	fields := make([]reflect.StructField, len(properties.featureList))
+	fields := make([]reflect.StructField, len(properties.FeatureList))
 
-	for i, featureName := range properties.featureList {
+	for i, featureName := range properties.FeatureList {
 		fields[i] = reflect.StructField{
 			Name: featurePropertyName(featureName),
 			Type: reflect.TypeOf(singleFeature{}),
@@ -96,7 +96,7 @@ func (f *Features) Init(properties *configProperties, list ...interface{}) {
 	f.BlueprintEmbed = instancePtr.Interface()
 
 	instance := reflect.Indirect(instancePtr)
-	for i := range properties.featureList {
+	for i := range properties.FeatureList {
 		propsInFeature := instance.Field(i).Addr().Interface().(*singleFeature)
 		propsInFeature.BlueprintEmbed = reflect.New(propsType).Interface()
 	}
@@ -175,8 +175,8 @@ func (f *Features) AppendProps(dst []interface{}, properties *configProperties) 
 	// featuresData is struct created in Features.Init function
 	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()
 
-	for _, featureKey := range properties.featureList {
-		if properties.features[featureKey] { // Check the feature is enabled
+	for _, featureKey := range properties.FeatureList {
+		if properties.Features[featureKey] { // Check the feature is enabled
 			// Features are matched like "Feature_name" - feature structure
 			featureFieldName := featurePropertyName(featureKey)
 			featureStruct := featuresData.FieldByName(featureFieldName)

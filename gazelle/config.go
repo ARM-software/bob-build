@@ -4,7 +4,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
+	bob "github.com/ARM-software/bob-build/core"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -73,10 +75,34 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		parser := newMconfigParser(c.RepoRoot, rel)
 
-		// TODO use returned configs from `mconfigParser.parse()`
-		_, err := parser.parse(&fileNames)
+		configs, err := parser.parse(&fileNames)
 		if err != nil {
 			log.Fatalf("Parse failed: %v\n", err)
 		}
+
+		// Create configuration based on returned configs
+		// from `mconfigParser.parse()`
+		createBobConfigSpoof(configs)
 	}
+}
+
+func createBobConfigSpoof(c *map[string]configData) *bob.BobConfig {
+
+	config := &bob.BobConfig{}
+
+	// prepare feature list
+	config.Properties.FeatureList = make([]string, 0)
+	config.Properties.Features = make(map[string]bool)
+	config.Properties.Properties = make(map[string]interface{})
+
+	for k, v := range *c {
+		if v.Ignore != "y" {
+			config.Properties.FeatureList = append(config.Properties.FeatureList, strings.ToLower(k))
+			// To be safe set everything to false by default.
+			config.Properties.Features[k] = false
+			config.Properties.Properties[k] = v
+		}
+	}
+
+	return config
 }

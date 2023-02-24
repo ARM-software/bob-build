@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +74,7 @@ func (m *alias) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
 // Create the structure representing the bob_alias
-func aliasFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &alias{}
 	module.Properties.Features.Init(&config.Properties, AliasProps{})
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}

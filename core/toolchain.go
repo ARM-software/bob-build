@@ -435,7 +435,7 @@ func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
 	}
 }
 
-func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommon) {
+func newToolchainGnuCommon(config *BobConfig, tgt tgtType) (tc toolchainGnuCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
@@ -464,12 +464,12 @@ func newToolchainGnuCommon(config *bobConfig, tgt tgtType) (tc toolchainGnuCommo
 	return
 }
 
-func newToolchainGnuNative(config *bobConfig) (tc toolchainGnuNative) {
+func newToolchainGnuNative(config *BobConfig) (tc toolchainGnuNative) {
 	tc.toolchainGnuCommon = newToolchainGnuCommon(config, tgtTypeHost)
 	return
 }
 
-func newToolchainGnuCross(config *bobConfig) (tc toolchainGnuCross) {
+func newToolchainGnuCross(config *BobConfig) (tc toolchainGnuCross) {
 	tc.toolchainGnuCommon = newToolchainGnuCommon(config, tgtTypeTarget)
 	return
 }
@@ -552,7 +552,7 @@ func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool 
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangCommon) {
+func newToolchainClangCommon(config *BobConfig, tgt tgtType) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
 
@@ -666,12 +666,12 @@ func newToolchainClangCommon(config *bobConfig, tgt tgtType) (tc toolchainClangC
 	return
 }
 
-func newToolchainClangNative(config *bobConfig) (tc toolchainClangNative) {
+func newToolchainClangNative(config *BobConfig) (tc toolchainClangNative) {
 	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeHost)
 	return
 }
 
-func newToolchainClangCross(config *bobConfig) (tc toolchainClangCross) {
+func newToolchainClangCross(config *BobConfig) (tc toolchainClangCross) {
 	tc.toolchainClangCommon = newToolchainClangCommon(config, tgtTypeTarget)
 	return
 }
@@ -735,7 +735,7 @@ func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArmClang) {
+func newToolchainArmClangCommon(config *BobConfig, tgt tgtType) (tc toolchainArmClang) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
@@ -752,12 +752,12 @@ func newToolchainArmClangCommon(config *bobConfig, tgt tgtType) (tc toolchainArm
 	return
 }
 
-func newToolchainArmClangNative(config *bobConfig) (tc toolchainArmClangNative) {
+func newToolchainArmClangNative(config *BobConfig) (tc toolchainArmClangNative) {
 	tc.toolchainArmClang = newToolchainArmClangCommon(config, tgtTypeHost)
 	return
 }
 
-func newToolchainArmClangCross(config *bobConfig) (tc toolchainArmClangCross) {
+func newToolchainArmClangCross(config *BobConfig) (tc toolchainArmClangCross) {
 	tc.toolchainArmClang = newToolchainArmClangCommon(config, tgtTypeTarget)
 	return
 }
@@ -889,7 +889,7 @@ func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode) {
+func newToolchainXcodeCommon(config *BobConfig, tgt tgtType) (tc toolchainXcode) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
@@ -915,12 +915,12 @@ func newToolchainXcodeCommon(config *bobConfig, tgt tgtType) (tc toolchainXcode)
 	return
 }
 
-func newToolchainXcodeNative(config *bobConfig) (tc toolchainXcodeNative) {
+func newToolchainXcodeNative(config *BobConfig) (tc toolchainXcodeNative) {
 	tc.toolchainXcode = newToolchainXcodeCommon(config, tgtTypeHost)
 	return
 }
 
-func newToolchainXcodeCross(config *bobConfig) (tc toolchainXcodeCross) {
+func newToolchainXcodeCross(config *BobConfig) (tc toolchainXcodeCross) {
 	tc.toolchainXcode = newToolchainXcodeCommon(config, tgtTypeTarget)
 	return
 }
@@ -937,7 +937,7 @@ func (tcs *toolchainSet) getToolchain(tgt tgtType) toolchain {
 	return tcs.target
 }
 
-func (tcs *toolchainSet) parseConfig(config *bobConfig) {
+func (tcs *toolchainSet) parseConfig(config *BobConfig) {
 	props := config.Properties
 
 	if props.GetBool("target_toolchain_clang") {

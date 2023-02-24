@@ -125,7 +125,7 @@ func (g *moduleGlob) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// Only sources should be returned to the modules depending on.
 }
 
-func globFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func globFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	t := true
 	module := &moduleGlob{}
 

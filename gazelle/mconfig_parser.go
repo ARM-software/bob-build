@@ -79,6 +79,7 @@ type configData struct {
 	Type      string      `json:"type"`
 	Default   interface{} `json:"default"`
 	Condition interface{} `json:"default_cond"`
+	Ignore    string      `json:"bob_ignore,omitempty"`
 }
 
 // Constructs a new `mconfigParser`

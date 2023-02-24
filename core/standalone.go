@@ -55,8 +55,8 @@ func projectModuleDir(ctx blueprint.BaseModuleContext) string {
 	return ctx.ModuleDir()
 }
 
-func getConfig(ctx configProvider) *bobConfig {
-	return ctx.Config().(*bobConfig)
+func getConfig(ctx configProvider) *BobConfig {
+	return ctx.Config().(*BobConfig)
 }
 
 func getBuildDir() string {
@@ -82,7 +82,7 @@ func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
 	// specified in the config.
-	config := &bobConfig{}
+	config := &BobConfig{}
 	err := config.Properties.LoadConfig(configJSONFile)
 	if err != nil {
 		utils.Die("%v", err)

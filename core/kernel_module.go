@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -266,7 +266,7 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func kernelModuleFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func kernelModuleFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
 
 	module.Properties.Features.Init(&config.Properties, CommonProps{}, KernelProps{})
