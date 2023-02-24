@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,14 +254,14 @@ func (m *resource) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
-func installGroupFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &installGroup{}
 	module.Properties.Features.Init(&config.Properties, InstallGroupProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
 
-func resourceFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &resource{}
 	module.Properties.Features.Init(&config.Properties, ResourceProps{})
 	return module, []interface{}{&module.Properties,

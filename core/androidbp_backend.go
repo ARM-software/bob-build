@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Arm Limited.
+ * Copyright 2020-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -322,7 +322,7 @@ func (cm *codeMatcher) match() bool {
 	return matched
 }
 
-func getSoongCompatFile(config *bobConfig) string {
+func getSoongCompatFile(config *BobConfig) string {
 	type compatVersion struct {
 		matches          []codeMatcher
 		android_versions []int
@@ -488,7 +488,7 @@ func (g *androidBpGenerator) getLogger() *warnings.WarningLogger {
 	return g.logger
 }
 
-func (g *androidBpGenerator) init(ctx *blueprint.Context, config *bobConfig) {
+func (g *androidBpGenerator) init(ctx *blueprint.Context, config *BobConfig) {
 	// Do not run in parallel to avoid locking issues on the map
 	ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
 

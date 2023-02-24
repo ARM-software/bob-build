@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -109,7 +109,7 @@ func propogateFilegroupData(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func filegroupFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &filegroup{}
 	module.Properties.Features.Init(&config.Properties, FileGroupProps{})
 	return module, []interface{}{&module.Properties,

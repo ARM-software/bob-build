@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Arm Limited.
+ * Copyright 2019-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,7 +79,7 @@ var _ splittable = (*externalLib)(nil)
 // External libraries have no actions - they are already built.
 func (m *externalLib) GenerateBuildActions(ctx blueprint.ModuleContext) {}
 
-func externalLibFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func externalLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &externalLib{}
 	module.Properties.Features.Init(&config.Properties, ExternalLibProps{})
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}

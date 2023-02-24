@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -371,6 +371,6 @@ func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
 	return g.logger
 }
 
-func (g *linuxGenerator) init(ctx *blueprint.Context, config *bobConfig) {
+func (g *linuxGenerator) init(ctx *blueprint.Context, config *BobConfig) {
 	g.toolchainSet.parseConfig(config)
 }

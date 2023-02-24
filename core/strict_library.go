@@ -164,7 +164,7 @@ func (m *strictLibrary) getTocName() string {
 	return m.Name() + tocExt
 }
 
-func LibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &strictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})
 	return module, []interface{}{&module.Properties,

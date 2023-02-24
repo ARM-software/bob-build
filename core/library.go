@@ -808,7 +808,7 @@ func (m *binary) outputFileName() string {
 	return m.outputName()
 }
 
-func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
+func (l *library) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
 	l.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})
 	l.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{})
 	l.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{})
@@ -816,12 +816,12 @@ func (l *library) LibraryFactory(config *bobConfig, module blueprint.Module) (bl
 	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
 }
 
-func staticLibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &staticLibrary{}
 	return module.LibraryFactory(config, module)
 }
 
-func sharedLibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func sharedLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &sharedLibrary{}
 	if config.Properties.GetBool("osx") {
 		module.fileNameExtension = ".dylib"
@@ -831,7 +831,7 @@ func sharedLibraryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
 	return module.LibraryFactory(config, module)
 }
 
-func binaryFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func binaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &binary{}
 	return module.LibraryFactory(config, module)
 }

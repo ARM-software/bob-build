@@ -132,7 +132,7 @@ func (m *defaults) getMatchSourcePropNames() []string {
 	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
 
-func defaultsFactory(config *bobConfig) (blueprint.Module, []interface{}) {
+func defaultsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &defaults{}
 
 	module.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, SplittableProps{})

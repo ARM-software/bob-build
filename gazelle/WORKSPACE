@@ -45,7 +45,7 @@ load("@rules_python//python:repositories.bzl", "py_repositories")
 py_repositories()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")  # keep
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")  # keep
 
 go_rules_dependencies()
 
@@ -74,3 +74,10 @@ pip_parse(
 load("@config_deps//:requirements.bzl", "install_deps")
 
 install_deps()
+
+# keep
+go_repository(
+    name = "com_github_google_blueprint",
+    commit = "6957a46d",
+    importpath = "github.com/google/blueprint",
+)
