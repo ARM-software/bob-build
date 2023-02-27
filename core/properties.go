@@ -84,7 +84,7 @@ func PrependMatchingProperties(dst []interface{}, src interface{}) error {
 }
 
 // Applies default options
-func defaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 	// The mutator is run bottom up, so modules without dependencies
 	// will be processed first.
 	//

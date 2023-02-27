@@ -80,9 +80,10 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			log.Fatalf("Parse failed: %v\n", err)
 		}
 
-		// Create configuration based on returned configs
-		// from `mconfigParser.parse()`
-		createBobConfigSpoof(configs)
+		bobConfig := createBobConfigSpoof(configs)
+		bobParser := newBobParser(c.RepoRoot, bobConfig)
+
+		bobParser.parse()
 	}
 }
 

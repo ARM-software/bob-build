@@ -96,7 +96,7 @@ func Main() {
 
 	var ctx = blueprint.NewContext()
 
-	registerModuleTypes(func(name string, mf factoryWithConfig) {
+	RegisterModuleTypes(func(name string, mf FactoryWithConfig) {
 		// Create a closure passing the config to a module factory so
 		// that the module factories can access the config.
 		factory := func() (blueprint.Module, []interface{}) {
@@ -169,8 +169,8 @@ func Main() {
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
 	// The generated depender mutator add dependencies to generated source modules.
-	ctx.RegisterBottomUpMutator("default_deps1", defaultDepsStage1Mutator).Parallel()
-	ctx.RegisterBottomUpMutator("default_deps2", defaultDepsStage2Mutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps1", DefaultDepsStage1Mutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_deps2", DefaultDepsStage2Mutator).Parallel()
 	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
 	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
@@ -179,7 +179,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
-	ctx.RegisterBottomUpMutator("default_applier", defaultApplierMutator).Parallel()
+	ctx.RegisterBottomUpMutator("default_applier", DefaultApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("library_defines", propogateLibraryDefinesMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
