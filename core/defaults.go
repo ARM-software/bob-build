@@ -118,8 +118,8 @@ func (m *defaults) getEscapeProperties() []*[]string {
 		&m.Properties.Ldflags}
 }
 
-func (m *defaults) getSourceProperties() *SourceProps {
-	return &m.Properties.SourceProps
+func (m *defaults) getLegacySourceProperties() *LegacySourceProps {
+	return &m.Properties.LegacySourceProps
 }
 
 // {{match_srcs}} template is only applied in specific properties where we've
@@ -191,7 +191,7 @@ var (
 func DefaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 
 	if d, ok := mctx.Module().(*defaults); ok {
-		srcs := d.getSourceProperties()
+		srcs := d.getLegacySourceProperties()
 
 		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
 		if len(srcs.Srcs) > 0 || len(srcs.Exclude_srcs) > 0 {

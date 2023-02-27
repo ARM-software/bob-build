@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Arm Limited.
+ * Copyright 2020-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -155,7 +155,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 		utils.Die("%v", err.Error())
 	}
 
-	srcs := gs.generateCommon.Properties.getSources(mctx)
+	srcs := gs.generateCommon.Properties.getSourcesResolved(mctx)
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
@@ -176,7 +176,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 		utils.Die(err.Error())
 	}
 
-	srcs := ts.generateCommon.Properties.getSources(mctx)
+	srcs := ts.generateCommon.Properties.getSourcesResolved(mctx)
 	m.AddStringList("srcs", srcs)
 	gr := m.NewGroup("out")
 	// if REs had double slashes in original value, at parsing they got removed, so compensate for that

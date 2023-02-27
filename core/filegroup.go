@@ -18,29 +18,33 @@
 package core
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
 
-type FileGroupProps struct {
-	Srcs           []string
-	Filegroup_srcs []string
-}
-
 type filegroup struct {
 	moduleBase
 	Properties struct {
-		FileGroupProps
+		SourceProps
 		Features
 	}
 }
 
-func (m *filegroup) getSources(ctx blueprint.BaseModuleContext) (srcs []string) {
-	srcs = m.Properties.Srcs
-	return
+// Implementation check:
+var _ sourceInterface = (*filegroup)(nil)
+
+func (m *filegroup) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
+	return m.Properties.SourceProps.getSourceFiles(ctx)
+}
+
+func (m *filegroup) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
+	return m.Properties.SourceProps.getSourceTargets(ctx)
+}
+
+func (m *filegroup) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
+	return m.Properties.SourceProps.getSourcesResolved(ctx)
 }
 
 func (m *filegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -52,13 +56,7 @@ func (m *filegroup) shortName() string {
 }
 
 func (m *filegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	for _, path := range m.Properties.Srcs {
-		if strings.Contains(path, "..") {
-			utils.Die("%s contains a relative uplink. Relative uplinks are not allowed in filegroup targets.", m.shortName())
-		}
-	}
-	prefix := projectModuleDir(ctx)
-	m.Properties.Srcs = utils.PrefixDirs(m.Properties.Srcs, prefix)
+	m.Properties.SourceProps.processPaths(ctx, g)
 }
 
 var (
@@ -67,21 +65,18 @@ var (
 )
 
 func prepFilegroupMapMutator(mctx blueprint.BottomUpMutatorContext) {
-	if l, ok := getLibrary(mctx.Module()); ok {
+	moduleName := mctx.ModuleName()
+	module := mctx.Module()
+	if m, ok := module.(sourceInterface); ok {
 		filegroupMapLock.Lock()
 		defer filegroupMapLock.Unlock()
-
-		filegroupMap[mctx.ModuleName()] = l.Properties.Filegroup_srcs
-	} else if fg, ok := mctx.Module().(*filegroup); ok {
-		filegroupMapLock.Lock()
-		defer filegroupMapLock.Unlock()
-
-		filegroupMap[mctx.ModuleName()] = fg.Properties.Filegroup_srcs
+		filegroupMap[moduleName] = m.getSourceTargets(mctx)
 	}
 }
 
 func expandFilegroup(d string, visited []string) []string {
 	var filegroups []string
+
 	if len(filegroupMap[d]) > 0 {
 		for _, def := range filegroupMap[d] {
 			if utils.Find(visited, def) >= 0 {
@@ -97,21 +92,14 @@ func expandFilegroup(d string, visited []string) []string {
 func propogateFilegroupData(mctx blueprint.BottomUpMutatorContext) {
 	if _, ok := getLibrary(mctx.Module()); ok {
 		flattenedFilegroups := expandFilegroup(mctx.ModuleName(), []string{})
-		var filegroups []string
-
-		for i, el := range flattenedFilegroups {
-			if utils.Find(flattenedFilegroups[i+1:], el) == -1 {
-				filegroups = append(filegroups, el)
-			}
-		}
-
+		filegroups := utils.Unique(flattenedFilegroups)
 		mctx.AddDependency(mctx.Module(), filegroupTag, filegroups...)
 	}
 }
 
 func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &filegroup{}
-	module.Properties.Features.Init(&config.Properties, FileGroupProps{})
+	module.Properties.Features.Init(&config.Properties, SourceProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }

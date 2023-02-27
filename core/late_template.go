@@ -28,8 +28,9 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
+// Currently only supported for Legacy source props
 type matchSourceInterface interface {
-	getSourceProperties() *SourceProps
+	getLegacySourceProperties() *LegacySourceProps
 	getMatchSourcePropNames() []string
 }
 
@@ -102,12 +103,12 @@ func applyLateTemplateRecursive(propsVal reflect.Value, stringvalues map[string]
 
 // Record non-compiled sources (only relevant for C/C++ compiled
 // libraries/binaries)
-func (s *SourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseModuleContext) map[string]bool {
+func (s *LegacySourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseModuleContext) map[string]bool {
 	// Unused non-compiled sources are not allowed, so create
 	// a map to mark whether a non-compiled source is matched.
 	nonCompiledSources := make(map[string]bool)
 	if _, ok := getLibrary(mctx.Module()); ok {
-		for _, src := range s.getSources(mctx) {
+		for _, src := range s.getSourcesResolved(mctx) {
 			if utils.IsNotCompilableSource(src) {
 				nonCompiledSources[src] = false
 			}
@@ -133,11 +134,11 @@ func (s *SourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseModuleCo
 func setupMatchSources(mctx blueprint.BaseModuleContext,
 	propfnmap map[string]template.FuncMap) map[string]bool {
 
-	var sourceProps *SourceProps
+	var sourceProps *LegacySourceProps
 	var matchSrcProps []string
 
 	if m, ok := mctx.Module().(matchSourceInterface); ok {
-		sourceProps = m.getSourceProperties()
+		sourceProps = m.getLegacySourceProperties()
 		matchSrcProps = m.getMatchSourcePropNames()
 	}
 
@@ -151,13 +152,13 @@ func setupMatchSources(mctx blueprint.BaseModuleContext,
 }
 
 // Callback function implementing {{match_srcs}}
-func (s *SourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
+func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 	matchedNonCompiledSources map[string]bool) string {
 
 	g := getBackend(ctx)
 
 	matchedSources := []string{}
-	for _, src := range s.getSources(ctx) {
+	for _, src := range s.getSourcesResolved(ctx) {
 		matched, err := pathtools.Match("**/"+arg, src)
 		if err != nil {
 			utils.Die("Error during matching filepath pattern")

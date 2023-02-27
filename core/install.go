@@ -188,7 +188,7 @@ type installable interface {
 
 // ResourceProps defines all the properties that can be used in a bob_resource
 type ResourceProps struct {
-	SourceProps
+	LegacySourceProps
 	AliasableProps
 	InstallableProps
 	EnableableProps
@@ -238,7 +238,7 @@ func (m *resource) getEnableableProps() *EnableableProps {
 }
 
 func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.SourceProps.getSources(ctx)
+	return m.Properties.LegacySourceProps.getSourcesResolved(ctx)
 }
 
 func (m *resource) getInstallableProps() *InstallableProps {
@@ -246,7 +246,7 @@ func (m *resource) getInstallableProps() *InstallableProps {
 }
 
 func (m *resource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.SourceProps.processPaths(ctx, g)
+	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 }
 

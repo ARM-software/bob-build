@@ -9,11 +9,24 @@ For general common properties please
 [check detailed documentation](common_module_properties.md).
 
 ```bp
+// Simple filegroup with source file list.
+bob_filegroup {
+    name: "other_filegroup_module",
+    srcs: ["src/a.cpp"],
+}
+
+bob_glob {
+    name: "glob_group",
+    srcs: ["src/common/*.cpp"],
+}
+
 bob_filegroup {
     name: "custom_name",
-
-    srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
-    filegroup_srcs: ["other_filegroup_module"],
+    srcs: [
+        "src/b.cpp",
+        ":other_filegroup_module",
+        ":glob_group"
+    ],
 }
 ```
 
@@ -27,11 +40,6 @@ The unique identifier that can be used to refer to this module.
 
 ### **bob_filegroup.srcs** (optional)
 
-Source files to add to other modules that depend upon this.
+A list of source files or other targets this filegroup includes.
 
 ---
-
-### **bob_filegroup.filegroup_srcs** (optional)
-
-Other filegroups this filegroup depends on. Their sources are also
-appended to the sources of any module that depends upon this module.

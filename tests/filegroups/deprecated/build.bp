@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Arm Limited.
+ * Copyright 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,28 +15,9 @@
  * limitations under the License.
  */
 
-bob_filegroup {
-    name: "filegroup_impl",
-    srcs: ["src/impl.cpp"],
-}
-
-bob_glob {
-    name: "glob_main",
-    srcs: ["**/main.cpp"],
-    allow_empty: false,
-}
-
-bob_filegroup {
-    name: "forward_filegroup",
-    srcs: [":filegroup_impl"],
-}
 
 bob_binary {
-    name: "test_filegroup_simple",
-    srcs: [ ":glob_main", ":forward_filegroup"],
-}
-
-bob_alias {
-    name: "bob_test_filegroups",
-    srcs: ["test_filegroup_simple", "test_filegroup_simple_deprecated"],
+    name: "test_filegroup_simple_deprecated",
+    srcs: [],
+    filegroup_srcs: ["forward_filegroup", "glob_main"], // filegroup_srcs is no longer recommended. But can be used in legacy targets.
 }
