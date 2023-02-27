@@ -675,9 +675,9 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-type factoryWithConfig func(*BobConfig) (blueprint.Module, []interface{})
+type FactoryWithConfig func(*BobConfig) (blueprint.Module, []interface{})
 
-func registerModuleTypes(register func(string, factoryWithConfig)) {
+func RegisterModuleTypes(register func(string, FactoryWithConfig)) {
 	register("bob_binary", binaryFactory)
 	register("bob_static_library", staticLibraryFactory)
 	register("bob_shared_library", sharedLibraryFactory)

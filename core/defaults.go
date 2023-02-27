@@ -181,14 +181,14 @@ var (
 	// each module, but allows us to access the information without
 	// having the blueprint.Module available.
 	//
-	// Populated by defaultDepsStage1Mutator.
-	// Used in defaultDepsStage2Mutator.
+	// Populated by DefaultDepsStage1Mutator.
+	// Used in DefaultDepsStage2Mutator.
 	defaultsMap     = map[string][]string{}
 	defaultsMapLock sync.RWMutex
 )
 
 // Locally store defaults in defaultsMap
-func defaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 
 	if d, ok := mctx.Module().(*defaults); ok {
 		srcs := d.getSourceProperties()
@@ -253,7 +253,7 @@ func expandDefault(d string, visited []string) []string {
 // on each module, and between hierarchies. Without flattening the
 // hierarchy we would need more control over the module visitation
 // order in WalkDeps.
-func defaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
 
 	_, isDefaults := mctx.Module().(*defaults)
 	if isDefaults {
