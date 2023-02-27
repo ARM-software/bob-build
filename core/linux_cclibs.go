@@ -163,7 +163,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 
 // Returns all the source files for a C/C++ library. This includes any sources that are generated.
 func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
-	srcs := l.Properties.getSources(ctx)
+	srcs := l.Properties.getSourcesResolved(ctx)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },

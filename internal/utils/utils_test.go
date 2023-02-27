@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Arm Limited.
+ * Copyright 2018-2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,6 +57,13 @@ func Test_PrefixAll(t *testing.T) {
 	assert.Equal(t, correct, PrefixAll(in, prefix))
 }
 
+func Test_StripPrefixAll(t *testing.T) {
+	in := []string{":a", ":b", ":some:target"}
+	prefix := ":"
+	correct := []string{"a", "b", "some:target"}
+	assert.Equal(t, correct, StripPrefixAll(in, prefix))
+}
+
 func Test_PrefixDirs(t *testing.T) {
 	if len(PrefixDirs([]string{}, "myprefix")) != 0 {
 		t.Errorf("Incorrect handling of empty list")
@@ -95,6 +102,12 @@ func Test_Contains(t *testing.T) {
 	assert.Falsef(t, Contains([]string{}, "anything"), "empty list")
 	assert.Falsef(t, Contains([]string{}, ""), "empty strings")
 	assert.Truef(t, Contains([]string{""}, ""), "empty strings")
+}
+
+func Test_Unique(t *testing.T) {
+	assert.Equal(t, Unique([]string{"a", "b", "c"}), []string{"a", "b", "c"})
+	assert.Equal(t, Unique([]string{"a", "a", "a"}), []string{"a"})
+	assert.Equal(t, Unique([]string{"a", "b", "a"}), []string{"a", "b"})
 }
 
 func Test_ListsContain(t *testing.T) {

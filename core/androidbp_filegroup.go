@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Arm Limited.
+ * Copyright 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,5 @@ func (g *androidBpGenerator) filegroupActions(fg *filegroup, ctx blueprint.Modul
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	var filegroupSrcs []string
-	for _, filegroupName := range fg.Properties.Filegroup_srcs {
-		filegroupSrcs = append(filegroupSrcs, ":"+filegroupName)
-	}
-
-	m.AddStringList("srcs", append(fg.Properties.Srcs, filegroupSrcs...))
+	m.AddStringList("srcs", fg.Properties.Srcs)
 }

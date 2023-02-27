@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Arm Limited.
+ * Copyright 2020-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,7 +75,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	}
 
 	addProvenanceProps(bpmod, l.Properties.AndroidProps)
-	bpmod.AddStringList("srcs", l.Properties.getSources(mctx))
+	bpmod.AddStringList("srcs", l.Properties.getSourcesResolved(mctx))
 	bpmod.AddStringList("generated_deps", generated_deps)
 	bpmod.AddStringList("out", l.outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})

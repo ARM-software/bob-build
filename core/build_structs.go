@@ -253,18 +253,6 @@ func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []
 	return files
 }
 
-// SourceProps defines module properties that are used to identify the
-// source files associated with a module.
-type SourceProps struct {
-	// The list of source files. Wildcards can be used (but are suboptimal)
-	Srcs []string
-	// The list of source files that should not be included. Use with care.
-	Exclude_srcs []string
-	// A list of filegroup modules that provide srcs, these are directly added to Srcs.
-	// We do not currently re-use Srcs for this.
-	Filegroup_srcs []string
-}
-
 // IncludeDirsProps defines a set of properties for including directories
 // by the module.
 type IncludeDirsProps struct {
@@ -274,28 +262,6 @@ type IncludeDirsProps struct {
 	// The list of include dirs to use that is relative to the build.bp file
 	// These use relative instead of absolute paths
 	Local_include_dirs []string `bob:"first_overrides"`
-}
-
-// Get a list of sources to compile.
-//
-// The sources are relative to the project directory (i.e. include
-// the module directory but not the base source directory), and
-// excludes have been handled.
-func (s *SourceProps) getSources(ctx blueprint.BaseModuleContext) []string {
-	return glob(ctx, append(s.Srcs, getFileGroupDeps(ctx)...), s.Exclude_srcs)
-}
-
-func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	prefix := projectModuleDir(ctx)
-
-	for _, s := range s.Srcs {
-		if strings.HasPrefix(filepath.Clean(s), "../") {
-			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
-		}
-	}
-
-	s.Srcs = utils.PrefixDirs(s.Srcs, prefix)
-	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
 
 func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -440,12 +406,11 @@ func getFileGroupDeps(mctx blueprint.BaseModuleContext) (srcs []string) {
 			return mctx.OtherModuleDependencyTag(m) == filegroupTag
 		},
 		func(m blueprint.Module) {
-			if fg, ok := m.(*filegroup); ok {
-				srcs = append(srcs, fg.getSources(mctx)...)
-			} else if mg, ok := m.(*moduleGlob); ok {
-				srcs = append(srcs, mg.getSources(mctx)...)
+			if s, ok := m.(sourceInterface); ok {
+				srcs = append(srcs, s.getSourceFiles(mctx)...)
 			}
 		})
+
 	return
 }
 

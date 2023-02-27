@@ -75,6 +75,7 @@ type strictLibrary struct {
 // All libraries must support:
 var _ splittable = (*strictLibrary)(nil)
 var _ dependentInterface = (*strictLibrary)(nil)
+var _ sourceInterface = (*library)(nil)
 
 // shared libraries must supports:
 // * producing output using the linker
@@ -87,8 +88,7 @@ var _ dependentInterface = (*strictLibrary)(nil)
 func (m *strictLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// TODO: Handle Bazel targets & check paths
 	prefix := projectModuleDir(ctx)
-
-	m.Properties.Srcs = utils.PrefixDirs(m.Properties.Srcs, prefix)
+	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.Hdrs = utils.PrefixDirs(m.Properties.Hdrs, prefix)
 }
 
@@ -111,6 +111,18 @@ func (m *strictLibrary) outputFileName() string {
 
 func (l *strictLibrary) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.outputName()) + string(os.PathSeparator)
+}
+
+func (l *strictLibrary) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.SourceProps.getSourceFiles(ctx)
+
+}
+func (l *strictLibrary) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.SourceProps.getSourceTargets(ctx)
+
+}
+func (l *strictLibrary) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.SourceProps.getSourcesResolved(ctx)
 }
 
 func (l *strictLibrary) getSrcs() []string {

@@ -64,7 +64,7 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 
 func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	g := getBackend(ctx)
-	srcs := l.getSrcs()
+	srcs := l.getSourcesResolved(ctx)
 
 	tc := g.getToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.getAssembler()

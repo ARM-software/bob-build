@@ -67,6 +67,8 @@ bootstrap_go_package {
         "core/late_template.go",
         "core/library.go",
         "core/strict_library.go",
+        "core/source_props.go",
+        "core/legacy_source_props.go",
         "core/output_producer.go",
         "core/properties.go",
         "core/splitter.go",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	args := m.generateKbuildArgs(ctx).toDict()
 	delete(args, "kmod_build")
 	sources := utils.NewStringSlice(
-		getBackendPathsInSourceDir(g, m.Properties.getSources(ctx)),
+		getBackendPathsInSourceDir(g, m.Properties.getSourcesResolved(ctx)),
 		m.extraSymbolsFiles(ctx))
 
 	ctx.Build(pctx,
