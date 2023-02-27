@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,8 @@ export CONFIGNAME="bob.config"
 export SRCDIR="${SCRIPT_DIR}"
 export BUILDDIR
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
+export BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
+export BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
 
 "${SCRIPT_DIR}/bob/bootstrap_linux.bash"
 

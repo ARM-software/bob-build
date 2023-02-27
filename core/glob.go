@@ -55,8 +55,16 @@ func (m *moduleGlob) shortName() string {
 	return m.Name()
 }
 
-func (m *moduleGlob) getSources(ctx blueprint.BaseModuleContext) []string {
+func (m *moduleGlob) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
 	return m.Properties.Files
+}
+
+func (m *moduleGlob) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
+	return []string{}
+}
+
+func (m *moduleGlob) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
+	return m.getSourceFiles(ctx)
 }
 
 func (m *moduleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {

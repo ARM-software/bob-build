@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, 2022 Arm Limited.
+ * Copyright 2018-2020, 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,7 @@ type generateLibraryInterface interface {
 
 	libExtension() string
 	outputFileName() string
-	getSources(ctx blueprint.BaseModuleContext) []string
+	getSourcesResolved(ctx blueprint.BaseModuleContext) []string
 	getImplicitSources(ctx blueprint.BaseModuleContext) []string
 	getDepfile() (string, bool)
 }
@@ -81,7 +81,7 @@ type generateLibraryInterface interface {
 func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleContext,
 	g generatorBackend, implicitOuts []string) []inout {
 	var io inout
-	io.in = append(getBackendPathsInSourceDir(g, m.getSources(ctx)), getGeneratedFiles(ctx)...)
+	io.in = append(getBackendPathsInSourceDir(g, m.getSourcesResolved(ctx)), getGeneratedFiles(ctx)...)
 	io.out = []string{m.outputFileName()}
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile

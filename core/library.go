@@ -50,7 +50,7 @@ type propertyExporter interface {
 // CommonProps defines a set of properties which are common
 // for multiple module types.
 type CommonProps struct {
-	SourceProps
+	LegacySourceProps
 	IncludeDirsProps
 	InstallableProps
 	EnableableProps
@@ -286,7 +286,7 @@ func (l *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend
 func (c *CommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
 
-	c.SourceProps.processPaths(ctx, g)
+	c.LegacySourceProps.processPaths(ctx, g)
 	c.InstallableProps.processPaths(ctx, g)
 	c.IncludeDirsProps.Local_include_dirs = utils.PrefixDirs(c.IncludeDirsProps.Local_include_dirs, prefix)
 }
@@ -323,6 +323,7 @@ var _ targetSpecificLibrary = (*library)(nil)
 var _ installable = (*library)(nil)
 var _ enableable = (*library)(nil)
 var _ propertyExporter = (*library)(nil)
+var _ sourceInterface = (*library)(nil)
 var _ matchSourceInterface = (*library)(nil)
 var _ propertyEscapeInterface = (*library)(nil)
 var _ splittable = (*library)(nil)
@@ -469,8 +470,20 @@ func (l *library) getEscapeProperties() []*[]string {
 		&l.Properties.Ldflags}
 }
 
-func (l *library) getSourceProperties() *SourceProps {
-	return &l.Properties.SourceProps
+func (l *library) getLegacySourceProperties() *LegacySourceProps {
+	return &l.Properties.LegacySourceProps
+}
+
+func (l *library) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.LegacySourceProps.getSourceFiles(ctx)
+}
+
+func (l *library) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.LegacySourceProps.getSourceTargets(ctx)
+}
+
+func (l *library) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
+	return l.Properties.LegacySourceProps.getSourcesResolved(ctx)
 }
 
 // {{match_srcs}} template is only applied in specific properties where we've

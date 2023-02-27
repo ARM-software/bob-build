@@ -74,7 +74,7 @@ func prefixInoutsWithOutputDir(inouts []inout, dir string) {
 // GenerateProps contains the module properties that allow generation of
 // output from arbitrary commands
 type GenerateProps struct {
-	SourceProps
+	LegacySourceProps
 	AliasableProps
 	EnableableProps
 	InstallableProps
@@ -309,8 +309,8 @@ func (m *generateCommon) getEscapeProperties() []*[]string {
 		&m.Properties.FlagArgsBuild.Ldflags}
 }
 
-func (m *generateCommon) getSourceProperties() *SourceProps {
-	return &m.Properties.GenerateProps.SourceProps
+func (m *generateCommon) getLegacySourceProperties() *LegacySourceProps {
+	return &m.Properties.GenerateProps.LegacySourceProps
 }
 
 // {{match_srcs}} template is only applied in specific properties where we've
@@ -680,12 +680,12 @@ func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string
 	return cmd, args, dependentTools
 }
 
-func (m *generateCommon) getSources(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.getSources(ctx)
+func (m *generateCommon) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
+	return m.Properties.getSourcesResolved(ctx)
 }
 
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.SourceProps.processPaths(ctx, g)
+	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 
 	if len(m.Properties.Tools) > 0 {
@@ -725,7 +725,7 @@ func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generat
 // added in by the backend specific GenerateBuildAction()
 func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.in = append(getBackendPathsInSourceDir(g, m.getSources(ctx)),
+	io.in = append(getBackendPathsInSourceDir(g, m.getSourcesResolved(ctx)),
 		getGeneratedFiles(ctx)...)
 	io.out = m.Properties.Out
 	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
@@ -805,7 +805,7 @@ func (m *transformSource) featurableProperties() []interface{} {
 
 func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
 	var sourceList []filePath
-	for _, src := range m.getSources(ctx) {
+	for _, src := range m.getSourcesResolved(ctx) {
 		sourceList = append(sourceList, newSourceFilePath(src, ctx, g))
 	}
 	for _, src := range getGeneratedFiles(ctx) {
@@ -984,9 +984,7 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	// Convert any filegroup dependencies into the correct format
 	if _, ok := getBackend(mctx).(*androidBpGenerator); ok {
 		if l, ok := getLibrary(mctx.Module()); ok {
-			for _, s := range l.Properties.Filegroup_srcs {
-				l.Properties.Srcs = append(l.Properties.Srcs, ":"+s)
-			}
+			l.Properties.Srcs = append(l.Properties.Srcs, utils.PrefixAll(l.Properties.Filegroup_srcs, ":")...)
 		}
 	}
 

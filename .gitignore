@@ -41,5 +41,10 @@ highlight.css
 # Ignore Android.bp files
 Android.bp
 
+
+# Files created by tests
+tests/build*
+build-*
+
 # Bazel
 bazel-*

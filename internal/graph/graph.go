@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2020 Arm Limited.
+ * Copyright 2018, 2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -568,10 +568,10 @@ func (g *graph) DeleteEdge(source, target string) error {
 func (g *graph) GetSources(id string) ([]string, error) {
 	g.mutex.RLock()
 	defer g.mutex.RUnlock()
-	return g.getSources(id)
+	return g.getSourcesResolved(id)
 }
 
-func (g *graph) getSources(id string) ([]string, error) {
+func (g *graph) getSourcesResolved(id string) ([]string, error) {
 	if !g.hasNode(id) {
 		return nil, fmt.Errorf("%s does not exist in the graph", id)
 	}

@@ -113,7 +113,7 @@ CONFIG_JSON="${CONFIGDIR}/.bob.config.json"
 BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
 
 # space separated values, e.g. "*:W RelativeUpLinkWarning:E"
-BOB_LOG_WARNINGS=""
+BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
 
 export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"

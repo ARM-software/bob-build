@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +56,15 @@ func PrefixAll(list []string, prefix string) []string {
 	output := []string{}
 	for _, s := range list {
 		output = append(output, prefix+s)
+	}
+	return output
+}
+
+// Removes prefix from every item in the list
+func StripPrefixAll(list []string, prefix string) []string {
+	output := []string{}
+	for _, s := range list {
+		output = append(output, strings.TrimPrefix(s, prefix))
 	}
 	return output
 }
@@ -120,6 +129,10 @@ func Contains(list []string, x string) bool {
 		}
 	}
 	return false
+}
+
+func Unique(list []string) (ret []string) {
+	return AppendUnique([]string{}, list)
 }
 
 func ListsContain(x string, lists ...[]string) bool {

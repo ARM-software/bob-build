@@ -21,7 +21,7 @@ bob_library {
 
 bob_binary {
     name: "strict_lib_binary_with_forward_define",
-    filegroup_srcs: ["static_bin_srcs"],
+    srcs: [":static_bin_srcs"],
     static_libs: ["lib_forward_defines"],
     host_supported: true,
     target_supported: false,
@@ -30,7 +30,7 @@ bob_binary {
 
 bob_binary {
     name: "strict_lib_binary_with_dep",
-    filegroup_srcs: ["static_bin_srcs"],
+    srcs: [":static_bin_srcs"],
     static_libs: ["lib_dep"],
     host_supported: true,
     target_supported: false,

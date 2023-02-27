@@ -60,7 +60,7 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 
 	if r, ok := dep.(*resource); ok {
 		var modNames []string
-		for _, src := range r.Properties.getSources(mctx) {
+		for _, src := range r.Properties.getSourcesResolved(mctx) {
 			modNames = append(modNames, r.getAndroidbpResourceName(src))
 		}
 		if len(modNames) == 0 {
@@ -265,7 +265,7 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	if l.shortName() != l.outputName() {
 		m.AddString("stem", l.outputName())
 	}
-	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.getSources(mctx)))
+	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.getSourcesResolved(mctx)))
 	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
 	genHeaderModules, exportGenHeaderModules := l.getGeneratedHeaderModules(mctx)
 	m.AddStringList("generated_headers", append(genHeaderModules, exportGenHeaderModules...))

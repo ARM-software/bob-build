@@ -1,2 +1,2 @@
 # Version number used to identify whether the user needs to re-boostrap their build directory.
-BOB_VERSION="9"
+BOB_VERSION="10"

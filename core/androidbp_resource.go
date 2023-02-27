@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Arm Limited.
+ * Copyright 2020-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,7 +89,7 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 	}
 
 	// as prebuilt_etc module supports only single src, we have to split into N modules
-	for _, src := range r.Properties.getSources(mctx) {
+	for _, src := range r.Properties.getSourcesResolved(mctx) {
 		// keep module name unique, remove slashes
 		m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(src))
 		if err != nil {
