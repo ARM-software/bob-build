@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
 go_library(
@@ -12,6 +12,8 @@ go_library(
         "kinds.go",
         "language.go",
         "mconfig_parser.go",
+        "module.go",
+        "registry.go",
         "resolve.go",
     ],
     data = [
@@ -58,4 +60,13 @@ gazelle(
         "-build_file_proto_mode=disable_global",
     ],
     command = "update-repos",
+)
+
+go_test(
+    # TODO: The name should be `plugin_test`
+    name = "gazelle_test",
+    srcs = ["registry_test.go"],
+    # TODO: we need to keep here as it sets the embed to `:gazelle` incorrectly.
+    embed = [":plugin"],  # keep
+    deps = ["@bazel_gazelle//label:go_default_library"],
 )
