@@ -37,6 +37,7 @@ bootstrap_go_package {
         "bob-graph",
         "bob-utils",
         "bob-warnings",
+        "bob-depmap",
     ],
     srcs: [
         "core/android.go",
@@ -154,6 +155,17 @@ bootstrap_go_package {
         "internal/utils/utils_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/utils",
+}
+
+bootstrap_go_package {
+    name: "bob-depmap",
+    srcs: [
+        "internal/depmap/depmap.go",
+    ],
+    testSrcs: [
+        "internal/depmap/depmap_test.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/internal/depmap",
 }
 
 bootstrap_go_package {
