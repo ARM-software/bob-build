@@ -18,8 +18,7 @@
 package core
 
 import (
-	"sync"
-
+	"github.com/ARM-software/bob-build/internal/depmap"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -60,40 +59,25 @@ func (m *filegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBac
 }
 
 var (
-	filegroupMap     = map[string][]string{}
-	filegroupMapLock sync.RWMutex
+	filegroupMap = depmap.NewDepmap()
 )
 
 func prepFilegroupMapMutator(mctx blueprint.BottomUpMutatorContext) {
-	moduleName := mctx.ModuleName()
-	module := mctx.Module()
-	if m, ok := module.(sourceInterface); ok {
-		filegroupMapLock.Lock()
-		defer filegroupMapLock.Unlock()
-		filegroupMap[moduleName] = m.getSourceTargets(mctx)
+	if m, ok := mctx.Module().(sourceInterface); ok {
+		filegroupMap.SetDeps(mctx.ModuleName(), m.getSourceTargets(mctx))
 	}
-}
-
-func expandFilegroup(d string, visited []string) []string {
-	var filegroups []string
-
-	if len(filegroupMap[d]) > 0 {
-		for _, def := range filegroupMap[d] {
-			if utils.Find(visited, def) >= 0 {
-				utils.Die("filegroup module %s depends upon itself", def)
-			}
-			filegroups = append(filegroups, expandFilegroup(def, append(visited, def))...)
-			filegroups = append(filegroups, def)
-		}
-	}
-	return filegroups
 }
 
 func propogateFilegroupData(mctx blueprint.BottomUpMutatorContext) {
 	if _, ok := getLibrary(mctx.Module()); ok {
-		flattenedFilegroups := expandFilegroup(mctx.ModuleName(), []string{})
-		filegroups := utils.Unique(flattenedFilegroups)
-		mctx.AddDependency(mctx.Module(), filegroupTag, filegroups...)
+		filegroupMap.Traverse(mctx.ModuleName(),
+			func(dep string) {
+				mctx.AddDependency(mctx.Module(), filegroupTag, dep)
+			},
+			func(dep string) {
+				utils.Die("filegroup module %s depends upon itself", dep)
+			},
+		)
 	}
 }
 

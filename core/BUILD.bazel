@@ -51,6 +51,7 @@ go_library(
     deps = [
         "//internal/bpwriter",
         "//internal/ccflags",
+        "//internal/depmap",
         "//internal/escape",
         "//internal/fileutils",
         "//internal/graph",
