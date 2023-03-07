@@ -35,6 +35,10 @@ func (l *staticLibrary) outputFileName() string {
 	return l.outputName() + ".a"
 }
 
+func (l staticLibrary) GetProperties() interface{} {
+	return l.library.Properties
+}
+
 func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &staticLibrary{}
 	return module.LibraryFactory(config, module)

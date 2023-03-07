@@ -254,6 +254,14 @@ func (m *resource) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
+func (m installGroup) GetProperties() interface{} {
+	return m.Properties
+}
+
+func (m resource) GetProperties() interface{} {
+	return m.Properties
+}
+
 func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &installGroup{}
 	module.Properties.Features.Init(&config.Properties, InstallGroupProps{})

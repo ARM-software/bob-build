@@ -56,6 +56,10 @@ func (m *generateStaticLibrary) outputFileName() string {
 	return m.altName() + m.libExtension()
 }
 
+func (m generateStaticLibrary) GetProperties() interface{} {
+	return m.generateLibrary.Properties
+}
+
 //// Factory functions
 
 func genStaticLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {

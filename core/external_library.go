@@ -79,6 +79,10 @@ var _ splittable = (*externalLib)(nil)
 // External libraries have no actions - they are already built.
 func (m *externalLib) GenerateBuildActions(ctx blueprint.ModuleContext) {}
 
+func (m externalLib) GetProperties() interface{} {
+	return m.Properties
+}
+
 func externalLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &externalLib{}
 	module.Properties.Features.Init(&config.Properties, ExternalLibProps{})

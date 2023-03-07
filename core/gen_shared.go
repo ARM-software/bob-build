@@ -64,6 +64,10 @@ func (m *generateSharedLibrary) getTocName() string {
 	return m.outputFileName() + tocExt
 }
 
+func (m generateSharedLibrary) GetProperties() interface{} {
+	return m.generateLibrary.Properties
+}
+
 //// Factory functions
 
 func genSharedLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {

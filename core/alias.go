@@ -73,6 +73,10 @@ func (m *alias) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	getBackend(ctx).aliasActions(m, ctx)
 }
 
+func (m alias) GetProperties() interface{} {
+	return m.Properties
+}
+
 // Create the structure representing the bob_alias
 func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &alias{}

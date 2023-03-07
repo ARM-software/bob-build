@@ -103,6 +103,10 @@ func (l *sharedLibrary) getTocName() string {
 	return l.getRealName() + tocExt
 }
 
+func (l sharedLibrary) GetProperties() interface{} {
+	return l.library.Properties
+}
+
 func sharedLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &sharedLibrary{}
 	if config.Properties.GetBool("osx") {
