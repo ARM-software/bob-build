@@ -55,11 +55,11 @@ type alias struct {
 	}
 }
 
-func (m *alias) features() *Features {
+func (m *alias) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *alias) featurableProperties() []interface{} {
+func (m *alias) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.AliasProps}
 }
 

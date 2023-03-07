@@ -38,15 +38,15 @@ type defaults struct {
 	}
 }
 
-func (m *defaults) supportedVariants() []tgtType {
-	return []tgtType{tgtTypeHost, tgtTypeTarget}
+func (m *defaults) supportedVariants() []TgtType {
+	return []TgtType{tgtTypeHost, tgtTypeTarget}
 }
 
 func (m *defaults) disable() {
 	panic("disable() called on Default")
 }
 
-func (m *defaults) setVariant(variant tgtType) {
+func (m *defaults) setVariant(variant TgtType) {
 	m.Properties.TargetType = variant
 }
 
@@ -71,7 +71,7 @@ func (m *defaults) defaultableProperties() []interface{} {
 	}
 }
 
-func (m *defaults) featurableProperties() []interface{} {
+func (m *defaults) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
@@ -89,15 +89,15 @@ func (m *defaults) targetableProperties() []interface{} {
 	}
 }
 
-func (m *defaults) features() *Features {
+func (m *defaults) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *defaults) getTarget() tgtType {
+func (m *defaults) getTarget() TgtType {
 	return m.Properties.TargetType
 }
 
-func (m *defaults) getTargetSpecific(variant tgtType) *TargetSpecific {
+func (m *defaults) getTargetSpecific(variant TgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(variant)
 }
 
@@ -163,7 +163,7 @@ var _ moduleWithBuildProps = (*defaults)(nil)
 var _ targetSpecificLibrary = (*defaults)(nil)
 
 // Defaults support conditional properties via "features"
-var _ featurable = (*defaults)(nil)
+var _ Featurable = (*defaults)(nil)
 
 // Defaults contain path fragments which need to be prefixes
 var _ pathProcessor = (*defaults)(nil)

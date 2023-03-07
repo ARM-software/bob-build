@@ -134,7 +134,7 @@ type GenerateProps struct {
 	Flag_defaults []string
 
 	// The target type - must be either "host" or "target"
-	Target tgtType
+	Target TgtType
 
 	// If true, depfile name will be generated and can be used as ${depfile} reference in 'cmd'
 	Depfile *bool
@@ -206,7 +206,7 @@ type androidGenerateRule struct {
 // * use of {{match_srcs}} on some properties
 // * properties that require escaping
 // * sharing properties from defaults via `flag_defaults` property
-var _ featurable = (*generateCommon)(nil)
+var _ Featurable = (*generateCommon)(nil)
 var _ enableable = (*generateCommon)(nil)
 var _ splittable = (*generateCommon)(nil)
 var _ matchSourceInterface = (*generateCommon)(nil)
@@ -262,15 +262,15 @@ func (m *androidGenerateCommon) getAndroidGenerateCommon() *androidGenerateCommo
 	return m
 }
 
-func (m *generateCommon) featurableProperties() []interface{} {
+func (m *generateCommon) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.GenerateProps}
 }
 
-func (m *generateCommon) features() *Features {
+func (m *generateCommon) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *generateCommon) getTarget() tgtType {
+func (m *generateCommon) getTarget() TgtType {
 	return m.Properties.Target
 }
 
@@ -282,15 +282,15 @@ func (m *generateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
 }
 
-func (m *generateCommon) supportedVariants() []tgtType {
-	return []tgtType{m.Properties.Target}
+func (m *generateCommon) supportedVariants() []TgtType {
+	return []TgtType{m.Properties.Target}
 }
 
 func (m *generateCommon) disable() {
 	*m.Properties.Enabled = false
 }
 
-func (m *generateCommon) setVariant(variant tgtType) {
+func (m *generateCommon) setVariant(variant TgtType) {
 	if variant != m.Properties.Target {
 		utils.Die("Variant mismatch: %s != %s", variant, m.Properties.Target)
 	}
@@ -442,8 +442,8 @@ func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func (m *generateSource) featurableProperties() []interface{} {
-	return append(m.generateCommon.featurableProperties(), &m.Properties.GenerateSourceProps)
+func (m *generateSource) FeaturableProperties() []interface{} {
+	return append(m.generateCommon.FeaturableProperties(), &m.Properties.GenerateSourceProps)
 }
 
 func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string) {
@@ -468,7 +468,7 @@ func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string)
 // target type and shared library dependencies for a generator module.
 // This is different from the "tool" in that it used to depend on
 // a bob_binary module.
-func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, tgtType) {
+func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, TgtType) {
 	// No host_bin provided
 	if m.Properties.Host_bin == nil {
 		return "", []string{}, tgtTypeUnknown
@@ -552,7 +552,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 	return
 }
 
-func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, tgtType) {
+func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, TgtType) {
 	g := getBackend(ctx)
 
 	tc := g.getToolchain(m.Properties.Target)
@@ -799,8 +799,8 @@ func (m *androidGenerateRule) GenerateBuildActions(ctx blueprint.ModuleContext) 
 	}
 }
 
-func (m *transformSource) featurableProperties() []interface{} {
-	return append(m.generateCommon.featurableProperties(), &m.Properties.TransformSourceProps)
+func (m *transformSource) FeaturableProperties() []interface{} {
+	return append(m.generateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
 func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {

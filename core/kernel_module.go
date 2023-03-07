@@ -78,7 +78,7 @@ type kernelModule struct {
 // * module enabling/disabling
 // * appending to aliases
 var _ defaultable = (*kernelModule)(nil)
-var _ featurable = (*kernelModule)(nil)
+var _ Featurable = (*kernelModule)(nil)
 var _ installable = (*kernelModule)(nil)
 var _ enableable = (*kernelModule)(nil)
 var _ aliasable = (*kernelModule)(nil)
@@ -91,11 +91,11 @@ func (m *kernelModule) defaultableProperties() []interface{} {
 	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
-func (m *kernelModule) featurableProperties() []interface{} {
+func (m *kernelModule) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
-func (m *kernelModule) features() *Features {
+func (m *kernelModule) Features() *Features {
 	return &m.Properties.Features
 }
 

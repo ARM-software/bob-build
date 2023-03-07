@@ -24,7 +24,7 @@ import (
 )
 
 type graphMutatorHandler struct {
-	graphs map[tgtType]graph.Graph
+	graphs map[TgtType]graph.Graph
 }
 
 const (

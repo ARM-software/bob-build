@@ -16,7 +16,7 @@
 ### Host toolchain options ###
 # The host options are not yet read by `toolchain.go`, so are empty, and
 # exist so that `host_explore.py` can be agnostic to the target type when
-# doing e.g. `get_config_string(tgtType + "_GNU_PREFIX")`. They are
+# doing e.g. `get_config_string(TgtType + "_GNU_PREFIX")`. They are
 # defined here, rather than in the superproject, because even when they are
 # fully supported, they will be empty most of the time.
 

@@ -57,7 +57,7 @@ type library struct {
 // * properties that require escaping
 // * appending to aliases
 var _ defaultable = (*library)(nil)
-var _ featurable = (*library)(nil)
+var _ Featurable = (*library)(nil)
 var _ targetSpecificLibrary = (*library)(nil)
 var _ installable = (*library)(nil)
 var _ enableable = (*library)(nil)
@@ -84,7 +84,7 @@ func (l *library) build() *Build {
 	return &l.Properties.Build
 }
 
-func (l *library) featurableProperties() []interface{} {
+func (l *library) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&l.Properties.Build.CommonProps,
 		&l.Properties.Build.BuildProps,
@@ -100,11 +100,11 @@ func (l *library) targetableProperties() []interface{} {
 	}
 }
 
-func (l *library) features() *Features {
+func (l *library) Features() *Features {
 	return &l.Properties.Features
 }
 
-func (l *library) getTarget() tgtType {
+func (l *library) getTarget() TgtType {
 	return l.Properties.TargetType
 }
 
@@ -139,7 +139,7 @@ func (l *library) getAliasList() []string {
 	return l.Properties.getAliasList()
 }
 
-func (l *library) supportedVariants() (tgts []tgtType) {
+func (l *library) supportedVariants() (tgts []TgtType) {
 	if l.Properties.isHostSupported() {
 		tgts = append(tgts, tgtTypeHost)
 	}
@@ -154,7 +154,7 @@ func (l *library) disable() {
 	l.Properties.Enabled = &f
 }
 
-func (l *library) setVariant(tgt tgtType) {
+func (l *library) setVariant(tgt TgtType) {
 	l.Properties.TargetType = tgt
 }
 
@@ -162,7 +162,7 @@ func (l *library) getSplittableProps() *SplittableProps {
 	return &l.Properties.SplittableProps
 }
 
-func (l *library) getTargetSpecific(tgt tgtType) *TargetSpecific {
+func (l *library) getTargetSpecific(tgt TgtType) *TargetSpecific {
 	return l.Properties.getTargetSpecific(tgt)
 }
 

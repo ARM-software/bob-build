@@ -204,22 +204,22 @@ func appendDefaults(dst []interface{}, src []interface{}) error {
 }
 
 // Modules implementing featurable support the use of features and templates.
-type featurable interface {
-	featurableProperties() []interface{}
-	features() *Features
+type Featurable interface {
+	FeaturableProperties() []interface{}
+	Features() *Features
 }
 
 func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	module := mctx.Module()
 	cfg := getConfig(mctx)
 
-	if m, ok := module.(featurable); ok {
+	if m, ok := module.(Featurable); ok {
 		cfgProps := &cfg.Properties
 
 		// TemplateApplier mutator is run before TargetApplier, so we
 		// need to apply templates with the core set, as well as
 		// host-specific and target-specific sets (where applicable).
-		props := append([]interface{}{}, m.featurableProperties()...)
+		props := append([]interface{}{}, m.FeaturableProperties()...)
 
 		if ts, ok := module.(targetSpecificLibrary); ok {
 			host := ts.getTargetSpecific(tgtTypeHost)
@@ -246,13 +246,13 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 	module := mctx.Module()
 	cfg := getConfig(mctx)
 
-	if m, ok := module.(featurable); ok {
+	if m, ok := module.(Featurable); ok {
 		cfgProps := &cfg.Properties
 
 		// FeatureApplier mutator is run first. We need to flatten the
 		// feature specific properties in the core set, and where
 		// supported, the host-specific and target-specific set.
-		var props = []propmap{{m.featurableProperties(), m.features()}}
+		var props = []propmap{{m.FeaturableProperties(), m.Features()}}
 
 		// Apply features in target-specific properties.
 		// This should happen for all modules which support host:{} and target:{}

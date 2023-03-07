@@ -223,7 +223,7 @@ func setupAddIfSupported(mctx blueprint.BaseModuleContext,
 // Applies late templates to the given module
 func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 
-	m, ok := mctx.Module().(featurable)
+	m, ok := mctx.Module().(Featurable)
 	if !ok {
 		// Features and templates not supported by this module type
 		return
@@ -244,7 +244,7 @@ func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 	}
 
 	// Generic template expansion
-	for _, p := range m.featurableProperties() {
+	for _, p := range m.FeaturableProperties() {
 		propsVal := reflect.Indirect(reflect.ValueOf(p))
 
 		// Properties have already been expanded, so set stringvalues to nil

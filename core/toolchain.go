@@ -435,7 +435,7 @@ func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
 	}
 }
 
-func newToolchainGnuCommon(config *BobConfig, tgt tgtType) (tc toolchainGnuCommon) {
+func newToolchainGnuCommon(config *BobConfig, tgt TgtType) (tc toolchainGnuCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
@@ -552,7 +552,7 @@ func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool 
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainClangCommon(config *BobConfig, tgt tgtType) (tc toolchainClangCommon) {
+func newToolchainClangCommon(config *BobConfig, tgt TgtType) (tc toolchainClangCommon) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
 
@@ -735,7 +735,7 @@ func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainArmClangCommon(config *BobConfig, tgt tgtType) (tc toolchainArmClang) {
+func newToolchainArmClangCommon(config *BobConfig, tgt TgtType) (tc toolchainArmClang) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
@@ -889,7 +889,7 @@ func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
-func newToolchainXcodeCommon(config *BobConfig, tgt tgtType) (tc toolchainXcode) {
+func newToolchainXcodeCommon(config *BobConfig, tgt TgtType) (tc toolchainXcode) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
@@ -930,7 +930,7 @@ type toolchainSet struct {
 	target toolchain
 }
 
-func (tcs *toolchainSet) getToolchain(tgt tgtType) toolchain {
+func (tcs *toolchainSet) getToolchain(tgt TgtType) toolchain {
 	if tgt == tgtTypeHost {
 		return tcs.host
 	}

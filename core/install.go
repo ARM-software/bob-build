@@ -166,11 +166,11 @@ func (m *installGroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// No build actions for a bob_install_group
 }
 
-func (m *installGroup) featurableProperties() []interface{} {
+func (m *installGroup) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.InstallGroupProps}
 }
 
-func (m *installGroup) features() *Features {
+func (m *installGroup) Features() *Features {
 	return &m.Properties.Features
 }
 
@@ -209,11 +209,11 @@ func (m *resource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
-func (m *resource) featurableProperties() []interface{} {
+func (m *resource) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.ResourceProps}
 }
 
-func (m *resource) features() *Features {
+func (m *resource) Features() *Features {
 	return &m.Properties.Features
 }
 

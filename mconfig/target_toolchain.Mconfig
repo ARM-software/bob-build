@@ -1,4 +1,4 @@
-# Copyright 2016-2022 Arm Limited.
+# Copyright 2016-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 # The target options are defined here so that `host_explore.py` can be
 # agnostic to the target type when doing
-# e.g. `get_config_string(tgtType + "_GNU_PREFIX")`.
+# e.g. `get_config_string(TgtType + "_GNU_PREFIX")`.
 # These are defined here, rather than in the superproject, because
 # they will be empty most of the time.
 

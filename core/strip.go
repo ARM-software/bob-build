@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Arm Limited.
+ * Copyright 2019-2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +56,7 @@ func (props *StripProps) setDebugPath(path *string) {
 
 type stripable interface {
 	strip() bool
-	getTarget() tgtType
+	getTarget() TgtType
 	stripOutputDir(g generatorBackend) string
 
 	getDebugInfo() *string

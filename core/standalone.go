@@ -195,7 +195,7 @@ func Main() {
 
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
 		dependencyGraphHandler := graphMutatorHandler{
-			map[tgtType]graph.Graph{
+			map[TgtType]graph.Graph{
 				tgtTypeHost:   graph.NewGraph("All"),
 				tgtTypeTarget: graph.NewGraph("All"),
 			},

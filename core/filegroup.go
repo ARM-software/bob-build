@@ -58,6 +58,16 @@ func (m *filegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBac
 	m.Properties.SourceProps.processPaths(ctx, g)
 }
 
+func (m *filegroup) FeaturableProperties() []interface{} {
+	return []interface{}{
+		&m.Properties.SourceProps,
+	}
+}
+
+func (m *filegroup) Features() *Features {
+	return &m.Properties.Features
+}
+
 var (
 	filegroupMap = depmap.NewDepmap()
 )
