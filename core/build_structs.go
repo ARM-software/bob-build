@@ -113,7 +113,7 @@ type generatorBackend interface {
 	buildDir() string
 	sourceDir() string
 	bobScriptsDir() string
-	sharedLibsDir(tgt tgtType) string
+	sharedLibsDir(tgt TgtType) string
 
 	// Backend flag escaping
 	escapeFlag(string) string
@@ -122,7 +122,7 @@ type generatorBackend interface {
 	init(*blueprint.Context, *BobConfig)
 
 	// Access to backend configuration
-	getToolchain(tgt tgtType) toolchain
+	getToolchain(tgt TgtType) toolchain
 
 	getLogger() *warnings.WarningLogger
 }
@@ -296,12 +296,12 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	}
 }
 
-type tgtType string
+type TgtType string
 
 const (
-	tgtTypeHost    tgtType = "host"
-	tgtTypeTarget  tgtType = "target"
-	tgtTypeUnknown tgtType = ""
+	tgtTypeHost    TgtType = "host"
+	tgtTypeTarget  TgtType = "target"
+	tgtTypeUnknown TgtType = ""
 )
 
 func stripEmptyComponents(list []string) []string {
@@ -330,15 +330,15 @@ func stripEmptyComponentsRecursive(propsVal reflect.Value) {
 }
 
 func stripEmptyComponentsMutator(mctx blueprint.BottomUpMutatorContext) {
-	f, ok := mctx.Module().(featurable)
+	f, ok := mctx.Module().(Featurable)
 	if !ok {
 		return
 	}
 
-	strippableProps := f.featurableProperties()
+	strippableProps := f.FeaturableProperties()
 
 	if t, ok := mctx.Module().(targetSpecificLibrary); ok {
-		for _, tgt := range []tgtType{tgtTypeHost, tgtTypeTarget} {
+		for _, tgt := range []TgtType{tgtTypeHost, tgtTypeTarget} {
 			tgtSpecific := t.getTargetSpecific(tgt)
 			tgtSpecificData := tgtSpecific.getTargetSpecificProps()
 			strippableProps = append(strippableProps, tgtSpecificData)

@@ -34,7 +34,7 @@ type Build struct {
 	SplittableProps
 }
 
-func (b *Build) getTargetSpecific(tgt tgtType) *TargetSpecific {
+func (b *Build) getTargetSpecific(tgt TgtType) *TargetSpecific {
 	if tgt == tgtTypeHost {
 		return &b.Host
 	} else if tgt == tgtTypeTarget {

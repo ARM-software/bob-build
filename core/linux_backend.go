@@ -119,7 +119,7 @@ type singleOutputModule interface {
 
 type targetableModule interface {
 	singleOutputModule
-	getTarget() tgtType
+	getTarget() TgtType
 }
 
 // Modules implementing sharedLibProducer create a shared library
@@ -140,7 +140,7 @@ func (g *linuxGenerator) staticLibOutputDir(m *staticLibrary) string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "static")
 }
 
-func (g *linuxGenerator) sharedLibsDir(tgt tgtType) string {
+func (g *linuxGenerator) sharedLibsDir(tgt TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "shared")
 }
 
@@ -166,7 +166,7 @@ var tocRule = pctx.StaticRule("shared_library_toc",
 	},
 	"tocflags")
 
-func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt tgtType) {
+func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt TgtType) {
 	tc := g.getToolchain(tgt)
 	tocFlags := tc.getLibraryTocFlags()
 
@@ -180,7 +180,7 @@ func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, to
 		})
 }
 
-func (g *linuxGenerator) binaryOutputDir(tgt tgtType) string {
+func (g *linuxGenerator) binaryOutputDir(tgt TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "executable")
 }
 

@@ -28,7 +28,9 @@ bob_glob {
 
 bob_filegroup {
     name: "forward_filegroup",
-    srcs: [":filegroup_impl"],
+    always_enabled_feature: {
+        srcs: [":filegroup_impl"],
+    }
 }
 
 bob_binary {

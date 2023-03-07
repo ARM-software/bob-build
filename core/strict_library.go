@@ -47,7 +47,7 @@ type StrictLibraryProps struct {
 	Deps          []string
 	Out           *string // TODO:
 	// unused but needed for the output interface, no easy way to hide it
-	TargetType tgtType `blueprint:"mutated"`
+	TargetType TgtType `blueprint:"mutated"`
 }
 
 type strictLibrary struct {
@@ -129,7 +129,7 @@ func (l *strictLibrary) getSrcs() []string {
 	return l.Properties.Srcs
 }
 
-func (l *strictLibrary) supportedVariants() (tgts []tgtType) {
+func (l *strictLibrary) supportedVariants() (tgts []TgtType) {
 	// TODO: Change tgts based on if host or target supported.
 	tgts = append(tgts, tgtTypeHost)
 	return
@@ -140,11 +140,11 @@ func (l *strictLibrary) disable() {
 	l.Properties.Enabled = &f
 }
 
-func (l *strictLibrary) setVariant(tgt tgtType) {
+func (l *strictLibrary) setVariant(tgt TgtType) {
 	l.Properties.TargetType = tgt
 }
 
-func (l *strictLibrary) getTarget() tgtType {
+func (l *strictLibrary) getTarget() TgtType {
 	return l.Properties.TargetType
 }
 

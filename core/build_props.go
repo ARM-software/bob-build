@@ -137,7 +137,7 @@ type BuildProps struct {
 
 	Hwasan_enabled *bool
 
-	TargetType tgtType `blueprint:"mutated"`
+	TargetType TgtType `blueprint:"mutated"`
 }
 
 func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {

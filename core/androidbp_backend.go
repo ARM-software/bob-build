@@ -124,7 +124,7 @@ func (g *androidBpGenerator) bobScriptsDir() string {
 	return srcToScripts
 }
 
-func (g *androidBpGenerator) sharedLibsDir(tgtType) string {
+func (g *androidBpGenerator) sharedLibsDir(TgtType) string {
 	// When writing link commands, it's common to put all the shared
 	// libraries in a single location to make it easy for the linker to
 	// find them. This function tells us where this is for the current

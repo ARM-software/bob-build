@@ -26,7 +26,7 @@ type ExternalLibProps struct {
 	Export_ldflags []string
 	Ldlibs         []string
 
-	TargetType tgtType `blueprint:"mutated"`
+	TargetType TgtType `blueprint:"mutated"`
 }
 
 type externalLib struct {
@@ -37,11 +37,11 @@ type externalLib struct {
 	}
 }
 
-func (m *externalLib) featurableProperties() []interface{} {
+func (m *externalLib) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.ExternalLibProps}
 }
 
-func (m *externalLib) features() *Features {
+func (m *externalLib) Features() *Features {
 	return &m.Properties.Features
 }
 
@@ -55,10 +55,10 @@ func (m *externalLib) outputs() []string         { return []string{} }
 func (m *externalLib) implicitOutputs() []string { return []string{} }
 
 // Implement the splittable interface so "normal" libraries can depend on external ones.
-func (m *externalLib) supportedVariants() []tgtType         { return []tgtType{tgtTypeHost, tgtTypeTarget} }
+func (m *externalLib) supportedVariants() []TgtType         { return []TgtType{tgtTypeHost, tgtTypeTarget} }
 func (m *externalLib) disable()                             {}
-func (m *externalLib) setVariant(tgt tgtType)               { m.Properties.TargetType = tgt }
-func (m *externalLib) getTarget() tgtType                   { return m.Properties.TargetType }
+func (m *externalLib) setVariant(tgt TgtType)               { m.Properties.TargetType = tgt }
+func (m *externalLib) getTarget() TgtType                   { return m.Properties.TargetType }
 func (m *externalLib) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
 // Implement the propertyExporter interface so that external libraries can pass

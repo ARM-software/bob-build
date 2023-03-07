@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,16 +36,16 @@ type SplittableProps struct {
 // the different variants by the splitterMutator
 type splittable interface {
 	// Retrieve all the different variations to create
-	supportedVariants() []tgtType
+	supportedVariants() []TgtType
 
 	// Disables the module is no variations supported
 	disable()
 
 	// Set the particular variant
-	setVariant(tgtType)
+	setVariant(TgtType)
 
 	// Retrieve the module target type variant as set by setVariant
-	getTarget() tgtType
+	getTarget() TgtType
 
 	// Get the properties related to which variants are available
 	getSplittableProps() *SplittableProps
@@ -57,7 +57,7 @@ type targetSpecificLibrary interface {
 	splittable
 
 	// Get the target specific properties i.e. host:{} or target:{}
-	getTargetSpecific(tgtType) *TargetSpecific
+	getTargetSpecific(TgtType) *TargetSpecific
 
 	// Get the set of the module main properties for
 	// that target specific properties would be applied to
@@ -112,7 +112,7 @@ func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func tgtToString(tgts []tgtType) []string {
+func tgtToString(tgts []TgtType) []string {
 	variants := make([]string, len(tgts))
 	for i, v := range tgts {
 		variants[i] = string(v)
@@ -133,7 +133,7 @@ func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
 				if !ok {
 					panic(errors.New("newly created variation is not splittable - should not happen"))
 				}
-				newsplit.setVariant(tgtType(v))
+				newsplit.setVariant(TgtType(v))
 			}
 		}
 	}

@@ -106,8 +106,8 @@ func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []
 
 //// Support splittable
 
-func (m *generateLibrary) supportedVariants() []tgtType {
-	return []tgtType{m.generateCommon.Properties.Target}
+func (m *generateLibrary) supportedVariants() []TgtType {
+	return []TgtType{m.generateCommon.Properties.Target}
 }
 
 func (m *generateLibrary) disable() {
@@ -115,7 +115,7 @@ func (m *generateLibrary) disable() {
 	panic("disable() called on GenerateLibrary")
 }
 
-func (m *generateLibrary) setVariant(variant tgtType) {
+func (m *generateLibrary) setVariant(variant TgtType) {
 	// No need to actually track this, as a single target is always supported
 }
 
@@ -123,8 +123,8 @@ func (m *generateLibrary) getSplittableProps() *SplittableProps {
 	return &m.generateCommon.Properties.FlagArgsBuild.SplittableProps
 }
 
-func (m *generateLibrary) featurableProperties() []interface{} {
-	return append(m.generateCommon.featurableProperties(), &m.Properties.GenerateLibraryProps)
+func (m *generateLibrary) FeaturableProperties() []interface{} {
+	return append(m.generateCommon.FeaturableProperties(), &m.Properties.GenerateLibraryProps)
 }
 
 //// Support singleOutputModule interface
