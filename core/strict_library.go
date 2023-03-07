@@ -176,6 +176,10 @@ func (m *strictLibrary) getTocName() string {
 	return m.Name() + tocExt
 }
 
+func (m strictLibrary) GetProperties() interface{} {
+	return m.Properties
+}
+
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &strictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})

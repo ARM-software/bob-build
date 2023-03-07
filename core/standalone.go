@@ -46,6 +46,10 @@ type moduleBase struct {
 	blueprint.SimpleName
 }
 
+type PropertyProvider interface {
+	GetProperties() interface{}
+}
+
 // configProvider allows the retrieval of configuration
 type configProvider interface {
 	Config() interface{}

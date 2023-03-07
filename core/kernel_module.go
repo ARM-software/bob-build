@@ -266,6 +266,10 @@ func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+func (m kernelModule) GetProperties() interface{} {
+	return m.Properties
+}
+
 func kernelModuleFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &kernelModule{}
 

@@ -43,6 +43,10 @@ func (b *binary) outputFileName() string {
 	return b.outputName()
 }
 
+func (b binary) GetProperties() interface{} {
+	return b.library.Properties
+}
+
 func binaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &binary{}
 	return module.LibraryFactory(config, module)

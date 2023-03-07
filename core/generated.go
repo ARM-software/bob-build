@@ -857,6 +857,18 @@ type transformSource struct {
 // transformSource supports installation
 var _ installable = (*transformSource)(nil)
 
+func (m generateSource) GetProperties() interface{} {
+	return m.Properties
+}
+
+func (m transformSource) GetProperties() interface{} {
+	return m.Properties
+}
+
+func (m androidGenerateRule) GetProperties() interface{} {
+	return m.Properties
+}
+
 func generateSourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
 	module.generateCommon.init(&config.Properties,

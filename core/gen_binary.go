@@ -56,6 +56,10 @@ func (m *generateBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	}
 }
 
+func (m generateBinary) GetProperties() interface{} {
+	return m.generateLibrary.Properties
+}
+
 //// Factory functions
 
 func genBinaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {

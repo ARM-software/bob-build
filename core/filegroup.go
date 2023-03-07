@@ -91,6 +91,10 @@ func propogateFilegroupData(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
+func (m filegroup) GetProperties() interface{} {
+	return m.Properties
+}
+
 func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &filegroup{}
 	module.Properties.Features.Init(&config.Properties, SourceProps{})
