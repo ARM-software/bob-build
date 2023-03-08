@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -183,8 +183,9 @@ bob_binary {
 bob_genrule {
     name: "gen_source_depfile_new",
     srcs: [
-    "depgen1.in",
-    "depgen2.in",],
+        "depgen1.in",
+        "depgen2.in",
+    ],
     out: ["output.txt"],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
@@ -193,10 +194,13 @@ bob_genrule {
 
 bob_genrule {
     name: "gen_source_depfile_with_implicit_outs_new",
-    srcs: ["depgen1.in","depgen2.in",],
+    srcs: [
+        "depgen1.in",
+        "depgen2.in",
+    ],
     out: [
         "output.txt",
-        "out.h"
+        "out.h",
     ],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
@@ -231,12 +235,15 @@ bob_genrule {
 
 bob_genrule {
     name: "multi_tool_file",
-    srcs: ["depgen2.in",],
+    srcs: ["depgen2.in"],
     out: [
         "output.txt",
-        "out.h"
+        "out.h",
     ],
-    tool_files: ["gen_with_dep.py", "depgen1.in",],
+    tool_files: [
+        "gen_with_dep.py",
+        "depgen1.in",
+    ],
     depfile: true,
     cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
 }

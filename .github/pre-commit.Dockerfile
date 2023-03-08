@@ -1,5 +1,8 @@
 FROM golang:1.20-bullseye as go
 
+ARG BAZELISK_VERSION=1.16.0
+RUN CGO_ENABLED=0 GOOS=linux GOBIN=/opt/bazelisk/bin go install github.com/bazelbuild/bazelisk@v${BAZELISK_VERSION}
+
 FROM debian:bullseye-slim
 
 RUN apt update \
@@ -27,3 +30,9 @@ RUN python3 -m pip install --user --no-cache-dir --upgrade pip==23.0
 RUN python3 -m pip install --user --no-cache-dir pre-commit==3.0.2
 
 COPY --from=go /usr/local/go /usr/local/go
+COPY --from=go /opt/bazelisk/bin/bazelisk /home/ci/.local/bin/bazelisk
+
+ENV BAZELISK_HOME /home/ci/.cache/bazelisk
+
+# Pre-download some bazel version to save time in CI
+RUN USE_BAZEL_VERSION=latest bazelisk --version

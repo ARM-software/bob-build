@@ -10,8 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: "true"
       - uses: actions/setup-python@v3
       - uses: actions/setup-go@v3
+      - uses: bazelbuild/setup-bazelisk@v2
       - run: echo "PATH=$PATH:/home/runner/go/bin" >> $GITHUB_ENV
       - uses: pre-commit/action@v3.0.0
 
@@ -221,6 +225,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: "true"
       - uses: bazelbuild/setup-bazelisk@v2
       - name: Mount bazel cache # Optional
         uses: actions/cache@v3

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 bob_alias {
     name: "bob_test_header_libs",
     srcs: [
@@ -31,7 +30,7 @@ bob_static_library {
 bob_static_library {
     name: "hl_b",
     export_local_include_dirs: ["include"],
-    static_libs: ["hl_a"]
+    static_libs: ["hl_a"],
 }
 
 bob_binary {

@@ -22,7 +22,7 @@ bob_glob {
 
 bob_binary {
     name: "glob_test",
-    srcs: [":src_glob"]
+    srcs: [":src_glob"],
 }
 
 bob_binary {
@@ -45,7 +45,7 @@ bob_binary {
     name: "test_exclude_srcs",
     srcs: [
         "src/inside/a/namespace/main.cpp",
-        ":src_glob_exclude"
+        ":src_glob_exclude",
     ],
 }
 

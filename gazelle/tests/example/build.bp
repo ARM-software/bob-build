@@ -7,21 +7,24 @@ bob_binary {
     ],
     feature_a: {
         static_libs: [
-            "hello_test"
-        ]
+            "hello_test",
+        ],
     },
 }
 
 bob_static_library {
     name: "hello_test",
     srcs: [
-        "src/hello.c"
+        "src/hello.c",
     ],
     feature_a: {
         export_cflags: ["-DFOO=2"],
-        cflags: ["-Wall"]
+        cflags: ["-Wall"],
     },
     debug: {
-       cflags: ["-g", "-O0"]
-    }
+        cflags: [
+            "-g",
+            "-O0",
+        ],
+    },
 }

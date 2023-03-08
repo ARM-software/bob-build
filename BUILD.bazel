@@ -1,4 +1,5 @@
 load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 # TODO: Fix config system import structure
 # load("@rules_python_gazelle_plugin//:def.bzl", "GAZELLE_PYTHON_RUNTIME_DEPS")
@@ -34,4 +35,32 @@ gazelle(
         "-build_file_proto_mode=disable_global",
     ],
     command = "update-repos",
+)
+
+# Blueprint does not support Bazel, build the formatter here.
+go_library(
+    name = "bpfmt_lib",
+    srcs = ["blueprint/bpfmt/bpfmt.go"],
+    importpath = "github.com/google/blueprint/bpfmt",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_google_blueprint//:blueprint",
+        "@com_github_google_blueprint//parser",
+    ],
+)
+
+go_binary(
+    name = "bpfmt",
+    embed = [":bpfmt_lib"],
+    visibility = ["//visibility:public"],
+)
+
+# By default, bazel run executes the binary in the sandbox with its runfiles.
+# This breaks the pre-commit convention which uses relative paths from workspace root.
+# This wrapper captures the location of the needed binary and changes dir to the working
+# directory before calling bpfmt.
+sh_binary(
+    name = "bpfmt_wrapper",
+    srcs = ["bpfmt_wrapper.sh"],
+    data = [":bpfmt"],
 )

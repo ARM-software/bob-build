@@ -59,3 +59,11 @@ repos:
         files: (BUILD|WORKSPACE|.+\.bazel|.+\.bzl)$
         entry: buildifier
         args: ["--lint=fix"]
+
+      - id: bpfmt
+        name: "blueprint formatter"
+        entry: bazelisk run //:bpfmt_wrapper -- -w
+        language: system
+        files: ^.*build.bp$
+        types_or: [text]
+        require_serial: true
