@@ -17,15 +17,21 @@
 
 bob_binary {
     name: "bob_test_flag_supported",
-    srcs: ["test.c", "test_cpp.cpp"],
+    srcs: [
+        "test.c",
+        "test_cpp.cpp",
+    ],
     conlyflags: [
         "{{add_if_supported \"-Wno-discarded-qualifiers\"}}",
         "{{add_if_supported \"-Wno-ignored-qualifiers\"}}",
         "{{add_if_supported \"-Wno-main-return-type\"}}",
-	/* old gcc uses -Wmain to warn about the declaration of 'main' */
+        /* old gcc uses -Wmain to warn about the declaration of 'main' */
         "{{add_if_supported \"-Wno-main\"}}",
     ],
-    cflags: ["-Wall", "-Werror"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
     cxxflags: [
         "{{add_if_supported \"-Wno-ignored-qualifiers\"}}",
     ],

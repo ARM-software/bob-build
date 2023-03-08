@@ -40,7 +40,7 @@ bob_binary {
 bob_alias {
     name: "bob_test_strict_static_libs",
     srcs: [
-    "strict_lib_binary_with_forward_define",
-    "strict_lib_binary_with_dep",
+        "strict_lib_binary_with_forward_define",
+        "strict_lib_binary_with_dep",
     ],
 }
