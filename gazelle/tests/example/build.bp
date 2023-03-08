@@ -1,1 +1,27 @@
 // Main build file
+
+bob_binary {
+    name: "greet_test",
+    srcs: [
+        "srcs/main.c",
+    ],
+    feature_a: {
+        static_libs: [
+            "hello_test"
+        ]
+    },
+}
+
+bob_static_library {
+    name: "hello_test",
+    srcs: [
+        "src/hello.c"
+    ],
+    feature_a: {
+        export_cflags: ["-DFOO=2"],
+        cflags: ["-Wall"]
+    },
+    debug: {
+       cflags: ["-g", "-O0"]
+    }
+}

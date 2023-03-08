@@ -8,7 +8,7 @@ import (
 func Test_register_module(t *testing.T) {
 	registry := NewRegistry()
 	testLabel := label.Label{Repo: "repo", Pkg: "some/pkg", Name: "m_name"}
-	m := BobModule{"m_name", "some/pkg", testLabel}
+	m := NewBobModule("m_name", "repo", "some/pkg")
 	registry.register(m)
 	if !registry.nameExists("m_name") {
 		t.Errorf("module %d not successfully registered", m.getName())

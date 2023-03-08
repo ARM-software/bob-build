@@ -73,17 +73,23 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		fileNames := []string{"Mconfig"}
 
-		parser := newMconfigParser(c.RepoRoot, rel)
+		mconfigParser := newMconfigParser(c.RepoRoot, rel)
 
-		configs, err := parser.parse(&fileNames)
+		configs, err := mconfigParser.parse(&fileNames)
 		if err != nil {
 			log.Fatalf("Parse failed: %v\n", err)
 		}
 
+		registry := NewRegistry()
 		bobConfig := createBobConfigSpoof(configs)
 		bobParser := newBobParser(c.RepoRoot, bobConfig)
 
-		bobParser.parse()
+		modules := bobParser.parse()
+
+		// Register all `BobModule`s
+		for _, m := range modules {
+			registry.register(m)
+		}
 	}
 }
 
