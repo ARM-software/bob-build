@@ -1,0 +1,29 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+# gazelle:exclude gendiffer.go
+
+exports_files([
+    "gendiffer.go",
+    "bob.linux.config",
+    "bob.linux.config.json",
+    "bob.android.config",
+    "bob.android.config.json",
+    "bob.android.config.d",
+])
+
+filegroup(
+    name = "all_files",
+    testonly = True,
+    srcs = [
+        "BUILD.bazel",
+        "gendiffer.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "gendiffer",
+    srcs = ["gendiffer.bzl"],
+    visibility = ["//:__subpackages__"],
+    deps = ["@io_bazel_rules_go//go:def"],
+)
