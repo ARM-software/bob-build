@@ -3,12 +3,18 @@ repos:
     rev: v3.2.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^config_system/tests/formatter/
+        exclude: (?x)(
+          ^config_system/tests/formatter/|
+          tests/gendiffer.*build.ninja|
+          tests/gendiffer.*Android.bp
+          )
       - id: end-of-file-fixer
         exclude: |
           (?x)(
             ^config_system/tests/formatter/|
-            expectedExitCode.txt
+            expectedExitCode.txt|
+            tests/gendiffer.*build.ninja|
+            tests/gendiffer.*Android.bp
           )
       - id: check-yaml
       - id: check-added-large-files

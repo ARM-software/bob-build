@@ -1,0 +1,21 @@
+
+
+
+cc_binary {
+    name: "hello_world",
+    srcs: ["hello_world.cpp"],
+    cflags: [
+        "-Wall",
+        "-pedantic",
+    ],
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            relative_install_path: "",
+        },
+        lib64: {
+            relative_install_path: "64",
+        },
+    },
+}
+

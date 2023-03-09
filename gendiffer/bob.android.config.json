@@ -1,0 +1,394 @@
+{
+  "allow_host_explore": {
+    "ignore": false,
+    "value": true
+  },
+  "always_enabled_feature": {
+    "ignore": false,
+    "value": true
+  },
+  "android": {
+    "ignore": false,
+    "value": true
+  },
+  "android_platform_version": {
+    "ignore": false,
+    "value": 13
+  },
+  "armclang_ar_binary": {
+    "ignore": false,
+    "value": "armar"
+  },
+  "armclang_as_binary": {
+    "ignore": false,
+    "value": "armasm"
+  },
+  "armclang_ld_binary": {
+    "ignore": false,
+    "value": "armlink"
+  },
+  "as_binary": {
+    "ignore": false,
+    "value": "as"
+  },
+  "builder_android_bp": {
+    "ignore": false,
+    "value": true
+  },
+  "builder_ninja": {
+    "ignore": false,
+    "value": false
+  },
+  "debug": {
+    "ignore": false,
+    "value": true
+  },
+  "extra_ld_library_path": {
+    "ignore": false,
+    "value": ""
+  },
+  "fuchsia": {
+    "ignore": false,
+    "value": false
+  },
+  "gen_ar": {
+    "ignore": false,
+    "value": "ar"
+  },
+  "gen_cc": {
+    "ignore": false,
+    "value": "gcc"
+  },
+  "host_ar_binary": {
+    "ignore": false,
+    "value": "ar"
+  },
+  "host_armclang_cc_binary": {
+    "ignore": false,
+    "value": "armclang"
+  },
+  "host_armclang_cxx_binary": {
+    "ignore": false,
+    "value": "armclang"
+  },
+  "host_armclang_flags": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_armclang_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_clang_cc_binary": {
+    "ignore": false,
+    "value": "clang"
+  },
+  "host_clang_compiler_runtime": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_clang_cxx_binary": {
+    "ignore": false,
+    "value": "clang++"
+  },
+  "host_clang_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_clang_stl_library": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_clang_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_clang_use_gnu_binutils": {
+    "ignore": false,
+    "value": false
+  },
+  "host_clang_use_gnu_crt": {
+    "ignore": false,
+    "value": false
+  },
+  "host_clang_use_gnu_libgcc": {
+    "ignore": false,
+    "value": false
+  },
+  "host_clang_use_gnu_stl": {
+    "ignore": false,
+    "value": false
+  },
+  "host_dsymutil_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_gnu_cc_binary": {
+    "ignore": false,
+    "value": "gcc"
+  },
+  "host_gnu_cxx_binary": {
+    "ignore": false,
+    "value": "g++"
+  },
+  "host_gnu_flags": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_gnu_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_nm_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_objcopy_binary": {
+    "ignore": false,
+    "value": "objcopy"
+  },
+  "host_objdump_binary": {
+    "ignore": false,
+    "value": "objdump"
+  },
+  "host_otool_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_strip_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_sysroot": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_toolchain_armclang": {
+    "ignore": false,
+    "value": false
+  },
+  "host_toolchain_clang": {
+    "ignore": false,
+    "value": false
+  },
+  "host_toolchain_gnu": {
+    "ignore": false,
+    "value": true
+  },
+  "host_toolchain_xcode": {
+    "ignore": false,
+    "value": false
+  },
+  "host_xcode_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "host_xcode_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "kernel_cc": {
+    "ignore": false,
+    "value": ""
+  },
+  "kernel_clang_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "linux": {
+    "ignore": false,
+    "value": false
+  },
+  "ndebug": {
+    "ignore": false,
+    "value": false
+  },
+  "not_builder_android_bp": {
+    "ignore": false,
+    "value": false
+  },
+  "not_osx": {
+    "ignore": false,
+    "value": true
+  },
+  "osx": {
+    "ignore": false,
+    "value": false
+  },
+  "pkg_config": {
+    "ignore": false,
+    "value": true
+  },
+  "pkg_config_binary": {
+    "ignore": false,
+    "value": "pkg-config"
+  },
+  "pkg_config_flags": {
+    "ignore": false,
+    "value": ""
+  },
+  "pkg_config_packages": {
+    "ignore": false,
+    "value": "zlib"
+  },
+  "pkg_config_path": {
+    "ignore": false,
+    "value": ""
+  },
+  "pkg_config_sysroot_dir": {
+    "ignore": false,
+    "value": ""
+  },
+  "static_lib_toggle": {
+    "ignore": false,
+    "value": false
+  },
+  "target_ar_binary": {
+    "ignore": false,
+    "value": "ar"
+  },
+  "target_armclang_cc_binary": {
+    "ignore": false,
+    "value": "armclang"
+  },
+  "target_armclang_cxx_binary": {
+    "ignore": false,
+    "value": "armclang"
+  },
+  "target_armclang_flags": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_armclang_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_clang_cc_binary": {
+    "ignore": false,
+    "value": "clang"
+  },
+  "target_clang_compiler_runtime": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_clang_cxx_binary": {
+    "ignore": false,
+    "value": "clang++"
+  },
+  "target_clang_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_clang_stl_library": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_clang_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_clang_use_gnu_binutils": {
+    "ignore": false,
+    "value": false
+  },
+  "target_clang_use_gnu_crt": {
+    "ignore": false,
+    "value": false
+  },
+  "target_clang_use_gnu_libgcc": {
+    "ignore": false,
+    "value": false
+  },
+  "target_clang_use_gnu_stl": {
+    "ignore": false,
+    "value": false
+  },
+  "target_dsymutil_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_gnu_cc_binary": {
+    "ignore": false,
+    "value": "gcc"
+  },
+  "target_gnu_cxx_binary": {
+    "ignore": false,
+    "value": "g++"
+  },
+  "target_gnu_flags": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_gnu_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_nm_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_objcopy_binary": {
+    "ignore": false,
+    "value": "objcopy"
+  },
+  "target_objdump_binary": {
+    "ignore": false,
+    "value": "objdump"
+  },
+  "target_otool_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_strip_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_sysroot": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_toolchain_armclang": {
+    "ignore": false,
+    "value": false
+  },
+  "target_toolchain_clang": {
+    "ignore": false,
+    "value": false
+  },
+  "target_toolchain_gnu": {
+    "ignore": false,
+    "value": true
+  },
+  "target_toolchain_xcode": {
+    "ignore": false,
+    "value": false
+  },
+  "target_xcode_prefix": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_xcode_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "template_test_value": {
+    "ignore": false,
+    "value": 6
+  },
+  "windows": {
+    "ignore": false,
+    "value": false
+  },
+  "zlib_cflags": {
+    "ignore": false,
+    "value": ""
+  },
+  "zlib_ldflags": {
+    "ignore": false,
+    "value": ""
+  },
+  "zlib_ldlibs": {
+    "ignore": false,
+    "value": "-lz"
+  }
+}

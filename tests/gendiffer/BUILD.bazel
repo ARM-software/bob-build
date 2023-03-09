@@ -1,0 +1,9 @@
+load("//gendiffer:gendiffer.bzl", "bob_generation_test")
+
+[bob_generation_test(
+    name = file[0:-len("/WORKSPACE")],
+    bob_binary = "//cmd/bob:bob",
+    test_data = glob(
+        include = [file[0:-len("/WORKSPACE")] + "/**"],
+    ),
+) for file in glob(["**/WORKSPACE"])]
