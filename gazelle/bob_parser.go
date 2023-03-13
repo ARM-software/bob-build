@@ -50,10 +50,9 @@ func (p *bobParser) parse() []*BobModule {
 	var bobModulesMutex sync.RWMutex
 
 	bp.RegisterBottomUpMutator("register_bob_modules", func(mctx blueprint.BottomUpMutatorContext) {
-		bpModule := mctx.Module()
-		bobModule := NewBobModule(bpModule.Name(), p.rootPath, mctx.ModuleDir())
+		bobModule := NewBobModule(mctx.ModuleName(), mctx.ModuleType(), mctx.ModuleDir(), p.rootPath)
 
-		parseBpModule(bpModule, func(feature string, attribute string, v interface{}) {
+		parseBpModule(mctx.Module(), func(feature string, attribute string, v interface{}) {
 			bobModule.addFeatureAttribute(feature, attribute, v)
 		})
 

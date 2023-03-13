@@ -7,6 +7,7 @@ import (
 type AttributesMap map[string]interface{}
 type BobModule struct {
 	bobName      string
+	bobType      string
 	relativePath string
 	bazelLabel   label.Label
 	features     map[string]AttributesMap
@@ -34,12 +35,13 @@ func (m *BobModule) addFeatureAttribute(feature string, attribute string, v inte
 	}
 }
 
-func NewBobModule(name string, repoRoot string, relPath string) *BobModule {
+func NewBobModule(moduleName string, moduleType string, relPath string, rootPath string) *BobModule {
 
 	bobModule := &BobModule{}
-	bobModule.bobName = name
+	bobModule.bobName = moduleName
+	bobModule.bobType = moduleType
 	bobModule.relativePath = relPath
-	bobModule.bazelLabel = label.Label{Repo: repoRoot, Pkg: relPath, Name: name}
+	bobModule.bazelLabel = label.Label{Repo: rootPath, Pkg: relPath, Name: moduleName}
 	bobModule.features = make(map[string]AttributesMap)
 
 	return bobModule
