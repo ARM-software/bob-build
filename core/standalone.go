@@ -40,6 +40,7 @@ var (
 	srcdir          = os.Getenv("SRCDIR")
 	configJSONFile  = os.Getenv("CONFIG_JSON")
 	logWarningsFile = os.Getenv("BOB_LOG_WARNINGS_FILE")
+	buildMetaFile   = os.Getenv("BOB_META_FILE")
 )
 
 type moduleBase struct {
@@ -190,6 +191,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
 	ctx.RegisterBottomUpMutator("filegroup_deps1", prepFilegroupMapMutator).Parallel()
 	ctx.RegisterBottomUpMutator("filegroup_deps2", propogateFilegroupData).Parallel()
+	ctx.RegisterBottomUpMutator("collect_metadata", metaDataCollector).Parallel()
 
 	if handler := initGrapvizHandler(); handler != nil {
 		ctx.RegisterBottomUpMutator("graphviz_output", handler.graphvizMutator)
@@ -241,6 +243,8 @@ func Main() {
 			utils.Die("%d error(s) ocurred!\n\n%s\n", errCnt, logger.InfoMessage())
 		}
 	}()
+
+	defer MetaDataWriteToFile(buildMetaFile)
 
 	if builder_ninja {
 		config.Generator = &linuxGenerator{logger: logger}

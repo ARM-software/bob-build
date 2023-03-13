@@ -1,4 +1,4 @@
-# Copyright 2018-2019, 2021-2022 Arm Limited.
+# Copyright 2018-2019, 2021-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,4 +31,5 @@ export BOB_CONFIG_OPTS="@@BobConfigOpts@@"
 export BOB_CONFIG_PLUGIN_OPTS="@@BobConfigPluginOpts@@"
 export BOB_BOOTSTRAP_VERSION="@@BobBootstrapVersion@@"
 export BOB_LOG_WARNINGS_FILE="@@BobLogWarningsFile@@"
+export BOB_META_FILE="@@BobMetaFile@@"
 export BOB_LOG_WARNINGS="@@BobLogWarnings@@"

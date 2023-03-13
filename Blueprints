@@ -79,6 +79,7 @@ bootstrap_go_package {
         "core/linux_cclibs.go",
         "core/linux_generated.go",
         "core/linux_kernel_module.go",
+        "core/metadata.go",
         "core/output_producer.go",
         "core/properties.go",
         "core/property_exporter.go",

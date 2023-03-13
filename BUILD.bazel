@@ -49,6 +49,7 @@ go_library(
     ],
 )
 
+# keep
 go_binary(
     name = "bpfmt",
     embed = [":bpfmt_lib"],
