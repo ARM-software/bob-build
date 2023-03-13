@@ -83,6 +83,7 @@ export SRCDIR="${SCRIPT_DIR}"
 export BUILDDIR
 export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 export BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
+export BOB_META_FILE="${BUILDDIR}/.bob.meta.json"
 export BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
 
 "${SCRIPT_DIR}/bob/bootstrap_linux.bash"

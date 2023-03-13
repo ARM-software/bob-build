@@ -42,6 +42,7 @@ go_library(
         "linux_cclibs.go",
         "linux_generated.go",
         "linux_kernel_module.go",
+        "metadata.go",
         "output_producer.go",
         "properties.go",
         "property_exporter.go",
