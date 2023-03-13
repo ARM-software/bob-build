@@ -68,6 +68,7 @@ go_test(
     name = "gazelle_test",
     srcs = [
         "bob_parser_test.go",
+        "config_test.go",
         "registry_test.go",
     ],
     # TODO: we need to keep here as it sets the embed to `:gazelle` incorrectly.
