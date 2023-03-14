@@ -1,0 +1,101 @@
+bob_genrule {
+    name: "genrule",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: [
+        "genrule_dummy01.c",
+        "genrule_dummy02.c",
+    ],
+
+    cmd: "touch $(out)",
+}
+
+bob_generate_source {
+    name: "generated_source",
+    out: ["generated.c"],
+    cmd: "touch ${out}",
+}
+
+bob_generate_source {
+    name: "nested_generated_source",
+    out: ["nested_generated.c"],
+    cmd: "touch ${out}",
+    generated_sources: ["generated_source"],
+}
+
+bob_transform_source {
+    name: "transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["out$1.c"],
+    },
+    cmd: "some_tool",
+}
+
+bob_transform_source {
+    name: "nested_transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["nested_out$1.c"],
+    },
+    cmd: "some_tool",
+    generated_sources: ["transform_source"],
+}
+
+bob_filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+}
+
+bob_glob {
+    name: "glob",
+    srcs: ["**/main.c"],
+    allow_empty: false,
+}
+
+bob_filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+}
+
+bob_filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":glob",
+        ":forward_filegroup",
+    ],
+}
+
+bob_static_library {
+    name: "lib",
+    srcs: [
+        ":all_filegroup",
+    ],
+    generated_sources: [
+        "nested_generated_source",
+        "nested_transform_source",
+        "genrule",
+    ],
+}
+
+bob_binary {
+    name: "bin",
+    srcs: [
+        ":all_filegroup",
+    ],
+    generated_sources: [
+        "nested_generated_source",
+        "nested_transform_source",
+        "genrule",
+    ],
+}
