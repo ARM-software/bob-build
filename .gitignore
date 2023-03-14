@@ -38,7 +38,7 @@ highlight.css
 # pytest
 .cache/
 
-# Ignore Android.bp files
+# Ignore Android.bp files, these conflict with AOSP builds.
 Android.bp
 
 
