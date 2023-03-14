@@ -64,7 +64,7 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 	runCmd.Stderr = &stdErr
 	err := runCmd.Run()
 	if err != nil {
-		t.Fatal("Failed executing bob with error: ", runCmd.Stderr)
+		t.Fatalf("Failed executing bob with error: %v, stdout: '%s', stderr: '%s'", err, runCmd.Stdout, runCmd.Stderr)
 	}
 
 	// Check Files
@@ -73,12 +73,12 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 
 	expectedStdout := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, "expectedStdout.txt"))
 	expectedStderr := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, "expectedStderr.txt"))
-	expectedFile := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, outputFile))
+	expectedFile := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, outputFile+".out"))
 
 	if shouldUpdate {
 		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, "expectedStdout.txt"), stdOut.Bytes(), 0644)
 		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, "expectedStderr.txt"), stdErr.Bytes(), 0644)
-		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, outputFile), []byte(outFile), 0644)
+		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, outputFile+".out"), []byte(outFile), 0644)
 	} else {
 		if outFile != expectedFile {
 			t.Fatal(outputFile, " mismatch.")
