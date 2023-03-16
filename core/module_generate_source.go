@@ -35,10 +35,9 @@ type GenerateSourceProps struct {
 	Implicit_srcs []string
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
-}
 
-func (g *GenerateSourceProps) getImplicitSources(ctx blueprint.BaseModuleContext) []string {
-	return glob(ctx, g.Implicit_srcs, g.Exclude_implicit_srcs)
+	ResolvedOut       FilePaths `blueprint:"mutated"`
+	ResolvedImplicits FilePaths `blueprint:"mutated"`
 }
 
 type generateSource struct {
@@ -48,8 +47,15 @@ type generateSource struct {
 	}
 }
 
-// generateSource supports installation
-var _ installable = (*generateSource)(nil)
+type generateSourceInterface interface {
+	installable
+	pathProcessor
+	FileResolver
+	SourceFileProvider
+	SourceFileConsumer
+}
+
+var _ generateSourceInterface = (*generateSource)(nil) // impl check
 
 func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
@@ -68,6 +74,56 @@ func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generat
 	m.generateCommon.processPaths(ctx, g)
 }
 
+func (m *generateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	// Resolve sources.
+	gc, _ := getGenerateCommon(m)
+	gc.Properties.LegacySourceProps.ResolveFiles(ctx, g)
+
+	// Resolve output files
+	outs := FilePaths{}
+	for _, out := range m.Properties.Out {
+		fp := newGeneratedFilePathFromModule(out, ctx, g)
+		outs = outs.AppendIfUnique(fp)
+	}
+
+	implicits := FilePaths{}
+	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
+		fp := newSourceFilePath(implicit, ctx, g)
+		implicits = implicits.AppendIfUnique(fp)
+	}
+
+	m.Properties.ResolvedOut = outs
+	m.Properties.ResolvedImplicits = implicits
+
+}
+
+func (m *generateSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	gc, _ := getGenerateCommon(m)
+	return gc.Properties.LegacySourceProps.GetSrcs(ctx)
+}
+
+func (m *generateSource) GetDirectSrcs() FilePaths {
+	gc, _ := getGenerateCommon(m)
+	return gc.Properties.LegacySourceProps.GetDirectSrcs()
+}
+
+func (m *generateSource) GetImplicits(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.ResolvedImplicits
+}
+
+func (m *generateSource) GetSrcTargets() []string {
+	gc, _ := getGenerateCommon(m)
+	return gc.Properties.Generated_sources
+}
+
+func (m *generateSource) OutSrcs() FilePaths {
+	return m.Properties.ResolvedOut
+}
+
+func (m *generateSource) OutSrcTargets() []string {
+	return []string{}
+}
+
 // Return an inouts structure naming all the files associated with a
 // generateSource's inputs.
 //
@@ -78,11 +134,20 @@ func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generat
 // added in by the backend specific GenerateBuildAction()
 func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
-	io.in = append(getBackendPathsInSourceDir(g, m.getSourcesResolved(ctx)),
-		getGeneratedFiles(ctx)...)
-	io.out = m.Properties.Out
-	io.implicitSrcs = getBackendPathsInSourceDir(g, m.Properties.getImplicitSources(ctx))
 
+	m.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			io.in = append(io.in, fp.buildPath())
+			return true
+		})
+
+	m.GetImplicits(ctx).ForEach(
+		func(fp filePath) bool {
+			io.implicitSrcs = append(io.implicitSrcs, fp.buildPath())
+			return true
+		})
+
+	io.out = m.Properties.Out
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile
 	}

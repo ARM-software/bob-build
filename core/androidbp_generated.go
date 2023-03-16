@@ -79,7 +79,6 @@ func expandCmd(gc *generateCommon, mctx blueprint.ModuleContext, s string) strin
 		default:
 			if strings.HasPrefix(s, "tool ") {
 				toolPath := strings.TrimSpace(strings.TrimPrefix(s, "tool "))
-				toolPath = filepath.Join(projectModuleDir(mctx), toolPath)
 				return "${tool " + toolPath + "}"
 			}
 			return "${" + s + "}"
@@ -140,7 +139,6 @@ func (g *androidBpGenerator) androidGenerateRuleActions(ag *androidGenerateRule,
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	ag.androidGenerateCommon.Properties.processPaths(mctx, g)
 	g.androidGenerateCommonActions(&ag.androidGenerateCommon, mctx, m)
 	m.AddStringList("out", ag.Properties.Out)
 }
@@ -155,10 +153,21 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 		utils.Die("%v", err.Error())
 	}
 
-	srcs := gs.generateCommon.Properties.getSourcesResolved(mctx)
+	srcs := []string{}
+	gs.generateCommon.Properties.GetDirectSrcs().ForEach(func(fp filePath) bool {
+		srcs = append(srcs, fp.localPath())
+		return true
+	})
+
+	implicits := []string{}
+	gs.GetImplicits(mctx).ForEach(func(fp filePath) bool {
+		implicits = append(implicits, fp.localPath())
+		return true
+	})
+
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
-	m.AddStringList("implicit_srcs", gs.Properties.getImplicitSources(mctx))
+	m.AddStringList("implicit_srcs", implicits)
 
 	populateCommonProps(&gs.generateCommon, mctx, m)
 
@@ -176,8 +185,14 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 		utils.Die(err.Error())
 	}
 
-	srcs := ts.generateCommon.Properties.getSourcesResolved(mctx)
+	srcs := []string{}
+	ts.generateCommon.Properties.GetDirectSrcs().ForEach(
+		func(fp filePath) bool {
+			srcs = append(srcs, fp.localPath())
+			return true
+		})
 	m.AddStringList("srcs", srcs)
+
 	gr := m.NewGroup("out")
 	// if REs had double slashes in original value, at parsing they got removed, so compensate for that
 	gr.AddString("match", strings.Replace(ts.Properties.TransformSourceProps.Out.Match, "\\", "\\\\", -1))

@@ -88,16 +88,18 @@ func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleC
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
 	}
 
-	// as prebuilt_etc module supports only single src, we have to split into N modules
-	for _, src := range r.Properties.getSourcesResolved(mctx) {
-		// keep module name unique, remove slashes
-		m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(src))
-		if err != nil {
-			utils.Die(err.Error())
-		}
+	r.Properties.GetSrcs(mctx).ForEach(
+		func(fp filePath) bool {
+			// keep module name unique, remove slashes
+			m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(fp.localPath()))
+			if err != nil {
+				utils.Die(err.Error())
+			}
 
-		addProvenanceProps(m, r.Properties.AndroidProps)
+			addProvenanceProps(m, r.Properties.AndroidProps)
 
-		write(m, src, installRel)
-	}
+			write(m, fp.localPath(), installRel)
+			return true
+		})
+
 }

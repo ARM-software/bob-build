@@ -72,16 +72,21 @@ type kernelModule struct {
 }
 
 // kernelModule supports the following functionality:
-// * sharing properties via defaults
-// * feature-specific properties
-// * installation
-// * module enabling/disabling
-// * appending to aliases
-var _ defaultable = (*kernelModule)(nil)
-var _ Featurable = (*kernelModule)(nil)
-var _ installable = (*kernelModule)(nil)
-var _ enableable = (*kernelModule)(nil)
-var _ aliasable = (*kernelModule)(nil)
+type kernelModuleInterface interface {
+	defaultable // sharing properties via defaults
+	Featurable  // feature-specific properties
+	installable // installation
+	enableable  // module enabling/disabling
+	aliasable   // appending to aliases
+	pathProcessor
+	FileResolver
+}
+
+var _ kernelModuleInterface = (*kernelModule)(nil) // impl check
+
+func (m *kernelModule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
+}
 
 func (m *kernelModule) defaults() []string {
 	return m.Properties.Defaults

@@ -46,6 +46,7 @@ There are few types to categorize a warning:
 - [GenerateRuleWarning](generate-rule.md) - `[generate-rule]`
 - [PropertyWarning](property.md) - `[property]`
 - [RelativeUpLinkWarning](relative-up-link.md) - `[relative-up-link]`
+- [UnmatchedNonCompileSrcsWarning](unmatched-non-compile-srcs.md) - `[unmatched-non-compile-srcs]`
 
 ## Warning actions
 

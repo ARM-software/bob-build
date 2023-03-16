@@ -240,6 +240,11 @@ func checkSimpleType(propertyName string, v interface{}) bool {
 		if v.(bob.TgtType) != "" {
 			ret = true
 		}
+
+	// Internal types which are only used in Bob
+	// TODO: ideally we should check for the blueprint:mutated tag on struct properties and ignore those.
+	case bob.FilePaths:
+		// ignore
 	default:
 		log.Printf("Unhandled type:  %s \n  attribute: %s \n", reflect.TypeOf(v), propertyName)
 	}

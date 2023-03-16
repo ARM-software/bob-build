@@ -413,8 +413,7 @@ func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string
 
 	for _, match := range matches {
 		submatch := r.FindStringSubmatch(match)
-
-		label := filepath.Join(projectModuleDir(ctx), submatch[1])
+		label := submatch[1]
 
 		if toolPath, ok := toolsLabels[label]; ok {
 			toolKey := "tool_" + strconv.Itoa(idx)
@@ -422,28 +421,48 @@ func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string
 			args[toolKey] = toolPath
 			idx++
 		} else {
-			ctx.ModuleErrorf("unknown tool %q in tools.", submatch[1])
+			ctx.ModuleErrorf("unknown tool '%q' in tools in cmd:'%q', possible tools:'%q'.",
+				label,
+				cmd,
+				toolsLabels)
 		}
 	}
 
 	return cmd, args, dependentTools
 }
 
-func (m *generateCommon) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.getSourcesResolved(ctx)
-}
+var toolTagRegex = regexp.MustCompile(`\$\{tool ([a-zA-Z0-9\/\.:_-]+)\}`)
 
 func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 
 	if len(m.Properties.Tools) > 0 {
-		toolPaths := []string{}
-		for _, tool := range m.Properties.Tools {
-			toolPaths = append(toolPaths, filepath.Join(projectModuleDir(ctx), tool))
-		}
-		m.Properties.Tools = toolPaths
+		m.Properties.Tools = utils.PrefixDirs(m.Properties.Tools, projectModuleDir(ctx))
 	}
+
+	prefix := projectModuleDir(ctx)
+
+	// TODO: add this test case
+	if m.Properties.Cmd != nil {
+		matches := toolTagRegex.FindAllStringSubmatch(*m.Properties.Cmd, -1)
+		for _, v := range matches {
+			tag := v[1]
+			if tag[0] == ':' {
+				continue
+			}
+			newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
+			// Replacing with space allows us to not replace the same basename more than once if it appears
+			// multiple times.
+			newCmd := strings.Replace(*m.Properties.Cmd, " "+tag, " "+newTag, -1)
+			m.Properties.Cmd = &newCmd
+		}
+	}
+
+}
+
+func (m *generateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.LegacySourceProps.ResolveFiles(ctx, g)
 }
 
 func (m *generateCommon) getAliasList() []string {

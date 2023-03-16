@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Arm Limited.
+ * Copyright 2019-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ package core
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -46,6 +47,9 @@ type filePath interface {
 	//      ${g.bob.BuildDir}/gen/module2
 	//      ${g.bob.BuildDir}
 	moduleDir() string
+
+	OutputPathWithoutPrefix() string
+	Ext() string
 }
 
 // Represents a normal file in the source directory
@@ -54,6 +58,8 @@ type sourceFilePath struct {
 	module    string
 	srcPrefix string
 }
+
+var _ filePath = (*sourceFilePath)(nil)
 
 func (file sourceFilePath) buildPath() string {
 	return filepath.Join(file.srcPrefix, file.path)
@@ -67,8 +73,23 @@ func (file sourceFilePath) moduleDir() string {
 	return filepath.Join(file.srcPrefix, file.module)
 }
 
+func (file sourceFilePath) Ext() string {
+	return path.Ext(file.path)
+}
+
+func (file sourceFilePath) OutputPathWithoutPrefix() string {
+	return file.localPath()
+}
+
 func newSourceFilePath(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
 	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir()}
+}
+
+func newSourceFilePathFromModule(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
+	project_path := projectModuleDir(ctx)
+	srcDir := g.sourceDir()
+	full := filepath.Join(project_path, path)
+	return sourceFilePath{full, project_path, srcDir}
 }
 
 // Represents a file created in the generated output directory
@@ -77,6 +98,8 @@ type generatedFilePath struct {
 	lclPath string
 	modDir  string
 }
+
+var _ filePath = (*generatedFilePath)(nil)
 
 func (file generatedFilePath) buildPath() string {
 	return file.path
@@ -88,6 +111,15 @@ func (file generatedFilePath) localPath() string {
 
 func (file generatedFilePath) moduleDir() string {
 	return file.modDir
+}
+
+func (file generatedFilePath) OutputPathWithoutPrefix() string {
+	pathElems := strings.Split(file.path, string(os.PathSeparator))
+	return filepath.Join(pathElems[1:]...)
+}
+
+func (file generatedFilePath) Ext() string {
+	return path.Ext(file.path)
 }
 
 func newGeneratedFilePath(path string) filePath {
@@ -109,7 +141,32 @@ func newGeneratedFilePath(path string) filePath {
 	}
 	lclPath := filepath.Join(pathElems[2:]...)
 	modDir := filepath.Join(pathElems[:3]...)
+
 	return generatedFilePath{path, lclPath, modDir}
+}
+
+func newGeneratedFilePathFromModule(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
+	// TODO: currently on the Android backend there is no prefix for the output generated sources.
+	// This needs to be fixed.
+	// TODO: Clean up this function to avoid the duplication.
+
+	if _, isBp := g.(*androidBpGenerator); isBp {
+		srcsOutputPath := g.sourceOutputDir(ctx.Module())
+		modpath := ctx.ModuleDir()
+		moddir := filepath.Join(srcsOutputPath, modpath)
+		full := filepath.Join(srcsOutputPath, modpath, path)
+		return generatedFilePath{full, filepath.Join(modpath, path), moddir}
+	} else {
+		full := filepath.Join(g.sourceOutputDir(ctx.Module()), path)
+		pathElems := strings.Split(full, string(os.PathSeparator))
+		if len(pathElems) < 4 {
+			utils.Die("Path doesn't have as many elements as expected. %s", full)
+		}
+		lclPath := filepath.Join(pathElems[2:]...)
+		modDir := filepath.Join(pathElems[:3]...)
+
+		return generatedFilePath{full, lclPath, modDir}
+	}
 }
 
 // Handle special files (i.e. bob.config) in the generated output

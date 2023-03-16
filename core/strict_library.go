@@ -45,8 +45,10 @@ type StrictLibraryProps struct {
 	Local_defines []string
 	Copts         []string
 	Deps          []string
-	Out           *string // TODO:
-	// unused but needed for the output interface, no easy way to hide it
+
+	// TODO: unused but needed for the output interface, no easy way to hide it
+	Out *string
+
 	TargetType TgtType `blueprint:"mutated"`
 }
 
@@ -72,18 +74,14 @@ type strictLibrary struct {
 	}
 }
 
-// All libraries must support:
-var _ splittable = (*strictLibrary)(nil)
-var _ dependentInterface = (*strictLibrary)(nil)
-var _ sourceInterface = (*library)(nil)
+type strictLibraryInterface interface {
+	splittable
+	dependentInterface
+	SourceFileConsumer
+	FileResolver
+}
 
-// shared libraries must supports:
-// * producing output using the linker
-// * producing a shared library
-// * stripping symbols from output
-// var _ linkableModule = (*strictLibrary)(nil)
-// var _ sharedLibProducer = (*strictLibrary)(nil)
-// var _ stripable = (*strictLibrary)(nil)
+var _ strictLibraryInterface = (*strictLibrary)(nil)
 
 func (m *strictLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// TODO: Handle Bazel targets & check paths
@@ -113,20 +111,21 @@ func (l *strictLibrary) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.outputName()) + string(os.PathSeparator)
 }
 
-func (l *strictLibrary) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.SourceProps.getSourceFiles(ctx)
-
-}
-func (l *strictLibrary) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.SourceProps.getSourceTargets(ctx)
-
-}
-func (l *strictLibrary) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.SourceProps.getSourcesResolved(ctx)
+func (l *strictLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return l.Properties.GetSrcs(ctx)
 }
 
-func (l *strictLibrary) getSrcs() []string {
-	return l.Properties.Srcs
+func (l *strictLibrary) GetDirectSrcs() FilePaths {
+	return l.Properties.GetDirectSrcs()
+}
+
+func (l *strictLibrary) GetSrcTargets() (tgts []string) {
+	tgts = append(tgts, l.Properties.GetSrcTargets()...)
+	return
+}
+
+func (l *strictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	l.Properties.ResolveFiles(ctx, g)
 }
 
 func (l *strictLibrary) supportedVariants() (tgts []TgtType) {

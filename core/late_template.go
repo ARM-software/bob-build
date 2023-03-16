@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint/pathtools"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 // Currently only supported for Legacy source props
@@ -108,11 +109,15 @@ func (s *LegacySourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseMo
 	// a map to mark whether a non-compiled source is matched.
 	nonCompiledSources := make(map[string]bool)
 	if _, ok := getLibrary(mctx.Module()); ok {
-		for _, src := range s.getSourcesResolved(mctx) {
-			if utils.IsNotCompilableSource(src) {
-				nonCompiledSources[src] = false
-			}
-		}
+		s.GetSrcs(mctx).ForEachIf(
+			func(fp filePath) bool {
+				return !utils.IsCompilableSource(fp.localPath())
+			},
+			func(fp filePath) bool {
+				nonCompiledSources[fp.localPath()] = false
+
+				return true
+			})
 	}
 	return nonCompiledSources
 }
@@ -155,19 +160,22 @@ func setupMatchSources(mctx blueprint.BaseModuleContext,
 func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg string,
 	matchedNonCompiledSources map[string]bool) string {
 
-	g := getBackend(ctx)
-
 	matchedSources := []string{}
-	for _, src := range s.getSourcesResolved(ctx) {
-		matched, err := pathtools.Match("**/"+arg, src)
-		if err != nil {
-			utils.Die("Error during matching filepath pattern")
-		}
-		if matched {
-			matchedNonCompiledSources[src] = true
-			matchedSources = append(matchedSources, getBackendPathInSourceDir(g, src))
-		}
-	}
+
+	s.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			matched, err := pathtools.Match("**/"+arg, fp.localPath())
+			if err != nil {
+				utils.Die("Error during matching filepath pattern")
+			}
+			if matched {
+				matchedNonCompiledSources[fp.localPath()] = true
+				matchedSources = append(matchedSources, fp.buildPath())
+			}
+
+			return true
+		})
+
 	if len(matchedSources) == 0 {
 		utils.Die("Could not match '%s' for module '%s'", arg, ctx.ModuleName())
 	}
@@ -177,11 +185,22 @@ func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg st
 
 // Ensure that every non-compiled source has been used by at least one
 // {{match_srcs}} instance.
-func verifyMatchSources(matchedNonCompiledSources map[string]bool) {
-	for src, matched := range matchedNonCompiledSources {
-		if !matched && src[0] != ':' {
-			utils.Die("Non-compiled source %s is not used by match_srcs.", src)
+func verifyMatchSources(ctx blueprint.BaseModuleContext, matchedNonCompiledSources map[string]bool) {
+	g := getBackend(ctx)
+
+	// TODO: For modules without any {{match_srcs}} statements, this can produce a red herring since all non-compile
+	// sources will be added to implicit deps. Issue a warning to flag this but ignore. In future, fix this
+	// to **only** apply when {{match_srcs}} is used.
+
+	unmatchedCount := 0
+	for _, matched := range matchedNonCompiledSources {
+		if !matched {
+			unmatchedCount += 1
 		}
+	}
+
+	if unmatchedCount > 0 {
+		g.getLogger().Warn(warnings.UnmatchedNonCompileSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 }
 
@@ -251,7 +270,7 @@ func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 		applyLateTemplateRecursive(propsVal, nil, propfnmap)
 	}
 
-	verifyMatchSources(nonCompiledSources)
+	verifyMatchSources(mctx, nonCompiledSources)
 }
 
 // This mutator handles late templates

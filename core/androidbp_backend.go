@@ -69,9 +69,10 @@ func (g *androidBpGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext)
 		switch ctx.OtherModuleType(child) {
 		case "bob_resource":
 			if r, ok := child.(*resource); ok {
-				for _, src := range r.Properties.getSourcesResolved(ctx) {
-					srcs = append(srcs, r.getAndroidbpResourceName(src))
-				}
+				r.Properties.GetSrcs(ctx).ForEach(func(fp filePath) bool {
+					srcs = append(srcs, r.getAndroidbpResourceName(fp.localPath()))
+					return true
+				})
 			}
 			return false
 		case "bob_alias":
@@ -122,6 +123,10 @@ func (g *androidBpGenerator) bobScriptsDir() string {
 	// script directory.
 	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
 	return srcToScripts
+}
+
+func (g *androidBpGenerator) sourceOutputDir(m blueprint.Module) string {
+	return ""
 }
 
 func (g *androidBpGenerator) sharedLibsDir(TgtType) string {

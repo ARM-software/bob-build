@@ -203,6 +203,14 @@ type resource struct {
 	}
 }
 
+type resourceInterface interface {
+	pathProcessor
+	FileResolver
+	SourceFileConsumer
+}
+
+var _ resourceInterface = (*resource)(nil) // impl check
+
 func (m *resource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getBackend(ctx).resourceActions(m, ctx)
@@ -237,8 +245,13 @@ func (m *resource) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.LegacySourceProps.getSourcesResolved(ctx)
+func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
+	m.Properties.LegacySourceProps.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			files = append(files, fp.buildPath())
+			return true
+		})
+	return
 }
 
 func (m *resource) getInstallableProps() *InstallableProps {
@@ -248,6 +261,22 @@ func (m *resource) getInstallableProps() *InstallableProps {
 func (m *resource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
+}
+
+func (m *resource) GetSrcTargets() []string {
+	return m.Properties.LegacySourceProps.GetSrcTargets()
+}
+
+func (m *resource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.LegacySourceProps.GetSrcs(ctx)
+}
+
+func (m *resource) GetDirectSrcs() FilePaths {
+	return m.Properties.LegacySourceProps.GetDirectSrcs()
+}
+
+func (m *resource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
 }
 
 func (m *resource) getAliasList() []string {

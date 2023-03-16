@@ -10,7 +10,6 @@ bob_glob {
     name: "glob_lib_srcs",
     srcs: ["src/**/*.cpp"],
     exclude: ["src/**/exclude_*.cpp"],
-    exclude_directories: True
     allow_empty: False
 }
 ```
@@ -34,12 +33,17 @@ Path patterns that are relative to the current module.
 Path patterns that are relative to the current module
 to exclude from `srcs`.
 
----
+<!--
+
 
 ### **bob_glob.exclude_directories** (optional)
 
 If the `exclude_directories` argument is set to `true` (default),
 the directories will be omitted from the results.
+
+TODO: Directories are not yet supported
+
+-->
 
 ---
 

@@ -37,7 +37,18 @@ type LegacySourceProps struct {
 	// A list of filegroup modules that provide srcs, these are directly added to Srcs.
 	// We do not currently re-use Srcs for this
 	Filegroup_srcs []string
+
+	ResolvedSrcs FilePaths `blueprint:"mutated"` // Glob results.
 }
+
+// All interfaces supported by LegacySourceProps
+type LegacySourcePropsInterface interface {
+	pathProcessor
+	SourceFileConsumer
+	FileResolver
+}
+
+var _ LegacySourcePropsInterface = (*LegacySourceProps)(nil) // impl check
 
 func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	prefix := projectModuleDir(ctx)
@@ -52,29 +63,33 @@ func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext, g gene
 		g.getLogger().Warn(warnings.DeprecatedFilegroupSrcs, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 
-	srcs := utils.PrefixDirs(utils.Filter(func(s string) bool { return s[0] != ':' }, s.Srcs), prefix)
-	srcs = append(srcs, utils.Filter(func(s string) bool { return s[0] == ':' }, s.Srcs)...)
+	srcs := utils.MixedListToFiles(s.Srcs)
+	targets := utils.MixedListToBobTargets(s.Srcs)
 
-	s.Srcs = srcs
+	s.Srcs = append(utils.PrefixDirs(srcs, prefix), utils.PrefixAll(targets, ":")...)
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
 
-// Get a list of sources which are files
-func (s *LegacySourceProps) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
-	return utils.Filter(func(s string) bool { return s[0] != ':' }, s.Srcs)
+func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	// Since globbing is supported we must call a resolver.
+	files := FilePaths{}
+
+	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), s.Exclude_srcs) {
+		fp := newSourceFilePath(match, ctx, g)
+		files = files.AppendIfUnique(fp)
+	}
+
+	s.ResolvedSrcs = files
 }
 
-func (s *LegacySourceProps) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
-	return append(utils.StripPrefixAll(utils.Filter(func(s string) bool { return s[0] == ':' }, s.Srcs), ":"), s.Filegroup_srcs...)
+func (s *LegacySourceProps) GetSrcTargets() []string {
+	return append(s.Filegroup_srcs, utils.MixedListToBobTargets(s.Srcs)...)
 }
 
-// Get a list of sources to compile.
-//
-// The sources are relative to the project directory (i.e. include
-// the module directory but not the base source directory), and
-// excludes have been handled.
-//
-// Legacy mode supports globbing.
-func (s *LegacySourceProps) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return glob(ctx, append(s.getSourceFiles(ctx), getFileGroupDeps(ctx)...), s.Exclude_srcs)
+func (s *LegacySourceProps) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return s.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
+}
+
+func (s *LegacySourceProps) GetDirectSrcs() FilePaths {
+	return s.ResolvedSrcs
 }

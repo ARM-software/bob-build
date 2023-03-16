@@ -75,7 +75,15 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 	}
 
 	addProvenanceProps(bpmod, l.Properties.AndroidProps)
-	bpmod.AddStringList("srcs", l.Properties.getSourcesResolved(mctx))
+
+	srcs := []string{}
+	l.Properties.GetSrcs(mctx).ForEach(
+		func(fp filePath) bool {
+			srcs = append(srcs, fp.localPath())
+			return true
+		})
+
+	bpmod.AddStringList("srcs", srcs)
 	bpmod.AddStringList("generated_deps", generated_deps)
 	bpmod.AddStringList("out", l.outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})

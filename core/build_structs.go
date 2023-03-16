@@ -113,6 +113,7 @@ type generatorBackend interface {
 	buildDir() string
 	sourceDir() string
 	bobScriptsDir() string
+	sourceOutputDir(blueprint.Module) string
 	sharedLibsDir(tgt TgtType) string
 
 	// Backend flag escaping
@@ -220,6 +221,7 @@ func getBackendPathInBobScriptsDir(g generatorBackend, elems ...string) string {
 	return filepath.Join(append([]string{g.bobScriptsDir()}, elems...)...)
 }
 
+// TODO: Add support for directories.
 func glob(ctx blueprint.BaseModuleContext, globs []string, excludes []string) []string {
 	var files []string
 
@@ -262,38 +264,6 @@ type IncludeDirsProps struct {
 	// The list of include dirs to use that is relative to the build.bp file
 	// These use relative instead of absolute paths
 	Local_include_dirs []string `bob:"first_overrides"`
-}
-
-func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	prefix := projectModuleDir(ctx)
-	// We don't want to process module dependencies as paths, we must filter them out first.
-	var dependencyList []string
-	var directPathList []string
-	for _, s := range ag.Srcs {
-		if s[0] == ':' {
-			dependencyList = append(dependencyList, s)
-		} else {
-			directPathList = append(directPathList, s)
-		}
-	}
-	ag.Srcs = append(utils.PrefixDirs(directPathList, prefix), dependencyList...)
-	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
-	ag.Tool_files = utils.PrefixDirs(ag.Tool_files, prefix)
-
-	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
-	// we must fix this by iterating through the command.
-	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
-	for _, v := range matches {
-		tag := v[1]
-		if tag[0] == ':' {
-			continue
-		}
-		newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
-		// Replacing with space allows us to not replace the same basename more than once if it appears
-		// multiple times.
-		newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
-		ag.Cmd = &newCmd
-	}
 }
 
 type TgtType string
@@ -400,20 +370,6 @@ func parseAndAddVariationDeps(mctx blueprint.BottomUpMutatorContext,
 	}
 }
 
-func getFileGroupDeps(mctx blueprint.BaseModuleContext) (srcs []string) {
-	mctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			return mctx.OtherModuleDependencyTag(m) == filegroupTag
-		},
-		func(m blueprint.Module) {
-			if s, ok := m.(sourceInterface); ok {
-				srcs = append(srcs, s.getSourceFiles(mctx)...)
-			}
-		})
-
-	return
-}
-
 var wholeStaticDepTag = dependencyTag{name: "whole_static"}
 var headerDepTag = dependencyTag{name: "header"}
 var staticDepTag = dependencyTag{name: "static"}
@@ -427,6 +383,14 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 			// Not enabled, so don't add dependencies
 			return
 		}
+	}
+
+	if m, ok := mctx.Module().(SourceFileProvider); ok {
+		mctx.AddDependency(mctx.Module(), filegroupTag, m.OutSrcTargets()...)
+	}
+
+	if m, ok := mctx.Module().(SourceFileConsumer); ok {
+		mctx.AddDependency(mctx.Module(), filegroupTag, m.GetSrcTargets()...)
 	}
 
 	if l, ok := getLibrary(mctx.Module()); ok {
@@ -494,6 +458,9 @@ func targetMutator(mctx blueprint.TopDownMutatorContext) {
 }
 
 type pathProcessor interface {
+	// Prepares any path attributes, in most cases this means prefixing the module path to make sources
+	// relative to Bob root directory.
+	// This mutator should **only** modify paths, no other work should be done here.
 	processPaths(blueprint.BaseModuleContext, generatorBackend)
 }
 

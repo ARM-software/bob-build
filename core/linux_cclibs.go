@@ -19,7 +19,6 @@ package core
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -61,7 +60,6 @@ func (l *library) ObjDir() string {
 // This function has common support to compile objs for static libs, shared libs and binaries.
 func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	g := getBackend(ctx)
-	srcs := l.GetSrcs(ctx)
 
 	expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
 	// There are 2 sets of include dirs - "global" and "local".
@@ -106,81 +104,55 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
 
-	for _, source := range srcs {
-		var rule blueprint.Rule
-		args := make(map[string]string)
-		switch path.Ext(source) {
-		case ".s":
-			args["ascompiler"] = as
-			args["asflags"] = "$asflags"
-			rule = asRule
-		case ".S":
-			// Assembly with .S suffix must be preprocessed by the C compiler
-			fallthrough
-		case ".c":
-			args["ccompiler"] = cc
-			args["cflags"] = "$cflags"
-			args["conlyflags"] = "$conlyflags"
-			rule = ccRule
-		case ".cc":
-			fallthrough
-		case ".cpp":
-			args["cxxcompiler"] = cxx
-			args["cflags"] = "$cflags"
-			args["cxxflags"] = "$cxxflags"
-			rule = cxxRule
-		default:
-			if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
-				// The source already has a fully qualified path, do not prefix.
-				nonCompiledDeps = append(nonCompiledDeps, source)
-			} else {
-				nonCompiledDeps = append(nonCompiledDeps, getBackendPathInSourceDir(g, source))
+	l.Properties.GetSrcs(ctx).ForEach(
+		func(source filePath) bool {
+			var rule blueprint.Rule
+			args := make(map[string]string)
+			switch source.Ext() {
+			case ".s":
+				args["ascompiler"] = as
+				args["asflags"] = "$asflags"
+				rule = asRule
+			case ".S":
+				// Assembly with .S suffix must be preprocessed by the C compiler
+				fallthrough
+			case ".c":
+				args["ccompiler"] = cc
+				args["cflags"] = "$cflags"
+				args["conlyflags"] = "$conlyflags"
+				rule = ccRule
+			case ".cc":
+				fallthrough
+			case ".cpp":
+				args["cxxcompiler"] = cxx
+				args["cflags"] = "$cflags"
+				args["cxxflags"] = "$cxxflags"
+				rule = cxxRule
+			default:
+				nonCompiledDeps = append(nonCompiledDeps, source.buildPath())
+				return true
 			}
-			continue
-		}
 
-		buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
-		args["build_wrapper"] = buildWrapper
+			buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
+			args["build_wrapper"] = buildWrapper
 
-		var sourceWithoutPrefix string
-		if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
-			sourceWithoutPrefix = source[len(buildDir):]
-		} else {
-			sourceWithoutPrefix = source
-			source = getBackendPathInSourceDir(g, source)
-		}
+			output := l.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
 
-		output := filepath.Join(l.ObjDir(), (sourceWithoutPrefix + ".o"))
+			ctx.Build(pctx,
+				blueprint.BuildParams{
+					Rule:      rule,
+					Outputs:   []string{output},
+					Inputs:    []string{source.buildPath()},
+					Args:      args,
+					OrderOnly: utils.NewStringSlice(orderOnly, buildWrapperDeps),
+					Optional:  true,
+				})
+			objectFiles = append(objectFiles, output)
 
-		ctx.Build(pctx,
-			blueprint.BuildParams{
-				Rule:      rule,
-				Outputs:   []string{output},
-				Inputs:    []string{source},
-				Args:      args,
-				OrderOnly: utils.NewStringSlice(orderOnly, buildWrapperDeps),
-				Optional:  true,
-			})
-		objectFiles = append(objectFiles, output)
-	}
+			return true
+		})
 
 	return objectFiles, nonCompiledDeps
-}
-
-// Returns all the source files for a C/C++ library. This includes any sources that are generated.
-func (l *library) GetSrcs(ctx blueprint.ModuleContext) []string {
-	srcs := l.Properties.getSourcesResolved(ctx)
-
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
-		func(m blueprint.Module) {
-			if gs, ok := m.(dependentInterface); ok {
-				srcs = append(srcs, getSourcesGenerated(gs)...)
-			} else {
-				utils.Die("%s does not have outputs", ctx.OtherModuleName(m))
-			}
-		})
-	return srcs
 }
 
 // Returns the whole static dependencies for a library.

@@ -18,7 +18,6 @@
 package core
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -35,13 +34,13 @@ type GlobProps struct {
 	Exclude []string
 
 	// Omitted directories from the `Files` result
-	Exclude_directories *bool
+	Exclude_directories *bool // Currently no supported.
 
 	// Error-out if the result `Files` is empty
 	Allow_empty *bool
 
 	// Found module sources
-	Files []string `blueprint:"mutated"`
+	Files FilePaths `blueprint:"mutated"`
 }
 
 type moduleGlob struct {
@@ -51,72 +50,23 @@ type moduleGlob struct {
 	}
 }
 
+// All interfaces supported by moduleGlob
+type moduleGlobInterface interface {
+	pathProcessor
+	FileResolver
+	SourceFileProvider
+}
+
+var _ moduleGlobInterface = (*moduleGlob)(nil) // impl check
+
 func (m *moduleGlob) shortName() string {
 	return m.Name()
 }
 
-func (m *moduleGlob) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.Files
-}
-
-func (m *moduleGlob) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
-	return []string{}
-}
-
-func (m *moduleGlob) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return m.getSourceFiles(ctx)
-}
-
 func (m *moduleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-
 	if len(m.Properties.Srcs) == 0 {
 		ctx.PropertyErrorf("srcs", "Missed required property.")
 		return
-	}
-
-	prefix := filepath.Join(getSourceDir(), ctx.ModuleDir())
-	excludes := utils.PrefixDirs(m.Properties.Exclude, prefix)
-
-	addPath := func(p string) {
-		dir := filepath.Join(prefix, p)
-		isDir, err := ctx.Fs().IsDir(dir)
-		if os.IsNotExist(err) || err != nil {
-			ctx.ModuleErrorf("glob failed with: %s", err)
-		}
-		if !(isDir && *m.Properties.Exclude_directories) {
-			m.Properties.Files = append(m.Properties.Files, p)
-		}
-	}
-
-	for _, file := range m.Properties.Srcs {
-		if strings.ContainsAny(file, "*?[") {
-			// Globs need to be calculated relative to the module
-			// directory but not current working directory,
-			// thus need to be prefixed with `source_dir/module_dir`
-			// (i.e. `getSourceDir() + ctx.ModuleDir()`)
-			// so add it to `file`, and remove it afterwards.
-
-			file = filepath.Join(prefix, file)
-			matches, err := ctx.GlobWithDeps(file, excludes)
-
-			if err != nil {
-				ctx.ModuleErrorf("glob failed with: %s", err)
-			}
-
-			for _, match := range matches {
-				rel, err := filepath.Rel(prefix, match)
-				if err != nil {
-					panic(err)
-				}
-				addPath(rel)
-			}
-		} else if !utils.Contains(m.Properties.Exclude, file) {
-			addPath(file)
-		}
-	}
-
-	if len(m.Properties.Files) == 0 && !(*m.Properties.Allow_empty) {
-		ctx.ModuleErrorf("Glob is empty!")
 	}
 
 	for _, s := range append(m.Properties.Srcs, m.Properties.Exclude...) {
@@ -125,7 +75,35 @@ func (m *moduleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 		}
 	}
 
-	m.Properties.Files = utils.PrefixDirs(m.Properties.Files, ctx.ModuleDir())
+	prefix := ctx.ModuleDir()
+	m.Properties.Srcs = utils.PrefixDirs(m.Properties.Srcs, prefix)
+	m.Properties.Exclude = utils.PrefixDirs(m.Properties.Exclude, prefix)
+}
+
+func (m *moduleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	matches := glob(ctx, m.Properties.Srcs, m.Properties.Exclude)
+	files := FilePaths{}
+
+	for _, match := range matches {
+		fp := newSourceFilePath(match, ctx, g)
+		files = files.AppendIfUnique(fp)
+	}
+
+	if len(files) == 0 && !(*m.Properties.Allow_empty) {
+		ctx.ModuleErrorf("Glob is empty!")
+	}
+
+	m.Properties.Files = files
+
+}
+
+func (m *moduleGlob) OutSrcs() FilePaths {
+	return m.Properties.Files
+}
+
+func (m *moduleGlob) OutSrcTargets() (tgts []string) {
+	// does not forward any of it's source providers.
+	return
 }
 
 func (g *moduleGlob) GenerateBuildActions(ctx blueprint.ModuleContext) {
