@@ -21,8 +21,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/blueprint"
-
-	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 var (
@@ -57,9 +55,15 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 
 	args := m.generateKbuildArgs(ctx).toDict()
 	delete(args, "kmod_build")
-	sources := utils.NewStringSlice(
-		getBackendPathsInSourceDir(g, m.Properties.getSourcesResolved(ctx)),
-		m.extraSymbolsFiles(ctx))
+
+	sources := []string{}
+	m.Properties.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			sources = append(sources, fp.buildPath())
+			return true
+		})
+
+	sources = append(sources, m.extraSymbolsFiles(ctx)...)
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{

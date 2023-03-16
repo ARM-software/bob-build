@@ -40,6 +40,8 @@ type GenerateLibraryProps struct {
 
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
+
+	ResolvedOut FilePaths `blueprint:"mutated"`
 }
 
 type generateLibrary struct {
@@ -54,17 +56,19 @@ var _ phonyInterface = (*generateLibrary)(nil)
 var _ dependentInterface = (*generateLibrary)(nil)
 var _ splittable = (*generateLibrary)(nil)
 var _ installable = (*generateLibrary)(nil)
+var _ SourceFileConsumer = (*generateLibrary)(nil)
+var _ SourceFileProvider = (*generateLibrary)(nil)
 
 // Modules implementing generateLibraryInterface support arbitrary commands
 // that either produce a static library, shared library or binary.
 type generateLibraryInterface interface {
 	blueprint.Module
 	dependentInterface
+	SourceFileProvider
+	ImplicitFileConsumer
 
 	libExtension() string
 	outputFileName() string
-	getSourcesResolved(ctx blueprint.BaseModuleContext) []string
-	getImplicitSources(ctx blueprint.BaseModuleContext) []string
 	getDepfile() (string, bool)
 }
 
@@ -81,12 +85,24 @@ type generateLibraryInterface interface {
 func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleContext,
 	g generatorBackend, implicitOuts []string) []inout {
 	var io inout
-	io.in = append(getBackendPathsInSourceDir(g, m.getSourcesResolved(ctx)), getGeneratedFiles(ctx)...)
+
+	m.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			io.in = append(io.in, fp.buildPath())
+			return true
+		})
+
+	m.GetImplicits(ctx).ForEach(
+		func(fp filePath) bool {
+			io.implicitSrcs = append(io.implicitSrcs, fp.buildPath())
+			return true
+		})
+
 	io.out = []string{m.outputFileName()}
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile
 	}
-	io.implicitSrcs = getBackendPathsInSourceDir(g, m.getImplicitSources(ctx))
+
 	io.implicitOuts = implicitOuts
 	return []inout{io}
 }
@@ -102,6 +118,41 @@ func (m *generateLibrary) processPaths(ctx blueprint.BaseModuleContext, g genera
 
 func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []string {
 	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
+}
+
+func (m *generateLibrary) GetSrcs(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+	gc, _ := getGenerateCommon(m)
+	srcs = gc.Properties.LegacySourceProps.GetSrcs(ctx)
+	return
+}
+
+func (m *generateLibrary) GetDirectSrcs() (srcs FilePaths) {
+	gc, _ := getGenerateCommon(m)
+	srcs = gc.Properties.LegacySourceProps.GetDirectSrcs()
+	return
+}
+
+func (m *generateLibrary) GetImplicits(ctx blueprint.BaseModuleContext) (implicits FilePaths) {
+	g := getBackend(ctx)
+	for _, s := range m.getImplicitSources(ctx) {
+		implicits = append(implicits, newSourceFilePath(s, ctx, g))
+	}
+	return
+}
+
+func (m *generateLibrary) GetSrcTargets() (tgts []string) {
+	gc, _ := getGenerateCommon(m)
+	tgts = append(tgts, gc.Properties.LegacySourceProps.GetSrcTargets()...)
+	tgts = append(tgts, gc.Properties.Generated_sources...)
+	return
+}
+
+func (m *generateLibrary) OutSrcs() FilePaths {
+	return m.Properties.ResolvedOut
+}
+
+func (m *generateLibrary) OutSrcTargets() []string {
+	return []string{}
 }
 
 //// Support splittable

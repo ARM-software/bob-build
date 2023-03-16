@@ -18,8 +18,6 @@
 package core
 
 import (
-	"github.com/ARM-software/bob-build/internal/depmap"
-	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
 
@@ -31,19 +29,25 @@ type filegroup struct {
 	}
 }
 
-// Implementation check:
-var _ sourceInterface = (*filegroup)(nil)
-
-func (m *filegroup) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.SourceProps.getSourceFiles(ctx)
+// All interfaces supported by filegroup
+type filegroupInterface interface {
+	pathProcessor
+	FileResolver
+	SourceFileProvider
 }
 
-func (m *filegroup) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.SourceProps.getSourceTargets(ctx)
+var _ filegroupInterface = (*filegroup)(nil) // impl check
+
+func (m *filegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *filegroup) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return m.Properties.SourceProps.getSourcesResolved(ctx)
+func (m *filegroup) OutSrcs() FilePaths {
+	return m.Properties.GetDirectSrcs()
+}
+
+func (m *filegroup) OutSrcTargets() []string {
+	return m.Properties.GetSrcTargets()
 }
 
 func (m *filegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -66,29 +70,6 @@ func (m *filegroup) FeaturableProperties() []interface{} {
 
 func (m *filegroup) Features() *Features {
 	return &m.Properties.Features
-}
-
-var (
-	filegroupMap = depmap.NewDepmap()
-)
-
-func prepFilegroupMapMutator(mctx blueprint.BottomUpMutatorContext) {
-	if m, ok := mctx.Module().(sourceInterface); ok {
-		filegroupMap.SetDeps(mctx.ModuleName(), m.getSourceTargets(mctx))
-	}
-}
-
-func propogateFilegroupData(mctx blueprint.BottomUpMutatorContext) {
-	if _, ok := getLibrary(mctx.Module()); ok {
-		filegroupMap.Traverse(mctx.ModuleName(),
-			func(dep string) {
-				mctx.AddDependency(mctx.Module(), filegroupTag, dep)
-			},
-			func(dep string) {
-				utils.Die("filegroup module %s depends upon itself", dep)
-			},
-		)
-	}
 }
 
 func (m filegroup) GetProperties() interface{} {

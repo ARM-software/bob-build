@@ -17,7 +17,12 @@
 
 package core
 
-import "github.com/google/blueprint"
+import (
+	"strings"
+
+	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/google/blueprint"
+)
 
 /*
 	We are swapping from bob_generate_source to bob_genrule
@@ -29,13 +34,14 @@ features as possible rather than too few. Some are commented out as they would t
 implementation for features we do not already have in place.
 */
 type AndroidGenerateRuleProps struct {
-	Out []string
+	Out         []string
+	ResolvedOut FilePaths `blueprint:"mutated"`
 }
 
 type AndroidGenerateCommonProps struct {
 	// See https://ci.android.com/builds/submitted/8928481/linux/latest/view/soong_build.html
 	Name                string
-	Srcs                []string
+	Srcs                []string // TODO: This module should probalby make use of LegacySourceProps
 	Exclude_srcs        []string
 	Cmd                 *string
 	Depfile             *bool
@@ -43,6 +49,68 @@ type AndroidGenerateCommonProps struct {
 	Export_include_dirs []string
 	Tool_files          []string
 	Tools               []string
+
+	ResolvedSrcs FilePaths `blueprint:"mutated"` // Glob results.
+}
+
+type AndroidGenerateCommonPropsInterface interface {
+	pathProcessor
+	SourceFileConsumer
+	FileResolver
+}
+
+var _ AndroidGenerateCommonPropsInterface = (*AndroidGenerateCommonProps)(nil) // impl check
+
+func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+
+	prefix := projectModuleDir(ctx)
+	// We don't want to process module dependencies as paths, we must filter them out first.
+
+	srcs := utils.MixedListToFiles(ag.Srcs)
+	targets := utils.PrefixAll(utils.MixedListToBobTargets(ag.Srcs), ":")
+
+	ag.Srcs = append(utils.PrefixDirs(srcs, prefix), targets...)
+	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
+	ag.Tool_files = utils.PrefixDirs(ag.Tool_files, prefix)
+
+	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
+	// we must fix this by iterating through the command.
+	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
+	for _, v := range matches {
+		tag := v[1]
+		if tag[0] == ':' {
+			continue
+		}
+		newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
+		// Replacing with space allows us to not replace the same basename more than once if it appears
+		// multiple times.
+		newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
+		ag.Cmd = &newCmd
+	}
+}
+
+func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	// Since globbing is supported we must call a resolver.
+	files := FilePaths{}
+
+	for _, match := range glob(ctx, utils.MixedListToFiles(ag.Srcs), ag.Exclude_srcs) {
+		fp := newSourceFilePath(match, ctx, g)
+		files = files.AppendIfUnique(fp)
+	}
+
+	ag.ResolvedSrcs = files
+}
+
+func (ag *AndroidGenerateCommonProps) GetSrcTargets() []string {
+	return utils.MixedListToBobTargets(ag.Srcs)
+}
+
+func (ag *AndroidGenerateCommonProps) GetDirectSrcs() FilePaths {
+	return ag.ResolvedSrcs
+}
+
+func (ag *AndroidGenerateCommonProps) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return ag.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
 }
 
 type androidGenerateCommon struct {
@@ -53,6 +121,28 @@ type androidGenerateCommon struct {
 	Properties struct {
 		AndroidGenerateCommonProps
 	}
+}
+
+var _ SourceFileConsumer = (*androidGenerateCommon)(nil)
+
+func (m *androidGenerateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.AndroidGenerateCommonProps.processPaths(ctx, g)
+}
+
+func (m *androidGenerateCommon) GetSrcTargets() []string {
+	return m.Properties.GetSrcTargets()
+}
+
+func (m *androidGenerateCommon) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetSrcs(ctx)
+}
+
+func (m *androidGenerateCommon) GetDirectSrcs() FilePaths {
+	return m.Properties.GetDirectSrcs()
+}
+
+func (m *androidGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
@@ -78,6 +168,51 @@ type androidGenerateRule struct {
 	Properties struct {
 		AndroidGenerateRuleProps
 	}
+}
+
+type androidGenerateRuleInterface interface {
+	SourceFileConsumer
+	FileResolver
+	pathProcessor
+}
+
+var _ androidGenerateRuleInterface = (*androidGenerateRule)(nil) // impl check
+
+func (m *androidGenerateRule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.androidGenerateCommon.processPaths(ctx, g)
+}
+
+func (m *androidGenerateRule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.androidGenerateCommon.ResolveFiles(ctx, g)
+
+	files := FilePaths{}
+	for _, out := range m.Properties.Out {
+		fp := newGeneratedFilePathFromModule(out, ctx, g)
+		files = files.AppendIfUnique(fp)
+	}
+
+	m.Properties.ResolvedOut = files
+}
+
+func (m *androidGenerateRule) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.androidGenerateCommon.Properties.GetSrcs(ctx)
+}
+
+func (m *androidGenerateRule) GetDirectSrcs() FilePaths {
+	return m.androidGenerateCommon.Properties.GetDirectSrcs()
+}
+
+func (m *androidGenerateRule) GetSrcTargets() []string {
+	return m.androidGenerateCommon.Properties.GetSrcTargets()
+}
+
+func (m *androidGenerateRule) OutSrcs() FilePaths {
+	return m.Properties.ResolvedOut
+}
+
+func (m *androidGenerateRule) OutSrcTargets() (tgts []string) {
+	// does not forward any of it's source providers.
+	return
 }
 
 func (m *androidGenerateRule) shortName() string {

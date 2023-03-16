@@ -39,6 +39,9 @@ type TransformSourceProps struct {
 		// and are not specified in the explicit sources.
 		Implicit_srcs []string
 	}
+
+	// Stores the files generated
+	ResolvedOut FilePaths `blueprint:"mutated"`
 }
 
 func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath, depfile *bool, rspfile bool) (io inout) {
@@ -79,22 +82,66 @@ type transformSource struct {
 	}
 }
 
-// transformSource supports installation
-var _ installable = (*transformSource)(nil)
+// All interfaces supported by filegroup
+type transformSourceInterface interface {
+	installable
+	SourceFileProvider
+	SourceFileConsumer
+	FileResolver
+}
+
+var _ transformSourceInterface = (*transformSource)(nil) // impl check
 
 func (m *transformSource) FeaturableProperties() []interface{} {
 	return append(m.generateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
 func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
-	var sourceList []filePath
-	for _, src := range m.getSourcesResolved(ctx) {
-		sourceList = append(sourceList, newSourceFilePath(src, ctx, g))
-	}
-	for _, src := range getGeneratedFiles(ctx) {
-		sourceList = append(sourceList, newGeneratedFilePath(src))
-	}
-	return sourceList
+	return m.GetSrcs(ctx)
+}
+
+func (m *transformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.getLegacySourceProperties().ResolveFiles(ctx, g)
+}
+
+func (m *transformSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.getLegacySourceProperties().GetSrcs(ctx)
+}
+
+func (m *transformSource) GetDirectSrcs() FilePaths {
+	return m.getLegacySourceProperties().GetDirectSrcs()
+}
+
+func (m *transformSource) GetSrcTargets() []string {
+	gc, _ := getGenerateCommon(m)
+	return gc.Properties.Generated_sources
+}
+
+func (m *transformSource) OutSrcs() FilePaths {
+	return m.Properties.ResolvedOut
+}
+
+func (m *transformSource) OutSrcTargets() []string {
+	return []string{}
+}
+
+func (m *transformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
+	g := getBackend(ctx)
+	re := regexp.MustCompile(m.Properties.Out.Match)
+
+	// fmt.Printf("%v:%+v\n", m.Name(), m.GetSrcs(ctx))
+	// TODO: Refactor this to share code with generateInouts, right now the ctx type is differnet so no sharing is possible.
+	m.GetSrcs(ctx).ForEach(
+		func(fp filePath) bool {
+			io := m.Properties.inoutForSrc(re, fp, m.generateCommon.Properties.Depfile,
+				m.generateCommon.Properties.Rsp_content != nil)
+			for _, out := range io.out {
+				fp := newGeneratedFilePathFromModule(out, ctx, g)
+				m.Properties.ResolvedOut = m.Properties.ResolvedOut.AppendIfUnique(fp)
+			}
+			return true
+		})
+
 }
 
 // Return an inouts structure naming all the files associated with

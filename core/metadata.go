@@ -10,7 +10,7 @@ import (
 )
 
 type ModuleMeta struct {
-	TransitiveSrcs []string `json:"srcs"`
+	Srcs           []string `json:"srcs"`
 	TransitiveDeps []string `json:"deps"`
 }
 
@@ -27,17 +27,6 @@ func init() {
 	metaDataLock = sync.RWMutex{}
 }
 
-// Helper to extract sources from various types of modules.
-func (m *ModuleMeta) extractSrcs(module blueprint.Module) {
-	if s, ok := module.(sourceInterface); ok {
-		m.TransitiveSrcs = utils.AppendUnique(m.TransitiveSrcs, s.getSourceFiles(nil))
-	} else if s, ok := module.(getGenerateCommonInterface); ok {
-		gc := s.getGenerateCommon()
-		m.TransitiveSrcs = utils.AppendUnique(m.TransitiveSrcs, gc.Properties.Tools)
-		m.TransitiveSrcs = utils.AppendUnique(m.TransitiveSrcs, gc.Properties.Srcs)
-	}
-}
-
 // Collects information about targets.
 //
 // Currently collects `srcs` and deps.
@@ -50,11 +39,17 @@ func metaDataCollector(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	meta := ModuleMeta{}
-	meta.extractSrcs(mctx.Module())
+
+	if s, ok := mctx.Module().(SourceFileConsumer); ok {
+		s.GetSrcs(mctx).ForEach(
+			func(fp filePath) bool {
+				meta.Srcs = append(meta.Srcs, fp.localPath())
+				return true
+			})
+	}
 
 	mctx.WalkDeps(func(dep, parent blueprint.Module) bool {
 		meta.TransitiveDeps = utils.AppendIfUnique(meta.TransitiveDeps, dep.Name())
-		meta.extractSrcs(dep)
 		return true
 	})
 

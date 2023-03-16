@@ -60,9 +60,13 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 
 	if r, ok := dep.(*resource); ok {
 		var modNames []string
-		for _, src := range r.Properties.getSourcesResolved(mctx) {
-			modNames = append(modNames, r.getAndroidbpResourceName(src))
-		}
+
+		r.Properties.GetSrcs(mctx).ForEach(
+			func(fp filePath) bool {
+				modNames = append(modNames, r.getAndroidbpResourceName(fp.localPath()))
+				return true
+			})
+
 		if len(modNames) == 0 {
 			utils.Die("bob_resource %s has empty srcs", name)
 		}
@@ -265,8 +269,25 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	if l.shortName() != l.outputName() {
 		m.AddString("stem", l.outputName())
 	}
-	m.AddStringList("srcs", utils.Filter(utils.IsCompilableSource, l.Properties.getSourcesResolved(mctx)))
-	m.AddStringList("generated_sources", l.getGeneratedSourceModules(mctx))
+
+	srcs := []string{}
+	l.Properties.GetSrcs(mctx).ForEachIf(
+		func(fp filePath) bool {
+			// On Android, generated sources are passed to the modules via
+			// `generated_sources` so they are omitted here.
+			_, isGen := fp.(generatedFilePath)
+			return utils.IsCompilableSource(fp.localPath()) && !isGen
+		},
+		func(fp filePath) bool {
+			srcs = append(srcs, fp.localPath())
+			return true
+		})
+
+	m.AddStringList("srcs", srcs)
+
+	generated_srcs := l.getGeneratedSourceModules(mctx)
+	m.AddStringList("generated_sources", generated_srcs)
+
 	genHeaderModules, exportGenHeaderModules := l.getGeneratedHeaderModules(mctx)
 	m.AddStringList("generated_headers", append(genHeaderModules, exportGenHeaderModules...))
 	m.AddStringList("export_generated_headers", exportGenHeaderModules)

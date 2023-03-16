@@ -47,26 +47,24 @@ type library struct {
 }
 
 // library supports the following functionality:
-// * sharing properties via defaults
-// * feature-specific properties
-// * target-specific properties
-// * installation
-// * module enabling/disabling
-// * exporting properties to other modules
-// * use of {{match_srcs}} on some properties
-// * properties that require escaping
-// * appending to aliases
-var _ defaultable = (*library)(nil)
-var _ Featurable = (*library)(nil)
-var _ targetSpecificLibrary = (*library)(nil)
-var _ installable = (*library)(nil)
-var _ enableable = (*library)(nil)
-var _ propertyExporter = (*library)(nil)
-var _ sourceInterface = (*library)(nil)
-var _ matchSourceInterface = (*library)(nil)
-var _ propertyEscapeInterface = (*library)(nil)
-var _ splittable = (*library)(nil)
-var _ aliasable = (*library)(nil)
+type libraryInterface interface {
+	aliasable
+	defaultable
+	enableable
+	Featurable
+	installable
+	matchSourceInterface
+	propertyEscapeInterface
+	propertyExporter
+	SourceFileConsumer
+}
+
+var _ libraryInterface = (*library)(nil) // impl check
+
+// TODO: These interfaces are causing a go build issue with 'duplicate functions'
+// when added to the group interface investigate why that is and fix it.
+var _ splittable = (*library)(nil)            // impl check
+var _ targetSpecificLibrary = (*library)(nil) // impl check
 
 func (l *library) defaults() []string {
 	return l.Properties.Defaults
@@ -213,16 +211,22 @@ func (l *library) getLegacySourceProperties() *LegacySourceProps {
 	return &l.Properties.LegacySourceProps
 }
 
-func (l *library) getSourceFiles(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.LegacySourceProps.getSourceFiles(ctx)
+func (l *library) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	l.Properties.ResolveFiles(ctx, g)
 }
 
-func (l *library) getSourceTargets(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.LegacySourceProps.getSourceTargets(ctx)
+func (l *library) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return l.Properties.GetSrcs(ctx)
 }
 
-func (l *library) getSourcesResolved(ctx blueprint.BaseModuleContext) []string {
-	return l.Properties.LegacySourceProps.getSourcesResolved(ctx)
+func (l *library) GetDirectSrcs() FilePaths {
+	return l.Properties.GetDirectSrcs()
+}
+
+func (l *library) GetSrcTargets() (tgts []string) {
+	tgts = append(tgts, l.Properties.GetSrcTargets()...)
+	tgts = append(tgts, l.Properties.Generated_sources...)
+	return
 }
 
 // {{match_srcs}} template is only applied in specific properties where we've

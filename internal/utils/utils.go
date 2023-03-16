@@ -386,3 +386,11 @@ func SplitPath(path string) (components []string) {
 
 	return append(SplitPath(dir), file)
 }
+
+func MixedListToBobTargets(fileTargetList []string) []string {
+	return StripPrefixAll(Filter(func(s string) bool { return s[0] == ':' }, fileTargetList), ":")
+}
+
+func MixedListToFiles(fileTargetList []string) []string {
+	return Filter(func(s string) bool { return s[0] != ':' }, fileTargetList)
+}

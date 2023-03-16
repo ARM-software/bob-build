@@ -183,14 +183,23 @@ func Main() {
 	ctx.RegisterBottomUpMutator("supported_variants", supportedVariantsMutator).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
 	ctx.RegisterTopDownMutator("target", targetMutator).Parallel()
+
+	// `pathMutator` has to run before `DefaultApplierMutator`. This is because paths declared in the module
+	// are relative to their module scope, whereas paths declared in the defaults are not.
 	ctx.RegisterBottomUpMutator("process_paths", pathMutator).Parallel()
+
 	ctx.RegisterBottomUpMutator("default_applier", DefaultApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
+
+	// First resolve providers which are not dependant on other modules.
+	ctx.RegisterBottomUpMutator("resolve_files", resolveFilesMutator).Parallel()
+
+	// Now we can resolve remaining, dynamic file providers.
+	ctx.RegisterBottomUpMutator("resolve_dynamic_src_outputs", resolveDynamicSrcOutputs) // Cannot be parallel.
+
 	ctx.RegisterBottomUpMutator("library_defines", propogateLibraryDefinesMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()
 	ctx.RegisterBottomUpMutator("generated", generatedDependerMutator).Parallel()
-	ctx.RegisterBottomUpMutator("filegroup_deps1", prepFilegroupMapMutator).Parallel()
-	ctx.RegisterBottomUpMutator("filegroup_deps2", propogateFilegroupData).Parallel()
 	ctx.RegisterBottomUpMutator("collect_metadata", metaDataCollector).Parallel()
 
 	if handler := initGrapvizHandler(); handler != nil {

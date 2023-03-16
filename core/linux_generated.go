@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +40,9 @@ var touchRule = pctx.StaticRule("touch",
 
 // Generate the build actions for a generateSource module and populates the outputs.
 func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.ModuleContext, inouts []inout) {
-	m.outputdir = g.sourceOutputDir(m)
+	m.outputdir = g.sourceOutputDir(ctx.Module())
 	prefixInoutsWithOutputDir(inouts, m.outputDir())
+
 	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
 	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
@@ -156,6 +157,7 @@ func transformCmdAndroidToOld(cmd string, ag *androidGenerateRule) (retCmd *stri
 			newCmd = strings.Replace(newCmd, "$(location)", "$(location "+ag.androidGenerateCommon.Properties.Tool_files[0]+")", -1)
 		}
 	}
+
 	return &newCmd
 }
 
@@ -179,6 +181,7 @@ func transformToolsAndroidToOld(ag *androidGenerateRule, pgs *generateSource) {
 	*/
 	// Extract each substr that is a 'location <tag>'
 	matches := locationTagRegex.FindAllStringSubmatch(*ag.androidGenerateCommon.Properties.Cmd, -1)
+
 	for _, v := range matches {
 		tag := v[1]
 		// If the tag refers to a tool inside of tool_files, we can just convert it the old command.
@@ -209,6 +212,10 @@ func transformToolsAndroidToOld(ag *androidGenerateRule, pgs *generateSource) {
 }
 
 func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mctx blueprint.ModuleContext) {
+	// TODO: remove proxy object and add a proper backend support.
+	// If needed, refactor backend to accept both objects.
+	// This approach is fragile, the generator runs after all the mutators have already executed and as such
+	// we have to assume some properties may have been modified.
 
 	// Re-use old Bob Code during transition by creating a proxy generateSource object to pass to the old generator
 	var proxyGenerateSource generateSource
@@ -222,11 +229,12 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 	proxyGenerateSource.generateCommon.Properties.Srcs = ag.androidGenerateCommon.Properties.Srcs
 	proxyGenerateSource.generateCommon.Properties.Exclude_srcs = ag.androidGenerateCommon.Properties.Exclude_srcs
 	proxyGenerateSource.generateCommon.Properties.Depfile = ag.androidGenerateCommon.Properties.Depfile
+	proxyGenerateSource.generateCommon.Properties.ResolveFiles(mctx, g)
+
 	proxyGenerateSource.Properties.Implicit_srcs = ag.androidGenerateCommon.Properties.Tool_files
 	proxyGenerateSource.Properties.Out = ag.Properties.Out
+	proxyGenerateSource.ResolveFiles(mctx, g)
 
-	// Adds the correct prefixes to all paths for the linux backend
-	proxyGenerateSource.processPaths(mctx, g)
 	g.generateSourceActions(&proxyGenerateSource, mctx)
 
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
@@ -235,6 +243,7 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 
 func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
+
 	g.generateCommonActions(&m.generateCommon, ctx, inouts)
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)

@@ -17,17 +17,35 @@
 
 package core
 
-import "github.com/google/blueprint"
+import (
+	"github.com/google/blueprint"
+)
 
 type binary struct {
 	library
 }
 
 // binary supports:
-// * producing output using the linker
-// * stripping symbols from output
-var _ linkableModule = (*binary)(nil)
-var _ stripable = (*binary)(nil)
+type binaryInterface interface {
+	stripable
+	linkableModule
+	SourceFileProvider // A binary can provide itself as a source
+}
+
+var _ binaryInterface = (*binary)(nil) // impl check
+
+func (m *binary) OutSrcs() (srcs FilePaths) {
+	for _, out := range m.outputs() {
+		fp := newGeneratedFilePath(out)
+		srcs = srcs.AppendIfUnique(fp)
+	}
+	return
+}
+
+func (m *binary) OutSrcTargets() (tgts []string) {
+	// does not forward any of it's source providers.
+	return
+}
 
 func (b *binary) strip() bool {
 	return b.Properties.Strip != nil && *b.Properties.Strip

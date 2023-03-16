@@ -18,9 +18,7 @@
 package core
 
 import (
-	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
@@ -63,9 +61,8 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 }
 
 func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
+	// TODO: Merge this backend with linux_cclibs once the interfaces are close enough.
 	g := getBackend(ctx)
-	srcs := l.getSourcesResolved(ctx)
-
 	tc := g.getToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.getAssembler()
 	cc, cctargetflags := tc.getCCompiler()
@@ -89,58 +86,48 @@ func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
 
-	for _, source := range srcs {
-		var rule blueprint.Rule
-		args := make(map[string]string)
-		switch path.Ext(source) {
-		case ".s":
-			args["ascompiler"] = as
-			args["asflags"] = "$asflags"
-			rule = asRule
-		case ".S":
-			// Assembly with .S suffix must be preprocessed by the C compiler
-			fallthrough
-		case ".c":
-			args["ccompiler"] = cc
-			args["cflags"] = "$cflags"
-			args["conlyflags"] = "$conlyflags"
-			rule = ccRule
-		case ".cc":
-			fallthrough
-		case ".cpp":
-			args["cxxcompiler"] = cxx
-			args["cflags"] = "$cflags"
-			args["cxxflags"] = "$cxxflags"
-			rule = cxxRule
-		default:
-			if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
-				// The source already has a fully qualified path, do not prefix.
-				nonCompiledDeps = append(nonCompiledDeps, source)
-			} else {
-				nonCompiledDeps = append(nonCompiledDeps, getBackendPathInSourceDir(g, source))
+	l.GetSrcs(ctx).ForEach(
+		func(source filePath) bool {
+			var rule blueprint.Rule
+			args := make(map[string]string)
+			switch source.Ext() {
+			case ".s":
+				args["ascompiler"] = as
+				args["asflags"] = "$asflags"
+				rule = asRule
+			case ".S":
+				// Assembly with .S suffix must be preprocessed by the C compiler
+				fallthrough
+			case ".c":
+				args["ccompiler"] = cc
+				args["cflags"] = "$cflags"
+				args["conlyflags"] = "$conlyflags"
+				rule = ccRule
+			case ".cc":
+				fallthrough
+			case ".cpp":
+				args["cxxcompiler"] = cxx
+				args["cflags"] = "$cflags"
+				args["cxxflags"] = "$cxxflags"
+				rule = cxxRule
+			default:
+				nonCompiledDeps = append(nonCompiledDeps, source.buildPath())
+				return true
 			}
-			continue
-		}
 
-		var sourceWithoutPrefix string
-		if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
-			sourceWithoutPrefix = source[len(buildDir):]
-		} else {
-			sourceWithoutPrefix = source
-			source = getBackendPathInSourceDir(g, source)
-		}
+			output := l.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
 
-		output := l.ObjDir() + sourceWithoutPrefix + ".o"
-		ctx.Build(pctx,
-			blueprint.BuildParams{
-				Rule:     rule,
-				Outputs:  []string{output},
-				Inputs:   []string{source},
-				Args:     args,
-				Optional: true,
-			})
-		objectFiles = append(objectFiles, output)
-	}
+			ctx.Build(pctx,
+				blueprint.BuildParams{
+					Rule:     rule,
+					Outputs:  []string{output},
+					Inputs:   []string{source.buildPath()},
+					Args:     args,
+					Optional: true,
+				})
+			objectFiles = append(objectFiles, output)
+			return true
+		})
 
 	return objectFiles, nonCompiledDeps
 }
@@ -269,6 +256,8 @@ func (g *androidBpGenerator) strictLibraryActions(m *strictLibrary, ctx blueprin
 	proxyStaticLib.Properties.Target_supported = m.Properties.Target_supported
 	// TODO: generate target for all supported target types
 	proxyStaticLib.Properties.TargetType = tgtTypeHost
+
+	proxyStaticLib.Properties.ResolveFiles(ctx, g)
 	g.staticActions(&proxyStaticLib, ctx)
 	// TODO: Static lib dependency
 

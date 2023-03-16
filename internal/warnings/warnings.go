@@ -32,24 +32,27 @@ const URL string = "https://github.com/ARM-software/bob-build/tree/master/docs/w
 type Category string
 
 const (
-	DefaultSrcsWarning      Category = "default-srcs"
-	GenerateRuleWarning     Category = "generate-rule"
-	RelativeUpLinkWarning   Category = "relative-up-link"
-	DeprecatedFilegroupSrcs Category = "deprecated-filegroup-srcs"
+	DefaultSrcsWarning             Category = "default-srcs"
+	GenerateRuleWarning            Category = "generate-rule"
+	RelativeUpLinkWarning          Category = "relative-up-link"
+	DeprecatedFilegroupSrcs        Category = "deprecated-filegroup-srcs"
+	UnmatchedNonCompileSrcsWarning Category = "unmatched-non-compile-srcs"
 )
 
 var categoriesMap = map[string]Category{
-	"DefaultSrcsWarning":      DefaultSrcsWarning,
-	"GenerateRuleWarning":     GenerateRuleWarning,
-	"RelativeUpLinkWarning":   RelativeUpLinkWarning,
-	"DeprecatedFilegroupSrcs": DeprecatedFilegroupSrcs,
+	"DefaultSrcsWarning":             DefaultSrcsWarning,
+	"GenerateRuleWarning":            GenerateRuleWarning,
+	"RelativeUpLinkWarning":          RelativeUpLinkWarning,
+	"DeprecatedFilegroupSrcs":        DeprecatedFilegroupSrcs,
+	"UnmatchedNonCompileSrcsWarning": UnmatchedNonCompileSrcsWarning,
 }
 
 var categoriesMessages = map[Category]string{
-	DefaultSrcsWarning:      "`srcs`/`exclude_srcs` property should not be used in defaults. Specify target sources explicitly or use `bob_filegroup`.",
-	GenerateRuleWarning:     "`bob_generate_source` should not be used. Use `bob_genrule` instead.",
-	RelativeUpLinkWarning:   "Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.",
-	DeprecatedFilegroupSrcs: "Use of `filegroup_srcs` is deprecated. Use `:<target_name>` in `srcs` instead.",
+	DefaultSrcsWarning:             "`srcs`/`exclude_srcs` property should not be used in defaults. Specify target sources explicitly or use `bob_filegroup`.",
+	GenerateRuleWarning:            "`bob_generate_source` should not be used. Use `bob_genrule` instead.",
+	RelativeUpLinkWarning:          "Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.",
+	DeprecatedFilegroupSrcs:        "Use of `filegroup_srcs` is deprecated. Use `:<target_name>` in `srcs` instead.",
+	UnmatchedNonCompileSrcsWarning: "Non-compiled sources have not been matched fully.",
 }
 
 type Action string

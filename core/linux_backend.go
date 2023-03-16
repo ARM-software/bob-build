@@ -107,7 +107,7 @@ func (g *linuxGenerator) bobScriptsDir() string {
 	return "${BobScriptsDir}"
 }
 
-func (g *linuxGenerator) sourceOutputDir(m *generateCommon) string {
+func (g *linuxGenerator) sourceOutputDir(m blueprint.Module) string {
 	return filepath.Join("${BuildDir}", "gen", m.Name())
 }
 
@@ -271,16 +271,8 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 			utils.SortedKeys(args)...)
 	}
 
-	// Check if this is a resource
-	_, isResource := ins.(*resource)
-
 	for _, src := range ins.filesToInstall(ctx) {
 		dest := filepath.Join(installPath, filepath.Base(src))
-		// Resources always come from the source directory.
-		// All other module types install files from the build directory.
-		if isResource {
-			src = getBackendPathInSourceDir(g, src)
-		}
 
 		// Interpose strip target
 		if lib, ok := m.(stripable); ok {
