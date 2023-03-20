@@ -5,7 +5,7 @@ import (
 )
 
 type AttributesMap map[string]interface{}
-type BobModule struct {
+type Module struct {
 	bobName      string
 	bobType      string
 	relativePath string
@@ -13,19 +13,19 @@ type BobModule struct {
 	features     map[string]AttributesMap
 }
 
-func (m BobModule) getName() string {
+func (m Module) getName() string {
 	return m.bobName
 }
 
-func (m BobModule) getRelativePath() string {
+func (m Module) getRelativePath() string {
 	return m.relativePath
 }
 
-func (m BobModule) getLabel() label.Label {
+func (m Module) getLabel() label.Label {
 	return m.bazelLabel
 }
 
-func (m *BobModule) addFeatureAttribute(feature string, attribute string, v interface{}) {
+func (m *Module) addFeatureAttribute(feature string, attribute string, v interface{}) {
 
 	if f, ok := m.features[feature]; ok {
 		f[attribute] = v
@@ -35,14 +35,14 @@ func (m *BobModule) addFeatureAttribute(feature string, attribute string, v inte
 	}
 }
 
-func NewBobModule(moduleName string, moduleType string, relPath string, rootPath string) *BobModule {
+func NewModule(moduleName string, moduleType string, relPath string, rootPath string) *Module {
 
-	bobModule := &BobModule{}
-	bobModule.bobName = moduleName
-	bobModule.bobType = moduleType
-	bobModule.relativePath = relPath
-	bobModule.bazelLabel = label.Label{Repo: rootPath, Pkg: relPath, Name: moduleName}
-	bobModule.features = make(map[string]AttributesMap)
+	m := &Module{}
+	m.bobName = moduleName
+	m.bobType = moduleType
+	m.relativePath = relPath
+	m.bazelLabel = label.Label{Repo: rootPath, Pkg: relPath, Name: moduleName}
+	m.features = make(map[string]AttributesMap)
 
-	return bobModule
+	return m
 }

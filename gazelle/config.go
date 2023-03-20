@@ -86,7 +86,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		modules := bobParser.parse()
 
-		// Register all `BobModule`s
+		// Register all `Module`s
 		for _, m := range modules {
 			registry.register(m)
 		}
