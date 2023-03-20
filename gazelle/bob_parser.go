@@ -27,7 +27,7 @@ func newBobParser(rootPath string, config *bob.BobConfig) *bobParser {
 	}
 }
 
-func (p *bobParser) parse() []*BobModule {
+func (p *bobParser) parse() []*Module {
 	// We only need the Blueprint context to parse the modules, we discard it afterwards.
 	bp := blueprint.NewContext()
 
@@ -46,19 +46,19 @@ func (p *bobParser) parse() []*BobModule {
 	bp.RegisterBottomUpMutator("default_deps2", bob.DefaultDepsStage2Mutator).Parallel()
 	bp.RegisterBottomUpMutator("default_applier", bob.DefaultApplierMutator).Parallel()
 
-	var bobModules []*BobModule
-	var bobModulesMutex sync.RWMutex
+	var modules []*Module
+	var modulesMutex sync.RWMutex
 
 	bp.RegisterBottomUpMutator("register_bob_modules", func(mctx blueprint.BottomUpMutatorContext) {
-		bobModule := NewBobModule(mctx.ModuleName(), mctx.ModuleType(), mctx.ModuleDir(), p.rootPath)
+		m := NewModule(mctx.ModuleName(), mctx.ModuleType(), mctx.ModuleDir(), p.rootPath)
 
 		parseBpModule(mctx.Module(), func(feature string, attribute string, v interface{}) {
-			bobModule.addFeatureAttribute(feature, attribute, v)
+			m.addFeatureAttribute(feature, attribute, v)
 		})
 
-		bobModulesMutex.Lock()
-		defer bobModulesMutex.Unlock()
-		bobModules = append(bobModules, bobModule)
+		modulesMutex.Lock()
+		defer modulesMutex.Unlock()
+		modules = append(modules, m)
 	}).Parallel()
 
 	bpToParse, err := findBpFiles(p.rootPath)
@@ -84,7 +84,7 @@ func (p *bobParser) parse() []*BobModule {
 		os.Exit(1)
 	}
 
-	return bobModules
+	return modules
 }
 
 func findBpFiles(root string) ([]string, error) {
