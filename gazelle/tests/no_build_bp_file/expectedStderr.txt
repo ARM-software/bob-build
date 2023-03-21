@@ -1,5 +1,4 @@
 gazelle: RegisterFlags() - NOT IMPLEMENTED
 gazelle: CheckFlags() - NOT IMPLEMENTED
-gazelle: Kinds() - NOT IMPLEMENTED
 gazelle: Loads() - NOT IMPLEMENTED
 gazelle: Parse failed: no paths provided to parse
