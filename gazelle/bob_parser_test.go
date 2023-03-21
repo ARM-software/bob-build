@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"fmt"
 	bob "github.com/ARM-software/bob-build/core"
 	"github.com/google/blueprint"
 	"github.com/stretchr/testify/assert"
@@ -104,7 +105,7 @@ func TestParseBpModule(t *testing.T) {
 	parseBpModule(bpModule, handler)
 
 	assert.Equal(t, 2, len(features), "Wrong features count")
-	assert.Contains(t, features, "//conditions:default", "No '//conditions:default' found")
+	assert.Contains(t, features, ConditionDefault, fmt.Sprintf("No '%s' found", ConditionDefault))
 	assert.Contains(t, features, "Feature_y", "No 'Feature_y' found")
 
 	for _, f := range features {
@@ -116,6 +117,6 @@ func TestParseBpModule(t *testing.T) {
 		}
 	}
 
-	assert.Contains(t, features["//conditions:default"]["Srcs"], "main.c")
+	assert.Contains(t, features[ConditionDefault]["Srcs"], "main.c")
 	assert.Contains(t, features["Feature_y"]["Srcs"], "libA.c")
 }
