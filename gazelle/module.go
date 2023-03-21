@@ -1,10 +1,12 @@
 package plugin
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/label"
+	"github.com/bazelbuild/bazel-gazelle/rule"
+	bzl "github.com/bazelbuild/buildtools/build"
 )
 
 type ModuleType int8
@@ -34,7 +36,7 @@ func (t ModuleType) String() string {
 		return "cc_binary"
 	case ModuleLibrary:
 		return "cc_library"
-	case ModuleFilegroup:
+	case ModuleFilegroup, ModuleGlob:
 		return "filegroup"
 	}
 	return "unknown"
@@ -44,7 +46,6 @@ func ParseModuleType(str string) ModuleType {
 	if t, ok := bobToModuleTypeMap[strings.ToLower(str)]; ok {
 		return t
 	} else {
-		log.Printf("Undefined module type: %s\n", str)
 		return ModuleUndefined
 	}
 }
@@ -93,4 +94,94 @@ func NewModule(moduleName string, moduleType string, relPath string, rootPath st
 	m.features = make(map[string]AttributesMap)
 
 	return m
+}
+
+func (m *Module) generateRule() (r *rule.Rule, err error) {
+
+	switch m.moduleType {
+	case ModuleFilegroup:
+		// build Bazel `filegroup` from `bob_filegroup`
+		r = m.buildFilegroup()
+	case ModuleGlob:
+		// build Bazel `filegroup` from `bob_glob`
+		r = m.buildGlobFilegroup()
+	default:
+		err = fmt.Errorf("Unsupported module '%s'", m.moduleType)
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func (m *Module) buildFilegroup() *rule.Rule {
+
+	r := rule.NewRule(m.moduleType.String(), m.name)
+	r.SetKind(m.moduleType.String())
+
+	list := make([]bzl.Expr, 0, 2)
+
+	if d, ok := m.features[ConditionDefault]; ok {
+		if srcs, ok := d["Srcs"].([]string); ok {
+			list = append(list, makeStringListWithGlob(srcs).BzlExpr())
+		}
+	}
+
+	data := make(SelectStringListWithGlobValue)
+
+	for name, attr := range m.features {
+		if srcs, ok := attr["Srcs"].([]string); ok && name != ConditionDefault {
+			data[getFeatureCondition(name)] = makeStringListWithGlob(srcs)
+		}
+	}
+
+	if len(data) > 0 {
+		list = append(list, data.SelectWithGlob())
+	}
+
+	if len(list) == 2 {
+		r.SetAttr("srcs", &bzl.BinaryExpr{X: list[0], Y: list[1], Op: "+"})
+	} else if len(list) == 1 {
+		r.SetAttr("srcs", list[0])
+	}
+
+	return r
+}
+
+func (m *Module) buildGlobFilegroup() *rule.Rule {
+
+	r := rule.NewRule(m.moduleType.String(), m.name)
+	r.SetKind(m.moduleType.String())
+
+	g := &GlobValue{}
+
+	// `bob_glob` is not featurable thus only `ConditionDefault` is present
+
+	if d, ok := m.features[ConditionDefault]; ok {
+		if srcs, ok := d["Srcs"].([]string); ok {
+			g.Patterns = srcs
+		}
+		if allowEmpty, ok := d["Allow_empty"].(*bool); ok {
+			g.AllowEmpty = allowEmpty
+		}
+		if exclude, ok := d["Exclude"].([]string); ok {
+			g.Excludes = exclude
+		}
+		if excludeDir, ok := d["Exclude_directories"].(*bool); ok {
+			g.ExcludeDirectories = excludeDir
+		}
+	}
+
+	r.SetAttr("srcs", g.BzlExpr())
+
+	return r
+}
+
+// TODO: resolve feature names properly depending on
+// the location in `build.bp`
+func getFeatureCondition(f string) string {
+	if f == ConditionDefault {
+		return f
+	} else {
+		return fmt.Sprint(":", strings.ToLower(f))
+	}
 }
