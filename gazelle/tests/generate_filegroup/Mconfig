@@ -1,0 +1,11 @@
+config FEATURE_A
+    bool "Enable Feature A"
+    default n
+
+config OPTION_B
+    string "Set Option B"
+    default "--secret"
+
+config DEBUG
+    bool "Set debug flags"
+    default y

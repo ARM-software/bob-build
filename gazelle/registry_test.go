@@ -23,5 +23,4 @@ func Test_register_module(t *testing.T) {
 	if _, ok := registry.retrieveByPath("some/pkg"); !ok {
 		t.Errorf("module %s not successfully registered", m.getName())
 	}
-
 }

@@ -1,0 +1,20 @@
+# gazelle:bob_root
+
+filegroup(
+    name = "glob_lib_srcs",
+    srcs = glob(
+        ["lib/**/*.c"],
+        exclude = ["lib/**/exclude_*.cpp"],
+        exclude_directories = 1,
+        allow_empty = False,
+    ),
+)
+
+filegroup(
+    name = "greet_srcs",
+    srcs = glob(["srcs/*.c"]) + select({
+        ":feature_a": [
+            "internal/secure.c",
+        ],
+    }),
+)
