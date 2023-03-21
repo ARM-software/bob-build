@@ -13,6 +13,10 @@ import (
 	"github.com/google/blueprint/proptools"
 )
 
+const (
+	ConditionDefault string = "//conditions:default"
+)
+
 type valueHandler func(feature string, attribute string, v interface{})
 
 type bobParser struct {
@@ -131,7 +135,7 @@ func parseBpModuleProperties(v interface{}, handler valueHandler) {
 			if propValue.Field(i).Kind() == reflect.Struct && name == "Features" {
 				parseBpModuleFeatures(fieldValue, handler)
 			} else {
-				parseProperties("//conditions:default", name, fieldValue, handler)
+				parseProperties(ConditionDefault, name, fieldValue, handler)
 			}
 		}
 	}
