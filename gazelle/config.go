@@ -80,7 +80,6 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			log.Fatalf("Parse failed: %v\n", err)
 		}
 
-		registry := NewRegistry()
 		bobConfig := createBobConfigSpoof(configs)
 		bobParser := newBobParser(c.RepoRoot, bobConfig)
 
@@ -88,7 +87,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		// Register all `Module`s
 		for _, m := range modules {
-			registry.register(m)
+			e.registry.register(m)
 		}
 	}
 }

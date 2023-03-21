@@ -8,10 +8,12 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
-type BobExtension struct{}
+type BobExtension struct {
+	registry *Registry
+}
 
 func NewLanguage() language.Language {
-	return &BobExtension{}
+	return &BobExtension{registry: NewRegistry()}
 }
 
 const BobExtensionName = "bob_build"
