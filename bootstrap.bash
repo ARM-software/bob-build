@@ -41,7 +41,7 @@ then
     exit 1
 fi
 
-go_version=$(go version | { read _ _ v _; echo ${v#go}; })
+go_version=$(go version | { read _ _ v _; echo "${v#go}"; })
 if [ "$(printf "%s\n1.20\n" "$go_version" | sort -t '.' -k 1,1 -k 2,2 -g | head -n 1)" == "1.20" ]; then
   # Since go 1.20, std modules are not installed by default. This breaks Blueprint.
   # Pre-install these modules before proceeding.
@@ -87,7 +87,8 @@ else
     mkdir -p "$BUILDDIR"
 
     # Relative path from build directory to working directory
-    WORKDIR=$(relative_path "${BUILDDIR}" $(pwd))
+    WORKDIR=$(relative_path "${BUILDDIR}" "$(pwd)")
+    export WORKDIR
 fi
 
 BOOTSTRAP_GLOBFILE="${BUILDDIR}/.bootstrap/build-globs.ninja"
@@ -105,7 +106,7 @@ if [ -f "${BOOTSTRAP_GLOBFILE}" ]; then
 fi
 
 # Calculate Bob directory relative to the working directory.
-BOB_DIR="$(relative_path $(pwd) "${SCRIPT_DIR}")"
+BOB_DIR="$(relative_path "$(pwd)" "${SCRIPT_DIR}")"
 CONFIG_FILE="${CONFIGDIR}/${CONFIGNAME}"
 CONFIG_JSON="${CONFIGDIR}/.bob.config.json"
 
@@ -115,6 +116,11 @@ BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
 # space separated values, e.g. "*:W RelativeUpLinkWarning:E"
 BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
 
+export BOB_DIR
+export CONFIG_FILE
+export CONFIG_JSON
+export BOB_LOG_WARNINGS
+export BOB_LOG_WARNINGS_FILE
 export TOPNAME="build.bp"
 export BOOTSTRAP="${BOB_DIR}/bootstrap.bash"
 export BLUEPRINTDIR="${BOB_DIR}/blueprint"
@@ -127,7 +133,7 @@ write_bootstrap
 
 if [ ${SRCDIR:0:1} != '/' ]; then
     # Use relative symlinks
-    BOB_DIR_FROM_BUILD="$(relative_path $(bob_realpath "${BUILDDIR}") "${SCRIPT_DIR}")"
+    BOB_DIR_FROM_BUILD="$(relative_path "$(bob_realpath "${BUILDDIR}")" "${SCRIPT_DIR}")"
 else
     # Use absolute symlinks
     BOB_DIR_FROM_BUILD="$(bob_realpath "${SCRIPT_DIR}")"

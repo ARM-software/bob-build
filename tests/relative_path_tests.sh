@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2021, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 # limitations under the License.
 
 # Check that relative_path() works as expected
-SCRIPT_DIR=$(dirname $0)
+SCRIPT_DIR=$(dirname "$0")
 BOB_DIR="${SCRIPT_DIR}/.."
 
 source "${BOB_DIR}/pathtools.bash"
@@ -38,13 +38,13 @@ function test_relpath() {
     fi
 
     if [ "${RESULT}" != "${EXPECTED}" ] ; then
-        echo FAIL: relative_path ${SOURCE} ${TARGET} expected to return ${EXPECTED}, got ${RESULT}
+        echo FAIL: relative_path "${SOURCE}" "${TARGET}" expected to return "${EXPECTED}", got "${RESULT}"
         HAVE_FAILURE=1
     fi
 }
 
 TEST_DIR="$(mktemp -d -t relative_path_tests.XXXXXX)"
-pushd "${TEST_DIR}" >&/dev/null
+pushd "${TEST_DIR}" >&/dev/null || exit
 
 mkdir -p "a/b/c/d"
 mkdir -p "a/b2/c"
@@ -140,7 +140,7 @@ test_relpath "combinations/c/b/a" "combinations/b" "../b"
 test_relpath "combinations/c/a" "combinations/b/c/a/b" "b/c/a/b"
 
 # Cleanup
-popd >&/dev/null
+popd >&/dev/null || exit
 rm -rf "${TEST_DIR}"
 
 exit ${HAVE_FAILURE}

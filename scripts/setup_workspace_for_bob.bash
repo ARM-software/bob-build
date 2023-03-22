@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2019 Arm Limited.
+# Copyright 2018-2019, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,8 @@ Options
   -h    Help text
 EOF
 }
+
+# shellcheck disable=SC2068,SC2294
 
 function run() {
     echo $@

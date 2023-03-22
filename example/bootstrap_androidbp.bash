@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020-2022 Arm Limited.
+# Copyright 2020-2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ EOF
 }
 
 MENU=0
-PARAMS=$(getopt -o c:hm -l configdir:,help,menuconfig --name $(basename "$0") -- "$@")
+PARAMS=$(getopt -o c:hm -l configdir:,help,menuconfig --name "$(basename "$0")" -- "$@")
 
 eval set -- "$PARAMS"
 unset PARAMS
@@ -86,7 +86,7 @@ source "${SCRIPT_DIR}/${BOB_DIR}/pathtools.bash"
 PROJ_DIR=$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")
 
 # Change to the working directory
-cd "${ANDROID_BUILD_TOP}"
+cd "${ANDROID_BUILD_TOP}" || exit
 
 ### Variables required for Bob and Android.bp bootstrap ###
 BPBUILD_DIR="${OUT}/gen/STATIC_LIBRARIES/bobbp_${PROJ_NAME}_intermediates"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2020 Arm Limited.
+# Copyright 2018-2020, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 function count_path_elems() {
     P=$1
     IFS='/'
-    set -f $P
+    set -f "$P"
     echo $#
 }
 
@@ -29,12 +29,12 @@ function count_path_elems() {
 # This is expected to be used with equivalent relative and absolute paths.
 # Where they are the same length, the first is preferred.
 function shortest_path() {
-    COUNT1=$(count_path_elems $1)
-    COUNT2=$(count_path_elems $2)
-    if [ ${COUNT1} -le ${COUNT2} ]; then
-        echo ${1}
+    COUNT1=$(count_path_elems "$1")
+    COUNT2=$(count_path_elems "$2")
+    if [ "${COUNT1}" -le "${COUNT2}" ]; then
+        echo "${1}"
     else
-        echo ${2}
+        echo "${2}"
     fi
 }
 
@@ -58,7 +58,8 @@ function bob_abspath() {
 # to be relative to the directory containing the link, not the current working
 # directory, so it is prefixed with the link's dirname.
 function bob_eval_link() {
-    local link_target="$(readlink "${1}")" link_dir=
+    local link_target
+    link_target="$(readlink "${1}")" link_dir=
     if [[ "${link_target:0:1}" != "/" ]]; then
         link_dir="$(dirname "${1}")"
         if [[ "${link_dir: -1}" != "/" ]]; then
@@ -90,11 +91,15 @@ function path_is_parent() {
 function relative_path() {
     [[ -e $1 ]] || { echo "relative_path: Source path '$1' does not exist" >&2; return 1; }
     [[ -e $2 ]] || { echo "relative_path: Target path '$2' does not exist" >&2; return 1; }
-    local SRC_ABS=$(bob_abspath "${1}")
-    local TGT_ABS=$(bob_abspath "${2}")
-    local BACK= RESULT= CMN_PFX= RELPATH_FROM_LINK=
+    local SRC_ABS
+    local TGT_ABS
+    SRC_ABS=$(bob_abspath "${1}")
+    TGT_ABS=$(bob_abspath "${2}")
+    local BACK='' RESULT='' CMN_PFX='' RELPATH_FROM_LINK=''
 
-    if [[ ${TGT_ABS} == ${SRC_ABS} ]]; then
+
+
+    if [[ "${TGT_ABS}" == "${SRC_ABS}" ]]; then
         RESULT=.
 
     elif path_is_parent "${SRC_ABS}" "${TGT_ABS}"; then
@@ -103,19 +108,19 @@ function relative_path() {
         # Remove the trailing slash from the prefix if it has one
         SRC_ABS=${SRC_ABS%/}
 
-        RESULT=${TGT_ABS#${SRC_ABS}/}
+        RESULT=${TGT_ABS#"${SRC_ABS}"/}
 
     elif path_is_parent "${TGT_ABS}" "${SRC_ABS}"; then
         # TGT_ABS is a parent of SRC_ABS
 
-        while [[ ${TGT_ABS} != ${SRC_ABS} ]]; do
+        while [[ "${TGT_ABS}" != "${SRC_ABS}" ]]; do
             if [[ -L ${SRC_ABS} ]]; then
                 SRC_ABS="$(bob_eval_link "${SRC_ABS}")" || return $?
                 RELPATH_FROM_LINK="$(relative_path "${SRC_ABS}" "${TGT_ABS}")" || return $?
                 echo "${BACK}${RELPATH_FROM_LINK}"
                 return
             fi
-            SRC_ABS=$(dirname ${SRC_ABS})
+            SRC_ABS=$(dirname "${SRC_ABS}")
             BACK="../${BACK}"
         done
 
@@ -131,15 +136,15 @@ function relative_path() {
                 echo "${BACK}${RELPATH_FROM_LINK}"
                 return
             fi
-            CMN_PFX=$(dirname ${CMN_PFX})
+            CMN_PFX=$(dirname "${CMN_PFX}")
             BACK="../${BACK}"
         done
 
         # Remove the trailing slash from the prefix if it has one
         CMN_PFX=${CMN_PFX%/}
 
-        RESULT=${BACK}${TGT_ABS#${CMN_PFX}/}
+        RESULT=${BACK}${TGT_ABS#"${CMN_PFX}"/}
     fi
 
-    echo ${RESULT}
+    echo "${RESULT}"
 }

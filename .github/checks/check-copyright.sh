@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 BOB_ROOT=$(dirname ${0})/../..
-cd "${BOB_ROOT}"
+cd "${BOB_ROOT}" || exit
 COPYRIGHT="copyright\s+[0-9,\s-]+"
 PARENT=$(git merge-base origin/master HEAD)
 
