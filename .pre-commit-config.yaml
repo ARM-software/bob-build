@@ -47,6 +47,17 @@ repos:
           # https://flake8.pycqa.org/en/latest/user/error-codes.html
           - "--ignore=E203,E266,E501,W503,F403,F401,E402"
 
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.2
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        description: Lint shell scripts with shellcheck
+        entry: shellcheck --severity=warning --exclude=1090 # Disable warning for certain quoting
+        language: python
+        types: [shell]
+        require_serial: true
+
   - repo: local
     hooks:
       - id: go-fmt

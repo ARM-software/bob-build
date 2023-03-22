@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -eE
-trap "echo '<------------- $(basename ${0}) failed'" ERR
+trap 'echo "<------------- $(basename "${0}") failed"' ERR
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 BOB_ROOT="${SCRIPT_DIR}/.."
@@ -18,10 +18,10 @@ function check_stripped() {
     local OS="${2}"
 
     if [ "$OS" != "OSX" ] ; then
-        [ $(nm -a "${FILE}" | wc -l) = "0" ] || { echo "${FILE} not stripped" ; false; }
+        [ "$(nm -a "${FILE}" | wc -l)" = "0" ] || { echo "${FILE} not stripped" ; false; }
     else
         # The symbol below is always expected on macOS
-        [ $(nm -a "${FILE}" | grep -Ev " dyld_stub_binder$" | wc -l) = "0" ] || {
+        [ "$(nm -a "${FILE}" | grep -Ev " dyld_stub_binder$" | wc -l)" = "0" ] || {
             echo "${FILE} not stripped"
             false
         }
@@ -160,7 +160,7 @@ function _check_dep_updates() {
     # Wait for a second in case the file system has poor timestamp resolution
     sleep 1
     touch "${SRC}"
-    ${DIR}/buildme bob_tests
+    "${DIR}"/buildme bob_tests
 
     for file in "${UPDATE[@]}"; do
         if [ ! -e "${file}" ] ; then
@@ -196,92 +196,92 @@ build_dir=build-indep
 
 # library dependencies on source files
 SRC=tests/static_libs/a.c
-UPDATE=(${build_dir}/target/objects/sl_liba/static_libs/a.c.o
-        ${build_dir}/target/static/sl_liba.a
-        ${build_dir}/target/executable/sl_main_whole)
+UPDATE=("${build_dir}"/target/objects/sl_liba/static_libs/a.c.o
+        "${build_dir}"/target/static/sl_liba.a
+        "${build_dir}"/target/executable/sl_main_whole)
 check_dep_updated "library sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # library dependencies on header file
 SRC=tests/static_libs/a.h
-UPDATE+=(${build_dir}/target/objects/sl_libb/static_libs/b.c.o
-         ${build_dir}/target/static/sl_libb.a)
+UPDATE+=("${build_dir}"/target/objects/sl_libb/static_libs/b.c.o
+         "${build_dir}"/target/static/sl_libb.a)
 check_dep_updated "library headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources
 SRC=tests/generate_source/before_generate.in
-UPDATE=(${build_dir}/gen/generate_source_single/single.cpp
-        ${build_dir}/target/executable/validate_link_generate_sources)
+UPDATE=("${build_dir}"/gen/generate_source_single/single.cpp
+        "${build_dir}"/target/executable/validate_link_generate_sources)
 check_dep_updated "generated sources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources tool update
 SRC=tests/generate_source/gen_with_dep.py
-UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
+UPDATE=("${build_dir}"/gen/gen_source_depfile/output.txt)
 check_dep_updated "generated source tool" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources host_bin update
 SRC=tests/shared_libs/main.c
-UPDATE=(${build_dir}/host/executable/sharedtest
-        ${build_dir}/gen/use_sharedtest_host/use_sharedtest_host_main.c
-        ${build_dir}/target/executable/use_sharedtest_host_gen_source)
+UPDATE=("${build_dir}"/host/executable/sharedtest
+        "${build_dir}"/gen/use_sharedtest_host/use_sharedtest_host_main.c
+        "${build_dir}"/target/executable/use_sharedtest_host_gen_source)
 check_dep_updated "generated source host_bin" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources with depfiles
 SRC=tests/generate_source/depgen2.in
-UPDATE=(${build_dir}/gen/gen_source_depfile/output.txt)
+UPDATE=("${build_dir}"/gen/gen_source_depfile/output.txt)
 check_dep_updated "generate source depfile" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated sources with implicit source
 SRC=tests/generate_source/an.implicit.src
-UPDATE=(${build_dir}/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c)
+UPDATE=("${build_dir}"/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c)
 check_dep_updated "generate source implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated source with excluded implicit source
 SRC=tests/generate_source/an.implicit.src
-UPDATE=(${build_dir}/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c)
+UPDATE=("${build_dir}"/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c)
 check_dep_not_updated "excluded implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # generated library with implicit source
 SRC=tests/generate_libs/libblah/libblah_feature.h
-UPDATE=(${build_dir}/gen/libblah_shared/libblah_shared${SHARED_LIBRARY_EXTENSION})
+UPDATE=("${build_dir}"/gen/libblah_shared/libblah_shared"${SHARED_LIBRARY_EXTENSION}")
 check_dep_updated "generate library implicit source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # resource dependencies
 SRC=tests/resources/main.c
-UPDATE=(${build_dir}/install/testcases/y/main.c)
+UPDATE=("${build_dir}"/install/testcases/y/main.c)
 check_dep_updated "resources" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 # using multiple tools for source generation
 SRC=tests/multiple_tools/template.in
-UPDATE=(${build_dir}/gen/multiple_tools_generate_sources/tool_first_out.c
-        ${build_dir}/gen/multiple_tools_generate_sources/tool_second_out.c)
+UPDATE=("${build_dir}"/gen/multiple_tools_generate_sources/tool_first_out.c
+        "${build_dir}"/gen/multiple_tools_generate_sources/tool_second_out.c)
 check_dep_updated "generate source with multiple tools" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
 if [ "$OS" != "OSX" ] ; then
     # simple version script
     SRC=tests/version_script/exports0.map
-    UPDATE=(${build_dir}/target/shared/libshared_vs_simple.so)
+    UPDATE=("${build_dir}"/target/shared/libshared_vs_simple.so)
     check_dep_updated "simple version script" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
     # generated version script
     SRC=tests/version_script/exports1.map
-    UPDATE=(${build_dir}/gen/vs_version_map/exports2.map
-            ${build_dir}/target/shared/libshared_vs_gen.so)
+    UPDATE=("${build_dir}"/gen/vs_version_map/exports2.map
+            "${build_dir}"/target/shared/libshared_vs_gen.so)
     check_dep_updated "generated version script" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
     # kernel module dependencies on sources
     SRC=tests/kernel_module/module1/test_module1.c
-    UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
+    UPDATE=("${build_dir}"/target/kernel_modules/test_module1/test_module1.ko)
     check_dep_updated "kernel module source" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
     # kernel module dependencies on kernel header
     SRC=tests/kernel_module/kdir/include/kernel_header.h
-    UPDATE=(${build_dir}/target/kernel_modules/test_module1/test_module1.ko)
+    UPDATE=("${build_dir}"/target/kernel_modules/test_module1/test_module1.ko)
     check_dep_updated "kernel headers" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
     # 'host_bin's shared libs dependency
     SRC=tests/shared_libs_toc/srcs/lib.c
-    UPDATE=(${build_dir}/gen/gen_output/input_one.gen
-            ${build_dir}/gen/gen_output/input_two.gen)
+    UPDATE=("${build_dir}"/gen/gen_output/input_one.gen
+            "${build_dir}"/gen/gen_output/input_two.gen)
     check_dep_updated "host_bin toc linking" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
 

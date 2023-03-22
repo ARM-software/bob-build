@@ -19,7 +19,7 @@
 # and SRCDIR should be moved together (i.e. BUILDDIR location is not
 # independent of SRCDIR).
 
-BASENAME=$(basename $0)
+BASENAME=$(basename "$0")
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 function usage() {

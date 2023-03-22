@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018-2021 Arm Limited.
+# Copyright 2018-2021, 2023 Arm Limited.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +19,14 @@ set -e
 trap 'echo "*** Unexpected error ***"' ERR
 
 # Move to the build driectory
-cd $(dirname "${BASH_SOURCE[0]}")
+cd "$(dirname "${BASH_SOURCE[0]}")"
 source ".bob.bootstrap"
 
 # Move to the working directory
 cd -P "${WORKDIR}"
 
 eval "${BOB_DIR}/config_system/menuconfig.py" -d "${SRCDIR}/Mconfig" \
-    ${BOB_CONFIG_OPTS} ${BOB_CONFIG_PLUGIN_OPTS} \
+    "${BOB_CONFIG_OPTS}" "${BOB_CONFIG_PLUGIN_OPTS}" \
     -j "${CONFIG_JSON}" \
     --depfile "${CONFIG_FILE}.d" \
     "${CONFIG_FILE}"

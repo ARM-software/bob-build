@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -eE
-trap "echo '<------------- $(basename ${0}) failed'" ERR
+trap 'echo "<------------- "$(basename ${0})" failed"' ERR
 
 SCRIPT_DIR=$(dirname $0)
 BOB_ROOT="${SCRIPT_DIR}/.."

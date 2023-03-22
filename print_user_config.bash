@@ -19,9 +19,10 @@ set -e
 trap 'echo "*** Unexpected error ***"' ERR
 
 ORIG_PWD="$(pwd)"
+export ORIG_PWD
 
 # Move to the build directory
-cd $(dirname "${BASH_SOURCE[0]}")
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 source ".bob.bootstrap"
 
@@ -37,4 +38,4 @@ fi
 "${BOB_DIR}/config_system/print_user_config.py" \
     -c "${CONFIG_FILE}" \
     -d "${SRCDIR}/Mconfig" \
-    ${ignore_missing}
+    "${ignore_missing}"
