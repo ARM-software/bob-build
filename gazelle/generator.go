@@ -25,7 +25,7 @@ type StringListWithGlob struct {
 	hasGlob bool
 }
 
-type SelectStringListWithGlobValue map[string]*StringListWithGlob
+type SelectStringListWithGlob map[string]*StringListWithGlob
 
 func makeStringListWithGlob(list []string) *StringListWithGlob {
 
@@ -114,7 +114,7 @@ func (s *GlobValue) BzlExpr() bzl.Expr {
 	}
 }
 
-func (s SelectStringListWithGlobValue) SelectWithGlob() bzl.Expr {
+func (s SelectStringListWithGlob) BzlExpr() bzl.Expr {
 	keys := make([]string, 0, len(s))
 	hasDefaultKey := false
 
@@ -128,11 +128,6 @@ func (s SelectStringListWithGlobValue) SelectWithGlob() bzl.Expr {
 
 	sort.Strings(keys)
 
-	// ConditionDefault in the end of the `select`
-	if hasDefaultKey {
-		keys = append(keys, ConditionDefault)
-	}
-
 	args := make([]*bzl.KeyValueExpr, 0, len(s))
 
 	for _, key := range keys {
@@ -143,6 +138,21 @@ func (s SelectStringListWithGlobValue) SelectWithGlob() bzl.Expr {
 			Value: value,
 		})
 	}
+
+	var v bzl.Expr
+
+	// ConditionDefault in the end of the `select`
+	if hasDefaultKey {
+		v = s[ConditionDefault].BzlExpr()
+	} else {
+		// empty '//conditions:default'
+		v = rule.ExprFromValue([]string{})
+	}
+
+	args = append(args, &bzl.KeyValueExpr{
+		Key:   &bzl.StringExpr{Value: ConditionDefault},
+		Value: v,
+	})
 
 	sel := &bzl.CallExpr{
 		X:    &bzl.Ident{Name: "select"},

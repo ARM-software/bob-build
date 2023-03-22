@@ -14,7 +14,13 @@ filegroup(
     name = "greet_srcs",
     srcs = glob(["srcs/*.c"]) + select({
         ":feature_a": [
-            "internal/secure.c",
+            "internal/file1.c",
         ],
+        "//conditions:default": [],
+    }) + select({
+        ":feature_b": [
+            "internal/file2.c",
+        ],
+        "//conditions:default": [],
     }),
 )

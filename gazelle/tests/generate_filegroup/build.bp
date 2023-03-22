@@ -5,7 +5,12 @@ bob_filegroup {
     srcs: ["srcs/*.c"],
     feature_a: {
         srcs: [
-            "internal/secure.c",
+            "internal/file1.c",
+        ],
+    },
+    feature_b: {
+        srcs: [
+            "internal/file2.c",
         ],
     },
 }
