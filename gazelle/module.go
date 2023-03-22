@@ -2,6 +2,8 @@ package plugin
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -50,7 +52,8 @@ func ParseModuleType(str string) ModuleType {
 	}
 }
 
-type AttributesMap map[string]interface{}
+type Attribute interface{}
+type AttributesMap map[string]Attribute
 
 type Module struct {
 	name         string
@@ -59,6 +62,7 @@ type Module struct {
 	relativePath string
 	bazelLabel   label.Label
 	features     map[string]AttributesMap
+	defaults     AttributesMap
 }
 
 func (m Module) getName() string {
@@ -73,13 +77,19 @@ func (m Module) getLabel() label.Label {
 	return m.bazelLabel
 }
 
-func (m *Module) addFeatureAttribute(feature string, attribute string, v interface{}) {
+func (m *Module) addDefaultAttribute(attribute string, a Attribute) {
+	m.defaults[attribute] = a
+}
 
-	if f, ok := m.features[feature]; ok {
-		f[attribute] = v
+func (m *Module) addFeatureAttribute(feature string, attribute string, a Attribute) {
+
+	if feature == ConditionDefault {
+		m.addDefaultAttribute(attribute, a)
+	} else if f, ok := m.features[feature]; ok {
+		f[attribute] = a
 	} else {
 		m.features[feature] = make(AttributesMap)
-		m.features[feature][attribute] = v
+		m.features[feature][attribute] = a
 	}
 }
 
@@ -92,6 +102,7 @@ func NewModule(moduleName string, moduleType string, relPath string, rootPath st
 	m.relativePath = relPath
 	m.bazelLabel = label.Label{Repo: rootPath, Pkg: relPath, Name: moduleName}
 	m.features = make(map[string]AttributesMap)
+	m.defaults = make(AttributesMap)
 
 	return m
 }
@@ -118,31 +129,45 @@ func (m *Module) buildFilegroup() *rule.Rule {
 	r := rule.NewRule(m.moduleType.String(), m.name)
 	r.SetKind(m.moduleType.String())
 
-	list := make([]bzl.Expr, 0, 2)
+	list := make([]bzl.Expr, 0, 1+len(m.features))
 
-	if d, ok := m.features[ConditionDefault]; ok {
-		if srcs, ok := d["Srcs"].([]string); ok {
+	if d, ok := m.defaults["Srcs"]; ok {
+		if srcs, ok := d.([]string); ok {
 			list = append(list, makeStringListWithGlob(srcs).BzlExpr())
 		}
 	}
 
-	data := make(SelectStringListWithGlobValue)
+	// features have to be sorted to preserve generation order
+	// TODO: improve sorting
+	features := make([]string, len(m.features))
+	keys := reflect.ValueOf(m.features).MapKeys()
 
-	for name, attr := range m.features {
-		if srcs, ok := attr["Srcs"].([]string); ok && name != ConditionDefault {
+	for i, k := range keys {
+		features[i] = k.String()
+	}
+
+	sort.Strings(features)
+
+	for _, name := range features {
+		attr := m.features[name]
+		data := make(SelectStringListWithGlob)
+		if srcs, ok := attr["Srcs"].([]string); ok {
 			data[getFeatureCondition(name)] = makeStringListWithGlob(srcs)
+			list = append(list, data.BzlExpr())
 		}
 	}
 
-	if len(data) > 0 {
-		list = append(list, data.SelectWithGlob())
+	var expr bzl.Expr
+
+	if len(list) > 0 {
+		expr = list[0]
+
+		for _, l := range list[1:] {
+			expr = &bzl.BinaryExpr{X: expr, Y: l, Op: "+"}
+		}
 	}
 
-	if len(list) == 2 {
-		r.SetAttr("srcs", &bzl.BinaryExpr{X: list[0], Y: list[1], Op: "+"})
-	} else if len(list) == 1 {
-		r.SetAttr("srcs", list[0])
-	}
+	r.SetAttr("srcs", expr)
 
 	return r
 }
@@ -154,21 +179,20 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 
 	g := &GlobValue{}
 
-	// `bob_glob` is not featurable thus only `ConditionDefault` is present
+	// `bob_glob` is not featurable
+	// thus only `m.defaults` data is used
 
-	if d, ok := m.features[ConditionDefault]; ok {
-		if srcs, ok := d["Srcs"].([]string); ok {
-			g.Patterns = srcs
-		}
-		if allowEmpty, ok := d["Allow_empty"].(*bool); ok {
-			g.AllowEmpty = allowEmpty
-		}
-		if exclude, ok := d["Exclude"].([]string); ok {
-			g.Excludes = exclude
-		}
-		if excludeDir, ok := d["Exclude_directories"].(*bool); ok {
-			g.ExcludeDirectories = excludeDir
-		}
+	if srcs, ok := m.defaults["Srcs"]; ok {
+		g.Patterns = srcs.([]string)
+	}
+	if allowEmpty, ok := m.defaults["Allow_empty"]; ok {
+		g.AllowEmpty = allowEmpty.(*bool)
+	}
+	if exclude, ok := m.defaults["Exclude"]; ok {
+		g.Excludes = exclude.([]string)
+	}
+	if excludeDir, ok := m.defaults["Exclude_directories"]; ok {
+		g.ExcludeDirectories = excludeDir.(*bool)
 	}
 
 	r.SetAttr("srcs", g.BzlExpr())
