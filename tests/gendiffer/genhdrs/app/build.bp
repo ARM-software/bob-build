@@ -1,0 +1,70 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_generate_source {
+    name: "generated_header_single",
+    out: ["h2.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "echo '#define H2 2' > ${out}",
+}
+
+bob_generate_source {
+    name: "generated_header",
+    out: ["h1.h"],
+    cmd: "echo '#define H1 1' > ${out}",
+    export_gen_include_dirs: ["."],
+}
+
+bob_static_library {
+    name: "public_interface_uses_generated_headers",
+    srcs: ["null.c"],
+    export_generated_headers: [
+        "generated_header",
+        "generated_header_single",
+    ],
+}
+
+bob_binary {
+    name: "uses_partially_generated_library",
+    srcs: ["include_h1_h2.c"],
+    static_libs: ["public_interface_uses_generated_headers"],
+}
+
+bob_static_library {
+    name: "reexports_partially_generated_library",
+    srcs: ["null.c"],
+    static_libs: ["public_interface_uses_generated_headers"],
+    reexport_libs: ["public_interface_uses_generated_headers"],
+}
+
+bob_binary {
+    name: "uses_reexporting_library",
+    srcs: ["include_h1_h2.c"],
+    static_libs: ["reexports_partially_generated_library"],
+}
+
+bob_static_library {
+    name: "uses_private_generated_headers",
+    srcs: ["null.c"],
+    generated_headers: ["generated_header"],
+}
+
+bob_binary {
+    name: "uses_library_with_private_generated_headers",
+    srcs: ["check_no_h1_h2.c"],
+    static_libs: ["uses_private_generated_headers"],
+}

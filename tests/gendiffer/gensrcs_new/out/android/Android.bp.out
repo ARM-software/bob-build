@@ -1,0 +1,202 @@
+
+
+
+genrule {
+    name: "gen_source_depfile_new",
+    srcs: [
+        "depgen1.in",
+        "depgen2.in",
+    ],
+    cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
+    depfile: true,
+    tool_files: ["gen_with_dep.py"],
+    out: ["output.txt"],
+}
+
+genrule {
+    name: "gen_source_depfile_with_implicit_outs_new",
+    srcs: [
+        "depgen1.in",
+        "depgen2.in",
+    ],
+    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
+    depfile: true,
+    tool_files: ["gen_with_dep.py"],
+    out: [
+        "output.txt",
+        "out.h",
+    ],
+}
+
+genrule {
+    name: "generate_source_multiple_in_new",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    tool_files: ["generator.py"],
+    out: ["multiple_in.cpp"],
+}
+
+genrule {
+    name: "generate_source_multiple_in_out_new",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    tool_files: ["generator.py"],
+    out: [
+        "multiple_in_out.cpp",
+        "multiple_in_out2.cpp",
+    ],
+}
+
+genrule {
+    name: "generate_source_multiple_out_new",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    tool_files: ["generator.py"],
+    out: [
+        "multiple_out.cpp",
+        "multiple_out2.cpp",
+    ],
+}
+
+genrule {
+    name: "generate_source_single_dependend_nested_new",
+    srcs: [
+        "before_generate.in",
+        ":generate_source_single_dependend_new",
+    ],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in deps.cpp",
+    tool_files: ["generator.py"],
+    out: ["deps2.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_dependend_new",
+    srcs: [
+        "before_generate.in",
+        ":generate_source_single_new",
+    ],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in single.cpp",
+    tool_files: ["generator.py"],
+    out: ["deps.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_level1_new",
+    srcs: [":generate_source_single_new"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in single.cpp",
+    tool_files: ["generator.py"],
+    out: ["level_1_single.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_level2_new",
+    srcs: [":generate_source_single_level1_new"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_1_single.cpp",
+    tool_files: ["generator.py"],
+    out: ["level_2_single.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_level3_new",
+    srcs: [":generate_source_single_level2_new"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_2_single.cpp",
+    tool_files: ["generator.py"],
+    out: ["level_3_single.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_nested_with_extra_new",
+    srcs: [
+        "before_generate.in",
+        ":generate_source_single_level2_new",
+    ],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in level_2_single.cpp",
+    tool_files: ["generator.py"],
+    out: ["extra_single.cpp"],
+}
+
+genrule {
+    name: "generate_source_single_new",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    tool_files: ["generator.py"],
+    out: ["single.cpp"],
+}
+
+cc_binary_host {
+    name: "host_and_target_supported_binary_new__host",
+    stem: "host_binary_new",
+    srcs: ["simple_main.c"],
+}
+
+cc_binary {
+    name: "host_and_target_supported_binary_new__target",
+    stem: "host_and_target_supported_binary_new",
+    srcs: ["simple_main.c"],
+}
+
+genrule {
+    name: "multi_src_tag",
+    srcs: [
+        "before_generate.in",
+        ":generate_source_single_new",
+    ],
+    cmd: "python $(location generator.py) --in $(in) --out $(out) --expect-in before_generate.in $(location :generate_source_single_new)",
+    tool_files: ["generator.py"],
+    out: ["deps.cpp"],
+}
+
+genrule {
+    name: "multi_tool_file",
+    srcs: ["depgen2.in"],
+    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
+    depfile: true,
+    tool_files: [
+        "gen_with_dep.py",
+        "depgen1.in",
+    ],
+    out: [
+        "output.txt",
+        "out.h",
+    ],
+}
+
+genrule {
+    name: "use_target_specific_library_new",
+    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+    tools: ["host_and_target_supported_binary_new__host"],
+    out: ["libout.a"],
+}
+
+genrule {
+    name: "validate_install_generate_sources_new",
+    cmd: "touch $(out)",
+    out: ["validate_install_generate_sources.txt"],
+}
+
+cc_binary {
+    name: "validate_link_generate_sources_new",
+    srcs: ["main.cpp"],
+    generated_sources: [
+        "generate_source_single_new",
+        "generate_source_multiple_in_new",
+        "generate_source_multiple_out_new",
+        "generate_source_multiple_in_out_new",
+        "generate_source_single_level1_new",
+        "generate_source_single_level2_new",
+        "generate_source_single_level3_new",
+        "generate_source_single_nested_with_extra_new",
+        "generate_source_single_dependend_new",
+        "generate_source_single_dependend_nested_new",
+    ],
+    generated_headers: ["generate_source_single_new"],
+}
+

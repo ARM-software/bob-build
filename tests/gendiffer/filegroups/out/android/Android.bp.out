@@ -1,0 +1,91 @@
+
+
+
+filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":glob",
+        ":forward_filegroup",
+    ],
+}
+
+cc_binary {
+    name: "bin",
+    srcs: [
+        "main.c",
+        "src/dummy01.c",
+    ],
+    generated_sources: [
+        "nested_generated_source",
+        "nested_transform_source",
+        "genrule",
+    ],
+}
+
+filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+}
+
+filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+}
+
+genrule_bob {
+    name: "generated_source",
+    out: ["generated.c"],
+    cmd: "touch ${out}",
+    depfile: false,
+}
+
+genrule {
+    name: "genrule",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    cmd: "touch $(out)",
+    out: [
+        "genrule_dummy01.c",
+        "genrule_dummy02.c",
+    ],
+}
+
+genrule_bob {
+    name: "nested_generated_source",
+    out: ["nested_generated.c"],
+    cmd: "touch ${out}",
+    depfile: false,
+    generated_sources: ["generated_source"],
+}
+
+gensrcs_bob {
+    name: "nested_transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    cmd: "some_tool",
+    depfile: false,
+    generated_sources: ["transform_source"],
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["nested_out$1.c"],
+    },
+}
+
+gensrcs_bob {
+    name: "transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    cmd: "some_tool",
+    depfile: false,
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["out$1.c"],
+    },
+}
+
