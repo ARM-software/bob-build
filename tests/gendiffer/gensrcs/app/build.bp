@@ -1,0 +1,260 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_generate_source {
+    name: "generate_source_single",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["single.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+}
+
+bob_generate_source {
+    name: "generate_source_multiple_in",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: ["multiple_in.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
+}
+
+bob_generate_source {
+    name: "generate_source_multiple_out",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "multiple_out.cpp",
+        "multiple_out2.cpp",
+    ],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+}
+
+bob_generate_source {
+    name: "generate_source_multiple_in_out",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: ["multiple_in_out.cpp"],
+    always_enabled_feature: {
+        out: ["multiple_in_out2.cpp"],
+    },
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
+}
+
+bob_generate_source {
+    name: "generate_source_single_level1",
+    generated_sources: ["generate_source_single"],
+
+    out: ["level_1_single.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in single.cpp",
+}
+
+bob_generate_source {
+    name: "generate_source_single_level2",
+    generated_sources: ["generate_source_single_level1"],
+
+    out: ["level_2_single.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_1_single.cpp",
+}
+
+bob_generate_source {
+    name: "generate_source_single_level3",
+    generated_sources: ["generate_source_single_level2"],
+
+    out: ["level_3_single.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_2_single.cpp",
+}
+
+bob_generate_source {
+    name: "generate_source_single_nested_with_extra",
+    generated_sources: ["generate_source_single_level2"],
+
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["extra_single.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in level_2_single.cpp",
+}
+
+bob_generate_source {
+    name: "generate_source_single_dependend",
+    generated_deps: ["generate_source_single"],
+
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["deps.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} ${generate_source_single_out} --out ${out} --expect-in before_generate.in single.cpp",
+}
+
+bob_generate_source {
+    name: "generate_source_single_dependend_nested",
+    generated_sources: ["generate_source_single_dependend"],
+
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["deps2.cpp"],
+
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
+}
+
+bob_binary {
+    name: "validate_link_generate_sources",
+    generated_sources: [
+        "generate_source_single",
+        "generate_source_multiple_in",
+        "generate_source_multiple_out",
+        "generate_source_multiple_in_out",
+
+        "generate_source_single_level1",
+        "generate_source_single_level2",
+        "generate_source_single_level3",
+        "generate_source_single_nested_with_extra",
+
+        "generate_source_single_dependend",
+        "generate_source_single_dependend_nested",
+    ],
+    generated_headers: [
+        "generate_source_single",
+    ],
+    srcs: ["main.cpp"],
+}
+
+bob_generate_source {
+    name: "gen_source_depfile",
+    srcs: ["depgen1.in"],
+    out: ["output.txt"],
+    depfile: true,
+    tools: ["gen_with_dep.py"],
+    cmd: "${tool} -o ${out} -d ${depfile} ${in}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "gen_source_depfile_with_implicit_outs",
+    srcs: ["depgen1.in"],
+    out: [
+        "output.txt",
+        "out.h",
+    ],
+    depfile: true,
+    tools: ["gen_with_dep.py"],
+    cmd: "${tool} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} ${in}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "validate_install_generate_sources",
+    out: ["validate_install_generate_sources.txt"],
+    cmd: "touch ${out}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "gen_source_globbed_implicit_sources",
+    implicit_srcs: ["*.implicit.src"],
+    out: ["validate_globbed_implicit_dependency.c"],
+    tools: ["join_srcs.py"],
+    cmd: "python ${tool} --src-dir ${module_dir} --use-a --out ${out}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "gen_source_globbed_exclude_implicit_sources",
+    implicit_srcs: ["*.src"],
+    exclude_implicit_srcs: [
+        "an.implicit.src",
+        "bn.src",
+    ],
+    out: ["validate_globbed_exclude_implicit_dependency.c"],
+    tools: ["join_srcs.py"],
+    cmd: "python ${tool} --src-dir ${module_dir} --use-c --out ${out}",
+    build_by_default: true,
+}
+
+bob_binary {
+    name: "use_miscellaneous_generated_source_tests",
+    generated_sources: [
+        "gen_source_globbed_implicit_sources",
+        "gen_source_globbed_exclude_implicit_sources",
+    ],
+}
+
+// Check that generated modules can depend on a specific variant of a module
+bob_binary {
+    name: "host_and_target_supported_binary",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    srcs: ["simple_main.c"],
+    // Verify that the generated module doesn't accidentally pick up the target variant
+    host: {
+        out: "host_binary",
+    },
+}
+
+bob_generate_source {
+    name: "use_target_specific_library",
+    out: ["libout.a"],
+    generated_deps: ["host_and_target_supported_binary:host"],
+    cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "multiple_tools_generate_sources",
+    srcs: [
+        "template.in",
+    ],
+    out: [
+        "tool_first_out.c",
+        "tool_second_out.c",
+    ],
+
+    tools: [
+        "subtool/verify.py",
+        "generate.py",
+    ],
+    cmd: "python ${tool generate.py} --in ${in} --out ${out} && python ${tool subtool/verify.py} --in ${out}",
+    build_by_default: true,
+}

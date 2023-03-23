@@ -1,0 +1,69 @@
+
+
+
+genrule_bob {
+    name: "generated_header",
+    out: ["h1.h"],
+    cmd: "echo '#define H1 1' > ${out}",
+    depfile: false,
+    export_gen_include_dirs: ["."],
+}
+
+genrule_bob {
+    name: "generated_header_single",
+    out: ["h2.h"],
+    cmd: "echo '#define H2 2' > ${out}",
+    depfile: false,
+    export_gen_include_dirs: ["."],
+}
+
+cc_library_static {
+    name: "public_interface_uses_generated_headers",
+    srcs: ["null.c"],
+    generated_headers: [
+        "generated_header",
+        "generated_header_single",
+    ],
+    export_generated_headers: [
+        "generated_header",
+        "generated_header_single",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "reexports_partially_generated_library",
+    srcs: ["null.c"],
+    static_libs: ["public_interface_uses_generated_headers"],
+    export_static_lib_headers: ["public_interface_uses_generated_headers"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "uses_library_with_private_generated_headers",
+    srcs: ["check_no_h1_h2.c"],
+    static_libs: ["uses_private_generated_headers"],
+}
+
+cc_binary {
+    name: "uses_partially_generated_library",
+    srcs: ["include_h1_h2.c"],
+    static_libs: ["public_interface_uses_generated_headers"],
+}
+
+cc_library_static {
+    name: "uses_private_generated_headers",
+    srcs: ["null.c"],
+    generated_headers: ["generated_header"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "uses_reexporting_library",
+    srcs: ["include_h1_h2.c"],
+    static_libs: [
+        "reexports_partially_generated_library",
+        "public_interface_uses_generated_headers",
+    ],
+}
+

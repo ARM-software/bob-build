@@ -1,0 +1,215 @@
+
+
+
+genrule_bob {
+    name: "gen_source_depfile",
+    srcs: ["depgen1.in"],
+    out: ["output.txt"],
+    cmd: "${tool} -o ${out} -d ${depfile} ${in}",
+    tools: ["gen_with_dep.py"],
+    depfile: true,
+}
+
+genrule_bob {
+    name: "gen_source_depfile_with_implicit_outs",
+    srcs: ["depgen1.in"],
+    out: [
+        "output.txt",
+        "out.h",
+    ],
+    cmd: "${tool} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} ${in}",
+    tools: ["gen_with_dep.py"],
+    depfile: true,
+}
+
+genrule_bob {
+    name: "gen_source_globbed_exclude_implicit_sources",
+    out: ["validate_globbed_exclude_implicit_dependency.c"],
+    cmd: "python ${tool} --src-dir ${module_dir} --use-c --out ${out}",
+    tools: ["join_srcs.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "gen_source_globbed_implicit_sources",
+    out: ["validate_globbed_implicit_dependency.c"],
+    cmd: "python ${tool} --src-dir ${module_dir} --use-a --out ${out}",
+    tools: ["join_srcs.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_multiple_in",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: ["multiple_in.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
+    tools: ["generator.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_multiple_in_out",
+    srcs: [
+        "before_generate.in",
+        "before_generate2.in",
+        "before_generate3.in",
+    ],
+    out: [
+        "multiple_in_out.cpp",
+        "multiple_in_out2.cpp",
+    ],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
+    tools: ["generator.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_multiple_out",
+    srcs: ["before_generate.in"],
+    out: [
+        "multiple_out.cpp",
+        "multiple_out2.cpp",
+    ],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+    tools: ["generator.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_single",
+    srcs: ["before_generate.in"],
+    out: ["single.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+    tools: ["generator.py"],
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_single_dependend",
+    srcs: ["before_generate.in"],
+    out: ["deps.cpp"],
+    cmd: "python ${tool} --in ${in} ${generate_source_single_out} --out ${out} --expect-in before_generate.in single.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_deps: ["generate_source_single"],
+}
+
+genrule_bob {
+    name: "generate_source_single_dependend_nested",
+    srcs: ["before_generate.in"],
+    out: ["deps2.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_single_dependend"],
+}
+
+genrule_bob {
+    name: "generate_source_single_level1",
+    out: ["level_1_single.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in single.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_single"],
+}
+
+genrule_bob {
+    name: "generate_source_single_level2",
+    out: ["level_2_single.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_1_single.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_single_level1"],
+}
+
+genrule_bob {
+    name: "generate_source_single_level3",
+    out: ["level_3_single.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in level_2_single.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_single_level2"],
+}
+
+genrule_bob {
+    name: "generate_source_single_nested_with_extra",
+    srcs: ["before_generate.in"],
+    out: ["extra_single.cpp"],
+    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in level_2_single.cpp",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_single_level2"],
+}
+
+cc_binary_host {
+    name: "host_and_target_supported_binary__host",
+    stem: "host_binary",
+    srcs: ["simple_main.c"],
+}
+
+cc_binary {
+    name: "host_and_target_supported_binary__target",
+    stem: "host_and_target_supported_binary",
+    srcs: ["simple_main.c"],
+}
+
+genrule_bob {
+    name: "multiple_tools_generate_sources",
+    srcs: ["template.in"],
+    out: [
+        "tool_first_out.c",
+        "tool_second_out.c",
+    ],
+    cmd: "python ${tool generate.py} --in ${in} --out ${out} && python ${tool subtool/verify.py} --in ${out}",
+    tools: [
+        "subtool/verify.py",
+        "generate.py",
+    ],
+    depfile: false,
+}
+
+cc_binary {
+    name: "use_miscellaneous_generated_source_tests",
+    generated_sources: [
+        "gen_source_globbed_implicit_sources",
+        "gen_source_globbed_exclude_implicit_sources",
+    ],
+}
+
+genrule_bob {
+    name: "use_target_specific_library",
+    out: ["libout.a"],
+    cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
+    depfile: false,
+    generated_deps: ["host_and_target_supported_binary__host"],
+}
+
+genrule_bob {
+    name: "validate_install_generate_sources",
+    out: ["validate_install_generate_sources.txt"],
+    cmd: "touch ${out}",
+    depfile: false,
+}
+
+cc_binary {
+    name: "validate_link_generate_sources",
+    srcs: ["main.cpp"],
+    generated_sources: [
+        "generate_source_single",
+        "generate_source_multiple_in",
+        "generate_source_multiple_out",
+        "generate_source_multiple_in_out",
+        "generate_source_single_level1",
+        "generate_source_single_level2",
+        "generate_source_single_level3",
+        "generate_source_single_nested_with_extra",
+        "generate_source_single_dependend",
+        "generate_source_single_dependend_nested",
+    ],
+    generated_headers: ["generate_source_single"],
+}
+

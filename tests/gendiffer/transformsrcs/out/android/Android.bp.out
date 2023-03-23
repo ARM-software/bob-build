@@ -1,0 +1,183 @@
+
+
+
+genrule_bob {
+    name: "combine_sources",
+    out: ["combined_source.cpp"],
+    cmd: "${tool} --out ${out} ${in}",
+    tools: ["combine_sources.py"],
+    depfile: false,
+    generated_sources: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+        "transform_source_generated_deps",
+        "transform_source_generated_sources_only",
+    ],
+}
+
+genrule_bob {
+    name: "generate_source_generated_sources_only",
+    out: ["f7.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_source_to_transform",
+    out: ["f5.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+    depfile: false,
+}
+
+genrule_bob {
+    name: "generate_template_source_used_by_transform",
+    out: ["test_src.tmpl"],
+    cmd: "python ${tool} ${out}",
+    tools: ["write_tmpl.py"],
+    depfile: false,
+}
+
+gensrcs_bob {
+    name: "transform_source_generated_deps",
+    srcs: ["f6.in"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_deps: ["generate_template_source_used_by_transform"],
+    export_gen_include_dirs: ["."],
+    out: {
+        match: ".*/(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+}
+
+gensrcs_bob {
+    name: "transform_source_generated_sources_only",
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_generated_sources_only"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+}
+
+gensrcs_bob {
+    name: "transform_source_multiple_in",
+    srcs: [
+        "f3.in",
+        "f4.in",
+    ],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    tools: ["generator.py"],
+    depfile: false,
+    generated_sources: ["generate_source_to_transform"],
+    export_gen_include_dirs: [
+        "generate_source_to_transform",
+        "transform_source",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+}
+
+gensrcs_bob {
+    name: "transform_source_single",
+    srcs: ["f2.in"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    tools: ["generator.py"],
+    depfile: false,
+    export_gen_include_dirs: ["transform_source"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+}
+
+gensrcs_bob {
+    name: "transform_source_single_dir",
+    srcs: ["f.in"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    tools: ["generator.py"],
+    depfile: false,
+    export_gen_include_dirs: ["single/transform_source"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "single/$1.cpp",
+            "single/$1.h",
+        ],
+    },
+}
+
+gensrcs_bob {
+    name: "validate_install_transform_source",
+    srcs: [
+        "f3.in",
+        "f4.in",
+    ],
+    cmd: "touch ${out}",
+    depfile: false,
+    out: {
+        match: "(.+)\\.in",
+        replace: ["$1.validate_install_transform_source.txt"],
+    },
+}
+
+cc_binary {
+    name: "validate_link_transform_source",
+    srcs: ["main.cpp"],
+    generated_sources: ["combine_sources"],
+    generated_headers: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+        "transform_source_generated_deps",
+    ],
+}
+
+gensrcs_bob {
+    name: "validate_transform_source_flattened_output",
+    srcs: [
+        "a/f0.in",
+        "b/f.in",
+    ],
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
+    rsp_content: "${in}",
+    depfile: true,
+    out: {
+        match: ".+/(.+)\\.in",
+        replace: ["$1.txt"],
+    },
+}
+
+gensrcs_bob {
+    name: "validate_transform_source_nested_output",
+    srcs: [
+        "a/f.in",
+        "b/f.in",
+    ],
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
+    rsp_content: "${in}",
+    depfile: true,
+    out: {
+        match: "(.+/.+)\\.in",
+        replace: ["$1.txt"],
+    },
+}
+

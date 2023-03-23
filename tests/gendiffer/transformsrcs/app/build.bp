@@ -1,0 +1,201 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_transform_source {
+    name: "transform_source_single_dir",
+    srcs: [
+        "f.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            // inside extra directory
+            "single/$1.cpp",
+            "single/$1.h",
+        ],
+    },
+    export_gen_include_dirs: ["single/transform_source"],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+}
+
+bob_transform_source {
+    name: "transform_source_single",
+    srcs: [
+        "f2.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+    },
+    always_enabled_feature: {
+        out: {
+            replace: [
+                "$1.cpp",
+                "$1.h",
+            ],
+        },
+    },
+    export_gen_include_dirs: ["transform_source"],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+}
+
+bob_generate_source {
+    name: "generate_source_to_transform",
+    out: ["f5.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+}
+
+bob_transform_source {
+    name: "transform_source_multiple_in",
+    srcs: [
+        "f3.in",
+        "f4.in",
+    ],
+    generated_sources: ["generate_source_to_transform"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    export_gen_include_dirs: [
+        "generate_source_to_transform",
+        "transform_source",
+    ],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+}
+
+bob_generate_source {
+    name: "generate_template_source_used_by_transform",
+    out: ["test_src.tmpl"],
+    tools: ["write_tmpl.py"],
+    cmd: "python ${tool} ${out}",
+}
+
+bob_transform_source {
+    name: "transform_source_generated_deps",
+    generated_deps: ["generate_template_source_used_by_transform"],
+    srcs: [
+        "f6.in",
+    ],
+    out: {
+        match: ".*/(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    export_gen_include_dirs: ["."],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
+}
+
+bob_generate_source {
+    name: "generate_source_generated_sources_only",
+    out: ["f7.in"],
+    cmd: "echo '// Dummy File' > ${out}",
+}
+
+bob_transform_source {
+    name: "transform_source_generated_sources_only",
+    generated_sources: ["generate_source_generated_sources_only"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    build_by_default: true,
+}
+
+bob_generate_source {
+    name: "combine_sources",
+    generated_sources: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+        "transform_source_generated_deps",
+        "transform_source_generated_sources_only",
+    ],
+    out: ["combined_source.cpp"],
+    tools: ["combine_sources.py"],
+    cmd: "${tool} --out ${out} ${in}",
+}
+
+bob_binary {
+    name: "validate_link_transform_source",
+    generated_sources: ["combine_sources"],
+    generated_headers: [
+        "transform_source_single_dir",
+        "transform_source_single",
+        "transform_source_multiple_in",
+        "transform_source_generated_deps",
+    ],
+    srcs: ["main.cpp"],
+}
+
+bob_transform_source {
+    name: "validate_install_transform_source",
+    srcs: [
+        "f3.in",
+        "f4.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: ["$1.validate_install_transform_source.txt"],
+    },
+    cmd: "touch ${out}",
+    build_by_default: true,
+}
+
+bob_transform_source {
+    name: "validate_transform_source_nested_output",
+    srcs: [
+        "a/f.in",
+        "b/f.in",
+    ],
+    out: {
+        match: "(.+/.+)\\.in",
+        replace: ["$1.txt"],
+    },
+    depfile: true,
+    rsp_content: "${in}",
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
+    build_by_default: true,
+}
+
+bob_transform_source {
+    name: "validate_transform_source_flattened_output",
+    srcs: [
+        "a/f0.in",
+        "b/f.in",
+    ],
+    out: {
+        match: ".+/(.+)\\.in",
+        replace: ["$1.txt"],
+    },
+    depfile: true,
+    rsp_content: "${in}",
+    cmd: "echo '${out}:' > ${depfile} && cat $$(cat ${rspfile}) > ${out}",
+    build_by_default: true,
+}

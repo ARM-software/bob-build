@@ -1,0 +1,315 @@
+
+
+
+cc_binary {
+    name: "bob_test_local_consumer",
+    srcs: ["src/bob_test_consumer.c"],
+    cflags: [
+        "-Wconversion",
+        "-Werror",
+    ],
+    static_libs: ["bob_test_local_libpublic"],
+}
+
+cc_library_static {
+    name: "bob_test_local_libpublic",
+    srcs: ["src/bob_test_public_impl.c"],
+    cflags: [
+        "-Wconversion",
+        "-Wno-error",
+    ],
+    local_include_dirs: [
+        "include",
+        "public",
+    ],
+    export_system_include_dirs : ["public"],
+    compile_multilib: "both",
+}
+
+cc_binary_host {
+    name: "bob_test_target_specific_link__host",
+    stem: "bob_test_target_specific_link",
+    srcs: ["main.c"],
+    static_libs: ["libuses_target_specific_link__host"],
+}
+
+cc_binary {
+    name: "bob_test_target_specific_link__target",
+    stem: "bob_test_target_specific_link",
+    srcs: ["main.c"],
+    static_libs: [
+        "libuses_target_specific_link__target",
+        "libonly_works_on_target__target",
+    ],
+}
+
+cc_library_host_static {
+    name: "lib_dep",
+    cflags: ["-DFORWARDED_DEFINE"],
+}
+
+cc_library_host_static {
+    name: "lib_forward_defines",
+    srcs: ["src/libs/lib.cpp"],
+    cflags: [
+        "-DLOCAL_DEFINE",
+        "-DFORWARDED_DEFINE",
+    ],
+}
+
+cc_library_host_static {
+    name: "lib_transitive_define",
+    cflags: ["-DFORWARDED_DEFINE"],
+    static_libs: ["lib_forward_defines"],
+}
+
+cc_library_static {
+    name: "libonly_works_on_target__target",
+    stem: "libonly_works_on_target",
+    srcs: ["fail_when_FAIL_is_1.c"],
+    cflags: ["-DFAIL=0"],
+    compile_multilib: "both",
+}
+
+cc_library_shared {
+    name: "libsharedtest__target",
+    stem: "libsharedtest",
+    srcs: ["srcs/lib.c"],
+    cflags: ["-fPIC"],
+    compile_multilib: "both",
+}
+
+cc_library_host_shared {
+    name: "libsharedtest_installed__host",
+    stem: "libsharedtest_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_installed"],
+}
+
+cc_library_shared {
+    name: "libsharedtest_installed__target",
+    stem: "libsharedtest_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_installed"],
+    compile_multilib: "both",
+}
+
+cc_library_host_shared {
+    name: "libsharedtest_not_installed__host",
+    stem: "libsharedtest_not_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_not_installed"],
+}
+
+cc_library_shared {
+    name: "libsharedtest_not_installed__target",
+    stem: "libsharedtest_not_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_not_installed"],
+    compile_multilib: "both",
+}
+
+cc_library_shared {
+    name: "libstripped_library",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=func"],
+    compile_multilib: "both",
+    strip: {
+        all: true,
+    },
+}
+
+cc_library_host_static {
+    name: "libuses_target_specific_link__host",
+    stem: "libuses_target_specific_link",
+    srcs: ["dummy.c"],
+}
+
+cc_library_static {
+    name: "libuses_target_specific_link__target",
+    stem: "libuses_target_specific_link",
+    srcs: ["dummy.c"],
+    static_libs: ["libonly_works_on_target__target"],
+    compile_multilib: "both",
+}
+
+cc_binary_host {
+    name: "sharedtest__host",
+    stem: "sharedtest",
+    srcs: ["main.c"],
+    shared_libs: [
+        "libsharedtest_installed__host",
+        "libsharedtest_not_installed__host",
+    ],
+}
+
+cc_binary {
+    name: "sharedtest__target",
+    stem: "sharedtest",
+    srcs: ["main.c"],
+    shared_libs: [
+        "libsharedtest_installed__target",
+        "libsharedtest_not_installed__target",
+    ],
+}
+
+cc_library_static {
+    name: "sl_liba",
+    srcs: ["a.c"],
+    cflags: [
+        "-fPIC",
+        "-DFOO=1",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "sl_liba_duplicates",
+    srcs: [
+        "a/a.c",
+        "a.c",
+    ],
+    cflags: ["-DFOO=1"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "sl_liba_duplicates_2",
+    whole_static_libs: ["sl_liba_duplicates"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "sl_libb",
+    srcs: ["b.c"],
+    cflags: [
+        "-fPIC",
+        "-DFOO=1",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "sl_libb_export_static",
+    srcs: ["b.c"],
+    cflags: ["-DFOO=1"],
+    static_libs: ["sl_liba"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "sl_libb_whole_inclusion",
+    srcs: ["b.c"],
+    cflags: [
+        "-fPIC",
+        "-DFOO=1",
+    ],
+    whole_static_libs: ["sl_liba"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "sl_main_duplicates",
+    srcs: ["main3.c"],
+    cflags: ["-DFOO=1"],
+    static_libs: ["sl_liba_duplicates_2"],
+}
+
+cc_binary {
+    name: "sl_main_export_static",
+    srcs: ["main.c"],
+    cflags: ["-DFOO=1"],
+    static_libs: [
+        "sl_libb_export_static",
+        "sl_liba",
+    ],
+}
+
+cc_binary {
+    name: "sl_main_ordered",
+    srcs: ["main.c"],
+    cflags: ["-DFOO=1"],
+    static_libs: [
+        "sl_libb",
+        "sl_liba",
+    ],
+}
+
+cc_binary {
+    name: "sl_main_whole",
+    srcs: ["main.c"],
+    static_libs: ["sl_libb_whole_inclusion"],
+}
+
+filegroup {
+    name: "static_bin_srcs",
+    srcs: ["src/main.cpp"],
+}
+
+cc_binary_host {
+    name: "strict_lib_binary_with_dep",
+    srcs: ["src/main.cpp"],
+    cflags: ["-DFORWARDED_DEFINE"],
+    static_libs: [
+        "lib_dep",
+        "lib_forward_defines",
+    ],
+}
+
+cc_binary_host {
+    name: "strict_lib_binary_with_forward_define",
+    srcs: ["src/main.cpp"],
+    cflags: ["-DFORWARDED_DEFINE"],
+    static_libs: ["lib_forward_defines"],
+}
+
+cc_binary_host {
+    name: "strict_lib_binary_with_transitive_define",
+    srcs: ["src/main.cpp"],
+    cflags: ["-DFORWARDED_DEFINE"],
+    static_libs: [
+        "lib_transitive_define",
+        "lib_forward_defines",
+    ],
+}
+
+cc_binary {
+    name: "stripped_binary",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=main"],
+    shared_libs: ["libstripped_library"],
+    required: ["libstripped_library"],
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            relative_install_path: "",
+        },
+        lib64: {
+            relative_install_path: "64",
+        },
+    },
+    strip: {
+        all: true,
+    },
+}
+
+genrule_bob {
+    name: "use_sharedtest_host",
+    out: ["use_sharedtest_host_main.c"],
+    cmd: "${host_bin} ${out}",
+    host_bin: "sharedtest__host",
+    depfile: false,
+}
+
+cc_binary {
+    name: "use_sharedtest_host_gen_source",
+    generated_sources: ["use_sharedtest_host"],
+}
+
+cc_binary {
+    name: "utility__target",
+    stem: "utility",
+    srcs: ["srcs/main.c"],
+    shared_libs: ["libsharedtest__target"],
+}
+

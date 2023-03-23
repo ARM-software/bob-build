@@ -1,0 +1,31 @@
+
+
+
+cc_binary {
+    name: "glob_test",
+    srcs: [
+        "main.c",
+        "test_exclude_glob.c",
+        "test_glob.c",
+        "dir1/func1.c",
+        "dir2/func2.c",
+    ],
+}
+
+cc_binary {
+    name: "glob_test_exclude",
+    srcs: [
+        "src/inside/a/namespace/func.cpp",
+        "src/inside/a/namespace/main.cpp",
+    ],
+    exclude_srcs: ["src/**/exclude_*.cpp"],
+}
+
+cc_binary {
+    name: "test_exclude_srcs",
+    srcs: [
+        "src/inside/a/namespace/main.cpp",
+        "src/inside/a/namespace/func.cpp",
+    ],
+}
+
