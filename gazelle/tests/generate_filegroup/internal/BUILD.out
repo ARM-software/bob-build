@@ -1,0 +1,30 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "int_flag")
+
+bool_flag(
+    name = "feature_internal_a",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_feature_internal_a",
+    flag_values = {
+        ":feature_internal_a": "true",
+    },
+)
+
+bool_flag(
+    name = "needs_deps",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "config_needs_deps",
+    flag_values = {
+        ":needs_deps": "true",
+    },
+)
+
+int_flag(
+    name = "pipe_count",
+    build_setting_default = 102,
+)

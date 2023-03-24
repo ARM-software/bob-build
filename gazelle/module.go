@@ -199,13 +199,3 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 
 	return r
 }
-
-// TODO: resolve feature names properly depending on
-// the location in `build.bp`
-func getFeatureCondition(f string) string {
-	if f == ConditionDefault {
-		return f
-	} else {
-		return fmt.Sprint(":", strings.ToLower(f))
-	}
-}

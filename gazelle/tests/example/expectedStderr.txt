@@ -1,6 +1,3 @@
 gazelle: RegisterFlags() - NOT IMPLEMENTED
 gazelle: CheckFlags() - NOT IMPLEMENTED
-gazelle: Loads() - NOT IMPLEMENTED
 gazelle: Fix() - NOT IMPLEMENTED
-gazelle: Unsupported module 'cc_binary'
-gazelle: Unsupported module 'cc_library'
