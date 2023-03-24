@@ -24,6 +24,7 @@ go_library(
 
 go_test(
     name = "depmap_test",
+    size = "small",
     srcs = ["depmap_test.go"],
     embed = [":depmap"],
     deps = ["@com_github_stretchr_testify//assert"],

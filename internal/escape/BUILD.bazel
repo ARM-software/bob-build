@@ -10,6 +10,7 @@ go_library(
 
 go_test(
     name = "escape_test",
+    size = "small",
     srcs = ["escape_test.go"],
     embed = [":escape"],
     deps = ["@com_github_stretchr_testify//assert"],

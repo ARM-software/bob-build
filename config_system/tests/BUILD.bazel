@@ -3,6 +3,7 @@ load("@config_deps//:requirements.bzl", "requirement")
 [
     py_test(
         name = test,
+        size = "small",
         srcs = [
             "{}.py".format(test),
         ],
@@ -22,6 +23,7 @@ load("@config_deps//:requirements.bzl", "requirement")
 
 py_test(
     name = "test_get_configs_gazelle",
+    size = "small",
     srcs = [
         "test_get_configs_gazelle.py",
     ],
@@ -37,6 +39,7 @@ py_test(
 
 py_test(
     name = "test_update_config",
+    size = "small",
     srcs = [
         "test_update_config.py",
     ],
@@ -52,6 +55,7 @@ py_test(
 
 py_test(
     name = "run_tests_formatter",
+    size = "small",
     srcs = [
         "run_tests_formatter.py",
     ],
@@ -64,6 +68,7 @@ py_test(
 
 py_test(
     name = "run_tests",
+    size = "small",
     srcs = [
         "run_tests.py",
     ],

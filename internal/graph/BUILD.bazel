@@ -10,6 +10,7 @@ go_library(
 
 go_test(
     name = "graph_test",
+    size = "small",
     srcs = ["graph_test.go"],
     embed = [":graph"],
     deps = [

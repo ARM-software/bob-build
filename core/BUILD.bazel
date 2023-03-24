@@ -80,6 +80,7 @@ go_library(
 
 go_test(
     name = "core_test",
+    size = "small",
     srcs = [
         "android_test.go",
         "androidbp_test.go",
