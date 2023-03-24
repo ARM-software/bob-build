@@ -13,3 +13,5 @@ config OPTION_B
 config DEBUG
     bool "Set debug flags"
     default y
+
+source "internal/Mconfig"

@@ -4,7 +4,7 @@ go_library(
     name = "utils",
     srcs = ["utils.go"],
     importpath = "github.com/ARM-software/bob-build/internal/utils",
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
 )
 
 go_test(

@@ -1,4 +1,47 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+
 # gazelle:bob_root
+
+bool_flag(
+    name = "debug",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_debug",
+    flag_values = {
+        ":debug": "true",
+    },
+)
+
+bool_flag(
+    name = "feature_a",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "config_feature_a",
+    flag_values = {
+        ":feature_a": "true",
+    },
+)
+
+bool_flag(
+    name = "feature_b",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_feature_b",
+    flag_values = {
+        ":feature_b": "true",
+    },
+)
+
+string_flag(
+    name = "option_b",
+    build_setting_default = "--secret",
+)
 
 filegroup(
     name = "glob_lib_srcs",
@@ -13,12 +56,12 @@ filegroup(
 filegroup(
     name = "greet_srcs",
     srcs = glob(["srcs/*.c"]) + select({
-        ":feature_a": [
+        ":config_feature_a": [
             "internal/file1.c",
         ],
         "//conditions:default": [],
     }) + select({
-        ":feature_b": [
+        ":config_feature_b": [
             "internal/file2.c",
         ],
         "//conditions:default": [],

@@ -1,11 +1,18 @@
 package plugin
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
+	"reflect"
 	"sort"
+	"strconv"
+	"strings"
 
+	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/language"
+	"github.com/bazelbuild/bazel-gazelle/rule"
+	bzl "github.com/bazelbuild/buildtools/build"
 )
 
 // GenerateRules extracts build metadata from source files in a directory.
@@ -22,46 +29,168 @@ import (
 // Any non-fatal errors this function encounters should be logged using
 // log.Print.
 func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.GenerateResult {
-	rel := filepath.Clean(args.Rel)
 	result := language.GenerateResult{}
+	rel := filepath.Clean(args.Rel)
+	rules := generateConfigs(e.configs, rel)
 
-	modules, ok := e.registry.retrieveByPath(rel)
+	if modules, ok := e.registry.retrieveByPath(rel); ok {
+		// To properly test generation of multiple modules
+		// at once the order needs to be preserved
+		// TODO: improve sorting
+		names := make([]string, len(modules))
 
-	if !ok {
-		return result
-	}
+		for i, m := range modules {
+			names[i] = m.getName()
+		}
 
-	// To properly test generation of multiple modules
-	// at once the order needs to be preserved
-	// TODO: improve sorting
-	names := make([]string, len(modules))
+		sort.Strings(names)
 
-	for i, m := range modules {
-		names[i] = m.getName()
-	}
+		for _, name := range names {
+			m, _ := e.registry.retrieveByName(name)
 
-	sort.Strings(names)
+			if g, ok := m.(generator); ok {
 
-	for _, name := range names {
-		m, _ := e.registry.retrieveByName(name)
+				rule, err := g.generateRule()
 
-		if g, ok := m.(generator); ok {
-
-			rule, err := g.generateRule()
-
-			if err != nil {
-				log.Println(err.Error())
-			} else {
-				// TODO: temporarily limit to `filegroup` rules
-				if rule.IsEmpty(bobKinds[rule.Kind()]) || rule.Kind() != "filegroup" {
-					result.Empty = append(result.Empty, rule)
+				if err != nil {
+					log.Println(err.Error())
 				} else {
-					result.Gen = append(result.Gen, rule)
-					result.Imports = append(result.Imports, rule.PrivateAttr(""))
+					rules = append(rules, rule)
 				}
 			}
 		}
 	}
 
+	for _, r := range rules {
+		if r.IsEmpty(bobKinds[r.Kind()]) {
+			result.Empty = append(result.Empty, r)
+		} else {
+			result.Gen = append(result.Gen, r)
+			result.Imports = append(result.Imports, r.PrivateAttr(""))
+		}
+	}
+
 	return result
+}
+
+func generateConfigs(c *map[string]configData, relPath string) []*rule.Rule {
+
+	rules := make([]*rule.Rule, 0)
+
+	if c != nil {
+		// To properly test generation of multiple configs
+		// at once the order needs to be preserved
+		// TODO: improve sorting
+		configNames := make([]string, len(*c))
+		keys := reflect.ValueOf(*c).MapKeys()
+
+		for i, k := range keys {
+			configNames[i] = k.String()
+		}
+
+		sort.Strings(configNames)
+
+		for _, config := range configNames {
+			v := (*c)[config]
+
+			if v.Ignore != "y" && v.RelPath == relPath {
+
+				// v.Datatype should be one of ["bool", "string", "int"]
+				if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
+					log.Printf("Unsupported config of type '%s'", v.Datatype)
+					break
+				}
+
+				ruleName := fmt.Sprintf("%s_flag", v.Datatype)
+				rFlag := generateFlag(ruleName, strings.ToLower(config))
+
+				// 'build_setting_default' value is mandatory
+				if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
+					setBuildSettingDefault(rFlag, d[1])
+				} else if _, ok := v.Condition.([]interface{}); ok {
+					// TODO: handle condition
+					setBuildSettingDefault(rFlag, false)
+				} else {
+					setBuildSettingDefault(rFlag, false)
+
+				}
+
+				rules = append(rules, rFlag)
+
+				// features are only when (v.Datatype == "bool")
+				if v.Datatype == "bool" {
+					rConfigSetting := generateConfigSetting(strings.ToLower(config))
+					setConfigSettingFlagValues(rConfigSetting, strings.ToLower(config), true)
+					rules = append(rules, rConfigSetting)
+				}
+			}
+		}
+	}
+
+	return rules
+}
+
+func generateFlag(flagType string, name string) *rule.Rule {
+
+	r := rule.NewRule(flagType, name)
+	r.SetKind(flagType)
+
+	return r
+}
+
+func setBuildSettingDefault(r *rule.Rule, value interface{}) {
+
+	switch value.(type) {
+	// json.Unmarshal grabs numbers as floats
+	case float64, float32:
+		v := int(reflect.ValueOf(value).Float())
+		r.SetAttr("build_setting_default", rule.ExprFromValue(v))
+	default:
+		r.SetAttr("build_setting_default", rule.ExprFromValue(value))
+	}
+}
+
+func generateConfigSetting(name string) *rule.Rule {
+
+	r := rule.NewRule("config_setting", fmt.Sprintf("config_%s", strings.ToLower(name)))
+	r.SetKind("config_setting")
+
+	return r
+}
+
+func setConfigSettingFlagValues(r *rule.Rule, name string, value interface{}) {
+	if value, ok := getValueString(value); ok {
+		arg := &bzl.KeyValueExpr{
+			Key:   &bzl.StringExpr{Value: fmt.Sprintf(":%s", name)},
+			Value: &bzl.StringExpr{Value: value},
+		}
+		expr := &bzl.DictExpr{List: []*bzl.KeyValueExpr{arg}, ForceMultiLine: true}
+
+		r.SetAttr("flag_values", expr)
+	}
+}
+
+func getValueString(value interface{}) (string, bool) {
+
+	switch value.(type) {
+	case bool:
+		b, _ := value.(bool)
+		return strconv.FormatBool(b), true
+	case string:
+		s, _ := value.(string)
+		return s, true
+	}
+
+	return "", false
+}
+
+// TODO: resolve feature names properly depending on
+// the location in `build.bp`
+func getFeatureCondition(f string) string {
+
+	if f == ConditionDefault {
+		return f
+	} else {
+		return fmt.Sprintf(":config_%s", strings.ToLower(f))
+	}
 }

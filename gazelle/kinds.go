@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"log"
-
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
@@ -10,6 +8,23 @@ var bobKinds = map[string]rule.KindInfo{
 	"filegroup": {
 		NonEmptyAttrs:  map[string]bool{"srcs": true},
 		MergeableAttrs: map[string]bool{"srcs": false},
+	},
+	"bool_flag": {
+		NonEmptyAttrs: map[string]bool{"name": true},
+	},
+	"string_flag": {
+		NonEmptyAttrs: map[string]bool{"name": true},
+	},
+}
+
+var bobLoads = []rule.LoadInfo{
+	{
+		Name: "@bazel_skylib//rules:common_settings.bzl",
+		Symbols: []string{
+			"bool_flag",
+			"string_flag",
+			"int_flag",
+		},
 	},
 }
 
@@ -24,6 +39,5 @@ func (e *BobExtension) Kinds() map[string]rule.KindInfo {
 // GenerateRules, now or in the past, should be loadable from one of these
 // files.
 func (e *BobExtension) Loads() []rule.LoadInfo {
-	log.Printf("Loads() - NOT IMPLEMENTED\n")
-	return nil
+	return bobLoads
 }
