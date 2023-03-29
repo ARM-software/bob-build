@@ -1,0 +1,67 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# gazelle:bob_root
+
+bool_flag(
+    name = "debug",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_debug",
+    flag_values = {
+        ":debug": "true",
+    },
+)
+
+bool_flag(
+    name = "feature_a",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "config_feature_a",
+    flag_values = {
+        ":feature_a": "true",
+    },
+)
+
+bool_flag(
+    name = "feature_b",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_feature_b",
+    flag_values = {
+        ":feature_b": "true",
+    },
+)
+
+# depends on: //:feature_b
+bool_flag(
+    name = "new_hw",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "interim_config_new_hw",
+    flag_values = {
+        ":new_hw": "true",
+    },
+)
+
+selects.config_setting_group(
+    name = "config_new_hw",
+    match_all = [
+        ":interim_config_new_hw",
+        "//:config_feature_b",
+    ],
+    visibility = [":__subpackages__"],
+)
+
+string_flag(
+    name = "option_b",
+    build_setting_default = "--secret",
+)

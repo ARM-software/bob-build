@@ -1,0 +1,23 @@
+config FEATURE_A
+    bool "Enable Feature A"
+    default n
+
+config FEATURE_B
+    bool "Enable Feature B"
+    default y
+
+config NEW_HW
+    bool "New hardware platform"
+    depends on FEATURE_B
+    default n
+
+config OPTION_B
+    string "Set Option B"
+    depends on FEATURE_A
+    default "--secret"
+
+config DEBUG
+    bool "Set debug flags"
+    default y
+
+source "internal/Mconfig"

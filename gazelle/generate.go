@@ -15,8 +15,26 @@ import (
 	bzl "github.com/bazelbuild/buildtools/build"
 )
 
+type MatchType int8
+
+const (
+	MatchAll MatchType = iota
+	MatchAny
+)
+
 const (
 	ruleSelectsBzl string = "@bazel_skylib//lib:selects.bzl"
+)
+
+var (
+	MatchString map[string]MatchType = map[string]MatchType{
+		"and": MatchAll,
+		"or":  MatchAny,
+	}
+	OpString map[string]string = map[string]string{
+		"and": "&&",
+		"or":  "||",
+	}
 )
 
 // GenerateRules extracts build metadata from source files in a directory.
@@ -35,7 +53,7 @@ const (
 func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	result := language.GenerateResult{}
 	rel := filepath.Clean(args.Rel)
-	rules := generateConfigs(e.configs, rel)
+	rules := generateConfigs(e.registry, rel)
 
 	// FIXME: Gazelle does not support load statements when macros are packaged
 	// into a struct.
@@ -105,61 +123,166 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 	return result
 }
 
-func generateConfigs(c *map[string]configData, relPath string) []*rule.Rule {
-
+func generateConfigs(r *Registry, relPath string) []*rule.Rule {
 	rules := make([]*rule.Rule, 0)
 
-	if c != nil {
+	if r != nil {
 		// To properly test generation of multiple configs
 		// at once the order needs to be preserved
 		// TODO: improve sorting
-		configNames := make([]string, len(*c))
-		keys := reflect.ValueOf(*c).MapKeys()
+		configNames := make([]string, 0)
 
-		for i, k := range keys {
-			configNames[i] = k.String()
+		regs, ok := r.retrieveByPath(relPath)
+		if !ok {
+			return rules
+		}
+
+		for _, reg := range regs {
+			if cfg, ok := reg.(configData); ok {
+				configNames = append(configNames, cfg.Name)
+			}
 		}
 
 		sort.Strings(configNames)
 
-		for _, config := range configNames {
-			v := (*c)[config]
+		for _, name := range configNames {
+			reg, ok := r.retrieveByName(name)
 
-			if v.Ignore != "y" && v.RelPath == relPath {
+			if !ok {
+				log.Printf("Could not retrieve `Registrable` for '%s' name", name)
+				return rules
+			}
 
-				// v.Datatype should be one of ["bool", "string", "int"]
-				if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
-					log.Printf("Unsupported config of type '%s'", v.Datatype)
-					break
-				}
+			if v, ok := reg.(configData); ok {
+				if v.Ignore != "y" {
+					// v.Datatype should be one of ["bool", "string", "int"]
+					if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
+						log.Printf("Unsupported config of type '%s'", v.Datatype)
+						break
+					}
 
-				ruleName := fmt.Sprintf("%s_flag", v.Datatype)
-				rFlag := generateFlag(ruleName, strings.ToLower(config))
+					ruleName := fmt.Sprintf("%s_flag", v.Datatype)
+					rFlag := generateFlag(ruleName, v.Name)
 
-				// 'build_setting_default' value is mandatory
-				if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
-					setBuildSettingDefault(rFlag, d[1])
-				} else if _, ok := v.Condition.([]interface{}); ok {
-					// TODO: handle condition
-					setBuildSettingDefault(rFlag, false)
-				} else {
-					setBuildSettingDefault(rFlag, false)
+					// 'build_setting_default' value is mandatory
+					if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
+						setBuildSettingDefault(rFlag, d[1])
+					} else if _, ok := v.Condition.([]interface{}); ok {
+						// TODO: handle condition
+						setBuildSettingDefault(rFlag, false)
+					} else {
+						setBuildSettingDefault(rFlag, false)
+					}
 
-				}
+					rules = append(rules, rFlag)
 
-				rules = append(rules, rFlag)
+					// features are only when (v.Datatype == "bool")
+					if v.Datatype == "bool" {
+						rConfigSetting := generateConfigSetting(v.Name, v.Depends != nil)
+						setConfigSettingFlagValues(rConfigSetting, v.Name, true)
+						rules = append(rules, rConfigSetting)
 
-				// features are only when (v.Datatype == "bool")
-				if v.Datatype == "bool" {
-					rConfigSetting := generateConfigSetting(strings.ToLower(config))
-					setConfigSettingFlagValues(rConfigSetting, strings.ToLower(config), true)
-					rules = append(rules, rConfigSetting)
+						if v.Depends != nil {
+							r, comment := generateDependencies(v.Name, v.Depends, r)
+							rules = append(rules, r...)
+							rFlag.AddComment("# depends on: " + comment)
+						}
+					}
 				}
 			}
 		}
 	}
 
 	return rules
+}
+
+func generateDependencies(name string, value interface{}, r *Registry) ([]*rule.Rule, string) {
+
+	// idx = 0, helper index to start enumerating from
+	// for interim rules of `depends on` equation
+	rules, last, comment := generateDependenciesInner(name, value, r, 0)
+
+	ruleName := fmt.Sprintf("config_%s", name)
+	configRuleName := fmt.Sprintf(":interim_config_%s", name)
+
+	// generate final config's `selects.config_setting_group`
+	// for its `depends on` property
+	cgRules := generateConfigGroup(ruleName, MatchAll, []string{configRuleName, last}, []string{":__subpackages__"})
+
+	rules = append(rules, cgRules)
+
+	return rules, comment
+}
+
+func generateDependenciesInner(name string, value interface{}, r *Registry, idx int64) ([]*rule.Rule, string, string) {
+	var comment string
+	var ruleLabel string
+	rules := make([]*rule.Rule, 0)
+
+	v := reflect.ValueOf(value)
+
+	if v.Kind() == reflect.Slice {
+
+		t := fmt.Sprint(v.Index(0).Interface())
+
+		switch t {
+		case "identifier":
+			depName := strings.ToLower(fmt.Sprintf("%s", v.Index(1).Interface()))
+			r, ok := r.retrieveByName(depName)
+
+			if !ok {
+				log.Printf("Could not retrieve `Registrable` for '%s' name", depName)
+			}
+
+			l := r.getLabel()
+			comment = l.String()
+			// `selects.config_setting_group` needs a flag's
+			// `config_setting` but not flag itself.
+			// Comment stays with flag's label for a better readability.
+			l.Name = "config_" + l.Name
+			ruleLabel = l.String()
+		case "and", "or":
+			r1, n1, s1 := generateDependenciesInner(name, v.Index(1).Interface(), r, idx+1)
+			r2, n2, s2 := generateDependenciesInner(name, v.Index(2).Interface(), r, idx+1)
+
+			rules = append(rules, r1...)
+			rules = append(rules, r2...)
+
+			ruleName := fmt.Sprintf("%s_%s_%d", name, t, idx)
+
+			r := generateConfigGroup(ruleName, MatchString[t], []string{n1, n2}, []string{"//visibility:private"})
+			r.AddComment("# autogenerated for internal use only")
+			rules = append(rules, r)
+
+			// rule label has to be prefixed with ':'
+			ruleLabel = fmt.Sprintf(":%s", ruleName)
+
+			comment = fmt.Sprintf("[%s %s %s]", s1, OpString[t], s2)
+		default:
+			log.Printf("unsupported %s\n", t)
+		}
+	}
+
+	return rules, ruleLabel, comment
+}
+
+func generateConfigGroup(name string, t MatchType, l []string, visibility []string) *rule.Rule {
+
+	r := rule.NewRule("selects.config_setting_group", name)
+	r.SetKind("selects.config_setting_group")
+
+	switch t {
+	case MatchAll:
+		r.SetAttr("match_all", l)
+	case MatchAny:
+		r.SetAttr("match_any", l)
+	}
+
+	if len(visibility) > 0 {
+		r.SetAttr("visibility", visibility)
+	}
+
+	return r
 }
 
 func generateFlag(flagType string, name string) *rule.Rule {
@@ -182,19 +305,27 @@ func setBuildSettingDefault(r *rule.Rule, value interface{}) {
 	}
 }
 
-func generateConfigSetting(name string) *rule.Rule {
+func generateConfigSetting(name string, isDependent bool) *rule.Rule {
 
-	r := rule.NewRule("config_setting", fmt.Sprintf("config_%s", strings.ToLower(name)))
+	var ruleName string
+
+	if isDependent {
+		ruleName = fmt.Sprintf("interim_config_%s", strings.ToLower(name))
+	} else {
+		ruleName = fmt.Sprintf("config_%s", strings.ToLower(name))
+	}
+
+	r := rule.NewRule("config_setting", ruleName)
 	r.SetKind("config_setting")
 
 	return r
 }
 
 func setConfigSettingFlagValues(r *rule.Rule, name string, value interface{}) {
-	if value, ok := getValueString(value); ok {
+	if v, ok := getValueString(value); ok {
 		arg := &bzl.KeyValueExpr{
 			Key:   &bzl.StringExpr{Value: fmt.Sprintf(":%s", name)},
-			Value: &bzl.StringExpr{Value: value},
+			Value: &bzl.StringExpr{Value: v},
 		}
 		expr := &bzl.DictExpr{List: []*bzl.KeyValueExpr{arg}, ForceMultiLine: true}
 
