@@ -1,6 +1,8 @@
 package plugin
 
-import "github.com/bazelbuild/bazel-gazelle/label"
+import (
+	"github.com/bazelbuild/bazel-gazelle/label"
+)
 
 type Registrable interface {
 	getName() string

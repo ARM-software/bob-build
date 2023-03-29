@@ -79,7 +79,11 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		if err != nil {
 			log.Fatalf("Parse failed: %v\n", err)
 		}
-		e.configs = configs
+
+		// Register all `configData`s
+		for _, c := range *configs {
+			e.registry.register(c)
+		}
 
 		bobConfig := createBobConfigSpoof(configs)
 		bobParser := newBobParser(c.RepoRoot, bobConfig)

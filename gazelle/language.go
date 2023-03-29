@@ -10,7 +10,6 @@ import (
 
 type BobExtension struct {
 	registry *Registry
-	configs  *map[string]configData
 }
 
 func NewLanguage() language.Language {

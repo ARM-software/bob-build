@@ -15,6 +15,9 @@ var bobKinds = map[string]rule.KindInfo{
 	"string_flag": {
 		NonEmptyAttrs: map[string]bool{"name": true},
 	},
+	"selects.config_setting_group": {
+		NonEmptyAttrs: map[string]bool{"name": true},
+	},
 }
 
 var bobLoads = []rule.LoadInfo{

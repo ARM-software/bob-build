@@ -9,9 +9,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 )
 
@@ -74,12 +77,29 @@ type mconfigParser struct {
 }
 
 type configData struct {
-	Datatype  string      `json:"datatype"`
-	RelPath   string      `json:"relPath"`
-	Type      string      `json:"type"`
-	Default   interface{} `json:"default"`
-	Condition interface{} `json:"default_cond"`
-	Ignore    string      `json:"bob_ignore,omitempty"`
+	Datatype   string      `json:"datatype"`
+	RelPath    string      `json:"relPath"`
+	Type       string      `json:"type"`
+	Default    interface{} `json:"default"`
+	Condition  interface{} `json:"default_cond"`
+	Ignore     string      `json:"bob_ignore,omitempty"`
+	Depends    interface{} `json:"depends"`
+	BazelLabel label.Label
+	Name       string
+}
+
+var _ Registrable = (*configData)(nil)
+
+func (c configData) getName() string {
+	return c.Name
+}
+
+func (c configData) getRelativePath() string {
+	return c.RelPath
+}
+
+func (c configData) getLabel() label.Label {
+	return c.BazelLabel
 }
 
 // Constructs a new `mconfigParser`
@@ -127,5 +147,22 @@ func (p *mconfigParser) parse(fileNames *[]string) (*map[string]configData, erro
 		}
 	}
 
+	resolveConfigLabels(&configs, p.repoRoot)
+
 	return &configs, nil
+}
+
+func resolveConfigLabels(c *map[string]configData, root string) {
+	for k, v := range *c {
+		relPath := filepath.Clean(v.RelPath)
+
+		if relPath == "." {
+			relPath = ""
+		}
+
+		v.Name = strings.ToLower(k)
+		v.BazelLabel = label.Label{Pkg: relPath, Name: v.Name}
+
+		(*c)[k] = v
+	}
 }
