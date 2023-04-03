@@ -488,7 +488,7 @@ m.use_miscellaneous_generated_source_tests_target.cflags =
 m.use_miscellaneous_generated_source_tests_target.conlyflags = 
 
 build $
-        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests//gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c.o $
+        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c
     build_wrapper = 
@@ -497,7 +497,7 @@ build $
     conlyflags = ${m.use_miscellaneous_generated_source_tests_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests//gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c.o $
+        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c
     build_wrapper = 
@@ -508,8 +508,8 @@ build $
 build $
         ${g.bob.BuildDir}/target/executable/use_miscellaneous_generated_source_tests $
         : g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests//gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c.o $
-        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests//gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c.o
+        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests/gen/gen_source_globbed_implicit_sources/validate_globbed_implicit_dependency.c.o $
+        ${g.bob.BuildDir}/target/objects/use_miscellaneous_generated_source_tests/gen/gen_source_globbed_exclude_implicit_sources/validate_globbed_exclude_implicit_dependency.c.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -586,7 +586,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single/single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single/single.cpp.o $
         : g.bob.cxx ${g.bob.BuildDir}/gen/generate_source_single/single.cpp || $
         ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
     build_wrapper = 
@@ -595,7 +595,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in/multiple_in.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in/multiple_in.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_multiple_in/multiple_in.cpp || $
         ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -605,7 +605,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_out/multiple_out.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_out/multiple_out.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out.cpp || $
         ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -615,7 +615,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_out/multiple_out2.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_out/multiple_out2.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out2.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -625,7 +625,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in_out/multiple_in_out.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in_out/multiple_in_out.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_multiple_in_out/multiple_in_out.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -635,7 +635,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in_out/multiple_in_out2.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in_out/multiple_in_out2.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_multiple_in_out/multiple_in_out2.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -645,7 +645,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level1/level_1_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level1/level_1_single.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_level1/level_1_single.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -655,7 +655,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level2/level_2_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level2/level_2_single.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_level2/level_2_single.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -665,7 +665,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level3/level_3_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level3/level_3_single.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_level3/level_3_single.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -675,7 +675,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_nested_with_extra/extra_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_nested_with_extra/extra_single.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_nested_with_extra/extra_single.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -685,7 +685,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_dependend/deps.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_dependend/deps.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_dependend/deps.cpp || $
         ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -695,7 +695,7 @@ build $
     cxxflags = ${m.validate_link_generate_sources_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_dependend_nested/deps2.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_dependend_nested/deps2.cpp.o $
         : g.bob.cxx $
         ${g.bob.BuildDir}/gen/generate_source_single_dependend_nested/deps2.cpp $
         || ${g.bob.BuildDir}/gen/generate_source_single/single.cpp
@@ -707,18 +707,18 @@ build $
 build ${g.bob.BuildDir}/target/executable/validate_link_generate_sources: $
         g.bob.executable $
         ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/main.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single/single.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in/multiple_in.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_out/multiple_out.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_out/multiple_out2.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in_out/multiple_in_out.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_multiple_in_out/multiple_in_out2.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level1/level_1_single.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level2/level_2_single.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_level3/level_3_single.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_nested_with_extra/extra_single.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_dependend/deps.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources//gen/generate_source_single_dependend_nested/deps2.cpp.o
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single/single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in/multiple_in.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_out/multiple_out.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_out/multiple_out2.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in_out/multiple_in_out.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_multiple_in_out/multiple_in_out2.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level1/level_1_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level2/level_2_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_level3/level_3_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_nested_with_extra/extra_single.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_dependend/deps.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_generate_sources/gen/generate_source_single_dependend_nested/deps2.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
