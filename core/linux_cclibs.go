@@ -144,7 +144,8 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 			sourceWithoutPrefix = source
 			source = getBackendPathInSourceDir(g, source)
 		}
-		output := l.ObjDir() + sourceWithoutPrefix + ".o"
+
+		output := filepath.Join(l.ObjDir(), (sourceWithoutPrefix + ".o"))
 
 		ctx.Build(pctx,
 			blueprint.BuildParams{

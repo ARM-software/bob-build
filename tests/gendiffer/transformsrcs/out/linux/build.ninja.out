@@ -343,7 +343,7 @@ build $
     cxxflags = ${m.validate_link_transform_source_target.cxxflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/validate_link_transform_source//gen/combine_sources/combined_source.cpp.o $
+        ${g.bob.BuildDir}/target/objects/validate_link_transform_source/gen/combine_sources/combined_source.cpp.o $
         : g.bob.cxx ${g.bob.BuildDir}/gen/combine_sources/combined_source.cpp $
         || ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
         ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h $
@@ -365,7 +365,7 @@ build $
 build ${g.bob.BuildDir}/target/executable/validate_link_transform_source: $
         g.bob.executable $
         ${g.bob.BuildDir}/target/objects/validate_link_transform_source/main.cpp.o $
-        ${g.bob.BuildDir}/target/objects/validate_link_transform_source//gen/combine_sources/combined_source.cpp.o
+        ${g.bob.BuildDir}/target/objects/validate_link_transform_source/gen/combine_sources/combined_source.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 

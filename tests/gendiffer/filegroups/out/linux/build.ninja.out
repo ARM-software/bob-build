@@ -72,7 +72,7 @@ build ${g.bob.BuildDir}/target/objects/bin/src/dummy01.c.o: g.bob.cc $
     conlyflags = ${m.bin_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_generated_source/nested_generated.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_generated_source/nested_generated.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c
     build_wrapper = 
@@ -81,7 +81,7 @@ build $
     conlyflags = ${m.bin_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/nested_out01.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out01.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/nested_out01.c
     build_wrapper = 
@@ -90,7 +90,7 @@ build $
     conlyflags = ${m.bin_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/nested_out02.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out02.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/nested_out02.c
     build_wrapper = 
@@ -99,7 +99,7 @@ build $
     conlyflags = ${m.bin_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/transform_source/out01.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out01.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out01.c
     build_wrapper = 
@@ -108,7 +108,7 @@ build $
     conlyflags = ${m.bin_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/transform_source/out02.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out02.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out02.c
     build_wrapper = 
@@ -116,14 +116,14 @@ build $
     cflags = ${m.bin_target.cflags}
     conlyflags = ${m.bin_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/objects/bin//gen/genrule/genrule_dummy01.c.o: $
+build ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy01.c.o: $
         g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c
     build_wrapper = 
     ccompiler = gcc
     cflags = ${m.bin_target.cflags}
     conlyflags = ${m.bin_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/objects/bin//gen/genrule/genrule_dummy02.c.o: $
+build ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o: $
         g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c
     build_wrapper = 
     ccompiler = gcc
@@ -133,13 +133,13 @@ build ${g.bob.BuildDir}/target/objects/bin//gen/genrule/genrule_dummy02.c.o: $
 build ${g.bob.BuildDir}/target/executable/bin: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/bin/main.c.o $
         ${g.bob.BuildDir}/target/objects/bin/src/dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_generated_source/nested_generated.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/nested_out01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/nested_out02.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/transform_source/out01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/nested_transform_source/transform_source/out02.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/genrule/genrule_dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin//gen/genrule/genrule_dummy02.c.o
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_generated_source/nested_generated.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out01.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out02.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out01.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out02.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy01.c.o $
+        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -216,7 +216,7 @@ build ${g.bob.BuildDir}/target/objects/lib/src/dummy01.c.o: g.bob.cc $
     conlyflags = ${m.lib_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_generated_source/nested_generated.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_generated_source/nested_generated.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c
     build_wrapper = 
@@ -225,7 +225,7 @@ build $
     conlyflags = ${m.lib_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/nested_out01.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out01.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/nested_out01.c
     build_wrapper = 
@@ -234,7 +234,7 @@ build $
     conlyflags = ${m.lib_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/nested_out02.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out02.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/nested_out02.c
     build_wrapper = 
@@ -243,7 +243,7 @@ build $
     conlyflags = ${m.lib_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/transform_source/out01.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/transform_source/out01.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out01.c
     build_wrapper = 
@@ -252,7 +252,7 @@ build $
     conlyflags = ${m.lib_target.conlyflags}
 
 build $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/transform_source/out02.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/transform_source/out02.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out02.c
     build_wrapper = 
@@ -260,14 +260,14 @@ build $
     cflags = ${m.lib_target.cflags}
     conlyflags = ${m.lib_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/objects/lib//gen/genrule/genrule_dummy01.c.o: $
+build ${g.bob.BuildDir}/target/objects/lib/gen/genrule/genrule_dummy01.c.o: $
         g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c
     build_wrapper = 
     ccompiler = gcc
     cflags = ${m.lib_target.cflags}
     conlyflags = ${m.lib_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/objects/lib//gen/genrule/genrule_dummy02.c.o: $
+build ${g.bob.BuildDir}/target/objects/lib/gen/genrule/genrule_dummy02.c.o: $
         g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c
     build_wrapper = 
     ccompiler = gcc
@@ -277,13 +277,13 @@ build ${g.bob.BuildDir}/target/objects/lib//gen/genrule/genrule_dummy02.c.o: $
 build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
         ${g.bob.BuildDir}/target/objects/lib/main.c.o $
         ${g.bob.BuildDir}/target/objects/lib/src/dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_generated_source/nested_generated.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/nested_out01.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/nested_out02.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/transform_source/out01.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/nested_transform_source/transform_source/out02.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/genrule/genrule_dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/lib//gen/genrule/genrule_dummy02.c.o
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_generated_source/nested_generated.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out01.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out02.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/transform_source/out01.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/transform_source/out02.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/genrule/genrule_dummy01.c.o $
+        ${g.bob.BuildDir}/target/objects/lib/gen/genrule/genrule_dummy02.c.o
     ar = ar
     build_wrapper = 
 

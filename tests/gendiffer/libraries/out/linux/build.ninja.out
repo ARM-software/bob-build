@@ -1468,7 +1468,7 @@ m.use_sharedtest_host_gen_source_target.cflags =
 m.use_sharedtest_host_gen_source_target.conlyflags = 
 
 build $
-        ${g.bob.BuildDir}/target/objects/use_sharedtest_host_gen_source//gen/use_sharedtest_host/use_sharedtest_host_main.c.o $
+        ${g.bob.BuildDir}/target/objects/use_sharedtest_host_gen_source/gen/use_sharedtest_host/use_sharedtest_host_main.c.o $
         : g.bob.cc $
         ${g.bob.BuildDir}/gen/use_sharedtest_host/use_sharedtest_host_main.c
     build_wrapper = 
@@ -1478,7 +1478,7 @@ build $
 
 build ${g.bob.BuildDir}/target/executable/use_sharedtest_host_gen_source: $
         g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/use_sharedtest_host_gen_source//gen/use_sharedtest_host/use_sharedtest_host_main.c.o
+        ${g.bob.BuildDir}/target/objects/use_sharedtest_host_gen_source/gen/use_sharedtest_host/use_sharedtest_host_main.c.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
