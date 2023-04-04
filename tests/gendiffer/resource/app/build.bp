@@ -1,0 +1,60 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_install_group {
+    name: "IG_testcases",
+    builder_android_bp: {
+        install_path: "tests",
+    },
+    builder_ninja: {
+        install_path: "install/testcases",
+    },
+}
+
+bob_install_group {
+    name: "IG_binaries",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/bin",
+    },
+}
+
+bob_resource {
+    name: "bob_test_resources",
+    srcs: ["main.c"],
+    install_group: "IG_testcases",
+    build_by_default: true,
+    builder_android_bp: {
+        relative_install_path: "z",
+    },
+    builder_ninja: {
+        relative_install_path: "y",
+    },
+}
+
+bob_resource {
+    name: "bob_test_resource_in_bin",
+    srcs: [
+        "bob_resource_test_script.sh",
+        "bob_resource_test_data.json",
+    ],
+    install_group: "IG_binaries",
+    relative_install_path: "bob_tests",
+    build_by_default: true,
+}

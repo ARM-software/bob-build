@@ -1,0 +1,25 @@
+
+
+
+cc_prebuilt_binary {
+    name: "bob_test_resource_in_bin__bob_resource_test_data.json",
+    srcs: ["bob_resource_test_data.json"],
+    stem: "bob_resource_test_data.json",
+    relative_install_path: "bob_tests",
+}
+
+cc_prebuilt_binary {
+    name: "bob_test_resource_in_bin__bob_resource_test_script.sh",
+    srcs: ["bob_resource_test_script.sh"],
+    stem: "bob_resource_test_script.sh",
+    relative_install_path: "bob_tests",
+}
+
+prebuilt_data_bob {
+    name: "bob_test_resources__main.c",
+    src: "main.c",
+    sub_dir: "nativetest/z",
+    filename_from_src: true,
+    installable: true,
+}
+
