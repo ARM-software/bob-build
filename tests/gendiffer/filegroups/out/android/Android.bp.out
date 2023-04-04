@@ -49,12 +49,16 @@ genrule {
     out: [
         "genrule_dummy01.c",
         "genrule_dummy02.c",
+        "generated_noncompile_genrule.md",
     ],
 }
 
 genrule_bob {
     name: "nested_generated_source",
-    out: ["nested_generated.c"],
+    out: [
+        "nested_generated.c",
+        "generated_noncompile_gensrc.md",
+    ],
     cmd: "touch ${out}",
     depfile: false,
     generated_sources: ["generated_source"],

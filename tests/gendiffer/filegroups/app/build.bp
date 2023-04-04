@@ -24,6 +24,7 @@ bob_genrule {
     out: [
         "genrule_dummy01.c",
         "genrule_dummy02.c",
+        "generated_noncompile_genrule.md",
     ],
 
     cmd: "touch $(out)",
@@ -37,7 +38,10 @@ bob_generate_source {
 
 bob_generate_source {
     name: "nested_generated_source",
-    out: ["nested_generated.c"],
+    out: [
+        "nested_generated.c",
+        "generated_noncompile_gensrc.md",
+    ],
     cmd: "touch ${out}",
     generated_sources: ["generated_source"],
 }
