@@ -52,7 +52,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:108:1
+# Defined: build.bp:112:1
 
 m.bin_target.cflags = 
 m.bin_target.conlyflags = 
@@ -139,7 +139,9 @@ build ${g.bob.BuildDir}/target/executable/bin: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out01.c.o $
         ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out02.c.o $
         ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o
+        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o | $
+        ${g.bob.BuildDir}/gen/nested_generated_source/generated_noncompile_gensrc.md $
+        ${g.bob.BuildDir}/gen/genrule/generated_noncompile_genrule.md
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -156,7 +158,7 @@ default bin
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:32:1
+# Defined: build.bp:33:1
 
 rule m.generated_source_.gen_generated_source
     command = touch ${_out_}
@@ -183,20 +185,22 @@ rule m.genrule_.gen_genrule
     restat = true
 
 build ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c $
-        ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c: $
+        ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c $
+        ${g.bob.BuildDir}/gen/genrule/generated_noncompile_genrule.md: $
         m.genrule_.gen_genrule ${g.bob.SrcDir}/dummy01.c $
         ${g.bob.SrcDir}/dummy02.c
-    _out_ = ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c
+    _out_ = ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c ${g.bob.BuildDir}/gen/genrule/generated_noncompile_genrule.md
 
 build genrule: phony ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c $
-        ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c
+        ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c $
+        ${g.bob.BuildDir}/gen/genrule/generated_noncompile_genrule.md
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:96:1
+# Defined: build.bp:100:1
 
 m.lib_target.cflags = 
 m.lib_target.conlyflags = 
@@ -294,27 +298,29 @@ build lib: phony ${g.bob.BuildDir}/target/static/lib.a
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:38:1
+# Defined: build.bp:39:1
 
 rule m.nested_generated_source_.gen_nested_generated_source
     command = touch ${_out_}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c: $
-        m.nested_generated_source_.gen_nested_generated_source $
+build ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c $
+        ${g.bob.BuildDir}/gen/nested_generated_source/generated_noncompile_gensrc.md $
+        : m.nested_generated_source_.gen_nested_generated_source $
         ${g.bob.BuildDir}/gen/generated_source/generated.c
-    _out_ = ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c
+    _out_ = ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c ${g.bob.BuildDir}/gen/nested_generated_source/generated_noncompile_gensrc.md
 
 build nested_generated_source: phony $
-        ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c
+        ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c $
+        ${g.bob.BuildDir}/gen/nested_generated_source/generated_noncompile_gensrc.md
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  nested_transform_source
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:58:1
+# Defined: build.bp:62:1
 
 rule m.nested_transform_source_.gen_nested_transform_source
     command = some_tool
@@ -352,7 +358,7 @@ build nested_transform_source: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:45:1
+# Defined: build.bp:49:1
 
 rule m.transform_source_.gen_transform_source
     command = some_tool

@@ -130,7 +130,12 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 			args["cxxflags"] = "$cxxflags"
 			rule = cxxRule
 		default:
-			nonCompiledDeps = append(nonCompiledDeps, getBackendPathInSourceDir(g, source))
+			if buildDir := g.buildDir(); strings.HasPrefix(source, buildDir) {
+				// The source already has a fully qualified path, do not prefix.
+				nonCompiledDeps = append(nonCompiledDeps, source)
+			} else {
+				nonCompiledDeps = append(nonCompiledDeps, getBackendPathInSourceDir(g, source))
+			}
 			continue
 		}
 
