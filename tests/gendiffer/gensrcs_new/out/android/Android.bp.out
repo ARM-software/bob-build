@@ -2,6 +2,21 @@
 
 
 genrule {
+    name: "exclude_support",
+    srcs: [
+        "input1.in",
+        "input2.in",
+        "input3.in",
+    ],
+    exclude_srcs: ["input2.in"],
+    cmd: "touch $(out)",
+    out: [
+        "input1.out",
+        "input3.out",
+    ],
+}
+
+genrule {
     name: "gen_source_depfile_new",
     srcs: [
         "depgen1.in",
