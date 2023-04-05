@@ -234,3 +234,18 @@ bob_genrule {
     tool_files: ["generator.py"],
     cmd: "python $(location generator.py) --in $(in) --out $(out) --expect-in before_generate.in $(location :generate_source_single_new)",
 }
+
+bob_genrule {
+    name: "exclude_support",
+    srcs: [
+        "input1.in",
+        "input2.in",
+        "input3.in",
+    ],
+    exclude_srcs: ["input2.in"],
+    out: [
+        "input1.out",
+        "input3.out",
+    ],
+    cmd: "touch $(out)",
+}
