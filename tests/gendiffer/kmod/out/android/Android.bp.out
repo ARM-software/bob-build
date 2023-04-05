@@ -1,0 +1,32 @@
+
+
+
+genrule_bob {
+    name: "test_module1",
+    srcs: [
+        "Kbuild",
+        "test_module1.c",
+    ],
+    out: ["test_module1.ko"],
+    implicit_outs: ["Module.symvers"],
+    tools: ["scripts/kmod_build.py"],
+    depfile: true,
+    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} --common-root %WORKSPACEPATH% --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
+    install_path: "lib/modules",
+}
+
+genrule_bob {
+    name: "test_module2",
+    srcs: [
+        "Kbuild",
+        "test_module2.c",
+    ],
+    generated_deps: ["test_module1"],
+    out: ["test_module2.ko"],
+    implicit_outs: ["Module.symvers"],
+    tools: ["scripts/kmod_build.py"],
+    depfile: true,
+    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} $$(dirname ${test_module1_out})/Module.symvers --common-root %WORKSPACEPATH% --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
+    install_path: "lib/modules",
+}
+
