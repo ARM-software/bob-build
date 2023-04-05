@@ -330,6 +330,31 @@ build libblah_static: phony $
         ${g.bob.BuildDir}/gen/libblah_static/include/libblah_feature.h
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  shared_library_input
+# Variant:
+# Type:    bob_generate_source
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:186:1
+
+rule m.shared_library_input_.gen_shared_library_input
+    command = ${tool} --links-to libblah_shared2  ${in} && touch ${_out_}
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/shared_library_input/success.txt: $
+        m.shared_library_input_.gen_shared_library_input $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah.h $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah_feature.h $
+        | ${g.bob.SrcDir}/check_library_link.py
+    _out_ = ${g.bob.BuildDir}/gen/shared_library_input/success.txt
+    tool = ${g.bob.SrcDir}/check_library_link.py
+
+build shared_library_input: phony $
+        ${g.bob.BuildDir}/gen/shared_library_input/success.txt
+default shared_library_input
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
 # Factory:   github.com/google/blueprint/bootstrap.Main.func4
 
