@@ -1,5 +1,8 @@
 
 
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash b0056baba0a40b11e47c2e959fc2c310be94dc5a --out $(out) -- $(in)",
+}
 
 genrule {
     name: "exclude_support",
@@ -140,9 +143,9 @@ genrule {
 
 genrule {
     name: "generate_source_single_new",
-    srcs: ["before_generate.in"],
+    srcs: ["nested/before_generate.in"],
     cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
-    tool_files: ["generator.py"],
+    tool_files: ["nested/generator.py"],
     out: ["single.cpp"],
 }
 
