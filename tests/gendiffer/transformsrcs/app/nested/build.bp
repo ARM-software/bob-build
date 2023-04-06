@@ -1,0 +1,52 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_transform_source {
+    name: "transform_source_single_dir",
+    srcs: [
+        "f.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            // inside extra directory
+            "single/$1.cpp",
+            "single/$1.h",
+        ],
+    },
+    export_gen_include_dirs: ["single/transform_source"],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+}
+
+bob_transform_source {
+    name: "transform_source_generated_deps",
+    generated_deps: ["generate_template_source_used_by_transform"],
+    srcs: [
+        "f6.in",
+    ],
+    out: {
+        match: ".*/(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+    export_gen_include_dirs: ["."],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
+}
