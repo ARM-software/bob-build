@@ -1,5 +1,8 @@
 
 
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash 910f0726ba7231a4c08366477c4af0eea976c49b --out $(out) -- $(in)",
+}
 
 genrule_bob {
     name: "gen_source_depfile",
@@ -81,10 +84,10 @@ genrule_bob {
 
 genrule_bob {
     name: "generate_source_single",
-    srcs: ["before_generate.in"],
+    srcs: ["nested/before_generate.in"],
     out: ["single.cpp"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
-    tools: ["generator.py"],
+    tools: ["nested/generator.py"],
     depfile: false,
 }
 
