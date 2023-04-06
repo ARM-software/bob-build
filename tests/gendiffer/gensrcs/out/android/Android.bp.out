@@ -1,8 +1,5 @@
 
 
-    tool_files: ["scripts/verify_hash.py"],
-    cmd: "python $(location scripts/verify_hash.py) --hash 910f0726ba7231a4c08366477c4af0eea976c49b --out $(out) -- $(in)",
-}
 
 genrule_bob {
     name: "gen_source_depfile",

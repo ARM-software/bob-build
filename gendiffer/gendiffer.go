@@ -155,7 +155,7 @@ func getFileContents(t *testing.T, filename string) string {
 
 func redactWorkspacePath(s, wsPath string) string {
 	// We must cleanup a specific Android.bp target that is unique to each generation. It is non-hermetic.
-	re := regexp.MustCompile("genrule {\n.*_check_buildbp_updates.*\n.*\n.*\n.*\n.*\n.*")
+	re := regexp.MustCompile("genrule {\n.*_check_buildbp_updates[^}]*}")
 	res := re.ReplaceAllString(s, "")
 	return strings.ReplaceAll(res, wsPath, "%WORKSPACEPATH%")
 }

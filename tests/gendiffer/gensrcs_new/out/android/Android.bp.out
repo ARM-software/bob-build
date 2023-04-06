@@ -1,8 +1,5 @@
 
 
-    tool_files: ["scripts/verify_hash.py"],
-    cmd: "python $(location scripts/verify_hash.py) --hash b0056baba0a40b11e47c2e959fc2c310be94dc5a --out $(out) -- $(in)",
-}
 
 genrule {
     name: "exclude_support",
