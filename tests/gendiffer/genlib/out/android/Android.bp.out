@@ -1,3 +1,6 @@
 
 
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash 9184b3ceeee6993813b94dd264c203b75412fc2b --out $(out) -- $(in)",
+}
 
