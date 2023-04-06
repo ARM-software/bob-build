@@ -16,17 +16,6 @@
  */
 
 bob_generate_source {
-    name: "generate_source_single",
-    srcs: [
-        "before_generate.in",
-    ],
-    out: ["single.cpp"],
-
-    tools: ["generator.py"],
-    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
-}
-
-bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
         "before_generate.in",
