@@ -16,24 +16,6 @@
  */
 
 bob_transform_source {
-    name: "transform_source_single_dir",
-    srcs: [
-        "f.in",
-    ],
-    out: {
-        match: "(.+)\\.in",
-        replace: [
-            // inside extra directory
-            "single/$1.cpp",
-            "single/$1.h",
-        ],
-    },
-    export_gen_include_dirs: ["single/transform_source"],
-    tools: ["generator.py"],
-    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
-}
-
-bob_transform_source {
     name: "transform_source_single",
     srcs: [
         "f2.in",
@@ -87,24 +69,6 @@ bob_generate_source {
     out: ["test_src.tmpl"],
     tools: ["write_tmpl.py"],
     cmd: "python ${tool} ${out}",
-}
-
-bob_transform_source {
-    name: "transform_source_generated_deps",
-    generated_deps: ["generate_template_source_used_by_transform"],
-    srcs: [
-        "f6.in",
-    ],
-    out: {
-        match: ".*/(.+)\\.in",
-        replace: [
-            "$1.cpp",
-            "$1.h",
-        ],
-    },
-    export_gen_include_dirs: ["."],
-    tools: ["generator.py"],
-    cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
 }
 
 bob_generate_source {

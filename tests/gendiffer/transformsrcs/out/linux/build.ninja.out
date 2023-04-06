@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:131:1
+# Defined: build.bp:95:1
 
 rule m.combine_sources_.gen_combine_sources
     command = ${tool} --out ${_out_} ${in}
@@ -57,8 +57,8 @@ rule m.combine_sources_.gen_combine_sources
 
 build ${g.bob.BuildDir}/gen/combine_sources/combined_source.cpp: $
         m.combine_sources_.gen_combine_sources $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.cpp $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f3.cpp $
@@ -67,8 +67,8 @@ build ${g.bob.BuildDir}/gen/combine_sources/combined_source.cpp: $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f4.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.cpp $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.h $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h $
         ${g.bob.BuildDir}/gen/transform_source_generated_sources_only/generate_source_generated_sources_only/f7.cpp $
         ${g.bob.BuildDir}/gen/transform_source_generated_sources_only/generate_source_generated_sources_only/f7.h $
         | ${g.bob.SrcDir}/combine_sources.py
@@ -83,7 +83,7 @@ build combine_sources: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:110:1
+# Defined: build.bp:74:1
 
 rule m.generate_source_generated_sources_only_.gen_generate_source_generated_sources_only
     command = echo '// Dummy File' > ${_out_}
@@ -102,7 +102,7 @@ build generate_source_generated_sources_only: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:57:1
+# Defined: build.bp:39:1
 
 rule m.generate_source_to_transform_.gen_generate_source_to_transform
     command = echo '// Dummy File' > ${_out_}
@@ -121,7 +121,7 @@ build generate_source_to_transform: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:85:1
+# Defined: build.bp:67:1
 
 rule m.generate_template_source_used_by_transform_.gen_generate_template_source_used_by_transform
     command = python ${tool} ${_out_}
@@ -144,33 +144,33 @@ build generate_template_source_used_by_transform: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:92:1
+# Defined: nested/build.bp:36:1
 
 rule m.transform_source_generated_deps_.gen_transform_source_generated_deps
     command = python ${tool} --in ${in} --gen ${_out_} --src-template ${generate_template_source_used_by_transform_out}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in: $
+build ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h: $
         m.transform_source_generated_deps_.gen_transform_source_generated_deps $
-        ${g.bob.SrcDir}/f6.in | $
+        ${g.bob.SrcDir}/nested/f6.in | $
         ${g.bob.BuildDir}/gen/generate_template_source_used_by_transform/test_src.tmpl $
-        ${g.bob.SrcDir}/generator.py
-    _out_ = ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in
+        ${g.bob.SrcDir}/nested/generator.py
+    _out_ = ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h
     generate_template_source_used_by_transform_out = ${g.bob.BuildDir}/gen/generate_template_source_used_by_transform/test_src.tmpl
-    tool = ${g.bob.SrcDir}/generator.py
+    tool = ${g.bob.SrcDir}/nested/generator.py
 
 build transform_source_generated_deps: phony $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  transform_source_generated_sources_only
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:116:1
+# Defined: build.bp:80:1
 
 rule m.transform_source_generated_sources_only_.gen_transform_source_generated_sources_only
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -197,7 +197,7 @@ default transform_source_generated_sources_only
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:63:1
+# Defined: build.bp:45:1
 
 rule m.transform_source_multiple_in_.gen_transform_source_multiple_in
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -240,7 +240,7 @@ build transform_source_multiple_in: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:36:1
+# Defined: build.bp:18:1
 
 rule m.transform_source_single_.gen_transform_source_single
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -263,30 +263,30 @@ build transform_source_single: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: nested/build.bp:18:1
 
 rule m.transform_source_single_dir_.gen_transform_source_single_dir
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h: $
+build ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h: $
         m.transform_source_single_dir_.gen_transform_source_single_dir $
-        ${g.bob.SrcDir}/f.in | ${g.bob.SrcDir}/generator.py
-    _out_ = ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h
-    tool = ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/nested/f.in | ${g.bob.SrcDir}/nested/generator.py
+    _out_ = ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h
+    tool = ${g.bob.SrcDir}/nested/generator.py
 
 build transform_source_single_dir: phony $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  validate_install_transform_source
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:157:1
+# Defined: build.bp:121:1
 
 rule m.validate_install_transform_source_.gen_validate_install_transform_source
     command = touch ${_out_}
@@ -317,7 +317,7 @@ default validate_install_transform_source
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:145:1
+# Defined: build.bp:109:1
 
 m.validate_link_transform_source_target.cflags = -I${g.bob.BuildDir}/gen/transform_source_single_dir/single/transform_source -I${g.bob.BuildDir}/gen/transform_source_single/transform_source -I${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform -I${g.bob.BuildDir}/gen/transform_source_multiple_in/transform_source -I${g.bob.BuildDir}/gen/transform_source_generated_deps
 m.validate_link_transform_source_target.cxxflags = 
@@ -325,8 +325,8 @@ m.validate_link_transform_source_target.cxxflags =
 build $
         ${g.bob.BuildDir}/target/objects/validate_link_transform_source/main.cpp.o $
         : g.bob.cxx ${g.bob.SrcDir}/main.cpp || $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.cpp $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f3.cpp $
@@ -335,8 +335,8 @@ build $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f4.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.cpp $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.h $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h
     build_wrapper = 
     cflags = ${m.validate_link_transform_source_target.cflags}
     cxxcompiler = g++
@@ -345,8 +345,9 @@ build $
 build $
         ${g.bob.BuildDir}/target/objects/validate_link_transform_source/gen/combine_sources/combined_source.cpp.o $
         : g.bob.cxx ${g.bob.BuildDir}/gen/combine_sources/combined_source.cpp $
-        || ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.cpp $
-        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/f.h $
+        || $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_single_dir/single/nested/f.h $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.cpp $
         ${g.bob.BuildDir}/gen/transform_source_single/f2.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f3.cpp $
@@ -355,8 +356,8 @@ build $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/f4.h $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.cpp $
         ${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform/f5.h $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in $
-        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.in
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.cpp $
+        ${g.bob.BuildDir}/gen/transform_source_generated_deps/f6.h
     build_wrapper = 
     cflags = ${m.validate_link_transform_source_target.cflags}
     cxxcompiler = g++
@@ -383,7 +384,7 @@ default validate_link_transform_source
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:187:1
+# Defined: build.bp:151:1
 
 rule m.validate_transform_source_flattened_output_.gen_validate_transform_source_flattened_output
     command = echo '${_out_}:' > ${depfile} && cat $$(cat ${rspfile}) > ${_out_}
@@ -416,7 +417,7 @@ default validate_transform_source_flattened_output
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:171:1
+# Defined: build.bp:135:1
 
 rule m.validate_transform_source_nested_output_.gen_validate_transform_source_nested_output
     command = echo '${_out_}:' > ${depfile} && cat $$(cat ${rspfile}) > ${_out_}
