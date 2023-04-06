@@ -1,8 +1,5 @@
 
 
-    tool_files: ["scripts/verify_hash.py"],
-    cmd: "python $(location scripts/verify_hash.py) --hash e76ad65d53ec20b25be85feea6ae705ab9088eb4 --out $(out) -- $(in)",
-}
 
 genrule_bob {
     name: "combine_sources",
