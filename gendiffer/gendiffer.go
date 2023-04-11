@@ -35,6 +35,29 @@ type generationArgs struct {
 	SrcTestDirectory        string
 }
 
+func produceDiff(t *testing.T, out string, expectedOut string, filename string) {
+	dir, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory used for diff outputting.")
+	}
+	os.WriteFile(dir+"/"+filename, []byte(out), 0644)
+	os.WriteFile(dir+"/expected_"+filename, []byte(expectedOut), 0644)
+
+	var stdOut bytes.Buffer
+	var stdErr bytes.Buffer
+	runCmd := exec.Command("diff", "-u", dir+"/"+filename, dir+"/expected_"+filename)
+	runCmd.Stdout = &stdOut
+	runCmd.Stderr = &stdErr
+	diffErr := runCmd.Run()
+	if diffErr != nil && diffErr.Error() != "exit status 1" { // We expect an error code once as there should be a produced diff.
+		t.Fatal(diffErr)
+	}
+
+	t.Log(stdOut.String())
+
+	os.RemoveAll(dir)
+}
+
 func setCommonEnv(t *testing.T, args *generationArgs) {
 	os.Setenv("TOPNAME", "build.bp")
 	os.Setenv("SRCDIR", args.BobRootAbsolute)
@@ -81,12 +104,15 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, outputFile+".out"), []byte(outFile), 0644)
 	} else {
 		if outFile != expectedFile {
+			produceDiff(t, outFile, expectedFile, outputFile)
 			t.Fatal(outputFile, " mismatch.")
 		}
 		if stdOut.String() != expectedStdout {
+			produceDiff(t, stdOut.String(), expectedStdout, "Stdout.txt")
 			t.Fatal(args.BackendType, " stdout mismatch")
 		}
 		if stdErr.String() != expectedStderr {
+			produceDiff(t, stdErr.String(), expectedStderr, "Stderr.txt")
 			t.Fatal(args.BackendType, " stderr mismatch.")
 		}
 	}
