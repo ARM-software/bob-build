@@ -81,10 +81,10 @@ genrule_bob {
 
 genrule_bob {
     name: "generate_source_single",
-    srcs: ["before_generate.in"],
+    srcs: ["nested/before_generate.in"],
     out: ["single.cpp"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
-    tools: ["generator.py"],
+    tools: ["nested/generator.py"],
     depfile: false,
 }
 

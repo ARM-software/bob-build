@@ -40,9 +40,9 @@ genrule_bob {
 
 gensrcs_bob {
     name: "transform_source_generated_deps",
-    srcs: ["f6.in"],
+    srcs: ["nested/f6.in"],
     cmd: "python ${tool} --in ${in} --gen ${out} --src-template ${generate_template_source_used_by_transform_out}",
-    tools: ["generator.py"],
+    tools: ["nested/generator.py"],
     depfile: false,
     generated_deps: ["generate_template_source_used_by_transform"],
     export_gen_include_dirs: ["."],
@@ -111,9 +111,9 @@ gensrcs_bob {
 
 gensrcs_bob {
     name: "transform_source_single_dir",
-    srcs: ["f.in"],
+    srcs: ["nested/f.in"],
     cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
-    tools: ["generator.py"],
+    tools: ["nested/generator.py"],
     depfile: false,
     export_gen_include_dirs: ["single/transform_source"],
     out: {

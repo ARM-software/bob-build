@@ -1,0 +1,68 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_install_group {
+    name: "IG_modules",
+    builder_android_bp: {
+        install_path: "lib/modules",
+    },
+    builder_ninja: {
+        install_path: "lib/modules",
+    },
+}
+
+bob_kernel_module {
+    name: "test_module1",
+    kernel_dir: "/tmp/thispathdoesnotexist",
+    kernel_cc: "{{.kernel_cc}}",
+    kernel_clang_triple: "{{.kernel_clang_triple}}",
+    srcs: [
+        "Kbuild",
+        "test_module1.c",
+    ],
+
+    // TODO: redact bazel paths for includes
+    // local_include_dirs: ["."],
+    install_group: "IG_modules",
+    build_by_default: true,
+    osx: {
+        enabled: false,
+    },
+}
+
+bob_kernel_module {
+    name: "test_module2",
+    kernel_dir: "/tmp/thispathdoesnotexist",
+    kernel_cc: "{{.kernel_cc}}",
+    kernel_clang_triple: "{{.kernel_clang_triple}}",
+    srcs: [
+        "Kbuild",
+        "test_module2.c",
+    ],
+    extra_symbols: [
+        "test_module1",
+    ],
+
+    // TODO: redact bazel paths for includes
+    // local_include_dirs: ["../module1"],
+
+    install_group: "IG_modules",
+    build_by_default: true,
+    osx: {
+        enabled: false,
+    },
+}

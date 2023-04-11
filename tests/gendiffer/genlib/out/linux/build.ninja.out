@@ -107,7 +107,7 @@ default binary_linked_to_gen_shared
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:156:1
+# Defined: build.bp:92:1
 
 m.binary_linked_to_gen_shared_rename_host.cflags = -I${g.bob.BuildDir}/gen/libblah_shared_rename/include
 m.binary_linked_to_gen_shared_rename_host.conlyflags = 
@@ -145,7 +145,7 @@ default binary_linked_to_gen_shared_rename
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:103:1
+# Defined: build.bp:78:1
 
 m.binary_linked_to_gen_static_host.cflags = -I${g.bob.BuildDir}/gen/libblah_static/include
 m.binary_linked_to_gen_static_host.conlyflags = 
@@ -185,7 +185,7 @@ default binary_linked_to_gen_static
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:170:1
+# Defined: nested/build.bp:83:1
 
 rule m.check_renamed_gen_library_.gen_check_renamed_gen_library
     command = ${tool} --links-to libblah_shared2  ${in} && touch ${_out_}
@@ -195,9 +195,9 @@ rule m.check_renamed_gen_library_.gen_check_renamed_gen_library
 build ${g.bob.BuildDir}/gen/check_renamed_gen_library/success.txt: $
         m.check_renamed_gen_library_.gen_check_renamed_gen_library $
         ${g.bob.BuildDir}/host/executable/binary_linked_to_gen_shared_rename | $
-        ${g.bob.SrcDir}/check_library_link.py
+        ${g.bob.SrcDir}/nested/check_library_link.py
     _out_ = ${g.bob.BuildDir}/gen/check_renamed_gen_library/success.txt
-    tool = ${g.bob.SrcDir}/check_library_link.py
+    tool = ${g.bob.SrcDir}/nested/check_library_link.py
 
 build check_renamed_gen_library: phony $
         ${g.bob.BuildDir}/gen/check_renamed_gen_library/success.txt
@@ -208,7 +208,7 @@ default check_renamed_gen_library
 # Variant: host
 # Type:    bob_generate_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:117:1
+# Defined: nested/build.bp:43:1
 
 rule m.generated_binary_host.gen_generated_binary
     command = gcc -fPIE -o ${_out_} ${in}
@@ -216,7 +216,8 @@ rule m.generated_binary_host.gen_generated_binary
     restat = true
 
 build ${g.bob.BuildDir}/gen/generated_binary/generated_binary: $
-        m.generated_binary_host.gen_generated_binary ${g.bob.SrcDir}/main2.c
+        m.generated_binary_host.gen_generated_binary $
+        ${g.bob.SrcDir}/nested/main2.c
     _out_ = ${g.bob.BuildDir}/gen/generated_binary/generated_binary
 
 build ${g.bob.BuildDir}/host/executable/generated_binary: g.bob.copy $
@@ -272,7 +273,7 @@ build libblah_shared: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_shared.so $
 # Variant: host
 # Type:    bob_generate_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:134:1
+# Defined: nested/build.bp:60:1
 
 rule m.libblah_shared_rename_host.gen_libblah_shared_rename
     command = gcc -fPIC -o ${_out_} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.
@@ -283,11 +284,12 @@ build ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so | $
         ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah.h $
         ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah_feature.h: $
         m.libblah_shared_rename_host.gen_libblah_shared_rename $
-        ${g.bob.SrcDir}/libblah/libblah.c | ${g.bob.SrcDir}/libblah/libblah.h $
-        ${g.bob.SrcDir}/libblah/libblah_feature.h
+        ${g.bob.SrcDir}/nested/libblah/libblah.c | $
+        ${g.bob.SrcDir}/nested/libblah/libblah.h $
+        ${g.bob.SrcDir}/nested/libblah/libblah_feature.h
     _out_ = ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so
     gen_dir = ${g.bob.BuildDir}/gen/libblah_shared_rename
-    module_dir = ${g.bob.SrcDir}
+    module_dir = ${g.bob.SrcDir}/nested
 
 build ${g.bob.BuildDir}/host/shared/libblah_shared2.so: g.bob.copy $
         ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so
@@ -307,7 +309,7 @@ build libblah_shared_rename: phony $
 # Variant: host
 # Type:    bob_generate_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:78:1
+# Defined: nested/build.bp:18:1
 
 rule m.libblah_static_host.gen_libblah_static
     command = gcc -c -o ${gen_dir}/libblah.o ${in}; ar rcs ${_out_} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.
@@ -318,16 +320,42 @@ build ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a | $
         ${g.bob.BuildDir}/gen/libblah_static/include/libblah.h $
         ${g.bob.BuildDir}/gen/libblah_static/include/libblah_feature.h: $
         m.libblah_static_host.gen_libblah_static $
-        ${g.bob.SrcDir}/libblah/libblah.c | ${g.bob.SrcDir}/libblah/libblah.h $
-        ${g.bob.SrcDir}/libblah/libblah_feature.h
+        ${g.bob.SrcDir}/nested/libblah/libblah.c | $
+        ${g.bob.SrcDir}/nested/libblah/libblah.h $
+        ${g.bob.SrcDir}/nested/libblah/libblah_feature.h
     _out_ = ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a
     gen_dir = ${g.bob.BuildDir}/gen/libblah_static
-    module_dir = ${g.bob.SrcDir}
+    module_dir = ${g.bob.SrcDir}/nested
 
 build libblah_static: phony $
         ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a $
         ${g.bob.BuildDir}/gen/libblah_static/include/libblah.h $
         ${g.bob.BuildDir}/gen/libblah_static/include/libblah_feature.h
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  shared_library_input
+# Variant:
+# Type:    bob_generate_source
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:105:1
+
+rule m.shared_library_input_.gen_shared_library_input
+    command = ${tool} --links-to libblah_shared2  ${in} && touch ${_out_}
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/shared_library_input/success.txt: $
+        m.shared_library_input_.gen_shared_library_input $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah.h $
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah_feature.h $
+        | ${g.bob.SrcDir}/check_library_link.py
+    _out_ = ${g.bob.BuildDir}/gen/shared_library_input/success.txt
+    tool = ${g.bob.SrcDir}/check_library_link.py
+
+build shared_library_input: phony $
+        ${g.bob.BuildDir}/gen/shared_library_input/success.txt
+default shared_library_input
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
