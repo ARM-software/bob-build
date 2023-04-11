@@ -6,6 +6,8 @@ Given a `build.bp` and `bplist` it will track the generation of `build.ninja` or
 The main use case of this is to enable targetted testing while modernising certain test targets & also to allow easier testing of Android backend generation
 without a AOSP checkout at hand.
 
+_NOTE_: 'Diff' is required on `PATH` for gendiffer to work.
+
 ## Example
 
 An example is setup under `tests/gendiffer/example`. It will require a dir tree structure of:
