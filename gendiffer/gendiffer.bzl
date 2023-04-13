@@ -4,24 +4,24 @@ def bob_generation_test(name, bob_binary, test_data, bob_timeout_seconds = 60, s
     [
         go_test(
             name = name + "_" + backend,
-            srcs = [Label("//gendiffer:gendiffer.go")],
+            srcs = [Label(":gendiffer.go")],
             deps = [
                 "@io_bazel_rules_go//go/tools/bazel:go_default_library",
             ],
             args = [
                 "-backend=%s" % backend,
                 "-bob_binary_path=$(rootpath %s)" % bob_binary,
-                "-config_file=$(rootpath %s)" % Label("//gendiffer:bob.%s.config") % backend,
-                "-config_json=$(rootpath %s)" % Label("//gendiffer:bob.%s.config.json") % backend,
+                "-config_file=$(rootpath %s)" % Label(":bob.%s.config") % backend,
+                "-config_json=$(rootpath %s)" % Label(":bob.%s.config.json") % backend,
             ],
             size = size,
             data = test_data + [
                 bob_binary,
-                Label("//gendiffer:bob.linux.config"),
-                Label("//gendiffer:bob.linux.config.json"),
-                Label("//gendiffer:bob.android.config"),
-                Label("//gendiffer:bob.android.config.json"),
-                Label("//gendiffer:bob.android.config.d"),
+                Label(":bob.linux.config"),
+                Label(":bob.linux.config.json"),
+                Label(":bob.android.config"),
+                Label(":bob.android.config.json"),
+                Label(":bob.android.config.d"),
             ],
             **kwargs
         )
