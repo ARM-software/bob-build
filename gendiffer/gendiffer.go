@@ -3,16 +3,16 @@ package gendiffer
 import (
 	"bytes"
 	"flag"
-	"io/ioutil"
+	"fmt"
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
 )
 
 var (
@@ -33,29 +33,7 @@ type generationArgs struct {
 	ConfigJson              string
 	BuildWorkspaceDirectory string
 	SrcTestDirectory        string
-}
-
-func produceDiff(t *testing.T, out string, expectedOut string, filename string) {
-	dir, err := os.MkdirTemp(os.TempDir(), "")
-	if err != nil {
-		t.Fatalf("Failed to create temporary directory used for diff outputting.")
-	}
-	os.WriteFile(dir+"/"+filename, []byte(out), 0644)
-	os.WriteFile(dir+"/expected_"+filename, []byte(expectedOut), 0644)
-
-	var stdOut bytes.Buffer
-	var stdErr bytes.Buffer
-	runCmd := exec.Command("diff", "-u", dir+"/"+filename, dir+"/expected_"+filename)
-	runCmd.Stdout = &stdOut
-	runCmd.Stderr = &stdErr
-	diffErr := runCmd.Run()
-	if diffErr != nil && diffErr.Error() != "exit status 1" { // We expect an error code once as there should be a produced diff.
-		t.Fatal(diffErr)
-	}
-
-	t.Log(stdOut.String())
-
-	os.RemoveAll(dir)
+	ShouldUpdate            bool
 }
 
 func setCommonEnv(t *testing.T, args *generationArgs) {
@@ -70,53 +48,145 @@ func setCommonEnv(t *testing.T, args *generationArgs) {
 	os.Setenv("BOB_LINK_PARALLELISM", "1")
 }
 
+func diff(filename string, a []byte, b []byte) ([]byte, error) {
+	tmp, err := os.MkdirTemp(os.TempDir(), "diff-")
+	if err != nil {
+		return nil, err
+	}
+
+	left := path.Join(tmp, "a")
+	right := path.Join(tmp, "b")
+
+	if err := os.Mkdir(left, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	if err := os.WriteFile(path.Join(left, filename), a, 0644); err != nil {
+		return nil, err
+	}
+
+	if err := os.Mkdir(right, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	if err := os.WriteFile(path.Join(right, filename), b, 0644); err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command("diff", "-bur", "a", "b")
+	cmd.Dir = tmp
+	data, err := cmd.Output()
+	if len(data) > 0 {
+		err = nil // ignore error code if we get a diff
+	}
+
+	return data, err
+}
+
+type DiffError struct {
+	filepath string
+	diff     []byte
+}
+
+func (e *DiffError) Error() string {
+	return fmt.Sprintf("Difference in expected output %s:\n%s", e.filepath, e.diff)
+}
+
+func split(data []byte, sep string) ([]byte, []byte) {
+	slices := bytes.SplitN(data, []byte(sep), 2)
+	return slices[0], slices[1]
+}
+
+func redact(args *generationArgs, data []byte) []byte {
+	redacted := []byte("${1}redacted")
+	data = regexp.MustCompile(`(_check_buildbp_updates_)[a-f0-9]{10}`).ReplaceAll(data, redacted)
+	data = regexp.MustCompile(`(--hash )[a-f0-9]{40}`).ReplaceAll(data, redacted)
+	data = regexp.MustCompile(args.BobRootAbsolute).ReplaceAll(data, []byte("redacted"))
+	return data
+}
+
+func checkFileContents(args *generationArgs, filename string, data []byte) error {
+	absolute := path.Join(args.TestDataPathAbsolute, "out", args.BackendType, filename)
+	relative := path.Join(args.TestDataPathRelative, "out", args.BackendType, filename)
+
+	data = redact(args, data)
+
+	if args.ShouldUpdate {
+		os.WriteFile(absolute, data, 0644)
+	}
+
+	actual, err := os.ReadFile(absolute)
+	if err != nil {
+		return err
+	}
+
+	if bytes.Equal(actual, data) {
+		return nil
+	}
+
+	patch, err := diff(filename, actual, data)
+	if err != nil {
+		return err
+	}
+
+	_, suffix := split(patch, "\n")
+	return &DiffError{relative, suffix}
+}
+
+func checkFile(args *generationArgs, filename string) error {
+	absolute := path.Join(args.BobRootAbsolute, filename)
+	data, err := os.ReadFile(absolute)
+	if err != nil {
+		return err
+	}
+	return checkFileContents(args, filename+".out", data)
+}
+
+var generated = map[string]string{
+	"android": "Android.bp",
+	"linux":   "build.ninja",
+}
+
 func singleBobGenerationTest(t *testing.T, args *generationArgs) {
-	shouldUpdate := os.Getenv("UPDATE_SNAPSHOTS") != ""
 	setCommonEnv(t, args)
 
-	outputFile := "build.ninja"
-	outputDir := "out/linux/"
-	if args.BackendType == "android" {
-		outputFile = "Android.bp"
-		outputDir = "out/android/"
-	}
+	expectedExitCode := getFileInt(t, path.Join(args.TestDataPathAbsolute, "out", args.BackendType, "expectedExitCode.int"))
 	var stdOut bytes.Buffer
 	var stdErr bytes.Buffer
 	runCmd := exec.Command(args.BobBinaryPath, "-l", args.BobRootAbsolute+"/bplist", "-b", args.BobRootAbsolute, "-n", args.BobRootAbsolute, "-d", args.BobRootAbsolute+"/ninja.build.d", "-o", args.BobRootAbsolute+"/build.ninja", args.BobRootAbsolute+"/build.bp")
 	runCmd.Stdout = &stdOut
 	runCmd.Stderr = &stdErr
 	err := runCmd.Run()
-	if err != nil {
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		if exitErr.ExitCode() != expectedExitCode {
+			t.Fatalf("Failed executing bob with error: %v, stdout: '%s', stderr: '%s'", exitErr, runCmd.Stdout, runCmd.Stderr)
+		}
+	} else if err != nil {
 		t.Fatalf("Failed executing bob with error: %v, stdout: '%s', stderr: '%s'", err, runCmd.Stdout, runCmd.Stderr)
+	} else if 0 != expectedExitCode {
+		t.Fatalf("Success executing bob when expecting error: %v, stdout: '%s', stderr: '%s'", expectedExitCode, runCmd.Stdout, runCmd.Stderr)
 	}
 
-	// Check Files
-	outFile := getFileContents(t, path.Join(args.BobRootAbsolute, outputFile))
-	outFile = redactWorkspacePath(outFile, args.BobRootAbsolute)
-
-	expectedStdout := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, "expectedStdout.txt"))
-	expectedStderr := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, "expectedStderr.txt"))
-	expectedFile := getFileContents(t, path.Join(args.TestDataPathAbsolute, outputDir, outputFile+".out"))
-
-	if shouldUpdate {
-		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, "expectedStdout.txt"), stdOut.Bytes(), 0644)
-		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, "expectedStderr.txt"), stdErr.Bytes(), 0644)
-		os.WriteFile(path.Join(args.SrcTestDirectory, outputDir, outputFile+".out"), []byte(outFile), 0644)
-	} else {
-		if outFile != expectedFile {
-			produceDiff(t, outFile, expectedFile, outputFile)
-			t.Fatal(outputFile, " mismatch.")
-		}
-		if stdOut.String() != expectedStdout {
-			produceDiff(t, stdOut.String(), expectedStdout, "Stdout.txt")
-			t.Fatal(args.BackendType, " stdout mismatch")
-		}
-		if stdErr.String() != expectedStderr {
-			produceDiff(t, stdErr.String(), expectedStderr, "Stderr.txt")
-			t.Fatal(args.BackendType, " stderr mismatch.")
+	// Check files
+	errs := []error{}
+	if err := checkFileContents(args, "expectedStdout.txt", stdOut.Bytes()); err != nil {
+		errs = append(errs, err)
+	}
+	if err := checkFileContents(args, "expectedStderr.txt", stdErr.Bytes()); err != nil {
+		errs = append(errs, err)
+	}
+	if err := checkFile(args, generated[args.BackendType]); err != nil {
+		if expectedExitCode == 0 || !os.IsNotExist(err) {
+			errs = append(errs, err)
 		}
 	}
-
+	for _, err := range errs {
+		t.Log(err)
+	}
+	if 0 != len(errs) {
+		target := os.Getenv("TEST_TARGET")
+		t.Fatalf("Expected outputs did not match.\n\nRun UPDATE_SNAPSHOTS=true bazel run %s", target)
+	}
 }
 
 func TestFullGeneration(t *testing.T) {
@@ -157,6 +227,7 @@ func TestFullGeneration(t *testing.T) {
 				ConfigJson:              absoluteConfigJson,
 				BuildWorkspaceDirectory: os.Getenv("BUILD_WORKSPACE_DIRECTORY"),
 				SrcTestDirectory:        path.Join(os.Getenv("BUILD_WORKSPACE_DIRECTORY"), path.Dir(relativePathToTestDirectory), name),
+				ShouldUpdate:            os.Getenv("UPDATE_SNAPSHOTS") == "true",
 			})
 		}
 	}
@@ -169,19 +240,16 @@ func TestFullGeneration(t *testing.T) {
 	}
 }
 
-func getFileContents(t *testing.T, filename string) string {
-	// We wrap this call as if no file exists, we can centralize the error.
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		t.Logf("File: ", filename)
-		t.Logf("File not found. \n Please run UPDATE_SNAPSHOTS=true bazel run ", os.Getenv("TEST_TARGET"))
+func getFileInt(t *testing.T, filename string) int {
+	data, err := os.ReadFile(filename)
+	if os.IsNotExist(err) {
+		return 0
+	} else if err != nil {
+		t.Fatalf("Failed to read integer value %s: %v", filename, err)
 	}
-	return string(data)
-}
-
-func redactWorkspacePath(s, wsPath string) string {
-	// We must cleanup a specific Android.bp target that is unique to each generation. It is non-hermetic.
-	re := regexp.MustCompile("genrule {\n.*_check_buildbp_updates[^}]*}")
-	res := re.ReplaceAllString(s, "")
-	return strings.ReplaceAll(res, wsPath, "%WORKSPACEPATH%")
+	value, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		t.Fatalf("Failed to convert integer value %s: %v", filename, err)
+	}
+	return value
 }

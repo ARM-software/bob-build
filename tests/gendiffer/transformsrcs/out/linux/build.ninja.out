@@ -10,17 +10,17 @@
 #
 ninja_required_version = 1.7.0
 
-g.bob.BuildDir = %WORKSPACEPATH%
+g.bob.BuildDir = redacted
 
-g.bob.SrcDir = %WORKSPACEPATH%
+g.bob.SrcDir = redacted
 
-g.bootstrap.BinDir = %WORKSPACEPATH%/.bootstrap/bin
+g.bootstrap.BinDir = redacted/.bootstrap/bin
 
-g.bootstrap.buildDir = %WORKSPACEPATH%
+g.bootstrap.buildDir = redacted
 
-g.bootstrap.ninjaBuildDir = %WORKSPACEPATH%
+g.bootstrap.ninjaBuildDir = redacted
 
-g.bootstrap.srcDir = %WORKSPACEPATH%
+g.bootstrap.srcDir = redacted
 
 # Limit the parallelization of linking, which is memory intensive
 pool g.bob.link
@@ -450,7 +450,7 @@ default validate_transform_source_nested_output
 # Factory:   github.com/google/blueprint/bootstrap.Main.func4
 
 rule s.bootstrap.bigbpDocs
-    command = ${g.bootstrap.BinDir}/minibp -p -l %WORKSPACEPATH%/bplist -b ${g.bootstrap.buildDir} --docs ${out} ${g.bootstrap.srcDir}/build.bp
+    command = ${g.bootstrap.BinDir}/minibp -p -l redacted/bplist -b ${g.bootstrap.buildDir} --docs ${out} ${g.bootstrap.srcDir}/build.bp
     description = minibp docs ${out}
 
 build ${g.bootstrap.buildDir}/bin/minibp: g.bootstrap.cp $

@@ -21,17 +21,23 @@ An example is setup under `tests/gendiffer/example`. It will require a dir tree 
 │       └── Android.bp.in
 └── out
     ├── linux
-    │   ├── build.ninja
+    │   ├── build.ninja.out
     │   ├── expectedStdout.txt
     │   └── expectedStderr.txt
     └── android
-        ├── bob_warnings.csv
+        ├── Android.bp.out
         ├── expectedStdout.txt
         └── expectedStderr.txt
 ```
 
 Anything inside of the `out` folder can be automatically generated for you. `WORKSPACE` is an empty file that is used as the marker
 of the root of a test directory. See the `BUILD.bazel` file setup for more information.
+
+### Expected Failures
+
+Adding a `expectedExitCode.int` into the output folder will check that `bob` returns that exit code.
+
+In this situation the generated build file will not be generated so there is no need to have a Ninja or Android blueprint file.
 
 ## BUILD.bazel
 

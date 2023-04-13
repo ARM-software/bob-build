@@ -1,5 +1,11 @@
 
-
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
 
 genrule_bob {
     name: "test_module1",
@@ -11,7 +17,7 @@ genrule_bob {
     implicit_outs: ["Module.symvers"],
     tools: ["scripts/kmod_build.py"],
     depfile: true,
-    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} --common-root %WORKSPACEPATH% --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
+    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} --common-root redacted --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
     install_path: "lib/modules",
 }
 
@@ -26,7 +32,7 @@ genrule_bob {
     implicit_outs: ["Module.symvers"],
     tools: ["scripts/kmod_build.py"],
     depfile: true,
-    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} $$(dirname ${test_module1_out})/Module.symvers --common-root %WORKSPACEPATH% --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
+    cmd: "${tool} -o ${out} --depfile ${depfile} --sources ${in} $$(dirname ${test_module1_out})/Module.symvers --common-root redacted --kernel /tmp/thispathdoesnotexist --module-dir ${gen_dir}/. --make-command prebuilts/build-tools/linux-x86/bin/make --extra-cflags=''",
     install_path: "lib/modules",
 }
 
