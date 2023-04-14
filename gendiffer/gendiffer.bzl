@@ -1,6 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
-def bob_generation_test(name, bob_binary, test_data, bob_timeout_seconds = 60, size = "small", **kwargs):
+def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
     [
         go_test(
             name = name + "_" + backend,
