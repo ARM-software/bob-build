@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"os"
 	"os/exec"
 	"path"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 )
 
 var (
@@ -73,7 +74,7 @@ func diff(filename string, a []byte, b []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("diff", "-bur", "a", "b")
+	cmd := exec.Command("diff", "-bur", "--color=always", "a", "b")
 	cmd.Dir = tmp
 	data, err := cmd.Output()
 	if len(data) > 0 {
