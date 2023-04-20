@@ -23,6 +23,7 @@ def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
                 Label("//gendiffer:bob.android.config.json"),
                 Label("//gendiffer:bob.android.config.d"),
             ],
+            testonly = False,
             **kwargs
         )
         for backend in ["android", "linux"]

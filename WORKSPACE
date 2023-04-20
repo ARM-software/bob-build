@@ -57,6 +57,13 @@ py_repositories()
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")  # keep
 
+http_archive(
+    name = "rules_multirun",
+    sha256 = "9ced12fb88f793c2f0a8c19f498485c4a95c22c91bb51fc4ec6812d41fc3331d",
+    strip_prefix = "rules_multirun-0.6.0",
+    url = "https://github.com/keith/rules_multirun/archive/refs/tags/0.6.0.tar.gz",
+)
+
 # keep
 go_repository(
     name = "com_github_google_blueprint",
