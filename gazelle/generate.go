@@ -15,6 +15,10 @@ import (
 	bzl "github.com/bazelbuild/buildtools/build"
 )
 
+const (
+	ruleSelectsBzl string = "@bazel_skylib//lib:selects.bzl"
+)
+
 // GenerateRules extracts build metadata from source files in a directory.
 // GenerateRules is called in each directory where an update is requested
 // in depth-first post-order.
@@ -32,6 +36,34 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 	result := language.GenerateResult{}
 	rel := filepath.Clean(args.Rel)
 	rules := generateConfigs(e.configs, rel)
+
+	// FIXME: Gazelle does not support load statements when macros are packaged
+	// into a struct.
+	// Temporarily add load statement for `selects.config_setting_group`
+	// when it's generated.
+	for _, r := range rules {
+		if strings.HasPrefix(r.Kind(), "selects.") {
+			if args.File != nil {
+				var load *rule.Load
+				for _, l := range args.File.Loads {
+					if l.Name() == ruleSelectsBzl {
+						load = l
+						load.Add("selects")
+						break
+					}
+				}
+
+				// Add new `load` statement
+				if load == nil {
+					load = rule.NewLoad(ruleSelectsBzl)
+					load.Add("selects")
+					load.Insert(args.File, len(args.File.Loads))
+				}
+			}
+
+			break
+		}
+	}
 
 	if modules, ok := e.registry.retrieveByPath(rel); ok {
 		// To properly test generation of multiple modules
