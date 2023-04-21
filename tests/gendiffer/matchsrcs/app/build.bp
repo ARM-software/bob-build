@@ -1,0 +1,49 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_generate_source {
+    name: "match_source_gen",
+    srcs: [
+        "main.c",
+        "function_def.txt",
+    ],
+    out: ["gen_main.c"],
+    cmd: "cat {{match_srcs \"function_def.txt\"}} {{match_srcs \"main.c\"}} > ${out}",
+}
+
+bob_binary {
+    name: "match_source_bin",
+    srcs: [
+        "source.c",
+        "test_cpp.cpp",
+        "cflags.h",
+        "conlyflags.h",
+        "cxxflags.h",
+    ],
+    generated_sources: ["match_source_gen"],
+    not_osx: {
+        srcs: ["exports.txt"],
+        ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
+    },
+    osx: {
+        srcs: ["order_file.txt"],
+        ldflags: ["-Wl,-order_file,{{match_srcs \"*.txt\"}}"],
+    },
+    cflags: ["-include {{match_srcs \"cflags.h\"}}"],
+    conlyflags: ["-include {{match_srcs \"conlyflags.h\"}}"],
+    cxxflags: ["-include {{match_srcs \"cxxflags.h\"}}"],
+}
