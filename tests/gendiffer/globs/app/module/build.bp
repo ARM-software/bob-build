@@ -16,42 +16,35 @@
  */
 
 bob_glob {
-    name: "src_glob",
+    name: "nested_src_glob",
     srcs: ["**/*.c"],
-    exclude: ["module/**/*"],
 }
 
 bob_binary {
-    name: "glob_test",
-    srcs: [":src_glob"],
-}
-
-bob_binary {
-    name: "glob_test_nested",
+    name: "nested_glob_test",
     srcs: [":nested_src_glob"],
 }
 
 bob_binary {
-    name: "glob_test_exclude",
+    name: "nested_glob_test_exclude",
     srcs: ["src/**/*.cpp"],
     exclude_srcs: ["src/**/exclude_*.cpp"],
 }
 
 bob_glob {
-    name: "src_glob_exclude",
+    name: "nested_src_glob_exclude",
     srcs: ["src/**/*.cpp"],
     exclude: [
         "src/**/main.cpp",
         "**/exclude_this_file.cpp",
         "src/inside/a/exclude_this_too.cpp",
-        "module/**/*",
     ],
 }
 
 bob_binary {
-    name: "test_exclude_srcs",
+    name: "nested_test_exclude_srcs",
     srcs: [
         "src/inside/a/namespace/main.cpp",
-        ":src_glob_exclude",
+        ":nested_src_glob_exclude",
     ],
 }
