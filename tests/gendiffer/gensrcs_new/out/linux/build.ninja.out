@@ -58,7 +58,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:227:1
+# Defined: build.bp:185:1
 
 rule m.exclude_support_.gen_exclude_support
     command = touch ${_out_}
@@ -79,7 +79,7 @@ build exclude_support: phony ${g.bob.BuildDir}/gen/exclude_support/input1.out $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:149:1
+# Defined: nested/build.bp:44:1
 
 rule m.gen_source_depfile_new_.gen_gen_source_depfile_new
     command = ${tool_1} -o ${_out_} -d ${depfile} --in ${in}
@@ -88,11 +88,12 @@ rule m.gen_source_depfile_new_.gen_gen_source_depfile_new
 
 build ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt: $
         m.gen_source_depfile_new_.gen_gen_source_depfile_new $
-        ${g.bob.SrcDir}/depgen1.in ${g.bob.SrcDir}/depgen2.in | $
-        ${g.bob.SrcDir}/gen_with_dep.py ${g.bob.SrcDir}/gen_with_dep.py
+        ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py
     depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_new/gen_source_depfile_new.d
     _out_ = ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt
-    tool_1 = ${g.bob.SrcDir}/gen_with_dep.py
+    tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py
 
 build gen_source_depfile_new: phony $
         ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt
@@ -102,7 +103,7 @@ build gen_source_depfile_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:161:1
+# Defined: nested/build.bp:56:1
 
 rule m.gen_source_depfile_with_implicit_outs_new_.gen_gen_source_depfile_with_implicit_outs_new
     command = ${tool_1} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} --in ${in}
@@ -117,13 +118,14 @@ build $
         ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt $
         : $
         m.gen_source_depfile_with_implicit_outs_new_.gen_gen_source_depfile_with_implicit_outs_new $
-        ${g.bob.SrcDir}/depgen1.in ${g.bob.SrcDir}/depgen2.in | $
-        ${g.bob.SrcDir}/gen_with_dep.py ${g.bob.SrcDir}/gen_with_dep.py
+        ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py
     depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/gen_source_depfile_with_implicit_outs_new.d
     deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/out.h
     gen_dir = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new
-    tool_1 = ${g.bob.SrcDir}/gen_with_dep.py
+    tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py
 
 build gen_source_depfile_with_implicit_outs_new: phony $
         ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt $
@@ -389,7 +391,7 @@ build generate_source_single_new: phony $
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:182:1
+# Defined: build.bp:155:1
 
 m.host_and_target_supported_binary_new_host.cflags = 
 m.host_and_target_supported_binary_new_host.conlyflags = 
@@ -420,7 +422,7 @@ default host_and_target_supported_binary_new__host
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:182:1
+# Defined: build.bp:155:1
 
 m.host_and_target_supported_binary_new_target.cflags = 
 m.host_and_target_supported_binary_new_target.conlyflags = 
@@ -453,7 +455,7 @@ default host_and_target_supported_binary_new__target
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:215:1
+# Defined: build.bp:173:1
 
 rule m.multi_src_tag_.gen_multi_src_tag
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in ${generate_source_single_new_out}
@@ -477,7 +479,7 @@ build multi_src_tag: phony ${g.bob.BuildDir}/gen/multi_src_tag/deps.cpp
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:200:1
+# Defined: nested/build.bp:29:1
 
 rule m.multi_tool_file_.gen_multi_tool_file
     command = ${tool_1} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} --in ${tool_2} ${in}
@@ -488,15 +490,18 @@ build ${g.bob.BuildDir}/gen/multi_tool_file/out.h: g.bob.touch $
         ${g.bob.BuildDir}/gen/multi_tool_file/output.txt
 
 build ${g.bob.BuildDir}/gen/multi_tool_file/output.txt: $
-        m.multi_tool_file_.gen_multi_tool_file ${g.bob.SrcDir}/depgen2.in | $
-        ${g.bob.SrcDir}/gen_with_dep.py ${g.bob.SrcDir}/depgen1.in $
-        ${g.bob.SrcDir}/gen_with_dep.py ${g.bob.SrcDir}/depgen1.in
+        m.multi_tool_file_.gen_multi_tool_file $
+        ${g.bob.SrcDir}/nested/depgen2.in | $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py $
+        ${g.bob.SrcDir}/nested/depgen1.in $
+        ${g.bob.SrcDir}/nested/gen_with_dep.py $
+        ${g.bob.SrcDir}/nested/depgen1.in
     depfile = ${g.bob.BuildDir}/gen/multi_tool_file/multi_tool_file.d
     deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/multi_tool_file/output.txt ${g.bob.BuildDir}/gen/multi_tool_file/out.h
     gen_dir = ${g.bob.BuildDir}/gen/multi_tool_file
-    tool_1 = ${g.bob.SrcDir}/gen_with_dep.py
-    tool_2 = ${g.bob.SrcDir}/depgen1.in
+    tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py
+    tool_2 = ${g.bob.SrcDir}/nested/depgen1.in
 
 build multi_tool_file: phony ${g.bob.BuildDir}/gen/multi_tool_file/output.txt $
         ${g.bob.BuildDir}/gen/multi_tool_file/out.h
@@ -506,7 +511,7 @@ build multi_tool_file: phony ${g.bob.BuildDir}/gen/multi_tool_file/output.txt $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:193:1
+# Defined: build.bp:166:1
 
 rule m.use_target_specific_library_new_.gen_use_target_specific_library_new
     command = test $$(basename ${host_and_target_supported_binary_new_out}) = host_binary_new && cp ${host_and_target_supported_binary_new_out} ${_out_}
@@ -527,7 +532,7 @@ build use_target_specific_library_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:176:1
+# Defined: build.bp:149:1
 
 rule m.validate_install_generate_sources_new_.gen_validate_install_generate_sources_new
     command = touch ${_out_}

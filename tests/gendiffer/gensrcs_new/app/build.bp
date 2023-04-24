@@ -147,33 +147,6 @@ bob_binary {
 }
 
 bob_genrule {
-    name: "gen_source_depfile_new",
-    srcs: [
-        "depgen1.in",
-        "depgen2.in",
-    ],
-    out: ["output.txt"],
-    depfile: true,
-    tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
-}
-
-bob_genrule {
-    name: "gen_source_depfile_with_implicit_outs_new",
-    srcs: [
-        "depgen1.in",
-        "depgen2.in",
-    ],
-    out: [
-        "output.txt",
-        "out.h",
-    ],
-    depfile: true,
-    tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
-}
-
-bob_genrule {
     name: "validate_install_generate_sources_new",
     out: ["validate_install_generate_sources.txt"],
     cmd: "touch $(out)",
@@ -195,21 +168,6 @@ bob_genrule {
     out: ["libout.a"],
     tools: ["host_and_target_supported_binary_new:host"],
     cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
-}
-
-bob_genrule {
-    name: "multi_tool_file",
-    srcs: ["depgen2.in"],
-    out: [
-        "output.txt",
-        "out.h",
-    ],
-    tool_files: [
-        "gen_with_dep.py",
-        "depgen1.in",
-    ],
-    depfile: true,
-    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
 }
 
 bob_genrule {
