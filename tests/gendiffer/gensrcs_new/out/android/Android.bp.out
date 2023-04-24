@@ -28,24 +28,24 @@ genrule {
 genrule {
     name: "gen_source_depfile_new",
     srcs: [
-        "depgen1.in",
-        "depgen2.in",
+        "nested/depgen1.in",
+        "nested/depgen2.in",
     ],
     cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
     depfile: true,
-    tool_files: ["gen_with_dep.py"],
+    tool_files: ["nested/gen_with_dep.py"],
     out: ["output.txt"],
 }
 
 genrule {
     name: "gen_source_depfile_with_implicit_outs_new",
     srcs: [
-        "depgen1.in",
-        "depgen2.in",
+        "nested/depgen1.in",
+        "nested/depgen2.in",
     ],
     cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
     depfile: true,
-    tool_files: ["gen_with_dep.py"],
+    tool_files: ["nested/gen_with_dep.py"],
     out: [
         "output.txt",
         "out.h",
@@ -180,12 +180,12 @@ genrule {
 
 genrule {
     name: "multi_tool_file",
-    srcs: ["depgen2.in"],
-    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
+    srcs: ["nested/depgen2.in"],
+    cmd: "$(location nested/gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location nested/depgen1.in) $(in)",
     depfile: true,
     tool_files: [
-        "gen_with_dep.py",
-        "depgen1.in",
+        "nested/gen_with_dep.py",
+        "nested/depgen1.in",
     ],
     out: [
         "output.txt",
