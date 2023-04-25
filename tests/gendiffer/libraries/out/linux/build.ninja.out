@@ -88,7 +88,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:474:1
+# Defined: build.bp:469:1
 
 m.bob_test_local_consumer_target.cflags = -Wconversion -Werror -isystem ${g.bob.SrcDir}/public
 m.bob_test_local_consumer_target.conlyflags = 
@@ -122,7 +122,7 @@ default bob_test_local_consumer
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:464:1
+# Defined: build.bp:459:1
 
 m.bob_test_local_libconsumer_target.cflags = -Wconversion -Werror -isystem ${g.bob.SrcDir}/public
 m.bob_test_local_libconsumer_target.conlyflags = 
@@ -152,7 +152,7 @@ build bob_test_local_libconsumer: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:445:1
+# Defined: build.bp:440:1
 
 m.bob_test_local_libpublic_target.cflags = -Wconversion -I${g.bob.SrcDir}/include -I${g.bob.SrcDir}/public
 m.bob_test_local_libpublic_target.conlyflags = 
@@ -179,7 +179,7 @@ build bob_test_local_libpublic: phony $
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:507:1
+# Defined: build.bp:502:1
 
 m.bob_test_target_specific_link_host.cflags = 
 m.bob_test_target_specific_link_host.conlyflags = 
@@ -212,7 +212,7 @@ default bob_test_target_specific_link__host
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:507:1
+# Defined: build.bp:502:1
 
 m.bob_test_target_specific_link_target.cflags = 
 m.bob_test_target_specific_link_target.conlyflags = 
@@ -279,7 +279,7 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 # Variant: host
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:419:1
+# Defined: build.bp:414:1
 
 build ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a: g.bob.static_library $
         || $
@@ -294,7 +294,7 @@ default lib_dep.a
 # Variant: host
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:411:1
+# Defined: build.bp:406:1
 
 m.lib_forward_defines_host.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE
 m.lib_forward_defines_host.cxxflags = 
@@ -335,7 +335,7 @@ default lib_transitive_define
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:484:1
+# Defined: build.bp:479:1
 
 m.libonly_works_on_target_host.cflags = -DFAIL=1
 m.libonly_works_on_target_host.conlyflags = 
@@ -362,7 +362,7 @@ build libonly_works_on_target__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:484:1
+# Defined: build.bp:479:1
 
 m.libonly_works_on_target_target.cflags = -DFAIL=0
 m.libonly_works_on_target_target.conlyflags = 
@@ -660,7 +660,7 @@ build libstripped_library: phony $
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:497:1
+# Defined: build.bp:492:1
 
 m.libuses_target_specific_link_host.cflags = 
 m.libuses_target_specific_link_host.conlyflags = 
@@ -686,7 +686,7 @@ build libuses_target_specific_link__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:497:1
+# Defined: build.bp:492:1
 
 m.libuses_target_specific_link_target.cflags = 
 m.libuses_target_specific_link_target.conlyflags = 
@@ -1293,13 +1293,14 @@ default sl_main_whole
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:436:1
+# Defined: build.bp:431:1
 
 m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_dep_host.cxxflags = 
 
-build ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/src/main.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/src/main.cpp
+build $
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/nested/src/main.cpp.o $
+        : g.bob.cxx ${g.bob.SrcDir}/nested/src/main.cpp
     build_wrapper = 
     cflags = ${m.strict_lib_binary_with_dep_host.cflags}
     cxxcompiler = g++
@@ -1307,7 +1308,7 @@ build ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/src/main.cpp.o $
 
 build ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_dep: $
         g.bob.executable $
-        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/src/main.cpp.o $
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/nested/src/main.cpp.o $
         | ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a $
         ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
     build_wrapper = 
@@ -1327,14 +1328,14 @@ default strict_lib_binary_with_dep
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:427:1
+# Defined: build.bp:422:1
 
 m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_forward_define_host.cxxflags = 
 
 build $
-        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_forward_define/src/main.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/src/main.cpp
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_forward_define/nested/src/main.cpp.o $
+        : g.bob.cxx ${g.bob.SrcDir}/nested/src/main.cpp
     build_wrapper = 
     cflags = ${m.strict_lib_binary_with_forward_define_host.cflags}
     cxxcompiler = g++
@@ -1342,7 +1343,7 @@ build $
 
 build ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_forward_define: $
         g.bob.executable $
-        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_forward_define/src/main.cpp.o $
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_forward_define/nested/src/main.cpp.o $
         | $
         ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
     build_wrapper = 
@@ -1368,8 +1369,8 @@ m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_transitive_define_host.cxxflags = 
 
 build $
-        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_transitive_define/src/main.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/src/main.cpp
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_transitive_define/nested/src/main.cpp.o $
+        : g.bob.cxx ${g.bob.SrcDir}/nested/src/main.cpp
     build_wrapper = 
     cflags = ${m.strict_lib_binary_with_transitive_define_host.cflags}
     cxxcompiler = g++
@@ -1378,7 +1379,7 @@ build $
 build $
         ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_transitive_define $
         : g.bob.executable $
-        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_transitive_define/src/main.cpp.o $
+        ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_transitive_define/nested/src/main.cpp.o $
         | ${g.bob.BuildDir}/host/static/lib_transitive_define.a $
         ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
     build_wrapper = 
