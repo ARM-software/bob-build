@@ -403,11 +403,6 @@ bob_binary {
     build_by_default: true,
 }
 
-bob_filegroup {
-    name: "static_bin_srcs",
-    srcs: ["src/main.cpp"],
-}
-
 bob_library {
     name: "lib_forward_defines",
     srcs: ["src/libs/lib.cpp"],

@@ -73,28 +73,10 @@ bob_transform_source {
     generated_sources: ["transform_source"],
 }
 
-bob_filegroup {
-    name: "filegroup",
-    srcs: ["src/dummy01.c"],
-}
-
 bob_glob {
     name: "glob",
     srcs: ["**/main.c"],
     allow_empty: false,
-}
-
-bob_filegroup {
-    name: "forward_filegroup",
-    srcs: [":filegroup"],
-}
-
-bob_filegroup {
-    name: "all_filegroup",
-    srcs: [
-        ":glob",
-        ":forward_filegroup",
-    ],
 }
 
 bob_static_library {

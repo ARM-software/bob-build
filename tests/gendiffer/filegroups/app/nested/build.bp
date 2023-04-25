@@ -1,0 +1,17 @@
+bob_filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+}
+
+bob_filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+}
+
+bob_filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":glob",
+        ":forward_filegroup",
+    ],
+}

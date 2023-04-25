@@ -1,0 +1,4 @@
+bob_filegroup {
+    name: "static_bin_srcs",
+    srcs: ["src/main.cpp"],
+}

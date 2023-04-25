@@ -1,7 +1,10 @@
 
 genrule {
     name: "_check_buildbp_updates_redacted",
-    srcs: ["build.bp"],
+    srcs: [
+        "build.bp",
+        "nested/build.bp",
+    ],
     out: ["androidbp_up_to_date"],
     tool_files: ["scripts/verify_hash.py"],
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
@@ -249,12 +252,12 @@ cc_binary {
 
 filegroup {
     name: "static_bin_srcs",
-    srcs: ["src/main.cpp"],
+    srcs: ["nested/src/main.cpp"],
 }
 
 cc_binary_host {
     name: "strict_lib_binary_with_dep",
-    srcs: ["src/main.cpp"],
+    srcs: ["nested/src/main.cpp"],
     cflags: ["-DFORWARDED_DEFINE"],
     static_libs: [
         "lib_dep",
@@ -264,14 +267,14 @@ cc_binary_host {
 
 cc_binary_host {
     name: "strict_lib_binary_with_forward_define",
-    srcs: ["src/main.cpp"],
+    srcs: ["nested/src/main.cpp"],
     cflags: ["-DFORWARDED_DEFINE"],
     static_libs: ["lib_forward_defines"],
 }
 
 cc_binary_host {
     name: "strict_lib_binary_with_transitive_define",
-    srcs: ["src/main.cpp"],
+    srcs: ["nested/src/main.cpp"],
     cflags: ["-DFORWARDED_DEFINE"],
     static_libs: [
         "lib_transitive_define",

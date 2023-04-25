@@ -1,7 +1,10 @@
 
 genrule {
     name: "_check_buildbp_updates_redacted",
-    srcs: ["build.bp"],
+    srcs: [
+        "build.bp",
+        "nested/build.bp",
+    ],
     out: ["androidbp_up_to_date"],
     tool_files: ["scripts/verify_hash.py"],
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
@@ -19,7 +22,7 @@ cc_binary {
     name: "bin",
     srcs: [
         "main.c",
-        "src/dummy01.c",
+        "nested/src/dummy01.c",
     ],
     generated_sources: [
         "nested_generated_source",
@@ -30,7 +33,7 @@ cc_binary {
 
 filegroup {
     name: "filegroup",
-    srcs: ["src/dummy01.c"],
+    srcs: ["nested/src/dummy01.c"],
 }
 
 filegroup {
