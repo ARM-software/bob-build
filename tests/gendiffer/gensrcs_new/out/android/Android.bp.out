@@ -158,13 +158,13 @@ genrule {
 cc_binary_host {
     name: "host_and_target_supported_binary_new__host",
     stem: "host_binary_new",
-    srcs: ["simple_main.c"],
+    srcs: ["nested/simple_main.c"],
 }
 
 cc_binary {
     name: "host_and_target_supported_binary_new__target",
     stem: "host_and_target_supported_binary_new",
-    srcs: ["simple_main.c"],
+    srcs: ["nested/simple_main.c"],
 }
 
 genrule {

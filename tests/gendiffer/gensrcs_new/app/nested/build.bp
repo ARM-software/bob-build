@@ -26,6 +26,24 @@ bob_genrule {
     cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
 }
 
+bob_binary {
+    name: "host_and_target_supported_binary_new",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    srcs: ["simple_main.c"],
+    host: {
+        out: "host_binary_new",
+    },
+}
+
+bob_genrule {
+    name: "use_target_specific_library_new",
+    out: ["libout.a"],
+    tools: ["host_and_target_supported_binary_new:host"],
+    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+}
+
 bob_genrule {
     name: "multi_tool_file",
     srcs: ["depgen2.in"],
