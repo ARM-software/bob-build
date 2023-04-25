@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"sync"
 
 	bob "github.com/ARM-software/bob-build/core"
@@ -20,14 +21,16 @@ const (
 type valueHandler func(feature string, attribute string, v interface{})
 
 type bobParser struct {
-	rootPath string
-	config   *bob.BobConfig
+	rootPath     string
+	BobIgnoreDir []string
+	config       *bob.BobConfig
 }
 
-func newBobParser(rootPath string, config *bob.BobConfig) *bobParser {
+func newBobParser(rootPath string, BobIgnoreDir []string, config *bob.BobConfig) *bobParser {
 	return &bobParser{
-		rootPath: rootPath,
-		config:   config,
+		rootPath:     rootPath,
+		BobIgnoreDir: BobIgnoreDir,
+		config:       config,
 	}
 }
 
@@ -65,7 +68,7 @@ func (p *bobParser) parse() []*Module {
 		modules = append(modules, m)
 	}).Parallel()
 
-	bpToParse, err := findBpFiles(p.rootPath)
+	bpToParse, err := findBpFiles(p.rootPath, p.BobIgnoreDir)
 	if err != nil {
 		log.Fatalf("Creating bplist failed: %v\n", err)
 	}
@@ -91,9 +94,16 @@ func (p *bobParser) parse() []*Module {
 	return modules
 }
 
-func findBpFiles(root string) ([]string, error) {
+func findBpFiles(root string, ignoreDirs []string) ([]string, error) {
 	var files []string
+
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		for _, ignoreDir := range ignoreDirs {
+			if strings.TrimPrefix(path, root+"/") == ignoreDir {
+				return filepath.SkipDir
+			}
+		}
+
 		if d.IsDir() {
 			return nil
 		}

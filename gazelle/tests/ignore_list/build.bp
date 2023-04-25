@@ -1,0 +1,6 @@
+// Main build file
+
+bob_filegroup {
+    name: "should_include",
+    srcs: ["*.c"],
+}

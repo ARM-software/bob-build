@@ -1,0 +1,4 @@
+bob_filegroup {
+    name: "should_exclude",
+    srcs: ["*.c"],
+}

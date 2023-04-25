@@ -8,8 +8,9 @@ import (
 // The structure is designed to inherit parent configuration to propagate settings on a tree level.
 type Config struct {
 	parent                  *Config
-	RepositoryRootPath      string // Absolute path to the root of the workspace.
-	BobWorkspaceRootRelPath string // Relative module path to Bob workspace root.
+	RepositoryRootPath      string   // Absolute path to the root of the workspace.
+	BobWorkspaceRootRelPath string   // Relative module path to Bob workspace root.
+	BobIgnoreDir            []string // Relative path to ignore list from workspace root
 }
 
 func (c *Config) NewChild() *Config {
@@ -25,6 +26,7 @@ func NewRootConfig(repositoryRootPath string) *Config {
 		parent:                  nil,
 		RepositoryRootPath:      repositoryRootPath,
 		BobWorkspaceRootRelPath: "",
+		BobIgnoreDir:            nil,
 	}
 }
 

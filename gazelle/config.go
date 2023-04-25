@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	BobRootDirective = "bob_root" // Directive used to mark the root module of the Bob workspace
+	BobRootDirective      = "bob_root" // Directive used to mark the root module of the Bob workspace
+	BobIgnoreDirDirective = "bob_ignore"
 )
 
 // KnownDirectives returns a list of directive keys that this Configurer can
@@ -22,6 +23,7 @@ const (
 func (e *BobExtension) KnownDirectives() []string {
 	return []string{
 		BobRootDirective,
+		BobIgnoreDirDirective,
 	}
 }
 
@@ -62,6 +64,8 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			case BobRootDirective:
 				pc.BobWorkspaceRootRelPath = rel
 				isBobRoot = true
+			case BobIgnoreDirDirective:
+				pc.BobIgnoreDir = append(pc.BobIgnoreDir, d.Value)
 			}
 		}
 	}
@@ -86,7 +90,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
-		bobParser := newBobParser(c.RepoRoot, bobConfig)
+		bobParser := newBobParser(c.RepoRoot, pc.BobIgnoreDir, bobConfig)
 
 		modules := bobParser.parse()
 
