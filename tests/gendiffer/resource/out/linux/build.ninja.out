@@ -64,6 +64,15 @@ build bob_test_resources: phony ${g.bob.BuildDir}/install/testcases/y/main.c
 default bob_test_resources
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  bob_tests
+# Variant:
+# Type:    bob_alias
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:62:1
+
+build bob_tests: phony bob_test_resources bob_test_resource_in_bin
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
 # Factory:   github.com/google/blueprint/bootstrap.Main.func4
 

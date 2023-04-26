@@ -102,3 +102,17 @@ bob_binary {
         "genrule",
     ],
 }
+
+bob_alias {
+    name: "bob_tests",
+    srcs: [
+        "genrule",
+        "generated_source",
+        "nested_generated_source",
+        "transform_source",
+        "nested_transform_source",
+        "glob",
+        "lib",
+        "bin",
+    ],
+}

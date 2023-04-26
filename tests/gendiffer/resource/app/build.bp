@@ -58,3 +58,11 @@ bob_resource {
     relative_install_path: "bob_tests",
     build_by_default: true,
 }
+
+bob_alias {
+    name: "bob_tests",
+    srcs: [
+        "bob_test_resources",
+        "bob_test_resource_in_bin",
+    ],
+}
