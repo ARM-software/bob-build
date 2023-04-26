@@ -154,6 +154,16 @@ build bin: phony ${g.bob.BuildDir}/target/executable/bin
 default bin
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  bob_tests
+# Variant:
+# Type:    bob_alias
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:106:1
+
+build bob_tests: phony genrule generated_source nested_generated_source $
+        transform_source nested_transform_source glob lib bin
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generated_source
 # Variant:
 # Type:    bob_generate_source

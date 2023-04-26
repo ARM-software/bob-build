@@ -31,6 +31,18 @@ cc_binary {
     ],
 }
 
+phony {
+    name: "bob_tests",
+    required: [
+        "generated_source",
+        "nested_generated_source",
+        "transform_source",
+        "nested_transform_source",
+        "glob",
+        "bin",
+    ],
+}
+
 filegroup {
     name: "filegroup",
     srcs: ["nested/src/dummy01.c"],

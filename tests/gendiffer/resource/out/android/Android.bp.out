@@ -29,3 +29,12 @@ prebuilt_data_bob {
     installable: true,
 }
 
+phony {
+    name: "bob_tests",
+    required: [
+        "bob_test_resources__main.c",
+        "bob_test_resource_in_bin__bob_resource_test_script.sh",
+        "bob_test_resource_in_bin__bob_resource_test_data.json",
+    ],
+}
+
