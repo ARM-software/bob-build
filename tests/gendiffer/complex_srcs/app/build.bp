@@ -1,0 +1,30 @@
+builder_script = "tools_builder.sh"
+
+bob_generate_binary {
+    name: "special-tool",
+    install_group: "IG_testcases",
+    cmd: "env CC='${cc}' CFLAGS='${cflags} ${conlyflags}' CXX='${cxx}' CXXFLAGS='${cxxflags}' " +
+        "BUILD_WRAPPER='${build_wrapper}' " +
+        "${tool} ${args} && cp ${gen_dir}/tools/bin ${gen_dir}",
+    args: [
+        "${gen_dir}",
+        "${src_dir}/tools",
+        "bin",
+    ],
+    tools: [builder_script],
+    srcs: [
+        "CHANGES.md",
+    ],
+    target: "host",
+    build_by_default: false,
+    enabled: true,
+    console: true,
+}
+
+bob_defaults {
+    name: "srcs_scope",
+    srcs: [
+        "source0.cpp",
+        "source_glob_*.cpp",
+    ],
+}
