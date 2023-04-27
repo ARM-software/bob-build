@@ -1,0 +1,170 @@
+test_config_module_out = [
+    "include/config/test-config.h",
+    "include/config/config.h",
+]
+
+write_config_cmd = "bash -ec 'mkdir -p $$(dirname ${out}); ${tool} -o ${out} {{match_srcs \"*.in\"}} $$(cat {{match_srcs \"*.in\"}}) ${args}'"
+write_config = "config_tool.py"
+wirte_config_common_args = [
+    "SOME_ARG1=foo",
+    "SOME_ARG2=",
+]
+
+bob_generate_source {
+    name: "test_config_h",
+    srcs: [
+        "config1.h.in",
+    ],
+    out: ["include/config.h"],
+    tools: [write_config],
+    cmd: write_config_cmd,
+    args: wirte_config_common_args,
+}
+
+bob_generate_source {
+    name: "config_h",
+    srcs: [
+        "config2.h.in",
+    ],
+    out: ["include/config.h"],
+    tools: [write_config],
+    cmd: write_config_cmd,
+    args: wirte_config_common_args,
+}
+
+bob_generate_source {
+    name: "test_target_configuration",
+    generated_deps: [
+        "test_config_h",
+        "config_h",
+    ],
+    tools: ["scripts/merge_headers.py"],
+    out: test_config_module_out,
+    cmd: "${tool} -t ${gen_dir} " +
+        "${test_config_h_out} " +
+        "${config_h_out}",
+    export_gen_include_dirs: ["include"],
+}
+
+bob_generate_source {
+    name: "test_host_configuration",
+    generated_deps: [
+        "test_config_h",
+        "config_h",
+    ],
+    tools: ["scripts/merge_headers.py"],
+    out: test_config_module_out,
+    cmd: "${tool} -t ${gen_dir} " +
+        "${test_config_h_out} " +
+        "${config_h_out}",
+    export_gen_include_dirs: ["include"],
+}
+
+bob_generate_source {
+    name: "include_0_h",
+    srcs: ["../../../../some/source0.td"],
+    out: ["include/lib/header0.h"],
+    depfile: true,
+    host_bin: "special-tool",
+    cmd: "bash -c \"${host_bin} -I ${src_dir} -o ${gen_dir}/include/lib/header0.h -d ${depfile}\"",
+}
+
+bob_generate_source {
+    name: "include_1_h",
+    srcs: ["../../../../some/source0.td"],
+    out: ["include/lib/header1.h"],
+    depfile: true,
+    host_bin: "special-tool",
+    cmd: "bash -c \"${host_bin} -I ${src_dir} -o ${gen_dir}/include/lib/header1.h -d ${depfile}\"",
+}
+
+bob_generate_source {
+    name: "file_cpp",
+    srcs: ["../../../../some/other/source.td"],
+    out: ["source.cpp"],
+    depfile: true,
+    host_bin: "special-tool",
+    cmd: "bash -c \"${host_bin} --create-source ${args} -I ${src_dir}/. -o ${gen_dir}/source.cpp -d ${depfile}\"",
+}
+
+bob_generate_source {
+    name: "data_inc",
+    srcs: ["../../../../yet/another/source.td"],
+    out: ["lib/data.inc"],
+    depfile: true,
+    host_bin: "special-tool",
+    cmd: "bash -c \"${host_bin} -create-data ${args} --write-if-changed -I ${src_dir}/. -o ${gen_dir}/lib/data.inc -d ${depfile}\"",
+}
+
+bob_generate_source {
+    name: "generated_srcs",
+    generated_deps: [
+        "include_0_h",
+        "include_1_h",
+        "file_cpp",
+        "data_inc",
+    ],
+    out: [
+        "include/dir/subdir/lib/someheader0.h.inc",
+        "include/dir/subdir/lib/someheader1.h.inc",
+        "lib/dir/subdir/source.cpp",
+        "lib/dir/subdir/data.inc",
+    ],
+    cmd: "mkdir -p ${gen_dir}/include/lib; cp ${include_0_h_out} ${gen_dir}/include/lib/someheader0.h.inc;" +
+        "mkdir -p ${gen_dir}/include/lib; cp ${include_1_h_out} ${gen_dir}/include/lib/someheader1.h.inc;" +
+        "mkdir -p ${gen_dir}/include/lib; cp ${data_inc_out} ${gen_dir}/include/lib/data.inc;" +
+        "mkdir -p ${gen_dir}/lib; cp ${file_cpp_out} ${gen_dir}/lib/source.cpp;",
+
+    export_gen_include_dirs: [
+        "include",
+        "include/lib",
+    ],
+}
+
+bob_defaults {
+    name: "test_defaults",
+    install_group: "IG_testcases",
+    srcs: [
+        "../static.cpp",
+    ],
+    generated_headers: [
+        "generated_srcs",
+    ],
+    host_supported: true,
+    target_supported: false,
+    host: {
+        generated_headers: ["test_host_configuration"],
+    },
+    target: {
+        generated_headers: ["test_target_configuration"],
+    },
+    local_include_dirs: [
+        "..",
+        "../src",
+    ],
+
+}
+
+bob_install_group {
+    name: "IG_testcases",
+    builder_android_bp: {
+        install_path: "tests",
+    },
+    builder_ninja: {
+        install_path: "install/testcases",
+    },
+}
+
+bob_binary {
+    name: "binary",
+    defaults: [
+        "test_defaults",
+        "srcs_scope",
+        "srcs_scope_deep",
+    ],
+    srcs: [
+        "module/source3.cpp",
+        "../src/source1.cpp",
+        "../src/source2.cpp",
+    ],
+}

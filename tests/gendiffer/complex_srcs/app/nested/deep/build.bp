@@ -1,0 +1,7 @@
+bob_defaults {
+    name: "srcs_scope_deep",
+    srcs: [
+        "deep_source0.cpp",
+        "deep_source_glob_*.cpp",
+    ],
+}
