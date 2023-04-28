@@ -84,6 +84,7 @@ type configData struct {
 	Condition  interface{} `json:"default_cond"`
 	Ignore     string      `json:"bob_ignore,omitempty"`
 	Depends    interface{} `json:"depends"`
+	Position   uint32      `json:"position"`
 	BazelLabel label.Label
 	Name       string
 }

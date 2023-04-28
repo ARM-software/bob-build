@@ -4,18 +4,6 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 # gazelle:bob_root
 
 bool_flag(
-    name = "debug",
-    build_setting_default = True,
-)
-
-config_setting(
-    name = "config_debug",
-    flag_values = {
-        ":debug": "true",
-    },
-)
-
-bool_flag(
     name = "feature_a",
     build_setting_default = False,
 )
@@ -64,4 +52,16 @@ selects.config_setting_group(
 string_flag(
     name = "option_b",
     build_setting_default = "--secret",
+)
+
+bool_flag(
+    name = "debug",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_debug",
+    flag_values = {
+        ":debug": "true",
+    },
 )

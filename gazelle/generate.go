@@ -129,8 +129,8 @@ func generateConfigs(r *Registry, relPath string) []*rule.Rule {
 	if r != nil {
 		// To properly test generation of multiple configs
 		// at once the order needs to be preserved
-		// TODO: improve sorting
-		configNames := make([]string, 0)
+		// Sort all configs by its Position
+		configsToGen := make([]configData, 0)
 
 		regs, ok := r.retrieveByPath(relPath)
 		if !ok {
@@ -138,56 +138,48 @@ func generateConfigs(r *Registry, relPath string) []*rule.Rule {
 		}
 
 		for _, reg := range regs {
-			if cfg, ok := reg.(configData); ok {
-				configNames = append(configNames, cfg.Name)
+			if cfg, ok := reg.(configData); ok && cfg.Ignore != "y" {
+				configsToGen = append(configsToGen, cfg)
 			}
 		}
 
-		sort.Strings(configNames)
+		sort.Slice(configsToGen, func(i, j int) bool {
+			return configsToGen[i].Position < configsToGen[j].Position
+		})
 
-		for _, name := range configNames {
-			reg, ok := r.retrieveByName(name)
+		for _, v := range configsToGen {
 
-			if !ok {
-				log.Printf("Could not retrieve `Registrable` for '%s' name", name)
-				return rules
+			// v.Datatype should be one of ["bool", "string", "int"]
+			if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
+				log.Printf("Unsupported config of type '%s'", v.Datatype)
+				break
 			}
 
-			if v, ok := reg.(configData); ok {
-				if v.Ignore != "y" {
-					// v.Datatype should be one of ["bool", "string", "int"]
-					if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
-						log.Printf("Unsupported config of type '%s'", v.Datatype)
-						break
-					}
+			ruleName := fmt.Sprintf("%s_flag", v.Datatype)
+			rFlag := generateFlag(ruleName, v.Name)
 
-					ruleName := fmt.Sprintf("%s_flag", v.Datatype)
-					rFlag := generateFlag(ruleName, v.Name)
+			// 'build_setting_default' value is mandatory
+			if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
+				setBuildSettingDefault(rFlag, d[1])
+			} else if _, ok := v.Condition.([]interface{}); ok {
+				// TODO: handle condition
+				setBuildSettingDefault(rFlag, false)
+			} else {
+				setBuildSettingDefault(rFlag, false)
+			}
 
-					// 'build_setting_default' value is mandatory
-					if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
-						setBuildSettingDefault(rFlag, d[1])
-					} else if _, ok := v.Condition.([]interface{}); ok {
-						// TODO: handle condition
-						setBuildSettingDefault(rFlag, false)
-					} else {
-						setBuildSettingDefault(rFlag, false)
-					}
+			rules = append(rules, rFlag)
 
-					rules = append(rules, rFlag)
+			// features are only when (v.Datatype == "bool")
+			if v.Datatype == "bool" {
+				rConfigSetting := generateConfigSetting(v.Name, v.Depends != nil)
+				setConfigSettingFlagValues(rConfigSetting, v.Name, true)
+				rules = append(rules, rConfigSetting)
 
-					// features are only when (v.Datatype == "bool")
-					if v.Datatype == "bool" {
-						rConfigSetting := generateConfigSetting(v.Name, v.Depends != nil)
-						setConfigSettingFlagValues(rConfigSetting, v.Name, true)
-						rules = append(rules, rConfigSetting)
-
-						if v.Depends != nil {
-							r, comment := generateDependencies(v.Name, v.Depends, r)
-							rules = append(rules, r...)
-							rFlag.AddComment("# depends on: " + comment)
-						}
-					}
+				if v.Depends != nil {
+					r, comment := generateDependencies(v.Name, v.Depends, r)
+					rules = append(rules, r...)
+					rFlag.AddComment("# depends on: " + comment)
 				}
 			}
 		}
