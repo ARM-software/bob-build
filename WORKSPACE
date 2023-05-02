@@ -69,6 +69,10 @@ go_repository(
     name = "com_github_google_blueprint",
     commit = "6957a46d",
     importpath = "github.com/google/blueprint",
+    patch_args = ["-p1"],
+    patches = [
+        "@plugin//patches:blueprint/export_module_pos.patch",
+    ],
 )
 
 load("//:deps.bzl", "go_dependencies")

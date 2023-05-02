@@ -83,20 +83,25 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 		}
 	}
 
-	if modules, ok := e.registry.retrieveByPath(rel); ok {
+	if regs, ok := e.registry.retrieveByPath(rel); ok {
 		// To properly test generation of multiple modules
 		// at once the order needs to be preserved
-		// TODO: improve sorting
-		names := make([]string, len(modules))
+		// Sort modules by its `idx` index
 
-		for i, m := range modules {
-			names[i] = m.getName()
+		modulesToGen := make([]*Module, 0)
+
+		for _, reg := range regs {
+			if mod, ok := reg.(*Module); ok {
+				modulesToGen = append(modulesToGen, mod)
+			}
 		}
 
-		sort.Strings(names)
+		sort.Slice(modulesToGen, func(i, j int) bool {
+			return (*modulesToGen[i]).idx < (*modulesToGen[j]).idx
+		})
 
-		for _, name := range names {
-			m, _ := e.registry.retrieveByName(name)
+		for _, mod := range modulesToGen {
+			m, _ := e.registry.retrieveByName(mod.getName())
 
 			if g, ok := m.(generator); ok {
 

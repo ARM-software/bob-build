@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"text/scanner"
 
 	bob "github.com/ARM-software/bob-build/core"
 	"github.com/google/blueprint"
@@ -54,6 +55,7 @@ func (p *bobParser) parse() []*Module {
 	bp.RegisterBottomUpMutator("default_applier", bob.DefaultApplierMutator).Parallel()
 
 	var modules []*Module
+	var modulesMap map[string]*Module = make(map[string]*Module)
 	var modulesMutex sync.RWMutex
 
 	bp.RegisterBottomUpMutator("register_bob_modules", func(mctx blueprint.BottomUpMutatorContext) {
@@ -65,6 +67,7 @@ func (p *bobParser) parse() []*Module {
 
 		modulesMutex.Lock()
 		defer modulesMutex.Unlock()
+		modulesMap[mctx.ModuleName()] = m
 		modules = append(modules, m)
 	}).Parallel()
 
@@ -90,6 +93,13 @@ func (p *bobParser) parse() []*Module {
 		}
 		os.Exit(1)
 	}
+
+	// set proper indexes for all the parsed modules
+	bp.VisitAllModulesWithPos(func(m blueprint.Module, p scanner.Position) {
+		if mod, ok := modulesMap[m.Name()]; ok {
+			mod.SetIndex(uint32(p.Line))
+		}
+	})
 
 	return modules
 }
