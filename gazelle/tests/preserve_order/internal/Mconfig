@@ -1,0 +1,3 @@
+config FEATURE_B
+    bool "Enable Feature B"
+    default y

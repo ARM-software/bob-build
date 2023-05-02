@@ -63,6 +63,7 @@ type Module struct {
 	bazelLabel   label.Label
 	features     map[string]AttributesMap
 	defaults     AttributesMap
+	idx          uint32
 }
 
 func (m Module) getName() string {
@@ -198,4 +199,8 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 	r.SetAttr("srcs", g.BzlExpr())
 
 	return r
+}
+
+func (m *Module) SetIndex(i uint32) {
+	m.idx = i
 }

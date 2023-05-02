@@ -6,7 +6,8 @@ repos:
         exclude: (?x)(
           ^config_system/tests/formatter/|
           tests/gendiffer.*build.ninja|
-          tests/gendiffer.*Android.bp
+          tests/gendiffer.*Android.bp|
+          gazelle/patches/
           )
       - id: end-of-file-fixer
         exclude: |
@@ -14,7 +15,8 @@ repos:
             ^config_system/tests/formatter/|
             expectedExitCode.txt|
             tests/gendiffer.*build.ninja|
-            tests/gendiffer.*Android.bp
+            tests/gendiffer.*Android.bp|
+            gazelle/patches/
           )
       - id: check-yaml
       - id: check-added-large-files

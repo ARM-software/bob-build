@@ -1,0 +1,85 @@
+// internal build.bp
+
+bob_filegroup {
+    name: "fg_201",
+    srcs: ["srcs/input_201.c"],
+}
+
+bob_filegroup {
+    name: "fg_202",
+    srcs: ["srcs/input_202.c"],
+}
+
+bob_filegroup {
+    name: "fg_203",
+    srcs: ["srcs/input_203.c"],
+}
+
+bob_filegroup {
+    name: "fg_204",
+    srcs: ["srcs/input_204.c"],
+}
+
+bob_glob {
+    name: "glob_204_1",
+    srcs: ["lib/**/*_204_1.c"],
+    allow_empty: true,
+}
+
+bob_filegroup {
+    name: "fg_205",
+    srcs: ["srcs/input_205.c"],
+}
+
+bob_filegroup {
+    name: "fg_206",
+    srcs: ["srcs/input_206.c"],
+}
+
+bob_glob {
+    name: "glob_lib_207",
+    srcs: ["lib/**/*_207.c"],
+    exclude: ["lib/**/exclude_*_207.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}
+
+bob_glob {
+    name: "glob_lib_208",
+    srcs: ["lib/**/*_208.c"],
+    exclude: ["lib/**/exclude_*_208.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}
+
+bob_glob {
+    name: "glob_lib_209",
+    srcs: ["lib/**/*_209.c"],
+    exclude: ["lib/**/exclude_*_209.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}
+
+bob_glob {
+    name: "glob_lib_210",
+    srcs: ["lib/**/*_210.c"],
+    exclude: ["lib/**/exclude_*_210.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}
+
+bob_glob {
+    name: "glob_lib_211",
+    srcs: ["lib/**/*_211.c"],
+    exclude: ["lib/**/exclude_*_211.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}
+
+bob_glob {
+    name: "glob_lib_212",
+    srcs: ["lib/**/*_212.c"],
+    exclude: ["lib/**/exclude_*_212.cpp"],
+    exclude_directories: true,
+    allow_empty: true,
+}

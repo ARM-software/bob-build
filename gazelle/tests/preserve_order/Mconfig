@@ -1,0 +1,5 @@
+config FEATURE_A
+    bool "Enable Feature A"
+    default n
+
+source "internal/Mconfig"
