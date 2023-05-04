@@ -25,3 +25,21 @@ bob_generate_source {
     tools: ["generator.py"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
 }
+
+bob_generate_source {
+    name: "multiple_tools_generate_sources",
+    srcs: [
+        "template.in",
+    ],
+    out: [
+        "tool_first_out.c",
+        "tool_second_out.c",
+    ],
+
+    tools: [
+        "subtool/verify.py",
+        "generate.py",
+    ],
+    cmd: "python ${tool generate.py} --in ${in} --out ${out} && python ${tool subtool/verify.py} --in ${out}",
+    build_by_default: true,
+}

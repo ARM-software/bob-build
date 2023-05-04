@@ -168,15 +168,15 @@ cc_binary {
 
 genrule_bob {
     name: "multiple_tools_generate_sources",
-    srcs: ["template.in"],
+    srcs: ["nested/template.in"],
     out: [
         "tool_first_out.c",
         "tool_second_out.c",
     ],
-    cmd: "python ${tool generate.py} --in ${in} --out ${out} && python ${tool subtool/verify.py} --in ${out}",
+    cmd: "python ${tool nested/generate.py} --in ${in} --out ${out} && python ${tool nested/subtool/verify.py} --in ${out}",
     tools: [
-        "subtool/verify.py",
-        "generate.py",
+        "nested/subtool/verify.py",
+        "nested/generate.py",
     ],
     depfile: false,
 }

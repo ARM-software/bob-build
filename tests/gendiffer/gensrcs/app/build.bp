@@ -229,21 +229,3 @@ bob_generate_source {
     cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
     build_by_default: true,
 }
-
-bob_generate_source {
-    name: "multiple_tools_generate_sources",
-    srcs: [
-        "template.in",
-    ],
-    out: [
-        "tool_first_out.c",
-        "tool_second_out.c",
-    ],
-
-    tools: [
-        "subtool/verify.py",
-        "generate.py",
-    ],
-    cmd: "python ${tool generate.py} --in ${in} --out ${out} && python ${tool subtool/verify.py} --in ${out}",
-    build_by_default: true,
-}
