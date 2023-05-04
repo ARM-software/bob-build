@@ -456,7 +456,7 @@ default host_and_target_supported_binary__target
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:233:1
+# Defined: nested/build.bp:29:1
 
 rule m.multiple_tools_generate_sources_.gen_multiple_tools_generate_sources
     command = python ${tool_1} --in ${in} --out ${_out_} && python ${tool_2} --in ${_out_}
@@ -467,11 +467,12 @@ build ${g.bob.BuildDir}/gen/multiple_tools_generate_sources/tool_first_out.c $
         ${g.bob.BuildDir}/gen/multiple_tools_generate_sources/tool_second_out.c $
         : $
         m.multiple_tools_generate_sources_.gen_multiple_tools_generate_sources $
-        ${g.bob.SrcDir}/template.in | ${g.bob.SrcDir}/subtool/verify.py $
-        ${g.bob.SrcDir}/generate.py
+        ${g.bob.SrcDir}/nested/template.in | $
+        ${g.bob.SrcDir}/nested/subtool/verify.py $
+        ${g.bob.SrcDir}/nested/generate.py
     _out_ = ${g.bob.BuildDir}/gen/multiple_tools_generate_sources/tool_first_out.c ${g.bob.BuildDir}/gen/multiple_tools_generate_sources/tool_second_out.c
-    tool_1 = ${g.bob.SrcDir}/generate.py
-    tool_2 = ${g.bob.SrcDir}/subtool/verify.py
+    tool_1 = ${g.bob.SrcDir}/nested/generate.py
+    tool_2 = ${g.bob.SrcDir}/nested/subtool/verify.py
 
 build multiple_tools_generate_sources: phony $
         ${g.bob.BuildDir}/gen/multiple_tools_generate_sources/tool_first_out.c $
