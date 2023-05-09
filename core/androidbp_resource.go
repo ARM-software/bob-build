@@ -42,11 +42,11 @@ func writeCodeResourceModule(m bpwriter.Module, src, installRel string) {
 	m.AddString("relative_install_path", installRel)
 }
 
-func (m *resource) getAndroidbpResourceName(src string) string {
+func (m *ModuleResource) getAndroidbpResourceName(src string) string {
 	return m.shortName() + "__" + strings.Replace(src, "/", "_", -1)
 }
 
-func (g *androidBpGenerator) resourceActions(r *resource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) resourceActions(r *ModuleResource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(r) {
 		return
 	}

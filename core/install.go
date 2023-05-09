@@ -195,7 +195,7 @@ type ResourceProps struct {
 	AndroidProps
 }
 
-type resource struct {
+type ModuleResource struct {
 	moduleBase
 	Properties struct {
 		ResourceProps
@@ -209,43 +209,43 @@ type resourceInterface interface {
 	SourceFileConsumer
 }
 
-var _ resourceInterface = (*resource)(nil) // impl check
+var _ resourceInterface = (*ModuleResource)(nil) // impl check
 
-func (m *resource) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleResource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getBackend(ctx).resourceActions(m, ctx)
 	}
 }
 
-func (m *resource) FeaturableProperties() []interface{} {
+func (m *ModuleResource) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.ResourceProps}
 }
 
-func (m *resource) Features() *Features {
+func (m *ModuleResource) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *resource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
+func (m *ModuleResource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
 }
 
-func (m *resource) shortName() string {
+func (m *ModuleResource) shortName() string {
 	return m.Name()
 }
 
-func (m *resource) altName() string {
+func (m *ModuleResource) altName() string {
 	return m.Name()
 }
 
-func (m *resource) altShortName() string {
+func (m *ModuleResource) altShortName() string {
 	return m.shortName()
 }
 
-func (m *resource) getEnableableProps() *EnableableProps {
+func (m *ModuleResource) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
+func (m *ModuleResource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
 	m.Properties.LegacySourceProps.GetSrcs(ctx).ForEach(
 		func(fp filePath) bool {
 			files = append(files, fp.buildPath())
@@ -254,32 +254,32 @@ func (m *resource) filesToInstall(ctx blueprint.BaseModuleContext) (files []stri
 	return
 }
 
-func (m *resource) getInstallableProps() *InstallableProps {
+func (m *ModuleResource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *resource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleResource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 }
 
-func (m *resource) GetSrcTargets() []string {
+func (m *ModuleResource) GetSrcTargets() []string {
 	return m.Properties.LegacySourceProps.GetSrcTargets()
 }
 
-func (m *resource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleResource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.Properties.LegacySourceProps.GetSrcs(ctx)
 }
 
-func (m *resource) GetDirectSrcs() FilePaths {
+func (m *ModuleResource) GetDirectSrcs() FilePaths {
 	return m.Properties.LegacySourceProps.GetDirectSrcs()
 }
 
-func (m *resource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleResource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *resource) getAliasList() []string {
+func (m *ModuleResource) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
@@ -287,7 +287,7 @@ func (m ModuleInstallGroup) GetProperties() interface{} {
 	return m.Properties
 }
 
-func (m resource) GetProperties() interface{} {
+func (m ModuleResource) GetProperties() interface{} {
 	return m.Properties
 }
 
@@ -299,7 +299,7 @@ func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 }
 
 func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &resource{}
+	module := &ModuleResource{}
 	module.Properties.Features.Init(&config.Properties, ResourceProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}

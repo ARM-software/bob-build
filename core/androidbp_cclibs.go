@@ -58,7 +58,7 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 		utils.Die("%s has no dependency '%s'", mctx.ModuleName(), name)
 	}
 
-	if r, ok := dep.(*resource); ok {
+	if r, ok := dep.(*ModuleResource); ok {
 		var modNames []string
 
 		r.Properties.GetSrcs(mctx).ForEach(

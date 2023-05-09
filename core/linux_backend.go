@@ -350,9 +350,9 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	return append(installedFiles, ins.getInstallDepPhonyNames(ctx)...)
 }
 
-func (g *linuxGenerator) resourceActions(m *resource, ctx blueprint.ModuleContext) {
-	installDeps := g.install(m, ctx)
-	addPhony(m, ctx, installDeps, false)
+func (g *linuxGenerator) resourceActions(r *ModuleResource, ctx blueprint.ModuleContext) {
+	installDeps := g.install(r, ctx)
+	addPhony(r, ctx, installDeps, false)
 }
 
 func (g *linuxGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
