@@ -22,7 +22,7 @@ import (
 )
 
 type staticLibrary struct {
-	library
+	ModuleLibrary
 }
 
 func (l *staticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -36,7 +36,7 @@ func (l *staticLibrary) outputFileName() string {
 }
 
 func (l staticLibrary) GetProperties() interface{} {
-	return l.library.Properties
+	return l.ModuleLibrary.Properties
 }
 
 func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {

@@ -22,7 +22,7 @@ import (
 )
 
 type ModuleBinary struct {
-	library
+	ModuleLibrary
 }
 
 // binary supports:
@@ -62,7 +62,7 @@ func (m *ModuleBinary) outputFileName() string {
 }
 
 func (m ModuleBinary) GetProperties() interface{} {
-	return m.library.Properties
+	return m.ModuleLibrary.Properties
 }
 
 func binaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {

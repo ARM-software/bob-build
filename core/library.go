@@ -30,8 +30,8 @@ import (
 
 var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 
-// library is a base class for modules which are generated from sets of object files
-type library struct {
+// ModuleLibrary is a base class for modules which are generated from sets of object files
+type ModuleLibrary struct {
 	moduleBase
 	simpleOutputProducer
 
@@ -59,61 +59,61 @@ type libraryInterface interface {
 	SourceFileConsumer
 }
 
-var _ libraryInterface = (*library)(nil) // impl check
+var _ libraryInterface = (*ModuleLibrary)(nil) // impl check
 
 // TODO: These interfaces are causing a go build issue with 'duplicate functions'
 // when added to the group interface investigate why that is and fix it.
-var _ splittable = (*library)(nil)            // impl check
-var _ targetSpecificLibrary = (*library)(nil) // impl check
+var _ splittable = (*ModuleLibrary)(nil)            // impl check
+var _ targetSpecificLibrary = (*ModuleLibrary)(nil) // impl check
 
-func (l *library) defaults() []string {
-	return l.Properties.Defaults
+func (m *ModuleLibrary) defaults() []string {
+	return m.Properties.Defaults
 }
 
-func (l *library) defaultableProperties() []interface{} {
+func (m *ModuleLibrary) defaultableProperties() []interface{} {
 	return []interface{}{
-		&l.Properties.Build.CommonProps,
-		&l.Properties.Build.BuildProps,
-		&l.Properties.Build.SplittableProps,
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
 	}
 }
 
-func (l *library) build() *Build {
-	return &l.Properties.Build
+func (m *ModuleLibrary) build() *Build {
+	return &m.Properties.Build
 }
 
-func (l *library) FeaturableProperties() []interface{} {
+func (m *ModuleLibrary) FeaturableProperties() []interface{} {
 	return []interface{}{
-		&l.Properties.Build.CommonProps,
-		&l.Properties.Build.BuildProps,
-		&l.Properties.Build.SplittableProps,
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
 	}
 }
 
-func (l *library) targetableProperties() []interface{} {
+func (m *ModuleLibrary) targetableProperties() []interface{} {
 	return []interface{}{
-		&l.Properties.Build.CommonProps,
-		&l.Properties.Build.BuildProps,
-		&l.Properties.Build.SplittableProps,
+		&m.Properties.Build.CommonProps,
+		&m.Properties.Build.BuildProps,
+		&m.Properties.Build.SplittableProps,
 	}
 }
 
-func (l *library) Features() *Features {
-	return &l.Properties.Features
+func (m *ModuleLibrary) Features() *Features {
+	return &m.Properties.Features
 }
 
-func (l *library) getTarget() TgtType {
-	return l.Properties.TargetType
+func (m *ModuleLibrary) getTarget() TgtType {
+	return m.Properties.TargetType
 }
 
-func (l *library) getInstallableProps() *InstallableProps {
-	return &l.Properties.InstallableProps
+func (m *ModuleLibrary) getInstallableProps() *InstallableProps {
+	return &m.Properties.InstallableProps
 }
 
 // Return the shortName of dependencies which must be installed alongside the
 // library. Exclude external libraries - these will never be added via
 // install_deps, but may end up in shared_libs.
-func (l *library) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
+func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
 	return getShortNamesForDirectDepsIf(ctx,
 		func(m blueprint.Module) bool {
 			tag := ctx.OtherModuleDependencyTag(m)
@@ -129,103 +129,103 @@ func (l *library) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string 
 		})
 }
 
-func (l *library) getEnableableProps() *EnableableProps {
-	return &l.Properties.Build.EnableableProps
+func (m *ModuleLibrary) getEnableableProps() *EnableableProps {
+	return &m.Properties.Build.EnableableProps
 }
 
-func (l *library) getAliasList() []string {
-	return l.Properties.getAliasList()
+func (m *ModuleLibrary) getAliasList() []string {
+	return m.Properties.getAliasList()
 }
 
-func (l *library) supportedVariants() (tgts []TgtType) {
-	if l.Properties.isHostSupported() {
+func (m *ModuleLibrary) supportedVariants() (tgts []TgtType) {
+	if m.Properties.isHostSupported() {
 		tgts = append(tgts, tgtTypeHost)
 	}
-	if l.Properties.isTargetSupported() {
+	if m.Properties.isTargetSupported() {
 		tgts = append(tgts, tgtTypeTarget)
 	}
 	return
 }
 
-func (l *library) disable() {
+func (m *ModuleLibrary) disable() {
 	f := false
-	l.Properties.Enabled = &f
+	m.Properties.Enabled = &f
 }
 
-func (l *library) setVariant(tgt TgtType) {
-	l.Properties.TargetType = tgt
+func (m *ModuleLibrary) setVariant(tgt TgtType) {
+	m.Properties.TargetType = tgt
 }
 
-func (l *library) getSplittableProps() *SplittableProps {
-	return &l.Properties.SplittableProps
+func (m *ModuleLibrary) getSplittableProps() *SplittableProps {
+	return &m.Properties.SplittableProps
 }
 
-func (l *library) getTargetSpecific(tgt TgtType) *TargetSpecific {
-	return l.Properties.getTargetSpecific(tgt)
+func (m *ModuleLibrary) getTargetSpecific(tgt TgtType) *TargetSpecific {
+	return m.Properties.getTargetSpecific(tgt)
 }
 
-func (l *library) outputName() string {
-	if l.Properties.Out != nil {
-		return *l.Properties.Out
+func (m *ModuleLibrary) outputName() string {
+	if m.Properties.Out != nil {
+		return *m.Properties.Out
 	}
-	return l.Name()
+	return m.Name()
 }
 
-func (l *library) getDebugInfo() *string {
-	return l.Properties.getDebugInfo()
+func (m *ModuleLibrary) getDebugInfo() *string {
+	return m.Properties.getDebugInfo()
 }
 
-func (l *library) getDebugPath() *string {
-	return l.Properties.getDebugPath()
+func (m *ModuleLibrary) getDebugPath() *string {
+	return m.Properties.getDebugPath()
 }
 
-func (l *library) setDebugPath(path *string) {
-	l.Properties.setDebugPath(path)
+func (m *ModuleLibrary) setDebugPath(path *string) {
+	m.Properties.setDebugPath(path)
 }
 
-func (m *library) stripOutputDir(g generatorBackend) string {
+func (m *ModuleLibrary) stripOutputDir(g generatorBackend) string {
 	return getBackendPathInBuildDir(g, string(m.Properties.TargetType), "strip")
 }
 
-func (l *library) altName() string {
-	return l.outputName()
+func (m *ModuleLibrary) altName() string {
+	return m.outputName()
 }
 
-func (l *library) altShortName() string {
-	if len(l.supportedVariants()) > 1 {
-		return l.altName() + "__" + string(l.Properties.TargetType)
+func (m *ModuleLibrary) altShortName() string {
+	if len(m.supportedVariants()) > 1 {
+		return m.altName() + "__" + string(m.Properties.TargetType)
 	}
-	return l.altName()
+	return m.altName()
 }
 
-func (l *library) getEscapeProperties() []*[]string {
+func (m *ModuleLibrary) getEscapeProperties() []*[]string {
 	return []*[]string{
-		&l.Properties.Asflags,
-		&l.Properties.Cflags,
-		&l.Properties.Conlyflags,
-		&l.Properties.Cxxflags,
-		&l.Properties.Ldflags}
+		&m.Properties.Asflags,
+		&m.Properties.Cflags,
+		&m.Properties.Conlyflags,
+		&m.Properties.Cxxflags,
+		&m.Properties.Ldflags}
 }
 
-func (l *library) getLegacySourceProperties() *LegacySourceProps {
-	return &l.Properties.LegacySourceProps
+func (m *ModuleLibrary) getLegacySourceProperties() *LegacySourceProps {
+	return &m.Properties.LegacySourceProps
 }
 
-func (l *library) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	l.Properties.ResolveFiles(ctx, g)
+func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (l *library) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return l.Properties.GetSrcs(ctx)
+func (m *ModuleLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetSrcs(ctx)
 }
 
-func (l *library) GetDirectSrcs() FilePaths {
-	return l.Properties.GetDirectSrcs()
+func (m *ModuleLibrary) GetDirectSrcs() FilePaths {
+	return m.Properties.GetDirectSrcs()
 }
 
-func (l *library) GetSrcTargets() (tgts []string) {
-	tgts = append(tgts, l.Properties.GetSrcTargets()...)
-	tgts = append(tgts, l.Properties.Generated_sources...)
+func (m *ModuleLibrary) GetSrcTargets() (tgts []string) {
+	tgts = append(tgts, m.Properties.GetSrcTargets()...)
+	tgts = append(tgts, m.Properties.Generated_sources...)
 	return
 }
 
@@ -235,21 +235,21 @@ func (l *library) GetSrcTargets() (tgts []string) {
 //   - Cflags
 //   - Conlyflags
 //   - Cxxflags
-func (l *library) getMatchSourcePropNames() []string {
+func (m *ModuleLibrary) getMatchSourcePropNames() []string {
 	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
 
 // Returns the shortname for the output, which is used as a phony target. If it
 // can be built for multiple variants, require a '__host' or '__target' suffix to
 // disambiguate.
-func (l *library) shortName() string {
-	if len(l.supportedVariants()) > 1 {
-		return l.Name() + "__" + string(l.Properties.TargetType)
+func (m *ModuleLibrary) shortName() string {
+	if len(m.supportedVariants()) > 1 {
+		return m.Name() + "__" + string(m.Properties.TargetType)
 	}
-	return l.Name()
+	return m.Name()
 }
 
-func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
+func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
 	visited := map[string]bool{}
 
 	mainModule := ctx.Module()
@@ -349,7 +349,7 @@ func (l *library) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs 
 	return
 }
 
-func (l *library) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
+func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
 		func(m blueprint.Module) {
@@ -361,7 +361,7 @@ func (l *library) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (mod
 	return
 }
 
-func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, expCflags []string) {
+func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, expCflags []string) {
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
@@ -389,9 +389,9 @@ func (l *library) GetExportedVariables(ctx blueprint.ModuleContext) (expSystemIn
 	return
 }
 
-func (l *library) getVersionScript(ctx blueprint.ModuleContext) *string {
-	if l.Properties.VersionScriptModule != nil {
-		module, _ := ctx.GetDirectDep(*l.Properties.VersionScriptModule)
+func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
+	if m.Properties.VersionScriptModule != nil {
+		module, _ := ctx.GetDirectDep(*m.Properties.VersionScriptModule)
 		outputs := module.(dependentInterface).outputs()
 		if len(outputs) != 1 {
 			panic(errors.New(ctx.OtherModuleName(module) + " must have exactly one output"))
@@ -399,73 +399,77 @@ func (l *library) getVersionScript(ctx blueprint.ModuleContext) *string {
 		return &outputs[0]
 	}
 
-	if l.Properties.Build.Version_script != nil {
-		path := getBackendPathInSourceDir(getBackend(ctx), *l.Properties.Build.Version_script)
+	if m.Properties.Build.Version_script != nil {
+		path := getBackendPathInSourceDir(getBackend(ctx), *m.Properties.Build.Version_script)
 		return &path
 	}
 
 	return nil
 }
 
-func (l *library) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	l.Properties.Build.processPaths(ctx, g)
+func (m *ModuleLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.Build.processPaths(ctx, g)
 
-	versionScript := l.Properties.Build.Version_script
+	versionScript := m.Properties.Build.Version_script
 	if versionScript != nil {
 		matches := depOutputsVarRegexp.FindStringSubmatch(*versionScript)
 		if len(matches) == 2 {
-			l.Properties.VersionScriptModule = &matches[1]
+			m.Properties.VersionScriptModule = &matches[1]
 		} else {
 			*versionScript = filepath.Join(projectModuleDir(ctx), *versionScript)
 		}
 	}
 }
 
-func (m *library) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+func (m *ModuleLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.outputs()
 }
 
-func (l *library) checkField(cond bool, fieldName string) {
+func (m *ModuleLibrary) checkField(cond bool, fieldName string) {
 	if !cond {
-		utils.Die("%s has field %s set", l.Name(), fieldName)
+		utils.Die("%s has field %s set", m.Name(), fieldName)
 	}
 }
 
 // All libraries must implement `propertyExporter`
-func (l *library) exportCflags() []string            { return l.Properties.Export_cflags }
-func (l *library) exportIncludeDirs() []string       { return l.Properties.Export_include_dirs }
-func (l *library) exportLocalIncludeDirs() []string  { return l.Properties.Export_local_include_dirs }
-func (l *library) exportLdflags() []string           { return l.Properties.Export_ldflags }
-func (l *library) exportLdlibs() []string            { return l.Properties.Ldlibs }
-func (l *library) exportSharedLibs() []string        { return l.Properties.Shared_libs }
-func (l *library) exportSystemIncludeDirs() []string { return l.Properties.Export_system_include_dirs }
-func (l *library) exportLocalSystemIncludeDirs() []string {
-	return l.Properties.Export_local_system_include_dirs
+func (m *ModuleLibrary) exportCflags() []string      { return m.Properties.Export_cflags }
+func (m *ModuleLibrary) exportIncludeDirs() []string { return m.Properties.Export_include_dirs }
+func (m *ModuleLibrary) exportLocalIncludeDirs() []string {
+	return m.Properties.Export_local_include_dirs
+}
+func (m *ModuleLibrary) exportLdflags() []string    { return m.Properties.Export_ldflags }
+func (m *ModuleLibrary) exportLdlibs() []string     { return m.Properties.Ldlibs }
+func (m *ModuleLibrary) exportSharedLibs() []string { return m.Properties.Shared_libs }
+func (m *ModuleLibrary) exportSystemIncludeDirs() []string {
+	return m.Properties.Export_system_include_dirs
+}
+func (m *ModuleLibrary) exportLocalSystemIncludeDirs() []string {
+	return m.Properties.Export_local_system_include_dirs
 }
 
-func (l *library) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	l.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})
-	l.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{})
-	l.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{})
+func (m *ModuleLibrary) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
+	m.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})
+	m.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{})
+	m.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{})
 
-	return module, []interface{}{&l.Properties, &l.SimpleName.Properties}
+	return module, []interface{}{&m.Properties, &m.SimpleName.Properties}
 }
 
-func getBinaryOrSharedLib(m blueprint.Module) (*library, bool) {
+func getBinaryOrSharedLib(m blueprint.Module) (*ModuleLibrary, bool) {
 	if sl, ok := m.(*sharedLibrary); ok {
-		return &sl.library, true
+		return &sl.ModuleLibrary, true
 	} else if b, ok := m.(*ModuleBinary); ok {
-		return &b.library, true
+		return &b.ModuleLibrary, true
 	}
 
 	return nil, false
 }
 
-func getLibrary(m blueprint.Module) (*library, bool) {
+func getLibrary(m blueprint.Module) (*ModuleLibrary, bool) {
 	if bsl, ok := getBinaryOrSharedLib(m); ok {
 		return bsl, true
 	} else if sl, ok := m.(*staticLibrary); ok {
-		return &sl.library, true
+		return &sl.ModuleLibrary, true
 	}
 
 	return nil, false
@@ -555,8 +559,8 @@ func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bo
 }
 
 // While traversing the static library dependency tree, propagate extra properties.
-func propagateOtherExportedProperties(l *library, depLib propertyExporter) {
-	props := &l.Properties.Build
+func propagateOtherExportedProperties(m *ModuleLibrary, depLib propertyExporter) {
+	props := &m.Properties.Build
 	for _, shLib := range depLib.exportSharedLibs() {
 		if !utils.Contains(props.Shared_libs, shLib) {
 			props.Shared_libs = append(props.Shared_libs, shLib)
