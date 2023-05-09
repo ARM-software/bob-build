@@ -103,7 +103,7 @@ type generatorBackend interface {
 	genStaticActions(*generateStaticLibrary, blueprint.ModuleContext)
 	genBinaryActions(*generateBinary, blueprint.ModuleContext)
 	kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext)
-	sharedActions(*sharedLibrary, blueprint.ModuleContext)
+	sharedActions(*ModuleSharedLibrary, blueprint.ModuleContext)
 	staticActions(*ModuleStaticLibrary, blueprint.ModuleContext)
 	resourceActions(*resource, blueprint.ModuleContext)
 	filegroupActions(*filegroup, blueprint.ModuleContext)

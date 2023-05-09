@@ -342,7 +342,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
 		func(m blueprint.Module) {
-			if sl, ok := m.(*sharedLibrary); ok {
+			if sl, ok := m.(*ModuleSharedLibrary); ok {
 				b := &sl.ModuleLibrary.Properties.Build
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
@@ -440,12 +440,12 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 	return args
 }
 
-func (g *linuxGenerator) getSharedLibArgs(l *sharedLibrary, ctx blueprint.ModuleContext) map[string]string {
-	args := g.getCommonLibArgs(&l.ModuleLibrary, ctx)
+func (g *linuxGenerator) getSharedLibArgs(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) map[string]string {
+	args := g.getCommonLibArgs(&m.ModuleLibrary, ctx)
 	ldflags := []string{}
 
-	if l.Properties.Library_version != "" {
-		var sonameFlag = "-Wl,-soname," + l.getSoname()
+	if m.Properties.Library_version != "" {
+		var sonameFlag = "-Wl,-soname," + m.getSoname()
 		ldflags = append(ldflags, sonameFlag)
 	}
 
@@ -509,7 +509,7 @@ var symlinkRule = pctx.StaticRule("symlink",
 		Description: "$out",
 	}, "target")
 
-func (g *linuxGenerator) sharedActions(m *sharedLibrary, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
 	m.outputdir = g.sharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.outputDir(), m.getRealName())

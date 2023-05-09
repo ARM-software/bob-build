@@ -433,42 +433,42 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, mctx blueprint.Modul
 	}
 }
 
-func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.ModuleContext) {
-	if !enabledAndRequired(l) {
+func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(m) {
 		return
 	}
 
 	// Calculate and record outputs
-	l.outs = []string{l.outputName() + l.fileNameExtension}
+	m.outs = []string{m.outputName() + m.fileNameExtension}
 
 	var modType string
-	switch l.Properties.TargetType {
+	switch m.Properties.TargetType {
 	case tgtTypeHost:
 		modType = "cc_library_host_shared"
 	case tgtTypeTarget:
 		modType = "cc_library_shared"
 	}
 
-	installBase, _, _ := getSoongInstallPath(l.getInstallableProps())
+	installBase, _, _ := getSoongInstallPath(m.getInstallableProps())
 	if installBase != "" && installBase != "lib" {
 		panic(fmt.Errorf("Unknown base install location for %s (%s)",
-			l.Name(), installBase))
+			m.Name(), installBase))
 	}
 
-	m, err := AndroidBpFile().NewModule(modType, l.shortName())
+	mod, err := AndroidBpFile().NewModule(modType, m.shortName())
 	if err != nil {
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(m, l.ModuleLibrary, mctx)
-	addStaticOrSharedLibraryProps(m, l.ModuleLibrary, mctx)
-	if l.strip() {
-		addStripProp(m)
+	addCcLibraryProps(mod, m.ModuleLibrary, mctx)
+	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, mctx)
+	if m.strip() {
+		addStripProp(mod)
 	}
 
-	versionScript := g.getVersionScript(&l.ModuleLibrary, mctx)
+	versionScript := g.getVersionScript(&m.ModuleLibrary, mctx)
 	if versionScript != nil {
-		m.AddString("version_script", *versionScript)
+		mod.AddString("version_script", *versionScript)
 	}
 }
 
