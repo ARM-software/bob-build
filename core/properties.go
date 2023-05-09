@@ -93,7 +93,7 @@ func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	// No need to do this on defaults modules, as we've flattened the
 	// hierarchy
-	_, isDefaults := mctx.Module().(*defaults)
+	_, isDefaults := mctx.Module().(*ModuleDefaults)
 	if isDefaults {
 		return
 	}
@@ -108,11 +108,11 @@ func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	// Accumulate properties from direct dependencies into an empty defaults
-	accumulatedDef := defaults{}
+	accumulatedDef := ModuleDefaults{}
 	accumulatedProps := accumulatedDef.defaultableProperties()
 	mctx.VisitDirectDeps(func(dep blueprint.Module) {
 		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
-			def, ok := dep.(*defaults)
+			def, ok := dep.(*ModuleDefaults)
 			if !ok {
 				utils.Die("module %s in %s's defaults is not a default",
 					dep.Name(), mctx.ModuleName())

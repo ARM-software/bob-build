@@ -34,7 +34,7 @@ func metaDataCollector(mctx blueprint.BottomUpMutatorContext) {
 	// Alias/defaults are skipped to avoid polluting the file.
 	if _, ok := mctx.Module().(*alias); ok {
 		return
-	} else if _, ok := mctx.Module().(*defaults); ok {
+	} else if _, ok := mctx.Module().(*ModuleDefaults); ok {
 		return
 	}
 
