@@ -119,7 +119,7 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 			tag := ctx.OtherModuleDependencyTag(m)
 			// External libraries do not have a build target so don't
 			// try to add a dependency on them.
-			if _, ok := m.(*externalLib); ok {
+			if _, ok := m.(*ModuleExternalLibrary); ok {
 				return false
 			}
 			if tag == installDepTag || tag == sharedDepTag {
@@ -621,7 +621,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			// The GeneratedStaticLibrary is expected to be self
 			// contained, so no pulling in of other static or shared
 			// libraries.
-		} else if depLib, ok := dep.(*externalLib); ok {
+		} else if depLib, ok := dep.(*ModuleExternalLibrary); ok {
 			propagateOtherExportedProperties(l, depLib)
 		} else if _, ok := dep.(*ModuleStrictLibrary); ok {
 			// TODO: Propogate flags here?
