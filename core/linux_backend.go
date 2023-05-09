@@ -190,7 +190,7 @@ func (g *linuxGenerator) getBinaryPath(t targetableModule) string {
 	return filepath.Join(g.binaryOutputDir(t.getTarget()), t.outputFileName())
 }
 
-func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
+func (*linuxGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
 	srcs := []string{}
 
 	/* Only depend on enabled targets */
@@ -214,7 +214,7 @@ func (*linuxGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
 			Inputs:   srcs,
-			Outputs:  []string{m.Name()},
+			Outputs:  []string{a.Name()},
 			Optional: true,
 		})
 }

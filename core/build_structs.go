@@ -94,7 +94,7 @@ func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
 // backend specific information
 type generatorBackend interface {
 	// Module build actions
-	aliasActions(*alias, blueprint.ModuleContext)
+	aliasActions(*ModuleAlias, blueprint.ModuleContext)
 	binaryActions(*ModuleBinary, blueprint.ModuleContext)
 	generateSourceActions(*ModuleGenerateSource, blueprint.ModuleContext)
 	androidGenerateRuleActions(*ModuleGenrule, blueprint.ModuleContext)
@@ -542,7 +542,7 @@ func findRequiredModulesMutator(mctx blueprint.TopDownMutatorContext) {
 		}
 	} else if _, ok := mctx.Module().(*ModuleDefaults); ok { // Ignore defaults.
 		return
-	} else if _, ok := mctx.Module().(*alias); ok { // Ignore aliases.
+	} else if _, ok := mctx.Module().(*ModuleAlias); ok { // Ignore aliases.
 		return
 	}
 

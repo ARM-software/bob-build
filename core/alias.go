@@ -47,7 +47,7 @@ type AliasProps struct {
 }
 
 // Type representing each bob_alias module
-type alias struct {
+type ModuleAlias struct {
 	moduleBase
 	Properties struct {
 		AliasProps
@@ -55,38 +55,38 @@ type alias struct {
 	}
 }
 
-func (m *alias) Features() *Features {
+func (m *ModuleAlias) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *alias) FeaturableProperties() []interface{} {
+func (m *ModuleAlias) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.AliasProps}
 }
 
-func (m *alias) getAliasList() []string {
+func (m *ModuleAlias) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
 // Called by Blueprint to generate the rules associated with the alias.
 // This is forwarded to the backend to handle.
-func (m *alias) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleAlias) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	getBackend(ctx).aliasActions(m, ctx)
 }
 
-func (m alias) GetProperties() interface{} {
+func (m ModuleAlias) GetProperties() interface{} {
 	return m.Properties
 }
 
 // Create the structure representing the bob_alias
 func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &alias{}
+	module := &ModuleAlias{}
 	module.Properties.Features.Init(&config.Properties, AliasProps{})
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 
 // Setup dependencies between aliases and their targets
 func aliasMutator(mctx blueprint.BottomUpMutatorContext) {
-	if a, ok := mctx.Module().(*alias); ok {
+	if a, ok := mctx.Module().(*ModuleAlias); ok {
 		parseAndAddVariationDeps(mctx, aliasTag, a.Properties.Srcs...)
 	}
 	if a, ok := mctx.Module().(aliasable); ok {
