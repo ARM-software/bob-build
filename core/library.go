@@ -623,7 +623,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			// libraries.
 		} else if depLib, ok := dep.(*externalLib); ok {
 			propagateOtherExportedProperties(l, depLib)
-		} else if _, ok := dep.(*strictLibrary); ok {
+		} else if _, ok := dep.(*ModuleStrictLibrary); ok {
 			// TODO: Propogate flags here?
 		} else {
 			utils.Die("%s is not a staticLibrary", dep.Name())

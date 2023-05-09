@@ -107,7 +107,7 @@ type generatorBackend interface {
 	staticActions(*ModuleStaticLibrary, blueprint.ModuleContext)
 	resourceActions(*resource, blueprint.ModuleContext)
 	filegroupActions(*ModuleFilegroup, blueprint.ModuleContext)
-	strictLibraryActions(*strictLibrary, blueprint.ModuleContext)
+	strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext)
 
 	// Backend specific info for module types
 	buildDir() string
@@ -406,7 +406,7 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	// TODO: Shared Lib dependencies
-	if sl, ok := mctx.Module().(*strictLibrary); ok {
+	if sl, ok := mctx.Module().(*ModuleStrictLibrary); ok {
 		mctx.AddVariationDependencies(nil, staticDepTag, sl.Properties.Deps...)
 	}
 

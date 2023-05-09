@@ -28,7 +28,7 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 	accumlatedDefines := []string{}
 	accumlatedDeps := []string{}
 	mctx.VisitDirectDeps(func(dep blueprint.Module) {
-		strictLib, ok := dep.(*strictLibrary)
+		strictLib, ok := dep.(*ModuleStrictLibrary)
 		if ok {
 			for _, define := range strictLib.Properties.Defines {
 				accumlatedDefines = append(accumlatedDefines, define)
@@ -45,7 +45,7 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 	})
 
-	if sl, ok := mctx.Module().(*strictLibrary); ok {
+	if sl, ok := mctx.Module().(*ModuleStrictLibrary); ok {
 		sl.Properties.Defines = append(sl.Properties.Defines, accumlatedDefines...)
 		sl.Properties.Deps = append(sl.Properties.Deps, accumlatedDeps...)
 		mctx.AddDependency(mctx.Module(), staticDepTag, accumlatedDeps...)
@@ -60,23 +60,23 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
+func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	// TODO: Merge this backend with linux_cclibs once the interfaces are close enough.
 	g := getBackend(ctx)
-	tc := g.getToolchain(l.Properties.TargetType)
+	tc := g.getToolchain(m.Properties.TargetType)
 	as, astargetflags := tc.getAssembler()
 	cc, cctargetflags := tc.getCCompiler()
 	cxx, cxxtargetflags := tc.getCXXCompiler()
 	var cflagsList []string = nil
-	for _, local_define := range l.Properties.Local_defines {
+	for _, local_define := range m.Properties.Local_defines {
 		cflagsList = append(cflagsList, ("-D" + local_define))
 	}
-	for _, local_define := range l.Properties.Defines {
+	for _, local_define := range m.Properties.Defines {
 		// TODO: For legacy libraries, this gets set in the mutator, it is unsymmetrical to set
 		// this up here.
 		cflagsList = append(cflagsList, ("-D" + local_define))
 	}
-	cflagsList = append(cflagsList, l.Properties.Copts...)
+	cflagsList = append(cflagsList, m.Properties.Copts...)
 
 	ctx.Variable(pctx, "asflags", utils.Join(astargetflags))
 	ctx.Variable(pctx, "cflags", utils.Join(cflagsList))
@@ -86,7 +86,7 @@ func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
 
-	l.GetSrcs(ctx).ForEach(
+	m.GetSrcs(ctx).ForEach(
 		func(source filePath) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
@@ -115,7 +115,7 @@ func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 				return true
 			}
 
-			output := l.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
+			output := m.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
 
 			ctx.Build(pctx,
 				blueprint.BuildParams{
@@ -132,7 +132,7 @@ func (l *strictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	return objectFiles, nonCompiledDeps
 }
 
-func (g *linuxGenerator) strictLibraryStaticActions(m *strictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
+func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
 	m.Static.outputdir = m.ObjDir()
 	m.Static.outs = []string{filepath.Join(m.Static.outputDir(), m.Name()+".a")}
 
@@ -145,7 +145,7 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *strictLibrary, ctx bluepr
 			return ctx.OtherModuleDependencyTag(m) == staticDepTag
 		},
 		func(m blueprint.Module) {
-			gen, _ := m.(*strictLibrary)
+			gen, _ := m.(*ModuleStrictLibrary)
 			depfiles = append(depfiles, gen.Static.outputs()...)
 		})
 	args := map[string]string{
@@ -169,7 +169,7 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *strictLibrary, ctx bluepr
 		})
 }
 
-func (g *linuxGenerator) strictLibrarySharedActions(m *strictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
+func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
 	m.Shared.outputdir = g.sharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.Shared.outputDir(), m.Name()+".so")
 	m.Shared.outs = []string{soFile}
@@ -225,14 +225,14 @@ func (g *linuxGenerator) strictLibrarySharedActions(m *strictLibrary, ctx bluepr
 		})
 }
 
-func (g *linuxGenerator) strictLibraryActions(m *strictLibrary, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
 	objectFiles, _ := m.CompileObjs(ctx)
 	g.strictLibraryStaticActions(m, ctx, objectFiles)
 	// TODO: Stub the shared lib implementation and break it off of this patch.
 	// g.strictLibrarySharedActions(m, ctx, objectFiles)
 }
 
-func proxyCflags(m *strictLibrary) []string {
+func proxyCflags(m *ModuleStrictLibrary) []string {
 	Cflags := m.Properties.Copts
 	for _, def := range m.Properties.Local_defines {
 		Cflags = append(Cflags, "-D"+def)
@@ -243,7 +243,7 @@ func proxyCflags(m *strictLibrary) []string {
 	return Cflags
 }
 
-func (g *androidBpGenerator) strictLibraryActions(m *strictLibrary, ctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
 	// TODO: Move this to it's own file
 
 	// TODO: Handle shared library versions too
