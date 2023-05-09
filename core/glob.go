@@ -43,7 +43,7 @@ type GlobProps struct {
 	Files FilePaths `blueprint:"mutated"`
 }
 
-type moduleGlob struct {
+type ModuleGlob struct {
 	moduleBase
 	Properties struct {
 		GlobProps
@@ -57,13 +57,13 @@ type moduleGlobInterface interface {
 	SourceFileProvider
 }
 
-var _ moduleGlobInterface = (*moduleGlob)(nil) // impl check
+var _ moduleGlobInterface = (*ModuleGlob)(nil) // impl check
 
-func (m *moduleGlob) shortName() string {
+func (m *ModuleGlob) shortName() string {
 	return m.Name()
 }
 
-func (m *moduleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	if len(m.Properties.Srcs) == 0 {
 		ctx.PropertyErrorf("srcs", "Missed required property.")
 		return
@@ -80,7 +80,7 @@ func (m *moduleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 	m.Properties.Exclude = utils.PrefixDirs(m.Properties.Exclude, prefix)
 }
 
-func (m *moduleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	matches := glob(ctx, m.Properties.Srcs, m.Properties.Exclude)
 	files := FilePaths{}
 
@@ -97,27 +97,27 @@ func (m *moduleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBa
 
 }
 
-func (m *moduleGlob) OutSrcs() FilePaths {
+func (m *ModuleGlob) OutSrcs() FilePaths {
 	return m.Properties.Files
 }
 
-func (m *moduleGlob) OutSrcTargets() (tgts []string) {
+func (m *ModuleGlob) OutSrcTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }
 
-func (g *moduleGlob) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleGlob) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// `moduleGlob` does not need any generate actions.
 	// Only sources should be returned to the modules depending on.
 }
 
-func (g moduleGlob) GetProperties() interface{} {
-	return g.Properties
+func (m ModuleGlob) GetProperties() interface{} {
+	return m.Properties
 }
 
 func globFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	t := true
-	module := &moduleGlob{}
+	module := &ModuleGlob{}
 
 	// set `Allow_empty` and `Exclude_directories` to true
 	// to match Bazel's `glob`
