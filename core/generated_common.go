@@ -284,7 +284,7 @@ func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []st
 
 			return true // keep visiting
 		} else if parent != mctx.Module() && depTag == sharedDepTag {
-			if l, ok := child.(*sharedLibrary); ok {
+			if l, ok := child.(*ModuleSharedLibrary); ok {
 				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
 			}
 

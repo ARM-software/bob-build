@@ -24,7 +24,7 @@ import (
 	"github.com/google/blueprint"
 )
 
-type sharedLibrary struct {
+type ModuleSharedLibrary struct {
 	ModuleLibrary
 	fileNameExtension string
 }
@@ -37,78 +37,78 @@ const (
 // * producing output using the linker
 // * producing a shared library
 // * stripping symbols from output
-var _ linkableModule = (*sharedLibrary)(nil)
-var _ sharedLibProducer = (*sharedLibrary)(nil)
-var _ stripable = (*sharedLibrary)(nil)
+var _ linkableModule = (*ModuleSharedLibrary)(nil)
+var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
+var _ stripable = (*ModuleSharedLibrary)(nil)
 
-func (l *sharedLibrary) getLinkName() string {
-	return l.outputName() + l.fileNameExtension
+func (m *ModuleSharedLibrary) getLinkName() string {
+	return m.outputName() + m.fileNameExtension
 }
 
-func (l *sharedLibrary) getSoname() string {
-	name := l.getLinkName()
-	if l.ModuleLibrary.Properties.Library_version != "" {
-		var v = strings.Split(l.ModuleLibrary.Properties.Library_version, ".")
+func (m *ModuleSharedLibrary) getSoname() string {
+	name := m.getLinkName()
+	if m.ModuleLibrary.Properties.Library_version != "" {
+		var v = strings.Split(m.ModuleLibrary.Properties.Library_version, ".")
 		name += "." + v[0]
 	}
 	return name
 }
 
-func (l *sharedLibrary) getRealName() string {
-	name := l.getLinkName()
-	if l.ModuleLibrary.Properties.Library_version != "" {
-		name += "." + l.ModuleLibrary.Properties.Library_version
+func (m *ModuleSharedLibrary) getRealName() string {
+	name := m.getLinkName()
+	if m.ModuleLibrary.Properties.Library_version != "" {
+		name += "." + m.ModuleLibrary.Properties.Library_version
 	}
 	return name
 }
 
-func (l *sharedLibrary) strip() bool {
-	return l.Properties.Strip != nil && *l.Properties.Strip
+func (m *ModuleSharedLibrary) strip() bool {
+	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
-func (l *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
+func (m *ModuleSharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
 	symlinks := map[string]string{}
 
-	if l.ModuleLibrary.Properties.Library_version != "" {
+	if m.ModuleLibrary.Properties.Library_version != "" {
 		// To build you need a symlink from the link name and soname.
 		// At runtime only the soname symlink is required.
-		soname := l.getSoname()
-		realName := l.getRealName()
+		soname := m.getSoname()
+		realName := m.getRealName()
 		if soname == realName {
 			utils.Die("module %s has invalid library_version '%s'",
-				l.Name(),
-				l.ModuleLibrary.Properties.Library_version)
+				m.Name(),
+				m.ModuleLibrary.Properties.Library_version)
 		}
-		symlinks[l.getLinkName()] = soname
+		symlinks[m.getLinkName()] = soname
 		symlinks[soname] = realName
 	}
 
 	return symlinks
 }
 
-func (l *sharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	if isEnabled(l) {
-		getBackend(ctx).sharedActions(l, ctx)
+func (m *ModuleSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	if isEnabled(m) {
+		getBackend(ctx).sharedActions(m, ctx)
 	}
 }
 
-func (l *sharedLibrary) outputFileName() string {
+func (m *ModuleSharedLibrary) outputFileName() string {
 	// Since we link against libraries using the library flag style,
 	// -lmod, return the name of the link library here rather than the
 	// real, versioned library.
-	return l.getLinkName()
+	return m.getLinkName()
 }
 
-func (l *sharedLibrary) getTocName() string {
-	return l.getRealName() + tocExt
+func (m *ModuleSharedLibrary) getTocName() string {
+	return m.getRealName() + tocExt
 }
 
-func (l sharedLibrary) GetProperties() interface{} {
-	return l.ModuleLibrary.Properties
+func (m ModuleSharedLibrary) GetProperties() interface{} {
+	return m.ModuleLibrary.Properties
 }
 
 func sharedLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &sharedLibrary{}
+	module := &ModuleSharedLibrary{}
 	if config.Properties.GetBool("osx") {
 		module.fileNameExtension = ".dylib"
 	} else {

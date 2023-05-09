@@ -135,7 +135,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 		// aren't actually applied
 		showLdlibs = false
 		depEdgeStyle = "dashed"
-	case *sharedLibrary:
+	case *ModuleSharedLibrary:
 		if !handler.showSharedLibraries {
 			return
 		}
