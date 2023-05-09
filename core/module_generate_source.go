@@ -40,7 +40,7 @@ type GenerateSourceProps struct {
 	ResolvedImplicits FilePaths `blueprint:"mutated"`
 }
 
-type generateSource struct {
+type ModuleGenerateSource struct {
 	ModuleGenerateCommon
 	Properties struct {
 		GenerateSourceProps
@@ -55,26 +55,26 @@ type generateSourceInterface interface {
 	SourceFileConsumer
 }
 
-var _ generateSourceInterface = (*generateSource)(nil) // impl check
+var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
 
-func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
 		g.generateSourceActions(m, ctx)
 	}
 }
 
-func (m *generateSource) FeaturableProperties() []interface{} {
+func (m *ModuleGenerateSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.GenerateSourceProps)
 }
 
-func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
 	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, projectModuleDir(ctx))
 	m.ModuleGenerateCommon.processPaths(ctx, g)
 }
 
-func (m *generateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// Resolve sources.
 	gc, _ := getGenerateCommon(m)
 	gc.Properties.LegacySourceProps.ResolveFiles(ctx, g)
@@ -97,30 +97,30 @@ func (m *generateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generat
 
 }
 
-func (m *generateSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenerateSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.LegacySourceProps.GetSrcs(ctx)
 }
 
-func (m *generateSource) GetDirectSrcs() FilePaths {
+func (m *ModuleGenerateSource) GetDirectSrcs() FilePaths {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.LegacySourceProps.GetDirectSrcs()
 }
 
-func (m *generateSource) GetImplicits(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenerateSource) GetImplicits(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.Properties.ResolvedImplicits
 }
 
-func (m *generateSource) GetSrcTargets() []string {
+func (m *ModuleGenerateSource) GetSrcTargets() []string {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.Generated_sources
 }
 
-func (m *generateSource) OutSrcs() FilePaths {
+func (m *ModuleGenerateSource) OutSrcs() FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *generateSource) OutSrcTargets() []string {
+func (m *ModuleGenerateSource) OutSrcTargets() []string {
 	return []string{}
 }
 
@@ -132,7 +132,7 @@ func (m *generateSource) OutSrcTargets() []string {
 // The outputs are relative to the output directory. This applies
 // to out, depfile and rspfile. The output directory (if needed) needs to be
 // added in by the backend specific GenerateBuildAction()
-func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
+func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
 
 	m.GetSrcs(ctx).ForEach(
@@ -158,17 +158,17 @@ func (m *generateSource) generateInouts(ctx blueprint.ModuleContext, g generator
 	return []inout{io}
 }
 
-func (m *generateSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+func (m *ModuleGenerateSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	// Install everything that we generate
 	return m.outputs()
 }
 
-func (m generateSource) GetProperties() interface{} {
+func (m ModuleGenerateSource) GetProperties() interface{} {
 	return m.Properties
 }
 
 func generateSourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &generateSource{}
+	module := &ModuleGenerateSource{}
 	module.ModuleGenerateCommon.init(&config.Properties,
 		GenerateProps{}, GenerateSourceProps{})
 

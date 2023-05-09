@@ -170,7 +170,7 @@ func contains(s []string, elem string) bool {
 	return false
 }
 
-func transformToolsAndroidToOld(ag *androidGenerateRule, pgs *generateSource) {
+func transformToolsAndroidToOld(ag *androidGenerateRule, pgs *ModuleGenerateSource) {
 	/*
 		Bob handles multiple tool files identically to android. e.g.
 		$(location tool2) == ${tool tool2}
@@ -218,7 +218,7 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 	// we have to assume some properties may have been modified.
 
 	// Re-use old Bob Code during transition by creating a proxy generateSource object to pass to the old generator
-	var proxyGenerateSource generateSource
+	var proxyGenerateSource ModuleGenerateSource
 	proxyGenerateSource.SimpleName.Properties.Name = ag.androidGenerateCommon.Properties.Name
 	ag.androidGenerateCommon.Properties.Cmd = transformCmdAndroidToOld(*ag.androidGenerateCommon.Properties.Cmd, ag)
 	transformToolsAndroidToOld(ag, &proxyGenerateSource)
@@ -241,7 +241,7 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 	ag.androidGenerateCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs
 }
 
-func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
 
 	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
