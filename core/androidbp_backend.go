@@ -195,8 +195,8 @@ func androidBpSingletonFactory() blueprint.Singleton {
 	return &androidBpSingleton{}
 }
 
-func collectBuildBpFilesMutator(mctx blueprint.BottomUpMutatorContext) {
-	buildbpPathsMap[mctx.BlueprintsFile()] = true
+func collectBuildBpFilesMutator(ctx blueprint.BottomUpMutatorContext) {
+	buildbpPathsMap[ctx.BlueprintsFile()] = true
 }
 
 // Extract dependencies from a depfile where:

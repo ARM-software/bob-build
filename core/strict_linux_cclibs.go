@@ -24,10 +24,10 @@ import (
 	"github.com/google/blueprint"
 )
 
-func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
+func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 	accumlatedDefines := []string{}
 	accumlatedDeps := []string{}
-	mctx.VisitDirectDeps(func(dep blueprint.Module) {
+	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 		strictLib, ok := dep.(*ModuleStrictLibrary)
 		if ok {
 			for _, define := range strictLib.Properties.Defines {
@@ -45,17 +45,17 @@ func propogateLibraryDefinesMutator(mctx blueprint.BottomUpMutatorContext) {
 		}
 	})
 
-	if sl, ok := mctx.Module().(*ModuleStrictLibrary); ok {
+	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
 		sl.Properties.Defines = append(sl.Properties.Defines, accumlatedDefines...)
 		sl.Properties.Deps = append(sl.Properties.Deps, accumlatedDeps...)
-		mctx.AddDependency(mctx.Module(), staticDepTag, accumlatedDeps...)
-	} else if l, ok := getLibrary(mctx.Module()); ok {
+		ctx.AddDependency(ctx.Module(), staticDepTag, accumlatedDeps...)
+	} else if l, ok := getLibrary(ctx.Module()); ok {
 		for _, define := range accumlatedDefines {
 			l.Properties.Cflags = append(l.Properties.Cflags, "-D"+define)
 			l.Properties.Defines = append(l.Properties.Defines, define)
 			// TODO: how we decide on static vs. shared?
 			l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
-			mctx.AddVariationDependencies(nil, staticDepTag, accumlatedDeps...)
+			ctx.AddVariationDependencies(nil, staticDepTag, accumlatedDeps...)
 		}
 	}
 }

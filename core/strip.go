@@ -64,9 +64,9 @@ type stripable interface {
 	setDebugPath(*string)
 }
 
-func debugInfoMutator(mctx blueprint.TopDownMutatorContext) {
-	if m, ok := mctx.Module().(stripable); ok {
-		path := getInstallGroupPathFromTag(mctx, debugInfoTag)
+func debugInfoMutator(ctx blueprint.TopDownMutatorContext) {
+	if m, ok := ctx.Module().(stripable); ok {
+		path := getInstallGroupPathFromTag(ctx, debugInfoTag)
 		m.setDebugPath(path)
 	}
 }

@@ -32,8 +32,8 @@ const (
 	minInt = -maxInt - 1
 )
 
-func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.BottomUpMutatorContext) {
-	mainModule := mctx.Module()
+func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.BottomUpMutatorContext) {
+	mainModule := ctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so not needed
@@ -152,9 +152,9 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, mainBuild.Static_libs)
 
-	mctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
+	ctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
-	mctx.AddVariationDependencies(nil, sharedDepTag, mainBuild.ExtraSharedLibs...)
+	ctx.AddVariationDependencies(nil, sharedDepTag, mainBuild.ExtraSharedLibs...)
 }

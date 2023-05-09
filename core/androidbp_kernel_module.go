@@ -45,7 +45,7 @@ func stringParams(optName string, optValueLists ...[]string) (opts []string) {
 
 const prebuiltMake = "prebuilts/build-tools/linux-x86/bin/make"
 
-func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(ko) {
 		return
 	}
@@ -63,7 +63,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, mctx bl
 
 	sources_param := "${in}"
 	var generated_deps []string
-	for _, mod := range ko.extraSymbolsModules(mctx) {
+	for _, mod := range ko.extraSymbolsModules(ctx) {
 		generated_deps = append(generated_deps, mod.Name())
 		// reference all dependent modules outputs, needed for related symvers files
 		sources_param += " $$(dirname ${" + mod.Name() + "_out})/Module.symvers"
@@ -77,7 +77,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, mctx bl
 	addProvenanceProps(bpmod, ko.Properties.AndroidProps)
 
 	srcs := []string{}
-	ko.Properties.GetSrcs(mctx).ForEach(
+	ko.Properties.GetSrcs(ctx).ForEach(
 		func(fp filePath) bool {
 			srcs = append(srcs, fp.localPath())
 			return true
@@ -100,7 +100,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, mctx bl
 			"--sources", sources_param,
 			"--common-root", getSourceDir(),
 			"--kernel", kdir,
-			"--module-dir", "${gen_dir}/" + mctx.ModuleDir(),
+			"--module-dir", "${gen_dir}/" + ctx.ModuleDir(),
 			"--make-command", prebuiltMake,
 			"--extra-cflags='" + utils.Join(ko.Properties.Cflags) + "'",
 		},

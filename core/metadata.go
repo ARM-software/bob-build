@@ -1,3 +1,20 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package core
 
 import (
@@ -30,32 +47,32 @@ func init() {
 // Collects information about targets.
 //
 // Currently collects `srcs` and deps.
-func metaDataCollector(mctx blueprint.BottomUpMutatorContext) {
+func metaDataCollector(ctx blueprint.BottomUpMutatorContext) {
 	// Alias/defaults are skipped to avoid polluting the file.
-	if _, ok := mctx.Module().(*ModuleAlias); ok {
+	if _, ok := ctx.Module().(*ModuleAlias); ok {
 		return
-	} else if _, ok := mctx.Module().(*ModuleDefaults); ok {
+	} else if _, ok := ctx.Module().(*ModuleDefaults); ok {
 		return
 	}
 
 	meta := ModuleMeta{}
 
-	if s, ok := mctx.Module().(SourceFileConsumer); ok {
-		s.GetSrcs(mctx).ForEach(
+	if s, ok := ctx.Module().(SourceFileConsumer); ok {
+		s.GetSrcs(ctx).ForEach(
 			func(fp filePath) bool {
 				meta.Srcs = append(meta.Srcs, fp.localPath())
 				return true
 			})
 	}
 
-	mctx.WalkDeps(func(dep, parent blueprint.Module) bool {
+	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
 		meta.TransitiveDeps = utils.AppendIfUnique(meta.TransitiveDeps, dep.Name())
 		return true
 	})
 
 	metaDataLock.Lock()
 	defer metaDataLock.Unlock()
-	metaData[mctx.ModuleName()] = meta
+	metaData[ctx.ModuleName()] = meta
 }
 
 // Writes the metadata to specified file if the path is set.

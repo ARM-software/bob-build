@@ -192,30 +192,30 @@ var (
 )
 
 // Locally store defaults in defaultsMap
-func DefaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultDepsStage1Mutator(ctx blueprint.BottomUpMutatorContext) {
 
-	if d, ok := mctx.Module().(*ModuleDefaults); ok {
+	if d, ok := ctx.Module().(*ModuleDefaults); ok {
 		srcs := d.getLegacySourceProperties()
 
 		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
 		if len(srcs.Srcs) > 0 || len(srcs.Exclude_srcs) > 0 {
-			getBackend(mctx).getLogger().Warn(warnings.DefaultSrcsWarning, mctx.BlueprintsFile(), mctx.ModuleName())
+			getBackend(ctx).getLogger().Warn(warnings.DefaultSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 
-	if l, ok := mctx.Module().(defaultable); ok {
+	if l, ok := ctx.Module().(defaultable); ok {
 		defaultsMapLock.Lock()
 		defer defaultsMapLock.Unlock()
 
-		defaultsMap[mctx.ModuleName()] = l.defaults()
+		defaultsMap[ctx.ModuleName()] = l.defaults()
 	}
 
-	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
+	if gsc, ok := getGenerateCommon(ctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
 			if !(tgt == tgtTypeHost || tgt == tgtTypeTarget) {
 				utils.Die("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
-					mctx.ModuleName(), gsc.Properties.Flag_defaults, tgt)
+					ctx.ModuleName(), gsc.Properties.Flag_defaults, tgt)
 			}
 		}
 	}
@@ -257,17 +257,17 @@ func expandDefault(d string, visited []string) []string {
 // on each module, and between hierarchies. Without flattening the
 // hierarchy we would need more control over the module visitation
 // order in WalkDeps.
-func DefaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultDepsStage2Mutator(ctx blueprint.BottomUpMutatorContext) {
 
-	_, isDefaults := mctx.Module().(*ModuleDefaults)
+	_, isDefaults := ctx.Module().(*ModuleDefaults)
 	if isDefaults {
 		return
 	}
 
-	if _, ok := mctx.Module().(defaultable); ok {
+	if _, ok := ctx.Module().(defaultable); ok {
 
 		// Get a flattened list of the default hierarchy
-		flattenedDefaults := expandDefault(mctx.ModuleName(), []string{})
+		flattenedDefaults := expandDefault(ctx.ModuleName(), []string{})
 
 		var defaults []string
 
@@ -280,6 +280,6 @@ func DefaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
 			}
 		}
 
-		mctx.AddDependency(mctx.Module(), defaultDepTag, defaults...)
+		ctx.AddDependency(ctx.Module(), defaultDepTag, defaults...)
 	}
 }

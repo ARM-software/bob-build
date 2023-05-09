@@ -226,10 +226,10 @@ func (m *ModuleGenerateCommon) defaults() []string {
 	return m.Properties.Flag_defaults
 }
 
-func (m *ModuleGenerateCommon) hostBinName(mctx blueprint.ModuleContext) (name string) {
-	mctx.VisitDirectDepsIf(
+func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name string) {
+	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return mctx.OtherModuleDependencyTag(dep) == hostToolBinTag
+			return ctx.OtherModuleDependencyTag(dep) == hostToolBinTag
 		},
 		func(module blueprint.Module) {
 			_, bin_ok := module.(*ModuleBinary)
@@ -237,7 +237,7 @@ func (m *ModuleGenerateCommon) hostBinName(mctx blueprint.ModuleContext) (name s
 			if bin_ok || genbin_ok {
 				name = module.Name()
 			} else {
-				mctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", module.Name())
+				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", module.Name())
 			}
 		})
 
@@ -248,7 +248,7 @@ func (m *ModuleGenerateCommon) hostBinName(mctx blueprint.ModuleContext) (name s
 // target type and shared library dependencies for a generator module.
 // This is different from the "tool" in that it used to depend on
 // a bob_binary module.
-func (m *ModuleGenerateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, TgtType) {
+func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string, []string, TgtType) {
 	// No host_bin provided
 	if m.Properties.Host_bin == nil {
 		return "", []string{}, tgtTypeUnknown
@@ -259,10 +259,10 @@ func (m *ModuleGenerateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string
 	hostBinTarget := tgtTypeUnknown
 	hostBinFound := false
 
-	mctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
-		depTag := mctx.OtherModuleDependencyTag(child)
+	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+		depTag := ctx.OtherModuleDependencyTag(child)
 
-		if parent == mctx.Module() && depTag == hostToolBinTag {
+		if parent == ctx.Module() && depTag == hostToolBinTag {
 			var outputs []string
 			hostBinFound = true
 
@@ -272,18 +272,18 @@ func (m *ModuleGenerateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string
 			} else if gb, ok := child.(*generateBinary); ok {
 				outputs = gb.outputs()
 			} else {
-				mctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
+				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
 				return false
 			}
 
 			if len(outputs) != 1 {
-				mctx.OtherModuleErrorf(child, "outputs() returned %d outputs", len(outputs))
+				ctx.OtherModuleErrorf(child, "outputs() returned %d outputs", len(outputs))
 			} else {
 				hostBinOut = outputs[0]
 			}
 
 			return true // keep visiting
-		} else if parent != mctx.Module() && depTag == sharedDepTag {
+		} else if parent != ctx.Module() && depTag == sharedDepTag {
 			if l, ok := child.(*ModuleSharedLibrary); ok {
 				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
 			}
@@ -295,7 +295,7 @@ func (m *ModuleGenerateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string
 	})
 
 	if !hostBinFound {
-		mctx.ModuleErrorf("Could not find module specified by `host_bin: %v`", m.Properties.Host_bin)
+		ctx.ModuleErrorf("Could not find module specified by `host_bin: %v`", m.Properties.Host_bin)
 	}
 
 	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget

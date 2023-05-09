@@ -39,10 +39,10 @@ import (
 // Note that this function returns a list of names instead of a single name.
 // This is due to resource module that can generate multiple Blueprint modules.
 // All other bob modules only return one name.
-func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string {
+func bpModuleNamesForDep(ctx blueprint.BaseModuleContext, name string) []string {
 	var dep blueprint.Module
 
-	mctx.VisitDirectDeps(func(m blueprint.Module) {
+	ctx.VisitDirectDeps(func(m blueprint.Module) {
 		if m.Name() == name {
 			dep = m
 		} else if l, ok := getLibrary(m); ok {
@@ -55,13 +55,13 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 	})
 
 	if dep == nil {
-		utils.Die("%s has no dependency '%s'", mctx.ModuleName(), name)
+		utils.Die("%s has no dependency '%s'", ctx.ModuleName(), name)
 	}
 
 	if r, ok := dep.(*ModuleResource); ok {
 		var modNames []string
 
-		r.Properties.GetSrcs(mctx).ForEach(
+		r.Properties.GetSrcs(ctx).ForEach(
 			func(fp filePath) bool {
 				modNames = append(modNames, r.getAndroidbpResourceName(fp.localPath()))
 				return true
@@ -83,20 +83,20 @@ func bpModuleNamesForDep(mctx blueprint.BaseModuleContext, name string) []string
 	return []string{dep.Name()}
 }
 
-func bpModuleNamesForDeps(mctx blueprint.BaseModuleContext, nameLists ...[]string) []string {
+func bpModuleNamesForDeps(ctx blueprint.BaseModuleContext, nameLists ...[]string) []string {
 	ccModules := []string{}
 	for _, nameList := range nameLists {
 		for _, name := range nameList {
-			ccModules = append(ccModules, bpModuleNamesForDep(mctx, name)...)
+			ccModules = append(ccModules, bpModuleNamesForDep(ctx, name)...)
 		}
 	}
 	return ccModules
 }
 
-func (m *ModuleLibrary) getGeneratedSourceModules(mctx blueprint.BaseModuleContext) (srcs []string) {
-	mctx.VisitDirectDepsIf(
+func (m *ModuleLibrary) getGeneratedSourceModules(ctx blueprint.BaseModuleContext) (srcs []string) {
+	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return mctx.OtherModuleDependencyTag(dep) == generatedSourceTag
+			return ctx.OtherModuleDependencyTag(dep) == generatedSourceTag
 		},
 		func(dep blueprint.Module) {
 			switch dep.(type) {
@@ -113,10 +113,10 @@ func (m *ModuleLibrary) getGeneratedSourceModules(mctx blueprint.BaseModuleConte
 	return
 }
 
-func (m *ModuleLibrary) getGeneratedHeaderModules(mctx blueprint.BaseModuleContext) (headers, exportHeaders []string) {
-	mctx.VisitDirectDeps(
+func (m *ModuleLibrary) getGeneratedHeaderModules(ctx blueprint.BaseModuleContext) (headers, exportHeaders []string) {
+	ctx.VisitDirectDeps(
 		func(dep blueprint.Module) {
-			switch mctx.OtherModuleDependencyTag(dep) {
+			switch ctx.OtherModuleDependencyTag(dep) {
 			case generatedHeaderTag:
 				headers = append(headers, dep.Name())
 			case exportGeneratedHeaderTag:
@@ -190,10 +190,10 @@ func addHWASANProps(m bpwriter.Module, props Build) {
 	}
 }
 
-func addRequiredModules(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.ModuleContext) {
+func addRequiredModules(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
 	if _, _, ok := getSoongInstallPath(m.getInstallableProps()); ok {
-		requiredModuleNames := m.getInstallDepPhonyNames(mctx)
-		mod.AddStringList("required", bpModuleNamesForDeps(mctx, requiredModuleNames))
+		requiredModuleNames := m.getInstallDepPhonyNames(ctx)
+		mod.AddStringList("required", bpModuleNamesForDeps(ctx, requiredModuleNames))
 	}
 }
 
@@ -229,34 +229,34 @@ func (g *androidBpGenerator) getVersionScript(m *ModuleLibrary, ctx blueprint.Mo
 	return m.Properties.Build.Version_script
 }
 
-func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.ModuleContext) {
+func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
 	if len(m.Properties.Export_include_dirs) > 0 {
 		utils.Die("Module %s exports non-local include dirs %v - this is not supported",
-			mctx.ModuleName(), m.Properties.Export_include_dirs)
+			ctx.ModuleName(), m.Properties.Export_include_dirs)
 	}
 
 	if len(m.Properties.Export_system_include_dirs) > 0 {
 		utils.Die("Module %s exports non-local system include dirs %v - this is not supported",
-			mctx.ModuleName(), m.Properties.Export_system_include_dirs)
+			ctx.ModuleName(), m.Properties.Export_system_include_dirs)
 	}
 
 	// Soong deals with exported include directories between library
 	// modules, but it doesn't export cflags.
-	_, _, _, _, exported_cflags := m.GetExportedVariables(mctx)
+	_, _, _, _, exported_cflags := m.GetExportedVariables(ctx)
 
 	cflags := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags, exported_cflags)
 
-	sharedLibs := bpModuleNamesForDeps(mctx, m.Properties.Shared_libs)
-	staticLibs := bpModuleNamesForDeps(mctx, m.Properties.ResolvedStaticLibs)
+	sharedLibs := bpModuleNamesForDeps(ctx, m.Properties.Shared_libs)
+	staticLibs := bpModuleNamesForDeps(ctx, m.Properties.ResolvedStaticLibs)
 	// Exported header libraries must be mentioned in both header_libs
 	// *and* export_header_lib_headers - i.e., we can't export a header
 	// library which isn't actually being used.
-	headerLibs := bpModuleNamesForDeps(mctx, m.Properties.Header_libs, m.Properties.Export_header_libs)
+	headerLibs := bpModuleNamesForDeps(ctx, m.Properties.Header_libs, m.Properties.Export_header_libs)
 
 	reexportShared := []string{}
 	reexportStatic := []string{}
-	reexportHeaders := bpModuleNamesForDeps(mctx, m.Properties.Export_header_libs)
-	for _, lib := range bpModuleNamesForDeps(mctx, m.Properties.Reexport_libs) {
+	reexportHeaders := bpModuleNamesForDeps(ctx, m.Properties.Export_header_libs)
+	for _, lib := range bpModuleNamesForDeps(ctx, m.Properties.Reexport_libs) {
 		if utils.Contains(sharedLibs, lib) {
 			reexportShared = append(reexportShared, lib)
 		} else if utils.Contains(staticLibs, lib) {
@@ -271,7 +271,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.Modu
 	}
 
 	srcs := []string{}
-	m.Properties.GetSrcs(mctx).ForEachIf(
+	m.Properties.GetSrcs(ctx).ForEachIf(
 		func(fp filePath) bool {
 			// On Android, generated sources are passed to the modules via
 			// `generated_sources` so they are omitted here.
@@ -285,16 +285,16 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.Modu
 
 	mod.AddStringList("srcs", srcs)
 
-	generated_srcs := m.getGeneratedSourceModules(mctx)
+	generated_srcs := m.getGeneratedSourceModules(ctx)
 	mod.AddStringList("generated_sources", generated_srcs)
 
-	genHeaderModules, exportGenHeaderModules := m.getGeneratedHeaderModules(mctx)
+	genHeaderModules, exportGenHeaderModules := m.getGeneratedHeaderModules(ctx)
 	mod.AddStringList("generated_headers", append(genHeaderModules, exportGenHeaderModules...))
 	mod.AddStringList("export_generated_headers", exportGenHeaderModules)
 	mod.AddStringList("exclude_srcs", m.Properties.Exclude_srcs)
 	err := addCFlags(mod, cflags, m.Properties.Conlyflags, m.Properties.Cxxflags)
 	if err != nil {
-		utils.Die("Module %s: %s", mctx.ModuleName(), err.Error())
+		utils.Die("Module %s: %s", ctx.ModuleName(), err.Error())
 	}
 	mod.AddStringList("include_dirs", m.Properties.Include_dirs)
 
@@ -302,9 +302,9 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.Modu
 	propagated to downstream deps. To remedy this, we add those paths to local includes also. */
 	localIncludeDirs := append(m.Properties.Local_include_dirs, m.Properties.Export_local_system_include_dirs...)
 	mod.AddStringList("local_include_dirs", localIncludeDirs)
-	mod.AddStringList("shared_libs", bpModuleNamesForDeps(mctx, m.Properties.Shared_libs))
+	mod.AddStringList("shared_libs", bpModuleNamesForDeps(ctx, m.Properties.Shared_libs))
 	mod.AddStringList("static_libs", staticLibs)
-	mod.AddStringList("whole_static_libs", bpModuleNamesForDeps(mctx, m.Properties.Whole_static_libs))
+	mod.AddStringList("whole_static_libs", bpModuleNamesForDeps(ctx, m.Properties.Whole_static_libs))
 	mod.AddStringList("header_libs", headerLibs)
 	mod.AddStringList("export_shared_lib_headers", reexportShared)
 	mod.AddStringList("export_static_lib_headers", reexportStatic)
@@ -318,17 +318,17 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.Modu
 
 	addProvenanceProps(mod, m.Properties.Build.AndroidProps)
 	addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
-	addRequiredModules(mod, m, mctx)
+	addRequiredModules(mod, m, ctx)
 
 	if m.Properties.Post_install_cmd != nil ||
 		m.Properties.Post_install_args != nil ||
 		m.Properties.Post_install_tool != nil {
 		utils.Die("Module %s has post install actions - this is not supported on Android.bp",
-			mctx.ModuleName())
+			ctx.ModuleName())
 	}
 }
 
-func addBinaryProps(mod bpwriter.Module, m ModuleBinary, mctx blueprint.ModuleContext) {
+func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleContext) {
 	// Handle installation
 	if _, installRel, ok := getSoongInstallPath(m.getInstallableProps()); ok {
 		// Only setup multilib for target modules.
@@ -336,7 +336,7 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, mctx blueprint.ModuleCo
 		// binaries in both modes.
 		// We disable multilib if this module depends on generated libraries
 		// (which can't support multilib).
-		if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
+		if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to
@@ -352,7 +352,7 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, mctx blueprint.ModuleCo
 	addHWASANProps(mod, m.Properties.Build)
 }
 
-func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx blueprint.ModuleContext) {
+func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
 	// Soong's `export_include_dirs` field is relative to the module
 	// dir. The Android.bp backend writes the file into the project
 	// root, so we can use the Export_local_include_dirs and its system counter part
@@ -364,7 +364,7 @@ func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, mctx bl
 	// This part handles the target libraries.
 	// We disable multilib if this module depends on generated libraries
 	// (which can't support multilib).
-	if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
+	if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
 	addHWASANProps(mod, m.Properties.Build)
@@ -375,7 +375,7 @@ func addStripProp(m bpwriter.Module) {
 	g.AddBool("all", true)
 }
 
-func (g *androidBpGenerator) binaryActions(m *ModuleBinary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
 	}
@@ -414,8 +414,8 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, mctx blueprint.Modul
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(mod, m.ModuleLibrary, mctx)
-	addBinaryProps(mod, *m, mctx)
+	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
+	addBinaryProps(mod, *m, ctx)
 	if m.strip() {
 		addStripProp(mod)
 	}
@@ -427,13 +427,13 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, mctx blueprint.Modul
 		mod.AddBool("gtest", false)
 	}
 
-	versionScript := g.getVersionScript(&m.ModuleLibrary, mctx)
+	versionScript := g.getVersionScript(&m.ModuleLibrary, ctx)
 	if versionScript != nil {
 		mod.AddString("version_script", *versionScript)
 	}
 }
 
-func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
 	}
@@ -460,19 +460,19 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, mctx blueprin
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(mod, m.ModuleLibrary, mctx)
-	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, mctx)
+	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
+	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
 	if m.strip() {
 		addStripProp(mod)
 	}
 
-	versionScript := g.getVersionScript(&m.ModuleLibrary, mctx)
+	versionScript := g.getVersionScript(&m.ModuleLibrary, ctx)
 	if versionScript != nil {
 		mod.AddString("version_script", *versionScript)
 	}
 }
 
-func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
 	}
@@ -493,6 +493,6 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, mctx blueprin
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(mod, m.ModuleLibrary, mctx)
-	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, mctx)
+	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
+	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
 }
