@@ -106,7 +106,7 @@ type generatorBackend interface {
 	sharedActions(*ModuleSharedLibrary, blueprint.ModuleContext)
 	staticActions(*ModuleStaticLibrary, blueprint.ModuleContext)
 	resourceActions(*resource, blueprint.ModuleContext)
-	filegroupActions(*filegroup, blueprint.ModuleContext)
+	filegroupActions(*ModuleFilegroup, blueprint.ModuleContext)
 	strictLibraryActions(*strictLibrary, blueprint.ModuleContext)
 
 	// Backend specific info for module types
