@@ -97,7 +97,7 @@ type generatorBackend interface {
 	aliasActions(*alias, blueprint.ModuleContext)
 	binaryActions(*ModuleBinary, blueprint.ModuleContext)
 	generateSourceActions(*ModuleGenerateSource, blueprint.ModuleContext)
-	androidGenerateRuleActions(*androidGenerateRule, blueprint.ModuleContext)
+	androidGenerateRuleActions(*ModuleGenrule, blueprint.ModuleContext)
 	transformSourceActions(*ModuleTransformSource, blueprint.ModuleContext)
 	genSharedActions(*generateSharedLibrary, blueprint.ModuleContext)
 	genStaticActions(*generateStaticLibrary, blueprint.ModuleContext)

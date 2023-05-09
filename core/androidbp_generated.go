@@ -134,13 +134,13 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	m.AddStringList("tools", gc.Properties.Tools)
 }
 
-func (g *androidBpGenerator) androidGenerateRuleActions(m *androidGenerateRule, mctx blueprint.ModuleContext) {
-	mod, err := AndroidBpFile().NewModule("genrule", m.shortName())
+func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, mctx blueprint.ModuleContext) {
+	mod, err := AndroidBpFile().NewModule("genrule", gr.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	g.androidGenerateCommonActions(&m.ModuleGenruleCommon, mctx, mod)
-	mod.AddStringList("out", m.Properties.Out)
+	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, mctx, mod)
+	mod.AddStringList("out", gr.Properties.Out)
 }
 
 func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mctx blueprint.ModuleContext) {
