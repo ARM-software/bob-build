@@ -454,7 +454,7 @@ func (l *library) LibraryFactory(config *BobConfig, module blueprint.Module) (bl
 func getBinaryOrSharedLib(m blueprint.Module) (*library, bool) {
 	if sl, ok := m.(*sharedLibrary); ok {
 		return &sl.library, true
-	} else if b, ok := m.(*binary); ok {
+	} else if b, ok := m.(*ModuleBinary); ok {
 		return &b.library, true
 	}
 
@@ -473,7 +473,7 @@ func getLibrary(m blueprint.Module) (*library, bool) {
 
 func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 	m := mctx.Module()
-	if b, ok := m.(*binary); ok {
+	if b, ok := m.(*ModuleBinary); ok {
 		props := b.Properties
 		b.checkField(len(props.Export_cflags) == 0, "export_cflags")
 		b.checkField(len(props.Export_include_dirs) == 0, "export_include_dirs")

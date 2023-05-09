@@ -328,28 +328,28 @@ func addCcLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContex
 	}
 }
 
-func addBinaryProps(m bpwriter.Module, l binary, mctx blueprint.ModuleContext) {
+func addBinaryProps(mod bpwriter.Module, m ModuleBinary, mctx blueprint.ModuleContext) {
 	// Handle installation
-	if _, installRel, ok := getSoongInstallPath(l.getInstallableProps()); ok {
+	if _, installRel, ok := getSoongInstallPath(m.getInstallableProps()); ok {
 		// Only setup multilib for target modules.
 		// We support multilib target binaries to allow creation of test
 		// binaries in both modes.
 		// We disable multilib if this module depends on generated libraries
 		// (which can't support multilib).
-		if l.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
-			m.AddString("compile_multilib", "both")
+		if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(mctx) {
+			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to
 			// install both 32 and 64 bit versions of the
 			// binaries.
-			g := m.NewGroup("multilib")
+			g := mod.NewGroup("multilib")
 			g.NewGroup("lib32").AddString("relative_install_path", installRel)
 			g.NewGroup("lib64").AddString("relative_install_path", installRel+"64")
 		}
 	}
 
-	addMTEProps(m, l.Properties.Build.AndroidMTEProps)
-	addHWASANProps(m, l.Properties.Build)
+	addMTEProps(mod, m.Properties.Build.AndroidMTEProps)
+	addHWASANProps(mod, m.Properties.Build)
 }
 
 func addStaticOrSharedLibraryProps(m bpwriter.Module, l library, mctx blueprint.ModuleContext) {
@@ -375,21 +375,21 @@ func addStripProp(m bpwriter.Module) {
 	g.AddBool("all", true)
 }
 
-func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleContext) {
-	if !enabledAndRequired(l) {
+func (g *androidBpGenerator) binaryActions(m *ModuleBinary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(m) {
 		return
 	}
 
 	// Calculate and record outputs
-	l.outs = []string{l.outputName()}
+	m.outs = []string{m.outputName()}
 
-	installBase, _, _ := getSoongInstallPath(l.getInstallableProps())
+	installBase, _, _ := getSoongInstallPath(m.getInstallableProps())
 
 	var modType string
 	useCcTest := false
 	if installBase == "tests" {
 		useCcTest = true
-		switch l.Properties.TargetType {
+		switch m.Properties.TargetType {
 		case tgtTypeHost:
 			modType = "cc_test_host"
 		case tgtTypeTarget:
@@ -398,10 +398,10 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 	} else {
 		if installBase != "" && installBase != "bin" {
 			panic(fmt.Errorf("Unknown base install location for %s (%s)",
-				l.Name(), installBase))
+				m.Name(), installBase))
 		}
 
-		switch l.Properties.TargetType {
+		switch m.Properties.TargetType {
 		case tgtTypeHost:
 			modType = "cc_binary_host"
 		case tgtTypeTarget:
@@ -409,27 +409,27 @@ func (g *androidBpGenerator) binaryActions(l *binary, mctx blueprint.ModuleConte
 		}
 	}
 
-	m, err := AndroidBpFile().NewModule(modType, l.shortName())
+	mod, err := AndroidBpFile().NewModule(modType, m.shortName())
 	if err != nil {
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(m, l.library, mctx)
-	addBinaryProps(m, *l, mctx)
-	if l.strip() {
-		addStripProp(m)
+	addCcLibraryProps(mod, m.library, mctx)
+	addBinaryProps(mod, *m, mctx)
+	if m.strip() {
+		addStripProp(mod)
 	}
 	if useCcTest {
 		// Avoid using cc_test default setup
-		m.AddBool("no_named_install_directory", true)
-		m.AddBool("include_build_directory", false)
-		m.AddBool("auto_gen_config", false)
-		m.AddBool("gtest", false)
+		mod.AddBool("no_named_install_directory", true)
+		mod.AddBool("include_build_directory", false)
+		mod.AddBool("auto_gen_config", false)
+		mod.AddBool("gtest", false)
 	}
 
-	versionScript := g.getVersionScript(&l.library, mctx)
+	versionScript := g.getVersionScript(&m.library, mctx)
 	if versionScript != nil {
-		m.AddString("version_script", *versionScript)
+		mod.AddString("version_script", *versionScript)
 	}
 }
 

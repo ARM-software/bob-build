@@ -454,8 +454,8 @@ func (g *linuxGenerator) getSharedLibArgs(l *sharedLibrary, ctx blueprint.Module
 	return args
 }
 
-func (g *linuxGenerator) getBinaryArgs(b *binary, ctx blueprint.ModuleContext) map[string]string {
-	return g.getCommonLibArgs(&b.library, ctx)
+func (g *linuxGenerator) getBinaryArgs(m *ModuleBinary, ctx blueprint.ModuleContext) map[string]string {
+	return g.getCommonLibArgs(&m.library, ctx)
 }
 
 // Returns the implicit dependencies for a library
@@ -571,7 +571,7 @@ var executableRule = pctx.StaticRule("executable",
 	}, "build_wrapper", "ldflags", "ldlibs", "linker", "shared_libs_dir",
 	"shared_libs_flags", "static_libs")
 
-func (g *linuxGenerator) binaryActions(m *binary, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
 	m.outputdir = g.binaryOutputDir(m.Properties.TargetType)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}

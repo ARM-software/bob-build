@@ -21,7 +21,7 @@ import (
 	"github.com/google/blueprint"
 )
 
-type binary struct {
+type ModuleBinary struct {
 	library
 }
 
@@ -32,9 +32,9 @@ type binaryInterface interface {
 	SourceFileProvider // A binary can provide itself as a source
 }
 
-var _ binaryInterface = (*binary)(nil) // impl check
+var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
-func (m *binary) OutSrcs() (srcs FilePaths) {
+func (m *ModuleBinary) OutSrcs() (srcs FilePaths) {
 	for _, out := range m.outputs() {
 		fp := newGeneratedFilePath(out)
 		srcs = srcs.AppendIfUnique(fp)
@@ -42,30 +42,30 @@ func (m *binary) OutSrcs() (srcs FilePaths) {
 	return
 }
 
-func (m *binary) OutSrcTargets() (tgts []string) {
+func (m *ModuleBinary) OutSrcTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }
 
-func (b *binary) strip() bool {
-	return b.Properties.Strip != nil && *b.Properties.Strip
+func (m *ModuleBinary) strip() bool {
+	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
-func (b *binary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	if isEnabled(b) {
-		getBackend(ctx).binaryActions(b, ctx)
+func (m *ModuleBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	if isEnabled(m) {
+		getBackend(ctx).binaryActions(m, ctx)
 	}
 }
 
-func (b *binary) outputFileName() string {
-	return b.outputName()
+func (m *ModuleBinary) outputFileName() string {
+	return m.outputName()
 }
 
-func (b binary) GetProperties() interface{} {
-	return b.library.Properties
+func (m ModuleBinary) GetProperties() interface{} {
+	return m.library.Properties
 }
 
 func binaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &binary{}
+	module := &ModuleBinary{}
 	return module.LibraryFactory(config, module)
 }

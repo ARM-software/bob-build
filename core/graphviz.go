@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2020 Arm Limited.
+ * Copyright 2018, 2020, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,7 +140,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			return
 		}
 		handler.graph.SetNodeBackgroundColor(mainModule.Name(), "orange")
-	case *binary:
+	case *ModuleBinary:
 		if !handler.showBinaries {
 			return
 		}

@@ -95,7 +95,7 @@ func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
 type generatorBackend interface {
 	// Module build actions
 	aliasActions(*alias, blueprint.ModuleContext)
-	binaryActions(*binary, blueprint.ModuleContext)
+	binaryActions(*ModuleBinary, blueprint.ModuleContext)
 	generateSourceActions(*generateSource, blueprint.ModuleContext)
 	androidGenerateRuleActions(*androidGenerateRule, blueprint.ModuleContext)
 	transformSourceActions(*transformSource, blueprint.ModuleContext)
