@@ -64,11 +64,11 @@ func (m generateBinary) GetProperties() interface{} {
 
 func genBinaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &generateBinary{}
-	module.generateCommon.init(&config.Properties, GenerateProps{})
+	module.ModuleGenerateCommon.init(&config.Properties, GenerateProps{})
 
 	return module, []interface{}{
 		&module.SimpleName.Properties,
-		&module.generateCommon.Properties,
+		&module.ModuleGenerateCommon.Properties,
 		&module.Properties,
 	}
 }

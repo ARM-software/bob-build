@@ -82,7 +82,7 @@ func (m generateSharedLibrary) GetProperties() interface{} {
 
 func genSharedLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSharedLibrary{}
-	module.generateCommon.init(&config.Properties, GenerateProps{},
+	module.ModuleGenerateCommon.init(&config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
 
 	if config.Properties.GetBool("osx") {
@@ -92,7 +92,7 @@ func genSharedLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	}
 	return module, []interface{}{
 		&module.SimpleName.Properties,
-		&module.generateCommon.Properties,
+		&module.ModuleGenerateCommon.Properties,
 		&module.Properties,
 	}
 }

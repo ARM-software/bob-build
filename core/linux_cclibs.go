@@ -363,7 +363,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
-				if installPath, ok := sl.generateCommon.Properties.InstallableProps.getInstallPath(); ok {
+				if installPath, ok := sl.ModuleGenerateCommon.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if el, ok := m.(*externalLib); ok {

@@ -76,7 +76,7 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 	return split[0], strings.Join(split[1:], "/")
 }
 
-type generateCommon struct {
+type ModuleGenerateCommon struct {
 	moduleBase
 	simpleOutputProducer
 	headerProducer
@@ -87,82 +87,82 @@ type generateCommon struct {
 	}
 }
 
-// generateCommon supports:
+// ModuleGenerateCommon supports:
 // * feature-specific properties
 // * module enabling/disabling
 // * module splitting for targets
 // * use of {{match_srcs}} on some properties
 // * properties that require escaping
 // * sharing properties from defaults via `flag_defaults` property
-var _ Featurable = (*generateCommon)(nil)
-var _ enableable = (*generateCommon)(nil)
-var _ splittable = (*generateCommon)(nil)
-var _ matchSourceInterface = (*generateCommon)(nil)
-var _ propertyEscapeInterface = (*generateCommon)(nil)
-var _ defaultable = (*generateCommon)(nil)
+var _ Featurable = (*ModuleGenerateCommon)(nil)
+var _ enableable = (*ModuleGenerateCommon)(nil)
+var _ splittable = (*ModuleGenerateCommon)(nil)
+var _ matchSourceInterface = (*ModuleGenerateCommon)(nil)
+var _ propertyEscapeInterface = (*ModuleGenerateCommon)(nil)
+var _ defaultable = (*ModuleGenerateCommon)(nil)
 
-func (m *generateCommon) init(properties *configProperties, list ...interface{}) {
+func (m *ModuleGenerateCommon) init(properties *configProperties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 	m.Properties.FlagArgsBuild.Host.init(properties, CommonProps{}, BuildProps{})
 	m.Properties.FlagArgsBuild.Target.init(properties, CommonProps{}, BuildProps{})
 }
 
-func (m *generateCommon) shortName() string {
+func (m *ModuleGenerateCommon) shortName() string {
 	return m.Name()
 }
 
-func (m *generateCommon) altName() string {
+func (m *ModuleGenerateCommon) altName() string {
 	return m.Name()
 }
 
-func (m *generateCommon) altShortName() string {
+func (m *ModuleGenerateCommon) altShortName() string {
 	return m.shortName()
 }
 
 // Workaround for Golang not having a way of querying superclasses
-func (m *generateCommon) getGenerateCommon() *generateCommon {
+func (m *ModuleGenerateCommon) getGenerateCommon() *ModuleGenerateCommon {
 	return m
 }
 
-func (m *generateCommon) FeaturableProperties() []interface{} {
+func (m *ModuleGenerateCommon) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.GenerateProps}
 }
 
-func (m *generateCommon) Features() *Features {
+func (m *ModuleGenerateCommon) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *generateCommon) getTarget() TgtType {
+func (m *ModuleGenerateCommon) getTarget() TgtType {
 	return m.Properties.Target
 }
 
-func (m *generateCommon) getInstallableProps() *InstallableProps {
+func (m *ModuleGenerateCommon) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *generateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
+func (m *ModuleGenerateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
 }
 
-func (m *generateCommon) supportedVariants() []TgtType {
+func (m *ModuleGenerateCommon) supportedVariants() []TgtType {
 	return []TgtType{m.Properties.Target}
 }
 
-func (m *generateCommon) disable() {
+func (m *ModuleGenerateCommon) disable() {
 	*m.Properties.Enabled = false
 }
 
-func (m *generateCommon) setVariant(variant TgtType) {
+func (m *ModuleGenerateCommon) setVariant(variant TgtType) {
 	if variant != m.Properties.Target {
 		utils.Die("Variant mismatch: %s != %s", variant, m.Properties.Target)
 	}
 }
 
-func (m *generateCommon) getSplittableProps() *SplittableProps {
+func (m *ModuleGenerateCommon) getSplittableProps() *SplittableProps {
 	return &m.Properties.FlagArgsBuild.SplittableProps
 }
 
-func (m *generateCommon) getEscapeProperties() []*[]string {
+func (m *ModuleGenerateCommon) getEscapeProperties() []*[]string {
 	return []*[]string{
 		&m.Properties.FlagArgsBuild.Asflags,
 		&m.Properties.FlagArgsBuild.Cflags,
@@ -171,7 +171,7 @@ func (m *generateCommon) getEscapeProperties() []*[]string {
 		&m.Properties.FlagArgsBuild.Ldflags}
 }
 
-func (m *generateCommon) getLegacySourceProperties() *LegacySourceProps {
+func (m *ModuleGenerateCommon) getLegacySourceProperties() *LegacySourceProps {
 	return &m.Properties.GenerateProps.LegacySourceProps
 }
 
@@ -179,25 +179,25 @@ func (m *generateCommon) getLegacySourceProperties() *LegacySourceProps {
 // seen sensible use-cases and for `generateCommon` these are:
 //   - Args
 //   - Cmd
-func (m *generateCommon) getMatchSourcePropNames() []string {
+func (m *ModuleGenerateCommon) getMatchSourcePropNames() []string {
 	return []string{"Cmd", "Args"}
 }
 
 // Populate the output from inout structures that have already been
 // filled out. Note, if output directories need to be referenced, then
 // inouts should be updated before calling this function.
-func (m *generateCommon) recordOutputsFromInout(inouts []inout) {
+func (m *ModuleGenerateCommon) recordOutputsFromInout(inouts []inout) {
 	for _, inout := range inouts {
 		m.outs = append(m.outs, inout.out...)
 		m.implicitOuts = append(m.implicitOuts, inout.implicitOuts...)
 	}
 }
 
-func (m *generateCommon) getEnableableProps() *EnableableProps {
+func (m *ModuleGenerateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *generateCommon) getDepfile() (name string, depfile bool) {
+func (m *ModuleGenerateCommon) getDepfile() (name string, depfile bool) {
 	depfile = proptools.Bool(m.Properties.Depfile)
 	if depfile {
 		name = getDepfileName(m.Name())
@@ -206,7 +206,7 @@ func (m *generateCommon) getDepfile() (name string, depfile bool) {
 	return "", depfile
 }
 
-func (m *generateCommon) getRspfile() (name string, rspfile bool) {
+func (m *ModuleGenerateCommon) getRspfile() (name string, rspfile bool) {
 	rspfile = m.Properties.Rsp_content != nil
 	if rspfile {
 		name = getRspfileName(m.Name())
@@ -215,18 +215,18 @@ func (m *generateCommon) getRspfile() (name string, rspfile bool) {
 	return "", rspfile
 }
 
-func (m *generateCommon) defaultableProperties() []interface{} {
+func (m *ModuleGenerateCommon) defaultableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.FlagArgsBuild.CommonProps,
 		&m.Properties.FlagArgsBuild.BuildProps,
 	}
 }
 
-func (m *generateCommon) defaults() []string {
+func (m *ModuleGenerateCommon) defaults() []string {
 	return m.Properties.Flag_defaults
 }
 
-func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string) {
+func (m *ModuleGenerateCommon) hostBinName(mctx blueprint.ModuleContext) (name string) {
 	mctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
 			return mctx.OtherModuleDependencyTag(dep) == hostToolBinTag
@@ -248,7 +248,7 @@ func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string)
 // target type and shared library dependencies for a generator module.
 // This is different from the "tool" in that it used to depend on
 // a bob_binary module.
-func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, TgtType) {
+func (m *ModuleGenerateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []string, TgtType) {
 	// No host_bin provided
 	if m.Properties.Host_bin == nil {
 		return "", []string{}, tgtTypeUnknown
@@ -301,7 +301,7 @@ func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []st
 	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget
 }
 
-func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, TgtType) {
+func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, TgtType) {
 	g := getBackend(ctx)
 
 	tc := g.getToolchain(m.Properties.Target)
@@ -373,7 +373,7 @@ func (m *generateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[strin
 	return cmd, args, dependents, hostTarget
 }
 
-func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string) (string, map[string]string, []string) {
+func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string) (string, map[string]string, []string) {
 
 	dependentTools := []string{}
 	toolsLabels := map[string]string{}
@@ -433,7 +433,7 @@ func (m *generateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string
 
 var toolTagRegex = regexp.MustCompile(`\$\{tool ([a-zA-Z0-9\/\.:_-]+)\}`)
 
-func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.LegacySourceProps.processPaths(ctx, g)
 	m.Properties.InstallableProps.processPaths(ctx, g)
 
@@ -461,21 +461,21 @@ func (m *generateCommon) processPaths(ctx blueprint.BaseModuleContext, g generat
 
 }
 
-func (m *generateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.LegacySourceProps.ResolveFiles(ctx, g)
 }
 
-func (m *generateCommon) getAliasList() []string {
+func (m *ModuleGenerateCommon) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
 type getGenerateCommonInterface interface {
-	getGenerateCommon() *generateCommon
+	getGenerateCommon() *ModuleGenerateCommon
 }
 
-func getGenerateCommon(i interface{}) (*generateCommon, bool) {
-	var gsc *generateCommon
+func getGenerateCommon(i interface{}) (*ModuleGenerateCommon, bool) {
+	var gsc *ModuleGenerateCommon
 	gsd, ok := i.(getGenerateCommonInterface)
 	if ok {
 		gsc = gsd.getGenerateCommon()

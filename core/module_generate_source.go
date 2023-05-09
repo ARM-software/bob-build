@@ -41,7 +41,7 @@ type GenerateSourceProps struct {
 }
 
 type generateSource struct {
-	generateCommon
+	ModuleGenerateCommon
 	Properties struct {
 		GenerateSourceProps
 	}
@@ -65,13 +65,13 @@ func (m *generateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
 func (m *generateSource) FeaturableProperties() []interface{} {
-	return append(m.generateCommon.FeaturableProperties(), &m.Properties.GenerateSourceProps)
+	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.GenerateSourceProps)
 }
 
 func (m *generateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
 	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, projectModuleDir(ctx))
-	m.generateCommon.processPaths(ctx, g)
+	m.ModuleGenerateCommon.processPaths(ctx, g)
 }
 
 func (m *generateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -169,9 +169,9 @@ func (m generateSource) GetProperties() interface{} {
 
 func generateSourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &generateSource{}
-	module.generateCommon.init(&config.Properties,
+	module.ModuleGenerateCommon.init(&config.Properties,
 		GenerateProps{}, GenerateSourceProps{})
 
-	return module, []interface{}{&module.generateCommon.Properties, &module.Properties,
+	return module, []interface{}{&module.ModuleGenerateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }

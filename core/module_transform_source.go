@@ -76,7 +76,7 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 // The working directory will be the source directory, and all paths will be relative to the source directory
 // if not else noted
 type transformSource struct {
-	generateCommon
+	ModuleGenerateCommon
 	Properties struct {
 		TransformSourceProps
 	}
@@ -93,7 +93,7 @@ type transformSourceInterface interface {
 var _ transformSourceInterface = (*transformSource)(nil) // impl check
 
 func (m *transformSource) FeaturableProperties() []interface{} {
-	return append(m.generateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
+	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
 func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
@@ -133,8 +133,8 @@ func (m *transformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
 	// TODO: Refactor this to share code with generateInouts, right now the ctx type is differnet so no sharing is possible.
 	m.GetSrcs(ctx).ForEach(
 		func(fp filePath) bool {
-			io := m.Properties.inoutForSrc(re, fp, m.generateCommon.Properties.Depfile,
-				m.generateCommon.Properties.Rsp_content != nil)
+			io := m.Properties.inoutForSrc(re, fp, m.ModuleGenerateCommon.Properties.Depfile,
+				m.ModuleGenerateCommon.Properties.Rsp_content != nil)
 			for _, out := range io.out {
 				fp := newGeneratedFilePathFromModule(out, ctx, g)
 				m.Properties.ResolvedOut = m.Properties.ResolvedOut.AppendIfUnique(fp)
@@ -157,8 +157,8 @@ func (m *transformSource) generateInouts(ctx blueprint.ModuleContext, g generato
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
 	for _, source := range m.sourceInfo(ctx, g) {
-		io := m.Properties.inoutForSrc(re, source, m.generateCommon.Properties.Depfile,
-			m.generateCommon.Properties.Rsp_content != nil)
+		io := m.Properties.inoutForSrc(re, source, m.ModuleGenerateCommon.Properties.Depfile,
+			m.ModuleGenerateCommon.Properties.Rsp_content != nil)
 		inouts = append(inouts, io)
 	}
 
@@ -183,10 +183,10 @@ func (m transformSource) GetProperties() interface{} {
 
 func transformSourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &transformSource{}
-	module.generateCommon.init(&config.Properties,
+	module.ModuleGenerateCommon.init(&config.Properties,
 		GenerateProps{}, TransformSourceProps{})
 
-	return module, []interface{}{&module.generateCommon.Properties,
+	return module, []interface{}{&module.ModuleGenerateCommon.Properties,
 		&module.Properties,
 		&module.SimpleName.Properties}
 }
