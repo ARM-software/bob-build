@@ -22,10 +22,10 @@ import (
 	"github.com/google/blueprint"
 )
 
-func (g *androidBpGenerator) filegroupActions(fg *filegroup, ctx blueprint.ModuleContext) {
-	m, err := AndroidBpFile().NewModule("filegroup", fg.shortName())
+func (g *androidBpGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
+	mod, err := AndroidBpFile().NewModule("filegroup", m.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	m.AddStringList("srcs", fg.Properties.Srcs)
+	mod.AddStringList("srcs", m.Properties.Srcs)
 }

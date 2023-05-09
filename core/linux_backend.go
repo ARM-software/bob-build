@@ -355,7 +355,7 @@ func (g *linuxGenerator) resourceActions(m *resource, ctx blueprint.ModuleContex
 	addPhony(m, ctx, installDeps, false)
 }
 
-func (g *linuxGenerator) filegroupActions(m *filegroup, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
 
 }
 

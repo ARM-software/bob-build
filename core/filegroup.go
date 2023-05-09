@@ -21,7 +21,7 @@ import (
 	"github.com/google/blueprint"
 )
 
-type filegroup struct {
+type ModuleFilegroup struct {
 	moduleBase
 	Properties struct {
 		SourceProps
@@ -36,48 +36,48 @@ type filegroupInterface interface {
 	SourceFileProvider
 }
 
-var _ filegroupInterface = (*filegroup)(nil) // impl check
+var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check
 
-func (m *filegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *filegroup) OutSrcs() FilePaths {
+func (m *ModuleFilegroup) OutSrcs() FilePaths {
 	return m.Properties.GetDirectSrcs()
 }
 
-func (m *filegroup) OutSrcTargets() []string {
+func (m *ModuleFilegroup) OutSrcTargets() []string {
 	return m.Properties.GetSrcTargets()
 }
 
-func (m *filegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleFilegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	getBackend(ctx).filegroupActions(m, ctx)
 }
 
-func (m *filegroup) shortName() string {
+func (m *ModuleFilegroup) shortName() string {
 	return m.Name()
 }
 
-func (m *filegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleFilegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.SourceProps.processPaths(ctx, g)
 }
 
-func (m *filegroup) FeaturableProperties() []interface{} {
+func (m *ModuleFilegroup) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.SourceProps,
 	}
 }
 
-func (m *filegroup) Features() *Features {
+func (m *ModuleFilegroup) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m filegroup) GetProperties() interface{} {
+func (m ModuleFilegroup) GetProperties() interface{} {
 	return m.Properties
 }
 
 func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &filegroup{}
+	module := &ModuleFilegroup{}
 	module.Properties.Features.Init(&config.Properties, SourceProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
