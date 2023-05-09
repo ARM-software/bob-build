@@ -472,27 +472,27 @@ func (g *androidBpGenerator) sharedActions(l *sharedLibrary, mctx blueprint.Modu
 	}
 }
 
-func (g *androidBpGenerator) staticActions(l *staticLibrary, mctx blueprint.ModuleContext) {
-	if !enabledAndRequired(l) {
+func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(m) {
 		return
 	}
 
 	// Calculate and record outputs
-	l.outs = []string{l.outputName()}
+	m.outs = []string{m.outputName()}
 
 	var modType string
-	switch l.Properties.TargetType {
+	switch m.Properties.TargetType {
 	case tgtTypeHost:
 		modType = "cc_library_host_static"
 	case tgtTypeTarget:
 		modType = "cc_library_static"
 	}
 
-	m, err := AndroidBpFile().NewModule(modType, l.shortName())
+	mod, err := AndroidBpFile().NewModule(modType, m.shortName())
 	if err != nil {
 		panic(err.Error())
 	}
 
-	addCcLibraryProps(m, l.ModuleLibrary, mctx)
-	addStaticOrSharedLibraryProps(m, l.ModuleLibrary, mctx)
+	addCcLibraryProps(mod, m.ModuleLibrary, mctx)
+	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, mctx)
 }

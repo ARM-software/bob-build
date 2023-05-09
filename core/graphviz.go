@@ -125,7 +125,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 
 	// Set type of node
 	switch mainModule.(type) {
-	case *staticLibrary:
+	case *ModuleStaticLibrary:
 		if !handler.showStaticLibraries {
 			return
 		}
