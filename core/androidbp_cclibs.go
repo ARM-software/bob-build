@@ -100,7 +100,7 @@ func (m *ModuleLibrary) getGeneratedSourceModules(mctx blueprint.BaseModuleConte
 		},
 		func(dep blueprint.Module) {
 			switch dep.(type) {
-			case *generateSource:
+			case *ModuleGenerateSource:
 			case *transformSource:
 			case *androidGenerateRule:
 			default:
@@ -126,7 +126,7 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(mctx blueprint.BaseModuleConte
 			}
 
 			switch dep.(type) {
-			case *generateSource:
+			case *ModuleGenerateSource:
 			case *transformSource:
 			case *androidGenerateRule:
 			default:

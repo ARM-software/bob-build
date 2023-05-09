@@ -110,7 +110,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 
 func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 
-	if _, ok := mctx.Module().(*generateSource); ok {
+	if _, ok := mctx.Module().(*ModuleGenerateSource); ok {
 		getBackend(mctx).getLogger().Warn(warnings.GenerateRuleWarning, mctx.BlueprintsFile(), mctx.ModuleName())
 	}
 

@@ -143,7 +143,7 @@ func (g *androidBpGenerator) androidGenerateRuleActions(ag *androidGenerateRule,
 	m.AddStringList("out", ag.Properties.Out)
 }
 
-func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(gs) {
 		return
 	}
