@@ -53,12 +53,12 @@ var cxxRule = pctx.StaticRule("cxx",
 		Description: "$out",
 	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper", "depfile")
 
-func (l *library) ObjDir() string {
-	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.outputName()) + string(os.PathSeparator)
+func (m *ModuleLibrary) ObjDir() string {
+	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
-func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
+func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	g := getBackend(ctx)
 
 	expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
@@ -156,7 +156,7 @@ func (l *library) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) 
 }
 
 // Returns the whole static dependencies for a library.
-func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
+func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	libs := []string{}
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == wholeStaticDepTag },
@@ -178,12 +178,12 @@ func (l *library) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 }
 
 // Returns all the static library dependencies for a module.
-func (l *library) GetStaticLibs(ctx blueprint.ModuleContext) []string {
+func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 	libs := []string{}
-	for _, moduleName := range l.Properties.ResolvedStaticLibs {
+	for _, moduleName := range m.Properties.ResolvedStaticLibs {
 		dep, _ := ctx.GetDirectDep(moduleName)
 		if dep == nil {
-			utils.Die("%s has no dependency on static lib %s", l.Name(), moduleName)
+			utils.Die("%s has no dependency on static lib %s", m.Name(), moduleName)
 		}
 		if sl, ok := dep.(*staticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
@@ -246,7 +246,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 		"build_wrapper": buildWrapper,
 	}
 
-	wholeStaticLibs := m.library.GetWholeStaticLibs(ctx)
+	wholeStaticLibs := m.ModuleLibrary.GetWholeStaticLibs(ctx)
 	implicits := wholeStaticLibs
 
 	if len(wholeStaticLibs) > 0 {
@@ -256,7 +256,7 @@ func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleCon
 
 	// The archiver rules do not allow adding arguments that the user can
 	// set, so does not support nonCompiledDeps
-	objectFiles, _ := m.library.CompileObjs(ctx)
+	objectFiles, _ := m.ModuleLibrary.CompileObjs(ctx)
 
 	// OSX workaround, see rule for details.
 	if len(objectFiles) == 0 && len(wholeStaticLibs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
@@ -331,19 +331,19 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 	return
 }
 
-func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
+func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
-	useNoAsNeeded := !l.Properties.Build.isForwardingSharedLibrary()
+	useNoAsNeeded := !m.Properties.Build.isForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
-	tc := getBackend(ctx).getToolchain(l.Properties.TargetType)
+	tc := getBackend(ctx).getToolchain(m.Properties.TargetType)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*sharedLibrary); ok {
-				b := &sl.library.Properties.Build
+				b := &sl.ModuleLibrary.Properties.Build
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
 					ldlibs = append(ldlibs, tc.getLinker().keepSharedLibraryTransitivity())
@@ -379,8 +379,8 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 	if hasForwardingLib {
 		ldlibs = append(ldlibs, tc.getLinker().getForwardingLibFlags())
 	}
-	if l.Properties.isRpathWanted() {
-		if installPath, ok := l.Properties.InstallableProps.getInstallPath(); ok {
+	if m.Properties.isRpathWanted() {
+		if installPath, ok := m.Properties.InstallableProps.getInstallPath(); ok {
 			var rpaths []string
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
@@ -395,38 +395,38 @@ func (l *library) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []strin
 	return
 }
 
-func (g *linuxGenerator) getCommonLibArgs(l *library, ctx blueprint.ModuleContext) map[string]string {
-	tc := g.getToolchain(l.Properties.TargetType)
+func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.ModuleContext) map[string]string {
+	tc := g.getToolchain(m.Properties.TargetType)
 
-	ldflags := l.Properties.Ldflags
+	ldflags := m.Properties.Ldflags
 
-	if l.Properties.Build.isForwardingSharedLibrary() {
+	if m.Properties.Build.isForwardingSharedLibrary() {
 		ldflags = append(ldflags, tc.getLinker().keepUnusedDependencies())
 	} else {
 		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
 	}
 
-	versionScript := l.getVersionScript(ctx)
+	versionScript := m.getVersionScript(ctx)
 	if versionScript != nil {
 		ldflags = append(ldflags, tc.getLinker().setVersionScript(*versionScript))
 	}
 
-	sharedLibLdlibs, sharedLibLdflags := l.getSharedLibFlags(ctx)
+	sharedLibLdlibs, sharedLibLdflags := m.getSharedLibFlags(ctx)
 
 	linker := tc.getLinker().getTool()
 	tcLdflags := tc.getLinker().getFlags()
 	tcLdlibs := tc.getLinker().getLibs()
-	buildWrapper, _ := l.Properties.Build.getBuildWrapperAndDeps(ctx)
+	buildWrapper, _ := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
-	wholeStaticLibs := l.GetWholeStaticLibs(ctx)
-	staticLibs := l.GetStaticLibs(ctx)
+	wholeStaticLibs := m.GetWholeStaticLibs(ctx)
+	staticLibs := m.GetStaticLibs(ctx)
 	staticLibFlags := []string{}
 	if len(wholeStaticLibs) > 0 {
 		staticLibFlags = append(staticLibFlags, tc.getLinker().linkWholeArchives(
 			wholeStaticLibs))
 	}
 	staticLibFlags = append(staticLibFlags, staticLibs...)
-	sharedLibDir := g.sharedLibsDir(l.Properties.TargetType)
+	sharedLibDir := g.sharedLibsDir(m.Properties.TargetType)
 	args := map[string]string{
 		"build_wrapper":   buildWrapper,
 		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
@@ -435,13 +435,13 @@ func (g *linuxGenerator) getCommonLibArgs(l *library, ctx blueprint.ModuleContex
 		"shared_libs_flags": utils.Join(append(sharedLibLdlibs,
 			tc.getLinker().setRpathLink(sharedLibDir))),
 		"static_libs": utils.Join(staticLibFlags),
-		"ldlibs":      utils.Join(l.Properties.Ldlibs, tcLdlibs),
+		"ldlibs":      utils.Join(m.Properties.Ldlibs, tcLdlibs),
 	}
 	return args
 }
 
 func (g *linuxGenerator) getSharedLibArgs(l *sharedLibrary, ctx blueprint.ModuleContext) map[string]string {
-	args := g.getCommonLibArgs(&l.library, ctx)
+	args := g.getCommonLibArgs(&l.ModuleLibrary, ctx)
 	ldflags := []string{}
 
 	if l.Properties.Library_version != "" {
@@ -455,7 +455,7 @@ func (g *linuxGenerator) getSharedLibArgs(l *sharedLibrary, ctx blueprint.Module
 }
 
 func (g *linuxGenerator) getBinaryArgs(m *ModuleBinary, ctx blueprint.ModuleContext) map[string]string {
-	return g.getCommonLibArgs(&m.library, ctx)
+	return g.getCommonLibArgs(&m.ModuleLibrary, ctx)
 }
 
 // Returns the implicit dependencies for a library

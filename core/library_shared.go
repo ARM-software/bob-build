@@ -25,7 +25,7 @@ import (
 )
 
 type sharedLibrary struct {
-	library
+	ModuleLibrary
 	fileNameExtension string
 }
 
@@ -47,8 +47,8 @@ func (l *sharedLibrary) getLinkName() string {
 
 func (l *sharedLibrary) getSoname() string {
 	name := l.getLinkName()
-	if l.library.Properties.Library_version != "" {
-		var v = strings.Split(l.library.Properties.Library_version, ".")
+	if l.ModuleLibrary.Properties.Library_version != "" {
+		var v = strings.Split(l.ModuleLibrary.Properties.Library_version, ".")
 		name += "." + v[0]
 	}
 	return name
@@ -56,8 +56,8 @@ func (l *sharedLibrary) getSoname() string {
 
 func (l *sharedLibrary) getRealName() string {
 	name := l.getLinkName()
-	if l.library.Properties.Library_version != "" {
-		name += "." + l.library.Properties.Library_version
+	if l.ModuleLibrary.Properties.Library_version != "" {
+		name += "." + l.ModuleLibrary.Properties.Library_version
 	}
 	return name
 }
@@ -69,7 +69,7 @@ func (l *sharedLibrary) strip() bool {
 func (l *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
 	symlinks := map[string]string{}
 
-	if l.library.Properties.Library_version != "" {
+	if l.ModuleLibrary.Properties.Library_version != "" {
 		// To build you need a symlink from the link name and soname.
 		// At runtime only the soname symlink is required.
 		soname := l.getSoname()
@@ -77,7 +77,7 @@ func (l *sharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]
 		if soname == realName {
 			utils.Die("module %s has invalid library_version '%s'",
 				l.Name(),
-				l.library.Properties.Library_version)
+				l.ModuleLibrary.Properties.Library_version)
 		}
 		symlinks[l.getLinkName()] = soname
 		symlinks[soname] = realName
@@ -104,7 +104,7 @@ func (l *sharedLibrary) getTocName() string {
 }
 
 func (l sharedLibrary) GetProperties() interface{} {
-	return l.library.Properties
+	return l.ModuleLibrary.Properties
 }
 
 func sharedLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
