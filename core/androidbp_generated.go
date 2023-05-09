@@ -46,7 +46,7 @@ func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blu
 	}
 }
 
-func expandCmd(gc *generateCommon, mctx blueprint.ModuleContext, s string) string {
+func expandCmd(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, s string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
@@ -86,7 +86,7 @@ func expandCmd(gc *generateCommon, mctx blueprint.ModuleContext, s string) strin
 	})
 }
 
-func populateCommonProps(gc *generateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
+func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
@@ -154,7 +154,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	}
 
 	srcs := []string{}
-	gs.generateCommon.Properties.GetDirectSrcs().ForEach(func(fp filePath) bool {
+	gs.ModuleGenerateCommon.Properties.GetDirectSrcs().ForEach(func(fp filePath) bool {
 		srcs = append(srcs, fp.localPath())
 		return true
 	})
@@ -169,7 +169,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *generateSource, mctx blue
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", implicits)
 
-	populateCommonProps(&gs.generateCommon, mctx, m)
+	populateCommonProps(&gs.ModuleGenerateCommon, mctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
 	addInstallProps(m, gs.getInstallableProps(), true)
@@ -186,7 +186,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 	}
 
 	srcs := []string{}
-	ts.generateCommon.Properties.GetDirectSrcs().ForEach(
+	ts.ModuleGenerateCommon.Properties.GetDirectSrcs().ForEach(
 		func(fp filePath) bool {
 			srcs = append(srcs, fp.localPath())
 			return true
@@ -199,7 +199,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx bl
 	gr.AddStringList("replace", ts.Properties.TransformSourceProps.Out.Replace)
 	gr.AddStringList("implicit_srcs", ts.Properties.TransformSourceProps.Out.Implicit_srcs)
 
-	populateCommonProps(&ts.generateCommon, mctx, m)
+	populateCommonProps(&ts.ModuleGenerateCommon, mctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
 	addInstallProps(m, ts.getInstallableProps(), true)

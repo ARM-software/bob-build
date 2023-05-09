@@ -64,12 +64,12 @@ func (m generateStaticLibrary) GetProperties() interface{} {
 
 func genStaticLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &generateStaticLibrary{}
-	module.generateCommon.init(&config.Properties, GenerateProps{},
+	module.ModuleGenerateCommon.init(&config.Properties, GenerateProps{},
 		GenerateLibraryProps{})
 
 	return module, []interface{}{
 		&module.SimpleName.Properties,
-		&module.generateCommon.Properties,
+		&module.ModuleGenerateCommon.Properties,
 		&module.Properties,
 	}
 }

@@ -39,7 +39,7 @@ var touchRule = pctx.StaticRule("touch",
 	})
 
 // Generate the build actions for a generateSource module and populates the outputs.
-func (g *linuxGenerator) generateCommonActions(m *generateCommon, ctx blueprint.ModuleContext, inouts []inout) {
+func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blueprint.ModuleContext, inouts []inout) {
 	m.outputdir = g.sourceOutputDir(ctx.Module())
 	prefixInoutsWithOutputDir(inouts, m.outputDir())
 
@@ -222,14 +222,14 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 	proxyGenerateSource.SimpleName.Properties.Name = ag.androidGenerateCommon.Properties.Name
 	ag.androidGenerateCommon.Properties.Cmd = transformCmdAndroidToOld(*ag.androidGenerateCommon.Properties.Cmd, ag)
 	transformToolsAndroidToOld(ag, &proxyGenerateSource)
-	proxyGenerateSource.generateCommon.Properties.Cmd = ag.androidGenerateCommon.Properties.Cmd
-	proxyGenerateSource.generateCommon.Properties.Tools = ag.androidGenerateCommon.Properties.Tool_files
-	proxyGenerateSource.generateCommon.Properties.Generated_deps = append(proxyGenerateSource.generateCommon.Properties.Generated_deps, ag.androidGenerateCommon.Properties.Tools...)
-	proxyGenerateSource.generateCommon.Properties.Export_gen_include_dirs = ag.androidGenerateCommon.Properties.Export_include_dirs
-	proxyGenerateSource.generateCommon.Properties.Srcs = ag.androidGenerateCommon.Properties.Srcs
-	proxyGenerateSource.generateCommon.Properties.Exclude_srcs = ag.androidGenerateCommon.Properties.Exclude_srcs
-	proxyGenerateSource.generateCommon.Properties.Depfile = ag.androidGenerateCommon.Properties.Depfile
-	proxyGenerateSource.generateCommon.Properties.ResolveFiles(mctx, g)
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Cmd = ag.androidGenerateCommon.Properties.Cmd
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Tools = ag.androidGenerateCommon.Properties.Tool_files
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, ag.androidGenerateCommon.Properties.Tools...)
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Export_gen_include_dirs = ag.androidGenerateCommon.Properties.Export_include_dirs
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = ag.androidGenerateCommon.Properties.Srcs
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = ag.androidGenerateCommon.Properties.Exclude_srcs
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = ag.androidGenerateCommon.Properties.Depfile
+	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(mctx, g)
 
 	proxyGenerateSource.Properties.Implicit_srcs = ag.androidGenerateCommon.Properties.Tool_files
 	proxyGenerateSource.Properties.Out = ag.Properties.Out
@@ -238,13 +238,13 @@ func (g *linuxGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mct
 	g.generateSourceActions(&proxyGenerateSource, mctx)
 
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
-	ag.androidGenerateCommon.outs = proxyGenerateSource.generateCommon.outs
+	ag.androidGenerateCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs
 }
 
 func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
 
-	g.generateCommonActions(&m.generateCommon, ctx, inouts)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
@@ -252,7 +252,7 @@ func (g *linuxGenerator) generateSourceActions(m *generateSource, ctx blueprint.
 
 func (g *linuxGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
-	g.generateCommonActions(&m.generateCommon, ctx, inouts)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
@@ -260,7 +260,7 @@ func (g *linuxGenerator) transformSourceActions(m *transformSource, ctx blueprin
 
 func (g *linuxGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
-	g.generateCommonActions(&m.generateCommon, ctx, inouts)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
@@ -268,7 +268,7 @@ func (g *linuxGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprin
 
 func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
-	g.generateCommonActions(&m.generateCommon, ctx, inouts)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
 	// Create a rule to copy the generated library
 	// from gen_dir to the common library directory
@@ -290,7 +290,7 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 
 func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
-	g.generateCommonActions(&m.generateCommon, ctx, inouts)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
 	// Create a rule to copy the generated binary
 	// from gen_dir to the common binary directory

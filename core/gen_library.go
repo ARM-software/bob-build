@@ -45,7 +45,7 @@ type GenerateLibraryProps struct {
 }
 
 type generateLibrary struct {
-	generateCommon
+	ModuleGenerateCommon
 	Properties struct {
 		GenerateLibraryProps
 	}
@@ -111,7 +111,7 @@ func (m *generateLibrary) processPaths(ctx blueprint.BaseModuleContext, g genera
 	pmdir := projectModuleDir(ctx)
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, pmdir)
 	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, pmdir)
-	m.generateCommon.processPaths(ctx, g)
+	m.ModuleGenerateCommon.processPaths(ctx, g)
 }
 
 //// Support generateLibraryInterface
@@ -158,7 +158,7 @@ func (m *generateLibrary) OutSrcTargets() []string {
 //// Support splittable
 
 func (m *generateLibrary) supportedVariants() []TgtType {
-	return []TgtType{m.generateCommon.Properties.Target}
+	return []TgtType{m.ModuleGenerateCommon.Properties.Target}
 }
 
 func (m *generateLibrary) disable() {
@@ -171,11 +171,11 @@ func (m *generateLibrary) setVariant(variant TgtType) {
 }
 
 func (m *generateLibrary) getSplittableProps() *SplittableProps {
-	return &m.generateCommon.Properties.FlagArgsBuild.SplittableProps
+	return &m.ModuleGenerateCommon.Properties.FlagArgsBuild.SplittableProps
 }
 
 func (m *generateLibrary) FeaturableProperties() []interface{} {
-	return append(m.generateCommon.FeaturableProperties(), &m.Properties.GenerateLibraryProps)
+	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.GenerateLibraryProps)
 }
 
 //// Support singleOutputModule interface
