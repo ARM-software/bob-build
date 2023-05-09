@@ -232,7 +232,7 @@ func (m *generateCommon) hostBinName(mctx blueprint.ModuleContext) (name string)
 			return mctx.OtherModuleDependencyTag(dep) == hostToolBinTag
 		},
 		func(module blueprint.Module) {
-			_, bin_ok := module.(*binary)
+			_, bin_ok := module.(*ModuleBinary)
 			_, genbin_ok := module.(*generateBinary)
 			if bin_ok || genbin_ok {
 				name = module.Name()
@@ -266,7 +266,7 @@ func (m *generateCommon) hostBinOuts(mctx blueprint.ModuleContext) (string, []st
 			var outputs []string
 			hostBinFound = true
 
-			if b, ok := child.(*binary); ok {
+			if b, ok := child.(*ModuleBinary); ok {
 				outputs = b.outputs()
 				hostBinTarget = b.getTarget()
 			} else if gb, ok := child.(*generateBinary); ok {
