@@ -62,7 +62,7 @@ func isBuiltByDefault(e enableable) bool {
 		if m.Properties.TargetType == tgtTypeTarget {
 			return true
 		}
-	case *kernelModule:
+	case *ModuleKernelObject:
 		return true
 	}
 	return false

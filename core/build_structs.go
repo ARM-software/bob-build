@@ -102,7 +102,7 @@ type generatorBackend interface {
 	genSharedActions(*generateSharedLibrary, blueprint.ModuleContext)
 	genStaticActions(*generateStaticLibrary, blueprint.ModuleContext)
 	genBinaryActions(*generateBinary, blueprint.ModuleContext)
-	kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext)
+	kernelModuleActions(*ModuleKernelObject, blueprint.ModuleContext)
 	sharedActions(*ModuleSharedLibrary, blueprint.ModuleContext)
 	staticActions(*ModuleStaticLibrary, blueprint.ModuleContext)
 	resourceActions(*ModuleResource, blueprint.ModuleContext)
@@ -410,7 +410,7 @@ func dependerMutator(mctx blueprint.BottomUpMutatorContext) {
 		mctx.AddVariationDependencies(nil, staticDepTag, sl.Properties.Deps...)
 	}
 
-	if km, ok := mctx.Module().(*kernelModule); ok {
+	if km, ok := mctx.Module().(*ModuleKernelObject); ok {
 		mctx.AddDependency(mctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
 	}
 

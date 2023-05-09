@@ -43,32 +43,32 @@ var (
 		"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
 )
 
-func (g *linuxGenerator) kernelModOutputDir(m *kernelModule) string {
-	return filepath.Join("${BuildDir}", "target", "kernel_modules", m.outputName())
+func (g *linuxGenerator) kernelModOutputDir(ko *ModuleKernelObject) string {
+	return filepath.Join("${BuildDir}", "target", "kernel_modules", ko.outputName())
 }
 
-func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = g.kernelModOutputDir(m)
-	m.outs = []string{filepath.Join(m.outputDir(), m.outputName()+".ko")}
-	optional := !isBuiltByDefault(m)
+	ko.outputdir = g.kernelModOutputDir(ko)
+	ko.outs = []string{filepath.Join(ko.outputDir(), ko.outputName()+".ko")}
+	optional := !isBuiltByDefault(ko)
 
-	args := m.generateKbuildArgs(ctx).toDict()
+	args := ko.generateKbuildArgs(ctx).toDict()
 	delete(args, "kmod_build")
 
 	sources := []string{}
-	m.Properties.GetSrcs(ctx).ForEach(
+	ko.Properties.GetSrcs(ctx).ForEach(
 		func(fp filePath) bool {
 			sources = append(sources, fp.buildPath())
 			return true
 		})
 
-	sources = append(sources, m.extraSymbolsFiles(ctx)...)
+	sources = append(sources, ko.extraSymbolsFiles(ctx)...)
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     kbuildRule,
-			Outputs:  m.outputs(),
+			Outputs:  ko.outputs(),
 			Inputs:   sources,
 			Optional: true,
 			Args:     args,
@@ -80,11 +80,11 @@ func (g *linuxGenerator) kernelModuleActions(m *kernelModule, ctx blueprint.Modu
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
-			Inputs:   m.outputs(),
-			Outputs:  []string{filepath.Join(m.outputDir(), "Module.symvers")},
+			Inputs:   ko.outputs(),
+			Outputs:  []string{filepath.Join(ko.outputDir(), "Module.symvers")},
 			Optional: true,
 		})
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
-	addPhony(m, ctx, installDeps, optional)
+	installDeps := append(g.install(ko, ctx), g.getPhonyFiles(ko)...)
+	addPhony(ko, ctx, installDeps, optional)
 }
