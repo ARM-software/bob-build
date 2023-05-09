@@ -540,7 +540,7 @@ func findRequiredModulesMutator(mctx blueprint.TopDownMutatorContext) {
 		} else {
 			return
 		}
-	} else if _, ok := mctx.Module().(*defaults); ok { // Ignore defaults.
+	} else if _, ok := mctx.Module().(*ModuleDefaults); ok { // Ignore defaults.
 		return
 	} else if _, ok := mctx.Module().(*alias); ok { // Ignore aliases.
 		return
@@ -571,7 +571,7 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 	// or if type is not enableable (eg. alias)
 	ep, ok := module.(enableable)
 	if ok {
-		if _, ok := module.(*defaults); ok {
+		if _, ok := module.(*ModuleDefaults); ok {
 			return
 		}
 		if !isEnabled(ep) {
@@ -586,7 +586,7 @@ func checkDisabledMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	mctx.VisitDirectDeps(func(dep blueprint.Module) {
 		// ignore defaults - it's allowed for them to be disabled
-		if _, ok := dep.(*defaults); ok {
+		if _, ok := dep.(*ModuleDefaults); ok {
 			return
 		}
 		if e, ok := dep.(enableable); ok {

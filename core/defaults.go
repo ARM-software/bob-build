@@ -26,7 +26,7 @@ import (
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
-type defaults struct {
+type ModuleDefaults struct {
 	moduleBase
 
 	Properties struct {
@@ -38,31 +38,31 @@ type defaults struct {
 	}
 }
 
-func (m *defaults) supportedVariants() []TgtType {
+func (m *ModuleDefaults) supportedVariants() []TgtType {
 	return []TgtType{tgtTypeHost, tgtTypeTarget}
 }
 
-func (m *defaults) disable() {
+func (m *ModuleDefaults) disable() {
 	panic("disable() called on Default")
 }
 
-func (m *defaults) setVariant(variant TgtType) {
+func (m *ModuleDefaults) setVariant(variant TgtType) {
 	m.Properties.TargetType = variant
 }
 
-func (m *defaults) getSplittableProps() *SplittableProps {
+func (m *ModuleDefaults) getSplittableProps() *SplittableProps {
 	return &m.Properties.SplittableProps
 }
 
-func (m *defaults) defaults() []string {
+func (m *ModuleDefaults) defaults() []string {
 	return m.Properties.Defaults
 }
 
-func (m *defaults) build() *Build {
+func (m *ModuleDefaults) build() *Build {
 	return &m.Properties.Build
 }
 
-func (m *defaults) defaultableProperties() []interface{} {
+func (m *ModuleDefaults) defaultableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
@@ -71,7 +71,7 @@ func (m *defaults) defaultableProperties() []interface{} {
 	}
 }
 
-func (m *defaults) FeaturableProperties() []interface{} {
+func (m *ModuleDefaults) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
@@ -80,7 +80,7 @@ func (m *defaults) FeaturableProperties() []interface{} {
 	}
 }
 
-func (m *defaults) targetableProperties() []interface{} {
+func (m *ModuleDefaults) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
@@ -89,27 +89,27 @@ func (m *defaults) targetableProperties() []interface{} {
 	}
 }
 
-func (m *defaults) Features() *Features {
+func (m *ModuleDefaults) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *defaults) getTarget() TgtType {
+func (m *ModuleDefaults) getTarget() TgtType {
 	return m.Properties.TargetType
 }
 
-func (m *defaults) getTargetSpecific(variant TgtType) *TargetSpecific {
+func (m *ModuleDefaults) getTargetSpecific(variant TgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(variant)
 }
 
-func (m *defaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleDefaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.Build.processPaths(ctx, g)
 	m.Properties.KernelProps.processPaths(ctx)
 }
 
-func (m *defaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleDefaults) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
-func (m *defaults) getEscapeProperties() []*[]string {
+func (m *ModuleDefaults) getEscapeProperties() []*[]string {
 	return []*[]string{
 		&m.Properties.Asflags,
 		&m.Properties.Cflags,
@@ -118,7 +118,7 @@ func (m *defaults) getEscapeProperties() []*[]string {
 		&m.Properties.Ldflags}
 }
 
-func (m *defaults) getLegacySourceProperties() *LegacySourceProps {
+func (m *ModuleDefaults) getLegacySourceProperties() *LegacySourceProps {
 	return &m.Properties.LegacySourceProps
 }
 
@@ -128,16 +128,16 @@ func (m *defaults) getLegacySourceProperties() *LegacySourceProps {
 //   - Cflags
 //   - Conlyflags
 //   - Cxxflags
-func (m *defaults) getMatchSourcePropNames() []string {
+func (m *ModuleDefaults) getMatchSourcePropNames() []string {
 	return []string{"Ldflags", "Cflags", "Conlyflags", "Cxxflags"}
 }
 
-func (m defaults) GetProperties() interface{} {
+func (m ModuleDefaults) GetProperties() interface{} {
 	return m.Properties
 }
 
 func defaultsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &defaults{}
+	module := &ModuleDefaults{}
 
 	module.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, SplittableProps{})
 	module.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{})
@@ -158,25 +158,25 @@ type defaultable interface {
 }
 
 // Defaults use other defaults, so are themselves `defaultable`
-var _ defaultable = (*defaults)(nil)
+var _ defaultable = (*ModuleDefaults)(nil)
 
 // Defaults have build properties
-var _ moduleWithBuildProps = (*defaults)(nil)
+var _ moduleWithBuildProps = (*ModuleDefaults)(nil)
 
 // Defaults have host and target variants
-var _ targetSpecificLibrary = (*defaults)(nil)
+var _ targetSpecificLibrary = (*ModuleDefaults)(nil)
 
 // Defaults support conditional properties via "features"
-var _ Featurable = (*defaults)(nil)
+var _ Featurable = (*ModuleDefaults)(nil)
 
 // Defaults contain path fragments which need to be prefixes
-var _ pathProcessor = (*defaults)(nil)
+var _ pathProcessor = (*ModuleDefaults)(nil)
 
 // Defaults support {{match_srcs}} on some properties
-var _ matchSourceInterface = (*defaults)(nil)
+var _ matchSourceInterface = (*ModuleDefaults)(nil)
 
 // Defaults have properties that require escaping
-var _ propertyEscapeInterface = (*defaults)(nil)
+var _ propertyEscapeInterface = (*ModuleDefaults)(nil)
 
 var (
 	// Map of defaults for each module.
@@ -194,7 +194,7 @@ var (
 // Locally store defaults in defaultsMap
 func DefaultDepsStage1Mutator(mctx blueprint.BottomUpMutatorContext) {
 
-	if d, ok := mctx.Module().(*defaults); ok {
+	if d, ok := mctx.Module().(*ModuleDefaults); ok {
 		srcs := d.getLegacySourceProperties()
 
 		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
@@ -259,7 +259,7 @@ func expandDefault(d string, visited []string) []string {
 // order in WalkDeps.
 func DefaultDepsStage2Mutator(mctx blueprint.BottomUpMutatorContext) {
 
-	_, isDefaults := mctx.Module().(*defaults)
+	_, isDefaults := mctx.Module().(*ModuleDefaults)
 	if isDefaults {
 		return
 	}

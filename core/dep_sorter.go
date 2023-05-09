@@ -39,7 +39,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(mctx blueprint.
 			return // Not enabled, so not needed
 		}
 	}
-	if _, ok := mainModule.(*defaults); ok {
+	if _, ok := mainModule.(*ModuleDefaults); ok {
 		return // ignore bob_defaults
 	}
 

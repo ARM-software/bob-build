@@ -145,7 +145,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 			return
 		}
 		handler.graph.SetNodeBackgroundColor(mainModule.Name(), "gray")
-	case *defaults:
+	case *ModuleDefaults:
 		if !handler.showDefaults {
 			return
 		}
@@ -196,7 +196,7 @@ func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorCo
 		}
 	}
 
-	if moduleDefault, ok := mainModule.(*defaults); ok && handler.showDefaults {
+	if moduleDefault, ok := mainModule.(*ModuleDefaults); ok && handler.showDefaults {
 		for _, element := range moduleDefault.defaults() {
 			handler.graph.AddEdge(mainModule.Name(), element)
 			handler.graph.SetEdgeColor(mainModule.Name(), element, "yellow")
