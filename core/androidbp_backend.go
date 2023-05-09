@@ -56,7 +56,7 @@ func AndroidBpFile() bpwriter.File {
 }
 
 // Translate `bob_alias` to `phony` rules in Android.bp
-func (g *androidBpGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
 	srcs := []string{}
 
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
@@ -94,7 +94,7 @@ func (g *androidBpGenerator) aliasActions(m *alias, ctx blueprint.ModuleContext)
 		return
 	}
 
-	mod, err := AndroidBpFile().NewModule("phony", m.Name())
+	mod, err := AndroidBpFile().NewModule("phony", a.Name())
 	if err != nil {
 		panic(err)
 	}

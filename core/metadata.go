@@ -32,7 +32,7 @@ func init() {
 // Currently collects `srcs` and deps.
 func metaDataCollector(mctx blueprint.BottomUpMutatorContext) {
 	// Alias/defaults are skipped to avoid polluting the file.
-	if _, ok := mctx.Module().(*alias); ok {
+	if _, ok := mctx.Module().(*ModuleAlias); ok {
 		return
 	} else if _, ok := mctx.Module().(*ModuleDefaults); ok {
 		return
