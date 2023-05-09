@@ -113,7 +113,7 @@ func (ag *AndroidGenerateCommonProps) GetSrcs(ctx blueprint.BaseModuleContext) F
 	return ag.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
 }
 
-type androidGenerateCommon struct {
+type ModuleGenruleCommon struct {
 	moduleBase
 	EnableableProps
 	simpleOutputProducer
@@ -123,39 +123,39 @@ type androidGenerateCommon struct {
 	}
 }
 
-var _ SourceFileConsumer = (*androidGenerateCommon)(nil)
+var _ SourceFileConsumer = (*ModuleGenruleCommon)(nil)
 
-func (m *androidGenerateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.AndroidGenerateCommonProps.processPaths(ctx, g)
 }
 
-func (m *androidGenerateCommon) GetSrcTargets() []string {
+func (m *ModuleGenruleCommon) GetSrcTargets() []string {
 	return m.Properties.GetSrcTargets()
 }
 
-func (m *androidGenerateCommon) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenruleCommon) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.Properties.GetSrcs(ctx)
 }
 
-func (m *androidGenerateCommon) GetDirectSrcs() FilePaths {
+func (m *ModuleGenruleCommon) GetDirectSrcs() FilePaths {
 	return m.Properties.GetDirectSrcs()
 }
 
-func (m *androidGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.ResolveFiles(ctx, g)
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
 type getAndroidGenerateCommonInterface interface {
-	getAndroidGenerateCommon() *androidGenerateCommon
+	getAndroidGenerateCommon() *ModuleGenruleCommon
 }
 
-func (m *androidGenerateCommon) getAndroidGenerateCommon() *androidGenerateCommon {
+func (m *ModuleGenruleCommon) getAndroidGenerateCommon() *ModuleGenruleCommon {
 	return m
 }
 
-func getAndroidGenerateCommon(i interface{}) (*androidGenerateCommon, bool) {
-	var gsc *androidGenerateCommon
+func getAndroidGenerateCommon(i interface{}) (*ModuleGenruleCommon, bool) {
+	var gsc *ModuleGenruleCommon
 	gsd, ok := i.(getAndroidGenerateCommonInterface)
 	if ok {
 		gsc = gsd.getAndroidGenerateCommon()
@@ -164,7 +164,7 @@ func getAndroidGenerateCommon(i interface{}) (*androidGenerateCommon, bool) {
 }
 
 type androidGenerateRule struct {
-	androidGenerateCommon
+	ModuleGenruleCommon
 	Properties struct {
 		AndroidGenerateRuleProps
 	}
@@ -179,11 +179,11 @@ type androidGenerateRuleInterface interface {
 var _ androidGenerateRuleInterface = (*androidGenerateRule)(nil) // impl check
 
 func (m *androidGenerateRule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.androidGenerateCommon.processPaths(ctx, g)
+	m.ModuleGenruleCommon.processPaths(ctx, g)
 }
 
 func (m *androidGenerateRule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.androidGenerateCommon.ResolveFiles(ctx, g)
+	m.ModuleGenruleCommon.ResolveFiles(ctx, g)
 
 	files := FilePaths{}
 	for _, out := range m.Properties.Out {
@@ -195,15 +195,15 @@ func (m *androidGenerateRule) ResolveFiles(ctx blueprint.BaseModuleContext, g ge
 }
 
 func (m *androidGenerateRule) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.androidGenerateCommon.Properties.GetSrcs(ctx)
+	return m.ModuleGenruleCommon.Properties.GetSrcs(ctx)
 }
 
 func (m *androidGenerateRule) GetDirectSrcs() FilePaths {
-	return m.androidGenerateCommon.Properties.GetDirectSrcs()
+	return m.ModuleGenruleCommon.Properties.GetDirectSrcs()
 }
 
 func (m *androidGenerateRule) GetSrcTargets() []string {
-	return m.androidGenerateCommon.Properties.GetSrcTargets()
+	return m.ModuleGenruleCommon.Properties.GetSrcTargets()
 }
 
 func (m *androidGenerateRule) OutSrcs() FilePaths {
@@ -237,6 +237,6 @@ func (m androidGenerateRule) GetProperties() interface{} {
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &androidGenerateRule{}
 
-	return module, []interface{}{&module.androidGenerateCommon.Properties, &module.Properties,
+	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }

@@ -123,24 +123,24 @@ func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext,
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
-func (g *androidBpGenerator) androidGenerateCommonActions(ag *androidGenerateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
-	m.AddStringList("srcs", ag.Properties.Srcs)
-	m.AddStringList("exclude_srcs", ag.Properties.Exclude_srcs)
-	m.AddOptionalString("cmd", ag.Properties.Cmd)
-	m.AddOptionalBool("depfile", ag.Properties.Depfile)
-	m.AddOptionalBool("enabled", ag.Properties.Enabled)
-	m.AddStringList("export_include_dirs", ag.Properties.Export_include_dirs)
-	m.AddStringList("tool_files", ag.Properties.Tool_files)
-	m.AddStringList("tools", ag.Properties.Tools)
+func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
+	m.AddStringList("srcs", gc.Properties.Srcs)
+	m.AddStringList("exclude_srcs", gc.Properties.Exclude_srcs)
+	m.AddOptionalString("cmd", gc.Properties.Cmd)
+	m.AddOptionalBool("depfile", gc.Properties.Depfile)
+	m.AddOptionalBool("enabled", gc.Properties.Enabled)
+	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
+	m.AddStringList("tool_files", gc.Properties.Tool_files)
+	m.AddStringList("tools", gc.Properties.Tools)
 }
 
-func (g *androidBpGenerator) androidGenerateRuleActions(ag *androidGenerateRule, mctx blueprint.ModuleContext) {
-	m, err := AndroidBpFile().NewModule("genrule", ag.shortName())
+func (g *androidBpGenerator) androidGenerateRuleActions(m *androidGenerateRule, mctx blueprint.ModuleContext) {
+	mod, err := AndroidBpFile().NewModule("genrule", m.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	g.androidGenerateCommonActions(&ag.androidGenerateCommon, mctx, m)
-	m.AddStringList("out", ag.Properties.Out)
+	g.androidGenerateCommonActions(&m.ModuleGenruleCommon, mctx, mod)
+	mod.AddStringList("out", m.Properties.Out)
 }
 
 func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mctx blueprint.ModuleContext) {
