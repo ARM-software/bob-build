@@ -52,7 +52,7 @@ type StrictLibraryProps struct {
 	TargetType TgtType `blueprint:"mutated"`
 }
 
-type strictLibrary struct {
+type ModuleStrictLibrary struct {
 	moduleBase
 	simpleOutputProducer // band-aid so legacy don't complain the interface isn't implemented
 	Properties           struct {
@@ -81,106 +81,106 @@ type strictLibraryInterface interface {
 	FileResolver
 }
 
-var _ strictLibraryInterface = (*strictLibrary)(nil)
+var _ strictLibraryInterface = (*ModuleStrictLibrary)(nil)
 
-func (m *strictLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// TODO: Handle Bazel targets & check paths
 	prefix := projectModuleDir(ctx)
 	m.Properties.SourceProps.processPaths(ctx, g)
 	m.Properties.Hdrs = utils.PrefixDirs(m.Properties.Hdrs, prefix)
 }
 
-func (m *strictLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+func (m *ModuleStrictLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	// TODO: Header only installs
 	return append(m.Static.outputs(), m.Shared.outputs()...)
 }
 
-func (l *strictLibrary) outputName() string {
-	if l.Properties.Out != nil {
-		return *l.Properties.Out
+func (m *ModuleStrictLibrary) outputName() string {
+	if m.Properties.Out != nil {
+		return *m.Properties.Out
 	}
-	return l.Name()
+	return m.Name()
 }
 
-func (m *strictLibrary) outputFileName() string {
+func (m *ModuleStrictLibrary) outputFileName() string {
 	utils.Die("Cannot use outputFileName on strict_library")
 	return "badName"
 }
 
-func (l *strictLibrary) ObjDir() string {
-	return filepath.Join("${BuildDir}", string(l.Properties.TargetType), "objects", l.outputName()) + string(os.PathSeparator)
+func (m *ModuleStrictLibrary) ObjDir() string {
+	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
-func (l *strictLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return l.Properties.GetSrcs(ctx)
+func (m *ModuleStrictLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetSrcs(ctx)
 }
 
-func (l *strictLibrary) GetDirectSrcs() FilePaths {
-	return l.Properties.GetDirectSrcs()
+func (m *ModuleStrictLibrary) GetDirectSrcs() FilePaths {
+	return m.Properties.GetDirectSrcs()
 }
 
-func (l *strictLibrary) GetSrcTargets() (tgts []string) {
-	tgts = append(tgts, l.Properties.GetSrcTargets()...)
+func (m *ModuleStrictLibrary) GetSrcTargets() (tgts []string) {
+	tgts = append(tgts, m.Properties.GetSrcTargets()...)
 	return
 }
 
-func (l *strictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	l.Properties.ResolveFiles(ctx, g)
+func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (l *strictLibrary) supportedVariants() (tgts []TgtType) {
+func (m *ModuleStrictLibrary) supportedVariants() (tgts []TgtType) {
 	// TODO: Change tgts based on if host or target supported.
 	tgts = append(tgts, tgtTypeHost)
 	return
 }
 
-func (l *strictLibrary) disable() {
+func (m *ModuleStrictLibrary) disable() {
 	f := false
-	l.Properties.Enabled = &f
+	m.Properties.Enabled = &f
 }
 
-func (l *strictLibrary) setVariant(tgt TgtType) {
-	l.Properties.TargetType = tgt
+func (m *ModuleStrictLibrary) setVariant(tgt TgtType) {
+	m.Properties.TargetType = tgt
 }
 
-func (l *strictLibrary) getTarget() TgtType {
-	return l.Properties.TargetType
+func (m *ModuleStrictLibrary) getTarget() TgtType {
+	return m.Properties.TargetType
 }
 
-func (l *strictLibrary) getSplittableProps() *SplittableProps {
-	return &l.Properties.SplittableProps
+func (m *ModuleStrictLibrary) getSplittableProps() *SplittableProps {
+	return &m.Properties.SplittableProps
 }
 
-func (l *strictLibrary) getEnableableProps() *EnableableProps {
-	return &l.Properties.EnableableProps
+func (m *ModuleStrictLibrary) getEnableableProps() *EnableableProps {
+	return &m.Properties.EnableableProps
 }
 
-func (l *strictLibrary) getInstallableProps() *InstallableProps {
-	return &l.Properties.InstallableProps
+func (m *ModuleStrictLibrary) getInstallableProps() *InstallableProps {
+	return &m.Properties.InstallableProps
 }
 
-func (m *strictLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleStrictLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	getBackend(ctx).strictLibraryActions(m, ctx)
 }
 
-func (m *strictLibrary) shortName() string {
+func (m *ModuleStrictLibrary) shortName() string {
 	return m.Name()
 }
 
 // Shared Library BoB Interface
 
-func (m *strictLibrary) getTocName() string {
+func (m *ModuleStrictLibrary) getTocName() string {
 	// TODO: Does this need to be m.getRealName() It is in other impls
 	// what does getRealName() look like?
 	return m.Name() + tocExt
 }
 
-func (m strictLibrary) GetProperties() interface{} {
+func (m ModuleStrictLibrary) GetProperties() interface{} {
 	return m.Properties
 }
 
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &strictLibrary{}
+	module := &ModuleStrictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}

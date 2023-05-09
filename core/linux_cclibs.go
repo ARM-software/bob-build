@@ -167,7 +167,7 @@ func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
 				libs = append(libs, sl.outputs()...)
 			} else if _, ok := m.(*externalLib); ok {
 				utils.Die("%s is external, so cannot be used in whole_static_libs", ctx.OtherModuleName(m))
-			} else if _, ok := m.(*strictLibrary); ok {
+			} else if _, ok := m.(*ModuleStrictLibrary); ok {
 				// TODO: append lib outputs here, or not, since this is whole_static_libs
 			} else {
 				utils.Die("%s is not a static library", ctx.OtherModuleName(m))
@@ -193,7 +193,7 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			// External static libraries are added to the link using the flags
 			// exported by their ldlibs and ldflags properties, rather than by
 			// specifying the filename here.
-		} else if sl, ok := dep.(*strictLibrary); ok {
+		} else if sl, ok := dep.(*ModuleStrictLibrary); ok {
 			libs = append(libs, sl.Static.outputs()...)
 		} else {
 			utils.Die("%s is not a static library", ctx.OtherModuleName(dep))
@@ -369,7 +369,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 			} else if el, ok := m.(*externalLib); ok {
 				ldlibs = append(ldlibs, el.exportLdlibs()...)
 				ldflags = append(ldflags, el.exportLdflags()...)
-			} else if sl, ok := m.(*strictLibrary); ok {
+			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.Name()+".so"))
 			} else {
 				utils.Die("%s is not a shared library", ctx.OtherModuleName(m))
