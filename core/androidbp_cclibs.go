@@ -102,7 +102,7 @@ func (m *ModuleLibrary) getGeneratedSourceModules(mctx blueprint.BaseModuleConte
 			switch dep.(type) {
 			case *ModuleGenerateSource:
 			case *ModuleTransformSource:
-			case *androidGenerateRule:
+			case *ModuleGenrule:
 			default:
 				panic(fmt.Errorf("Dependency %s of %s is not a generated source",
 					dep.Name(), m.Name()))
@@ -128,7 +128,7 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(mctx blueprint.BaseModuleConte
 			switch dep.(type) {
 			case *ModuleGenerateSource:
 			case *ModuleTransformSource:
-			case *androidGenerateRule:
+			case *ModuleGenrule:
 			default:
 				panic(fmt.Errorf("Dependency %s of %s is not a generated source",
 					dep.Name(), m.Name()))

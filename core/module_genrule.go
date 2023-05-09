@@ -163,7 +163,7 @@ func getAndroidGenerateCommon(i interface{}) (*ModuleGenruleCommon, bool) {
 	return gsc, ok
 }
 
-type androidGenerateRule struct {
+type ModuleGenrule struct {
 	ModuleGenruleCommon
 	Properties struct {
 		AndroidGenerateRuleProps
@@ -176,13 +176,13 @@ type androidGenerateRuleInterface interface {
 	pathProcessor
 }
 
-var _ androidGenerateRuleInterface = (*androidGenerateRule)(nil) // impl check
+var _ androidGenerateRuleInterface = (*ModuleGenrule)(nil) // impl check
 
-func (m *androidGenerateRule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.ModuleGenruleCommon.processPaths(ctx, g)
 }
 
-func (m *androidGenerateRule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.ModuleGenruleCommon.ResolveFiles(ctx, g)
 
 	files := FilePaths{}
@@ -194,48 +194,48 @@ func (m *androidGenerateRule) ResolveFiles(ctx blueprint.BaseModuleContext, g ge
 	m.Properties.ResolvedOut = files
 }
 
-func (m *androidGenerateRule) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenrule) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.ModuleGenruleCommon.Properties.GetSrcs(ctx)
 }
 
-func (m *androidGenerateRule) GetDirectSrcs() FilePaths {
+func (m *ModuleGenrule) GetDirectSrcs() FilePaths {
 	return m.ModuleGenruleCommon.Properties.GetDirectSrcs()
 }
 
-func (m *androidGenerateRule) GetSrcTargets() []string {
+func (m *ModuleGenrule) GetSrcTargets() []string {
 	return m.ModuleGenruleCommon.Properties.GetSrcTargets()
 }
 
-func (m *androidGenerateRule) OutSrcs() FilePaths {
+func (m *ModuleGenrule) OutSrcs() FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *androidGenerateRule) OutSrcTargets() (tgts []string) {
+func (m *ModuleGenrule) OutSrcTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }
 
-func (m *androidGenerateRule) shortName() string {
+func (m *ModuleGenrule) shortName() string {
 	return m.Name()
 }
 
-func (m *androidGenerateRule) getEnableableProps() *EnableableProps {
+func (m *ModuleGenrule) getEnableableProps() *EnableableProps {
 	return &m.EnableableProps
 }
 
-func (m *androidGenerateRule) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
 		g.androidGenerateRuleActions(m, ctx)
 	}
 }
 
-func (m androidGenerateRule) GetProperties() interface{} {
+func (m ModuleGenrule) GetProperties() interface{} {
 	return m.Properties
 }
 
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &androidGenerateRule{}
+	module := &ModuleGenrule{}
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
