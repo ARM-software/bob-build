@@ -45,39 +45,39 @@ func stringParams(optName string, optValueLists ...[]string) (opts []string) {
 
 const prebuiltMake = "prebuilts/build-tools/linux-x86/bin/make"
 
-func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint.ModuleContext) {
-	if !enabledAndRequired(l) {
+func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, mctx blueprint.ModuleContext) {
+	if !enabledAndRequired(ko) {
 		return
 	}
 
-	bpmod, err := AndroidBpFile().NewModule("genrule_bob", l.Name())
+	bpmod, err := AndroidBpFile().NewModule("genrule_bob", ko.Name())
 	if err != nil {
 		panic(err)
 	}
 
 	// Calculate and record outputs
-	out := l.outputName() + ".ko"
-	l.outs = []string{out}
+	out := ko.outputName() + ".ko"
+	ko.outs = []string{out}
 
 	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 
 	sources_param := "${in}"
 	var generated_deps []string
-	for _, mod := range l.extraSymbolsModules(mctx) {
+	for _, mod := range ko.extraSymbolsModules(mctx) {
 		generated_deps = append(generated_deps, mod.Name())
 		// reference all dependent modules outputs, needed for related symvers files
 		sources_param += " $$(dirname ${" + mod.Name() + "_out})/Module.symvers"
 	}
 
-	kdir := proptools.String(l.Properties.Kernel_dir)
+	kdir := proptools.String(ko.Properties.Kernel_dir)
 	if !filepath.IsAbs(kdir) {
 		kdir = getPathInSourceDir(kdir)
 	}
 
-	addProvenanceProps(bpmod, l.Properties.AndroidProps)
+	addProvenanceProps(bpmod, ko.Properties.AndroidProps)
 
 	srcs := []string{}
-	l.Properties.GetSrcs(mctx).ForEach(
+	ko.Properties.GetSrcs(mctx).ForEach(
 		func(fp filePath) bool {
 			srcs = append(srcs, fp.localPath())
 			return true
@@ -85,7 +85,7 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 
 	bpmod.AddStringList("srcs", srcs)
 	bpmod.AddStringList("generated_deps", generated_deps)
-	bpmod.AddStringList("out", l.outs)
+	bpmod.AddStringList("out", ko.outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})
 	bpmod.AddStringList("tools", []string{kmod_build})
 	bpmod.AddBool("depfile", true)
@@ -102,19 +102,19 @@ func (g *androidBpGenerator) kernelModuleActions(l *kernelModule, mctx blueprint
 			"--kernel", kdir,
 			"--module-dir", "${gen_dir}/" + mctx.ModuleDir(),
 			"--make-command", prebuiltMake,
-			"--extra-cflags='" + utils.Join(l.Properties.Cflags) + "'",
+			"--extra-cflags='" + utils.Join(ko.Properties.Cflags) + "'",
 		},
-		stringParam("--kbuild-options", utils.Join(l.Properties.Kbuild_options)),
-		stringParam("--cross-compile", proptools.String(l.Properties.Kernel_cross_compile)),
-		stringParam("--cc", proptools.String(l.Properties.Kernel_cc)),
-		stringParam("--hostcc", proptools.String(l.Properties.Kernel_hostcc)),
-		stringParam("--clang-triple", proptools.String(l.Properties.Kernel_clang_triple)),
-		stringParam("--ld", proptools.String(l.Properties.Kernel_ld)),
+		stringParam("--kbuild-options", utils.Join(ko.Properties.Kbuild_options)),
+		stringParam("--cross-compile", proptools.String(ko.Properties.Kernel_cross_compile)),
+		stringParam("--cc", proptools.String(ko.Properties.Kernel_cc)),
+		stringParam("--hostcc", proptools.String(ko.Properties.Kernel_hostcc)),
+		stringParam("--clang-triple", proptools.String(ko.Properties.Kernel_clang_triple)),
+		stringParam("--ld", proptools.String(ko.Properties.Kernel_ld)),
 		stringParams("-I",
-			l.Properties.Include_dirs,
-			getPathsInSourceDir(l.Properties.Local_include_dirs)),
-		l.Properties.Make_args,
+			ko.Properties.Include_dirs,
+			getPathsInSourceDir(ko.Properties.Local_include_dirs)),
+		ko.Properties.Make_args,
 	)
 
-	addInstallProps(bpmod, l.getInstallableProps(), l.Properties.isProprietary())
+	addInstallProps(bpmod, ko.getInstallableProps(), ko.Properties.isProprietary())
 }

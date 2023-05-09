@@ -60,7 +60,7 @@ func (k *KernelProps) processPaths(ctx blueprint.BaseModuleContext) {
 	}
 }
 
-type kernelModule struct {
+type ModuleKernelObject struct {
 	moduleBase
 	simpleOutputProducer
 	Properties struct {
@@ -82,74 +82,74 @@ type kernelModuleInterface interface {
 	FileResolver
 }
 
-var _ kernelModuleInterface = (*kernelModule)(nil) // impl check
+var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
 
-func (m *kernelModule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleKernelObject) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *kernelModule) defaults() []string {
+func (m *ModuleKernelObject) defaults() []string {
 	return m.Properties.Defaults
 }
 
-func (m *kernelModule) defaultableProperties() []interface{} {
+func (m *ModuleKernelObject) defaultableProperties() []interface{} {
 	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
-func (m *kernelModule) FeaturableProperties() []interface{} {
+func (m *ModuleKernelObject) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.CommonProps, &m.Properties.KernelProps}
 }
 
-func (m *kernelModule) Features() *Features {
+func (m *ModuleKernelObject) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *kernelModule) outputName() string {
+func (m *ModuleKernelObject) outputName() string {
 	return m.Name()
 }
 
-func (m *kernelModule) altName() string {
+func (m *ModuleKernelObject) altName() string {
 	return m.outputName()
 }
 
-func (m *kernelModule) altShortName() string {
+func (m *ModuleKernelObject) altShortName() string {
 	return m.altName()
 }
 
-func (m *kernelModule) shortName() string {
+func (m *ModuleKernelObject) shortName() string {
 	return m.Name()
 }
 
-func (m *kernelModule) getEnableableProps() *EnableableProps {
+func (m *ModuleKernelObject) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *kernelModule) getAliasList() []string {
+func (m *ModuleKernelObject) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
-func (m *kernelModule) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+func (m *ModuleKernelObject) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.outputs()
 }
 
-func (m *kernelModule) getInstallableProps() *InstallableProps {
+func (m *ModuleKernelObject) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *kernelModule) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
+func (m *ModuleKernelObject) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
 	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, kernelModuleDepTag)
 }
 
-func (m *kernelModule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.CommonProps.processPaths(ctx, g)
 	m.Properties.KernelProps.processPaths(ctx)
 }
 
-func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*kernelModule) {
+func (m *ModuleKernelObject) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*ModuleKernelObject) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
 		func(m blueprint.Module) {
-			if km, ok := m.(*kernelModule); ok {
+			if km, ok := m.(*ModuleKernelObject); ok {
 				modules = append(modules, km)
 			} else {
 				utils.Die("invalid extra_symbols, %s not a kernel module", ctx.OtherModuleName(m))
@@ -159,7 +159,7 @@ func (m *kernelModule) extraSymbolsModules(ctx blueprint.BaseModuleContext) (mod
 	return
 }
 
-func (m *kernelModule) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
+func (m *ModuleKernelObject) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
 	for _, mod := range m.extraSymbolsModules(ctx) {
 		files = append(files, filepath.Join(mod.outputDir(), "Module.symvers"))
 	}
@@ -199,7 +199,7 @@ func (a kbuildArgs) toDict() map[string]string {
 	}
 }
 
-func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuildArgs {
+func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuildArgs {
 	var extraIncludePaths []string
 
 	g := getBackend(ctx)
@@ -265,18 +265,18 @@ func (m *kernelModule) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuil
 	}
 }
 
-func (m *kernelModule) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleKernelObject) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getBackend(ctx).kernelModuleActions(m, ctx)
 	}
 }
 
-func (m kernelModule) GetProperties() interface{} {
+func (m ModuleKernelObject) GetProperties() interface{} {
 	return m.Properties
 }
 
 func kernelModuleFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &kernelModule{}
+	module := &ModuleKernelObject{}
 
 	module.Properties.Features.Init(&config.Properties, CommonProps{}, KernelProps{})
 
