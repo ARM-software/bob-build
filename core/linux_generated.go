@@ -211,7 +211,7 @@ func transformToolsAndroidToOld(gr *ModuleGenrule, gs *ModuleGenerateSource) {
 	}
 }
 
-func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, mctx blueprint.ModuleContext) {
+func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
 	// TODO: remove proxy object and add a proper backend support.
 	// If needed, refactor backend to accept both objects.
 	// This approach is fragile, the generator runs after all the mutators have already executed and as such
@@ -229,13 +229,13 @@ func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, mctx blue
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = gr.ModuleGenruleCommon.Properties.Srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleGenruleCommon.Properties.Exclude_srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = gr.ModuleGenruleCommon.Properties.Depfile
-	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(mctx, g)
+	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx, g)
 
 	proxyGenerateSource.Properties.Implicit_srcs = gr.ModuleGenruleCommon.Properties.Tool_files
 	proxyGenerateSource.Properties.Out = gr.Properties.Out
-	proxyGenerateSource.ResolveFiles(mctx, g)
+	proxyGenerateSource.ResolveFiles(ctx, g)
 
-	g.generateSourceActions(&proxyGenerateSource, mctx)
+	g.generateSourceActions(&proxyGenerateSource, ctx)
 
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
 	gr.ModuleGenruleCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs

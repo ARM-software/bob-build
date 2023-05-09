@@ -46,7 +46,7 @@ func (m *ModuleResource) getAndroidbpResourceName(src string) string {
 	return m.shortName() + "__" + strings.Replace(src, "/", "_", -1)
 }
 
-func (g *androidBpGenerator) resourceActions(r *ModuleResource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) resourceActions(r *ModuleResource, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(r) {
 		return
 	}
@@ -88,7 +88,7 @@ func (g *androidBpGenerator) resourceActions(r *ModuleResource, mctx blueprint.M
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
 	}
 
-	r.Properties.GetSrcs(mctx).ForEach(
+	r.Properties.GetSrcs(ctx).ForEach(
 		func(fp filePath) bool {
 			// keep module name unique, remove slashes
 			m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(fp.localPath()))

@@ -58,16 +58,16 @@ func (p *bobParser) parse() []*Module {
 	var modulesMap map[string]*Module = make(map[string]*Module)
 	var modulesMutex sync.RWMutex
 
-	bp.RegisterBottomUpMutator("register_bob_modules", func(mctx blueprint.BottomUpMutatorContext) {
-		m := NewModule(mctx.ModuleName(), mctx.ModuleType(), mctx.ModuleDir(), p.rootPath)
+	bp.RegisterBottomUpMutator("register_bob_modules", func(ctx blueprint.BottomUpMutatorContext) {
+		m := NewModule(ctx.ModuleName(), ctx.ModuleType(), ctx.ModuleDir(), p.rootPath)
 
-		parseBpModule(mctx.Module(), func(feature string, attribute string, v interface{}) {
+		parseBpModule(ctx.Module(), func(feature string, attribute string, v interface{}) {
 			m.addFeatureAttribute(feature, attribute, v)
 		})
 
 		modulesMutex.Lock()
 		defer modulesMutex.Unlock()
-		modulesMap[mctx.ModuleName()] = m
+		modulesMap[ctx.ModuleName()] = m
 		modules = append(modules, m)
 	}).Parallel()
 

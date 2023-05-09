@@ -28,25 +28,25 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
-func (g *androidBpGenerator) genBinaryActions(m *generateBinary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		utils.Die("Generated binaries are not supported (%s)", m.Name())
 	}
 }
 
-func (g *androidBpGenerator) genSharedActions(m *generateSharedLibrary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		utils.Die("Generated shared libraries are not supported (%s)", m.Name())
 	}
 }
 
-func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
 		utils.Die("Generated static libraries are not supported (%s)", m.Name())
 	}
 }
 
-func expandCmd(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, s string) string {
+func expandCmd(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, s string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
@@ -61,7 +61,7 @@ func expandCmd(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, s string)
 			// directory (= the root of the Android tree). This is required because
 			// the result will be used directly in `cmd`, rather than being
 			// included in a `srcs` field which would be processed further.
-			return filepath.Join("${module_dir}", mctx.ModuleDir())
+			return filepath.Join("${module_dir}", ctx.ModuleDir())
 		case "bob_config":
 			if !proptools.Bool(gc.Properties.Depfile) {
 				utils.Die("%s references Bob config but depfile not enabled. "+
@@ -86,11 +86,11 @@ func expandCmd(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, s string)
 	})
 }
 
-func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
+func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
 	// Replace ${args} immediately
 	cmd := strings.Replace(proptools.String(gc.Properties.Cmd), "${args}",
 		strings.Join(gc.Properties.Args, " "), -1)
-	cmd = expandCmd(gc, mctx, cmd)
+	cmd = expandCmd(gc, ctx, cmd)
 	m.AddString("cmd", cmd)
 
 	if len(gc.Properties.Tools) > 0 {
@@ -100,7 +100,7 @@ func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext,
 		m.AddString("rsp_content", *gc.Properties.Rsp_content)
 	}
 	if gc.Properties.Host_bin != nil {
-		hostBin := bpModuleNamesForDep(mctx, gc.hostBinName(mctx))
+		hostBin := bpModuleNamesForDep(ctx, gc.hostBinName(ctx))
 		if len(hostBin) != 1 {
 			utils.Die("%s must have one host_bin entry (have %d)", gc.Name(), len(hostBin))
 		}
@@ -112,8 +112,8 @@ func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext,
 
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
-	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(mctx, generatedDepTag))
-	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(mctx, generatedSourceTag))
+	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(ctx, generatedDepTag))
+	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(ctx, generatedSourceTag))
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)
 	m.AddStringList("conlyflags", gc.Properties.FlagArgsBuild.Conlyflags)
@@ -123,7 +123,7 @@ func populateCommonProps(gc *ModuleGenerateCommon, mctx blueprint.ModuleContext,
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
-func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, mctx blueprint.ModuleContext, m bpwriter.Module) {
+func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
 	m.AddStringList("srcs", gc.Properties.Srcs)
 	m.AddStringList("exclude_srcs", gc.Properties.Exclude_srcs)
 	m.AddOptionalString("cmd", gc.Properties.Cmd)
@@ -134,16 +134,16 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	m.AddStringList("tools", gc.Properties.Tools)
 }
 
-func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, mctx blueprint.ModuleContext) {
-	mod, err := AndroidBpFile().NewModule("genrule", gr.shortName())
+func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
+	m, err := AndroidBpFile().NewModule("genrule", gr.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, mctx, mod)
-	mod.AddStringList("out", gr.Properties.Out)
+	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
+	m.AddStringList("out", gr.Properties.Out)
 }
 
-func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(gs) {
 		return
 	}
@@ -160,7 +160,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mct
 	})
 
 	implicits := []string{}
-	gs.GetImplicits(mctx).ForEach(func(fp filePath) bool {
+	gs.GetImplicits(ctx).ForEach(func(fp filePath) bool {
 		implicits = append(implicits, fp.localPath())
 		return true
 	})
@@ -169,13 +169,13 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mct
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", implicits)
 
-	populateCommonProps(&gs.ModuleGenerateCommon, mctx, m)
+	populateCommonProps(&gs.ModuleGenerateCommon, ctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
 	addInstallProps(m, gs.getInstallableProps(), true)
 }
 
-func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(ts) {
 		return
 	}
@@ -199,7 +199,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, m
 	gr.AddStringList("replace", ts.Properties.TransformSourceProps.Out.Replace)
 	gr.AddStringList("implicit_srcs", ts.Properties.TransformSourceProps.Out.Implicit_srcs)
 
-	populateCommonProps(&ts.ModuleGenerateCommon, mctx, m)
+	populateCommonProps(&ts.ModuleGenerateCommon, ctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
 	addInstallProps(m, ts.getInstallableProps(), true)

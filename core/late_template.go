@@ -104,12 +104,12 @@ func applyLateTemplateRecursive(propsVal reflect.Value, stringvalues map[string]
 
 // Record non-compiled sources (only relevant for C/C++ compiled
 // libraries/binaries)
-func (s *LegacySourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseModuleContext) map[string]bool {
+func (s *LegacySourceProps) initializeNonCompiledSourceMap(ctx blueprint.BaseModuleContext) map[string]bool {
 	// Unused non-compiled sources are not allowed, so create
 	// a map to mark whether a non-compiled source is matched.
 	nonCompiledSources := make(map[string]bool)
-	if _, ok := getLibrary(mctx.Module()); ok {
-		s.GetSrcs(mctx).ForEachIf(
+	if _, ok := getLibrary(ctx.Module()); ok {
+		s.GetSrcs(ctx).ForEachIf(
 			func(fp filePath) bool {
 				return !utils.IsCompilableSource(fp.localPath())
 			},
@@ -136,21 +136,21 @@ func (s *LegacySourceProps) initializeNonCompiledSourceMap(mctx blueprint.BaseMo
 // - Generated Common:
 //   - Args
 //   - Cmd
-func setupMatchSources(mctx blueprint.BaseModuleContext,
+func setupMatchSources(ctx blueprint.BaseModuleContext,
 	propfnmap map[string]template.FuncMap) map[string]bool {
 
 	var sourceProps *LegacySourceProps
 	var matchSrcProps []string
 
-	if m, ok := mctx.Module().(matchSourceInterface); ok {
+	if m, ok := ctx.Module().(matchSourceInterface); ok {
 		sourceProps = m.getLegacySourceProperties()
 		matchSrcProps = m.getMatchSourcePropNames()
 	}
 
-	nonCompiledSources := sourceProps.initializeNonCompiledSourceMap(mctx)
+	nonCompiledSources := sourceProps.initializeNonCompiledSourceMap(ctx)
 	addtoFuncmap(propfnmap, matchSrcProps, "match_srcs",
 		func(arg string) string {
-			return sourceProps.matchSources(mctx, arg, nonCompiledSources)
+			return sourceProps.matchSources(ctx, arg, nonCompiledSources)
 		})
 
 	return nonCompiledSources
@@ -217,12 +217,12 @@ func checkCompilerFlag(flag string, languages []string, tc toolchain) string {
 
 // Handle {{add_if_supported}}. It checks the compiler flag passed
 // on the input and keeps it *if* the compiler supports it.
-func setupAddIfSupported(mctx blueprint.BaseModuleContext,
+func setupAddIfSupported(ctx blueprint.BaseModuleContext,
 	propfnmap map[string]template.FuncMap) {
 
-	if t, ok := mctx.Module().(moduleWithBuildProps); ok {
+	if t, ok := ctx.Module().(moduleWithBuildProps); ok {
 		build := t.build()
-		tc := getBackend(mctx).getToolchain(build.TargetType)
+		tc := getBackend(ctx).getToolchain(build.TargetType)
 
 		addtoFuncmap(propfnmap, []string{"Cflags", "Export_cflags"}, "add_if_supported",
 			func(s string) string {
@@ -240,9 +240,9 @@ func setupAddIfSupported(mctx blueprint.BaseModuleContext,
 }
 
 // Applies late templates to the given module
-func applyLateTemplates(mctx blueprint.BaseModuleContext) {
+func applyLateTemplates(ctx blueprint.BaseModuleContext) {
 
-	m, ok := mctx.Module().(Featurable)
+	m, ok := ctx.Module().(Featurable)
 	if !ok {
 		// Features and templates not supported by this module type
 		return
@@ -251,8 +251,8 @@ func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 	propfnmap := make(map[string]template.FuncMap)
 
 	// Set up {{match_srcs}} and {{add_if_supported}} handling
-	nonCompiledSources := setupMatchSources(mctx, propfnmap)
-	setupAddIfSupported(mctx, propfnmap)
+	nonCompiledSources := setupMatchSources(ctx, propfnmap)
+	setupAddIfSupported(ctx, propfnmap)
 
 	// Add more late templates above this line
 
@@ -270,19 +270,19 @@ func applyLateTemplates(mctx blueprint.BaseModuleContext) {
 		applyLateTemplateRecursive(propsVal, nil, propfnmap)
 	}
 
-	verifyMatchSources(mctx, nonCompiledSources)
+	verifyMatchSources(ctx, nonCompiledSources)
 }
 
 // This mutator handles late templates
 //
 // These templates have access to more information that normal
 // templates in template.go
-func lateTemplateMutator(mctx blueprint.TopDownMutatorContext) {
-	module := mctx.Module()
+func lateTemplateMutator(ctx blueprint.TopDownMutatorContext) {
+	module := ctx.Module()
 
 	if e, ok := module.(enableable); ok {
 		if isEnabled(e) {
-			applyLateTemplates(mctx)
+			applyLateTemplates(ctx)
 		}
 	}
 }

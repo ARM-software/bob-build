@@ -475,8 +475,8 @@ func getLibrary(m blueprint.Module) (*ModuleLibrary, bool) {
 	return nil, false
 }
 
-func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
-	m := mctx.Module()
+func checkLibraryFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
+	m := ctx.Module()
 	if b, ok := m.(*ModuleBinary); ok {
 		props := b.Properties
 		b.checkField(len(props.Export_cflags) == 0, "export_cflags")
@@ -502,8 +502,8 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 }
 
 // Check that each module only reexports libraries that it is actually using.
-func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
-	if l, ok := getLibrary(mctx.Module()); ok {
+func checkReexportLibsMutator(ctx blueprint.TopDownMutatorContext) {
+	if l, ok := getLibrary(ctx.Module()); ok {
 		for _, lib := range l.Properties.Reexport_libs {
 			if !utils.ListsContain(lib,
 				l.Properties.Shared_libs,
@@ -511,7 +511,7 @@ func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
 				l.Properties.Header_libs,
 				l.Properties.Whole_static_libs,
 				l.Properties.Export_header_libs) {
-				utils.Die("%s re-exports unused library %s", mctx.ModuleName(), lib)
+				utils.Die("%s re-exports unused library %s", ctx.ModuleName(), lib)
 			}
 		}
 	}
@@ -519,14 +519,14 @@ func checkReexportLibsMutator(mctx blueprint.TopDownMutatorContext) {
 
 // Traverse the dependency tree, following all StaticDepTag and WholeStaticDepTag links.
 // Do *not* include modules which are in the tree via any other dependency tag.
-func getLinkableModules(mctx blueprint.TopDownMutatorContext) map[blueprint.Module]bool {
+func getLinkableModules(ctx blueprint.TopDownMutatorContext) map[blueprint.Module]bool {
 	ret := make(map[blueprint.Module]bool)
 
-	mctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
+	ctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		// Stop iteration once we get to other kinds of dependency which won't
 		// actually be linked.
-		if mctx.OtherModuleDependencyTag(dep) != staticDepTag &&
-			mctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag {
+		if ctx.OtherModuleDependencyTag(dep) != staticDepTag &&
+			ctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag {
 			return false
 		}
 		ret[dep] = true
@@ -579,8 +579,8 @@ func propagateOtherExportedProperties(m *ModuleLibrary, depLib propertyExporter)
 	// by adding them to LOCAL_EXPORT_HEADER_LIBRARY_HEADERS.
 }
 
-func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
-	l, ok := getBinaryOrSharedLib(mctx.Module())
+func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
+	l, ok := getBinaryOrSharedLib(ctx.Module())
 	if !ok {
 		return
 	}
@@ -593,9 +593,9 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 	insideWholeLibs := make(map[string]string)
 	// VisitDepsDepthFirst doesn't let us stop iteration, so get the list of
 	// modules to examine separately using WalkDeps.
-	modulesToVisit := getLinkableModules(mctx)
+	modulesToVisit := getLinkableModules(ctx)
 
-	mctx.VisitDepsDepthFirst(func(dep blueprint.Module) {
+	ctx.VisitDepsDepthFirst(func(dep blueprint.Module) {
 		if _, ok := modulesToVisit[dep]; !ok {
 			return
 		}
@@ -604,7 +604,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			for _, subLib := range depLib.Properties.Whole_static_libs {
 				if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
 					utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",
-						mctx.Module().Name(), firstContainingLib,
+						ctx.Module().Name(), firstContainingLib,
 						depLib.Name(), subLib)
 				} else {
 					insideWholeLibs[subLib] = depLib.Name()
@@ -631,11 +631,11 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
-		if mctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag && mctx.OtherModuleDependencyTag(dep) != staticDepTag {
+		if ctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag && ctx.OtherModuleDependencyTag(dep) != staticDepTag {
 			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
-				dep.Name(), mctx.ModuleName())
+				dep.Name(), ctx.ModuleName())
 		}
 	})
 
-	checkForMultipleLinking(mctx.ModuleName(), allImportedStaticLibs, insideWholeLibs)
+	checkForMultipleLinking(ctx.ModuleName(), allImportedStaticLibs, insideWholeLibs)
 }

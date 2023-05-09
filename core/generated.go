@@ -108,13 +108,13 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 	return srcs
 }
 
-func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
+func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 
-	if _, ok := mctx.Module().(*ModuleGenerateSource); ok {
-		getBackend(mctx).getLogger().Warn(warnings.GenerateRuleWarning, mctx.BlueprintsFile(), mctx.ModuleName())
+	if _, ok := ctx.Module().(*ModuleGenerateSource); ok {
+		getBackend(ctx).getLogger().Warn(warnings.GenerateRuleWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 
-	if e, ok := mctx.Module().(enableable); ok {
+	if e, ok := ctx.Module().(enableable); ok {
 		if !isEnabled(e) {
 			// Not enabled, so don't add dependencies
 			return
@@ -122,34 +122,34 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	}
 
 	// Things which depend on generated/transformed sources
-	if l, ok := getLibrary(mctx.Module()); ok {
-		mctx.AddDependency(mctx.Module(), generatedSourceTag, l.Properties.Generated_sources...)
-		mctx.AddDependency(mctx.Module(), generatedHeaderTag, l.Properties.Generated_headers...)
-		mctx.AddDependency(mctx.Module(), exportGeneratedHeaderTag, l.Properties.Export_generated_headers...)
-		mctx.AddDependency(mctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
+	if l, ok := getLibrary(ctx.Module()); ok {
+		ctx.AddDependency(ctx.Module(), generatedSourceTag, l.Properties.Generated_sources...)
+		ctx.AddDependency(ctx.Module(), generatedHeaderTag, l.Properties.Generated_headers...)
+		ctx.AddDependency(ctx.Module(), exportGeneratedHeaderTag, l.Properties.Export_generated_headers...)
+		ctx.AddDependency(ctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
 	}
 
 	// Things that a generated/transformed source depends on
-	if gsc, ok := getGenerateCommon(mctx.Module()); ok {
+	if gsc, ok := getGenerateCommon(ctx.Module()); ok {
 		if gsc.Properties.Host_bin != nil {
-			parseAndAddVariationDeps(mctx, hostToolBinTag,
+			parseAndAddVariationDeps(ctx, hostToolBinTag,
 				proptools.String(gsc.Properties.Host_bin))
 		}
 		// Generated sources can use the outputs of another generated
 		// source or library as a source file or dependency.
-		parseAndAddVariationDeps(mctx, generatedDepTag,
+		parseAndAddVariationDeps(ctx, generatedDepTag,
 			gsc.Properties.Generated_deps...)
-		parseAndAddVariationDeps(mctx, generatedSourceTag,
+		parseAndAddVariationDeps(ctx, generatedSourceTag,
 			gsc.Properties.Generated_sources...)
 	}
 
-	if _, ok := getBackend(mctx).(*linuxGenerator); ok {
-		if agsc, ok := getAndroidGenerateCommon(mctx.Module()); ok {
+	if _, ok := getBackend(ctx).(*linuxGenerator); ok {
+		if agsc, ok := getAndroidGenerateCommon(ctx.Module()); ok {
 			for _, s := range agsc.Properties.Srcs {
 				if s[0] == ':' {
-					parseAndAddVariationDeps(mctx, generatedSourceTag,
+					parseAndAddVariationDeps(ctx, generatedSourceTag,
 						s[1:])
-					parseAndAddVariationDeps(mctx, generatedDepTag,
+					parseAndAddVariationDeps(ctx, generatedDepTag,
 						s[1:])
 				}
 			}
@@ -160,12 +160,12 @@ func generatedDependerMutator(mctx blueprint.BottomUpMutatorContext) {
 	// However, if a colon appears at the end of a module name with a text string, we assume there is a variant
 	// called <module_name>__<variant_name> generated. Which bob currently does. This will fix behaviour on Android, to
 	// ensure it works on Linux, the backend must see this as a generated_dep which is processing done in the linux backend.
-	if agsc, ok := getAndroidGenerateCommon((mctx.Module())); ok {
+	if agsc, ok := getAndroidGenerateCommon((ctx.Module())); ok {
 		var removeList []string
 		for _, s := range agsc.Properties.Tools {
 			if strings.Contains(s, ":") {
-				if _, ok := getBackend(mctx).(*linuxGenerator); ok {
-					parseAndAddVariationDeps(mctx, generatedDepTag,
+				if _, ok := getBackend(ctx).(*linuxGenerator); ok {
+					parseAndAddVariationDeps(ctx, generatedDepTag,
 						s)
 				} else {
 					agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))

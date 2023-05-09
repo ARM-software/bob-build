@@ -247,9 +247,9 @@ func (m *genrulebobCommon) Srcs() android.Paths {
 	return m.outputs().Paths()
 }
 
-func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
+func (m *genrulebobCommon) DepsMutator(ctx android.BottomUpMutatorContext) {
 	if m.Properties.Host_bin != "" {
-		mctx.AddFarVariationDependencies(mctx.Config().BuildOSTarget.Variations(),
+		ctx.AddFarVariationDependencies(ctx.Config().BuildOSTarget.Variations(),
 			hostToolBinTag, m.Properties.Host_bin)
 	}
 
@@ -260,8 +260,8 @@ func (m *genrulebobCommon) DepsMutator(mctx android.BottomUpMutatorContext) {
 	// here, because this will automatically choose the first available
 	// variant, rather than the other dependency-adding functions, which
 	// will error when multiple variants are present.
-	mctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Generated_deps...)
-	mctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Generated_sources...)
+	ctx.AddFarVariationDependencies(nil, generatedDepTag, m.Properties.Generated_deps...)
+	ctx.AddFarVariationDependencies(nil, generatedSourceTag, m.Properties.Generated_sources...)
 }
 
 func (m *genrulebobCommon) getHostBin(ctx android.ModuleContext) android.OptionalPath {
@@ -415,16 +415,16 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 	}
 }
 
-func (m *genrulebobCommon) calcExportGenIncludeDirs(mctx android.ModuleContext) android.Paths {
+func (m *genrulebobCommon) calcExportGenIncludeDirs(ctx android.ModuleContext) android.Paths {
 	var allIncludeDirs android.Paths
 
 	// Add our own include dirs
 	for _, dir := range m.Properties.Export_gen_include_dirs {
-		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(mctx, dir))
+		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(ctx, dir))
 	}
 
 	// Add include dirs of our all dependencies
-	mctx.WalkDeps(func(child android.Module, parent android.Module) bool {
+	ctx.WalkDeps(func(child android.Module, parent android.Module) bool {
 		if cmod, ok := child.(genruleInterface); ok {
 			for _, dir := range cmod.GeneratedHeaderDirs() {
 				allIncludeDirs = append(allIncludeDirs, dir)

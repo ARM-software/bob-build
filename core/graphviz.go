@@ -112,8 +112,8 @@ func (handler *graphvizHandler) generateGraphviz() {
 	file.WriteString(graph.ToString(outputGraph))
 }
 
-func (handler *graphvizHandler) graphvizMutator(mctx blueprint.BottomUpMutatorContext) {
-	mainModule := mctx.Module()
+func (handler *graphvizHandler) graphvizMutator(ctx blueprint.BottomUpMutatorContext) {
+	mainModule := ctx.Module()
 	if e, ok := mainModule.(enableable); ok {
 		if !isEnabled(e) {
 			return // Not enabled, so not needed

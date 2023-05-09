@@ -84,7 +84,7 @@ func PrependMatchingProperties(dst []interface{}, src interface{}) error {
 }
 
 // Applies default options
-func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
+func DefaultApplierMutator(ctx blueprint.BottomUpMutatorContext) {
 	// The mutator is run bottom up, so modules without dependencies
 	// will be processed first.
 	//
@@ -93,14 +93,14 @@ func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 
 	// No need to do this on defaults modules, as we've flattened the
 	// hierarchy
-	_, isDefaults := mctx.Module().(*ModuleDefaults)
+	_, isDefaults := ctx.Module().(*ModuleDefaults)
 	if isDefaults {
 		return
 	}
 
 	var defaultableProps []interface{}
 
-	if d, ok := mctx.Module().(defaultable); ok {
+	if d, ok := ctx.Module().(defaultable); ok {
 		defaultableProps = d.defaultableProperties()
 	} else {
 		// Not defaultable.
@@ -110,19 +110,19 @@ func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 	// Accumulate properties from direct dependencies into an empty defaults
 	accumulatedDef := ModuleDefaults{}
 	accumulatedProps := accumulatedDef.defaultableProperties()
-	mctx.VisitDirectDeps(func(dep blueprint.Module) {
-		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
+	ctx.VisitDirectDeps(func(dep blueprint.Module) {
+		if ctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*ModuleDefaults)
 			if !ok {
 				utils.Die("module %s in %s's defaults is not a default",
-					dep.Name(), mctx.ModuleName())
+					dep.Name(), ctx.ModuleName())
 			}
 
 			// Append defaults at the same level to maintain cflag order
 			err := appendDefaults(accumulatedProps, def.defaultableProperties())
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+					ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
 					utils.Die("%s", err)
 				}
@@ -140,7 +140,7 @@ func DefaultApplierMutator(mctx blueprint.BottomUpMutatorContext) {
 	err := prependDefaults(defaultableProps, accumulatedProps)
 	if err != nil {
 		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+			ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 		} else {
 			utils.Die("%s", err)
 		}
@@ -209,9 +209,9 @@ type Featurable interface {
 	Features() *Features
 }
 
-func templateApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	module := mctx.Module()
-	cfg := getConfig(mctx)
+func templateApplierMutator(ctx blueprint.TopDownMutatorContext) {
+	module := ctx.Module()
+	cfg := getConfig(ctx)
 
 	if m, ok := module.(Featurable); ok {
 		cfgProps := &cfg.Properties
@@ -242,9 +242,9 @@ type propmap struct {
 }
 
 // Applies feature specific properties within each module
-func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
-	module := mctx.Module()
-	cfg := getConfig(mctx)
+func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
+	module := ctx.Module()
+	cfg := getConfig(ctx)
 
 	if m, ok := module.(Featurable); ok {
 		cfgProps := &cfg.Properties
@@ -276,7 +276,7 @@ func featureApplierMutator(mctx blueprint.TopDownMutatorContext) {
 			err := prop.src.AppendProps(prop.dst, cfgProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+					ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
 					utils.Die("%s", err)
 				}

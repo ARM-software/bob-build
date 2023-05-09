@@ -27,12 +27,12 @@ type propertyEscapeInterface interface {
 	getEscapeProperties() []*[]string
 }
 
-func escapeMutator(mctx blueprint.TopDownMutatorContext) {
+func escapeMutator(ctx blueprint.TopDownMutatorContext) {
 	// This mutator is not registered on the androidbp backend, as it
 	// doesn't need escaping
 
-	g := getBackend(mctx)
-	module := mctx.Module()
+	g := getBackend(ctx)
+	module := ctx.Module()
 
 	if _, ok := module.(*ModuleDefaults); ok {
 		// No need to apply to defaults

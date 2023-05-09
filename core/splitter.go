@@ -66,34 +66,34 @@ type targetSpecificLibrary interface {
 
 // Propagate Host_supported and Target_supported from defaults to
 // splittable modules to find out which variations are supported.
-func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
+func supportedVariantsMutator(ctx blueprint.BottomUpMutatorContext) {
 
 	// No need to do this on defaults modules, as we've flattened the
 	// hierarchy
-	_, isDefaults := mctx.Module().(*ModuleDefaults)
+	_, isDefaults := ctx.Module().(*ModuleDefaults)
 	if isDefaults {
 		return
 	}
 
-	sp, ok := mctx.Module().(splittable)
+	sp, ok := ctx.Module().(splittable)
 	if !ok {
 		return
 	}
 
 	accumulatedProps := SplittableProps{}
-	mctx.VisitDirectDeps(func(dep blueprint.Module) {
-		if mctx.OtherModuleDependencyTag(dep) == defaultDepTag {
+	ctx.VisitDirectDeps(func(dep blueprint.Module) {
+		if ctx.OtherModuleDependencyTag(dep) == defaultDepTag {
 			def, ok := dep.(*ModuleDefaults)
 			if !ok {
 				utils.Die("module %s in %s's defaults is not a default",
-					dep.Name(), mctx.ModuleName())
+					dep.Name(), ctx.ModuleName())
 			}
 
 			// Append at the same level, so later siblings take precedence
 			err := AppendProperties(&accumulatedProps, &def.Properties.SplittableProps)
 			if err != nil {
 				if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-					mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+					ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 				} else {
 					utils.Die("%v", err)
 				}
@@ -105,7 +105,7 @@ func supportedVariantsMutator(mctx blueprint.BottomUpMutatorContext) {
 	err := PrependProperties(sp.getSplittableProps(), &accumulatedProps)
 	if err != nil {
 		if propertyErr, ok := err.(*proptools.ExtendPropertyError); ok {
-			mctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
+			ctx.PropertyErrorf(propertyErr.Property, "%s", propertyErr.Err.Error())
 		} else {
 			utils.Die("%v", err)
 		}
@@ -121,13 +121,13 @@ func tgtToString(tgts []TgtType) []string {
 }
 
 // Creates all the supported variants of splittable modules, including defaults.
-func splitterMutator(mctx blueprint.BottomUpMutatorContext) {
-	if s, ok := mctx.Module().(splittable); ok {
+func splitterMutator(ctx blueprint.BottomUpMutatorContext) {
+	if s, ok := ctx.Module().(splittable); ok {
 		variants := tgtToString(s.supportedVariants())
 		if len(variants) == 0 {
 			s.disable()
 		} else {
-			modules := mctx.CreateVariations(variants...)
+			modules := ctx.CreateVariations(variants...)
 			for i, v := range variants {
 				newsplit, ok := modules[i].(splittable)
 				if !ok {

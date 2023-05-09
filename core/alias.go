@@ -85,13 +85,13 @@ func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 }
 
 // Setup dependencies between aliases and their targets
-func aliasMutator(mctx blueprint.BottomUpMutatorContext) {
-	if a, ok := mctx.Module().(*ModuleAlias); ok {
-		parseAndAddVariationDeps(mctx, aliasTag, a.Properties.Srcs...)
+func aliasMutator(ctx blueprint.BottomUpMutatorContext) {
+	if a, ok := ctx.Module().(*ModuleAlias); ok {
+		parseAndAddVariationDeps(ctx, aliasTag, a.Properties.Srcs...)
 	}
-	if a, ok := mctx.Module().(aliasable); ok {
+	if a, ok := ctx.Module().(aliasable); ok {
 		for _, s := range a.getAliasList() {
-			mctx.AddReverseDependency(mctx.Module(), aliasTag, s)
+			ctx.AddReverseDependency(ctx.Module(), aliasTag, s)
 		}
 	}
 }
