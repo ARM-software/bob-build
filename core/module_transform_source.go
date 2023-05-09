@@ -75,7 +75,7 @@ func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath,
 // information.
 // The working directory will be the source directory, and all paths will be relative to the source directory
 // if not else noted
-type transformSource struct {
+type ModuleTransformSource struct {
 	ModuleGenerateCommon
 	Properties struct {
 		TransformSourceProps
@@ -90,42 +90,42 @@ type transformSourceInterface interface {
 	FileResolver
 }
 
-var _ transformSourceInterface = (*transformSource)(nil) // impl check
+var _ transformSourceInterface = (*ModuleTransformSource)(nil) // impl check
 
-func (m *transformSource) FeaturableProperties() []interface{} {
+func (m *ModuleTransformSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
-func (m *transformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
+func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
 	return m.GetSrcs(ctx)
 }
 
-func (m *transformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleTransformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.getLegacySourceProperties().ResolveFiles(ctx, g)
 }
 
-func (m *transformSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleTransformSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.getLegacySourceProperties().GetSrcs(ctx)
 }
 
-func (m *transformSource) GetDirectSrcs() FilePaths {
+func (m *ModuleTransformSource) GetDirectSrcs() FilePaths {
 	return m.getLegacySourceProperties().GetDirectSrcs()
 }
 
-func (m *transformSource) GetSrcTargets() []string {
+func (m *ModuleTransformSource) GetSrcTargets() []string {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.Generated_sources
 }
 
-func (m *transformSource) OutSrcs() FilePaths {
+func (m *ModuleTransformSource) OutSrcs() FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *transformSource) OutSrcTargets() []string {
+func (m *ModuleTransformSource) OutSrcTargets() []string {
 	return []string{}
 }
 
-func (m *transformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
+func (m *ModuleTransformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
 	g := getBackend(ctx)
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
@@ -152,7 +152,7 @@ func (m *transformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
 // The outputs are relative to the output directory. This applies
 // to out, depfile and rspfile. The output directory (if needed) needs to be
 // added in by the backend specific GenerateBuildAction()
-func (m *transformSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
+func (m *ModuleTransformSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var inouts []inout
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
@@ -165,24 +165,24 @@ func (m *transformSource) generateInouts(ctx blueprint.ModuleContext, g generato
 	return inouts
 }
 
-func (m *transformSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+func (m *ModuleTransformSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	// Install everything that we generate
 	return m.outputs()
 }
 
-func (m *transformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleTransformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getBackend(ctx)
 		g.transformSourceActions(m, ctx)
 	}
 }
 
-func (m transformSource) GetProperties() interface{} {
+func (m ModuleTransformSource) GetProperties() interface{} {
 	return m.Properties
 }
 
 func transformSourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &transformSource{}
+	module := &ModuleTransformSource{}
 	module.ModuleGenerateCommon.init(&config.Properties,
 		GenerateProps{}, TransformSourceProps{})
 

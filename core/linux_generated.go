@@ -250,7 +250,7 @@ func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blue
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
-func (g *linuxGenerator) transformSourceActions(m *transformSource, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) transformSourceActions(m *ModuleTransformSource, ctx blueprint.ModuleContext) {
 	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 

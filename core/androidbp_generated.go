@@ -175,7 +175,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, mct
 	addInstallProps(m, gs.getInstallableProps(), true)
 }
 
-func (g *androidBpGenerator) transformSourceActions(ts *transformSource, mctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, mctx blueprint.ModuleContext) {
 	if !enabledAndRequired(ts) {
 		return
 	}
