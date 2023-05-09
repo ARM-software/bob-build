@@ -468,7 +468,7 @@ func getBinaryOrSharedLib(m blueprint.Module) (*ModuleLibrary, bool) {
 func getLibrary(m blueprint.Module) (*ModuleLibrary, bool) {
 	if bsl, ok := getBinaryOrSharedLib(m); ok {
 		return bsl, true
-	} else if sl, ok := m.(*staticLibrary); ok {
+	} else if sl, ok := m.(*ModuleStaticLibrary); ok {
 		return &sl.ModuleLibrary, true
 	}
 
@@ -492,7 +492,7 @@ func checkLibraryFieldsMutator(mctx blueprint.BottomUpMutatorContext) {
 		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
 		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
-	} else if sl, ok := m.(*staticLibrary); ok {
+	} else if sl, ok := m.(*ModuleStaticLibrary); ok {
 		props := sl.Properties
 		sl.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 		sl.checkField(props.Version_script == nil, "version_script")
@@ -600,7 +600,7 @@ func exportLibFlagsMutator(mctx blueprint.TopDownMutatorContext) {
 			return
 		}
 
-		if depLib, ok := dep.(*staticLibrary); ok {
+		if depLib, ok := dep.(*ModuleStaticLibrary); ok {
 			for _, subLib := range depLib.Properties.Whole_static_libs {
 				if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
 					utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",

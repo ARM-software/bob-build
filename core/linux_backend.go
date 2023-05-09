@@ -136,7 +136,7 @@ type linkableModule interface {
 	GetStaticLibs(ctx blueprint.ModuleContext) []string
 }
 
-func (g *linuxGenerator) staticLibOutputDir(m *staticLibrary) string {
+func (g *linuxGenerator) staticLibOutputDir(m *ModuleStaticLibrary) string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "static")
 }
 

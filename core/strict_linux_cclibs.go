@@ -247,7 +247,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *strictLibrary, ctx blueprin
 	// TODO: Move this to it's own file
 
 	// TODO: Handle shared library versions too
-	var proxyStaticLib staticLibrary
+	var proxyStaticLib ModuleStaticLibrary
 	proxyStaticLib.SimpleName.Properties.Name = m.SimpleName.Properties.Name
 	proxyStaticLib.Properties.EnableableProps.Required = true
 	proxyStaticLib.Properties.Srcs = m.Properties.Srcs

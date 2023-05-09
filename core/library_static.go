@@ -21,25 +21,25 @@ import (
 	"github.com/google/blueprint"
 )
 
-type staticLibrary struct {
+type ModuleStaticLibrary struct {
 	ModuleLibrary
 }
 
-func (l *staticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	if isEnabled(l) {
-		getBackend(ctx).staticActions(l, ctx)
+func (m *ModuleStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	if isEnabled(m) {
+		getBackend(ctx).staticActions(m, ctx)
 	}
 }
 
-func (l *staticLibrary) outputFileName() string {
-	return l.outputName() + ".a"
+func (m *ModuleStaticLibrary) outputFileName() string {
+	return m.outputName() + ".a"
 }
 
-func (l staticLibrary) GetProperties() interface{} {
-	return l.ModuleLibrary.Properties
+func (m ModuleStaticLibrary) GetProperties() interface{} {
+	return m.ModuleLibrary.Properties
 }
 
 func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &staticLibrary{}
+	module := &ModuleStaticLibrary{}
 	return module.LibraryFactory(config, module)
 }

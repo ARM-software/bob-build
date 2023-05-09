@@ -161,7 +161,7 @@ func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == wholeStaticDepTag },
 		func(m blueprint.Module) {
-			if sl, ok := m.(*staticLibrary); ok {
+			if sl, ok := m.(*ModuleStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)
 			} else if sl, ok := m.(*generateStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)
@@ -185,7 +185,7 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 		if dep == nil {
 			utils.Die("%s has no dependency on static lib %s", m.Name(), moduleName)
 		}
-		if sl, ok := dep.(*staticLibrary); ok {
+		if sl, ok := dep.(*ModuleStaticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
 		} else if sl, ok := dep.(*generateStaticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
@@ -228,7 +228,7 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper", "whole_static_libs")
 
-func (g *linuxGenerator) staticActions(m *staticLibrary, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
 
 	// Calculate and record outputs
 	m.outputdir = g.staticLibOutputDir(m)
