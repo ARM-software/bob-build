@@ -165,7 +165,7 @@ func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
 				libs = append(libs, sl.outputs()...)
 			} else if sl, ok := m.(*generateStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)
-			} else if _, ok := m.(*externalLib); ok {
+			} else if _, ok := m.(*ModuleExternalLibrary); ok {
 				utils.Die("%s is external, so cannot be used in whole_static_libs", ctx.OtherModuleName(m))
 			} else if _, ok := m.(*ModuleStrictLibrary); ok {
 				// TODO: append lib outputs here, or not, since this is whole_static_libs
@@ -189,7 +189,7 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			libs = append(libs, sl.outputs()...)
 		} else if sl, ok := dep.(*generateStaticLibrary); ok {
 			libs = append(libs, sl.outputs()...)
-		} else if _, ok := dep.(*externalLib); ok {
+		} else if _, ok := dep.(*ModuleExternalLibrary); ok {
 			// External static libraries are added to the link using the flags
 			// exported by their ldlibs and ldflags properties, rather than by
 			// specifying the filename here.
@@ -303,7 +303,7 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
 				libs = append(libs, g.getSharedLibLinkPath(t))
-			} else if _, ok := m.(*externalLib); ok {
+			} else if _, ok := m.(*ModuleExternalLibrary); ok {
 				// Don't try and guess the path to external libraries,
 				// and as they are outside of the build we don't need to
 				// add a dependency on them anyway.
@@ -320,7 +320,7 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 		func(m blueprint.Module) {
 			if l, ok := m.(sharedLibProducer); ok {
 				libs = append(libs, g.getSharedLibTocPath(l))
-			} else if _, ok := m.(*externalLib); ok {
+			} else if _, ok := m.(*ModuleExternalLibrary); ok {
 				// Don't try and guess the path to external libraries,
 				// and as they are outside of the build we don't need to
 				// add a dependency on them anyway.
@@ -366,7 +366,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 				if installPath, ok := sl.ModuleGenerateCommon.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
-			} else if el, ok := m.(*externalLib); ok {
+			} else if el, ok := m.(*ModuleExternalLibrary); ok {
 				ldlibs = append(ldlibs, el.exportLdlibs()...)
 				ldflags = append(ldflags, el.exportLdflags()...)
 			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
