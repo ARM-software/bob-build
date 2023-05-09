@@ -154,7 +154,7 @@ type InstallGroupProps struct {
 	Install_path *string
 }
 
-type installGroup struct {
+type ModuleInstallGroup struct {
 	moduleBase
 	Properties struct {
 		InstallGroupProps
@@ -162,15 +162,15 @@ type installGroup struct {
 	}
 }
 
-func (m *installGroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
+func (m *ModuleInstallGroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// No build actions for a bob_install_group
 }
 
-func (m *installGroup) FeaturableProperties() []interface{} {
+func (m *ModuleInstallGroup) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.InstallGroupProps}
 }
 
-func (m *installGroup) Features() *Features {
+func (m *ModuleInstallGroup) Features() *Features {
 	return &m.Properties.Features
 }
 
@@ -283,7 +283,7 @@ func (m *resource) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
-func (m installGroup) GetProperties() interface{} {
+func (m ModuleInstallGroup) GetProperties() interface{} {
 	return m.Properties
 }
 
@@ -292,7 +292,7 @@ func (m resource) GetProperties() interface{} {
 }
 
 func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &installGroup{}
+	module := &ModuleInstallGroup{}
 	module.Properties.Features.Init(&config.Properties, InstallGroupProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
@@ -314,7 +314,7 @@ func getInstallGroupPathFromTag(mctx blueprint.TopDownMutatorContext, tag depend
 	mctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return mctx.OtherModuleDependencyTag(m) == tag },
 		func(m blueprint.Module) {
-			insg, ok := m.(*installGroup)
+			insg, ok := m.(*ModuleInstallGroup)
 			if !ok {
 				utils.Die("%s dependency of %s not an install group",
 					tag.name, mctx.ModuleName())
