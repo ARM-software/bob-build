@@ -32,7 +32,7 @@ var (
 	GeneratedHeadersTag       = DependencyTag{name: "generated_headers"}
 	ExportGeneratedHeadersTag = DependencyTag{name: "export_generated_headers"}
 	GeneratedSourcesTag       = DependencyTag{name: "generated_sources"}
-	generatedDepTag           = DependencyTag{name: "generated_dep"}
+	GeneratedTag              = DependencyTag{name: "generated_dep"}
 	hostToolBinTag            = DependencyTag{name: "host_tool_bin"}
 	filegroupTag              = DependencyTag{name: "filegroup"}
 	implicitSrcsTag           = DependencyTag{name: "implicit_srcs"}
@@ -54,7 +54,7 @@ func getSourcesGenerated(m dependentInterface) []string {
 func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]string) (depfiles []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == generatedDepTag
+			return ctx.OtherModuleDependencyTag(m) == GeneratedTag
 		},
 		func(m blueprint.Module) {
 			gen, ok := m.(dependentInterface)
@@ -126,7 +126,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		ctx.AddDependency(ctx.Module(), GeneratedSourcesTag, l.Properties.Generated_sources...)
 		ctx.AddDependency(ctx.Module(), GeneratedHeadersTag, l.Properties.Generated_headers...)
 		ctx.AddDependency(ctx.Module(), ExportGeneratedHeadersTag, l.Properties.Export_generated_headers...)
-		ctx.AddDependency(ctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
+		ctx.AddDependency(ctx.Module(), GeneratedTag, l.Properties.Generated_deps...)
 	}
 
 	// Things that a generated/transformed source depends on
@@ -137,7 +137,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 		// Generated sources can use the outputs of another generated
 		// source or library as a source file or dependency.
-		parseAndAddVariationDeps(ctx, generatedDepTag,
+		parseAndAddVariationDeps(ctx, GeneratedTag,
 			gsc.Properties.Generated_deps...)
 		parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
 			gsc.Properties.Generated_sources...)
@@ -149,7 +149,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 				if s[0] == ':' {
 					parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
 						s[1:])
-					parseAndAddVariationDeps(ctx, generatedDepTag,
+					parseAndAddVariationDeps(ctx, GeneratedTag,
 						s[1:])
 				}
 			}
@@ -165,7 +165,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		for _, s := range agsc.Properties.Tools {
 			if strings.Contains(s, ":") {
 				if _, ok := getBackend(ctx).(*linuxGenerator); ok {
-					parseAndAddVariationDeps(ctx, generatedDepTag,
+					parseAndAddVariationDeps(ctx, GeneratedTag,
 						s)
 				} else {
 					agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))
