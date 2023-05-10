@@ -34,7 +34,7 @@ var (
 	GeneratedSourcesTag       = DependencyTag{name: "generated_sources"}
 	GeneratedTag              = DependencyTag{name: "generated_dep"}
 	HostToolBinaryTag         = DependencyTag{name: "host_tool_bin"}
-	filegroupTag              = DependencyTag{name: "filegroup"}
+	FilegroupTag              = DependencyTag{name: "filegroup"}
 	implicitSrcsTag           = DependencyTag{name: "implicit_srcs"}
 )
 

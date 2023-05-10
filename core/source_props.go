@@ -151,7 +151,7 @@ func (s *SourceProps) GetSrcTargets() []string {
 func ReferenceGetSrcsImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
-			isFilegroup := ctx.OtherModuleDependencyTag(child) == filegroupTag
+			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
 			_, isConsumer := child.(SourceFileConsumer)
 			_, isProvider := child.(SourceFileProvider)
 
@@ -172,7 +172,7 @@ func ReferenceGetSrcsImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
 func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits FilePaths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
-			isFilegroup := ctx.OtherModuleDependencyTag(child) == filegroupTag
+			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
 			_, isConsumer := child.(ImplicitFileConsumer)
 			_, isProvider := child.(ImplicitFileProvider)
 
