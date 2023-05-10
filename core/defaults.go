@@ -146,7 +146,7 @@ func defaultsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 
-var defaultDepTag = DependencyTag{name: "default"}
+var DefaultTag = DependencyTag{name: "default"}
 
 // Modules implementing defaultable can refer to bob_defaults via the
 // `defaults` or `flag_defaults` property
@@ -280,6 +280,6 @@ func DefaultDepsStage2Mutator(ctx blueprint.BottomUpMutatorContext) {
 			}
 		}
 
-		ctx.AddDependency(ctx.Module(), defaultDepTag, defaults...)
+		ctx.AddDependency(ctx.Module(), DefaultTag, defaults...)
 	}
 }
