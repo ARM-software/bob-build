@@ -95,6 +95,7 @@ bootstrap_go_package {
         "core/strict_library.go",
         "core/strict_linux_cclibs.go",
         "core/strip.go",
+        "core/tag.go",
         "core/template.go",
         "core/toolchain.go",
     ],

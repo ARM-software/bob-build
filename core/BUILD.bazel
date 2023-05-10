@@ -58,6 +58,7 @@ go_library(
         "strict_library.go",
         "strict_linux_cclibs.go",
         "strip.go",
+        "tag.go",
         "template.go",
         "toolchain.go",
     ],

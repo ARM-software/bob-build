@@ -146,8 +146,6 @@ func defaultsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 
-var DefaultTag = DependencyTag{name: "default"}
-
 // Modules implementing defaultable can refer to bob_defaults via the
 // `defaults` or `flag_defaults` property
 type defaultable interface {
