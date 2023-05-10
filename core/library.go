@@ -122,7 +122,7 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 			if _, ok := m.(*ModuleExternalLibrary); ok {
 				return false
 			}
-			if tag == installDepTag || tag == sharedDepTag {
+			if tag == InstallTag || tag == sharedDepTag {
 				return true
 			}
 			return false

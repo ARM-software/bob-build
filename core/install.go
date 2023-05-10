@@ -226,7 +226,7 @@ func (m *ModuleResource) Features() *Features {
 }
 
 func (m *ModuleResource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
+	return getShortNamesForDirectDepsWithTags(ctx, InstallTag)
 }
 
 func (m *ModuleResource) shortName() string {
@@ -306,7 +306,7 @@ func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 }
 
 var InstallGroupTag = DependencyTag{name: "install_group"}
-var installDepTag = DependencyTag{name: "install_dep"}
+var InstallTag = DependencyTag{name: "install_dep"}
 
 func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag DependencyTag) *string {
 	var installGroupPath *string
