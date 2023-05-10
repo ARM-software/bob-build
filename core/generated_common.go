@@ -283,7 +283,7 @@ func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string,
 			}
 
 			return true // keep visiting
-		} else if parent != ctx.Module() && depTag == sharedDepTag {
+		} else if parent != ctx.Module() && depTag == SharedTag {
 			if l, ok := child.(*ModuleSharedLibrary); ok {
 				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
 			}
