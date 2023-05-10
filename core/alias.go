@@ -21,7 +21,7 @@ import (
 	"github.com/google/blueprint"
 )
 
-var aliasTag = DependencyTag{name: "alias"}
+var AliasTag = DependencyTag{name: "alias"}
 
 // Modules implementing the aliasable interface can be referenced by a
 // bob_alias module
@@ -87,11 +87,11 @@ func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 // Setup dependencies between aliases and their targets
 func aliasMutator(ctx blueprint.BottomUpMutatorContext) {
 	if a, ok := ctx.Module().(*ModuleAlias); ok {
-		parseAndAddVariationDeps(ctx, aliasTag, a.Properties.Srcs...)
+		parseAndAddVariationDeps(ctx, AliasTag, a.Properties.Srcs...)
 	}
 	if a, ok := ctx.Module().(aliasable); ok {
 		for _, s := range a.getAliasList() {
-			ctx.AddReverseDependency(ctx.Module(), aliasTag, s)
+			ctx.AddReverseDependency(ctx.Module(), AliasTag, s)
 		}
 	}
 }
