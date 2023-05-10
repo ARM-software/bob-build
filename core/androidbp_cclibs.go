@@ -96,7 +96,7 @@ func bpModuleNamesForDeps(ctx blueprint.BaseModuleContext, nameLists ...[]string
 func (m *ModuleLibrary) getGeneratedSourceModules(ctx blueprint.BaseModuleContext) (srcs []string) {
 	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == generatedSourceTag
+			return ctx.OtherModuleDependencyTag(dep) == GeneratedSourcesTag
 		},
 		func(dep blueprint.Module) {
 			switch dep.(type) {

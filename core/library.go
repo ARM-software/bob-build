@@ -351,7 +351,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 
 func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == GeneratedSourcesTag },
 		func(m blueprint.Module) {
 			if gs, ok := getGenerateCommon(m); ok {
 				// Add our own name
