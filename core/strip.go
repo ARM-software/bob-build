@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	debugInfoTag = DependencyTag{name: "debug_info"}
+	DebugInfoTag = DependencyTag{name: "debug_info"}
 )
 
 type StripProps struct {
@@ -66,7 +66,7 @@ type stripable interface {
 
 func debugInfoMutator(ctx blueprint.TopDownMutatorContext) {
 	if m, ok := ctx.Module().(stripable); ok {
-		path := getInstallGroupPathFromTag(ctx, debugInfoTag)
+		path := getInstallGroupPathFromTag(ctx, DebugInfoTag)
 		m.setDebugPath(path)
 	}
 }

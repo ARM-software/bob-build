@@ -424,7 +424,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if strlib, ok := ctx.Module().(stripable); ok {
 		info := strlib.getDebugInfo()
 		if info != nil {
-			ctx.AddDependency(ctx.Module(), debugInfoTag, *info)
+			ctx.AddDependency(ctx.Module(), DebugInfoTag, *info)
 		}
 	}
 }
