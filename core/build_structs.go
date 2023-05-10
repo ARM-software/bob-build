@@ -374,7 +374,7 @@ var WholeStaticTag = DependencyTag{name: "whole_static"}
 var HeaderTag = DependencyTag{name: "header"}
 var StaticTag = DependencyTag{name: "static"}
 var SharedTag = DependencyTag{name: "shared"}
-var reexportLibsTag = DependencyTag{name: "reexport_libs"}
+var ReexportLibraryTag = DependencyTag{name: "reexport_libs"}
 var kernelModuleDepTag = DependencyTag{name: "kernel_module"}
 
 func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
@@ -522,7 +522,7 @@ func applyReexportLibsDependenciesMutator(ctx blueprint.BottomUpMutatorContext) 
 	var build *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
 		build = buildProps.build()
-		ctx.AddVariationDependencies(nil, reexportLibsTag, build.ResolvedReexportedLibs...)
+		ctx.AddVariationDependencies(nil, ReexportLibraryTag, build.ResolvedReexportedLibs...)
 	}
 }
 
