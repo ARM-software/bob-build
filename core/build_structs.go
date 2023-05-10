@@ -375,7 +375,7 @@ var HeaderTag = DependencyTag{name: "header"}
 var StaticTag = DependencyTag{name: "static"}
 var SharedTag = DependencyTag{name: "shared"}
 var ReexportLibraryTag = DependencyTag{name: "reexport_libs"}
-var kernelModuleDepTag = DependencyTag{name: "kernel_module"}
+var KernelModuleTag = DependencyTag{name: "kernel_module"}
 
 func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if e, ok := ctx.Module().(enableable); ok {
@@ -411,7 +411,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 
 	if km, ok := ctx.Module().(*ModuleKernelObject); ok {
-		ctx.AddDependency(ctx.Module(), kernelModuleDepTag, km.Properties.Extra_symbols...)
+		ctx.AddDependency(ctx.Module(), KernelModuleTag, km.Properties.Extra_symbols...)
 	}
 
 	if ins, ok := ctx.Module().(installable); ok {
