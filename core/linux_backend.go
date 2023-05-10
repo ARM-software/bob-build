@@ -195,7 +195,7 @@ func (*linuxGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext)
 
 	/* Only depend on enabled targets */
 	ctx.VisitDirectDepsIf(
-		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == aliasTag },
+		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == AliasTag },
 		func(p blueprint.Module) {
 			if e, ok := p.(enableable); ok {
 				if !isEnabled(e) {
