@@ -152,7 +152,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, mainBuild.Static_libs)
 
-	ctx.AddVariationDependencies(nil, staticDepTag, extraStaticLibsDependencies...)
+	ctx.AddVariationDependencies(nil, StaticTag, extraStaticLibsDependencies...)
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
