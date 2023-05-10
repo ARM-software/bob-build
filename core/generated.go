@@ -33,7 +33,7 @@ var (
 	ExportGeneratedHeadersTag = DependencyTag{name: "export_generated_headers"}
 	GeneratedSourcesTag       = DependencyTag{name: "generated_sources"}
 	GeneratedTag              = DependencyTag{name: "generated_dep"}
-	hostToolBinTag            = DependencyTag{name: "host_tool_bin"}
+	HostToolBinaryTag         = DependencyTag{name: "host_tool_bin"}
 	filegroupTag              = DependencyTag{name: "filegroup"}
 	implicitSrcsTag           = DependencyTag{name: "implicit_srcs"}
 )
@@ -132,7 +132,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	// Things that a generated/transformed source depends on
 	if gsc, ok := getGenerateCommon(ctx.Module()); ok {
 		if gsc.Properties.Host_bin != nil {
-			parseAndAddVariationDeps(ctx, hostToolBinTag,
+			parseAndAddVariationDeps(ctx, HostToolBinaryTag,
 				proptools.String(gsc.Properties.Host_bin))
 		}
 		// Generated sources can use the outputs of another generated
