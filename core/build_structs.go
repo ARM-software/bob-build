@@ -371,7 +371,7 @@ func parseAndAddVariationDeps(ctx blueprint.BottomUpMutatorContext,
 }
 
 var WholeStaticTag = DependencyTag{name: "whole_static"}
-var headerDepTag = DependencyTag{name: "header"}
+var HeaderTag = DependencyTag{name: "header"}
 var staticDepTag = DependencyTag{name: "static"}
 var sharedDepTag = DependencyTag{name: "shared"}
 var reexportLibsTag = DependencyTag{name: "reexport_libs"}
@@ -399,8 +399,8 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		ctx.AddVariationDependencies(nil, WholeStaticTag, build.Whole_static_libs...)
 		ctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
 
-		ctx.AddVariationDependencies(nil, headerDepTag, build.Header_libs...)
-		ctx.AddVariationDependencies(nil, headerDepTag, build.Export_header_libs...)
+		ctx.AddVariationDependencies(nil, HeaderTag, build.Header_libs...)
+		ctx.AddVariationDependencies(nil, HeaderTag, build.Export_header_libs...)
 
 		ctx.AddVariationDependencies(nil, sharedDepTag, build.Shared_libs...)
 	}
