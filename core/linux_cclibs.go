@@ -159,7 +159,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	libs := []string{}
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == wholeStaticDepTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*ModuleStaticLibrary); ok {
 				libs = append(libs, sl.outputs()...)

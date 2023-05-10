@@ -370,7 +370,7 @@ func parseAndAddVariationDeps(ctx blueprint.BottomUpMutatorContext,
 	}
 }
 
-var wholeStaticDepTag = DependencyTag{name: "whole_static"}
+var WholeStaticTag = DependencyTag{name: "whole_static"}
 var headerDepTag = DependencyTag{name: "header"}
 var staticDepTag = DependencyTag{name: "static"}
 var sharedDepTag = DependencyTag{name: "shared"}
@@ -396,7 +396,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if l, ok := getLibrary(ctx.Module()); ok {
 		build := &l.Properties.Build
 
-		ctx.AddVariationDependencies(nil, wholeStaticDepTag, build.Whole_static_libs...)
+		ctx.AddVariationDependencies(nil, WholeStaticTag, build.Whole_static_libs...)
 		ctx.AddVariationDependencies(nil, staticDepTag, build.Static_libs...)
 
 		ctx.AddVariationDependencies(nil, headerDepTag, build.Header_libs...)
@@ -488,7 +488,7 @@ func collectReexportLibsDependenciesMutator(ctx blueprint.TopDownMutatorContext)
 
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := ctx.OtherModuleDependencyTag(child)
-		if depTag == wholeStaticDepTag || depTag == staticDepTag || depTag == sharedDepTag {
+		if depTag == WholeStaticTag || depTag == staticDepTag || depTag == sharedDepTag {
 			parentModule, ok1 := parent.(moduleWithBuildProps)
 			childModule, ok2 := child.(moduleWithBuildProps)
 

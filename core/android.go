@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, 2022 Arm Limited.
+ * Copyright 2020, 2022-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -233,7 +233,7 @@ func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
 		tag := ctx.OtherModuleDependencyTag(dep)
 		if tag == staticDepTag ||
 			tag == sharedDepTag ||
-			tag == wholeStaticDepTag {
+			tag == WholeStaticTag {
 			_, staticLib := dep.(*generateStaticLibrary)
 			_, sharedLib := dep.(*generateSharedLibrary)
 			if sharedLib || staticLib {
