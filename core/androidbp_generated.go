@@ -113,7 +113,7 @@ func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, 
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
 	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTags(ctx, generatedDepTag))
-	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(ctx, generatedSourceTag))
+	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(ctx, GeneratedSourcesTag))
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)
 	m.AddStringList("conlyflags", gc.Properties.FlagArgsBuild.Conlyflags)

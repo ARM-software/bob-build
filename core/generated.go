@@ -31,7 +31,7 @@ import (
 var (
 	GeneratedHeadersTag       = DependencyTag{name: "generated_headers"}
 	ExportGeneratedHeadersTag = DependencyTag{name: "export_generated_headers"}
-	generatedSourceTag        = DependencyTag{name: "generated_sources"}
+	GeneratedSourcesTag       = DependencyTag{name: "generated_sources"}
 	generatedDepTag           = DependencyTag{name: "generated_dep"}
 	hostToolBinTag            = DependencyTag{name: "host_tool_bin"}
 	filegroupTag              = DependencyTag{name: "filegroup"}
@@ -96,7 +96,7 @@ func getRspfileName(s string) string {
 func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 	var srcs []string
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == generatedSourceTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == GeneratedSourcesTag },
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
 				srcs = append(srcs, gs.outputs()...)
@@ -123,7 +123,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 
 	// Things which depend on generated/transformed sources
 	if l, ok := getLibrary(ctx.Module()); ok {
-		ctx.AddDependency(ctx.Module(), generatedSourceTag, l.Properties.Generated_sources...)
+		ctx.AddDependency(ctx.Module(), GeneratedSourcesTag, l.Properties.Generated_sources...)
 		ctx.AddDependency(ctx.Module(), GeneratedHeadersTag, l.Properties.Generated_headers...)
 		ctx.AddDependency(ctx.Module(), ExportGeneratedHeadersTag, l.Properties.Export_generated_headers...)
 		ctx.AddDependency(ctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
@@ -139,7 +139,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		// source or library as a source file or dependency.
 		parseAndAddVariationDeps(ctx, generatedDepTag,
 			gsc.Properties.Generated_deps...)
-		parseAndAddVariationDeps(ctx, generatedSourceTag,
+		parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
 			gsc.Properties.Generated_sources...)
 	}
 
@@ -147,7 +147,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		if agsc, ok := getAndroidGenerateCommon(ctx.Module()); ok {
 			for _, s := range agsc.Properties.Srcs {
 				if s[0] == ':' {
-					parseAndAddVariationDeps(ctx, generatedSourceTag,
+					parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
 						s[1:])
 					parseAndAddVariationDeps(ctx, generatedDepTag,
 						s[1:])
