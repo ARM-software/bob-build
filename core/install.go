@@ -305,7 +305,7 @@ func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 		&module.SimpleName.Properties}
 }
 
-var installGroupTag = DependencyTag{name: "install_group"}
+var InstallGroupTag = DependencyTag{name: "install_group"}
 var installDepTag = DependencyTag{name: "install_dep"}
 
 func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag DependencyTag) *string {
@@ -331,7 +331,7 @@ func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag Depende
 
 func installGroupMutator(ctx blueprint.TopDownMutatorContext) {
 	if ins, ok := ctx.Module().(installable); ok {
-		path := getInstallGroupPathFromTag(ctx, installGroupTag)
+		path := getInstallGroupPathFromTag(ctx, InstallGroupTag)
 		if path != nil {
 			if *path == "" {
 				utils.Die("Module %s has empty install path", ctx.ModuleName())

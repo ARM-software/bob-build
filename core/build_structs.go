@@ -417,7 +417,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if ins, ok := ctx.Module().(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			ctx.AddDependency(ctx.Module(), installGroupTag, proptools.String(props.Install_group))
+			ctx.AddDependency(ctx.Module(), InstallGroupTag, proptools.String(props.Install_group))
 		}
 		parseAndAddVariationDeps(ctx, installDepTag, props.Install_deps...)
 	}
