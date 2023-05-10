@@ -299,7 +299,7 @@ func pathToLibFlag(path string) string {
 
 func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
 				libs = append(libs, g.getSharedLibLinkPath(t))
@@ -316,7 +316,7 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 
 func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
 		func(m blueprint.Module) {
 			if l, ok := m.(sharedLibProducer); ok {
 				libs = append(libs, g.getSharedLibTocPath(l))
@@ -340,7 +340,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	tc := getBackend(ctx).getToolchain(m.Properties.TargetType)
 
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == sharedDepTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*ModuleSharedLibrary); ok {
 				b := &sl.ModuleLibrary.Properties.Build

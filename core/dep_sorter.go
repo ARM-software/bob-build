@@ -156,5 +156,5 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
-	ctx.AddVariationDependencies(nil, sharedDepTag, mainBuild.ExtraSharedLibs...)
+	ctx.AddVariationDependencies(nil, SharedTag, mainBuild.ExtraSharedLibs...)
 }

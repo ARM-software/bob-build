@@ -122,7 +122,7 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 			if _, ok := m.(*ModuleExternalLibrary); ok {
 				return false
 			}
-			if tag == InstallTag || tag == sharedDepTag {
+			if tag == InstallTag || tag == SharedTag {
 				return true
 			}
 			return false
@@ -277,7 +277,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
-			} else if tag == StaticTag || tag == sharedDepTag || tag == reexportLibsTag {
+			} else if tag == StaticTag || tag == SharedTag || tag == reexportLibsTag {
 				/* Try to import generated header dirs from static|shared_libs too:
 				 * - The library could be a bob_generate_shared_library or
 				 *   bob_generate_static_library, in which case we need to import
@@ -367,7 +367,7 @@ func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSy
 
 		if !(ctx.OtherModuleDependencyTag(dep) == WholeStaticTag ||
 			ctx.OtherModuleDependencyTag(dep) == StaticTag ||
-			ctx.OtherModuleDependencyTag(dep) == sharedDepTag ||
+			ctx.OtherModuleDependencyTag(dep) == SharedTag ||
 			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag) {
 			return
 		} else if _, ok := visited[dep.Name()]; ok {
