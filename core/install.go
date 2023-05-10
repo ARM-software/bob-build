@@ -135,7 +135,7 @@ func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,
 }
 
 func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
-	tags ...dependencyTag) (ret []string) {
+	tags ...DependencyTag) (ret []string) {
 
 	return getShortNamesForDirectDepsIf(ctx,
 		func(m blueprint.Module) bool {
@@ -305,10 +305,10 @@ func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 		&module.SimpleName.Properties}
 }
 
-var installGroupTag = dependencyTag{name: "install_group"}
-var installDepTag = dependencyTag{name: "install_dep"}
+var installGroupTag = DependencyTag{name: "install_group"}
+var installDepTag = DependencyTag{name: "install_dep"}
 
-func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag dependencyTag) *string {
+func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag DependencyTag) *string {
 	var installGroupPath *string
 
 	ctx.VisitDirectDepsIf(
