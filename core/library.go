@@ -274,7 +274,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 		visitChildren := false
 		childMustBeGenerated := true
 		if parent == mainModule {
-			if tag == GeneratedHeadersTag || tag == exportGeneratedHeaderTag {
+			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
 			} else if tag == staticDepTag || tag == sharedDepTag || tag == reexportLibsTag {
@@ -291,7 +291,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 				childMustBeGenerated = false
 			}
 		} else {
-			if tag == exportGeneratedHeaderTag {
+			if tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
 			}
