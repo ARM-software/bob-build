@@ -277,7 +277,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
-			} else if tag == staticDepTag || tag == sharedDepTag || tag == reexportLibsTag {
+			} else if tag == StaticTag || tag == sharedDepTag || tag == reexportLibsTag {
 				/* Try to import generated header dirs from static|shared_libs too:
 				 * - The library could be a bob_generate_shared_library or
 				 *   bob_generate_static_library, in which case we need to import
@@ -366,7 +366,7 @@ func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSy
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
 		if !(ctx.OtherModuleDependencyTag(dep) == WholeStaticTag ||
-			ctx.OtherModuleDependencyTag(dep) == staticDepTag ||
+			ctx.OtherModuleDependencyTag(dep) == StaticTag ||
 			ctx.OtherModuleDependencyTag(dep) == sharedDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag) {
 			return
@@ -525,7 +525,7 @@ func getLinkableModules(ctx blueprint.TopDownMutatorContext) map[blueprint.Modul
 	ctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		// Stop iteration once we get to other kinds of dependency which won't
 		// actually be linked.
-		if ctx.OtherModuleDependencyTag(dep) != staticDepTag &&
+		if ctx.OtherModuleDependencyTag(dep) != StaticTag &&
 			ctx.OtherModuleDependencyTag(dep) != WholeStaticTag {
 			return false
 		}
@@ -631,7 +631,7 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
-		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag && ctx.OtherModuleDependencyTag(dep) != staticDepTag {
+		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag && ctx.OtherModuleDependencyTag(dep) != StaticTag {
 			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
 				dep.Name(), ctx.ModuleName())
 		}

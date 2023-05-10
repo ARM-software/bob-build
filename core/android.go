@@ -231,7 +231,7 @@ func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
 	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
 		// Only consider dependencies that get linked
 		tag := ctx.OtherModuleDependencyTag(dep)
-		if tag == staticDepTag ||
+		if tag == StaticTag ||
 			tag == sharedDepTag ||
 			tag == WholeStaticTag {
 			_, staticLib := dep.(*generateStaticLibrary)

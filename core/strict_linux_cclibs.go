@@ -48,14 +48,14 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
 		sl.Properties.Defines = append(sl.Properties.Defines, accumlatedDefines...)
 		sl.Properties.Deps = append(sl.Properties.Deps, accumlatedDeps...)
-		ctx.AddDependency(ctx.Module(), staticDepTag, accumlatedDeps...)
+		ctx.AddDependency(ctx.Module(), StaticTag, accumlatedDeps...)
 	} else if l, ok := getLibrary(ctx.Module()); ok {
 		for _, define := range accumlatedDefines {
 			l.Properties.Cflags = append(l.Properties.Cflags, "-D"+define)
 			l.Properties.Defines = append(l.Properties.Defines, define)
 			// TODO: how we decide on static vs. shared?
 			l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
-			ctx.AddVariationDependencies(nil, staticDepTag, accumlatedDeps...)
+			ctx.AddVariationDependencies(nil, StaticTag, accumlatedDeps...)
 		}
 	}
 }
@@ -142,7 +142,7 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx 
 	depfiles := []string{}
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == staticDepTag
+			return ctx.OtherModuleDependencyTag(m) == StaticTag
 		},
 		func(m blueprint.Module) {
 			gen, _ := m.(*ModuleStrictLibrary)
