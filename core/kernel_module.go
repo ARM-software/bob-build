@@ -137,7 +137,7 @@ func (m *ModuleKernelObject) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleKernelObject) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, installDepTag, kernelModuleDepTag)
+	return getShortNamesForDirectDepsWithTags(ctx, InstallTag, kernelModuleDepTag)
 }
 
 func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {

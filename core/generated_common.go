@@ -141,7 +141,7 @@ func (m *ModuleGenerateCommon) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleGenerateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, installDepTag)
+	return getShortNamesForDirectDepsWithTags(ctx, InstallTag)
 }
 
 func (m *ModuleGenerateCommon) supportedVariants() []TgtType {
