@@ -365,7 +365,7 @@ func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSy
 	visited := map[string]bool{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
 
-		if !(ctx.OtherModuleDependencyTag(dep) == wholeStaticDepTag ||
+		if !(ctx.OtherModuleDependencyTag(dep) == WholeStaticTag ||
 			ctx.OtherModuleDependencyTag(dep) == staticDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == sharedDepTag ||
 			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag) {
@@ -526,7 +526,7 @@ func getLinkableModules(ctx blueprint.TopDownMutatorContext) map[blueprint.Modul
 		// Stop iteration once we get to other kinds of dependency which won't
 		// actually be linked.
 		if ctx.OtherModuleDependencyTag(dep) != staticDepTag &&
-			ctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag {
+			ctx.OtherModuleDependencyTag(dep) != WholeStaticTag {
 			return false
 		}
 		ret[dep] = true
@@ -631,7 +631,7 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
-		if ctx.OtherModuleDependencyTag(dep) != wholeStaticDepTag && ctx.OtherModuleDependencyTag(dep) != staticDepTag {
+		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag && ctx.OtherModuleDependencyTag(dep) != staticDepTag {
 			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
 				dep.Name(), ctx.ModuleName())
 		}
