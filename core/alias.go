@@ -21,8 +21,6 @@ import (
 	"github.com/google/blueprint"
 )
 
-var AliasTag = DependencyTag{name: "alias"}
-
 // Modules implementing the aliasable interface can be referenced by a
 // bob_alias module
 type aliasable interface {

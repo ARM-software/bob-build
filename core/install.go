@@ -305,9 +305,6 @@ func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 		&module.SimpleName.Properties}
 }
 
-var InstallGroupTag = DependencyTag{name: "install_group"}
-var InstallTag = DependencyTag{name: "install_dep"}
-
 func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag DependencyTag) *string {
 	var installGroupPath *string
 

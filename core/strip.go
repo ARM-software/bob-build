@@ -21,10 +21,6 @@ import (
 	"github.com/google/blueprint"
 )
 
-var (
-	DebugInfoTag = DependencyTag{name: "debug_info"}
-)
-
 type StripProps struct {
 	// When set, strip symbols and debug information from libraries
 	// and binaries. This is a separate stage that occurs after
