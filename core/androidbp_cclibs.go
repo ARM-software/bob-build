@@ -117,7 +117,7 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(ctx blueprint.BaseModuleContex
 	ctx.VisitDirectDeps(
 		func(dep blueprint.Module) {
 			switch ctx.OtherModuleDependencyTag(dep) {
-			case generatedHeaderTag:
+			case GeneratedHeadersTag:
 				headers = append(headers, dep.Name())
 			case exportGeneratedHeaderTag:
 				exportHeaders = append(exportHeaders, dep.Name())

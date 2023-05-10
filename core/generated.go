@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	generatedHeaderTag       = DependencyTag{name: "generated_headers"}
+	GeneratedHeadersTag      = DependencyTag{name: "generated_headers"}
 	exportGeneratedHeaderTag = DependencyTag{name: "export_generated_headers"}
 	generatedSourceTag       = DependencyTag{name: "generated_sources"}
 	generatedDepTag          = DependencyTag{name: "generated_dep"}
@@ -124,7 +124,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	// Things which depend on generated/transformed sources
 	if l, ok := getLibrary(ctx.Module()); ok {
 		ctx.AddDependency(ctx.Module(), generatedSourceTag, l.Properties.Generated_sources...)
-		ctx.AddDependency(ctx.Module(), generatedHeaderTag, l.Properties.Generated_headers...)
+		ctx.AddDependency(ctx.Module(), GeneratedHeadersTag, l.Properties.Generated_headers...)
 		ctx.AddDependency(ctx.Module(), exportGeneratedHeaderTag, l.Properties.Export_generated_headers...)
 		ctx.AddDependency(ctx.Module(), generatedDepTag, l.Properties.Generated_deps...)
 	}
