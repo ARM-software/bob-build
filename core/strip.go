@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	debugInfoTag = dependencyTag{name: "debug_info"}
+	debugInfoTag = DependencyTag{name: "debug_info"}
 )
 
 type StripProps struct {

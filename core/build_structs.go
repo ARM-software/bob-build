@@ -78,9 +78,9 @@ type dependentInterface interface {
 	outputDir() string
 }
 
-// dependencyTag contains the name of the tag used to track a particular type
+// DependencyTag contains the name of the tag used to track a particular type
 // of dependency between modules
-type dependencyTag struct {
+type DependencyTag struct {
 	blueprint.BaseDependencyTag
 	name string
 }
@@ -370,12 +370,12 @@ func parseAndAddVariationDeps(ctx blueprint.BottomUpMutatorContext,
 	}
 }
 
-var wholeStaticDepTag = dependencyTag{name: "whole_static"}
-var headerDepTag = dependencyTag{name: "header"}
-var staticDepTag = dependencyTag{name: "static"}
-var sharedDepTag = dependencyTag{name: "shared"}
-var reexportLibsTag = dependencyTag{name: "reexport_libs"}
-var kernelModuleDepTag = dependencyTag{name: "kernel_module"}
+var wholeStaticDepTag = DependencyTag{name: "whole_static"}
+var headerDepTag = DependencyTag{name: "header"}
+var staticDepTag = DependencyTag{name: "static"}
+var sharedDepTag = DependencyTag{name: "shared"}
+var reexportLibsTag = DependencyTag{name: "reexport_libs"}
+var kernelModuleDepTag = DependencyTag{name: "kernel_module"}
 
 func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if e, ok := ctx.Module().(enableable); ok {

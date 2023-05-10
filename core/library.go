@@ -340,7 +340,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
 			} else if childMustBeGenerated {
-				utils.Die("%s dependency on non-generated module %s", tag.(dependencyTag).name, child.Name())
+				utils.Die("%s dependency on non-generated module %s", tag.(DependencyTag).name, child.Name())
 			}
 		}
 
