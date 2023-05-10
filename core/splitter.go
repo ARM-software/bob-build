@@ -82,7 +82,7 @@ func supportedVariantsMutator(ctx blueprint.BottomUpMutatorContext) {
 
 	accumulatedProps := SplittableProps{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
-		if ctx.OtherModuleDependencyTag(dep) == defaultDepTag {
+		if ctx.OtherModuleDependencyTag(dep) == DefaultTag {
 			def, ok := dep.(*ModuleDefaults)
 			if !ok {
 				utils.Die("module %s in %s's defaults is not a default",
