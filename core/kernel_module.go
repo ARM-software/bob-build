@@ -137,7 +137,7 @@ func (m *ModuleKernelObject) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleKernelObject) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, InstallTag, kernelModuleDepTag)
+	return getShortNamesForDirectDepsWithTags(ctx, InstallTag, KernelModuleTag)
 }
 
 func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -147,7 +147,7 @@ func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext, g gen
 
 func (m *ModuleKernelObject) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*ModuleKernelObject) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == kernelModuleDepTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == KernelModuleTag },
 		func(m blueprint.Module) {
 			if km, ok := m.(*ModuleKernelObject); ok {
 				modules = append(modules, km)
