@@ -229,7 +229,7 @@ func (m *ModuleGenerateCommon) defaults() []string {
 func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name string) {
 	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == hostToolBinTag
+			return ctx.OtherModuleDependencyTag(dep) == HostToolBinaryTag
 		},
 		func(module blueprint.Module) {
 			_, bin_ok := module.(*ModuleBinary)
@@ -262,7 +262,7 @@ func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string,
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := ctx.OtherModuleDependencyTag(child)
 
-		if parent == ctx.Module() && depTag == hostToolBinTag {
+		if parent == ctx.Module() && depTag == HostToolBinaryTag {
 			var outputs []string
 			hostBinFound = true
 
