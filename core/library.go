@@ -277,7 +277,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
-			} else if tag == StaticTag || tag == SharedTag || tag == reexportLibsTag {
+			} else if tag == StaticTag || tag == SharedTag || tag == ReexportLibraryTag {
 				/* Try to import generated header dirs from static|shared_libs too:
 				 * - The library could be a bob_generate_shared_library or
 				 *   bob_generate_static_library, in which case we need to import
@@ -368,7 +368,7 @@ func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSy
 		if !(ctx.OtherModuleDependencyTag(dep) == WholeStaticTag ||
 			ctx.OtherModuleDependencyTag(dep) == StaticTag ||
 			ctx.OtherModuleDependencyTag(dep) == SharedTag ||
-			ctx.OtherModuleDependencyTag(dep) == reexportLibsTag) {
+			ctx.OtherModuleDependencyTag(dep) == ReexportLibraryTag) {
 			return
 		} else if _, ok := visited[dep.Name()]; ok {
 			// VisitDirectDeps will visit a module once for each
