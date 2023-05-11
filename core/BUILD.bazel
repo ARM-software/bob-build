@@ -65,6 +65,7 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/core",
     visibility = ["//visibility:public"],
     deps = [
+        "//core/module",
         "//internal/bpwriter",
         "//internal/ccflags",
         "//internal/depmap",

@@ -43,10 +43,6 @@ var (
 	buildMetaFile   = os.Getenv("BOB_META_FILE")
 )
 
-type moduleBase struct {
-	blueprint.SimpleName
-}
-
 type PropertyProvider interface {
 	GetProperties() interface{}
 }

@@ -23,16 +23,17 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/google/blueprint"
-
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
+
+	"github.com/google/blueprint"
 )
 
 var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 
 // ModuleLibrary is a base class for modules which are generated from sets of object files
 type ModuleLibrary struct {
-	moduleBase
+	module.ModuleBase
 	simpleOutputProducer
 
 	Properties struct {

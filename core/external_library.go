@@ -18,6 +18,8 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/module"
+
 	"github.com/google/blueprint"
 )
 
@@ -30,7 +32,7 @@ type ExternalLibProps struct {
 }
 
 type ModuleExternalLibrary struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		ExternalLibProps
 		Features

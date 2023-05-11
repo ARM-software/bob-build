@@ -21,8 +21,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
+
 	"github.com/google/blueprint"
 )
 
@@ -44,7 +46,7 @@ type GlobProps struct {
 }
 
 type ModuleGlob struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		GlobProps
 	}

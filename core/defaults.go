@@ -20,14 +20,15 @@ package core
 import (
 	"sync"
 
-	"github.com/google/blueprint"
-
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
+
+	"github.com/google/blueprint"
 )
 
 type ModuleDefaults struct {
-	moduleBase
+	module.ModuleBase
 
 	Properties struct {
 		Features

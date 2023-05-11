@@ -21,10 +21,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/internal/utils"
+
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
-
-	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 type KernelProps struct {
@@ -61,7 +62,7 @@ func (k *KernelProps) processPaths(ctx blueprint.BaseModuleContext) {
 }
 
 type ModuleKernelObject struct {
-	moduleBase
+	module.ModuleBase
 	simpleOutputProducer
 	Properties struct {
 		Features
