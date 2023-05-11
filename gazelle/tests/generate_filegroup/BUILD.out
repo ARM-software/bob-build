@@ -62,8 +62,8 @@ filegroup(
     name = "glob_lib_srcs",
     srcs = glob(
         ["lib/**/*.c"],
+        allow_empty = False,
         exclude = ["lib/**/exclude_*.cpp"],
         exclude_directories = 1,
-        allow_empty = False,
     ),
 )
