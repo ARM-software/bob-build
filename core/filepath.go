@@ -27,6 +27,22 @@ import (
 	"github.com/google/blueprint"
 )
 
+type FileType uint32
+
+const (
+	FileTypeGenerated FileType = 1 << iota
+	FileTypeTool
+	FileTypeBinary
+	FileTypeImplicit
+	FileTypeC
+	FileTypeCpp
+	FileTypeAsm
+	FileTypeHeader
+
+	// Masks:
+	FileTypeCompilable = FileTypeC | FileTypeCpp | FileTypeAsm
+)
+
 // filePath encapsulates paths that may need to be used in different
 // ways in source generation modules.
 type filePath interface {
@@ -50,6 +66,8 @@ type filePath interface {
 
 	OutputPathWithoutPrefix() string
 	Ext() string
+
+	IsType(tag FileType) bool
 }
 
 // Represents a normal file in the source directory
@@ -57,6 +75,7 @@ type sourceFilePath struct {
 	path      string
 	module    string
 	srcPrefix string
+	tag       FileType
 }
 
 var _ filePath = (*sourceFilePath)(nil)
@@ -81,15 +100,19 @@ func (file sourceFilePath) OutputPathWithoutPrefix() string {
 	return file.localPath()
 }
 
+func (file sourceFilePath) IsType(ft FileType) bool {
+	return (file.tag & ft) > 0
+}
+
 func newSourceFilePath(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
-	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir()}
+	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir(), 0} // file tag is UNSET (0) until we implement.
 }
 
 func newSourceFilePathFromModule(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
 	project_path := projectModuleDir(ctx)
 	srcDir := g.sourceDir()
 	full := filepath.Join(project_path, path)
-	return sourceFilePath{full, project_path, srcDir}
+	return sourceFilePath{full, project_path, srcDir, 0} // file tag is UNSET (0) until we implement.
 }
 
 // Represents a file created in the generated output directory
@@ -120,6 +143,12 @@ func (file generatedFilePath) OutputPathWithoutPrefix() string {
 
 func (file generatedFilePath) Ext() string {
 	return path.Ext(file.path)
+}
+
+// Always return false as we will be removing this type later down the road
+// and do not plan to implement the new FileType tagging to it.
+func (file generatedFilePath) IsType(ft FileType) bool {
+	return false
 }
 
 func newGeneratedFilePath(path string) filePath {

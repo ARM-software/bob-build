@@ -24,7 +24,7 @@ import (
 )
 
 func Test_basic_filepaths_tests(t *testing.T) {
-	fp1 := sourceFilePath{"somemod/foo.c", "somemod", "${SrcDir}"}
+	fp1 := sourceFilePath{"somemod/foo.c", "somemod", "${SrcDir}", FileTypeC}
 	fp2 := generatedFilePath{"${BuildDir}/gen/somemod/file.ext", "somemod/file.ext", "${BuildDir}/gen/somemod"}
 	fp3 := generatedFilePath{"${BuildDir}/gen/othermod/file.ext", "othermod/file.ext", "${BuildDir}/gen/othermod"}
 
@@ -81,4 +81,8 @@ func Test_basic_filepaths_tests(t *testing.T) {
 	assert.Equal(t, 2, gen_count, "Correct number of generated files counted in the merged list.")
 	assert.Equal(t, 1, srcs_count, "Correct number of sources counted in the merged list.")
 	assert.Equal(t, 3, all_files, "Correct number of all files in the merged list.")
+
+	assert.Equal(t, true, fp1.IsType(FileTypeC), "Correct set tag for FilePath.")
+	assert.Equal(t, true, fp1.IsType(FileTypeCompilable), "Correct mask that is a superset of tag for FilePath.")
+	assert.Equal(t, false, fp1.IsType(FileTypeCpp), "Correctly report non-matching FileType for FilePath.")
 }
