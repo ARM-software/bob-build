@@ -44,8 +44,8 @@ filegroup(
     name = "glob_204_1",
     srcs = glob(
         ["lib/**/*_204_1.c"],
-        exclude_directories = 1,
         allow_empty = True,
+        exclude_directories = 1,
     ),
 )
 
@@ -67,9 +67,9 @@ filegroup(
     name = "glob_lib_207",
     srcs = glob(
         ["lib/**/*_207.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_207.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )
 
@@ -77,9 +77,9 @@ filegroup(
     name = "glob_lib_208",
     srcs = glob(
         ["lib/**/*_208.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_208.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )
 
@@ -87,9 +87,9 @@ filegroup(
     name = "glob_lib_209",
     srcs = glob(
         ["lib/**/*_209.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_209.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )
 
@@ -97,9 +97,9 @@ filegroup(
     name = "glob_lib_210",
     srcs = glob(
         ["lib/**/*_210.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_210.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )
 
@@ -107,9 +107,9 @@ filegroup(
     name = "glob_lib_211",
     srcs = glob(
         ["lib/**/*_211.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_211.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )
 
@@ -117,8 +117,8 @@ filegroup(
     name = "glob_lib_212",
     srcs = glob(
         ["lib/**/*_212.c"],
+        allow_empty = True,
         exclude = ["lib/**/exclude_*_212.cpp"],
         exclude_directories = 1,
-        allow_empty = True,
     ),
 )

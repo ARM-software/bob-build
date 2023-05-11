@@ -77,6 +77,15 @@ func (s *GlobValue) BzlExpr() bzl.Expr {
 	patternsValue := rule.ExprFromValue(s.Patterns)
 	globArgs := []bzl.Expr{patternsValue}
 
+	if s.AllowEmpty != nil {
+		allowEmptyValue := rule.ExprFromValue(*s.AllowEmpty)
+		globArgs = append(globArgs, &bzl.AssignExpr{
+			LHS: &bzl.LiteralExpr{Token: "allow_empty"},
+			Op:  "=",
+			RHS: allowEmptyValue,
+		})
+	}
+
 	if len(s.Excludes) > 0 {
 		excludesValue := rule.ExprFromValue(s.Excludes)
 		globArgs = append(globArgs, &bzl.AssignExpr{
@@ -96,15 +105,6 @@ func (s *GlobValue) BzlExpr() bzl.Expr {
 			LHS: &bzl.LiteralExpr{Token: "exclude_directories"},
 			Op:  "=",
 			RHS: excludeDirValue,
-		})
-	}
-
-	if s.AllowEmpty != nil {
-		allowEmptyValue := rule.ExprFromValue(*s.AllowEmpty)
-		globArgs = append(globArgs, &bzl.AssignExpr{
-			LHS: &bzl.LiteralExpr{Token: "allow_empty"},
-			Op:  "=",
-			RHS: allowEmptyValue,
 		})
 	}
 
