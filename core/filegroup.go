@@ -18,11 +18,13 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/module"
+
 	"github.com/google/blueprint"
 )
 
 type ModuleFilegroup struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		SourceProps
 		Features

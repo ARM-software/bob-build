@@ -21,7 +21,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
+
 	"github.com/google/blueprint"
 )
 
@@ -53,7 +55,7 @@ type StrictLibraryProps struct {
 }
 
 type ModuleStrictLibrary struct {
-	moduleBase
+	module.ModuleBase
 	simpleOutputProducer // band-aid so legacy don't complain the interface isn't implemented
 	Properties           struct {
 		StrictLibraryProps

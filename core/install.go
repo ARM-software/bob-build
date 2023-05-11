@@ -20,9 +20,10 @@ package core
 import (
 	"path/filepath"
 
-	"github.com/google/blueprint"
-
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
+
+	"github.com/google/blueprint"
 )
 
 // EnableableProps allow a module to be disabled or only built when explicitly requested
@@ -155,7 +156,7 @@ type InstallGroupProps struct {
 }
 
 type ModuleInstallGroup struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		InstallGroupProps
 		Features
@@ -196,7 +197,7 @@ type ResourceProps struct {
 }
 
 type ModuleResource struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		ResourceProps
 		Features

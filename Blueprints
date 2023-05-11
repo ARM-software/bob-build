@@ -38,6 +38,7 @@ bootstrap_go_package {
         "bob-utils",
         "bob-warnings",
         "bob-depmap",
+        "bob-module",
     ],
     srcs: [
         "core/alias.go",
@@ -195,4 +196,15 @@ bootstrap_go_package {
         "internal/warnings/warnings_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/warnings",
+}
+
+bootstrap_go_package {
+    name: "bob-module",
+    srcs: [
+        "core/module/module.go",
+    ],
+    deps: [
+        "blueprint",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/module",
 }

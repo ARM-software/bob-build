@@ -20,7 +20,9 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
+
 	"github.com/google/blueprint"
 )
 
@@ -114,7 +116,7 @@ func (ag *AndroidGenerateCommonProps) GetSrcs(ctx blueprint.BaseModuleContext) F
 }
 
 type ModuleGenruleCommon struct {
-	moduleBase
+	module.ModuleBase
 	EnableableProps
 	simpleOutputProducer
 	headerProducer

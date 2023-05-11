@@ -23,7 +23,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
+
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
@@ -77,7 +79,7 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 }
 
 type ModuleGenerateCommon struct {
-	moduleBase
+	module.ModuleBase
 	simpleOutputProducer
 	headerProducer
 	Properties struct {

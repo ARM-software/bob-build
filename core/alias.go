@@ -18,6 +18,8 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/module"
+
 	"github.com/google/blueprint"
 )
 
@@ -46,7 +48,7 @@ type AliasProps struct {
 
 // Type representing each bob_alias module
 type ModuleAlias struct {
-	moduleBase
+	module.ModuleBase
 	Properties struct {
 		AliasProps
 		Features
