@@ -499,5 +499,5 @@ func (g *androidBpGenerator) init(ctx *blueprint.Context, config *BobConfig) {
 
 	ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
 
-	g.ToolchainSet.parseConfig(config)
+	g.ToolchainSet.parseConfig(&config.Properties)
 }

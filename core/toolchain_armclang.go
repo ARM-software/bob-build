@@ -19,6 +19,8 @@ package core
 
 import (
 	"strings"
+
+	"github.com/ARM-software/bob-build/core/config"
 )
 
 type toolchainArmClang struct {
@@ -86,8 +88,7 @@ func (tc toolchainArmClang) Is64BitOnly() bool {
 	return tc.is64BitOnly
 }
 
-func newToolchainArmClangCommon(config *BobConfig, tgt TgtType) (tc toolchainArmClang) {
-	props := config.Properties
+func newToolchainArmClangCommon(props *config.Properties, tgt TgtType) (tc toolchainArmClang) {
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
@@ -97,19 +98,19 @@ func newToolchainArmClangCommon(config *BobConfig, tgt TgtType) (tc toolchainArm
 	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cxx_binary")
 	tc.linker = newDefaultLinker(tc.cxxBinary, []string{}, []string{})
 
-	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
+	tc.cflags = strings.Split(props.GetString(string(tgt)+"_armclang_flags"), " ")
 	tc.flagCache = newFlagCache()
 	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
 	return
 }
 
-func newToolchainArmClangNative(config *BobConfig) (tc toolchainArmClangNative) {
-	tc.toolchainArmClang = newToolchainArmClangCommon(config, TgtTypeHost)
+func newToolchainArmClangNative(props *config.Properties) (tc toolchainArmClangNative) {
+	tc.toolchainArmClang = newToolchainArmClangCommon(props, TgtTypeHost)
 	return
 }
 
-func newToolchainArmClangCross(config *BobConfig) (tc toolchainArmClangCross) {
-	tc.toolchainArmClang = newToolchainArmClangCommon(config, TgtTypeTarget)
+func newToolchainArmClangCross(props *config.Properties) (tc toolchainArmClangCross) {
+	tc.toolchainArmClang = newToolchainArmClangCommon(props, TgtTypeTarget)
 	return
 }

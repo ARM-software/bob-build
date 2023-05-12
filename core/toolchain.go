@@ -26,6 +26,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -222,29 +223,28 @@ func (tcs *ToolchainSet) getToolchain(tgt TgtType) toolchain {
 	return tcs.target
 }
 
-func (tcs *ToolchainSet) parseConfig(config *BobConfig) {
-	props := config.Properties
+func (tcs *ToolchainSet) parseConfig(props *config.Properties) {
 
 	if props.GetBool("target_toolchain_clang") {
-		tcs.target = newToolchainClangCross(config)
+		tcs.target = newToolchainClangCross(props)
 	} else if props.GetBool("target_toolchain_gnu") {
-		tcs.target = newToolchainGnuCross(config)
+		tcs.target = newToolchainGnuCross(props)
 	} else if props.GetBool("target_toolchain_armclang") {
-		tcs.target = newToolchainArmClangCross(config)
+		tcs.target = newToolchainArmClangCross(props)
 	} else if props.GetBool("target_toolchain_xcode") {
-		tcs.target = newToolchainXcodeCross(config)
+		tcs.target = newToolchainXcodeCross(props)
 	} else {
 		panic(errors.New("no usable target compiler toolchain configured"))
 	}
 
 	if props.GetBool("host_toolchain_clang") {
-		tcs.host = newToolchainClangNative(config)
+		tcs.host = newToolchainClangNative(props)
 	} else if props.GetBool("host_toolchain_gnu") {
-		tcs.host = newToolchainGnuNative(config)
+		tcs.host = newToolchainGnuNative(props)
 	} else if props.GetBool("host_toolchain_armclang") {
-		tcs.host = newToolchainArmClangNative(config)
+		tcs.host = newToolchainArmClangNative(props)
 	} else if props.GetBool("host_toolchain_xcode") {
-		tcs.host = newToolchainXcodeNative(config)
+		tcs.host = newToolchainXcodeNative(props)
 	} else {
 		panic(errors.New("no usable host compiler toolchain configured"))
 	}

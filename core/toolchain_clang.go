@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -105,8 +106,7 @@ func (tc toolchainClangCommon) Is64BitOnly() bool {
 	return tc.is64BitOnly
 }
 
-func newToolchainClangCommon(config *BobConfig, tgt TgtType) (tc toolchainClangCommon) {
-	props := config.Properties
+func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchainClangCommon) {
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
 
 	// This assumes arBinary and asBinary are either in the path, or the same directory as clang.
@@ -143,9 +143,9 @@ func newToolchainClangCommon(config *BobConfig, tgt TgtType) (tc toolchainClangC
 
 	if tc.useGnuBinutils || useGnuStl || useGnuCrt || useGnuLibgcc {
 		if tgt == TgtTypeHost {
-			tc.gnu = newToolchainGnuNative(config)
+			tc.gnu = newToolchainGnuNative(props)
 		} else {
-			tc.gnu = newToolchainGnuCross(config)
+			tc.gnu = newToolchainGnuCross(props)
 		}
 	}
 
@@ -219,12 +219,12 @@ func newToolchainClangCommon(config *BobConfig, tgt TgtType) (tc toolchainClangC
 	return
 }
 
-func newToolchainClangNative(config *BobConfig) (tc toolchainClangNative) {
-	tc.toolchainClangCommon = newToolchainClangCommon(config, TgtTypeHost)
+func newToolchainClangNative(props *config.Properties) (tc toolchainClangNative) {
+	tc.toolchainClangCommon = newToolchainClangCommon(props, TgtTypeHost)
 	return
 }
 
-func newToolchainClangCross(config *BobConfig) (tc toolchainClangCross) {
-	tc.toolchainClangCommon = newToolchainClangCommon(config, TgtTypeTarget)
+func newToolchainClangCross(props *config.Properties) (tc toolchainClangCross) {
+	tc.toolchainClangCommon = newToolchainClangCommon(props, TgtTypeTarget)
 	return
 }

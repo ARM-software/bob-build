@@ -364,5 +364,5 @@ func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
 }
 
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *BobConfig) {
-	g.ToolchainSet.parseConfig(config)
+	g.ToolchainSet.parseConfig(&config.Properties)
 }
