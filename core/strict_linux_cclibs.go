@@ -255,7 +255,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	proxyStaticLib.Properties.Host_supported = m.Properties.Host_supported
 	proxyStaticLib.Properties.Target_supported = m.Properties.Target_supported
 	// TODO: generate target for all supported target types
-	proxyStaticLib.Properties.TargetType = tgtTypeHost
+	proxyStaticLib.Properties.TargetType = TgtTypeHost
 
 	proxyStaticLib.Properties.ResolveFiles(ctx, g)
 	g.staticActions(&proxyStaticLib, ctx)

@@ -46,7 +46,7 @@ var (
 )
 
 type linuxGenerator struct {
-	toolchainSet
+	ToolchainSet
 	logger *warnings.WarningLogger
 }
 
@@ -364,5 +364,5 @@ func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
 }
 
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *BobConfig) {
-	g.toolchainSet.parseConfig(config)
+	g.ToolchainSet.parseConfig(config)
 }

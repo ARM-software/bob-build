@@ -336,7 +336,7 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 		// binaries in both modes.
 		// We disable multilib if this module depends on generated libraries
 		// (which can't support multilib).
-		if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+		if m.Properties.TargetType == TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to
@@ -364,7 +364,7 @@ func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blu
 	// This part handles the target libraries.
 	// We disable multilib if this module depends on generated libraries
 	// (which can't support multilib).
-	if m.Properties.TargetType == tgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	if m.Properties.TargetType == TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
 	addHWASANProps(mod, m.Properties.Build)
@@ -390,9 +390,9 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	if installBase == "tests" {
 		useCcTest = true
 		switch m.Properties.TargetType {
-		case tgtTypeHost:
+		case TgtTypeHost:
 			modType = "cc_test_host"
-		case tgtTypeTarget:
+		case TgtTypeTarget:
 			modType = "cc_test"
 		}
 	} else {
@@ -402,9 +402,9 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 		}
 
 		switch m.Properties.TargetType {
-		case tgtTypeHost:
+		case TgtTypeHost:
 			modType = "cc_binary_host"
-		case tgtTypeTarget:
+		case TgtTypeTarget:
 			modType = "cc_binary"
 		}
 	}
@@ -443,9 +443,9 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 
 	var modType string
 	switch m.Properties.TargetType {
-	case tgtTypeHost:
+	case TgtTypeHost:
 		modType = "cc_library_host_shared"
-	case tgtTypeTarget:
+	case TgtTypeTarget:
 		modType = "cc_library_shared"
 	}
 
@@ -482,9 +482,9 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint
 
 	var modType string
 	switch m.Properties.TargetType {
-	case tgtTypeHost:
+	case TgtTypeHost:
 		modType = "cc_library_host_static"
-	case tgtTypeTarget:
+	case TgtTypeTarget:
 		modType = "cc_library_static"
 	}
 

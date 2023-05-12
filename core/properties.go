@@ -222,8 +222,8 @@ func templateApplierMutator(ctx blueprint.TopDownMutatorContext) {
 		props := append([]interface{}{}, m.FeaturableProperties()...)
 
 		if ts, ok := module.(targetSpecificLibrary); ok {
-			host := ts.getTargetSpecific(tgtTypeHost)
-			target := ts.getTargetSpecific(tgtTypeTarget)
+			host := ts.getTargetSpecific(TgtTypeHost)
+			target := ts.getTargetSpecific(TgtTypeTarget)
 
 			props = append(props, host.getTargetSpecificProps())
 			props = append(props, target.getTargetSpecificProps())
@@ -257,8 +257,8 @@ func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
 		// Apply features in target-specific properties.
 		// This should happen for all modules which support host:{} and target:{}
 		if ts, ok := module.(targetSpecificLibrary); ok {
-			host := ts.getTargetSpecific(tgtTypeHost)
-			target := ts.getTargetSpecific(tgtTypeTarget)
+			host := ts.getTargetSpecific(TgtTypeHost)
+			target := ts.getTargetSpecific(TgtTypeTarget)
 
 			var tgtprops = []propmap{
 				{[]interface{}{host.getTargetSpecificProps()}, &host.Features},

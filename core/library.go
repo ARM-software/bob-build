@@ -140,10 +140,10 @@ func (m *ModuleLibrary) getAliasList() []string {
 
 func (m *ModuleLibrary) supportedVariants() (tgts []TgtType) {
 	if m.Properties.isHostSupported() {
-		tgts = append(tgts, tgtTypeHost)
+		tgts = append(tgts, TgtTypeHost)
 	}
 	if m.Properties.isTargetSupported() {
-		tgts = append(tgts, tgtTypeTarget)
+		tgts = append(tgts, TgtTypeTarget)
 	}
 	return
 }

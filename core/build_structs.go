@@ -260,14 +260,6 @@ type IncludeDirsProps struct {
 	Local_include_dirs []string `bob:"first_overrides"`
 }
 
-type TgtType string
-
-const (
-	tgtTypeHost    TgtType = "host"
-	tgtTypeTarget  TgtType = "target"
-	tgtTypeUnknown TgtType = ""
-)
-
 func stripEmptyComponents(list []string) []string {
 	var emptyStrFilter = func(s string) bool { return s != "" }
 
@@ -302,7 +294,7 @@ func stripEmptyComponentsMutator(ctx blueprint.BottomUpMutatorContext) {
 	strippableProps := f.FeaturableProperties()
 
 	if t, ok := ctx.Module().(targetSpecificLibrary); ok {
-		for _, tgt := range []TgtType{tgtTypeHost, tgtTypeTarget} {
+		for _, tgt := range []TgtType{TgtTypeHost, TgtTypeTarget} {
 			tgtSpecific := t.getTargetSpecific(tgt)
 			tgtSpecificData := tgtSpecific.getTargetSpecificProps()
 			strippableProps = append(strippableProps, tgtSpecificData)
@@ -334,8 +326,8 @@ const splitterMutatorName string = "bob_splitter"
 func parseAndAddVariationDeps(ctx blueprint.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
-	hostVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(tgtTypeHost)}}
-	targetVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(tgtTypeTarget)}}
+	hostVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(TgtTypeHost)}}
+	targetVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(TgtTypeTarget)}}
 
 	for _, dep := range deps {
 		var variations []blueprint.Variation
@@ -423,7 +415,7 @@ func targetMutator(ctx blueprint.TopDownMutatorContext) {
 
 		tgt := t.getTarget()
 
-		if tgt != tgtTypeHost && tgt != tgtTypeTarget {
+		if tgt != TgtTypeHost && tgt != TgtTypeTarget {
 			// This is fine if target is neither host or target,
 			// it can happen if the target is the default
 			return

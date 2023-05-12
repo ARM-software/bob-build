@@ -254,12 +254,12 @@ func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name st
 func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string, []string, TgtType) {
 	// No host_bin provided
 	if m.Properties.Host_bin == nil {
-		return "", []string{}, tgtTypeUnknown
+		return "", []string{}, TgtTypeUnknown
 	}
 
 	hostBinOut := ""
 	hostBinSharedLibsDeps := []string{}
-	hostBinTarget := tgtTypeUnknown
+	hostBinTarget := TgtTypeUnknown
 	hostBinFound := false
 
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
