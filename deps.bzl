@@ -8,7 +8,6 @@ def go_dependencies():
         sum = "h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=",
         version = "v1.1.0",
     )
-
     go_repository(
         name = "com_github_pmezard_go_difflib",
         build_file_proto_mode = "disable_global",

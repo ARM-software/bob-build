@@ -71,7 +71,7 @@ go_repository(
     importpath = "github.com/google/blueprint",
     patch_args = ["-p1"],
     patches = [
-        "@plugin//patches:blueprint/export_module_pos.patch",
+        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
     ],
 )
 
@@ -102,8 +102,3 @@ pip_parse(
 load("@config_deps//:requirements.bzl", "install_deps")
 
 install_deps()
-
-local_repository(
-    name = "plugin",
-    path = "gazelle",
-)

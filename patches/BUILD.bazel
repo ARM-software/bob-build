@@ -1,0 +1,7 @@
+filegroup(
+    name = "blueprint-patches",
+    srcs = [
+        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
+    ],
+    visibility = ["//visibility:public"],
+)
