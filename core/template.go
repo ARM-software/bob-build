@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 Arm Limited.
+ * Copyright 2018-2021, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -99,7 +100,7 @@ func filter_compiler_flags(flag string) string {
 
 // ApplyTemplate writes configuration values (from properties) into the string
 // properties in props. This is done recursively.
-func ApplyTemplate(props interface{}, properties *configProperties) {
+func ApplyTemplate(props interface{}, properties *config.Properties) {
 	stringvalues := properties.StringMap()
 	funcmap := make(map[string]interface{})
 	funcmap["to_upper"] = strings.ToUpper

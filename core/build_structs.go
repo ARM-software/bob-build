@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -53,7 +54,7 @@ type TargetSpecific struct {
 }
 
 // init initializes properties and features
-func (t *TargetSpecific) init(properties *configProperties, list ...interface{}) {
+func (t *TargetSpecific) init(properties *config.Properties, list ...interface{}) {
 	if len(list) == 0 {
 		utils.Die("List can't be empty")
 	}
@@ -125,7 +126,7 @@ type generatorBackend interface {
 // retrieve the backend and configuration values from within Blueprint callbacks.
 type BobConfig struct {
 	Generator  generatorBackend
-	Properties configProperties
+	Properties config.Properties
 }
 
 // AndroidProps defines module properties used by Android backends

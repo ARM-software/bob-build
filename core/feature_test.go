@@ -25,11 +25,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
 // enabledFeatures is just wrapper function to easily enable features that we want
-func enabledFeatures(featuresList ...string) (properties configProperties) {
+func enabledFeatures(featuresList ...string) (properties config.Properties) {
 	properties.Features = make(map[string]bool)
 	for _, feature := range featuresList {
 		// Features keys should be in lowercase
@@ -117,7 +118,7 @@ type testPropsGroupC struct {
 	FieldF string
 }
 
-func createTestModuleAndFeatures() (testProps, configProperties) {
+func createTestModuleAndFeatures() (testProps, config.Properties) {
 	module := testProps{
 		FieldA: "a",
 		FieldB: "b",

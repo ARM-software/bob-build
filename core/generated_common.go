@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -103,7 +104,7 @@ var _ matchSourceInterface = (*ModuleGenerateCommon)(nil)
 var _ propertyEscapeInterface = (*ModuleGenerateCommon)(nil)
 var _ defaultable = (*ModuleGenerateCommon)(nil)
 
-func (m *ModuleGenerateCommon) init(properties *configProperties, list ...interface{}) {
+func (m *ModuleGenerateCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 	m.Properties.FlagArgsBuild.Host.init(properties, CommonProps{}, BuildProps{})
 	m.Properties.FlagArgsBuild.Target.init(properties, CommonProps{}, BuildProps{})

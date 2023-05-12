@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -76,7 +77,7 @@ func typesOf(list ...interface{}) []reflect.Type {
 // Name of each property in this struct is custom feature name.
 // Blueprint will inflate this structure with data read from .bp files.
 // Only exported properties can be set so property name MUST start from capital letter.
-func (f *Features) Init(properties *configProperties, list ...interface{}) {
+func (f *Features) Init(properties *config.Properties, list ...interface{}) {
 	if len(list) == 0 {
 		utils.Die("List can't be empty")
 	}
@@ -171,7 +172,7 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 // AppendProps merges properties from BlueprintEmbed to dst, but only for enabled features
 // expect that Features are inited (before using this function we should call Features.Init)
 // expect that properties.Features should contain all available features (whenever disabled/enabled)
-func (f *Features) AppendProps(dst []interface{}, properties *configProperties) error {
+func (f *Features) AppendProps(dst []interface{}, properties *config.Properties) error {
 	// featuresData is struct created in Features.Init function
 	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()
 
