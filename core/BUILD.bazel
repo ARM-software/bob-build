@@ -16,7 +16,6 @@ go_library(
         "build_props.go",
         "build_structs.go",
         "common_props.go",
-        "config_props.go",
         "defaults.go",
         "dep_sorter.go",
         "escape.go",
@@ -65,10 +64,10 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/core",
     visibility = ["//visibility:public"],
     deps = [
+        "//core/config",
         "//core/module",
         "//internal/bpwriter",
         "//internal/ccflags",
-        "//internal/depmap",
         "//internal/escape",
         "//internal/fileutils",
         "//internal/graph",
@@ -93,6 +92,7 @@ go_test(
     ],
     embed = [":core"],
     deps = [
+        "//core/config",
         "//internal/bpwriter",
         "//internal/utils",
         "@com_github_stretchr_testify//assert",

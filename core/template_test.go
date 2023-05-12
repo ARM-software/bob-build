@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Arm Limited.
+ * Copyright 2018-2019, 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,16 +20,18 @@ package core
 import (
 	"testing"
 
+	"github.com/ARM-software/bob-build/core/config"
+
 	"github.com/stretchr/testify/assert"
 )
 
 // Create a ConfigProperties type that we can use for testing. This
 // avoids having to setup JSON input files for each test.
-func setupTestConfig(m map[string]string) *configProperties {
-	properties := &configProperties{}
+func setupTestConfig(m map[string]string) *config.Properties {
+	properties := &config.Properties{}
 
 	// We can ignore ConfigPropertiesJson, as that is just used to read in the JSON file.
-	properties.stringMap = m
+	properties.SetConfig(m)
 
 	return properties
 }

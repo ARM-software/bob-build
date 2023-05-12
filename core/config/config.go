@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package config
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
-type configProperties struct {
+type Properties struct {
 	// Map of all available features (e.g. noasserts: { cflags: ["-DNDEBUG]" }),
 	// and whether they are enabled or not.
 	Features map[string]bool
@@ -46,7 +46,7 @@ type configProperties struct {
 	stringMap map[string]string
 }
 
-func (properties configProperties) getProp(name string) interface{} {
+func (properties Properties) getProp(name string) interface{} {
 	if elem, ok := properties.Properties[name]; ok {
 		return elem
 	}
@@ -54,7 +54,7 @@ func (properties configProperties) getProp(name string) interface{} {
 	return nil
 }
 
-func (properties configProperties) GetBool(name string) bool {
+func (properties Properties) GetBool(name string) bool {
 	ret, ok := properties.getProp(name).(bool)
 	if ok {
 		return ret
@@ -63,7 +63,7 @@ func (properties configProperties) GetBool(name string) bool {
 	return !ret
 }
 
-func (properties configProperties) GetInt(name string) int {
+func (properties Properties) GetInt(name string) int {
 	number, ok := properties.getProp(name).(json.Number)
 	if !ok {
 		utils.Die("Property %s with value '%v' is not an int",
@@ -83,7 +83,7 @@ func (properties configProperties) GetInt(name string) int {
 	return int(ret)
 }
 
-func (properties configProperties) GetString(name string) string {
+func (properties Properties) GetString(name string) string {
 	if ret, ok := properties.getProp(name).(string); ok {
 		return ret
 	}
@@ -91,7 +91,7 @@ func (properties configProperties) GetString(name string) string {
 	return ""
 }
 
-func (properties configProperties) StringMap() map[string]string {
+func (properties Properties) StringMap() map[string]string {
 	return properties.stringMap
 }
 
@@ -158,7 +158,7 @@ func boolValue(thing interface{}) (value, isBool bool) {
 	return
 }
 
-func (properties *configProperties) LoadConfig(filename string) error {
+func (properties *Properties) LoadConfig(filename string) error {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("Unable to read configuration file: %s", err.Error())
@@ -205,4 +205,9 @@ func (properties *configProperties) LoadConfig(filename string) error {
 	properties.FeatureList = utils.SortedKeysBoolMap(properties.Features)
 
 	return nil
+}
+
+// Loads the config map directly, used for testing.
+func (properties *Properties) SetConfig(m map[string]string) {
+	properties.stringMap = m
 }
