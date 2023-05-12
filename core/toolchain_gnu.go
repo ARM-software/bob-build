@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -180,8 +181,7 @@ func (tc toolchainGnuCross) getStdCxxHeaderDirs() []string {
 	}
 }
 
-func newToolchainGnuCommon(config *BobConfig, tgt TgtType) (tc toolchainGnuCommon) {
-	props := config.Properties
+func newToolchainGnuCommon(props *config.Properties, tgt TgtType) (tc toolchainGnuCommon) {
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
@@ -199,7 +199,7 @@ func newToolchainGnuCommon(config *BobConfig, tgt TgtType) (tc toolchainGnuCommo
 		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
 	}
 
-	flags := strings.Split(config.Properties.GetString(string(tgt)+"_gnu_flags"), " ")
+	flags := strings.Split(props.GetString(string(tgt)+"_gnu_flags"), " ")
 	tc.cflags = append(tc.cflags, flags...)
 	tc.ldflags = append(tc.ldflags, flags...)
 
@@ -210,12 +210,12 @@ func newToolchainGnuCommon(config *BobConfig, tgt TgtType) (tc toolchainGnuCommo
 	return
 }
 
-func newToolchainGnuNative(config *BobConfig) (tc toolchainGnuNative) {
-	tc.toolchainGnuCommon = newToolchainGnuCommon(config, TgtTypeHost)
+func newToolchainGnuNative(props *config.Properties) (tc toolchainGnuNative) {
+	tc.toolchainGnuCommon = newToolchainGnuCommon(props, TgtTypeHost)
 	return
 }
 
-func newToolchainGnuCross(config *BobConfig) (tc toolchainGnuCross) {
-	tc.toolchainGnuCommon = newToolchainGnuCommon(config, TgtTypeTarget)
+func newToolchainGnuCross(props *config.Properties) (tc toolchainGnuCross) {
+	tc.toolchainGnuCommon = newToolchainGnuCommon(props, TgtTypeTarget)
 	return
 }

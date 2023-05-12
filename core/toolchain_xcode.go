@@ -17,6 +17,8 @@
 
 package core
 
+import "github.com/ARM-software/bob-build/core/config"
+
 type toolchainXcode struct {
 	arBinary    string
 	asBinary    string
@@ -89,8 +91,7 @@ func (tc toolchainXcode) Is64BitOnly() bool {
 	return tc.is64BitOnly
 }
 
-func newToolchainXcodeCommon(config *BobConfig, tgt TgtType) (tc toolchainXcode) {
-	props := config.Properties
+func newToolchainXcodeCommon(props *config.Properties, tgt TgtType) (tc toolchainXcode) {
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
@@ -115,12 +116,12 @@ func newToolchainXcodeCommon(config *BobConfig, tgt TgtType) (tc toolchainXcode)
 	return
 }
 
-func newToolchainXcodeNative(config *BobConfig) (tc toolchainXcodeNative) {
-	tc.toolchainXcode = newToolchainXcodeCommon(config, TgtTypeHost)
+func newToolchainXcodeNative(props *config.Properties) (tc toolchainXcodeNative) {
+	tc.toolchainXcode = newToolchainXcodeCommon(props, TgtTypeHost)
 	return
 }
 
-func newToolchainXcodeCross(config *BobConfig) (tc toolchainXcodeCross) {
-	tc.toolchainXcode = newToolchainXcodeCommon(config, TgtTypeTarget)
+func newToolchainXcodeCross(props *config.Properties) (tc toolchainXcodeCross) {
+	tc.toolchainXcode = newToolchainXcodeCommon(props, TgtTypeTarget)
 	return
 }
