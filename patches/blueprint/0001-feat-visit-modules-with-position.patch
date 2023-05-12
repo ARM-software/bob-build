@@ -1,3 +1,20 @@
+From 034a79b3f9e48b7c534bf9ed0146524b379ff9fb Mon Sep 17 00:00:00 2001
+From: Sebastian Birunt <sebastian.birunt@arm.com>
+Date: Tue, 16 May 2023 13:30:54 +0200
+Subject: [PATCH] feat: visit modules with position
+
+Currntly Blueprint does not provide (exports) any
+information about the module position from `build.bp`
+file where it's defined.
+
+However some external utilities want to have modules
+position for a better management.
+
+Provide ability to walk all modules with its position.
+---
+ context.go | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
 diff --git a/context.go b/context.go
 index da86837..ee0cf34 100644
 --- a/context.go
@@ -37,3 +54,6 @@ index da86837..ee0cf34 100644
  func (c *Context) VisitAllModulesIf(pred func(Module) bool,
  	visit func(Module)) {
  
+-- 
+2.25.1
+

@@ -1,3 +1,4 @@
 # Infinite symlink expansion. Used originally for bootstraped bob running tests.
 tests/bob
 blueprint
+gazelle

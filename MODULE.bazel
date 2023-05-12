@@ -1,0 +1,83 @@
+module(
+    name = "bob-build",
+    version = "0.0.1",
+    repo_name = "bob",
+)
+
+print("WARNING: The `bob-build` Bazel module is still highly experimental and subject to change at any time. Only use it to try out bzlmod for now.")
+
+bazel_dep(name = "bazel_skylib", version = "1.3.0")
+bazel_dep(name = "rules_multirun", version = "0.6.0")
+bazel_dep(name = "rules_go", version = "0.39.1", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "gazelle", version = "0.30.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "rules_python", version = "0.20.0")
+
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
+
+# NOTE: https://github.com/bazelbuild/bazel-gazelle/issues/1469
+go_sdk.download(
+    version = "1.18",
+)
+use_repo(
+    go_sdk,
+    "go_toolchains",
+)
+
+register_toolchains("@go_toolchains//:all")
+
+pip = use_extension("@rules_python//python:extensions.bzl", "pip")
+pip.parse(
+    name = "config_deps",
+    requirements_lock = "//config_system:requirements_lock.txt",
+)
+use_repo(pip, "config_deps")
+
+# Register a specific python toolchain instead of using the host version
+python = use_extension("@rules_python//python:extensions.bzl", "python")
+python.toolchain(
+    name = "python3_10",
+    python_version = "3.10",
+)
+use_repo(python, "python3_10_toolchains")
+
+register_toolchains(
+    "@python3_10_toolchains//:all",
+)
+
+# Set up dependencies
+go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
+go_deps.module(
+    path = "github.com/stretchr/testify",
+    sum = "h1:jlIyCplCJFULU/01vCkhKuTyc3OorI3bJFuw6obfgho=",
+    version = "v1.6.0",
+)
+go_deps.module(
+    path = "github.com/davecgh/go-spew",
+    sum = "h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=",
+    version = "v1.1.0",
+)
+go_deps.module(
+    path = "gopkg.in/yaml.v3",
+    sum = "h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=",
+    version = "v3.0.0-20200313102051-9f266ea9e77c",
+)
+go_deps.module(
+    path = "github.com/stretchr/objx",
+    sum = "h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=",
+    version = "v0.1.0",
+)
+use_repo(
+    go_deps,
+    "com_github_stretchr_testify",
+    "in_gopkg_yaml_v3",
+)
+
+blueprint = use_extension("@bob//:extensions.bzl", "blueprint")
+blueprint.from_commit(
+    commit = "6957a46d",
+    patch_strip = 1,
+    patches = [
+        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
+    ],
+)
+use_repo(blueprint, "com_github_google_blueprint")
