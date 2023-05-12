@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package toolchain
 
 import (
 	"errors"
@@ -38,15 +38,15 @@ const (
 	TgtTypeUnknown TgtType = ""
 )
 
-type toolchain interface {
-	getArchiver() (tool string, flags []string)
-	getAssembler() (tool string, flags []string)
-	getCCompiler() (tool string, flags []string)
-	getCXXCompiler() (tool string, flags []string)
-	getLinker() linker
-	getStripFlags() []string
-	getLibraryTocFlags() []string
-	checkFlagIsSupported(language, flag string) bool
+type Toolchain interface {
+	GetArchiver() (tool string, flags []string)
+	GetAssembler() (tool string, flags []string)
+	GetCCompiler() (tool string, flags []string)
+	GetCXXCompiler() (tool string, flags []string)
+	GetLinker() Linker
+	GetStripFlags() []string
+	GetLibraryTocFlags() []string
+	CheckFlagIsSupported(language, flag string) bool
 	Is64BitOnly() bool
 }
 
@@ -101,7 +101,7 @@ func getToolPath(toolUnqualified string) string {
 	// is going via something like update-alternatives.
 	realToolPath, err := filepath.EvalSymlinks(toolPath)
 	if err != nil {
-		panic(fmt.Errorf("Could not follow toolchain symlink %s: %v", toolPath, err))
+		panic(fmt.Errorf("Could not follow Toolchain symlink %s: %v", toolPath, err))
 	}
 
 	return realToolPath
@@ -109,8 +109,8 @@ func getToolPath(toolUnqualified string) string {
 
 // Run the compiler with the -print-file-name option, and return the result.
 // Check that the file exists. Return an error if the file can't be located.
-func getFileName(tc toolchain, basename string) (fname string, e error) {
-	ccBinary, flags := tc.getCCompiler()
+func getFileName(tc Toolchain, basename string) (fname string, e error) {
+	ccBinary, flags := tc.GetCCompiler()
 
 	cmd := exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-print-file-name=" + basename})...)
 	bytes, err := cmd.Output()
@@ -132,7 +132,7 @@ func getFileName(tc toolchain, basename string) (fname string, e error) {
 // Run the compiler with the -print-file-name option, and return the directory
 // name of the result, or an empty list if a non-existent directory was
 // returned or an error occurred.
-func getFileNameDir(tc toolchain, basename string) (dirs []string) {
+func getFileNameDir(tc Toolchain, basename string) (dirs []string) {
 
 	fname, err := getFileName(tc, basename)
 
@@ -162,15 +162,15 @@ func newFlagCache() (cache *flagSupportedCache) {
 	return
 }
 
-// Check that a toolchain's compiler for 'language' supports the given 'flag'
-func (cache *flagSupportedCache) checkFlag(tc toolchain, language, flag string) bool {
+// Check that a Toolchain's compiler for 'language' supports the given 'flag'
+func (cache *flagSupportedCache) checkFlag(tc Toolchain, language, flag string) bool {
 	compiler := ""
 	flags := []string{}
 	switch language {
 	case "c++":
-		compiler, flags = tc.getCXXCompiler()
+		compiler, flags = tc.GetCXXCompiler()
 	case "c":
-		compiler, flags = tc.getCCompiler()
+		compiler, flags = tc.GetCCompiler()
 	default:
 		// No other language currently supported
 		return false
@@ -212,18 +212,18 @@ func (cache *flagSupportedCache) checkFlag(tc toolchain, language, flag string) 
 }
 
 type ToolchainSet struct {
-	host   toolchain
-	target toolchain
+	host   Toolchain
+	target Toolchain
 }
 
-func (tcs *ToolchainSet) getToolchain(tgt TgtType) toolchain {
+func (tcs *ToolchainSet) GetToolchain(tgt TgtType) Toolchain {
 	if tgt == TgtTypeHost {
 		return tcs.host
 	}
 	return tcs.target
 }
 
-func (tcs *ToolchainSet) parseConfig(props *config.Properties) {
+func (tcs *ToolchainSet) Configure(props *config.Properties) {
 
 	if props.GetBool("target_toolchain_clang") {
 		tcs.target = newToolchainClangCross(props)
@@ -234,7 +234,7 @@ func (tcs *ToolchainSet) parseConfig(props *config.Properties) {
 	} else if props.GetBool("target_toolchain_xcode") {
 		tcs.target = newToolchainXcodeCross(props)
 	} else {
-		panic(errors.New("no usable target compiler toolchain configured"))
+		panic(errors.New("no usable target compiler Toolchain configured"))
 	}
 
 	if props.GetBool("host_toolchain_clang") {
@@ -246,6 +246,6 @@ func (tcs *ToolchainSet) parseConfig(props *config.Properties) {
 	} else if props.GetBool("host_toolchain_xcode") {
 		tcs.host = newToolchainXcodeNative(props)
 	} else {
-		panic(errors.New("no usable host compiler toolchain configured"))
+		panic(errors.New("no usable host compiler Toolchain configured"))
 	}
 }

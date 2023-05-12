@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, 2023 Arm Limited.
+ * Copyright 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package toolchain
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ import (
 )
 
 type toolchainGnu interface {
-	toolchain
+	Toolchain
 	getBinDirs() []string
 	getStdCxxHeaderDirs() []string
 	getInstallDir() string
@@ -42,7 +42,7 @@ type toolchainGnuCommon struct {
 	objdumpBinary string
 	gccBinary     string
 	gxxBinary     string
-	linker        linker
+	linker        Linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
 	ldflags       []string // Linker flags, including anything required for C++
@@ -59,34 +59,34 @@ type toolchainGnuCross struct {
 	toolchainGnuCommon
 }
 
-func (tc toolchainGnuCommon) getArchiver() (string, []string) {
+func (tc toolchainGnuCommon) GetArchiver() (string, []string) {
 	return tc.arBinary, []string{}
 }
 
-func (tc toolchainGnuCommon) getAssembler() (string, []string) {
+func (tc toolchainGnuCommon) GetAssembler() (string, []string) {
 	return tc.asBinary, []string{}
 }
 
-func (tc toolchainGnuCommon) getCCompiler() (string, []string) {
+func (tc toolchainGnuCommon) GetCCompiler() (string, []string) {
 	return tc.gccBinary, tc.cflags
 }
 
-func (tc toolchainGnuCommon) getCXXCompiler() (tool string, flags []string) {
+func (tc toolchainGnuCommon) GetCXXCompiler() (tool string, flags []string) {
 	return tc.gxxBinary, tc.cflags
 }
 
-func (tc toolchainGnuCommon) getLinker() linker {
+func (tc toolchainGnuCommon) GetLinker() Linker {
 	return tc.linker
 }
 
-func (tc toolchainGnuCommon) getStripFlags() []string {
+func (tc toolchainGnuCommon) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objcopy-tool", tc.objcopyBinary,
 	}
 }
 
-func (tc toolchainGnuCommon) getLibraryTocFlags() []string {
+func (tc toolchainGnuCommon) GetLibraryTocFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objdump-tool", tc.objdumpBinary,
@@ -97,7 +97,7 @@ func (tc toolchainGnuCommon) getBinDirs() []string {
 	return []string{tc.binDir}
 }
 
-func (tc toolchainGnuCommon) checkFlagIsSupported(language, flag string) bool {
+func (tc toolchainGnuCommon) CheckFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
@@ -108,7 +108,7 @@ func (tc toolchainGnuCommon) checkFlagIsSupported(language, flag string) bool {
 // contain the path to the compiler as well, we instead obtain it by trying the
 // `-print-multiarch` and `-dumpmachine` options.
 func (tc toolchainGnuCommon) getTargetTripleHeaderSubdir() string {
-	ccBinary, flags := tc.getCCompiler()
+	ccBinary, flags := tc.GetCCompiler()
 	cmd := exec.Command(ccBinary, utils.NewStringSlice(flags, []string{"-print-multiarch"})...)
 	bytes, err := cmd.Output()
 	if err == nil {
@@ -130,7 +130,7 @@ func (tc toolchainGnuCommon) getTargetTripleHeaderSubdir() string {
 }
 
 func (tc toolchainGnuCommon) getVersion() string {
-	ccBinary, _ := tc.getCCompiler()
+	ccBinary, _ := tc.GetCCompiler()
 	cmd := exec.Command(ccBinary, "-dumpversion")
 	bytes, err := cmd.Output()
 	if err != nil {
@@ -150,7 +150,7 @@ func (tc toolchainGnuCommon) Is64BitOnly() bool {
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
 // directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
 // 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
-// when passed the --gcc-toolchain option, so add the unprefixed version to the
+// when passed the --gcc-Toolchain option, so add the unprefixed version to the
 // binary search path.
 func (tc toolchainGnuCross) getBinDirs() []string {
 	dirs := tc.toolchainGnuCommon.getBinDirs()

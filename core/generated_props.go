@@ -17,6 +17,8 @@
 
 package core
 
+import "github.com/ARM-software/bob-build/core/toolchain"
+
 // GenerateProps contains the module properties that allow generation of
 // output from arbitrary commands
 type GenerateProps struct {
@@ -80,7 +82,7 @@ type GenerateProps struct {
 	Flag_defaults []string
 
 	// The target type - must be either "host" or "target"
-	Target TgtType
+	Target toolchain.TgtType
 
 	// If true, depfile name will be generated and can be used as ${depfile} reference in 'cmd'
 	Depfile *bool

@@ -20,6 +20,7 @@ package core
 import (
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -157,8 +158,8 @@ func (m *generateLibrary) OutSrcTargets() []string {
 
 //// Support splittable
 
-func (m *generateLibrary) supportedVariants() []TgtType {
-	return []TgtType{m.ModuleGenerateCommon.Properties.Target}
+func (m *generateLibrary) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{m.ModuleGenerateCommon.Properties.Target}
 }
 
 func (m *generateLibrary) disable() {
@@ -166,7 +167,7 @@ func (m *generateLibrary) disable() {
 	panic("disable() called on GenerateLibrary")
 }
 
-func (m *generateLibrary) setVariant(variant TgtType) {
+func (m *generateLibrary) setVariant(variant toolchain.TgtType) {
 	// No need to actually track this, as a single target is always supported
 }
 

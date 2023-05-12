@@ -28,6 +28,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -206,9 +207,9 @@ func Main() {
 
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
 		dependencyGraphHandler := graphMutatorHandler{
-			map[TgtType]graph.Graph{
-				TgtTypeHost:   graph.NewGraph("All"),
-				TgtTypeTarget: graph.NewGraph("All"),
+			map[toolchain.TgtType]graph.Graph{
+				toolchain.TgtTypeHost:   graph.NewGraph("All"),
+				toolchain.TgtTypeTarget: graph.NewGraph("All"),
 			},
 		}
 		ctx.RegisterBottomUpMutator("sort_resolved_static_libs",

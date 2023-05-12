@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -51,7 +52,7 @@ type StrictLibraryProps struct {
 	// TODO: unused but needed for the output interface, no easy way to hide it
 	Out *string
 
-	TargetType TgtType `blueprint:"mutated"`
+	TargetType toolchain.TgtType `blueprint:"mutated"`
 }
 
 type ModuleStrictLibrary struct {
@@ -130,9 +131,9 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g ge
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *ModuleStrictLibrary) supportedVariants() (tgts []TgtType) {
+func (m *ModuleStrictLibrary) supportedVariants() (tgts []toolchain.TgtType) {
 	// TODO: Change tgts based on if host or target supported.
-	tgts = append(tgts, TgtTypeHost)
+	tgts = append(tgts, toolchain.TgtTypeHost)
 	return
 }
 
@@ -141,11 +142,11 @@ func (m *ModuleStrictLibrary) disable() {
 	m.Properties.Enabled = &f
 }
 
-func (m *ModuleStrictLibrary) setVariant(tgt TgtType) {
+func (m *ModuleStrictLibrary) setVariant(tgt toolchain.TgtType) {
 	m.Properties.TargetType = tgt
 }
 
-func (m *ModuleStrictLibrary) getTarget() TgtType {
+func (m *ModuleStrictLibrary) getTarget() toolchain.TgtType {
 	return m.Properties.TargetType
 }
 

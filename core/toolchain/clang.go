@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, 2023 Arm Limited.
+ * Copyright 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package toolchain
 
 import (
 	"github.com/ARM-software/bob-build/core/config"
@@ -30,15 +30,15 @@ type toolchainClangCommon struct {
 	objdumpBinary  string
 	clangBinary    string
 	clangxxBinary  string
-	linker         linker
+	linker         Linker
 	prefix         string
 	useGnuBinutils bool
 
-	// Use the GNU toolchain's 'ar' and 'as', as well as its libstdc++
+	// Use the GNU Toolchain's 'ar' and 'as', as well as its libstdc++
 	// headers if required
 	gnu toolchainGnu
 
-	// Calculated during toolchain initialization:
+	// Calculated during Toolchain initialization:
 	cflags   []string // Flags for both C and C++
 	cxxflags []string // Flags just for C++
 	ldflags  []string // Linker flags, including anything required for C++
@@ -58,47 +58,47 @@ type toolchainClangCross struct {
 	toolchainClangCommon
 }
 
-func (tc toolchainClangCommon) getArchiver() (string, []string) {
+func (tc toolchainClangCommon) GetArchiver() (string, []string) {
 	if tc.useGnuBinutils {
-		return tc.gnu.getArchiver()
+		return tc.gnu.GetArchiver()
 	}
 	return tc.arBinary, []string{}
 }
 
-func (tc toolchainClangCommon) getAssembler() (string, []string) {
+func (tc toolchainClangCommon) GetAssembler() (string, []string) {
 	if tc.useGnuBinutils {
-		return tc.gnu.getAssembler()
+		return tc.gnu.GetAssembler()
 	}
 	return tc.asBinary, []string{}
 }
 
-func (tc toolchainClangCommon) getCCompiler() (string, []string) {
+func (tc toolchainClangCommon) GetCCompiler() (string, []string) {
 	return tc.clangBinary, tc.cflags
 }
 
-func (tc toolchainClangCommon) getCXXCompiler() (string, []string) {
+func (tc toolchainClangCommon) GetCXXCompiler() (string, []string) {
 	return tc.clangxxBinary, tc.cxxflags
 }
 
-func (tc toolchainClangCommon) getLinker() linker {
+func (tc toolchainClangCommon) GetLinker() Linker {
 	return newDefaultLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs)
 }
 
-func (tc toolchainClangCommon) getStripFlags() []string {
+func (tc toolchainClangCommon) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objcopy-tool", tc.objcopyBinary,
 	}
 }
 
-func (tc toolchainClangCommon) getLibraryTocFlags() []string {
+func (tc toolchainClangCommon) GetLibraryTocFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objdump-tool", tc.objdumpBinary,
 	}
 }
 
-func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool {
+func (tc toolchainClangCommon) CheckFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
@@ -110,7 +110,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	tc.prefix = props.GetString(string(tgt) + "_clang_prefix")
 
 	// This assumes arBinary and asBinary are either in the path, or the same directory as clang.
-	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU toolchain.
+	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU Toolchain.
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
 
@@ -162,9 +162,9 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	binDirs := []string{}
 
 	if useGnuCrt || useGnuLibgcc || useGnuStl {
-		// Tell Clang where the GNU toolchain is installed, so it can use its
+		// Tell Clang where the GNU Toolchain is installed, so it can use its
 		// headers and libraries, for example, if we are using libstdc++.
-		gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
+		gnuInstallArg := "--gcc-Toolchain=" + tc.gnu.getInstallDir()
 		tc.cflags = append(tc.cflags, gnuInstallArg)
 		tc.ldflags = append(tc.ldflags, gnuInstallArg)
 	}
@@ -172,9 +172,9 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 		binDirs = append(binDirs, getFileNameDir(tc.gnu, "crt1.o")...)
 	}
 	if tc.useGnuBinutils {
-		// Add the GNU toolchain's binary directories to Clang's binary search
-		// path, so that Clang can find the correct linker. If the GNU toolchain
-		// is a "system" toolchain (e.g. in /usr/bin), its binaries will already
+		// Add the GNU Toolchain's binary directories to Clang's binary search
+		// path, so that Clang can find the correct linker. If the GNU Toolchain
+		// is a "system" Toolchain (e.g. in /usr/bin), its binaries will already
 		// be in Clang's search path, so these arguments have no effect.
 		binDirs = append(binDirs, tc.gnu.getBinDirs()...)
 	}
@@ -210,7 +210,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	}
 
 	// Combine cflags and cxxflags once here, to avoid appending during
-	// every call to getCXXCompiler().
+	// every call to GetCXXCompiler().
 	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
 	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})

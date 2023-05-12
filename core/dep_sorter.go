@@ -18,13 +18,14 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
 
 type graphMutatorHandler struct {
-	graphs map[TgtType]graph.Graph
+	graphs map[toolchain.TgtType]graph.Graph
 }
 
 const (
@@ -59,7 +60,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 	}
 
 	// This mutator is run after host/target splitting, so TargetType should have been set.
-	if !(mainBuild.TargetType == TgtTypeTarget || mainBuild.TargetType == TgtTypeHost) {
+	if !(mainBuild.TargetType == toolchain.TgtTypeTarget || mainBuild.TargetType == toolchain.TgtTypeHost) {
 		utils.Die("Cannot process dependencies on module '%s' with target type '%s'", mainModuleName, mainBuild.TargetType)
 	}
 

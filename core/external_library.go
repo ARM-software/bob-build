@@ -19,6 +19,7 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 
 	"github.com/google/blueprint"
 )
@@ -28,7 +29,7 @@ type ExternalLibProps struct {
 	Export_ldflags []string
 	Ldlibs         []string
 
-	TargetType TgtType `blueprint:"mutated"`
+	TargetType toolchain.TgtType `blueprint:"mutated"`
 }
 
 type ModuleExternalLibrary struct {
@@ -57,12 +58,12 @@ func (m *ModuleExternalLibrary) outputs() []string         { return []string{} }
 func (m *ModuleExternalLibrary) implicitOutputs() []string { return []string{} }
 
 // Implement the splittable interface so "normal" libraries can depend on external ones.
-func (m *ModuleExternalLibrary) supportedVariants() []TgtType {
-	return []TgtType{TgtTypeHost, TgtTypeTarget}
+func (m *ModuleExternalLibrary) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{toolchain.TgtTypeHost, toolchain.TgtTypeTarget}
 }
 func (m *ModuleExternalLibrary) disable()                             {}
-func (m *ModuleExternalLibrary) setVariant(tgt TgtType)               { m.Properties.TargetType = tgt }
-func (m *ModuleExternalLibrary) getTarget() TgtType                   { return m.Properties.TargetType }
+func (m *ModuleExternalLibrary) setVariant(tgt toolchain.TgtType)     { m.Properties.TargetType = tgt }
+func (m *ModuleExternalLibrary) getTarget() toolchain.TgtType         { return m.Properties.TargetType }
 func (m *ModuleExternalLibrary) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
 // Implement the propertyExporter interface so that external libraries can pass

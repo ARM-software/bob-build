@@ -25,6 +25,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -135,7 +136,7 @@ func (m *ModuleGenerateCommon) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *ModuleGenerateCommon) getTarget() TgtType {
+func (m *ModuleGenerateCommon) getTarget() toolchain.TgtType {
 	return m.Properties.Target
 }
 
@@ -147,15 +148,15 @@ func (m *ModuleGenerateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleConte
 	return getShortNamesForDirectDepsWithTags(ctx, InstallTag)
 }
 
-func (m *ModuleGenerateCommon) supportedVariants() []TgtType {
-	return []TgtType{m.Properties.Target}
+func (m *ModuleGenerateCommon) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{m.Properties.Target}
 }
 
 func (m *ModuleGenerateCommon) disable() {
 	*m.Properties.Enabled = false
 }
 
-func (m *ModuleGenerateCommon) setVariant(variant TgtType) {
+func (m *ModuleGenerateCommon) setVariant(variant toolchain.TgtType) {
 	if variant != m.Properties.Target {
 		utils.Die("Variant mismatch: %s != %s", variant, m.Properties.Target)
 	}
@@ -251,15 +252,15 @@ func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name st
 // target type and shared library dependencies for a generator module.
 // This is different from the "tool" in that it used to depend on
 // a bob_binary module.
-func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string, []string, TgtType) {
+func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string, []string, toolchain.TgtType) {
 	// No host_bin provided
 	if m.Properties.Host_bin == nil {
-		return "", []string{}, TgtTypeUnknown
+		return "", []string{}, toolchain.TgtTypeUnknown
 	}
 
 	hostBinOut := ""
 	hostBinSharedLibsDeps := []string{}
-	hostBinTarget := TgtTypeUnknown
+	hostBinTarget := toolchain.TgtTypeUnknown
 	hostBinFound := false
 
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
@@ -304,17 +305,17 @@ func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string,
 	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget
 }
 
-func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, TgtType) {
+func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, toolchain.TgtType) {
 	g := getBackend(ctx)
 
-	tc := g.getToolchain(m.Properties.Target)
-	arBinary, _ := tc.getArchiver()
-	asBinary, astargetflags := tc.getAssembler()
-	cc, cctargetflags := tc.getCCompiler()
-	cxx, cxxtargetflags := tc.getCXXCompiler()
-	linker := tc.getLinker().getTool()
-	ldtargetflags := tc.getLinker().getFlags()
-	ldlibs := tc.getLinker().getLibs()
+	tc := g.GetToolchain(m.Properties.Target)
+	arBinary, _ := tc.GetArchiver()
+	asBinary, astargetflags := tc.GetAssembler()
+	cc, cctargetflags := tc.GetCCompiler()
+	cxx, cxxtargetflags := tc.GetCXXCompiler()
+	linker := tc.GetLinker().GetTool()
+	ldtargetflags := tc.GetLinker().GetFlags()
+	ldlibs := tc.GetLinker().GetLibs()
 
 	props := &m.Properties.FlagArgsBuild
 

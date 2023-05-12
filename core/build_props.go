@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -137,7 +138,7 @@ type BuildProps struct {
 
 	Hwasan_enabled *bool
 
-	TargetType TgtType `blueprint:"mutated"`
+	TargetType toolchain.TgtType `blueprint:"mutated"`
 }
 
 func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {

@@ -24,6 +24,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -222,8 +223,8 @@ func templateApplierMutator(ctx blueprint.TopDownMutatorContext) {
 		props := append([]interface{}{}, m.FeaturableProperties()...)
 
 		if ts, ok := module.(targetSpecificLibrary); ok {
-			host := ts.getTargetSpecific(TgtTypeHost)
-			target := ts.getTargetSpecific(TgtTypeTarget)
+			host := ts.getTargetSpecific(toolchain.TgtTypeHost)
+			target := ts.getTargetSpecific(toolchain.TgtTypeTarget)
 
 			props = append(props, host.getTargetSpecificProps())
 			props = append(props, target.getTargetSpecificProps())
@@ -257,8 +258,8 @@ func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
 		// Apply features in target-specific properties.
 		// This should happen for all modules which support host:{} and target:{}
 		if ts, ok := module.(targetSpecificLibrary); ok {
-			host := ts.getTargetSpecific(TgtTypeHost)
-			target := ts.getTargetSpecific(TgtTypeTarget)
+			host := ts.getTargetSpecific(toolchain.TgtTypeHost)
+			target := ts.getTargetSpecific(toolchain.TgtTypeTarget)
 
 			var tgtprops = []propmap{
 				{[]interface{}{host.getTargetSpecificProps()}, &host.Features},

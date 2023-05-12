@@ -27,6 +27,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/core/config"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -108,7 +109,7 @@ type generatorBackend interface {
 	sourceDir() string
 	bobScriptsDir() string
 	sourceOutputDir(blueprint.Module) string
-	sharedLibsDir(tgt TgtType) string
+	sharedLibsDir(tgt toolchain.TgtType) string
 
 	// Backend flag escaping
 	escapeFlag(string) string
@@ -117,7 +118,7 @@ type generatorBackend interface {
 	init(*blueprint.Context, *BobConfig)
 
 	// Access to backend configuration
-	getToolchain(tgt TgtType) toolchain
+	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
 
 	getLogger() *warnings.WarningLogger
 }
@@ -294,7 +295,7 @@ func stripEmptyComponentsMutator(ctx blueprint.BottomUpMutatorContext) {
 	strippableProps := f.FeaturableProperties()
 
 	if t, ok := ctx.Module().(targetSpecificLibrary); ok {
-		for _, tgt := range []TgtType{TgtTypeHost, TgtTypeTarget} {
+		for _, tgt := range []toolchain.TgtType{toolchain.TgtTypeHost, toolchain.TgtTypeTarget} {
 			tgtSpecific := t.getTargetSpecific(tgt)
 			tgtSpecificData := tgtSpecific.getTargetSpecificProps()
 			strippableProps = append(strippableProps, tgtSpecificData)
@@ -326,8 +327,8 @@ const splitterMutatorName string = "bob_splitter"
 func parseAndAddVariationDeps(ctx blueprint.BottomUpMutatorContext,
 	tag blueprint.DependencyTag, deps ...string) {
 
-	hostVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(TgtTypeHost)}}
-	targetVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(TgtTypeTarget)}}
+	hostVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(toolchain.TgtTypeHost)}}
+	targetVariation := []blueprint.Variation{{Mutator: splitterMutatorName, Variation: string(toolchain.TgtTypeTarget)}}
 
 	for _, dep := range deps {
 		var variations []blueprint.Variation
@@ -415,7 +416,7 @@ func targetMutator(ctx blueprint.TopDownMutatorContext) {
 
 		tgt := t.getTarget()
 
-		if tgt != TgtTypeHost && tgt != TgtTypeTarget {
+		if tgt != toolchain.TgtTypeHost && tgt != toolchain.TgtTypeTarget {
 			// This is fine if target is neither host or target,
 			// it can happen if the target is the default
 			return

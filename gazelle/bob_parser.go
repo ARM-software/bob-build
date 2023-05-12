@@ -11,6 +11,7 @@ import (
 	"text/scanner"
 
 	bob "github.com/ARM-software/bob-build/core"
+	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
@@ -246,8 +247,8 @@ func checkSimpleType(propertyName string, v interface{}) bool {
 		if v.(string) != "" {
 			ret = true
 		}
-	case bob.TgtType:
-		if v.(bob.TgtType) != "" {
+	case bob_toolchain.TgtType:
+		if v.(bob_toolchain.TgtType) != "" {
 			ret = true
 		}
 

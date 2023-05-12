@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/ccflags"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -337,9 +338,9 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 		// We disable multilib if this module depends on generated libraries
 		// (which can't support multilib).
 		// We disable multilib if the target only supports 64bit
-		if m.Properties.TargetType == TgtTypeTarget &&
+		if m.Properties.TargetType == toolchain.TgtTypeTarget &&
 			!linksToGeneratedLibrary(ctx) &&
-			!g.target.Is64BitOnly() {
+			!g.GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
 			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to
@@ -367,7 +368,7 @@ func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blu
 	// This part handles the target libraries.
 	// We disable multilib if this module depends on generated libraries
 	// (which can't support multilib).
-	if m.Properties.TargetType == TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
 	addHWASANProps(mod, m.Properties.Build)
@@ -393,9 +394,9 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	if installBase == "tests" {
 		useCcTest = true
 		switch m.Properties.TargetType {
-		case TgtTypeHost:
+		case toolchain.TgtTypeHost:
 			modType = "cc_test_host"
-		case TgtTypeTarget:
+		case toolchain.TgtTypeTarget:
 			modType = "cc_test"
 		}
 	} else {
@@ -405,9 +406,9 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 		}
 
 		switch m.Properties.TargetType {
-		case TgtTypeHost:
+		case toolchain.TgtTypeHost:
 			modType = "cc_binary_host"
-		case TgtTypeTarget:
+		case toolchain.TgtTypeTarget:
 			modType = "cc_binary"
 		}
 	}
@@ -446,9 +447,9 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 
 	var modType string
 	switch m.Properties.TargetType {
-	case TgtTypeHost:
+	case toolchain.TgtTypeHost:
 		modType = "cc_library_host_shared"
-	case TgtTypeTarget:
+	case toolchain.TgtTypeTarget:
 		modType = "cc_library_shared"
 	}
 
@@ -485,9 +486,9 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint
 
 	var modType string
 	switch m.Properties.TargetType {
-	case TgtTypeHost:
+	case toolchain.TgtTypeHost:
 		modType = "cc_library_host_static"
-	case TgtTypeTarget:
+	case toolchain.TgtTypeTarget:
 		modType = "cc_library_static"
 	}
 

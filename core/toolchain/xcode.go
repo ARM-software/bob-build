@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, 2023 Arm Limited.
+ * Copyright 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package toolchain
 
 import "github.com/ARM-software/bob-build/core/config"
 
@@ -28,7 +28,7 @@ type toolchainXcode struct {
 	nmBinary    string
 	ccBinary    string
 	cxxBinary   string
-	linker      linker
+	linker      Linker
 	prefix      string
 	target      string
 	flagCache   *flagSupportedCache
@@ -47,27 +47,27 @@ type toolchainXcodeCross struct {
 	toolchainXcode
 }
 
-func (tc toolchainXcode) getArchiver() (string, []string) {
+func (tc toolchainXcode) GetArchiver() (string, []string) {
 	return tc.arBinary, []string{}
 }
 
-func (tc toolchainXcode) getAssembler() (string, []string) {
+func (tc toolchainXcode) GetAssembler() (string, []string) {
 	return tc.asBinary, []string{}
 }
 
-func (tc toolchainXcode) getCCompiler() (string, []string) {
+func (tc toolchainXcode) GetCCompiler() (string, []string) {
 	return tc.ccBinary, tc.cflags
 }
 
-func (tc toolchainXcode) getCXXCompiler() (string, []string) {
+func (tc toolchainXcode) GetCXXCompiler() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
-func (tc toolchainXcode) getLinker() linker {
+func (tc toolchainXcode) GetLinker() Linker {
 	return tc.linker
 }
 
-func (tc toolchainXcode) getStripFlags() []string {
+func (tc toolchainXcode) GetStripFlags() []string {
 	return []string{
 		"--format", "macho",
 		"--dsymutil-tool", tc.dsymBinary,
@@ -75,7 +75,7 @@ func (tc toolchainXcode) getStripFlags() []string {
 	}
 }
 
-func (tc toolchainXcode) getLibraryTocFlags() []string {
+func (tc toolchainXcode) GetLibraryTocFlags() []string {
 	return []string{
 		"--format", "macho",
 		"--otool-tool", tc.otoolBinary,
@@ -83,7 +83,7 @@ func (tc toolchainXcode) getLibraryTocFlags() []string {
 	}
 }
 
-func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
+func (tc toolchainXcode) CheckFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 

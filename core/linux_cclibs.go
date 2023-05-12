@@ -91,10 +91,10 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	cflagsList := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags,
 		exportedCflags, systemIncludeFlags, includeFlags)
 
-	tc := g.getToolchain(l.Properties.TargetType)
-	as, astargetflags := tc.getAssembler()
-	cc, cctargetflags := tc.getCCompiler()
-	cxx, cxxtargetflags := tc.getCXXCompiler()
+	tc := g.GetToolchain(l.Properties.TargetType)
+	as, astargetflags := tc.GetAssembler()
+	cc, cctargetflags := tc.GetCCompiler()
+	cxx, cxxtargetflags := tc.GetCXXCompiler()
 
 	ctx.Variable(pctx, "asflags", utils.Join(astargetflags, l.Properties.Asflags))
 	ctx.Variable(pctx, "cflags", utils.Join(cflagsList))
@@ -238,8 +238,8 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	buildWrapper, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
-	tc := g.getToolchain(m.Properties.TargetType)
-	arBinary, _ := tc.getArchiver()
+	tc := g.GetToolchain(m.Properties.TargetType)
+	arBinary, _ := tc.GetArchiver()
 
 	args := map[string]string{
 		"ar":            arBinary,
@@ -263,7 +263,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		rule = emptyStaticLibraryRule
 		// To create an empty lib, we require a dummy object file,
 		// we use the detected compiler to emit it.
-		cc, _ := tc.getCCompiler()
+		cc, _ := tc.GetCCompiler()
 		args["ccompiler"] = cc
 	}
 
@@ -337,7 +337,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	useNoAsNeeded := !m.Properties.Build.isForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
-	tc := getBackend(ctx).getToolchain(m.Properties.TargetType)
+	tc := getBackend(ctx).GetToolchain(m.Properties.TargetType)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
@@ -346,17 +346,17 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 				b := &sl.ModuleLibrary.Properties.Build
 				if b.isForwardingSharedLibrary() {
 					hasForwardingLib = true
-					ldlibs = append(ldlibs, tc.getLinker().keepSharedLibraryTransitivity())
+					ldlibs = append(ldlibs, tc.GetLinker().KeepSharedLibraryTransitivity())
 					if useNoAsNeeded {
-						ldlibs = append(ldlibs, tc.getLinker().keepUnusedDependencies())
+						ldlibs = append(ldlibs, tc.GetLinker().KeepUnusedDependencies())
 					}
 				}
 				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
 				if b.isForwardingSharedLibrary() {
 					if useNoAsNeeded {
-						ldlibs = append(ldlibs, tc.getLinker().dropUnusedDependencies())
+						ldlibs = append(ldlibs, tc.GetLinker().DropUnusedDependencies())
 					}
-					ldlibs = append(ldlibs, tc.getLinker().dropSharedLibraryTransitivity())
+					ldlibs = append(ldlibs, tc.GetLinker().DropSharedLibraryTransitivity())
 				}
 				if installPath, ok := sl.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
@@ -377,7 +377,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 		})
 
 	if hasForwardingLib {
-		ldlibs = append(ldlibs, tc.getLinker().getForwardingLibFlags())
+		ldlibs = append(ldlibs, tc.GetLinker().GetForwardingLibFlags())
 	}
 	if m.Properties.isRpathWanted() {
 		if installPath, ok := m.Properties.InstallableProps.getInstallPath(); ok {
@@ -389,40 +389,40 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 				}
 				rpaths = append(rpaths, "'$$ORIGIN/"+out+"'")
 			}
-			ldlibs = append(ldlibs, tc.getLinker().setRpath(rpaths))
+			ldlibs = append(ldlibs, tc.GetLinker().SetRpath(rpaths))
 		}
 	}
 	return
 }
 
 func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.ModuleContext) map[string]string {
-	tc := g.getToolchain(m.Properties.TargetType)
+	tc := g.GetToolchain(m.Properties.TargetType)
 
 	ldflags := m.Properties.Ldflags
 
 	if m.Properties.Build.isForwardingSharedLibrary() {
-		ldflags = append(ldflags, tc.getLinker().keepUnusedDependencies())
+		ldflags = append(ldflags, tc.GetLinker().KeepUnusedDependencies())
 	} else {
-		ldflags = append(ldflags, tc.getLinker().dropUnusedDependencies())
+		ldflags = append(ldflags, tc.GetLinker().DropUnusedDependencies())
 	}
 
 	versionScript := m.getVersionScript(ctx)
 	if versionScript != nil {
-		ldflags = append(ldflags, tc.getLinker().setVersionScript(*versionScript))
+		ldflags = append(ldflags, tc.GetLinker().SetVersionScript(*versionScript))
 	}
 
 	sharedLibLdlibs, sharedLibLdflags := m.getSharedLibFlags(ctx)
 
-	linker := tc.getLinker().getTool()
-	tcLdflags := tc.getLinker().getFlags()
-	tcLdlibs := tc.getLinker().getLibs()
+	linker := tc.GetLinker().GetTool()
+	tcLdflags := tc.GetLinker().GetFlags()
+	tcLdlibs := tc.GetLinker().GetLibs()
 	buildWrapper, _ := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
 	wholeStaticLibs := m.GetWholeStaticLibs(ctx)
 	staticLibs := m.GetStaticLibs(ctx)
 	staticLibFlags := []string{}
 	if len(wholeStaticLibs) > 0 {
-		staticLibFlags = append(staticLibFlags, tc.getLinker().linkWholeArchives(
+		staticLibFlags = append(staticLibFlags, tc.GetLinker().LinkWholeArchives(
 			wholeStaticLibs))
 	}
 	staticLibFlags = append(staticLibFlags, staticLibs...)
@@ -433,7 +433,7 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 		"linker":          linker,
 		"shared_libs_dir": sharedLibDir,
 		"shared_libs_flags": utils.Join(append(sharedLibLdlibs,
-			tc.getLinker().setRpathLink(sharedLibDir))),
+			tc.GetLinker().SetRpathLink(sharedLibDir))),
 		"static_libs": utils.Join(staticLibFlags),
 		"ldlibs":      utils.Join(m.Properties.Ldlibs, tcLdlibs),
 	}

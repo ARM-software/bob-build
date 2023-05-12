@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -60,7 +61,7 @@ func isBuiltByDefault(e enableable) bool {
 
 	switch m := e.(type) {
 	case *ModuleBinary:
-		if m.Properties.TargetType == TgtTypeTarget {
+		if m.Properties.TargetType == toolchain.TgtTypeTarget {
 			return true
 		}
 	case *ModuleKernelObject:
