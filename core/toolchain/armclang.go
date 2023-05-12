@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, 2023 Arm Limited.
+ * Copyright 2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package core
+package toolchain
 
 import (
 	"strings"
@@ -30,7 +30,7 @@ type toolchainArmClang struct {
 	objdumpBinary string
 	ccBinary      string
 	cxxBinary     string
-	linker        linker
+	linker        Linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
 	flagCache     *flagSupportedCache
@@ -46,41 +46,41 @@ type toolchainArmClangCross struct {
 	toolchainArmClang
 }
 
-func (tc toolchainArmClang) getArchiver() (string, []string) {
+func (tc toolchainArmClang) GetArchiver() (string, []string) {
 	return tc.arBinary, []string{}
 }
 
-func (tc toolchainArmClang) getAssembler() (string, []string) {
+func (tc toolchainArmClang) GetAssembler() (string, []string) {
 	return tc.asBinary, []string{}
 }
 
-func (tc toolchainArmClang) getCCompiler() (string, []string) {
+func (tc toolchainArmClang) GetCCompiler() (string, []string) {
 	return tc.ccBinary, tc.cflags
 }
 
-func (tc toolchainArmClang) getCXXCompiler() (string, []string) {
+func (tc toolchainArmClang) GetCXXCompiler() (string, []string) {
 	return tc.cxxBinary, tc.cflags
 }
 
-func (tc toolchainArmClang) getLinker() linker {
+func (tc toolchainArmClang) GetLinker() Linker {
 	return tc.linker
 }
 
-func (tc toolchainArmClang) getStripFlags() []string {
+func (tc toolchainArmClang) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objcopy-tool", tc.objcopyBinary,
 	}
 }
 
-func (tc toolchainArmClang) getLibraryTocFlags() []string {
+func (tc toolchainArmClang) GetLibraryTocFlags() []string {
 	return []string{
 		"--format", "elf",
 		"--objdump-tool", tc.objdumpBinary,
 	}
 }
 
-func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
+func (tc toolchainArmClang) CheckFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 

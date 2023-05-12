@@ -40,6 +40,7 @@ bootstrap_go_package {
         "bob-depmap",
         "bob-module",
         "bob-config",
+        "bob-toolchain",
     ],
     srcs: [
         "core/alias.go",
@@ -98,13 +99,6 @@ bootstrap_go_package {
         "core/strip.go",
         "core/tag.go",
         "core/template.go",
-        "core/toolchain.go",
-        "core/toolchain_armclang.go",
-        "core/toolchain_clang.go",
-        "core/toolchain_gnu.go",
-        "core/toolchain_linker.go",
-        "core/toolchain_linker_xcode.go",
-        "core/toolchain_xcode.go",
     ],
     testSrcs: [
         "core/android_test.go",
@@ -114,6 +108,24 @@ bootstrap_go_package {
         "core/filepaths_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",
+}
+
+bootstrap_go_package {
+    name: "bob-toolchain",
+    deps: [
+        "bob-utils",
+        "bob-config",
+    ],
+    srcs: [
+        "core/toolchain/armclang.go",
+        "core/toolchain/clang.go",
+        "core/toolchain/gnu.go",
+        "core/toolchain/linker.go",
+        "core/toolchain/toolchain.go",
+        "core/toolchain/xcode.go",
+        "core/toolchain/xcode_linker.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/toolchain",
 }
 
 bootstrap_go_package {

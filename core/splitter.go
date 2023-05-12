@@ -23,6 +23,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -36,16 +37,16 @@ type SplittableProps struct {
 // the different variants by the splitterMutator
 type splittable interface {
 	// Retrieve all the different variations to create
-	supportedVariants() []TgtType
+	supportedVariants() []toolchain.TgtType
 
 	// Disables the module is no variations supported
 	disable()
 
 	// Set the particular variant
-	setVariant(TgtType)
+	setVariant(toolchain.TgtType)
 
 	// Retrieve the module target type variant as set by setVariant
-	getTarget() TgtType
+	getTarget() toolchain.TgtType
 
 	// Get the properties related to which variants are available
 	getSplittableProps() *SplittableProps
@@ -57,7 +58,7 @@ type targetSpecificLibrary interface {
 	splittable
 
 	// Get the target specific properties i.e. host:{} or target:{}
-	getTargetSpecific(TgtType) *TargetSpecific
+	getTargetSpecific(toolchain.TgtType) *TargetSpecific
 
 	// Get the set of the module main properties for
 	// that target specific properties would be applied to
@@ -112,7 +113,7 @@ func supportedVariantsMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func tgtToString(tgts []TgtType) []string {
+func tgtToString(tgts []toolchain.TgtType) []string {
 	variants := make([]string, len(tgts))
 	for i, v := range tgts {
 		variants[i] = string(v)
@@ -133,7 +134,7 @@ func splitterMutator(ctx blueprint.BottomUpMutatorContext) {
 				if !ok {
 					panic(errors.New("newly created variation is not splittable - should not happen"))
 				}
-				newsplit.setVariant(TgtType(v))
+				newsplit.setVariant(toolchain.TgtType(v))
 			}
 		}
 	}

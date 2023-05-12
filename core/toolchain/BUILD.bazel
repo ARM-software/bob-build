@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "toolchain",
+    srcs = [
+        "armclang.go",
+        "clang.go",
+        "gnu.go",
+        "linker.go",
+        "toolchain.go",
+        "xcode.go",
+        "xcode_linker.go",
+    ],
+    importpath = "github.com/ARM-software/bob-build/core/toolchain",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/config",
+        "//internal/utils",
+    ],
+)

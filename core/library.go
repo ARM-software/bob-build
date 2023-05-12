@@ -24,6 +24,7 @@ import (
 	"regexp"
 
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -103,7 +104,7 @@ func (m *ModuleLibrary) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *ModuleLibrary) getTarget() TgtType {
+func (m *ModuleLibrary) getTarget() toolchain.TgtType {
 	return m.Properties.TargetType
 }
 
@@ -138,12 +139,12 @@ func (m *ModuleLibrary) getAliasList() []string {
 	return m.Properties.getAliasList()
 }
 
-func (m *ModuleLibrary) supportedVariants() (tgts []TgtType) {
+func (m *ModuleLibrary) supportedVariants() (tgts []toolchain.TgtType) {
 	if m.Properties.isHostSupported() {
-		tgts = append(tgts, TgtTypeHost)
+		tgts = append(tgts, toolchain.TgtTypeHost)
 	}
 	if m.Properties.isTargetSupported() {
-		tgts = append(tgts, TgtTypeTarget)
+		tgts = append(tgts, toolchain.TgtTypeTarget)
 	}
 	return
 }
@@ -153,7 +154,7 @@ func (m *ModuleLibrary) disable() {
 	m.Properties.Enabled = &f
 }
 
-func (m *ModuleLibrary) setVariant(tgt TgtType) {
+func (m *ModuleLibrary) setVariant(tgt toolchain.TgtType) {
 	m.Properties.TargetType = tgt
 }
 
@@ -161,7 +162,7 @@ func (m *ModuleLibrary) getSplittableProps() *SplittableProps {
 	return &m.Properties.SplittableProps
 }
 
-func (m *ModuleLibrary) getTargetSpecific(tgt TgtType) *TargetSpecific {
+func (m *ModuleLibrary) getTargetSpecific(tgt toolchain.TgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(tgt)
 }
 

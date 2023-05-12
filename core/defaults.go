@@ -21,6 +21,7 @@ import (
 	"sync"
 
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 
@@ -39,15 +40,15 @@ type ModuleDefaults struct {
 	}
 }
 
-func (m *ModuleDefaults) supportedVariants() []TgtType {
-	return []TgtType{TgtTypeHost, TgtTypeTarget}
+func (m *ModuleDefaults) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{toolchain.TgtTypeHost, toolchain.TgtTypeTarget}
 }
 
 func (m *ModuleDefaults) disable() {
 	panic("disable() called on Default")
 }
 
-func (m *ModuleDefaults) setVariant(variant TgtType) {
+func (m *ModuleDefaults) setVariant(variant toolchain.TgtType) {
 	m.Properties.TargetType = variant
 }
 
@@ -94,11 +95,11 @@ func (m *ModuleDefaults) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *ModuleDefaults) getTarget() TgtType {
+func (m *ModuleDefaults) getTarget() toolchain.TgtType {
 	return m.Properties.TargetType
 }
 
-func (m *ModuleDefaults) getTargetSpecific(variant TgtType) *TargetSpecific {
+func (m *ModuleDefaults) getTargetSpecific(variant toolchain.TgtType) *TargetSpecific {
 	return m.Properties.getTargetSpecific(variant)
 }
 
@@ -212,7 +213,7 @@ func DefaultDepsStage1Mutator(ctx blueprint.BottomUpMutatorContext) {
 	if gsc, ok := getGenerateCommon(ctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
-			if !(tgt == TgtTypeHost || tgt == TgtTypeTarget) {
+			if !(tgt == toolchain.TgtTypeHost || tgt == toolchain.TgtTypeTarget) {
 				utils.Die("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
 					ctx.ModuleName(), gsc.Properties.Flag_defaults, tgt)
 			}

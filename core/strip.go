@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
 
@@ -52,7 +53,7 @@ func (props *StripProps) setDebugPath(path *string) {
 
 type stripable interface {
 	strip() bool
-	getTarget() TgtType
+	getTarget() toolchain.TgtType
 	stripOutputDir(g generatorBackend) string
 
 	getDebugInfo() *string

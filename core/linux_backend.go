@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -46,8 +47,8 @@ var (
 )
 
 type linuxGenerator struct {
-	ToolchainSet
-	logger *warnings.WarningLogger
+	toolchains toolchain.ToolchainSet
+	logger     *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by linuxGenerator */
@@ -119,7 +120,7 @@ type singleOutputModule interface {
 
 type targetableModule interface {
 	singleOutputModule
-	getTarget() TgtType
+	getTarget() toolchain.TgtType
 }
 
 // Modules implementing sharedLibProducer create a shared library
@@ -140,7 +141,7 @@ func (g *linuxGenerator) staticLibOutputDir(m *ModuleStaticLibrary) string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "static")
 }
 
-func (g *linuxGenerator) sharedLibsDir(tgt TgtType) string {
+func (g *linuxGenerator) sharedLibsDir(tgt toolchain.TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "shared")
 }
 
@@ -166,9 +167,9 @@ var tocRule = pctx.StaticRule("shared_library_toc",
 	},
 	"tocflags")
 
-func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt TgtType) {
-	tc := g.getToolchain(tgt)
-	tocFlags := tc.getLibraryTocFlags()
+func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt toolchain.TgtType) {
+	tc := g.GetToolchain(tgt)
+	tocFlags := tc.GetLibraryTocFlags()
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
@@ -180,7 +181,7 @@ func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, to
 		})
 }
 
-func (g *linuxGenerator) binaryOutputDir(tgt TgtType) string {
+func (g *linuxGenerator) binaryOutputDir(tgt toolchain.TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "executable")
 }
 
@@ -288,10 +289,10 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 			}
 
 			if lib.strip() || separateDebugInfo {
-				tc := g.getToolchain(lib.getTarget())
+				tc := g.GetToolchain(lib.getTarget())
 				basename := filepath.Base(src)
 				strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
-				stArgs := tc.getStripFlags()
+				stArgs := tc.GetStripFlags()
 				if lib.strip() {
 					stArgs = append(stArgs, "--strip")
 				}
@@ -364,5 +365,9 @@ func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
 }
 
 func (g *linuxGenerator) init(ctx *blueprint.Context, config *BobConfig) {
-	g.ToolchainSet.parseConfig(&config.Properties)
+	g.toolchains.Configure(&config.Properties)
+}
+
+func (g *linuxGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
+	return g.toolchains.GetToolchain(tgt)
 }

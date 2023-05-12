@@ -31,6 +31,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -43,8 +44,8 @@ var (
 )
 
 type androidBpGenerator struct {
-	ToolchainSet
-	logger *warnings.WarningLogger
+	toolchains toolchain.ToolchainSet
+	logger     *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by androidBpGenerator */
@@ -129,7 +130,7 @@ func (g *androidBpGenerator) sourceOutputDir(m blueprint.Module) string {
 	return ""
 }
 
-func (g *androidBpGenerator) sharedLibsDir(TgtType) string {
+func (g *androidBpGenerator) sharedLibsDir(toolchain.TgtType) string {
 	// When writing link commands, it's common to put all the shared
 	// libraries in a single location to make it easy for the linker to
 	// find them. This function tells us where this is for the current
@@ -496,8 +497,10 @@ func (g *androidBpGenerator) getLogger() *warnings.WarningLogger {
 func (g *androidBpGenerator) init(ctx *blueprint.Context, config *BobConfig) {
 	// Do not run in parallel to avoid locking issues on the map
 	ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
-
 	ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
+	g.toolchains.Configure(&config.Properties)
+}
 
-	g.ToolchainSet.parseConfig(&config.Properties)
+func (g *androidBpGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
+	return g.toolchains.GetToolchain(tgt)
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -206,9 +207,9 @@ func verifyMatchSources(ctx blueprint.BaseModuleContext, matchedNonCompiledSourc
 
 // If the flag is supported by any of the input languages return it,
 // otherwise return "" to exclude it
-func checkCompilerFlag(flag string, languages []string, tc toolchain) string {
+func checkCompilerFlag(flag string, languages []string, tc toolchain.Toolchain) string {
 	for _, lang := range languages {
-		if tc.checkFlagIsSupported(lang, flag) {
+		if tc.CheckFlagIsSupported(lang, flag) {
 			return flag
 		}
 	}
@@ -222,7 +223,7 @@ func setupAddIfSupported(ctx blueprint.BaseModuleContext,
 
 	if t, ok := ctx.Module().(moduleWithBuildProps); ok {
 		build := t.build()
-		tc := getBackend(ctx).getToolchain(build.TargetType)
+		tc := getBackend(ctx).GetToolchain(build.TargetType)
 
 		addtoFuncmap(propfnmap, []string{"Cflags", "Export_cflags"}, "add_if_supported",
 			func(s string) string {

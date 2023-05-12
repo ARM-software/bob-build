@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -34,10 +35,10 @@ type Build struct {
 	SplittableProps
 }
 
-func (b *Build) getTargetSpecific(tgt TgtType) *TargetSpecific {
-	if tgt == TgtTypeHost {
+func (b *Build) getTargetSpecific(tgt toolchain.TgtType) *TargetSpecific {
+	if tgt == toolchain.TgtTypeHost {
 		return &b.Host
-	} else if tgt == TgtTypeTarget {
+	} else if tgt == toolchain.TgtTypeTarget {
 		return &b.Target
 	} else {
 		utils.Die("Unsupported target type: %s", tgt)
