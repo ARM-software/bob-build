@@ -47,6 +47,7 @@ type toolchainGnuCommon struct {
 	ldflags       []string // Linker flags, including anything required for C++
 	binDir        string
 	flagCache     *flagSupportedCache
+	is64BitOnly   bool
 }
 
 type toolchainGnuNative struct {
@@ -141,6 +142,10 @@ func (tc toolchainGnuCommon) getInstallDir() string {
 	return filepath.Dir(tc.binDir)
 }
 
+func (tc toolchainGnuCommon) Is64BitOnly() bool {
+	return tc.is64BitOnly
+}
+
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
 // directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
 // 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
@@ -200,6 +205,7 @@ func newToolchainGnuCommon(config *BobConfig, tgt TgtType) (tc toolchainGnuCommo
 
 	tc.linker = newDefaultLinker(tc.gxxBinary, tc.ldflags, []string{})
 	tc.flagCache = newFlagCache()
+	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
 	return
 }

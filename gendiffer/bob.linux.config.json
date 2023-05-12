@@ -59,6 +59,10 @@
     "ignore": false,
     "value": "gcc"
   },
+  "host_64bit_only": {
+    "ignore": false,
+    "value": false
+  },
   "host_ar_binary": {
     "ignore": false,
     "value": "ar"
@@ -240,6 +244,10 @@
     "value": ""
   },
   "static_lib_toggle": {
+    "ignore": false,
+    "value": false
+  },
+  "target_64bit_only": {
     "ignore": false,
     "value": false
   },

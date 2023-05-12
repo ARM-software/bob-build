@@ -20,6 +20,11 @@
 # e.g. `get_config_string(TgtType + "_GNU_PREFIX")`.
 # These are defined here, rather than in the superproject, because
 # they will be empty most of the time.
+config TARGET_64BIT_ONLY
+	bool "Target supports 64bit only"
+	default n
+	help
+		"Select whether the target architecture is exclusively 64bit."
 
 config TARGET_CLANG_PREFIX
 	string "Target Clang compiler prefix"

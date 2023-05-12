@@ -20,6 +20,12 @@
 # defined here, rather than in the superproject, because even when they are
 # fully supported, they will be empty most of the time.
 
+config HOST_64BIT_ONLY
+	bool "Host supports 64bit only"
+	default n
+	help
+		"Select whether the host architecture is exclusively 64bit."
+
 config HOST_GNU_PREFIX
 	string "Host GNU compiler prefix"
 	default "prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/bin/x86_64-linux-android-" if BUILDER_ANDROID_BP

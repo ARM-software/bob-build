@@ -33,6 +33,8 @@ type toolchainXcode struct {
 
 	cflags  []string
 	ldflags []string
+
+	is64BitOnly bool
 }
 
 type toolchainXcodeNative struct {
@@ -83,6 +85,10 @@ func (tc toolchainXcode) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
+func (tc toolchainXcode) Is64BitOnly() bool {
+	return tc.is64BitOnly
+}
+
 func newToolchainXcodeCommon(config *BobConfig, tgt TgtType) (tc toolchainXcode) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_xcode_prefix")
@@ -105,7 +111,7 @@ func newToolchainXcodeCommon(config *BobConfig, tgt TgtType) (tc toolchainXcode)
 
 	tc.linker = newXcodeLinker(tc.cxxBinary, tc.ldflags, []string{})
 	tc.flagCache = newFlagCache()
-
+	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 	return
 }
 

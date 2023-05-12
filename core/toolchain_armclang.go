@@ -32,6 +32,8 @@ type toolchainArmClang struct {
 	prefix        string
 	cflags        []string // Flags for both C and C++
 	flagCache     *flagSupportedCache
+
+	is64BitOnly bool
 }
 
 type toolchainArmClangNative struct {
@@ -80,6 +82,10 @@ func (tc toolchainArmClang) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
 }
 
+func (tc toolchainArmClang) Is64BitOnly() bool {
+	return tc.is64BitOnly
+}
+
 func newToolchainArmClangCommon(config *BobConfig, tgt TgtType) (tc toolchainArmClang) {
 	props := config.Properties
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
@@ -93,6 +99,7 @@ func newToolchainArmClangCommon(config *BobConfig, tgt TgtType) (tc toolchainArm
 
 	tc.cflags = strings.Split(config.Properties.GetString(string(tgt)+"_armclang_flags"), " ")
 	tc.flagCache = newFlagCache()
+	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
 	return
 }
