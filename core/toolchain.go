@@ -46,6 +46,7 @@ type toolchain interface {
 	getStripFlags() []string
 	getLibraryTocFlags() []string
 	checkFlagIsSupported(language, flag string) bool
+	Is64BitOnly() bool
 }
 
 func lookPathSecond(toolUnqualified string, firstHit string) (string, error) {

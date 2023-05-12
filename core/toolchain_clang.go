@@ -45,6 +45,8 @@ type toolchainClangCommon struct {
 
 	target    string
 	flagCache *flagSupportedCache
+
+	is64BitOnly bool
 }
 
 type toolchainClangNative struct {
@@ -97,6 +99,10 @@ func (tc toolchainClangCommon) getLibraryTocFlags() []string {
 
 func (tc toolchainClangCommon) checkFlagIsSupported(language, flag string) bool {
 	return tc.flagCache.checkFlag(tc, language, flag)
+}
+
+func (tc toolchainClangCommon) Is64BitOnly() bool {
+	return tc.is64BitOnly
 }
 
 func newToolchainClangCommon(config *BobConfig, tgt TgtType) (tc toolchainClangCommon) {

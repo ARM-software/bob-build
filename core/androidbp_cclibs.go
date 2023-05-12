@@ -328,7 +328,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 	}
 }
 
-func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleContext) {
+func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleContext, g *androidBpGenerator) {
 	// Handle installation
 	if _, installRel, ok := getSoongInstallPath(m.getInstallableProps()); ok {
 		// Only setup multilib for target modules.
@@ -336,7 +336,10 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 		// binaries in both modes.
 		// We disable multilib if this module depends on generated libraries
 		// (which can't support multilib).
-		if m.Properties.TargetType == TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+		// We disable multilib if the target only supports 64bit
+		if m.Properties.TargetType == TgtTypeTarget &&
+			!linksToGeneratedLibrary(ctx) &&
+			!g.target.Is64BitOnly() {
 			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to
@@ -415,7 +418,7 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	}
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
-	addBinaryProps(mod, *m, ctx)
+	addBinaryProps(mod, *m, ctx, g)
 	if m.strip() {
 		addStripProp(mod)
 	}
