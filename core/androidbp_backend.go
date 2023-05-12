@@ -43,7 +43,7 @@ var (
 )
 
 type androidBpGenerator struct {
-	toolchainSet
+	ToolchainSet
 	logger *warnings.WarningLogger
 }
 
@@ -499,5 +499,5 @@ func (g *androidBpGenerator) init(ctx *blueprint.Context, config *BobConfig) {
 
 	ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
 
-	g.toolchainSet.parseConfig(config)
+	g.ToolchainSet.parseConfig(config)
 }

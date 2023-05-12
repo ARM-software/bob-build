@@ -60,7 +60,7 @@ func isBuiltByDefault(e enableable) bool {
 
 	switch m := e.(type) {
 	case *ModuleBinary:
-		if m.Properties.TargetType == tgtTypeTarget {
+		if m.Properties.TargetType == TgtTypeTarget {
 			return true
 		}
 	case *ModuleKernelObject:

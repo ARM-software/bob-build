@@ -99,6 +99,12 @@ bootstrap_go_package {
         "core/tag.go",
         "core/template.go",
         "core/toolchain.go",
+        "core/toolchain_armclang.go",
+        "core/toolchain_clang.go",
+        "core/toolchain_gnu.go",
+        "core/toolchain_linker.go",
+        "core/toolchain_linker_xcode.go",
+        "core/toolchain_xcode.go",
     ],
     testSrcs: [
         "core/android_test.go",

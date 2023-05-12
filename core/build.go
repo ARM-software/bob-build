@@ -35,9 +35,9 @@ type Build struct {
 }
 
 func (b *Build) getTargetSpecific(tgt TgtType) *TargetSpecific {
-	if tgt == tgtTypeHost {
+	if tgt == TgtTypeHost {
 		return &b.Host
-	} else if tgt == tgtTypeTarget {
+	} else if tgt == TgtTypeTarget {
 		return &b.Target
 	} else {
 		utils.Die("Unsupported target type: %s", tgt)

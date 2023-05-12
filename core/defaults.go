@@ -40,7 +40,7 @@ type ModuleDefaults struct {
 }
 
 func (m *ModuleDefaults) supportedVariants() []TgtType {
-	return []TgtType{tgtTypeHost, tgtTypeTarget}
+	return []TgtType{TgtTypeHost, TgtTypeTarget}
 }
 
 func (m *ModuleDefaults) disable() {
@@ -212,7 +212,7 @@ func DefaultDepsStage1Mutator(ctx blueprint.BottomUpMutatorContext) {
 	if gsc, ok := getGenerateCommon(ctx.Module()); ok {
 		if len(gsc.Properties.Flag_defaults) > 0 {
 			tgt := gsc.Properties.Target
-			if !(tgt == tgtTypeHost || tgt == tgtTypeTarget) {
+			if !(tgt == TgtTypeHost || tgt == TgtTypeTarget) {
 				utils.Die("Module %s uses flag_defaults '%v' but has invalid target type '%s'",
 					ctx.ModuleName(), gsc.Properties.Flag_defaults, tgt)
 			}

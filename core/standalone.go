@@ -207,8 +207,8 @@ func Main() {
 		ctx.RegisterTopDownMutator("export_lib_flags", exportLibFlagsMutator).Parallel()
 		dependencyGraphHandler := graphMutatorHandler{
 			map[TgtType]graph.Graph{
-				tgtTypeHost:   graph.NewGraph("All"),
-				tgtTypeTarget: graph.NewGraph("All"),
+				TgtTypeHost:   graph.NewGraph("All"),
+				TgtTypeTarget: graph.NewGraph("All"),
 			},
 		}
 		ctx.RegisterBottomUpMutator("sort_resolved_static_libs",

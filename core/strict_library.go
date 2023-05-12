@@ -132,7 +132,7 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g ge
 
 func (m *ModuleStrictLibrary) supportedVariants() (tgts []TgtType) {
 	// TODO: Change tgts based on if host or target supported.
-	tgts = append(tgts, tgtTypeHost)
+	tgts = append(tgts, TgtTypeHost)
 	return
 }
 

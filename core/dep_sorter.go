@@ -59,7 +59,7 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 	}
 
 	// This mutator is run after host/target splitting, so TargetType should have been set.
-	if !(mainBuild.TargetType == tgtTypeTarget || mainBuild.TargetType == tgtTypeHost) {
+	if !(mainBuild.TargetType == TgtTypeTarget || mainBuild.TargetType == TgtTypeHost) {
 		utils.Die("Cannot process dependencies on module '%s' with target type '%s'", mainModuleName, mainBuild.TargetType)
 	}
 

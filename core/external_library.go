@@ -58,7 +58,7 @@ func (m *ModuleExternalLibrary) implicitOutputs() []string { return []string{} }
 
 // Implement the splittable interface so "normal" libraries can depend on external ones.
 func (m *ModuleExternalLibrary) supportedVariants() []TgtType {
-	return []TgtType{tgtTypeHost, tgtTypeTarget}
+	return []TgtType{TgtTypeHost, TgtTypeTarget}
 }
 func (m *ModuleExternalLibrary) disable()                             {}
 func (m *ModuleExternalLibrary) setVariant(tgt TgtType)               { m.Properties.TargetType = tgt }
