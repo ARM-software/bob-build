@@ -87,8 +87,9 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
 
-	m.GetSrcs(ctx).ForEach(
-		func(source filePath) bool {
+	// TODO: use filetags here
+	m.GetFiles(ctx).ForEach(
+		func(source FilePath) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
 			switch source.Ext() {
@@ -112,17 +113,17 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 				args["cxxflags"] = "$cxxflags"
 				rule = cxxRule
 			default:
-				nonCompiledDeps = append(nonCompiledDeps, source.buildPath())
+				nonCompiledDeps = append(nonCompiledDeps, source.BuildPath())
 				return true
 			}
 
-			output := m.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
+			output := m.ObjDir() + source.RelBuildPath() + ".o"
 
 			ctx.Build(pctx,
 				blueprint.BuildParams{
 					Rule:     rule,
 					Outputs:  []string{output},
-					Inputs:   []string{source.buildPath()},
+					Inputs:   []string{source.BuildPath()},
 					Args:     args,
 					Optional: true,
 				})

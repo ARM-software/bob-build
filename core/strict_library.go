@@ -80,7 +80,7 @@ type ModuleStrictLibrary struct {
 type strictLibraryInterface interface {
 	splittable
 	dependentInterface
-	SourceFileConsumer
+	FileConsumer
 	FileResolver
 }
 
@@ -114,16 +114,16 @@ func (m *ModuleStrictLibrary) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
-func (m *ModuleStrictLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.Properties.GetSrcs(ctx)
+func (m *ModuleStrictLibrary) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleStrictLibrary) GetDirectSrcs() FilePaths {
-	return m.Properties.GetDirectSrcs()
+func (m *ModuleStrictLibrary) GetDirectFiles() FilePaths {
+	return m.Properties.GetDirectFiles()
 }
 
-func (m *ModuleStrictLibrary) GetSrcTargets() (tgts []string) {
-	tgts = append(tgts, m.Properties.GetSrcTargets()...)
+func (m *ModuleStrictLibrary) GetTargets() (tgts []string) {
+	tgts = append(tgts, m.Properties.GetTargets()...)
 	return
 }
 

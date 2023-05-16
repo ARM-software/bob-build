@@ -208,7 +208,7 @@ type ModuleResource struct {
 type resourceInterface interface {
 	pathProcessor
 	FileResolver
-	SourceFileConsumer
+	FileConsumer
 }
 
 var _ resourceInterface = (*ModuleResource)(nil) // impl check
@@ -248,9 +248,9 @@ func (m *ModuleResource) getEnableableProps() *EnableableProps {
 }
 
 func (m *ModuleResource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
-	m.Properties.LegacySourceProps.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			files = append(files, fp.buildPath())
+	m.Properties.LegacySourceProps.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			files = append(files, fp.BuildPath())
 			return true
 		})
 	return
@@ -265,16 +265,16 @@ func (m *ModuleResource) processPaths(ctx blueprint.BaseModuleContext, g generat
 	m.Properties.InstallableProps.processPaths(ctx, g)
 }
 
-func (m *ModuleResource) GetSrcTargets() []string {
-	return m.Properties.LegacySourceProps.GetSrcTargets()
+func (m *ModuleResource) GetTargets() []string {
+	return m.Properties.LegacySourceProps.GetTargets()
 }
 
-func (m *ModuleResource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.Properties.LegacySourceProps.GetSrcs(ctx)
+func (m *ModuleResource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.LegacySourceProps.GetFiles(ctx)
 }
 
-func (m *ModuleResource) GetDirectSrcs() FilePaths {
-	return m.Properties.LegacySourceProps.GetDirectSrcs()
+func (m *ModuleResource) GetDirectFiles() FilePaths {
+	return m.Properties.LegacySourceProps.GetDirectFiles()
 }
 
 func (m *ModuleResource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {

@@ -18,21 +18,18 @@
 package core
 
 import (
-	"os"
 	"path"
 	"path/filepath"
-	"strings"
-
-	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/google/blueprint"
 )
 
 type FileType uint32
 
 const (
+	FileTypeUnset              = 0
 	FileTypeGenerated FileType = 1 << iota
 	FileTypeTool
 	FileTypeBinary
+	FileTypeExecutable
 	FileTypeImplicit
 	FileTypeC
 	FileTypeCpp
@@ -43,174 +40,85 @@ const (
 	FileTypeCompilable = FileTypeC | FileTypeCpp | FileTypeAsm
 )
 
-// filePath encapsulates paths that may need to be used in different
-// ways in source generation modules.
-type filePath interface {
-	// Full path to source used by ninja.
-	// e.g. ${g.bob.SrcDir}/module1/subdir/file1.c
-	//      ${g.bob.BuildDir}/gen/module2/subdir/file2.c
-	//      ${g.bob.BuildDir}/bob.config
-	buildPath() string
-	// Short path used to calculate names of related outputs.
-	// This may include the module directory.
-	// e.g. module1/subdir/file1.c
-	//      module2/subdir/file2.c
-	//      bob.config
-	localPath() string
-	// Module directory associated with this file.
-	// This path is valid from the build output directory.
-	// e.g. ${g.bob.SrcDir}/module1
-	//      ${g.bob.BuildDir}/gen/module2
-	//      ${g.bob.BuildDir}
-	moduleDir() string
+type FilePath struct {
+	backendPath string // either absolute location of the source tree, or generated file build root for AOSP/Linux respectively
 
-	OutputPathWithoutPrefix() string
-	Ext() string
+	namespacePath string
+	relativePath  string
+	tag           FileType // tag to indicate type
 
-	IsType(tag FileType) bool
 }
 
-// Represents a normal file in the source directory
-type sourceFilePath struct {
-	path      string
-	module    string
-	srcPrefix string
-	tag       FileType
-}
-
-var _ filePath = (*sourceFilePath)(nil)
-
-func (file sourceFilePath) buildPath() string {
-	return filepath.Join(file.srcPrefix, file.path)
-}
-
-func (file sourceFilePath) localPath() string {
-	return file.path
-}
-
-func (file sourceFilePath) moduleDir() string {
-	return filepath.Join(file.srcPrefix, file.module)
-}
-
-func (file sourceFilePath) Ext() string {
-	return path.Ext(file.path)
-}
-
-func (file sourceFilePath) OutputPathWithoutPrefix() string {
-	return file.localPath()
-}
-
-func (file sourceFilePath) IsType(ft FileType) bool {
-	return (file.tag & ft) > 0
-}
-
-func newSourceFilePath(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
-	return sourceFilePath{path, projectModuleDir(ctx), g.sourceDir(), 0} // file tag is UNSET (0) until we implement.
-}
-
-func newSourceFilePathFromModule(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
-	project_path := projectModuleDir(ctx)
-	srcDir := g.sourceDir()
-	full := filepath.Join(project_path, path)
-	return sourceFilePath{full, project_path, srcDir, 0} // file tag is UNSET (0) until we implement.
-}
-
-// Represents a file created in the generated output directory
-type generatedFilePath struct {
-	path    string
-	lclPath string
-	modDir  string
-}
-
-var _ filePath = (*generatedFilePath)(nil)
-
-func (file generatedFilePath) buildPath() string {
-	return file.path
-}
-
-func (file generatedFilePath) localPath() string {
-	return file.lclPath
-}
-
-func (file generatedFilePath) moduleDir() string {
-	return file.modDir
-}
-
-func (file generatedFilePath) OutputPathWithoutPrefix() string {
-	pathElems := strings.Split(file.path, string(os.PathSeparator))
-	return filepath.Join(pathElems[1:]...)
-}
-
-func (file generatedFilePath) Ext() string {
-	return path.Ext(file.path)
-}
-
-// Always return false as we will be removing this type later down the road
-// and do not plan to implement the new FileType tagging to it.
-func (file generatedFilePath) IsType(ft FileType) bool {
-	return false
-}
-
-func newGeneratedFilePath(path string) filePath {
-	// Identify the parts we need from the full path.
-	//
-	// Ideally we wouldn't need to do this - each module would return
-	// generatedFilePaths.
-	//
-	// For generated paths, the backends set:
-	// ${BuildDir}/gen/m.Name()/file.ext
-	// $(TARGET_OUT_GEN)/STATIC_LIBRARIES/m.Name()/file.ext
-	// $(HOST_OUT_GEN)/STATIC_LIBRARIES/m.Name()/file.ext
-	//
-	// Local path is anything from m.Name() (included)
-	// Module dir is everything up to and including m.Name().
-	pathElems := strings.Split(path, string(os.PathSeparator))
-	if len(pathElems) < 4 {
-		utils.Die("Path doesn't have as many elements as expected. %s", path)
-	}
-	lclPath := filepath.Join(pathElems[2:]...)
-	modDir := filepath.Join(pathElems[:3]...)
-
-	return generatedFilePath{path, lclPath, modDir}
-}
-
-func newGeneratedFilePathFromModule(path string, ctx blueprint.BaseModuleContext, g generatorBackend) filePath {
-	// TODO: currently on the Android backend there is no prefix for the output generated sources.
-	// This needs to be fixed.
-	// TODO: Clean up this function to avoid the duplication.
-
-	if _, isBp := g.(*androidBpGenerator); isBp {
-		srcsOutputPath := g.sourceOutputDir(ctx.Module())
-		modpath := ctx.ModuleDir()
-		moddir := filepath.Join(srcsOutputPath, modpath)
-		full := filepath.Join(srcsOutputPath, modpath, path)
-		return generatedFilePath{full, filepath.Join(modpath, path), moddir}
+func (file FilePath) RelBuildPath() string {
+	if file.IsType(FileTypeGenerated) {
+		// We want to preserve /gen/ in the path when using relative build path
+		return filepath.Join("gen", file.namespacePath, file.relativePath)
 	} else {
-		full := filepath.Join(g.sourceOutputDir(ctx.Module()), path)
-		pathElems := strings.Split(full, string(os.PathSeparator))
-		if len(pathElems) < 4 {
-			utils.Die("Path doesn't have as many elements as expected. %s", full)
-		}
-		lclPath := filepath.Join(pathElems[2:]...)
-		modDir := filepath.Join(pathElems[:3]...)
-
-		return generatedFilePath{full, lclPath, modDir}
+		return filepath.Join(file.namespacePath, file.relativePath)
 	}
 }
 
-// Handle special files (i.e. bob.config) in the generated output
-// directory a bit differently.
-func newSpecialFilePath(path string) filePath {
-	// Identify the parts we need from the full path.
-	//
-	// Ideally we wouldn't need to do this - each module would return
-	// filePaths.
-	//
-	// The special path should look like
-	// ${BuildDir}/filename.ext
-	// $(TARGET_OUT_GEN)/STATIC_LIBRARIES/directory/filename.ext
-	//
-	// Local path should just be the basename.
-	// Module dir should be the directory.
-	return generatedFilePath{path, filepath.Base(path), filepath.Dir(path)}
+func (file FilePath) BuildPath() string {
+	return filepath.Join(file.backendPath, file.namespacePath, file.relativePath)
+}
+
+func (file FilePath) UnScopedPath() string {
+	return file.relativePath
+}
+
+func (file FilePath) ScopedPath() string {
+	return filepath.Join(file.namespacePath, file.relativePath)
+}
+
+func (file FilePath) Scope() string {
+	return file.namespacePath
+}
+
+func (file FilePath) Ext() string {
+	return path.Ext(file.relativePath)
+}
+
+func (file FilePath) IsType(ft FileType) bool {
+	return (file.tag & ft) != 0
+}
+
+func (file FilePath) IsNotType(ft FileType) bool {
+	return ((file.tag & ft) ^ ft) != 0
+}
+
+var FileNoNameSpace string = ""
+
+func newFile(relativePath string, namespace string, g generatorBackend, tag FileType) FilePath {
+	// TODO: remove generator backend here
+	// TODO: add noncompiled dep tag
+	switch path.Ext(relativePath) {
+	case ".s", ".S":
+		tag |= FileTypeAsm
+	case ".c":
+		tag |= FileTypeC
+	case ".cc", ".cpp", ".cxx":
+		tag |= FileTypeCpp
+	case ".h", ".hpp":
+		tag |= FileTypeHeader
+		// TODO: .so .a .o
+	}
+
+	var backendPath string
+	var scopedPath string
+	if (tag & (FileTypeBinary | FileTypeExecutable)) != 0 {
+		backendPath = g.buildDir()
+	} else if (tag & FileTypeGenerated) != 0 {
+		backendPath = filepath.Join(g.buildDir(), "gen")
+		scopedPath = namespace
+	} else {
+		backendPath = g.sourceDir()
+		scopedPath = FileNoNameSpace
+	}
+
+	return FilePath{
+		backendPath:   backendPath,
+		namespacePath: scopedPath,
+		relativePath:  relativePath,
+		tag:           tag,
+	}
 }

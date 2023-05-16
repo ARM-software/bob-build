@@ -77,9 +77,9 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blu
 	addProvenanceProps(bpmod, ko.Properties.AndroidProps)
 
 	srcs := []string{}
-	ko.Properties.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			srcs = append(srcs, fp.localPath())
+	ko.Properties.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			srcs = append(srcs, fp.UnScopedPath())
 			return true
 		})
 

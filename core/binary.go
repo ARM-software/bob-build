@@ -18,6 +18,8 @@
 package core
 
 import (
+	"strings"
+
 	"github.com/google/blueprint"
 )
 
@@ -29,20 +31,20 @@ type ModuleBinary struct {
 type binaryInterface interface {
 	stripable
 	linkableModule
-	SourceFileProvider // A binary can provide itself as a source
+	FileProvider // A binary can provide itself as a source
 }
 
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
-func (m *ModuleBinary) OutSrcs() (srcs FilePaths) {
+func (m *ModuleBinary) OutFiles(g generatorBackend) (srcs FilePaths) {
 	for _, out := range m.outputs() {
-		fp := newGeneratedFilePath(out)
+		fp := newFile(strings.TrimPrefix(out, g.buildDir()), "", g, FileTypeBinary|FileTypeExecutable) // TODO: refactor outputs() to use FilePaths
 		srcs = srcs.AppendIfUnique(fp)
 	}
 	return
 }
 
-func (m *ModuleBinary) OutSrcTargets() (tgts []string) {
+func (m *ModuleBinary) OutFileTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }

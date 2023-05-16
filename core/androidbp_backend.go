@@ -70,8 +70,8 @@ func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleCo
 		switch ctx.OtherModuleType(child) {
 		case "bob_resource":
 			if r, ok := child.(*ModuleResource); ok {
-				r.Properties.GetSrcs(ctx).ForEach(func(fp filePath) bool {
-					srcs = append(srcs, r.getAndroidbpResourceName(fp.localPath()))
+				r.Properties.GetFiles(ctx).ForEach(func(fp FilePath) bool {
+					srcs = append(srcs, r.getAndroidbpResourceName(fp.UnScopedPath()))
 					return true
 				})
 			}

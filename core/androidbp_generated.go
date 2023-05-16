@@ -154,14 +154,14 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx
 	}
 
 	srcs := []string{}
-	gs.ModuleGenerateCommon.Properties.GetDirectSrcs().ForEach(func(fp filePath) bool {
-		srcs = append(srcs, fp.localPath())
+	gs.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(func(fp FilePath) bool {
+		srcs = append(srcs, fp.UnScopedPath())
 		return true
 	})
 
 	implicits := []string{}
-	gs.GetImplicits(ctx).ForEach(func(fp filePath) bool {
-		implicits = append(implicits, fp.localPath())
+	gs.GetImplicits(ctx).ForEach(func(fp FilePath) bool {
+		implicits = append(implicits, fp.UnScopedPath())
 		return true
 	})
 
@@ -186,9 +186,9 @@ func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, c
 	}
 
 	srcs := []string{}
-	ts.ModuleGenerateCommon.Properties.GetDirectSrcs().ForEach(
-		func(fp filePath) bool {
-			srcs = append(srcs, fp.localPath())
+	ts.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(
+		func(fp FilePath) bool {
+			srcs = append(srcs, fp.UnScopedPath())
 			return true
 		})
 	m.AddStringList("srcs", srcs)

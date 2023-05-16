@@ -110,12 +110,12 @@ func (s *LegacySourceProps) initializeNonCompiledSourceMap(ctx blueprint.BaseMod
 	// a map to mark whether a non-compiled source is matched.
 	nonCompiledSources := make(map[string]bool)
 	if _, ok := getLibrary(ctx.Module()); ok {
-		s.GetSrcs(ctx).ForEachIf(
-			func(fp filePath) bool {
-				return !utils.IsCompilableSource(fp.localPath())
+		s.GetFiles(ctx).ForEachIf(
+			func(fp FilePath) bool {
+				return !fp.IsType(FileTypeCompilable)
 			},
-			func(fp filePath) bool {
-				nonCompiledSources[fp.localPath()] = false
+			func(fp FilePath) bool {
+				nonCompiledSources[fp.ScopedPath()] = false
 
 				return true
 			})
@@ -163,15 +163,15 @@ func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg st
 
 	matchedSources := []string{}
 
-	s.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			matched, err := pathtools.Match("**/"+arg, fp.localPath())
+	s.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			matched, err := pathtools.Match("**/"+arg, fp.ScopedPath())
 			if err != nil {
 				utils.Die("Error during matching filepath pattern")
 			}
 			if matched {
-				matchedNonCompiledSources[fp.localPath()] = true
-				matchedSources = append(matchedSources, fp.buildPath())
+				matchedNonCompiledSources[fp.ScopedPath()] = true
+				matchedSources = append(matchedSources, fp.BuildPath())
 			}
 
 			return true

@@ -58,7 +58,7 @@ type libraryInterface interface {
 	matchSourceInterface
 	propertyEscapeInterface
 	propertyExporter
-	SourceFileConsumer
+	FileConsumer
 }
 
 var _ libraryInterface = (*ModuleLibrary)(nil) // impl check
@@ -217,16 +217,16 @@ func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generato
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *ModuleLibrary) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.Properties.GetSrcs(ctx)
+func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleLibrary) GetDirectSrcs() FilePaths {
-	return m.Properties.GetDirectSrcs()
+func (m *ModuleLibrary) GetDirectFiles() FilePaths {
+	return m.Properties.GetDirectFiles()
 }
 
-func (m *ModuleLibrary) GetSrcTargets() (tgts []string) {
-	tgts = append(tgts, m.Properties.GetSrcTargets()...)
+func (m *ModuleLibrary) GetTargets() (tgts []string) {
+	tgts = append(tgts, m.Properties.GetTargets()...)
 	tgts = append(tgts, m.Properties.Generated_sources...)
 	return
 }

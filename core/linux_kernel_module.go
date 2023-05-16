@@ -57,9 +57,9 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 	delete(args, "kmod_build")
 
 	sources := []string{}
-	ko.Properties.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			sources = append(sources, fp.buildPath())
+	ko.Properties.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			sources = append(sources, fp.BuildPath())
 			return true
 		})
 
