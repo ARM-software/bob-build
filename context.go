@@ -2751,6 +2751,23 @@ func (c *Context) visitAllModules(visit func(Module)) {
 	}
 }
 
+func (c *Context) visitAllModulesWithPos(visit func(Module, scanner.Position)) {
+	var module *moduleInfo
+
+	defer func() {
+		if r := recover(); r != nil {
+			panic(newPanicErrorf(r, "VisitAllModules(%s) for %s",
+				funcName(visit), module))
+		}
+	}()
+
+	for _, moduleGroup := range c.sortedModuleGroups() {
+		for _, module = range moduleGroup.modules {
+			visit(module.logicModule, module.pos)
+		}
+	}
+}
+
 func (c *Context) visitAllModulesIf(pred func(Module) bool,
 	visit func(Module)) {
 
@@ -3049,6 +3066,10 @@ func (c *Context) ModuleErrorf(logicModule Module, format string,
 
 func (c *Context) VisitAllModules(visit func(Module)) {
 	c.visitAllModules(visit)
+}
+
+func (c *Context) VisitAllModulesWithPos(visit func(Module, scanner.Position)) {
+	c.visitAllModulesWithPos(visit)
 }
 
 func (c *Context) VisitAllModulesIf(pred func(Module) bool,
