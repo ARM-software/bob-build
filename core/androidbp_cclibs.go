@@ -62,9 +62,9 @@ func bpModuleNamesForDep(ctx blueprint.BaseModuleContext, name string) []string 
 	if r, ok := dep.(*ModuleResource); ok {
 		var modNames []string
 
-		r.Properties.GetSrcs(ctx).ForEach(
-			func(fp filePath) bool {
-				modNames = append(modNames, r.getAndroidbpResourceName(fp.localPath()))
+		r.Properties.GetFiles(ctx).ForEach(
+			func(fp FilePath) bool {
+				modNames = append(modNames, r.getAndroidbpResourceName(fp.UnScopedPath()))
 				return true
 			})
 
@@ -272,15 +272,14 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 	}
 
 	srcs := []string{}
-	m.Properties.GetSrcs(ctx).ForEachIf(
-		func(fp filePath) bool {
+	m.Properties.GetFiles(ctx).ForEachIf(
+		func(fp FilePath) bool {
 			// On Android, generated sources are passed to the modules via
 			// `generated_sources` so they are omitted here.
-			_, isGen := fp.(generatedFilePath)
-			return utils.IsCompilableSource(fp.localPath()) && !isGen
+			return fp.IsType(FileTypeCompilable) && fp.IsNotType(FileTypeGenerated)
 		},
-		func(fp filePath) bool {
-			srcs = append(srcs, fp.localPath())
+		func(fp FilePath) bool {
+			srcs = append(srcs, fp.UnScopedPath())
 			return true
 		})
 

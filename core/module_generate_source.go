@@ -51,8 +51,8 @@ type generateSourceInterface interface {
 	installable
 	pathProcessor
 	FileResolver
-	SourceFileProvider
-	SourceFileConsumer
+	FileProvider
+	FileConsumer
 }
 
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
@@ -82,13 +82,13 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g g
 	// Resolve output files
 	outs := FilePaths{}
 	for _, out := range m.Properties.Out {
-		fp := newGeneratedFilePathFromModule(out, ctx, g)
+		fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
 		outs = outs.AppendIfUnique(fp)
 	}
 
 	implicits := FilePaths{}
 	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
-		fp := newSourceFilePath(implicit, ctx, g)
+		fp := newFile(implicit, ctx.ModuleName(), g, 0)
 		implicits = implicits.AppendIfUnique(fp)
 	}
 
@@ -97,30 +97,30 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g g
 
 }
 
-func (m *ModuleGenerateSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenerateSource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
 	gc, _ := getGenerateCommon(m)
-	return gc.Properties.LegacySourceProps.GetSrcs(ctx)
+	return gc.Properties.LegacySourceProps.GetFiles(ctx)
 }
 
-func (m *ModuleGenerateSource) GetDirectSrcs() FilePaths {
+func (m *ModuleGenerateSource) GetDirectFiles() FilePaths {
 	gc, _ := getGenerateCommon(m)
-	return gc.Properties.LegacySourceProps.GetDirectSrcs()
+	return gc.Properties.LegacySourceProps.GetDirectFiles()
 }
 
 func (m *ModuleGenerateSource) GetImplicits(ctx blueprint.BaseModuleContext) FilePaths {
 	return m.Properties.ResolvedImplicits
 }
 
-func (m *ModuleGenerateSource) GetSrcTargets() []string {
+func (m *ModuleGenerateSource) GetTargets() []string {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleGenerateSource) OutSrcs() FilePaths {
+func (m *ModuleGenerateSource) OutFiles(g generatorBackend) FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *ModuleGenerateSource) OutSrcTargets() []string {
+func (m *ModuleGenerateSource) OutFileTargets() []string {
 	return []string{}
 }
 
@@ -135,15 +135,15 @@ func (m *ModuleGenerateSource) OutSrcTargets() []string {
 func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
 
-	m.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			io.in = append(io.in, fp.buildPath())
+	m.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			io.in = append(io.in, fp.BuildPath())
 			return true
 		})
 
 	m.GetImplicits(ctx).ForEach(
-		func(fp filePath) bool {
-			io.implicitSrcs = append(io.implicitSrcs, fp.buildPath())
+		func(fp FilePath) bool {
+			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
 			return true
 		})
 

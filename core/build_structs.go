@@ -365,12 +365,12 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
-	if m, ok := ctx.Module().(SourceFileProvider); ok {
-		ctx.AddDependency(ctx.Module(), FilegroupTag, m.OutSrcTargets()...)
+	if m, ok := ctx.Module().(FileProvider); ok {
+		ctx.AddDependency(ctx.Module(), FilegroupTag, m.OutFileTargets()...)
 	}
 
-	if m, ok := ctx.Module().(SourceFileConsumer); ok {
-		ctx.AddDependency(ctx.Module(), FilegroupTag, m.GetSrcTargets()...)
+	if m, ok := ctx.Module().(FileConsumer); ok {
+		ctx.AddDependency(ctx.Module(), FilegroupTag, m.GetTargets()...)
 	}
 
 	if l, ok := getLibrary(ctx.Module()); ok {

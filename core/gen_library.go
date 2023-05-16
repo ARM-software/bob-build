@@ -57,15 +57,15 @@ var _ phonyInterface = (*generateLibrary)(nil)
 var _ dependentInterface = (*generateLibrary)(nil)
 var _ splittable = (*generateLibrary)(nil)
 var _ installable = (*generateLibrary)(nil)
-var _ SourceFileConsumer = (*generateLibrary)(nil)
-var _ SourceFileProvider = (*generateLibrary)(nil)
+var _ FileConsumer = (*generateLibrary)(nil)
+var _ FileProvider = (*generateLibrary)(nil)
 
 // Modules implementing generateLibraryInterface support arbitrary commands
 // that either produce a static library, shared library or binary.
 type generateLibraryInterface interface {
 	blueprint.Module
 	dependentInterface
-	SourceFileProvider
+	FileProvider
 	ImplicitFileConsumer
 
 	libExtension() string
@@ -87,15 +87,15 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 	g generatorBackend, implicitOuts []string) []inout {
 	var io inout
 
-	m.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
-			io.in = append(io.in, fp.buildPath())
+	m.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
+			io.in = append(io.in, fp.BuildPath())
 			return true
 		})
 
 	m.GetImplicits(ctx).ForEach(
-		func(fp filePath) bool {
-			io.implicitSrcs = append(io.implicitSrcs, fp.buildPath())
+		func(fp FilePath) bool {
+			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
 			return true
 		})
 
@@ -121,38 +121,39 @@ func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []
 	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
 }
 
-func (m *generateLibrary) GetSrcs(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+func (m *generateLibrary) GetFiles(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
 	gc, _ := getGenerateCommon(m)
-	srcs = gc.Properties.LegacySourceProps.GetSrcs(ctx)
+	srcs = gc.Properties.LegacySourceProps.GetFiles(ctx)
 	return
 }
 
-func (m *generateLibrary) GetDirectSrcs() (srcs FilePaths) {
+func (m *generateLibrary) GetDirectFiles() (srcs FilePaths) {
 	gc, _ := getGenerateCommon(m)
-	srcs = gc.Properties.LegacySourceProps.GetDirectSrcs()
+	srcs = gc.Properties.LegacySourceProps.GetDirectFiles()
 	return
 }
 
 func (m *generateLibrary) GetImplicits(ctx blueprint.BaseModuleContext) (implicits FilePaths) {
 	g := getBackend(ctx)
 	for _, s := range m.getImplicitSources(ctx) {
-		implicits = append(implicits, newSourceFilePath(s, ctx, g))
+		implicits = append(implicits, newFile(s, ctx.ModuleName(), g, 0))
 	}
 	return
 }
 
-func (m *generateLibrary) GetSrcTargets() (tgts []string) {
+func (m *generateLibrary) GetTargets() (tgts []string) {
 	gc, _ := getGenerateCommon(m)
-	tgts = append(tgts, gc.Properties.LegacySourceProps.GetSrcTargets()...)
+	tgts = append(tgts, gc.Properties.LegacySourceProps.GetTargets()...)
 	tgts = append(tgts, gc.Properties.Generated_sources...)
 	return
 }
 
-func (m *generateLibrary) OutSrcs() FilePaths {
+func (m *generateLibrary) OutFiles(g generatorBackend) FilePaths {
+	// TODO: Can we use the generator backend here?
 	return m.Properties.ResolvedOut
 }
 
-func (m *generateLibrary) OutSrcTargets() []string {
+func (m *generateLibrary) OutFileTargets() []string {
 	return []string{}
 }
 

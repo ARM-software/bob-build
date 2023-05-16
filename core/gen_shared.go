@@ -37,12 +37,12 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateSharedLibrary) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
+func (m *generateSharedLibrary) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 	g := getBackend(ctx)
 
-	m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, newGeneratedFilePathFromModule(m.outputFileName(), ctx, g))
+	m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, newFile(m.outputFileName(), ctx.ModuleName(), g, FileTypeGenerated))
 	for _, h := range m.Properties.Headers {
-		fp := newGeneratedFilePathFromModule(h, ctx, g)
+		fp := newFile(h, ctx.ModuleName(), g, FileTypeGenerated)
 		m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, fp)
 	}
 }

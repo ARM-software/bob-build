@@ -44,7 +44,7 @@ type LegacySourceProps struct {
 // All interfaces supported by LegacySourceProps
 type LegacySourcePropsInterface interface {
 	pathProcessor
-	SourceFileConsumer
+	FileConsumer
 	FileResolver
 }
 
@@ -75,21 +75,21 @@ func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g gene
 	files := FilePaths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), s.Exclude_srcs) {
-		fp := newSourceFilePath(match, ctx, g)
+		fp := newFile(match, ctx.ModuleName(), g, 0)
 		files = files.AppendIfUnique(fp)
 	}
 
 	s.ResolvedSrcs = files
 }
 
-func (s *LegacySourceProps) GetSrcTargets() []string {
+func (s *LegacySourceProps) GetTargets() []string {
 	return append(s.Filegroup_srcs, utils.MixedListToBobTargets(s.Srcs)...)
 }
 
-func (s *LegacySourceProps) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return s.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
+func (s *LegacySourceProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
-func (s *LegacySourceProps) GetDirectSrcs() FilePaths {
+func (s *LegacySourceProps) GetDirectFiles() FilePaths {
 	return s.ResolvedSrcs
 }

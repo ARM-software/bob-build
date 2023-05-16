@@ -104,8 +104,9 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
 
-	l.Properties.GetSrcs(ctx).ForEach(
-		func(source filePath) bool {
+	// TODO: use tags here instead of extensions
+	l.Properties.GetFiles(ctx).ForEach(
+		func(source FilePath) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
 			switch source.Ext() {
@@ -129,20 +130,20 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 				args["cxxflags"] = "$cxxflags"
 				rule = cxxRule
 			default:
-				nonCompiledDeps = append(nonCompiledDeps, source.buildPath())
+				nonCompiledDeps = append(nonCompiledDeps, source.BuildPath())
 				return true
 			}
 
 			buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
 			args["build_wrapper"] = buildWrapper
 
-			output := l.ObjDir() + source.OutputPathWithoutPrefix() + ".o"
+			output := l.ObjDir() + source.RelBuildPath() + ".o"
 
 			ctx.Build(pctx,
 				blueprint.BuildParams{
 					Rule:      rule,
 					Outputs:   []string{output},
-					Inputs:    []string{source.buildPath()},
+					Inputs:    []string{source.BuildPath()},
 					Args:      args,
 					OrderOnly: utils.NewStringSlice(orderOnly, buildWrapperDeps),
 					Optional:  true,

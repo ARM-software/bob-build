@@ -56,7 +56,7 @@ type ModuleGlob struct {
 type moduleGlobInterface interface {
 	pathProcessor
 	FileResolver
-	SourceFileProvider
+	FileProvider
 }
 
 var _ moduleGlobInterface = (*ModuleGlob)(nil) // impl check
@@ -87,7 +87,7 @@ func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBa
 	files := FilePaths{}
 
 	for _, match := range matches {
-		fp := newSourceFilePath(match, ctx, g)
+		fp := newFile(match, ctx.ModuleName(), g, 0)
 		files = files.AppendIfUnique(fp)
 	}
 
@@ -99,11 +99,11 @@ func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBa
 
 }
 
-func (m *ModuleGlob) OutSrcs() FilePaths {
+func (m *ModuleGlob) OutFiles(g generatorBackend) FilePaths {
 	return m.Properties.Files
 }
 
-func (m *ModuleGlob) OutSrcTargets() (tgts []string) {
+func (m *ModuleGlob) OutFileTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }

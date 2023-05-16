@@ -35,7 +35,7 @@ type ModuleFilegroup struct {
 type filegroupInterface interface {
 	pathProcessor
 	FileResolver
-	SourceFileProvider
+	FileProvider
 }
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check
@@ -44,12 +44,12 @@ func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g genera
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *ModuleFilegroup) OutSrcs() FilePaths {
-	return m.Properties.GetDirectSrcs()
+func (m *ModuleFilegroup) OutFiles(g generatorBackend) FilePaths {
+	return m.Properties.GetDirectFiles()
 }
 
-func (m *ModuleFilegroup) OutSrcTargets() []string {
-	return m.Properties.GetSrcTargets()
+func (m *ModuleFilegroup) OutFileTargets() []string {
+	return m.Properties.GetTargets()
 }
 
 func (m *ModuleFilegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {

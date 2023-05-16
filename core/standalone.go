@@ -192,7 +192,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("resolve_files", resolveFilesMutator).Parallel()
 
 	// Now we can resolve remaining, dynamic file providers.
-	ctx.RegisterBottomUpMutator("resolve_dynamic_src_outputs", resolveDynamicSrcOutputs) // Cannot be parallel.
+	ctx.RegisterBottomUpMutator("resolve_dynamic_src_outputs", resolveDynamicFileOutputs) // Cannot be parallel.
 
 	ctx.RegisterBottomUpMutator("library_defines", propogateLibraryDefinesMutator).Parallel()
 	ctx.RegisterBottomUpMutator("alias", aliasMutator).Parallel()

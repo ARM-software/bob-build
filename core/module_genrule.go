@@ -57,7 +57,7 @@ type AndroidGenerateCommonProps struct {
 
 type AndroidGenerateCommonPropsInterface interface {
 	pathProcessor
-	SourceFileConsumer
+	FileConsumer
 	FileResolver
 }
 
@@ -96,23 +96,23 @@ func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleConte
 	files := FilePaths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(ag.Srcs), ag.Exclude_srcs) {
-		fp := newSourceFilePath(match, ctx, g)
+		fp := newFile(match, ctx.ModuleName(), g, 0)
 		files = files.AppendIfUnique(fp)
 	}
 
 	ag.ResolvedSrcs = files
 }
 
-func (ag *AndroidGenerateCommonProps) GetSrcTargets() []string {
+func (ag *AndroidGenerateCommonProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(ag.Srcs)
 }
 
-func (ag *AndroidGenerateCommonProps) GetDirectSrcs() FilePaths {
+func (ag *AndroidGenerateCommonProps) GetDirectFiles() FilePaths {
 	return ag.ResolvedSrcs
 }
 
-func (ag *AndroidGenerateCommonProps) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return ag.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
+func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return ag.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
 type ModuleGenruleCommon struct {
@@ -125,22 +125,22 @@ type ModuleGenruleCommon struct {
 	}
 }
 
-var _ SourceFileConsumer = (*ModuleGenruleCommon)(nil)
+var _ FileConsumer = (*ModuleGenruleCommon)(nil)
 
 func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.AndroidGenerateCommonProps.processPaths(ctx, g)
 }
 
-func (m *ModuleGenruleCommon) GetSrcTargets() []string {
-	return m.Properties.GetSrcTargets()
+func (m *ModuleGenruleCommon) GetTargets() []string {
+	return m.Properties.GetTargets()
 }
 
-func (m *ModuleGenruleCommon) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.Properties.GetSrcs(ctx)
+func (m *ModuleGenruleCommon) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleGenruleCommon) GetDirectSrcs() FilePaths {
-	return m.Properties.GetDirectSrcs()
+func (m *ModuleGenruleCommon) GetDirectFiles() FilePaths {
+	return m.Properties.GetDirectFiles()
 }
 
 func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -173,7 +173,7 @@ type ModuleGenrule struct {
 }
 
 type androidGenerateRuleInterface interface {
-	SourceFileConsumer
+	FileConsumer
 	FileResolver
 	pathProcessor
 }
@@ -189,30 +189,30 @@ func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext, g generato
 
 	files := FilePaths{}
 	for _, out := range m.Properties.Out {
-		fp := newGeneratedFilePathFromModule(out, ctx, g)
+		fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
 		files = files.AppendIfUnique(fp)
 	}
 
 	m.Properties.ResolvedOut = files
 }
 
-func (m *ModuleGenrule) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.ModuleGenruleCommon.Properties.GetSrcs(ctx)
+func (m *ModuleGenrule) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.ModuleGenruleCommon.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleGenrule) GetDirectSrcs() FilePaths {
-	return m.ModuleGenruleCommon.Properties.GetDirectSrcs()
+func (m *ModuleGenrule) GetDirectFiles() FilePaths {
+	return m.ModuleGenruleCommon.Properties.GetDirectFiles()
 }
 
-func (m *ModuleGenrule) GetSrcTargets() []string {
-	return m.ModuleGenruleCommon.Properties.GetSrcTargets()
+func (m *ModuleGenrule) GetTargets() []string {
+	return m.ModuleGenruleCommon.Properties.GetTargets()
 }
 
-func (m *ModuleGenrule) OutSrcs() FilePaths {
+func (m *ModuleGenrule) OutFiles(g generatorBackend) FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *ModuleGenrule) OutSrcTargets() (tgts []string) {
+func (m *ModuleGenrule) OutFileTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
 }

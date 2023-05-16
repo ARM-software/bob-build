@@ -88,17 +88,17 @@ func (g *androidBpGenerator) resourceActions(r *ModuleResource, ctx blueprint.Mo
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))
 	}
 
-	r.Properties.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
+	r.Properties.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
 			// keep module name unique, remove slashes
-			m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(fp.localPath()))
+			m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(fp.UnScopedPath()))
 			if err != nil {
 				utils.Die(err.Error())
 			}
 
 			addProvenanceProps(m, r.Properties.AndroidProps)
 
-			write(m, fp.localPath(), installRel)
+			write(m, fp.UnScopedPath(), installRel)
 			return true
 		})
 

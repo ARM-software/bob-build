@@ -59,7 +59,7 @@ type SourceProps struct {
 
 // Reusable baseline implementation. Each module should match this interface.
 var _ pathProcessor = (*SourceProps)(nil)
-var _ SourceFileConsumer = (*SourceProps)(nil)
+var _ FileConsumer = (*SourceProps)(nil)
 
 // Helper function to process source paths for Modules using `SourceProps`
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
@@ -89,23 +89,23 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorB
 //
 // `OutSrcs` is not context aware, this is because it is called from a context aware visitor (`GetSrcs`).
 // This means its output needs to be resolved prior to this call. This is typically done via `processPaths` for
-// static sources, and `ResolveOutSrcs` for sources which use a dynamic pathing.
+// static sources, and `ResolveOutFiles` for sources which use a dynamic pathing.
 //
 // `processPaths` should not require context and only operate on the current module.
-type SourceFileProvider interface {
+type FileProvider interface {
 	// Sources to be forwarded to other modules
 	// Expected to be called from a context of another module.
-	OutSrcs() FilePaths
+	OutFiles(generatorBackend) FilePaths
 
 	// Targets to be forwarded to other modules
 	// Expected to be called from a context of another module.
-	OutSrcTargets() []string
+	OutFileTargets() []string
 }
 
 // TODO: Remove the need for the Implicit file handling.
 // Instead add a different filepath type or tag to handle this.
 type ImplicitFileProvider interface {
-	SourceFileProvider
+	FileProvider
 
 	// Sources to be forwarded to other modules
 	OutImplicits() FilePaths
@@ -118,45 +118,47 @@ type ImplicitFileProvider interface {
 //
 // This interface can retrieve the required source file for this module only via `GetSrcs`, note that
 // each provider needs to be ready by the time these are accessed. This means, `GetSrcs` should be called
-// after `ResolveOutSrcs` and `processPaths` for each of the dependant modules.
+// after `ResolveOutFiles` and `processPaths` for each of the dependant modules.
 //
-// The exception to this is `ResolveOutSrcs` which may depend on other dynamic providers, in this case a bottom up
+// The exception to this is `ResolveOutFiles` which may depend on other dynamic providers, in this case a bottom up
 // mutator is used to ensure the downstream dependencies of each module are ready.
-type SourceFileConsumer interface {
+type FileConsumer interface {
 
 	// Returns all sources this module consumes. At this point assumes all providers are ready.
 	// Paths will be fully resolved.
-	GetSrcs(blueprint.BaseModuleContext) FilePaths
+	GetFiles(blueprint.BaseModuleContext) FilePaths
 
 	// Returns a list of targets this consumer directly requires
-	GetSrcTargets() []string
+	GetTargets() []string
 
 	// Returns filepaths for current module only.
 	// Context is required for backend information but the accessor should only read current module.
-	GetDirectSrcs() FilePaths
+	GetDirectFiles() FilePaths
 }
 
 type ImplicitFileConsumer interface {
-	SourceFileConsumer
+	FileConsumer
 
 	GetImplicits(blueprint.BaseModuleContext) FilePaths
 }
 
 // Basic common implementation, certain targets will custmize this.
-func (s *SourceProps) GetSrcTargets() []string {
+func (s *SourceProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(s.Srcs)
 }
 
 // Basic common implementation, certain targets may wish to customize this.
-func ReferenceGetSrcsImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+	g := getBackend(ctx)
+
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
 			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
-			_, isConsumer := child.(SourceFileConsumer)
-			_, isProvider := child.(SourceFileProvider)
+			_, isConsumer := child.(FileConsumer)
+			_, isProvider := child.(FileProvider)
 
 			if isFilegroup && isProvider {
-				provided := child.(SourceFileProvider).OutSrcs()
+				provided := child.(FileProvider).OutFiles(g)
 				srcs = srcs.Merge(provided)
 			}
 
@@ -190,30 +192,30 @@ func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits FileP
 	return
 }
 
-func (s *SourceProps) GetDirectSrcs() FilePaths {
+func (s *SourceProps) GetDirectFiles() FilePaths {
 	return s.ResolvedSrcs
 }
 
-func (s *SourceProps) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return s.GetDirectSrcs().Merge(ReferenceGetSrcsImpl(ctx))
+func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
 // A dynamic source provider is a module which needs to compute the output file names.
 //
-// `ResolveOutSrcs`, is context aware, and runs bottom up in the dep graph. This means however it cannot run
+// `ResolveOutFiles`, is context aware, and runs bottom up in the dep graph. This means however it cannot run
 // in parallel, fortunately this is __only__ used for `bob_transform_source`.
 //
-// `ResolveOutSrcs` is context aware specifically because it can depend on other dynamic providers.
-type DynamicSourceFileProvider interface {
-	SourceFileProvider
-	ResolveOutSrcs(blueprint.BaseModuleContext)
+// `ResolveOutFiles` is context aware specifically because it can depend on other dynamic providers.
+type DynamicFileProvider interface {
+	FileProvider
+	ResolveOutFiles(blueprint.BaseModuleContext)
 }
 
 // TransformSources needs to figure out the output names based on it's inputs.
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
-func resolveDynamicSrcOutputs(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(DynamicSourceFileProvider); ok {
-		m.ResolveOutSrcs(ctx)
+func resolveDynamicFileOutputs(ctx blueprint.BottomUpMutatorContext) {
+	if m, ok := ctx.Module().(DynamicFileProvider); ok {
+		m.ResolveOutFiles(ctx)
 	}
 }
 
@@ -233,7 +235,7 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorB
 	files := FilePaths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), []string{}) {
-		fp := newSourceFilePath(match, ctx, g)
+		fp := newFile(match, ctx.ModuleName(), g, 0)
 		files = files.AppendIfUnique(fp)
 	}
 

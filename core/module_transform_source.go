@@ -44,25 +44,26 @@ type TransformSourceProps struct {
 	ResolvedOut FilePaths `blueprint:"mutated"`
 }
 
-func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source filePath, depfile *bool, rspfile bool) (io inout) {
-	io.in = []string{source.buildPath()}
+func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source FilePath, depfile *bool, rspfile bool) (io inout) {
+	io.in = []string{source.BuildPath()}
 
 	for _, rep := range tsp.Out.Replace {
-		out := filepath.Join(re.ReplaceAllString(source.localPath(), rep))
+		// TODO: figure out the outs here.
+		out := filepath.Join(re.ReplaceAllString(source.ScopedPath(), rep))
 		io.out = append(io.out, out)
 	}
 
 	if proptools.Bool(depfile) {
-		io.depfile = getDepfileName(source.localPath())
+		io.depfile = getDepfileName(source.UnScopedPath())
 	}
 
 	for _, implSrc := range tsp.Out.Implicit_srcs {
-		implSrc = re.ReplaceAllString(source.localPath(), implSrc)
-		io.implicitSrcs = append(io.implicitSrcs, filepath.Join(source.moduleDir(), implSrc))
+		implSrc = re.ReplaceAllString(source.UnScopedPath(), implSrc)
+		io.implicitSrcs = append(io.implicitSrcs, source.BuildPath())
 	}
 
 	if rspfile {
-		io.rspfile = getRspfileName(source.localPath())
+		io.rspfile = getRspfileName(source.UnScopedPath())
 	}
 
 	return
@@ -85,8 +86,8 @@ type ModuleTransformSource struct {
 // All interfaces supported by filegroup
 type transformSourceInterface interface {
 	installable
-	SourceFileProvider
-	SourceFileConsumer
+	DynamicFileProvider
+	FileConsumer
 	FileResolver
 }
 
@@ -96,52 +97,51 @@ func (m *ModuleTransformSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
-func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []filePath {
-	return m.GetSrcs(ctx)
+func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []FilePath {
+	return m.GetFiles(ctx)
 }
 
 func (m *ModuleTransformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.getLegacySourceProperties().ResolveFiles(ctx, g)
 }
 
-func (m *ModuleTransformSource) GetSrcs(ctx blueprint.BaseModuleContext) FilePaths {
-	return m.getLegacySourceProperties().GetSrcs(ctx)
+func (m *ModuleTransformSource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+	return m.getLegacySourceProperties().GetFiles(ctx)
 }
 
-func (m *ModuleTransformSource) GetDirectSrcs() FilePaths {
-	return m.getLegacySourceProperties().GetDirectSrcs()
+func (m *ModuleTransformSource) GetDirectFiles() FilePaths {
+	return m.getLegacySourceProperties().GetDirectFiles()
 }
 
-func (m *ModuleTransformSource) GetSrcTargets() []string {
+func (m *ModuleTransformSource) GetTargets() []string {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleTransformSource) OutSrcs() FilePaths {
+func (m *ModuleTransformSource) OutFiles(g generatorBackend) FilePaths {
 	return m.Properties.ResolvedOut
 }
 
-func (m *ModuleTransformSource) OutSrcTargets() []string {
+func (m *ModuleTransformSource) OutFileTargets() []string {
 	return []string{}
 }
 
-func (m *ModuleTransformSource) ResolveOutSrcs(ctx blueprint.BaseModuleContext) {
+func (m *ModuleTransformSource) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 	g := getBackend(ctx)
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
-	// fmt.Printf("%v:%+v\n", m.Name(), m.GetSrcs(ctx))
-	// TODO: Refactor this to share code with generateInouts, right now the ctx type is differnet so no sharing is possible.
-	m.GetSrcs(ctx).ForEach(
-		func(fp filePath) bool {
+	// TODO: Refactor this to share code with generateInouts, right now the ctx type is different so no sharing is possible.
+
+	m.GetFiles(ctx).ForEach(
+		func(fp FilePath) bool {
 			io := m.Properties.inoutForSrc(re, fp, m.ModuleGenerateCommon.Properties.Depfile,
 				m.ModuleGenerateCommon.Properties.Rsp_content != nil)
 			for _, out := range io.out {
-				fp := newGeneratedFilePathFromModule(out, ctx, g)
+				fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
 				m.Properties.ResolvedOut = m.Properties.ResolvedOut.AppendIfUnique(fp)
 			}
 			return true
 		})
-
 }
 
 // Return an inouts structure naming all the files associated with
