@@ -24,6 +24,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -154,13 +155,13 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx
 	}
 
 	srcs := []string{}
-	gs.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(func(fp FilePath) bool {
+	gs.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(func(fp file.Path) bool {
 		srcs = append(srcs, fp.UnScopedPath())
 		return true
 	})
 
 	implicits := []string{}
-	gs.GetImplicits(ctx).ForEach(func(fp FilePath) bool {
+	gs.GetImplicits(ctx).ForEach(func(fp file.Path) bool {
 		implicits = append(implicits, fp.UnScopedPath())
 		return true
 	})
@@ -187,7 +188,7 @@ func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, c
 
 	srcs := []string{}
 	ts.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			srcs = append(srcs, fp.UnScopedPath())
 			return true
 		})

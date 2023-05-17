@@ -23,6 +23,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -78,7 +79,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blu
 
 	srcs := []string{}
 	ko.Properties.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			srcs = append(srcs, fp.UnScopedPath())
 			return true
 		})

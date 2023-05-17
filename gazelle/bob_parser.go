@@ -11,6 +11,7 @@ import (
 	"text/scanner"
 
 	bob "github.com/ARM-software/bob-build/core"
+	bob_file "github.com/ARM-software/bob-build/core/file"
 	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -254,7 +255,7 @@ func checkSimpleType(propertyName string, v interface{}) bool {
 
 	// Internal types which are only used in Bob
 	// TODO: ideally we should check for the blueprint:mutated tag on struct properties and ignore those.
-	case bob.FilePaths:
+	case bob_file.Paths:
 		// ignore
 	default:
 		log.Printf("Unhandled type:  %s \n  attribute: %s \n", reflect.TypeOf(v), propertyName)

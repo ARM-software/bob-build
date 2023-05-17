@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -58,7 +59,7 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 
 	sources := []string{}
 	ko.Properties.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			sources = append(sources, fp.BuildPath())
 			return true
 		})

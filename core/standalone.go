@@ -28,6 +28,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -261,5 +262,10 @@ func Main() {
 	}
 
 	config.Generator.init(ctx, config)
+	file.FactorySetup(
+		config.Generator.buildDir(),
+		config.Generator.sourceDir(),
+	)
+
 	bootstrap.Main(ctx, config)
 }

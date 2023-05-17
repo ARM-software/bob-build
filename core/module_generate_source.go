@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -36,8 +37,8 @@ type GenerateSourceProps struct {
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
 
-	ResolvedOut       FilePaths `blueprint:"mutated"`
-	ResolvedImplicits FilePaths `blueprint:"mutated"`
+	ResolvedOut       file.Paths `blueprint:"mutated"`
+	ResolvedImplicits file.Paths `blueprint:"mutated"`
 }
 
 type ModuleGenerateSource struct {
@@ -80,15 +81,15 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g g
 	gc.Properties.LegacySourceProps.ResolveFiles(ctx, g)
 
 	// Resolve output files
-	outs := FilePaths{}
+	outs := file.Paths{}
 	for _, out := range m.Properties.Out {
-		fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
+		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
 		outs = outs.AppendIfUnique(fp)
 	}
 
-	implicits := FilePaths{}
+	implicits := file.Paths{}
 	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
-		fp := newFile(implicit, ctx.ModuleName(), g, 0)
+		fp := file.NewPath(implicit, ctx.ModuleName(), 0)
 		implicits = implicits.AppendIfUnique(fp)
 	}
 
@@ -97,17 +98,17 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g g
 
 }
 
-func (m *ModuleGenerateSource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenerateSource) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.LegacySourceProps.GetFiles(ctx)
 }
 
-func (m *ModuleGenerateSource) GetDirectFiles() FilePaths {
+func (m *ModuleGenerateSource) GetDirectFiles() file.Paths {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.LegacySourceProps.GetDirectFiles()
 }
 
-func (m *ModuleGenerateSource) GetImplicits(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenerateSource) GetImplicits(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.ResolvedImplicits
 }
 
@@ -116,7 +117,7 @@ func (m *ModuleGenerateSource) GetTargets() []string {
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleGenerateSource) OutFiles(g generatorBackend) FilePaths {
+func (m *ModuleGenerateSource) OutFiles(g generatorBackend) file.Paths {
 	return m.Properties.ResolvedOut
 }
 
@@ -136,13 +137,13 @@ func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g gen
 	var io inout
 
 	m.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			io.in = append(io.in, fp.BuildPath())
 			return true
 		})
 
 	m.GetImplicits(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
 			return true
 		})

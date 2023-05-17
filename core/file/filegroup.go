@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package core
+package file
 
 // Array of files as a helper for struct attribute collections
 // TODO: add the possibility to tag a group of files.
-type FilePaths []FilePath
+type Paths []Path
 
-func (fps FilePaths) Contains(query FilePath) bool {
+func (fps Paths) Contains(query Path) bool {
 	for _, fp := range fps {
 		if fp == query {
 			return true
@@ -30,19 +30,19 @@ func (fps FilePaths) Contains(query FilePath) bool {
 	return false
 }
 
-func (fps FilePaths) AppendIfUnique(fp FilePath) FilePaths {
+func (fps Paths) AppendIfUnique(fp Path) Paths {
 	if !fps.Contains(fp) {
 		return append(fps, fp)
 	}
 	return fps
 }
 
-func (fps FilePaths) Merge(other FilePaths) FilePaths {
+func (fps Paths) Merge(other Paths) Paths {
 	return append(fps, other...)
 }
 
-func (fps FilePaths) Iterate() <-chan FilePath {
-	c := make(chan FilePath)
+func (fps Paths) Iterate() <-chan Path {
+	c := make(chan Path)
 	go func() {
 		for _, fp := range fps {
 			c <- fp
@@ -52,8 +52,8 @@ func (fps FilePaths) Iterate() <-chan FilePath {
 	return c
 }
 
-func (fps FilePaths) IteratePredicate(predicate func(FilePath) bool) <-chan FilePath {
-	c := make(chan FilePath)
+func (fps Paths) IteratePredicate(predicate func(Path) bool) <-chan Path {
+	c := make(chan Path)
 	go func() {
 		for _, fp := range fps {
 			if predicate(fp) {
@@ -65,7 +65,7 @@ func (fps FilePaths) IteratePredicate(predicate func(FilePath) bool) <-chan File
 	return c
 }
 
-func (fps FilePaths) ForEach(functor func(FilePath) bool) {
+func (fps Paths) ForEach(functor func(Path) bool) {
 	for fp := range fps.Iterate() {
 		if !functor(fp) {
 			break
@@ -73,7 +73,7 @@ func (fps FilePaths) ForEach(functor func(FilePath) bool) {
 	}
 }
 
-func (fps FilePaths) ForEachIf(predicate func(FilePath) bool, functor func(FilePath) bool) {
+func (fps Paths) ForEachIf(predicate func(Path) bool, functor func(Path) bool) {
 	for fp := range fps.IteratePredicate(predicate) {
 		if !functor(fp) {
 			break

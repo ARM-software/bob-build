@@ -41,6 +41,7 @@ bootstrap_go_package {
         "bob-module",
         "bob-config",
         "bob-toolchain",
+        "bob-file",
     ],
     srcs: [
         "core/alias.go",
@@ -62,8 +63,6 @@ bootstrap_go_package {
         "core/external_library.go",
         "core/feature.go",
         "core/filegroup.go",
-        "core/filepath.go",
-        "core/filepaths.go",
         "core/gen_binary.go",
         "core/gen_library.go",
         "core/gen_shared.go",
@@ -108,6 +107,20 @@ bootstrap_go_package {
         "core/filepaths_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",
+}
+
+
+bootstrap_go_package {
+    name: "bob-file",
+    srcs: [
+        "core/file/factory.go",
+        "core/file/file.go",
+        "core/file/filegroup.go",
+    ],
+    testSrcs: [
+        "core/file/file_test.go"
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/file",
 }
 
 bootstrap_go_package {

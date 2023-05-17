@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -217,11 +218,11 @@ func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generato
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleLibrary) GetDirectFiles() FilePaths {
+func (m *ModuleLibrary) GetDirectFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 

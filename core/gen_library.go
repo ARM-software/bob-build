@@ -20,6 +20,7 @@ package core
 import (
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -42,7 +43,7 @@ type GenerateLibraryProps struct {
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
 
-	ResolvedOut FilePaths `blueprint:"mutated"`
+	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
 type generateLibrary struct {
@@ -88,13 +89,13 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 	var io inout
 
 	m.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			io.in = append(io.in, fp.BuildPath())
 			return true
 		})
 
 	m.GetImplicits(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
 			return true
 		})
@@ -121,22 +122,21 @@ func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []
 	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
 }
 
-func (m *generateLibrary) GetFiles(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+func (m *generateLibrary) GetFiles(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	srcs = gc.Properties.LegacySourceProps.GetFiles(ctx)
 	return
 }
 
-func (m *generateLibrary) GetDirectFiles() (srcs FilePaths) {
+func (m *generateLibrary) GetDirectFiles() (srcs file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	srcs = gc.Properties.LegacySourceProps.GetDirectFiles()
 	return
 }
 
-func (m *generateLibrary) GetImplicits(ctx blueprint.BaseModuleContext) (implicits FilePaths) {
-	g := getBackend(ctx)
+func (m *generateLibrary) GetImplicits(ctx blueprint.BaseModuleContext) (implicits file.Paths) {
 	for _, s := range m.getImplicitSources(ctx) {
-		implicits = append(implicits, newFile(s, ctx.ModuleName(), g, 0))
+		implicits = append(implicits, file.NewPath(s, ctx.ModuleName(), 0))
 	}
 	return
 }
@@ -148,7 +148,7 @@ func (m *generateLibrary) GetTargets() (tgts []string) {
 	return
 }
 
-func (m *generateLibrary) OutFiles(g generatorBackend) FilePaths {
+func (m *generateLibrary) OutFiles(g generatorBackend) file.Paths {
 	// TODO: Can we use the generator backend here?
 	return m.Properties.ResolvedOut
 }

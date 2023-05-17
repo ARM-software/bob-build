@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -38,11 +39,9 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateSharedLibrary) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
-	g := getBackend(ctx)
-
-	m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, newFile(m.outputFileName(), ctx.ModuleName(), g, FileTypeGenerated))
+	m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, file.NewPath(m.outputFileName(), ctx.ModuleName(), file.TypeGenerated))
 	for _, h := range m.Properties.Headers {
-		fp := newFile(h, ctx.ModuleName(), g, FileTypeGenerated)
+		fp := file.NewPath(h, ctx.ModuleName(), file.TypeGenerated)
 		m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, fp)
 	}
 }

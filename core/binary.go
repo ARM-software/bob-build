@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -36,9 +37,10 @@ type binaryInterface interface {
 
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
-func (m *ModuleBinary) OutFiles(g generatorBackend) (srcs FilePaths) {
+func (m *ModuleBinary) OutFiles(g generatorBackend) (srcs file.Paths) {
 	for _, out := range m.outputs() {
-		fp := newFile(strings.TrimPrefix(out, g.buildDir()), "", g, FileTypeBinary|FileTypeExecutable) // TODO: refactor outputs() to use FilePaths
+		// TODO: Remove the need to know the buildDir here, this prevents the removal of generatorBackend
+		fp := file.NewPath(strings.TrimPrefix(out, g.buildDir()), "", file.TypeBinary|file.TypeExecutable) // TODO: refactor outputs() to use file.Paths
 		srcs = srcs.AppendIfUnique(fp)
 	}
 	return

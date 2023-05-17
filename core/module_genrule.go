@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -37,7 +38,7 @@ implementation for features we do not already have in place.
 */
 type AndroidGenerateRuleProps struct {
 	Out         []string
-	ResolvedOut FilePaths `blueprint:"mutated"`
+	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
 type AndroidGenerateCommonProps struct {
@@ -52,7 +53,7 @@ type AndroidGenerateCommonProps struct {
 	Tool_files          []string
 	Tools               []string
 
-	ResolvedSrcs FilePaths `blueprint:"mutated"` // Glob results.
+	ResolvedSrcs file.Paths `blueprint:"mutated"` // Glob results.
 }
 
 type AndroidGenerateCommonPropsInterface interface {
@@ -93,10 +94,10 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 
 func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// Since globbing is supported we must call a resolver.
-	files := FilePaths{}
+	files := file.Paths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(ag.Srcs), ag.Exclude_srcs) {
-		fp := newFile(match, ctx.ModuleName(), g, 0)
+		fp := file.NewPath(match, ctx.ModuleName(), file.TypeUnset)
 		files = files.AppendIfUnique(fp)
 	}
 
@@ -107,11 +108,11 @@ func (ag *AndroidGenerateCommonProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(ag.Srcs)
 }
 
-func (ag *AndroidGenerateCommonProps) GetDirectFiles() FilePaths {
+func (ag *AndroidGenerateCommonProps) GetDirectFiles() file.Paths {
 	return ag.ResolvedSrcs
 }
 
-func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return ag.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
@@ -135,11 +136,11 @@ func (m *ModuleGenruleCommon) GetTargets() []string {
 	return m.Properties.GetTargets()
 }
 
-func (m *ModuleGenruleCommon) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenruleCommon) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleGenruleCommon) GetDirectFiles() FilePaths {
+func (m *ModuleGenruleCommon) GetDirectFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 
@@ -187,20 +188,20 @@ func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext, g generato
 func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.ModuleGenruleCommon.ResolveFiles(ctx, g)
 
-	files := FilePaths{}
+	files := file.Paths{}
 	for _, out := range m.Properties.Out {
-		fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
+		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
 		files = files.AppendIfUnique(fp)
 	}
 
 	m.Properties.ResolvedOut = files
 }
 
-func (m *ModuleGenrule) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleGenrule) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.ModuleGenruleCommon.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleGenrule) GetDirectFiles() FilePaths {
+func (m *ModuleGenrule) GetDirectFiles() file.Paths {
 	return m.ModuleGenruleCommon.Properties.GetDirectFiles()
 }
 
@@ -208,7 +209,7 @@ func (m *ModuleGenrule) GetTargets() []string {
 	return m.ModuleGenruleCommon.Properties.GetTargets()
 }
 
-func (m *ModuleGenrule) OutFiles(g generatorBackend) FilePaths {
+func (m *ModuleGenrule) OutFiles(g generatorBackend) file.Paths {
 	return m.Properties.ResolvedOut
 }
 
