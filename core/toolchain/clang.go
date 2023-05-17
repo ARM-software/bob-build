@@ -164,7 +164,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	if useGnuCrt || useGnuLibgcc || useGnuStl {
 		// Tell Clang where the GNU Toolchain is installed, so it can use its
 		// headers and libraries, for example, if we are using libstdc++.
-		gnuInstallArg := "--gcc-Toolchain=" + tc.gnu.getInstallDir()
+		gnuInstallArg := "--gcc-toolchain=" + tc.gnu.getInstallDir()
 		tc.cflags = append(tc.cflags, gnuInstallArg)
 		tc.ldflags = append(tc.ldflags, gnuInstallArg)
 	}

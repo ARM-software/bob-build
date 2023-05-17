@@ -150,7 +150,7 @@ func (tc toolchainGnuCommon) Is64BitOnly() bool {
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
 // directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
 // 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
-// when passed the --gcc-Toolchain option, so add the unprefixed version to the
+// when passed the --gcc-toolchain option, so add the unprefixed version to the
 // binary search path.
 func (tc toolchainGnuCross) getBinDirs() []string {
 	dirs := tc.toolchainGnuCommon.getBinDirs()
