@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -89,7 +90,7 @@ func (g *androidBpGenerator) resourceActions(r *ModuleResource, ctx blueprint.Mo
 	}
 
 	r.Properties.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			// keep module name unique, remove slashes
 			m, err := AndroidBpFile().NewModule(modType, r.getAndroidbpResourceName(fp.UnScopedPath()))
 			if err != nil {

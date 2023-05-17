@@ -45,6 +45,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -54,7 +55,7 @@ type SourceProps struct {
 	// The list of source files and target names for globs/filegroups
 	Srcs []string
 
-	ResolvedSrcs FilePaths `blueprint:"mutated"` // Glob results.
+	ResolvedSrcs file.Paths `blueprint:"mutated"` // Glob results.
 }
 
 // Reusable baseline implementation. Each module should match this interface.
@@ -95,7 +96,7 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorB
 type FileProvider interface {
 	// Sources to be forwarded to other modules
 	// Expected to be called from a context of another module.
-	OutFiles(generatorBackend) FilePaths
+	OutFiles(generatorBackend) file.Paths
 
 	// Targets to be forwarded to other modules
 	// Expected to be called from a context of another module.
@@ -108,7 +109,7 @@ type ImplicitFileProvider interface {
 	FileProvider
 
 	// Sources to be forwarded to other modules
-	OutImplicits() FilePaths
+	OutImplicits() file.Paths
 }
 
 // `SourceFileConsumer` interface describes a module that is capable of consuming sources for its actions.
@@ -126,20 +127,20 @@ type FileConsumer interface {
 
 	// Returns all sources this module consumes. At this point assumes all providers are ready.
 	// Paths will be fully resolved.
-	GetFiles(blueprint.BaseModuleContext) FilePaths
+	GetFiles(blueprint.BaseModuleContext) file.Paths
 
 	// Returns a list of targets this consumer directly requires
 	GetTargets() []string
 
 	// Returns filepaths for current module only.
 	// Context is required for backend information but the accessor should only read current module.
-	GetDirectFiles() FilePaths
+	GetDirectFiles() file.Paths
 }
 
 type ImplicitFileConsumer interface {
 	FileConsumer
 
-	GetImplicits(blueprint.BaseModuleContext) FilePaths
+	GetImplicits(blueprint.BaseModuleContext) file.Paths
 }
 
 // Basic common implementation, certain targets will custmize this.
@@ -148,7 +149,7 @@ func (s *SourceProps) GetTargets() []string {
 }
 
 // Basic common implementation, certain targets may wish to customize this.
-func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
+func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	g := getBackend(ctx)
 
 	ctx.WalkDeps(
@@ -171,7 +172,7 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs FilePaths) {
 	return
 }
 
-func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits FilePaths) {
+func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits file.Paths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
 			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
@@ -192,11 +193,11 @@ func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits FileP
 	return
 }
 
-func (s *SourceProps) GetDirectFiles() FilePaths {
+func (s *SourceProps) GetDirectFiles() file.Paths {
 	return s.ResolvedSrcs
 }
 
-func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
@@ -232,10 +233,10 @@ type FileResolver interface {
 
 func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// Since globbing is supported we must call a resolver.
-	files := FilePaths{}
+	files := file.Paths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), []string{}) {
-		fp := newFile(match, ctx.ModuleName(), g, 0)
+		fp := file.NewPath(match, ctx.ModuleName(), 0)
 		files = files.AppendIfUnique(fp)
 	}
 

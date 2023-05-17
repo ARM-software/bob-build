@@ -31,6 +31,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
@@ -70,7 +71,7 @@ func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleCo
 		switch ctx.OtherModuleType(child) {
 		case "bob_resource":
 			if r, ok := child.(*ModuleResource); ok {
-				r.Properties.GetFiles(ctx).ForEach(func(fp FilePath) bool {
+				r.Properties.GetFiles(ctx).ForEach(func(fp file.Path) bool {
 					srcs = append(srcs, r.getAndroidbpResourceName(fp.UnScopedPath()))
 					return true
 				})

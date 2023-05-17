@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -111,10 +112,10 @@ func (s *LegacySourceProps) initializeNonCompiledSourceMap(ctx blueprint.BaseMod
 	nonCompiledSources := make(map[string]bool)
 	if _, ok := getLibrary(ctx.Module()); ok {
 		s.GetFiles(ctx).ForEachIf(
-			func(fp FilePath) bool {
-				return !fp.IsType(FileTypeCompilable)
+			func(fp file.Path) bool {
+				return !fp.IsType(file.TypeCompilable)
 			},
-			func(fp FilePath) bool {
+			func(fp file.Path) bool {
 				nonCompiledSources[fp.ScopedPath()] = false
 
 				return true
@@ -164,7 +165,7 @@ func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg st
 	matchedSources := []string{}
 
 	s.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			matched, err := pathtools.Match("**/"+arg, fp.ScopedPath())
 			if err != nil {
 				utils.Die("Error during matching filepath pattern")

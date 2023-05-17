@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -59,8 +60,8 @@ func metaDataCollector(ctx blueprint.BottomUpMutatorContext) {
 
 	if s, ok := ctx.Module().(FileConsumer); ok {
 		s.GetFiles(ctx).ForEach(
-			func(fp FilePath) bool {
-				meta.Srcs = append(meta.Srcs, fp.relativePath)
+			func(fp file.Path) bool {
+				meta.Srcs = append(meta.Srcs, fp.UnScopedPath())
 				return true
 			})
 	}

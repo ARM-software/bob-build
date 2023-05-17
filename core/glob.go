@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -42,7 +43,7 @@ type GlobProps struct {
 	Allow_empty *bool
 
 	// Found module sources
-	Files FilePaths `blueprint:"mutated"`
+	Files file.Paths `blueprint:"mutated"`
 }
 
 type ModuleGlob struct {
@@ -84,10 +85,10 @@ func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 
 func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	matches := glob(ctx, m.Properties.Srcs, m.Properties.Exclude)
-	files := FilePaths{}
+	files := file.Paths{}
 
 	for _, match := range matches {
-		fp := newFile(match, ctx.ModuleName(), g, 0)
+		fp := file.NewPath(match, ctx.ModuleName(), 0)
 		files = files.AppendIfUnique(fp)
 	}
 
@@ -99,7 +100,7 @@ func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBa
 
 }
 
-func (m *ModuleGlob) OutFiles(g generatorBackend) FilePaths {
+func (m *ModuleGlob) OutFiles(g generatorBackend) file.Paths {
 	return m.Properties.Files
 }
 

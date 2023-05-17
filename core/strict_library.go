@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -114,11 +115,11 @@ func (m *ModuleStrictLibrary) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
-func (m *ModuleStrictLibrary) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleStrictLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleStrictLibrary) GetDirectFiles() FilePaths {
+func (m *ModuleStrictLibrary) GetDirectFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 

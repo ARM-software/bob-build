@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -249,7 +250,7 @@ func (m *ModuleResource) getEnableableProps() *EnableableProps {
 
 func (m *ModuleResource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
 	m.Properties.LegacySourceProps.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			files = append(files, fp.BuildPath())
 			return true
 		})
@@ -269,11 +270,11 @@ func (m *ModuleResource) GetTargets() []string {
 	return m.Properties.LegacySourceProps.GetTargets()
 }
 
-func (m *ModuleResource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleResource) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.LegacySourceProps.GetFiles(ctx)
 }
 
-func (m *ModuleResource) GetDirectFiles() FilePaths {
+func (m *ModuleResource) GetDirectFiles() file.Paths {
 	return m.Properties.LegacySourceProps.GetDirectFiles()
 }
 

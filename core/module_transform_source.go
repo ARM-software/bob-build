@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
@@ -41,10 +42,10 @@ type TransformSourceProps struct {
 	}
 
 	// Stores the files generated
-	ResolvedOut FilePaths `blueprint:"mutated"`
+	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
-func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source FilePath, depfile *bool, rspfile bool) (io inout) {
+func (tsp *TransformSourceProps) inoutForSrc(re *regexp.Regexp, source file.Path, depfile *bool, rspfile bool) (io inout) {
 	io.in = []string{source.BuildPath()}
 
 	for _, rep := range tsp.Out.Replace {
@@ -97,7 +98,7 @@ func (m *ModuleTransformSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }
 
-func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []FilePath {
+func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g generatorBackend) []file.Path {
 	return m.GetFiles(ctx)
 }
 
@@ -105,11 +106,11 @@ func (m *ModuleTransformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g 
 	m.getLegacySourceProperties().ResolveFiles(ctx, g)
 }
 
-func (m *ModuleTransformSource) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (m *ModuleTransformSource) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.getLegacySourceProperties().GetFiles(ctx)
 }
 
-func (m *ModuleTransformSource) GetDirectFiles() FilePaths {
+func (m *ModuleTransformSource) GetDirectFiles() file.Paths {
 	return m.getLegacySourceProperties().GetDirectFiles()
 }
 
@@ -118,7 +119,7 @@ func (m *ModuleTransformSource) GetTargets() []string {
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleTransformSource) OutFiles(g generatorBackend) FilePaths {
+func (m *ModuleTransformSource) OutFiles(g generatorBackend) file.Paths {
 	return m.Properties.ResolvedOut
 }
 
@@ -127,17 +128,16 @@ func (m *ModuleTransformSource) OutFileTargets() []string {
 }
 
 func (m *ModuleTransformSource) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
-	g := getBackend(ctx)
 	re := regexp.MustCompile(m.Properties.Out.Match)
 
 	// TODO: Refactor this to share code with generateInouts, right now the ctx type is different so no sharing is possible.
 
 	m.GetFiles(ctx).ForEach(
-		func(fp FilePath) bool {
+		func(fp file.Path) bool {
 			io := m.Properties.inoutForSrc(re, fp, m.ModuleGenerateCommon.Properties.Depfile,
 				m.ModuleGenerateCommon.Properties.Rsp_content != nil)
 			for _, out := range io.out {
-				fp := newFile(out, ctx.ModuleName(), g, FileTypeGenerated)
+				fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
 				m.Properties.ResolvedOut = m.Properties.ResolvedOut.AppendIfUnique(fp)
 			}
 			return true

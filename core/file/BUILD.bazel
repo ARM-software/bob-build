@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "file",
+    srcs = [
+        "factory.go",
+        "file.go",
+        "filegroup.go",
+    ],
+    importpath = "github.com/ARM-software/bob-build/core/file",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "file_test",
+    srcs = ["file_test.go"],
+    embed = [":file"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

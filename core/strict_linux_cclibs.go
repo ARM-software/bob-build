@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
@@ -89,7 +90,7 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 
 	// TODO: use filetags here
 	m.GetFiles(ctx).ForEach(
-		func(source FilePath) bool {
+		func(source file.Path) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
 			switch source.Ext() {

@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -38,7 +39,7 @@ type LegacySourceProps struct {
 	// We do not currently re-use Srcs for this
 	Filegroup_srcs []string
 
-	ResolvedSrcs FilePaths `blueprint:"mutated"` // Glob results.
+	ResolvedSrcs file.Paths `blueprint:"mutated"` // Glob results.
 }
 
 // All interfaces supported by LegacySourceProps
@@ -72,10 +73,10 @@ func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext, g gene
 
 func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	// Since globbing is supported we must call a resolver.
-	files := FilePaths{}
+	files := file.Paths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), s.Exclude_srcs) {
-		fp := newFile(match, ctx.ModuleName(), g, 0)
+		fp := file.NewPath(match, ctx.ModuleName(), 0)
 		files = files.AppendIfUnique(fp)
 	}
 
@@ -86,10 +87,10 @@ func (s *LegacySourceProps) GetTargets() []string {
 	return append(s.Filegroup_srcs, utils.MixedListToBobTargets(s.Srcs)...)
 }
 
-func (s *LegacySourceProps) GetFiles(ctx blueprint.BaseModuleContext) FilePaths {
+func (s *LegacySourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
-func (s *LegacySourceProps) GetDirectFiles() FilePaths {
+func (s *LegacySourceProps) GetDirectFiles() file.Paths {
 	return s.ResolvedSrcs
 }

@@ -26,6 +26,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -106,7 +107,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 
 	// TODO: use tags here instead of extensions
 	l.Properties.GetFiles(ctx).ForEach(
-		func(source FilePath) bool {
+		func(source file.Path) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
 			switch source.Ext() {

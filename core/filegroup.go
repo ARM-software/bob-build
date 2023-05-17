@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 
 	"github.com/google/blueprint"
@@ -44,7 +45,7 @@ func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g genera
 	m.Properties.ResolveFiles(ctx, g)
 }
 
-func (m *ModuleFilegroup) OutFiles(g generatorBackend) FilePaths {
+func (m *ModuleFilegroup) OutFiles(g generatorBackend) file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 
