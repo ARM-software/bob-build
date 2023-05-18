@@ -42,8 +42,6 @@ type GenerateLibraryProps struct {
 
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
-
-	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
 type generateLibrary struct {
@@ -59,7 +57,6 @@ var _ dependentInterface = (*generateLibrary)(nil)
 var _ splittable = (*generateLibrary)(nil)
 var _ installable = (*generateLibrary)(nil)
 var _ FileConsumer = (*generateLibrary)(nil)
-var _ FileProvider = (*generateLibrary)(nil)
 
 // Modules implementing generateLibraryInterface support arbitrary commands
 // that either produce a static library, shared library or binary.
@@ -148,11 +145,7 @@ func (m *generateLibrary) GetTargets() (tgts []string) {
 	return
 }
 
-func (m *generateLibrary) OutFiles(g generatorBackend) file.Paths {
-	// TODO: Can we use the generator backend here?
-	return m.Properties.ResolvedOut
-}
-
+// None of the generated targets forward their file deps.
 func (m *generateLibrary) OutFileTargets() []string {
 	return []string{}
 }

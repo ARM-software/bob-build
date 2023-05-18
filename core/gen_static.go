@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -26,6 +27,7 @@ type generateStaticLibrary struct {
 }
 
 // Verify that the following interfaces are implemented
+var _ FileProvider = (*generateStaticLibrary)(nil)
 var _ generateLibraryInterface = (*generateStaticLibrary)(nil)
 var _ singleOutputModule = (*generateStaticLibrary)(nil)
 var _ splittable = (*generateStaticLibrary)(nil)
@@ -33,6 +35,11 @@ var _ blueprint.Module = (*generateStaticLibrary)(nil)
 
 func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
+}
+
+func (m *generateStaticLibrary) OutFiles(g generatorBackend) (files file.Paths) {
+	// TODO: implement me
+	return
 }
 
 //// Support generateLibraryInterface
