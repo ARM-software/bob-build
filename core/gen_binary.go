@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -26,6 +27,7 @@ type generateBinary struct {
 }
 
 // Verify that the following interfaces are implemented
+var _ FileProvider = (*generateBinary)(nil)
 var _ generateLibraryInterface = (*generateBinary)(nil)
 var _ singleOutputModule = (*generateBinary)(nil)
 var _ splittable = (*generateBinary)(nil)
@@ -33,6 +35,11 @@ var _ blueprint.Module = (*generateBinary)(nil)
 
 func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
+}
+
+func (m *generateBinary) OutFiles(g generatorBackend) (files file.Paths) {
+	// TODO: implement me
+	return
 }
 
 //// Support generateLibraryInterface

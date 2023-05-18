@@ -28,6 +28,7 @@ type generateSharedLibrary struct {
 }
 
 // Verify that the following interfaces are implemented
+var _ FileProvider = (*generateSharedLibrary)(nil)
 var _ generateLibraryInterface = (*generateSharedLibrary)(nil)
 var _ singleOutputModule = (*generateSharedLibrary)(nil)
 var _ sharedLibProducer = (*generateSharedLibrary)(nil)
@@ -38,12 +39,15 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateSharedLibrary) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
-	m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, file.NewPath(m.outputFileName(), ctx.ModuleName(), file.TypeGenerated))
+func (m *generateSharedLibrary) OutFiles(g generatorBackend) (files file.Paths) {
+	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated))
+
 	for _, h := range m.Properties.Headers {
-		fp := file.NewPath(h, ctx.ModuleName(), file.TypeGenerated)
-		m.Properties.ResolvedOut = append(m.Properties.ResolvedOut, fp)
+		fp := file.NewPath(h, m.Name(), file.TypeGenerated|file.TypeHeader)
+		files = append(files, fp)
 	}
+
+	return
 }
 
 //// Support generateLibraryInterface
