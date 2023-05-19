@@ -20,7 +20,9 @@ package core
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -523,9 +525,22 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 
 	installDeps := g.install(m, ctx)
 
+	// Sort symlinks
+	symlinks := m.librarySymlinks(ctx)
+	symlinkKeys := make([]string, len(symlinks))
+	keys := reflect.ValueOf(symlinks).MapKeys()
+
+	for i, k := range keys {
+		symlinkKeys[i] = k.String()
+	}
+
+	sort.Strings(symlinkKeys)
+
 	// Create symlinks if needed
-	for name, symlinkTgt := range m.librarySymlinks(ctx) {
+	for _, name := range symlinkKeys {
+		symlinkTgt := symlinks[name]
 		symlink := filepath.Join(m.outputDir(), name)
+
 		lib := filepath.Join(m.outputDir(), symlinkTgt)
 		ctx.Build(pctx,
 			blueprint.BuildParams{
