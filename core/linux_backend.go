@@ -20,6 +20,8 @@ package core
 import (
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -332,8 +334,18 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 	if symlinkIns, ok := m.(symlinkInstaller); ok {
 		symlinks := symlinkIns.librarySymlinks(ctx)
 
-		for key, value := range symlinks {
-			symlink := filepath.Join(installPath, key)
+		symlinkKeys := make([]string, len(symlinks))
+		keys := reflect.ValueOf(symlinks).MapKeys()
+
+		for i, k := range keys {
+			symlinkKeys[i] = k.String()
+		}
+
+		sort.Strings(symlinkKeys)
+
+		for _, sym := range symlinkKeys {
+			value := symlinks[sym]
+			symlink := filepath.Join(installPath, sym)
 			symlinkTgt := filepath.Join(installPath, value)
 			ctx.Build(pctx,
 				blueprint.BuildParams{
