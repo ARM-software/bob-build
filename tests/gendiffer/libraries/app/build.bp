@@ -41,6 +41,7 @@ bob_shared_library {
     cflags: ["-fPIC"],
     host_supported: true,
     target_supported: true,
+    library_version: "1.2.1",
 }
 
 bob_binary {
