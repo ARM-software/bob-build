@@ -103,15 +103,6 @@ type FileProvider interface {
 	OutFileTargets() []string
 }
 
-// TODO: Remove the need for the Implicit file handling.
-// Instead add a different filepath type or tag to handle this.
-type ImplicitFileProvider interface {
-	FileProvider
-
-	// Sources to be forwarded to other modules
-	OutImplicits() file.Paths
-}
-
 // `SourceFileConsumer` interface describes a module that is capable of consuming sources for its actions.
 // Example of this include:
 //   - bob_binary
@@ -137,12 +128,6 @@ type FileConsumer interface {
 	GetDirectFiles() file.Paths
 }
 
-type ImplicitFileConsumer interface {
-	FileConsumer
-
-	GetImplicits(blueprint.BaseModuleContext) file.Paths
-}
-
 // Basic common implementation, certain targets will custmize this.
 func (s *SourceProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(s.Srcs)
@@ -161,27 +146,6 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 			if isFilegroup && isProvider {
 				provided := child.(FileProvider).OutFiles(g)
 				srcs = srcs.Merge(provided)
-			}
-
-			// Only continue if the child is a provider and not a consumer.
-			// This means if a consumer eats up downstream providers it should process and output them first.
-			return isProvider && !isConsumer
-		},
-	)
-
-	return
-}
-
-func ReferenceGetImplicitsImpl(ctx blueprint.BaseModuleContext) (implicits file.Paths) {
-	ctx.WalkDeps(
-		func(child, parent blueprint.Module) bool {
-			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
-			_, isConsumer := child.(ImplicitFileConsumer)
-			_, isProvider := child.(ImplicitFileProvider)
-
-			if isFilegroup && isProvider {
-				provided := child.(ImplicitFileProvider).OutImplicits()
-				implicits = implicits.Merge(provided)
 			}
 
 			// Only continue if the child is a provider and not a consumer.
