@@ -37,8 +37,7 @@ type GenerateSourceProps struct {
 	// Implicit source files that should not be included. Use with care.
 	Exclude_implicit_srcs []string
 
-	ResolvedOut       file.Paths `blueprint:"mutated"`
-	ResolvedImplicits file.Paths `blueprint:"mutated"`
+	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
 type ModuleGenerateSource struct {
@@ -87,14 +86,12 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g g
 		outs = outs.AppendIfUnique(fp)
 	}
 
-	implicits := file.Paths{}
 	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
-		fp := file.NewPath(implicit, ctx.ModuleName(), 0)
-		implicits = implicits.AppendIfUnique(fp)
+		fp := file.NewPath(implicit, ctx.ModuleName(), file.TypeImplicit)
+		gc.Properties.LegacySourceProps.ResolvedSrcs = gc.Properties.LegacySourceProps.ResolvedSrcs.AppendIfUnique(fp)
 	}
 
 	m.Properties.ResolvedOut = outs
-	m.Properties.ResolvedImplicits = implicits
 
 }
 
@@ -106,10 +103,6 @@ func (m *ModuleGenerateSource) GetFiles(ctx blueprint.BaseModuleContext) file.Pa
 func (m *ModuleGenerateSource) GetDirectFiles() file.Paths {
 	gc, _ := getGenerateCommon(m)
 	return gc.Properties.LegacySourceProps.GetDirectFiles()
-}
-
-func (m *ModuleGenerateSource) GetImplicits(ctx blueprint.BaseModuleContext) file.Paths {
-	return m.Properties.ResolvedImplicits
 }
 
 func (m *ModuleGenerateSource) GetTargets() []string {
@@ -138,20 +131,22 @@ func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g gen
 
 	m.GetFiles(ctx).ForEach(
 		func(fp file.Path) bool {
-			io.in = append(io.in, fp.BuildPath())
-			return true
-		})
-
-	m.GetImplicits(ctx).ForEach(
-		func(fp file.Path) bool {
-			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
+			if fp.IsType(file.TypeImplicit) {
+				io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
+			} else {
+				io.in = append(io.in, fp.BuildPath())
+			}
 			return true
 		})
 
 	io.out = m.Properties.Out
+
+	// TODO: Add file type for this?
 	if depfile, ok := m.getDepfile(); ok {
 		io.depfile = depfile
 	}
+
+	// TODO: Add file type for this?
 	if rspfile, ok := m.getRspfile(); ok {
 		io.rspfile = rspfile
 	}

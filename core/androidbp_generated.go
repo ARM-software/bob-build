@@ -155,16 +155,19 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx
 	}
 
 	srcs := []string{}
-	gs.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(func(fp file.Path) bool {
-		srcs = append(srcs, fp.UnScopedPath())
-		return true
-	})
-
 	implicits := []string{}
-	gs.GetImplicits(ctx).ForEach(func(fp file.Path) bool {
-		implicits = append(implicits, fp.UnScopedPath())
-		return true
-	})
+
+	gs.ModuleGenerateCommon.Properties.GetDirectFiles().ForEach(
+		func(fp file.Path) bool {
+
+			if fp.IsType(file.TypeImplicit) {
+				implicits = append(implicits, fp.UnScopedPath())
+			} else {
+				srcs = append(srcs, fp.UnScopedPath())
+			}
+
+			return true
+		})
 
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)

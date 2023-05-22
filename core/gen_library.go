@@ -64,7 +64,7 @@ type generateLibraryInterface interface {
 	blueprint.Module
 	dependentInterface
 	FileProvider
-	ImplicitFileConsumer
+	FileConsumer
 
 	libExtension() string
 	outputFileName() string
@@ -87,13 +87,11 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 
 	m.GetFiles(ctx).ForEach(
 		func(fp file.Path) bool {
-			io.in = append(io.in, fp.BuildPath())
-			return true
-		})
-
-	m.GetImplicits(ctx).ForEach(
-		func(fp file.Path) bool {
-			io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
+			if fp.IsType(file.TypeImplicit) {
+				io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
+			} else {
+				io.in = append(io.in, fp.BuildPath())
+			}
 			return true
 		})
 
@@ -119,22 +117,24 @@ func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []
 	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
 }
 
+func (m *generateLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.ModuleGenerateCommon.ResolveFiles(ctx, g)
+	for _, s := range m.getImplicitSources(ctx) {
+		m.ModuleGenerateCommon.Properties.LegacySourceProps.ResolvedSrcs = append(
+			m.ModuleGenerateCommon.Properties.LegacySourceProps.ResolvedSrcs,
+			file.NewPath(s, ctx.ModuleName(), file.TypeImplicit))
+	}
+}
+
 func (m *generateLibrary) GetFiles(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	srcs = gc.Properties.LegacySourceProps.GetFiles(ctx)
 	return
 }
 
-func (m *generateLibrary) GetDirectFiles() (srcs file.Paths) {
+func (m *generateLibrary) GetDirectFiles() (files file.Paths) {
 	gc, _ := getGenerateCommon(m)
-	srcs = gc.Properties.LegacySourceProps.GetDirectFiles()
-	return
-}
-
-func (m *generateLibrary) GetImplicits(ctx blueprint.BaseModuleContext) (implicits file.Paths) {
-	for _, s := range m.getImplicitSources(ctx) {
-		implicits = append(implicits, file.NewPath(s, ctx.ModuleName(), 0))
-	}
+	files = gc.Properties.LegacySourceProps.GetDirectFiles()
 	return
 }
 
