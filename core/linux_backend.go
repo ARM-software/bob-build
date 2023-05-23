@@ -27,6 +27,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -376,8 +377,8 @@ func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
 	return g.logger
 }
 
-func (g *linuxGenerator) init(ctx *blueprint.Context, config *BobConfig) {
-	g.toolchains.Configure(&config.Properties)
+func (g *linuxGenerator) init(config *config.Properties) {
+	g.toolchains.Configure(config)
 }
 
 func (g *linuxGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {

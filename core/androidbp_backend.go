@@ -31,6 +31,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
@@ -495,11 +496,8 @@ func (g *androidBpGenerator) getLogger() *warnings.WarningLogger {
 	return g.logger
 }
 
-func (g *androidBpGenerator) init(ctx *blueprint.Context, config *BobConfig) {
-	// Do not run in parallel to avoid locking issues on the map
-	ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
-	ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
-	g.toolchains.Configure(&config.Properties)
+func (g *androidBpGenerator) init(config *config.Properties) {
+	g.toolchains.Configure(config)
 }
 
 func (g *androidBpGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {

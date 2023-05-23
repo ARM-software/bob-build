@@ -257,11 +257,17 @@ func Main() {
 		config.Generator = &linuxGenerator{logger: logger}
 	} else if builder_android_bp {
 		config.Generator = &androidBpGenerator{logger: logger}
+
+		// Do not run in parallel to avoid locking issues on the map
+		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
+		ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
 	} else {
 		utils.Die("Unknown builder backend")
 	}
 
-	config.Generator.init(ctx, config)
+	config.Generator.init(&config.Properties)
+
+	// TODO: remove this to a common backend
 	file.FactorySetup(
 		config.Generator.buildDir(),
 		config.Generator.sourceDir(),
