@@ -115,7 +115,7 @@ type generatorBackend interface {
 	escapeFlag(string) string
 
 	// Backend initialisation
-	init(*blueprint.Context, *BobConfig)
+	init(*config.Properties)
 
 	// Access to backend configuration
 	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
