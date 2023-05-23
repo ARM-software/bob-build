@@ -42,6 +42,7 @@ bootstrap_go_package {
         "bob-config",
         "bob-toolchain",
         "bob-file",
+        "bob-backend",
     ],
     srcs: [
         "core/alias.go",
@@ -109,6 +110,25 @@ bootstrap_go_package {
     pkgPath: "github.com/ARM-software/bob-build/core",
 }
 
+
+bootstrap_go_package {
+    name: "bob-backend",
+    deps: [
+        "blueprint",
+        "blueprint-pathtools",
+        "bob-warnings",
+        "bob-config",
+        "bob-toolchain",
+        "bob-utils",
+    ],
+    srcs: [
+        "core/backend/androidbp.go",
+        "core/backend/backend.go",
+        "core/backend/linux.go",
+        "core/backend/mock.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/backend",
+}
 
 bootstrap_go_package {
     name: "bob-file",
