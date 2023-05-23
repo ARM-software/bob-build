@@ -28,6 +28,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
@@ -261,6 +262,12 @@ func Main() {
 	}
 
 	cfg.Generator.init(&cfg.Properties)
+
+	// It is safe to call `backend.Get()` after this call.
+	backend.Setup(env,
+		&cfg.Properties,
+		logger,
+	)
 
 	// TODO: remove this to a common backend
 	file.FactorySetup(

@@ -30,7 +30,6 @@ type propertyEscapeInterface interface {
 func escapeMutator(ctx blueprint.TopDownMutatorContext) {
 	// This mutator is not registered on the androidbp backend, as it
 	// doesn't need escaping
-
 	g := getBackend(ctx)
 	module := ctx.Module()
 
