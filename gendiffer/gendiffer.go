@@ -2,6 +2,7 @@ package gendiffer
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -21,6 +22,10 @@ var (
 	bobBinaryPath = flag.String("bob_binary_path", "", "Path to the bob binary to test.")
 	configFile    = flag.String("config_file", "", "Path to the config file for Linux.")
 	configJson    = flag.String("config_json", "", "Path to the config json file for Linux.")
+
+	expectedStdoutFilename   = "expectedStdout.txt"
+	expectedStderrFilename   = "expectedStderr.txt"
+	expectedExitCodeFilename = "expectedExitCode.int"
 )
 
 type generationArgs struct {
@@ -113,7 +118,9 @@ func checkFileContents(args *generationArgs, filename string, data []byte) error
 	data = redact(args, data)
 
 	if args.ShouldUpdate {
-		os.WriteFile(absolute, data, 0644)
+		if err := os.WriteFile(absolute, data, 0644); err != nil {
+			return err
+		}
 	}
 
 	actual, err := os.ReadFile(absolute)
@@ -151,13 +158,33 @@ var generated = map[string]string{
 func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 	setCommonEnv(t, args)
 
-	expectedExitCode := getFileInt(t, path.Join(args.TestDataPathAbsolute, "out", args.BackendType, "expectedExitCode.int"))
+	expectedExitCode := getFileInt(t, path.Join(args.TestDataPathAbsolute, "out", args.BackendType, expectedExitCodeFilename))
 	var stdOut bytes.Buffer
 	var stdErr bytes.Buffer
 	runCmd := exec.Command(args.BobBinaryPath, "-l", args.BobRootAbsolute+"/bplist", "-b", args.BobRootAbsolute, "-n", args.BobRootAbsolute, "-d", args.BobRootAbsolute+"/ninja.build.d", "-o", args.BobRootAbsolute+"/build.ninja", args.BobRootAbsolute+"/build.bp")
 	runCmd.Stdout = &stdOut
 	runCmd.Stderr = &stdErr
 	err := runCmd.Run()
+
+	if args.ShouldUpdate {
+		destFile := path.Join(args.BuildWorkspaceDirectory, args.TestDataPathRelative, "out", args.BackendType, expectedExitCodeFilename)
+
+		exitCode := 0
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		}
+
+		if _, fErr := os.Stat(destFile); errors.Is(fErr, os.ErrNotExist) {
+			data := []byte(fmt.Sprintf("%d\n", exitCode))
+
+			if err := os.WriteFile(destFile, data, 0644); err != nil {
+				t.Fatalf("Cannot create file: '%s'", destFile)
+			}
+		}
+
+		expectedExitCode = exitCode
+	}
+
 	if exitErr, ok := err.(*exec.ExitError); ok {
 		if exitErr.ExitCode() != expectedExitCode {
 			t.Fatalf("Failed executing bob with error: %v, stdout: '%s', stderr: '%s'", exitErr, runCmd.Stdout, runCmd.Stderr)
@@ -170,10 +197,10 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 
 	// Check files
 	errs := []error{}
-	if err := checkFileContents(args, "expectedStdout.txt", stdOut.Bytes()); err != nil {
+	if err := checkFileContents(args, expectedStdoutFilename, stdOut.Bytes()); err != nil {
 		errs = append(errs, err)
 	}
-	if err := checkFileContents(args, "expectedStderr.txt", stdErr.Bytes()); err != nil {
+	if err := checkFileContents(args, expectedStderrFilename, stdErr.Bytes()); err != nil {
 		errs = append(errs, err)
 	}
 	if err := checkFile(args, generated[args.BackendType]); err != nil {
