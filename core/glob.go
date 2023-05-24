@@ -84,7 +84,7 @@ func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext) {
 	m.Properties.Exclude = utils.PrefixDirs(m.Properties.Exclude, prefix)
 }
 
-func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	matches := glob(ctx, m.Properties.Srcs, m.Properties.Exclude)
 	files := file.Paths{}
 

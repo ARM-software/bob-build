@@ -128,8 +128,8 @@ func (m *ModuleStrictLibrary) GetTargets() (tgts []string) {
 	return
 }
 
-func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleStrictLibrary) supportedVariants() (tgts []toolchain.TgtType) {

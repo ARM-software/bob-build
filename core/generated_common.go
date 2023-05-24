@@ -484,8 +484,8 @@ func (m *ModuleGenerateCommon) processPaths(ctx blueprint.BaseModuleContext) {
 
 }
 
-func (m *ModuleGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.LegacySourceProps.ResolveFiles(ctx, g)
+func (m *ModuleGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.LegacySourceProps.ResolveFiles(ctx)
 }
 
 func (m *ModuleGenerateCommon) getAliasList() []string {

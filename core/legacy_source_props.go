@@ -72,7 +72,7 @@ func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 	s.Exclude_srcs = utils.PrefixDirs(s.Exclude_srcs, prefix)
 }
 
-func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Since globbing is supported we must call a resolver.
 	files := file.Paths{}
 

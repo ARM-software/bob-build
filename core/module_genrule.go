@@ -96,7 +96,7 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	}
 }
 
-func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Since globbing is supported we must call a resolver.
 	files := file.Paths{}
 
@@ -155,8 +155,8 @@ func (m *ModuleGenruleCommon) GetDirectFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 
-func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleGenruleCommon) Features() *Features {
@@ -204,8 +204,8 @@ func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleGenruleCommon.processPaths(ctx)
 }
 
-func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.ModuleGenruleCommon.ResolveFiles(ctx, g)
+func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.ModuleGenruleCommon.ResolveFiles(ctx)
 
 	files := file.Paths{}
 	for _, out := range m.Properties.Out {
