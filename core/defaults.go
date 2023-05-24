@@ -20,6 +20,7 @@ package core
 import (
 	"sync"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -199,7 +200,7 @@ func DefaultDepsStage1Mutator(ctx blueprint.BottomUpMutatorContext) {
 
 		// forbid the use of `srcs` and `exclude_srcs` in `bob_defaults` altogether
 		if len(srcs.Srcs) > 0 || len(srcs.Exclude_srcs) > 0 {
-			getBackend(ctx).getLogger().Warn(warnings.DefaultSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+			backend.Get().GetLogger().Warn(warnings.DefaultSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 

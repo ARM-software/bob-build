@@ -23,6 +23,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -40,7 +41,7 @@ var touchRule = pctx.StaticRule("touch",
 
 // Generate the build actions for a generateSource module and populates the outputs.
 func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blueprint.ModuleContext, inouts []inout) {
-	m.outputdir = g.sourceOutputDir(ctx.Module())
+	m.outputdir = backend.Get().SourceOutputDir(ctx.Module())
 	prefixInoutsWithOutputDir(inouts, m.outputDir())
 
 	// Calculate and record outputs and include dirs
@@ -51,7 +52,7 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 
 	ldLibraryPath := ""
 	if _, ok := args["host_bin"]; ok {
-		ldLibraryPath += "LD_LIBRARY_PATH=" + g.sharedLibsDir(hostTarget) + ":$$LD_LIBRARY_PATH "
+		ldLibraryPath += "LD_LIBRARY_PATH=" + backend.Get().SharedLibsDir(hostTarget) + ":$$LD_LIBRARY_PATH "
 	}
 	utils.StripUnusedArgs(args, cmd)
 

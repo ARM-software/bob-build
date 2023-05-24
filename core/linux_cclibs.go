@@ -28,6 +28,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -62,8 +63,6 @@ func (m *ModuleLibrary) ObjDir() string {
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
 func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
-	g := getBackend(ctx)
-
 	expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
 	// There are 2 sets of include dirs - "global" and "local".
 	// Local acts on the root source directory.
@@ -94,7 +93,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	cflagsList := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags,
 		exportedCflags, systemIncludeFlags, includeFlags)
 
-	tc := g.GetToolchain(l.Properties.TargetType)
+	tc := backend.Get().GetToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
@@ -235,14 +234,14 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
 
 	// Calculate and record outputs
-	m.outputdir = g.staticLibOutputDir(m)
+	m.outputdir = backend.Get().StaticLibOutputDir(m.Properties.TargetType)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputFileName())}
 
 	rule := staticLibraryRule
 
 	buildWrapper, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
 
-	tc := g.GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	arBinary, _ := tc.GetArchiver()
 
 	args := map[string]string{
@@ -341,7 +340,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	useNoAsNeeded := !m.Properties.Build.isForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
-	tc := getBackend(ctx).GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
@@ -400,7 +399,7 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 }
 
 func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.ModuleContext) map[string]string {
-	tc := g.GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	ldflags := m.Properties.Ldflags
 
@@ -430,7 +429,7 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 			wholeStaticLibs))
 	}
 	staticLibFlags = append(staticLibFlags, staticLibs...)
-	sharedLibDir := g.sharedLibsDir(m.Properties.TargetType)
+	sharedLibDir := backend.Get().SharedLibsDir(m.Properties.TargetType)
 	args := map[string]string{
 		"build_wrapper":   buildWrapper,
 		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
@@ -515,7 +514,7 @@ var symlinkRule = pctx.StaticRule("symlink",
 
 func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = g.sharedLibsDir(m.Properties.TargetType)
+	m.outputdir = backend.Get().SharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.outputDir(), m.getRealName())
 	m.outs = []string{soFile}
 

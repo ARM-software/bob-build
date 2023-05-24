@@ -249,9 +249,9 @@ func Main() {
 	defer MetaDataWriteToFile(env.BuildMetaFile)
 
 	if builder_ninja {
-		cfg.Generator = &linuxGenerator{logger: logger}
+		cfg.Generator = &linuxGenerator{}
 	} else if builder_android_bp {
-		cfg.Generator = &androidBpGenerator{logger: logger}
+		cfg.Generator = &androidBpGenerator{}
 
 		// Do not run in parallel to avoid locking issues on the map
 		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
@@ -259,8 +259,6 @@ func Main() {
 	} else {
 		utils.Die("Unknown builder backend")
 	}
-
-	cfg.Generator.init(&cfg.Properties)
 
 	// It is safe to call `backend.Get()` after this call.
 	backend.Setup(env,

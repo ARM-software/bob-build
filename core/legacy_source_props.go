@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -56,12 +57,12 @@ func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext, g gene
 
 	for _, src := range s.Srcs {
 		if strings.HasPrefix(filepath.Clean(src), "../") {
-			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+			backend.Get().GetLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 
 	if len(s.Filegroup_srcs) > 0 {
-		g.getLogger().Warn(warnings.DeprecatedFilegroupSrcs, ctx.BlueprintsFile(), ctx.ModuleName())
+		backend.Get().GetLogger().Warn(warnings.DeprecatedFilegroupSrcs, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 
 	srcs := utils.MixedListToFiles(s.Srcs)

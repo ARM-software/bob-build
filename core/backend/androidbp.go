@@ -53,7 +53,7 @@ func (g *AndroidPlatform) SourceDir() string {
 func (g *AndroidPlatform) BobScriptsDir() string {
 	// In the androidbp backend, we just want the relative path to the
 	// script directory.
-	srcToScripts, _ := filepath.Rel(g.SourceDir(), filepath.Join(g.SourceDir(), "scripts"))
+	srcToScripts, _ := filepath.Rel(g.SourceDir(), filepath.Join(g.env.BobDir, "scripts"))
 	return srcToScripts
 }
 

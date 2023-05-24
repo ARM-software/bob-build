@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
@@ -340,7 +341,7 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 		// We disable multilib if the target only supports 64bit
 		if m.Properties.TargetType == toolchain.TgtTypeTarget &&
 			!linksToGeneratedLibrary(ctx) &&
-			!g.GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
+			!backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
 			mod.AddString("compile_multilib", "both")
 
 			// For executables we need to be clear about where to

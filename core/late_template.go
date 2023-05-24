@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -188,8 +189,6 @@ func (s *LegacySourceProps) matchSources(ctx blueprint.BaseModuleContext, arg st
 // Ensure that every non-compiled source has been used by at least one
 // {{match_srcs}} instance.
 func verifyMatchSources(ctx blueprint.BaseModuleContext, matchedNonCompiledSources map[string]bool) {
-	g := getBackend(ctx)
-
 	// TODO: For modules without any {{match_srcs}} statements, this can produce a red herring since all non-compile
 	// sources will be added to implicit deps. Issue a warning to flag this but ignore. In future, fix this
 	// to **only** apply when {{match_srcs}} is used.
@@ -202,7 +201,7 @@ func verifyMatchSources(ctx blueprint.BaseModuleContext, matchedNonCompiledSourc
 	}
 
 	if unmatchedCount > 0 {
-		g.getLogger().Warn(warnings.UnmatchedNonCompileSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+		backend.Get().GetLogger().Warn(warnings.UnmatchedNonCompileSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 }
 
@@ -224,7 +223,7 @@ func setupAddIfSupported(ctx blueprint.BaseModuleContext,
 
 	if t, ok := ctx.Module().(moduleWithBuildProps); ok {
 		build := t.build()
-		tc := getBackend(ctx).GetToolchain(build.TargetType)
+		tc := backend.Get().GetToolchain(build.TargetType)
 
 		addtoFuncmap(propfnmap, []string{"Cflags", "Export_cflags"}, "add_if_supported",
 			func(s string) string {

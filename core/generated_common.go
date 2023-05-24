@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
@@ -306,9 +307,9 @@ func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string,
 }
 
 func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, toolchain.TgtType) {
-	g := getBackend(ctx)
+	b := backend.Get()
 
-	tc := g.GetToolchain(m.Properties.Target)
+	tc := b.GetToolchain(m.Properties.Target)
 	arBinary, _ := tc.GetArchiver()
 	asBinary, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
@@ -336,9 +337,9 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 		"ldlibs":          utils.Join(ldlibs, props.Ldlibs),
 		"linker":          linker,
 		"gen_dir":         m.outputDir(),
-		"module_dir":      getBackendPathInSourceDir(g, ctx.ModuleDir()),
-		"shared_libs_dir": g.sharedLibsDir(m.Properties.GenerateProps.Target),
-		"src_dir":         g.sourceDir(),
+		"module_dir":      getBackendPathInSourceDir(getBackend(ctx), ctx.ModuleDir()),
+		"shared_libs_dir": b.SharedLibsDir(m.Properties.GenerateProps.Target),
+		"src_dir":         b.SourceDir(),
 	}
 
 	args["build_wrapper"], _ = props.getBuildWrapperAndDeps(ctx)
@@ -398,7 +399,6 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 	}
 
 	if len(m.Properties.Tools) > 0 {
-		g := getBackend(ctx)
 		for _, tool := range m.Properties.Tools {
 			// If tool comes from other module with `:` notation
 			// just fill up `toolsLabels` to not duplicate
@@ -417,7 +417,7 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 				}
 
 			} else {
-				toolPath = getBackendPathInSourceDir(g, tool)
+				toolPath = getBackendPathInSourceDir(getBackend(ctx), tool)
 				dependentTools = append(dependentTools, toolPath)
 			}
 			addToolsLabel(tool, toolPath)
