@@ -38,7 +38,7 @@ type binaryInterface interface {
 
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
-func (m *ModuleBinary) OutFiles(generatorBackend) (srcs file.Paths) {
+func (m *ModuleBinary) OutFiles() (srcs file.Paths) {
 	for _, out := range m.outputs() {
 		// TODO: Remove the need to know the buildDir here, this prevents the removal of generatorBackend
 		fp := file.NewPath(strings.TrimPrefix(out, backend.Get().BuildDir()), "", file.TypeBinary|file.TypeExecutable) // TODO: refactor outputs() to use file.Paths

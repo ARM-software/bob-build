@@ -119,7 +119,7 @@ func (m *ModuleTransformSource) GetTargets() []string {
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleTransformSource) OutFiles(g generatorBackend) file.Paths {
+func (m *ModuleTransformSource) OutFiles() file.Paths {
 	return m.Properties.ResolvedOut
 }
 
