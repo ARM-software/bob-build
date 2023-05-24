@@ -1,0 +1,128 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_static_library {
+    name: "lib_provider",
+    export_local_system_include_dirs: [
+        "export/local/system/include/lib/provider",
+    ],
+    export_local_include_dirs: [
+        "export/local/include/lib/provider",
+    ],
+    local_include_dirs: [
+        "local/include/lib/provider",
+    ],
+    include_dirs: [
+        "include/lib/provider",
+    ],
+
+    srcs: [
+        "src/lib_provider.c",
+        "src/lib_provider.s",
+        "src/lib_provider.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_PROVIDER_LIB",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_PROVIDER_LIB",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_PROVIDER_LIB",
+    ],
+    asflags: [
+        "-DASFLAGS_PROVIDER_LIB",
+    ],
+    ldflags: [
+        "-O1",
+    ],
+
+    export_cflags: ["-DCFLAGS_PROVIDER_EXPORT"],
+}
+
+bob_static_library {
+    name: "lib_consumer",
+    static_libs: ["lib_provider"],
+    export_local_system_include_dirs: [
+        "export/local/system/include/lib/consumer",
+    ],
+    export_local_include_dirs: [
+        "export/local/include/lib/consumer",
+    ],
+    local_include_dirs: [
+        "local/include/lib/consumer",
+    ],
+    include_dirs: [
+        "include/lib/consumer",
+    ],
+
+    srcs: [
+        "src/lib_consumer.c",
+        "src/lib_consumer.s",
+        "src/lib_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_LIB",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_LIB",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_LIB",
+    ],
+    asflags: [
+        "-DASFLAGS_LIB",
+    ],
+    ldflags: [
+        "-O2",
+    ],
+}
+
+bob_binary {
+    name: "bin_consumer",
+    static_libs: [
+        "lib_provider",
+        "lib_consumer",
+    ],
+    local_include_dirs: [
+        "local/include/bin/consumer",
+    ],
+    include_dirs: [
+        "include/bin/consumer",
+    ],
+
+    srcs: [
+        "src/bin_consumer.c",
+        "src/bin_consumer.s",
+        "src/bin_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_BIN",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_BIN",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_BIN",
+    ],
+    asflags: [
+        "-DASFLAGS_BIN",
+    ],
+    ldflags: [
+        "-O3",
+    ],
+}
