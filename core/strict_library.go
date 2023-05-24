@@ -164,7 +164,7 @@ func (m *ModuleStrictLibrary) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleStrictLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	getBackend(ctx).strictLibraryActions(m, ctx)
+	getGenerator(ctx).strictLibraryActions(m, ctx)
 }
 
 func (m *ModuleStrictLibrary) shortName() string {

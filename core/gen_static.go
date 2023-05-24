@@ -52,7 +52,7 @@ func (m *generateStaticLibrary) libExtension() string {
 
 func (m *generateStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		g := getBackend(ctx)
+		g := getGenerator(ctx)
 		g.genStaticActions(m, ctx)
 	}
 }

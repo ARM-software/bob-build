@@ -247,7 +247,7 @@ func (m *ModuleGenrule) getEnableableProps() *EnableableProps {
 
 func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		g := getBackend(ctx)
+		g := getGenerator(ctx)
 		g.androidGenerateRuleActions(m, ctx)
 	}
 }

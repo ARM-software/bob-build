@@ -58,7 +58,7 @@ func (m *generateBinary) outputFileName() string {
 
 func (m *generateBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).genBinaryActions(m, ctx)
+		getGenerator(ctx).genBinaryActions(m, ctx)
 	}
 }
 

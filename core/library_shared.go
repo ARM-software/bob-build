@@ -88,7 +88,7 @@ func (m *ModuleSharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[s
 
 func (m *ModuleSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).sharedActions(m, ctx)
+		getGenerator(ctx).sharedActions(m, ctx)
 	}
 }
 

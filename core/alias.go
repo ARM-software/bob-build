@@ -70,7 +70,7 @@ func (m *ModuleAlias) getAliasList() []string {
 // Called by Blueprint to generate the rules associated with the alias.
 // This is forwarded to the backend to handle.
 func (m *ModuleAlias) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	getBackend(ctx).aliasActions(m, ctx)
+	getGenerator(ctx).aliasActions(m, ctx)
 }
 
 func (m ModuleAlias) GetProperties() interface{} {
