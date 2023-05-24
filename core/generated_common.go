@@ -456,9 +456,9 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 
 var toolTagRegex = regexp.MustCompile(`\$\{tool ([a-zA-Z0-9\/\.:_-]+)\}`)
 
-func (m *ModuleGenerateCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.LegacySourceProps.processPaths(ctx, g)
-	m.Properties.InstallableProps.processPaths(ctx, g)
+func (m *ModuleGenerateCommon) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.LegacySourceProps.processPaths(ctx)
+	m.Properties.InstallableProps.processPaths(ctx)
 
 	if len(m.Properties.Tools) > 0 {
 		m.Properties.Tools = utils.PrefixDirs(m.Properties.Tools, projectModuleDir(ctx))

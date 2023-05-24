@@ -423,13 +423,13 @@ type pathProcessor interface {
 	// Prepares any path attributes, in most cases this means prefixing the module path to make sources
 	// relative to Bob root directory.
 	// This mutator should **only** modify paths, no other work should be done here.
-	processPaths(blueprint.BaseModuleContext, generatorBackend)
+	processPaths(blueprint.BaseModuleContext)
 }
 
 // Adds module paths to appropriate properties.
 func pathMutator(ctx blueprint.BottomUpMutatorContext) {
 	if p, ok := ctx.Module().(pathProcessor); ok {
-		p.processPaths(ctx, getGenerator(ctx))
+		p.processPaths(ctx)
 	}
 }
 

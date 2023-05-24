@@ -65,7 +65,7 @@ type AndroidGenerateCommonPropsInterface interface {
 
 var _ AndroidGenerateCommonPropsInterface = (*AndroidGenerateCommonProps)(nil) // impl check
 
-func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext) {
 
 	prefix := projectModuleDir(ctx)
 	// We don't want to process module dependencies as paths, we must filter them out first.
@@ -138,9 +138,9 @@ func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interf
 	m.Properties.Features.Init(properties, list...)
 }
 
-func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext) {
 	m.deps = utils.MixedListToBobTargets(m.Properties.AndroidGenerateCommonProps.Tool_files)
-	m.Properties.AndroidGenerateCommonProps.processPaths(ctx, g)
+	m.Properties.AndroidGenerateCommonProps.processPaths(ctx)
 }
 
 func (m *ModuleGenruleCommon) GetTargets() []string {
@@ -200,8 +200,8 @@ type androidGenerateRuleInterface interface {
 
 var _ androidGenerateRuleInterface = (*ModuleGenrule)(nil) // impl check
 
-func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.ModuleGenruleCommon.processPaths(ctx, g)
+func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
+	m.ModuleGenruleCommon.processPaths(ctx)
 }
 
 func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {

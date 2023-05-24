@@ -104,11 +104,11 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 	return []inout{io}
 }
 
-func (m *generateLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *generateLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 	pmdir := projectModuleDir(ctx)
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, pmdir)
 	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, pmdir)
-	m.ModuleGenerateCommon.processPaths(ctx, g)
+	m.ModuleGenerateCommon.processPaths(ctx)
 }
 
 //// Support generateLibraryInterface

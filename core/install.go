@@ -98,9 +98,9 @@ type InstallableProps struct {
 	InstallGroupPath *string `blueprint:"mutated"`
 }
 
-func (props *InstallableProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (props *InstallableProps) processPaths(ctx blueprint.BaseModuleContext) {
 	if props.Post_install_tool != nil {
-		*props.Post_install_tool = getBackendPathInSourceDir(g, projectModuleDir(ctx), *props.Post_install_tool)
+		*props.Post_install_tool = getBackendPathInSourceDir(getGenerator(ctx), projectModuleDir(ctx), *props.Post_install_tool)
 	}
 }
 
@@ -261,9 +261,9 @@ func (m *ModuleResource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps
 }
 
-func (m *ModuleResource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.LegacySourceProps.processPaths(ctx, g)
-	m.Properties.InstallableProps.processPaths(ctx, g)
+func (m *ModuleResource) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.LegacySourceProps.processPaths(ctx)
+	m.Properties.InstallableProps.processPaths(ctx)
 }
 
 func (m *ModuleResource) GetTargets() []string {

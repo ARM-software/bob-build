@@ -141,8 +141,8 @@ func (m *ModuleKernelObject) getInstallDepPhonyNames(ctx blueprint.ModuleContext
 	return getShortNamesForDirectDepsWithTags(ctx, InstallTag, KernelModuleTag)
 }
 
-func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.CommonProps.processPaths(ctx, g)
+func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.CommonProps.processPaths(ctx)
 	m.Properties.KernelProps.processPaths(ctx)
 }
 

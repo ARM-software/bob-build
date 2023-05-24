@@ -61,8 +61,8 @@ func (m *ModuleFilegroup) shortName() string {
 	return m.Name()
 }
 
-func (m *ModuleFilegroup) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.SourceProps.processPaths(ctx, g)
+func (m *ModuleFilegroup) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.SourceProps.processPaths(ctx)
 }
 
 func (m *ModuleFilegroup) FeaturableProperties() []interface{} {

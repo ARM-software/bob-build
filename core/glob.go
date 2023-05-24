@@ -67,7 +67,7 @@ func (m *ModuleGlob) shortName() string {
 	return m.Name()
 }
 
-func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext) {
 	if len(m.Properties.Srcs) == 0 {
 		ctx.PropertyErrorf("srcs", "Missed required property.")
 		return

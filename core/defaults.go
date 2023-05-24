@@ -104,8 +104,8 @@ func (m *ModuleDefaults) getTargetSpecific(variant toolchain.TgtType) *TargetSpe
 	return m.Properties.getTargetSpecific(variant)
 }
 
-func (m *ModuleDefaults) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.Build.processPaths(ctx, g)
+func (m *ModuleDefaults) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.Build.processPaths(ctx)
 	m.Properties.KernelProps.processPaths(ctx)
 }
 

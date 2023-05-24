@@ -410,8 +410,8 @@ func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
 	return nil
 }
 
-func (m *ModuleLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.Build.processPaths(ctx, g)
+func (m *ModuleLibrary) processPaths(ctx blueprint.BaseModuleContext) {
+	m.Properties.Build.processPaths(ctx)
 
 	versionScript := m.Properties.Build.Version_script
 	if versionScript != nil {
