@@ -278,8 +278,8 @@ func (m *ModuleResource) GetDirectFiles() file.Paths {
 	return m.Properties.LegacySourceProps.GetDirectFiles()
 }
 
-func (m *ModuleResource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleResource) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleResource) getAliasList() []string {

@@ -214,8 +214,8 @@ func (m *ModuleLibrary) getLegacySourceProperties() *LegacySourceProps {
 	return &m.Properties.LegacySourceProps
 }
 
-func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {

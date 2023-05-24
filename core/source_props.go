@@ -193,10 +193,10 @@ func resolveDynamicFileOutputs(ctx blueprint.BottomUpMutatorContext) {
 //   - `ResolveSrcs` runs, setting up filepaths for distribution.
 type FileResolver interface {
 	// TODO: This may not be neccessary.
-	ResolveFiles(blueprint.BaseModuleContext, generatorBackend)
+	ResolveFiles(blueprint.BaseModuleContext)
 }
 
-func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Since globbing is supported we must call a resolver.
 	files := file.Paths{}
 
@@ -212,6 +212,6 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorB
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
 func resolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
 	if m, ok := ctx.Module().(FileResolver); ok {
-		m.ResolveFiles(ctx, getGenerator(ctx))
+		m.ResolveFiles(ctx)
 	}
 }

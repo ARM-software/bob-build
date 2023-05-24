@@ -260,7 +260,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	// TODO: generate target for all supported target types
 	proxyStaticLib.Properties.TargetType = toolchain.TgtTypeHost
 
-	proxyStaticLib.Properties.ResolveFiles(ctx, g)
+	proxyStaticLib.Properties.ResolveFiles(ctx)
 	g.staticActions(&proxyStaticLib, ctx)
 	// TODO: Static lib dependency
 

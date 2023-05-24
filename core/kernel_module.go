@@ -85,8 +85,8 @@ type kernelModuleInterface interface {
 
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
 
-func (m *ModuleKernelObject) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleKernelObject) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleKernelObject) defaults() []string {

@@ -102,8 +102,8 @@ func (m *ModuleTransformSource) sourceInfo(ctx blueprint.ModuleContext, g genera
 	return m.GetFiles(ctx)
 }
 
-func (m *ModuleTransformSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.getLegacySourceProperties().ResolveFiles(ctx, g)
+func (m *ModuleTransformSource) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.getLegacySourceProperties().ResolveFiles(ctx)
 }
 
 func (m *ModuleTransformSource) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {

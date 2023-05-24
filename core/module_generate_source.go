@@ -73,10 +73,10 @@ func (m *ModuleGenerateSource) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleGenerateCommon.processPaths(ctx)
 }
 
-func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Resolve sources.
 	gc, _ := getGenerateCommon(m)
-	gc.Properties.LegacySourceProps.ResolveFiles(ctx, g)
+	gc.Properties.LegacySourceProps.ResolveFiles(ctx)
 
 	// Resolve output files
 	outs := file.Paths{}

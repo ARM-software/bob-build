@@ -41,8 +41,8 @@ type filegroupInterface interface {
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check
 
-func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.Properties.ResolveFiles(ctx, g)
+func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.Properties.ResolveFiles(ctx)
 }
 
 func (m *ModuleFilegroup) OutFiles(g generatorBackend) file.Paths {

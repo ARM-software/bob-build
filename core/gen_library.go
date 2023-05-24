@@ -117,8 +117,8 @@ func (m *generateLibrary) getImplicitSources(ctx blueprint.BaseModuleContext) []
 	return glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs)
 }
 
-func (m *generateLibrary) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	m.ModuleGenerateCommon.ResolveFiles(ctx, g)
+func (m *generateLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
+	m.ModuleGenerateCommon.ResolveFiles(ctx)
 	for _, s := range m.getImplicitSources(ctx) {
 		m.ModuleGenerateCommon.Properties.LegacySourceProps.ResolvedSrcs = append(
 			m.ModuleGenerateCommon.Properties.LegacySourceProps.ResolvedSrcs,
