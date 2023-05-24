@@ -172,8 +172,7 @@ func (m *ModuleTransformSource) filesToInstall(ctx blueprint.BaseModuleContext) 
 
 func (m *ModuleTransformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		g := getBackend(ctx)
-		g.transformSourceActions(m, ctx)
+		getBackend(ctx).transformSourceActions(m, ctx)
 	}
 }
 

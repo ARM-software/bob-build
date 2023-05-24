@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -74,7 +75,7 @@ func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext, g generatorBa
 
 	for _, s := range append(m.Properties.Srcs, m.Properties.Exclude...) {
 		if strings.HasPrefix(filepath.Clean(s), "../") {
-			g.getLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+			backend.Get().GetLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 

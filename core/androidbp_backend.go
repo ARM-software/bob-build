@@ -33,11 +33,9 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
@@ -46,8 +44,6 @@ var (
 )
 
 type androidBpGenerator struct {
-	toolchains toolchain.ToolchainSet
-	logger     *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by androidBpGenerator */
@@ -55,6 +51,7 @@ var _ generatorBackend = (*androidBpGenerator)(nil)
 
 // Provides access to the global instance of the Android.bp file writer
 func AndroidBpFile() bpwriter.File {
+	// TODO: this should be part of core/backend
 	return outputFile
 }
 
@@ -103,51 +100,6 @@ func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleCo
 	}
 
 	mod.AddStringList("required", srcs)
-}
-
-func (g *androidBpGenerator) buildDir() string {
-	// The androidbp backend writes an Android.bp file, which should
-	// never reference an actual output directory (which will be
-	// chosen by Soong). Therefore this function returns an empty
-	// string.
-	return ""
-}
-
-func (g *androidBpGenerator) sourceDir() string {
-	// On the androidbp backend, sourceDir() is only used for match_src
-	// handling and for locating bob scripts. In these cases we want
-	// paths relative to ANDROID_BUILD_TOP directory,
-	// which is where all commands will be executed from
-	return getSourceDir()
-}
-
-func (g *androidBpGenerator) bobScriptsDir() string {
-	// In the androidbp backend, we just want the relative path to the
-	// script directory.
-	srcToScripts, _ := filepath.Rel(getSourceDir(), getBobScriptsDir())
-	return srcToScripts
-}
-
-func (g *androidBpGenerator) sourceOutputDir(m blueprint.Module) string {
-	return ""
-}
-
-func (g *androidBpGenerator) sharedLibsDir(toolchain.TgtType) string {
-	// When writing link commands, it's common to put all the shared
-	// libraries in a single location to make it easy for the linker to
-	// find them. This function tells us where this is for the current
-	// generatorBackend.
-	//
-	// In the androidbp backend, we don't write link command lines. Soong
-	// will do this after processing the generated Android.bp. Therefore
-	// this function just returns an empty string.
-	return ""
-}
-
-func (g *androidBpGenerator) escapeFlag(s string) string {
-	// Soong will handle the escaping of flags, so the androidbp backend
-	// just passes them through.
-	return s
 }
 
 func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
@@ -491,16 +443,4 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 			Outputs:  []string{androidbpFile},
 			Optional: true,
 		})
-}
-
-func (g *androidBpGenerator) getLogger() *warnings.WarningLogger {
-	return g.logger
-}
-
-func (g *androidBpGenerator) init(config *config.Properties) {
-	g.toolchains.Configure(config)
-}
-
-func (g *androidBpGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
-	return g.toolchains.GetToolchain(tgt)
 }

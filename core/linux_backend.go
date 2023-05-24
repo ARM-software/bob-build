@@ -25,12 +25,10 @@ import (
 	"strings"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 
-	"github.com/ARM-software/bob-build/core/config"
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 var (
@@ -50,8 +48,6 @@ var (
 )
 
 type linuxGenerator struct {
-	toolchains toolchain.ToolchainSet
-	logger     *warnings.WarningLogger
 }
 
 /* Compile time checks for interfaces that must be implemented by linuxGenerator */
@@ -95,26 +91,6 @@ func (g *linuxGenerator) getPhonyFiles(p dependentInterface) []string {
 	return utils.NewStringSlice(p.outputs(), p.implicitOutputs())
 }
 
-func (g *linuxGenerator) escapeFlag(s string) string {
-	return proptools.NinjaAndShellEscape(s)
-}
-
-func (g *linuxGenerator) sourceDir() string {
-	return "${SrcDir}"
-}
-
-func (g *linuxGenerator) buildDir() string {
-	return "${BuildDir}"
-}
-
-func (g *linuxGenerator) bobScriptsDir() string {
-	return "${BobScriptsDir}"
-}
-
-func (g *linuxGenerator) sourceOutputDir(m blueprint.Module) string {
-	return filepath.Join("${BuildDir}", "gen", m.Name())
-}
-
 type singleOutputModule interface {
 	blueprint.Module
 	outputName() string
@@ -140,24 +116,18 @@ type linkableModule interface {
 	GetStaticLibs(ctx blueprint.ModuleContext) []string
 }
 
-func (g *linuxGenerator) staticLibOutputDir(m *ModuleStaticLibrary) string {
-	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "static")
-}
-
-func (g *linuxGenerator) sharedLibsDir(tgt toolchain.TgtType) string {
-	return filepath.Join("${BuildDir}", string(tgt), "shared")
-}
-
 // Full path for shared libraries, in a shared location to simplify linking.
 // As long as the module is targetable, we can infer the library path.
 func (g *linuxGenerator) getSharedLibLinkPath(t targetableModule) string {
-	return filepath.Join(g.sharedLibsDir(t.getTarget()), t.outputFileName())
+	// TODO: this should be part of core/backend
+	return filepath.Join(backend.Get().SharedLibsDir(t.getTarget()), t.outputFileName())
 }
 
 // Full path for shared library tables of content.
 // As long as the module is targetable, we can infer the library path.
 func (g *linuxGenerator) getSharedLibTocPath(l sharedLibProducer) string {
-	return filepath.Join(g.sharedLibsDir(l.getTarget()), l.getTocName())
+	// TODO: this should be part of core/backend
+	return filepath.Join(backend.Get().SharedLibsDir(l.getTarget()), l.getTocName())
 }
 
 var _ = pctx.StaticVariable("toc", "${BobScriptsDir}/library_toc.py")
@@ -171,7 +141,7 @@ var tocRule = pctx.StaticRule("shared_library_toc",
 	"tocflags")
 
 func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt toolchain.TgtType) {
-	tc := g.GetToolchain(tgt)
+	tc := backend.Get().GetToolchain(tgt)
 	tocFlags := tc.GetLibraryTocFlags()
 
 	ctx.Build(pctx,
@@ -185,12 +155,14 @@ func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, to
 }
 
 func (g *linuxGenerator) binaryOutputDir(tgt toolchain.TgtType) string {
+	// TODO: this should be part of core/backend
 	return filepath.Join("${BuildDir}", string(tgt), "executable")
 }
 
 // Full path for a generated binary. This ensures generated binaries
 // are available in the same directory as compiled binaries
 func (g *linuxGenerator) getBinaryPath(t targetableModule) string {
+	// TODO: this should be part of core/backend
 	return filepath.Join(g.binaryOutputDir(t.getTarget()), t.outputFileName())
 }
 
@@ -292,7 +264,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 			}
 
 			if lib.strip() || separateDebugInfo {
-				tc := g.GetToolchain(lib.getTarget())
+				tc := backend.Get().GetToolchain(lib.getTarget())
 				basename := filepath.Base(src)
 				strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
 				stArgs := tc.GetStripFlags()
@@ -371,16 +343,4 @@ func (g *linuxGenerator) resourceActions(r *ModuleResource, ctx blueprint.Module
 
 func (g *linuxGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
 
-}
-
-func (g *linuxGenerator) getLogger() *warnings.WarningLogger {
-	return g.logger
-}
-
-func (g *linuxGenerator) init(config *config.Properties) {
-	g.toolchains.Configure(config)
-}
-
-func (g *linuxGenerator) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
-	return g.toolchains.GetToolchain(tgt)
 }

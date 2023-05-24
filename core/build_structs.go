@@ -26,10 +26,10 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/ARM-software/bob-build/internal/warnings"
 )
 
 // Types implementing phonyInterface support the creation of phony targets.
@@ -81,6 +81,7 @@ type dependentInterface interface {
 }
 
 func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
+	// TODO: rename to GetGenerator
 	return getConfig(ctx).Generator
 }
 
@@ -103,24 +104,6 @@ type generatorBackend interface {
 	resourceActions(*ModuleResource, blueprint.ModuleContext)
 	filegroupActions(*ModuleFilegroup, blueprint.ModuleContext)
 	strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext)
-
-	// Backend specific info for module types
-	buildDir() string
-	sourceDir() string
-	bobScriptsDir() string
-	sourceOutputDir(blueprint.Module) string
-	sharedLibsDir(tgt toolchain.TgtType) string
-
-	// Backend flag escaping
-	escapeFlag(string) string
-
-	// Backend initialisation
-	init(*config.Properties)
-
-	// Access to backend configuration
-	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
-
-	getLogger() *warnings.WarningLogger
 }
 
 // The `BobConfig` type is stored against the Blueprint context, and allows us to
@@ -195,25 +178,25 @@ func getPathsInSourceDir(filelist []string) []string {
 // Construct a path to a file within the build directory to be used
 // in backend output files.
 func getBackendPathInBuildDir(g generatorBackend, elems ...string) string {
-	return filepath.Join(append([]string{g.buildDir()}, elems...)...)
+	return filepath.Join(append([]string{backend.Get().BuildDir()}, elems...)...)
 }
 
 // Construct a path to a file within the source directory to be used
 // in backend output files.
 func getBackendPathInSourceDir(g generatorBackend, elems ...string) string {
-	return filepath.Join(append([]string{g.sourceDir()}, elems...)...)
+	return filepath.Join(append([]string{backend.Get().SourceDir()}, elems...)...)
 }
 
 // Construct paths to files within the source directory to be used in
 // backend output files.
 func getBackendPathsInSourceDir(g generatorBackend, filelist []string) []string {
-	return utils.PrefixDirs(filelist, g.sourceDir())
+	return utils.PrefixDirs(filelist, backend.Get().SourceDir())
 }
 
 // Construct a path to a file within the scripts directory to be used
 // in backend output files.
 func getBackendPathInBobScriptsDir(g generatorBackend, elems ...string) string {
-	return filepath.Join(append([]string{g.bobScriptsDir()}, elems...)...)
+	return filepath.Join(append([]string{backend.Get().BobScriptsDir()}, elems...)...)
 }
 
 // TODO: Add support for directories.

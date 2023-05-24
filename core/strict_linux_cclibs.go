@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -64,8 +65,7 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 
 func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
 	// TODO: Merge this backend with linux_cclibs once the interfaces are close enough.
-	g := getBackend(ctx)
-	tc := g.GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
@@ -139,7 +139,7 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx 
 	m.Static.outputdir = m.ObjDir()
 	m.Static.outs = []string{filepath.Join(m.Static.outputDir(), m.Name()+".a")}
 
-	tc := g.GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	arBinary, _ := tc.GetArchiver()
 
 	depfiles := []string{}
@@ -173,7 +173,7 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx 
 }
 
 func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	m.Shared.outputdir = g.sharedLibsDir(m.Properties.TargetType)
+	m.Shared.outputdir = backend.Get().SharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.Shared.outputDir(), m.Name()+".so")
 	m.Shared.outs = []string{soFile}
 
@@ -202,7 +202,7 @@ func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx 
 	// 	orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
 	// }
 
-	tc := g.GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	linker := tc.GetLinker().GetTool()
 	args := map[string]string{
 		"linker":          linker,

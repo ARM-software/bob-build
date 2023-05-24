@@ -203,12 +203,10 @@ func (a kbuildArgs) toDict() map[string]string {
 func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext) kbuildArgs {
 	var extraIncludePaths []string
 
-	g := getBackend(ctx)
-
 	extraCflags := m.Properties.Cflags
 
 	for _, includeDir := range m.Properties.IncludeDirsProps.Local_include_dirs {
-		includeDir = "-I" + getBackendPathInSourceDir(g, includeDir)
+		includeDir = "-I" + getBackendPathInSourceDir(getBackend(ctx), includeDir)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
@@ -217,10 +215,10 @@ func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
-	kmodBuild := getBackendPathInBobScriptsDir(g, "kmod_build.py")
+	kmodBuild := getBackendPathInBobScriptsDir(getBackend(ctx), "kmod_build.py")
 	kdir := proptools.String(m.Properties.KernelProps.Kernel_dir)
 	if kdir != "" && !filepath.IsAbs(kdir) {
-		kdir = getBackendPathInSourceDir(g, kdir)
+		kdir = getBackendPathInSourceDir(getBackend(ctx), kdir)
 	}
 
 	kbuildOptions := ""

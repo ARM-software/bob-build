@@ -60,8 +60,7 @@ func (m *generateSharedLibrary) libExtension() string {
 
 func (m *generateSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		g := getBackend(ctx)
-		g.genSharedActions(m, ctx)
+		getBackend(ctx).genSharedActions(m, ctx)
 	}
 }
 
