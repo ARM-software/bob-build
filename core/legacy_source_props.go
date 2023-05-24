@@ -52,7 +52,7 @@ type LegacySourcePropsInterface interface {
 
 var _ LegacySourcePropsInterface = (*LegacySourceProps)(nil) // impl check
 
-func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 
 	for _, src := range s.Srcs {

@@ -67,10 +67,10 @@ func (m *ModuleGenerateSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.GenerateSourceProps)
 }
 
-func (m *ModuleGenerateSource) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleGenerateSource) processPaths(ctx blueprint.BaseModuleContext) {
 	m.Properties.Implicit_srcs = utils.PrefixDirs(m.Properties.Implicit_srcs, projectModuleDir(ctx))
 	m.Properties.Exclude_implicit_srcs = utils.PrefixDirs(m.Properties.Exclude_implicit_srcs, projectModuleDir(ctx))
-	m.ModuleGenerateCommon.processPaths(ctx, g)
+	m.ModuleGenerateCommon.processPaths(ctx)
 }
 
 func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {

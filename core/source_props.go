@@ -64,7 +64,7 @@ var _ pathProcessor = (*SourceProps)(nil)
 var _ FileConsumer = (*SourceProps)(nil)
 
 // Helper function to process source paths for Modules using `SourceProps`
-func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 
 	prefix := projectModuleDir(ctx)
 

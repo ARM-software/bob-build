@@ -87,10 +87,10 @@ type strictLibraryInterface interface {
 
 var _ strictLibraryInterface = (*ModuleStrictLibrary)(nil)
 
-func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 	// TODO: Handle Bazel targets & check paths
 	prefix := projectModuleDir(ctx)
-	m.Properties.SourceProps.processPaths(ctx, g)
+	m.Properties.SourceProps.processPaths(ctx)
 	m.Properties.Hdrs = utils.PrefixDirs(m.Properties.Hdrs, prefix)
 }
 

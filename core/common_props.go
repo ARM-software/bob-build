@@ -36,10 +36,10 @@ type CommonProps struct {
 	Cflags []string
 }
 
-func (c *CommonProps) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+func (c *CommonProps) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 
-	c.LegacySourceProps.processPaths(ctx, g)
-	c.InstallableProps.processPaths(ctx, g)
+	c.LegacySourceProps.processPaths(ctx)
+	c.InstallableProps.processPaths(ctx)
 	c.IncludeDirsProps.Local_include_dirs = utils.PrefixDirs(c.IncludeDirsProps.Local_include_dirs, prefix)
 }

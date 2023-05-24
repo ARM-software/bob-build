@@ -94,7 +94,7 @@ func (b *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []s
 	return "", []string{}
 }
 
-func (b *Build) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
-	b.BuildProps.processPaths(ctx, g)
-	b.CommonProps.processPaths(ctx, g)
+func (b *Build) processPaths(ctx blueprint.BaseModuleContext) {
+	b.BuildProps.processPaths(ctx)
+	b.CommonProps.processPaths(ctx)
 }
