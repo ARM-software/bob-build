@@ -28,21 +28,12 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/bootstrap"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
-)
-
-var (
-	bobdir          = os.Getenv("BOB_DIR")
-	configFile      = os.Getenv("CONFIG_FILE")
-	configOpts      = os.Getenv("BOB_CONFIG_OPTS")
-	srcdir          = os.Getenv("SRCDIR")
-	configJSONFile  = os.Getenv("CONFIG_JSON")
-	logWarningsFile = os.Getenv("BOB_LOG_WARNINGS_FILE")
-	buildMetaFile   = os.Getenv("BOB_META_FILE")
 )
 
 type PropertyProvider interface {
@@ -70,11 +61,13 @@ func getBuildDir() string {
 }
 
 func getSourceDir() string {
-	return srcdir
+	// TODO: This should be part of the backend.
+	return config.GetEnvironmentVariables().SrcDir
 }
 
 func getBobDir() string {
-	return bobdir
+	// TODO: This should be part of the backend.
+	return config.GetEnvironmentVariables().BobDir
 }
 
 // Main is the entry point for the bob primary builder.
@@ -84,26 +77,28 @@ func getBobDir() string {
 func Main() {
 	// Load the config first. This is needed because some of the module
 	// types' definitions contain a struct-per-feature, and features are
-	// specified in the config.
-	config := &BobConfig{}
-	err := config.Properties.LoadConfig(configJSONFile)
+	// specified in the cfg.
+	cfg := &BobConfig{}
+	env := config.GetEnvironmentVariables()
+
+	err := cfg.Properties.LoadConfig(env.ConfigJSON)
 	if err != nil {
 		utils.Die("%v", err)
 	}
 
-	builder_ninja := config.Properties.GetBool("builder_ninja")
-	builder_android_bp := config.Properties.GetBool("builder_android_bp")
+	builder_ninja := cfg.Properties.GetBool("builder_ninja")
+	builder_android_bp := cfg.Properties.GetBool("builder_android_bp")
 
 	// Depend on the config file
-	pctx.AddNinjaFileDeps(configJSONFile, getPathInBuildDir(".env.hash"))
+	pctx.AddNinjaFileDeps(env.ConfigJSON, getPathInBuildDir(".env.hash"))
 
 	var ctx = blueprint.NewContext()
 
 	RegisterModuleTypes(func(name string, mf FactoryWithConfig) {
 		// Create a closure passing the config to a module factory so
-		// that the module factories can access the config.
+		// that the module factories can access the cfg.
 		factory := func() (blueprint.Module, []interface{}) {
-			return mf(config)
+			return mf(cfg)
 		}
 		ctx.RegisterModuleType(name, factory)
 	})
@@ -235,12 +230,12 @@ func Main() {
 		ctx.RegisterTopDownMutator("late_template_mutator", lateTemplateMutator).Parallel()
 	}
 
-	f, err := os.OpenFile(logWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	f, err := os.OpenFile(env.LogWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		utils.Die("error opening '%s' file: %v", logWarningsFile, err)
+		utils.Die("error opening '%s' file: %v", env.LogWarningsFile, err)
 	}
 
-	logger := warnings.New(f, os.Getenv("BOB_LOG_WARNINGS"))
+	logger := warnings.New(f, env.LogWarnings)
 
 	defer func() {
 		errCnt := logger.ErrorWarnings()
@@ -251,12 +246,12 @@ func Main() {
 		}
 	}()
 
-	defer MetaDataWriteToFile(buildMetaFile)
+	defer MetaDataWriteToFile(env.BuildMetaFile)
 
 	if builder_ninja {
-		config.Generator = &linuxGenerator{logger: logger}
+		cfg.Generator = &linuxGenerator{logger: logger}
 	} else if builder_android_bp {
-		config.Generator = &androidBpGenerator{logger: logger}
+		cfg.Generator = &androidBpGenerator{logger: logger}
 
 		// Do not run in parallel to avoid locking issues on the map
 		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
@@ -265,13 +260,13 @@ func Main() {
 		utils.Die("Unknown builder backend")
 	}
 
-	config.Generator.init(&config.Properties)
+	cfg.Generator.init(&cfg.Properties)
 
 	// TODO: remove this to a common backend
 	file.FactorySetup(
-		config.Generator.buildDir(),
-		config.Generator.sourceDir(),
+		cfg.Generator.buildDir(),
+		cfg.Generator.sourceDir(),
 	)
 
-	bootstrap.Main(ctx, config)
+	bootstrap.Main(ctx, cfg)
 }

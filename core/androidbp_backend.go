@@ -262,6 +262,7 @@ func hashBuildConfig(paths []string) string {
 
 func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext, projUid string) {
 	g := getConfig(ctx).Generator
+	env := config.GetEnvironmentVariables()
 
 	bpmod, err := AndroidBpFile().NewModule("genrule", "_check_buildbp_updates_"+projUid)
 	if err != nil {
@@ -274,7 +275,7 @@ func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext
 	prefixedBuildbpPathsList := utils.PrefixDirs(buildbpPathsList, getSourceDir())
 
 	configDeps := []string{}
-	prefixedConfigDeps := extractDeps(configFile + ".d")
+	prefixedConfigDeps := extractDeps(env.ConfigFile + ".d")
 	for _, path := range prefixedConfigDeps {
 		relPath, err := filepath.Rel(getSourceDir(), path)
 		if err != nil {
@@ -288,7 +289,7 @@ func (s *androidBpSingleton) generateBuildbpCheck(ctx blueprint.SingletonContext
 
 	hash := hashBuildConfig(prefixedSrcs)
 
-	ctx.AddNinjaFileDeps(configFile + ".d")
+	ctx.AddNinjaFileDeps(env.ConfigFile + ".d")
 
 	bpmod.AddStringList("srcs", srcs)
 	bpmod.AddStringList("out", []string{"androidbp_up_to_date"})
