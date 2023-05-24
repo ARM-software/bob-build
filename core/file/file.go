@@ -20,6 +20,8 @@ package file
 import (
 	"path"
 	"path/filepath"
+
+	"github.com/ARM-software/bob-build/core/backend"
 )
 
 type Type uint32
@@ -89,5 +91,39 @@ func (file Path) IsNotType(ft Type) bool {
 var FileNoNameSpace string = ""
 
 func NewPath(relativePath string, namespace string, tag Type) Path {
-	return GetFactory().New(relativePath, namespace, tag)
+	return New(relativePath, namespace, tag)
+}
+
+func New(relativePath string, namespace string, tag Type) Path {
+	// TODO: add noncompiled dep tag
+	switch path.Ext(relativePath) {
+	case ".s", ".S":
+		tag |= TypeAsm
+	case ".c":
+		tag |= TypeC
+	case ".cc", ".cpp", ".cxx":
+		tag |= TypeCpp
+	case ".h", ".hpp":
+		tag |= TypeHeader
+		// TODO: .so .a .o
+	}
+
+	var backendPath string
+	var scopedPath string
+	if (tag & (TypeBinary | TypeExecutable)) != 0 {
+		backendPath = backend.Get().BuildDir()
+	} else if (tag & TypeGenerated) != 0 {
+		backendPath = filepath.Join(backend.Get().BuildDir(), "gen")
+		scopedPath = namespace
+	} else {
+		backendPath = backend.Get().SourceDir()
+		scopedPath = FileNoNameSpace
+	}
+
+	return Path{
+		backendPath:   backendPath,
+		namespacePath: scopedPath,
+		relativePath:  relativePath,
+		tag:           tag,
+	}
 }

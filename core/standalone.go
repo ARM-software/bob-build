@@ -30,7 +30,6 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
-	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -267,12 +266,6 @@ func Main() {
 	backend.Setup(env,
 		&cfg.Properties,
 		logger,
-	)
-
-	// TODO: remove this to a common backend
-	file.FactorySetup(
-		cfg.Generator.buildDir(),
-		cfg.Generator.sourceDir(),
 	)
 
 	bootstrap.Main(ctx, cfg)

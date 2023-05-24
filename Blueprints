@@ -132,8 +132,10 @@ bootstrap_go_package {
 
 bootstrap_go_package {
     name: "bob-file",
+    deps: [
+        "bob-backend",
+    ],
     srcs: [
-        "core/file/factory.go",
         "core/file/file.go",
         "core/file/filegroup.go",
     ],

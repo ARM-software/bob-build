@@ -20,6 +20,8 @@ package file
 import (
 	"testing"
 
+	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -77,32 +79,72 @@ func Test_basic_paths_tests(t *testing.T) {
 	assert.Equal(t, false, fp1.IsType(TypeCpp), "Correctly report non-matching Type for Path.")
 }
 
-func Test_source_path_test(t *testing.T) {
-	FactorySetup("${BuildDir}", "${SrcDir}")
+// TODO: config should provide a mock setup here.
+func createMockConfigLinux() *config.Properties {
+	properties := &config.Properties{}
 
-	fp := NewPath("moduleFoo/srcs/main.c", FileNoNameSpace, TypeUnset)
+	properties.Properties = map[string]interface{}{}
+	properties.Properties["builder_ninja"] = true
+	properties.Properties["builder_android_bp"] = false
+	properties.Properties["as_binary"] = "as"
 
-	assert.Equal(t, "${SrcDir}/moduleFoo/srcs/main.c", fp.BuildPath())
-	assert.Equal(t, "moduleFoo/srcs/main.c", fp.RelBuildPath())
-	assert.Equal(t, "moduleFoo/srcs/main.c", fp.ScopedPath())
-	assert.Equal(t, "moduleFoo/srcs/main.c", fp.UnScopedPath())
-	assert.Equal(t, ".c", fp.Ext())
-	assert.True(t, fp.IsType(TypeC))
-	assert.True(t, fp.IsNotType(TypeAsm|TypeGenerated))
-	assert.True(t, fp.IsNotType(TypeGenerated))
+	properties.Properties["target_toolchain_clang"] = false
+	properties.Properties["target_toolchain_gnu"] = true
+	properties.Properties["target_gnu_prefix"] = ""
+	properties.Properties["target_ar_binary"] = "ar"
+	properties.Properties["target_objcopy_binary"] = "objcopy"
+	properties.Properties["target_objdump_binary"] = "objdump"
+	properties.Properties["target_gnu_cc_binary"] = "cc"
+	properties.Properties["target_gnu_cxx_binary"] = "cxx"
+	properties.Properties["target_sysroot"] = ""
+	properties.Properties["target_gnu_flags"] = ""
+	properties.Properties["target_64bit_only"] = false
+
+	properties.Properties["host_toolchain_clang"] = false
+	properties.Properties["host_toolchain_gnu"] = true
+	properties.Properties["host_gnu_prefix"] = ""
+	properties.Properties["host_ar_binary"] = "ar"
+	properties.Properties["host_objcopy_binary"] = "objcopy"
+	properties.Properties["host_objdump_binary"] = "objdump"
+	properties.Properties["host_gnu_cc_binary"] = "cc"
+	properties.Properties["host_gnu_cxx_binary"] = "cxx"
+	properties.Properties["host_sysroot"] = ""
+	properties.Properties["host_gnu_flags"] = ""
+	properties.Properties["host_64bit_only"] = false
+
+	return properties
 }
 
-func Test_generated_simple(t *testing.T) {
-	FactorySetup("${BuildDir}", "${SrcDir}")
+func TestLinux(t *testing.T) {
 
-	fp := NewPath("foo.c", "bar", TypeGenerated)
+	backend.Setup(config.GetEnvironmentVariables(),
+		createMockConfigLinux(),
+		nil, // logger is nil here, not used in these tests
+	)
 
-	assert.Equal(t, "${BuildDir}/gen/bar/foo.c", fp.BuildPath())
-	assert.Equal(t, "gen/bar/foo.c", fp.RelBuildPath())
-	assert.Equal(t, "bar/foo.c", fp.ScopedPath()) // foo/bar/transfomr.c
-	assert.Equal(t, "foo.c", fp.UnScopedPath())
-	assert.Equal(t, ".c", fp.Ext())
-	assert.True(t, fp.IsType(TypeC|TypeGenerated))
-	assert.True(t, fp.IsNotType(TypeAsm))
-	assert.False(t, fp.IsNotType(TypeGenerated))
+	t.Run("SourcePath", func(t *testing.T) {
+		fp := NewPath("moduleFoo/srcs/main.c", FileNoNameSpace, TypeUnset)
+
+		assert.Equal(t, "${SrcDir}/moduleFoo/srcs/main.c", fp.BuildPath())
+		assert.Equal(t, "moduleFoo/srcs/main.c", fp.RelBuildPath())
+		assert.Equal(t, "moduleFoo/srcs/main.c", fp.ScopedPath())
+		assert.Equal(t, "moduleFoo/srcs/main.c", fp.UnScopedPath())
+		assert.Equal(t, ".c", fp.Ext())
+		assert.True(t, fp.IsType(TypeC))
+		assert.True(t, fp.IsNotType(TypeAsm|TypeGenerated))
+		assert.True(t, fp.IsNotType(TypeGenerated))
+
+	})
+	t.Run("GeneratedPath", func(t *testing.T) {
+		fp := NewPath("foo.c", "bar", TypeGenerated)
+
+		assert.Equal(t, "${BuildDir}/gen/bar/foo.c", fp.BuildPath())
+		assert.Equal(t, "gen/bar/foo.c", fp.RelBuildPath())
+		assert.Equal(t, "bar/foo.c", fp.ScopedPath()) // foo/bar/transfomr.c
+		assert.Equal(t, "foo.c", fp.UnScopedPath())
+		assert.Equal(t, ".c", fp.Ext())
+		assert.True(t, fp.IsType(TypeC|TypeGenerated))
+		assert.True(t, fp.IsNotType(TypeAsm))
+		assert.False(t, fp.IsNotType(TypeGenerated))
+	})
 }
