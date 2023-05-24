@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -72,15 +73,15 @@ func expandCmd(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, s string) 
 				utils.Die("%s references Bob config but depfile not enabled. "+
 					"Config dependencies must be declared via a depfile!", gc.Name())
 			}
-			return configFile
+			return config.GetEnvironmentVariables().ConfigFile
 		case "bob_config_json":
 			if !proptools.Bool(gc.Properties.Depfile) {
 				utils.Die("%s references Bob config but depfile not enabled. "+
 					"Config dependencies must be declared via a depfile!", gc.Name())
 			}
-			return configJSONFile
+			return config.GetEnvironmentVariables().ConfigJSON
 		case "bob_config_opts":
-			return configOpts
+			return config.GetEnvironmentVariables().ConfigOpts
 		default:
 			if strings.HasPrefix(s, "tool ") {
 				toolPath := strings.TrimSpace(strings.TrimPrefix(s, "tool "))

@@ -319,13 +319,14 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 
 	props := &m.Properties.FlagArgsBuild
 
+	env := config.GetEnvironmentVariables()
 	args := map[string]string{
 		"ar":              arBinary,
 		"as":              asBinary,
 		"asflags":         utils.Join(astargetflags, props.Asflags),
-		"bob_config":      configFile,
-		"bob_config_json": configJSONFile,
-		"bob_config_opts": configOpts,
+		"bob_config":      env.ConfigFile,
+		"bob_config_json": env.ConfigJSON,
+		"bob_config_opts": env.ConfigOpts,
 		"cc":              cc,
 		"cflags":          strings.Join(props.Cflags, " "),
 		"conlyflags":      strings.Join(append(cctargetflags, props.Conlyflags...), " "),

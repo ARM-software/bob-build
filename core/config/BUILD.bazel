@@ -2,7 +2,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "config",
-    srcs = ["config.go"],
+    srcs = [
+        "config.go",
+        "environment.go",
+    ],
     importpath = "github.com/ARM-software/bob-build/core/config",
     visibility = ["//visibility:public"],
     deps = ["//internal/utils"],

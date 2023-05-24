@@ -148,6 +148,7 @@ bootstrap_go_package {
     ],
     srcs: [
         "core/config/config.go",
+        "core/config/environment.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/config",
 }
