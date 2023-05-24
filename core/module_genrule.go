@@ -228,7 +228,7 @@ func (m *ModuleGenrule) GetTargets() []string {
 	return m.ModuleGenruleCommon.Properties.GetTargets()
 }
 
-func (m *ModuleGenrule) OutFiles(g generatorBackend) file.Paths {
+func (m *ModuleGenrule) OutFiles() file.Paths {
 	return m.Properties.ResolvedOut
 }
 

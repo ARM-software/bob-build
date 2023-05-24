@@ -45,7 +45,7 @@ func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
-func (m *ModuleFilegroup) OutFiles(g generatorBackend) file.Paths {
+func (m *ModuleFilegroup) OutFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 

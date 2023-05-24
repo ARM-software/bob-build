@@ -37,7 +37,7 @@ func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generator
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateBinary) OutFiles(g generatorBackend) (files file.Paths) {
+func (m *generateBinary) OutFiles() (files file.Paths) {
 	// TODO: implement me
 	return
 }

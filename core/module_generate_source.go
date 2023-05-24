@@ -109,7 +109,7 @@ func (m *ModuleGenerateSource) GetTargets() []string {
 	return gc.Properties.Generated_sources
 }
 
-func (m *ModuleGenerateSource) OutFiles(g generatorBackend) file.Paths {
+func (m *ModuleGenerateSource) OutFiles() file.Paths {
 	return m.Properties.ResolvedOut
 }
 

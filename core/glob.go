@@ -101,7 +101,7 @@ func (m *ModuleGlob) ResolveFiles(ctx blueprint.BaseModuleContext) {
 
 }
 
-func (m *ModuleGlob) OutFiles(g generatorBackend) file.Paths {
+func (m *ModuleGlob) OutFiles() file.Paths {
 	return m.Properties.Files
 }
 

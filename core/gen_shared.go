@@ -39,7 +39,7 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateSharedLibrary) OutFiles(g generatorBackend) (files file.Paths) {
+func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated))
 
 	for _, h := range m.Properties.Headers {

@@ -37,7 +37,7 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateStaticLibrary) OutFiles(g generatorBackend) (files file.Paths) {
+func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
 	// TODO: implement me
 	return
 }

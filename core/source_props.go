@@ -97,7 +97,7 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 type FileProvider interface {
 	// Sources to be forwarded to other modules
 	// Expected to be called from a context of another module.
-	OutFiles(generatorBackend) file.Paths
+	OutFiles() file.Paths
 
 	// Targets to be forwarded to other modules
 	// Expected to be called from a context of another module.
@@ -136,8 +136,6 @@ func (s *SourceProps) GetTargets() []string {
 
 // Basic common implementation, certain targets may wish to customize this.
 func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
-	g := getGenerator(ctx)
-
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
 			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
@@ -145,7 +143,7 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 			_, isProvider := child.(FileProvider)
 
 			if isFilegroup && isProvider {
-				provided := child.(FileProvider).OutFiles(g)
+				provided := child.(FileProvider).OutFiles()
 				srcs = srcs.Merge(provided)
 			}
 
