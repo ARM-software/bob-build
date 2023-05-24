@@ -27,7 +27,7 @@ type ModuleStaticLibrary struct {
 
 func (m *ModuleStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).staticActions(m, ctx)
+		getGenerator(ctx).staticActions(m, ctx)
 	}
 }
 

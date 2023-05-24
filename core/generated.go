@@ -137,7 +137,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 			gsc.Properties.Generated_sources...)
 	}
 
-	if _, ok := getBackend(ctx).(*linuxGenerator); ok {
+	if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
 		if agsc, ok := getAndroidGenerateCommon(ctx.Module()); ok {
 			for _, s := range agsc.Properties.Srcs {
 				if s[0] == ':' {
@@ -162,7 +162,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		var removeList []string
 		for _, s := range agsc.Properties.Tools {
 			if strings.Contains(s, ":") {
-				if _, ok := getBackend(ctx).(*linuxGenerator); ok {
+				if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
 					parseAndAddVariationDeps(ctx, GeneratedTag,
 						s)
 				} else {

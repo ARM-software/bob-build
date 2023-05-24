@@ -80,8 +80,7 @@ type dependentInterface interface {
 	outputDir() string
 }
 
-func getBackend(ctx blueprint.BaseModuleContext) generatorBackend {
-	// TODO: rename to GetGenerator
+func getGenerator(ctx blueprint.BaseModuleContext) generatorBackend {
 	return getConfig(ctx).Generator
 }
 
@@ -430,7 +429,7 @@ type pathProcessor interface {
 // Adds module paths to appropriate properties.
 func pathMutator(ctx blueprint.BottomUpMutatorContext) {
 	if p, ok := ctx.Module().(pathProcessor); ok {
-		p.processPaths(ctx, getBackend(ctx))
+		p.processPaths(ctx, getGenerator(ctx))
 	}
 }
 

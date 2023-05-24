@@ -403,7 +403,7 @@ func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
 	}
 
 	if m.Properties.Build.Version_script != nil {
-		path := getBackendPathInSourceDir(getBackend(ctx), *m.Properties.Build.Version_script)
+		path := getBackendPathInSourceDir(getGenerator(ctx), *m.Properties.Build.Version_script)
 		return &path
 	}
 

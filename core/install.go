@@ -216,7 +216,7 @@ var _ resourceInterface = (*ModuleResource)(nil) // impl check
 
 func (m *ModuleResource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).resourceActions(m, ctx)
+		getGenerator(ctx).resourceActions(m, ctx)
 	}
 }
 

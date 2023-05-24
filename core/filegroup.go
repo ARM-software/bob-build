@@ -54,7 +54,7 @@ func (m *ModuleFilegroup) OutFileTargets() []string {
 }
 
 func (m *ModuleFilegroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	getBackend(ctx).filegroupActions(m, ctx)
+	getGenerator(ctx).filegroupActions(m, ctx)
 }
 
 func (m *ModuleFilegroup) shortName() string {

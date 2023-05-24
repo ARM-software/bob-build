@@ -206,7 +206,7 @@ func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext)
 	extraCflags := m.Properties.Cflags
 
 	for _, includeDir := range m.Properties.IncludeDirsProps.Local_include_dirs {
-		includeDir = "-I" + getBackendPathInSourceDir(getBackend(ctx), includeDir)
+		includeDir = "-I" + getBackendPathInSourceDir(getGenerator(ctx), includeDir)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
@@ -215,10 +215,10 @@ func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext)
 		extraIncludePaths = append(extraIncludePaths, includeDir)
 	}
 
-	kmodBuild := getBackendPathInBobScriptsDir(getBackend(ctx), "kmod_build.py")
+	kmodBuild := getBackendPathInBobScriptsDir(getGenerator(ctx), "kmod_build.py")
 	kdir := proptools.String(m.Properties.KernelProps.Kernel_dir)
 	if kdir != "" && !filepath.IsAbs(kdir) {
-		kdir = getBackendPathInSourceDir(getBackend(ctx), kdir)
+		kdir = getBackendPathInSourceDir(getGenerator(ctx), kdir)
 	}
 
 	kbuildOptions := ""
@@ -266,7 +266,7 @@ func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext)
 
 func (m *ModuleKernelObject) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).kernelModuleActions(m, ctx)
+		getGenerator(ctx).kernelModuleActions(m, ctx)
 	}
 }
 

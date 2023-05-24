@@ -136,7 +136,7 @@ func (s *SourceProps) GetTargets() []string {
 
 // Basic common implementation, certain targets may wish to customize this.
 func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
-	g := getBackend(ctx)
+	g := getGenerator(ctx)
 
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
@@ -212,6 +212,6 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorB
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
 func resolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
 	if m, ok := ctx.Module().(FileResolver); ok {
-		m.ResolveFiles(ctx, getBackend(ctx))
+		m.ResolveFiles(ctx, getGenerator(ctx))
 	}
 }

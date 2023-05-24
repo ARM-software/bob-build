@@ -59,7 +59,7 @@ var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
 
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).generateSourceActions(m, ctx)
+		getGenerator(ctx).generateSourceActions(m, ctx)
 	}
 }
 

@@ -337,7 +337,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 		"ldlibs":          utils.Join(ldlibs, props.Ldlibs),
 		"linker":          linker,
 		"gen_dir":         m.outputDir(),
-		"module_dir":      getBackendPathInSourceDir(getBackend(ctx), ctx.ModuleDir()),
+		"module_dir":      getBackendPathInSourceDir(getGenerator(ctx), ctx.ModuleDir()),
 		"shared_libs_dir": b.SharedLibsDir(m.Properties.GenerateProps.Target),
 		"src_dir":         b.SourceDir(),
 	}
@@ -417,7 +417,7 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 				}
 
 			} else {
-				toolPath = getBackendPathInSourceDir(getBackend(ctx), tool)
+				toolPath = getBackendPathInSourceDir(getGenerator(ctx), tool)
 				dependentTools = append(dependentTools, toolPath)
 			}
 			addToolsLabel(tool, toolPath)

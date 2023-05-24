@@ -58,7 +58,7 @@ func (m *ModuleBinary) strip() bool {
 
 func (m *ModuleBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
-		getBackend(ctx).binaryActions(m, ctx)
+		getGenerator(ctx).binaryActions(m, ctx)
 	}
 }
 

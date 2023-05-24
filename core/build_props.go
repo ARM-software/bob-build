@@ -156,7 +156,7 @@ func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 		if firstWord[0] != '/' {
 			// Otherwise if the first word contains '/' this is a local path
 			if strings.ContainsAny(firstWord, "/") {
-				*b.Build_wrapper = getBackendPathInSourceDir(getBackend(ctx), *b.Build_wrapper)
+				*b.Build_wrapper = getBackendPathInSourceDir(getGenerator(ctx), *b.Build_wrapper)
 			}
 		}
 	}
