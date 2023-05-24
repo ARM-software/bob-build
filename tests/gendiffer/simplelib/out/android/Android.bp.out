@@ -1,0 +1,80 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "bin_consumer",
+    srcs: [
+        "src/bin_consumer.c",
+        "src/bin_consumer.s",
+        "src/bin_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_BIN",
+        "-DCFLAGS_PROVIDER_EXPORT",
+    ],
+    conlyflags: ["-DCONLYFLAGS_BIN"],
+    cppflags: ["-DCXXFLAGS_BIN"],
+    include_dirs: ["include/bin/consumer"],
+    local_include_dirs: ["local/include/bin/consumer"],
+    static_libs: [
+        "lib_consumer",
+        "lib_provider",
+    ],
+    ldflags: ["-O3"],
+}
+
+cc_library_static {
+    name: "lib_consumer",
+    srcs: [
+        "src/lib_consumer.c",
+        "src/lib_consumer.s",
+        "src/lib_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_LIB",
+        "-DCFLAGS_PROVIDER_EXPORT",
+    ],
+    conlyflags: ["-DCONLYFLAGS_LIB"],
+    cppflags: ["-DCXXFLAGS_LIB"],
+    include_dirs: ["include/lib/consumer"],
+    local_include_dirs: [
+        "local/include/lib/consumer",
+        "export/local/system/include/lib/consumer",
+    ],
+    static_libs: ["lib_provider"],
+    ldflags: ["-O2"],
+    export_include_dirs: ["export/local/include/lib/consumer"],
+    export_system_include_dirs : ["export/local/system/include/lib/consumer"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "lib_provider",
+    srcs: [
+        "src/lib_provider.c",
+        "src/lib_provider.s",
+        "src/lib_provider.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_PROVIDER_LIB",
+        "-DCFLAGS_PROVIDER_EXPORT",
+    ],
+    conlyflags: ["-DCONLYFLAGS_PROVIDER_LIB"],
+    cppflags: ["-DCXXFLAGS_PROVIDER_LIB"],
+    include_dirs: ["include/lib/provider"],
+    local_include_dirs: [
+        "local/include/lib/provider",
+        "export/local/system/include/lib/provider",
+    ],
+    ldflags: ["-O1"],
+    export_include_dirs: ["export/local/include/lib/provider"],
+    export_system_include_dirs : ["export/local/system/include/lib/provider"],
+    compile_multilib: "both",
+}
+
