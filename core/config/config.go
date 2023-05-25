@@ -207,6 +207,51 @@ func (properties *Properties) LoadConfig(filename string) error {
 	return nil
 }
 
+// Initializes a mock config used for unit tests.
+//
+// `overrides` can be used to set particular config values to a desired state for the target tests.
+func CreateMockConfig(overrides map[string]interface{}) *Properties {
+	properties := &Properties{}
+
+	properties.Properties = map[string]interface{}{}
+
+	// Minimum config required for the toolchain backend to be instantiated correctly:
+	properties.Properties["builder_ninja"] = false
+	properties.Properties["builder_android_bp"] = false
+	properties.Properties["as_binary"] = "as"
+
+	properties.Properties["target_toolchain_clang"] = false
+	properties.Properties["target_toolchain_gnu"] = true
+	properties.Properties["target_gnu_prefix"] = ""
+	properties.Properties["target_ar_binary"] = "ar"
+	properties.Properties["target_objcopy_binary"] = "objcopy"
+	properties.Properties["target_objdump_binary"] = "objdump"
+	properties.Properties["target_gnu_cc_binary"] = "cc"
+	properties.Properties["target_gnu_cxx_binary"] = "cxx"
+	properties.Properties["target_sysroot"] = ""
+	properties.Properties["target_gnu_flags"] = ""
+	properties.Properties["target_64bit_only"] = false
+
+	properties.Properties["host_toolchain_clang"] = false
+	properties.Properties["host_toolchain_gnu"] = true
+	properties.Properties["host_gnu_prefix"] = ""
+	properties.Properties["host_ar_binary"] = "ar"
+	properties.Properties["host_objcopy_binary"] = "objcopy"
+	properties.Properties["host_objdump_binary"] = "objdump"
+	properties.Properties["host_gnu_cc_binary"] = "cc"
+	properties.Properties["host_gnu_cxx_binary"] = "cxx"
+	properties.Properties["host_sysroot"] = ""
+	properties.Properties["host_gnu_flags"] = ""
+	properties.Properties["host_64bit_only"] = false
+
+	// Override the basic set of configs with user provided values
+	for k, v := range overrides {
+		properties.Properties[k] = v
+	}
+
+	return properties
+}
+
 // Loads the config map directly, used for testing.
 func (properties *Properties) SetConfig(m map[string]string) {
 	properties.stringMap = m

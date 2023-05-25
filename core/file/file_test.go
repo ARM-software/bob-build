@@ -79,46 +79,12 @@ func Test_basic_paths_tests(t *testing.T) {
 	assert.Equal(t, false, fp1.IsType(TypeCpp), "Correctly report non-matching Type for Path.")
 }
 
-// TODO: config should provide a mock setup here.
-func createMockConfigLinux() *config.Properties {
-	properties := &config.Properties{}
-
-	properties.Properties = map[string]interface{}{}
-	properties.Properties["builder_ninja"] = true
-	properties.Properties["builder_android_bp"] = false
-	properties.Properties["as_binary"] = "as"
-
-	properties.Properties["target_toolchain_clang"] = false
-	properties.Properties["target_toolchain_gnu"] = true
-	properties.Properties["target_gnu_prefix"] = ""
-	properties.Properties["target_ar_binary"] = "ar"
-	properties.Properties["target_objcopy_binary"] = "objcopy"
-	properties.Properties["target_objdump_binary"] = "objdump"
-	properties.Properties["target_gnu_cc_binary"] = "cc"
-	properties.Properties["target_gnu_cxx_binary"] = "cxx"
-	properties.Properties["target_sysroot"] = ""
-	properties.Properties["target_gnu_flags"] = ""
-	properties.Properties["target_64bit_only"] = false
-
-	properties.Properties["host_toolchain_clang"] = false
-	properties.Properties["host_toolchain_gnu"] = true
-	properties.Properties["host_gnu_prefix"] = ""
-	properties.Properties["host_ar_binary"] = "ar"
-	properties.Properties["host_objcopy_binary"] = "objcopy"
-	properties.Properties["host_objdump_binary"] = "objdump"
-	properties.Properties["host_gnu_cc_binary"] = "cc"
-	properties.Properties["host_gnu_cxx_binary"] = "cxx"
-	properties.Properties["host_sysroot"] = ""
-	properties.Properties["host_gnu_flags"] = ""
-	properties.Properties["host_64bit_only"] = false
-
-	return properties
-}
-
 func TestLinux(t *testing.T) {
 
 	backend.Setup(config.GetEnvironmentVariables(),
-		createMockConfigLinux(),
+		config.CreateMockConfig(map[string]interface{}{
+			"builder_ninja": true,
+		}),
 		nil, // logger is nil here, not used in these tests
 	)
 
