@@ -1,0 +1,69 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+genrule {
+    name: "generate_config",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    tool_files: ["generator.py"],
+    out: ["generated.json"],
+}
+
+genrule {
+    name: "generate_source_colon_dep",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --json $(location :generate_config) --out $(out) --expect-in before_generate.in",
+    tool_files: [
+        "generator.py",
+        ":generate_config",
+    ],
+    out: [
+        "out1.cpp",
+        "out2.cpp",
+    ],
+}
+
+genrule {
+    name: "generate_source_multiple_colon_dep",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --tools $(location :generate_source_colon_dep) --out $(out) --expect-in before_generate.in",
+    tool_files: [
+        "generator.py",
+        ":generate_source_colon_dep",
+    ],
+    out: [
+        "out5.cpp",
+        "out6.cpp",
+    ],
+}
+
+genrule {
+    name: "generate_source_out_dep",
+    srcs: ["before_generate.in"],
+    cmd: "python $(location) --in $(in) --json $(location :generate_config) --out $(out) --expect-in before_generate.in",
+    tool_files: [
+        "generator.py",
+        ":generate_config",
+    ],
+    out: [
+        "out3.cpp",
+        "out4.cpp",
+    ],
+}
+
+cc_binary {
+    name: "validate_link_generate_sources_new",
+    srcs: ["main.cpp"],
+    generated_sources: [
+        "generate_source_colon_dep",
+        "generate_source_out_dep",
+        "generate_source_multiple_colon_dep",
+    ],
+}
+

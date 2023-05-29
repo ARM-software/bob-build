@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -74,7 +75,10 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 
 	ag.Srcs = append(utils.PrefixDirs(srcs, prefix), targets...)
 	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
-	ag.Tool_files = utils.PrefixDirs(ag.Tool_files, prefix)
+
+	tool_files_targets := utils.PrefixAll(utils.MixedListToBobTargets(ag.Tool_files), ":")
+	ag.Tool_files = utils.PrefixDirs(utils.MixedListToFiles(ag.Tool_files), prefix)
+	ag.Tool_files = append(ag.Tool_files, tool_files_targets...)
 
 	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
 	// we must fix this by iterating through the command.
@@ -122,13 +126,20 @@ type ModuleGenruleCommon struct {
 	simpleOutputProducer
 	headerProducer
 	Properties struct {
+		Features
 		AndroidGenerateCommonProps
 	}
+	deps []string
 }
 
 var _ FileConsumer = (*ModuleGenruleCommon)(nil)
 
+func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interface{}) {
+	m.Properties.Features.Init(properties, list...)
+}
+
 func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext, g generatorBackend) {
+	m.deps = utils.MixedListToBobTargets(m.Properties.AndroidGenerateCommonProps.Tool_files)
 	m.Properties.AndroidGenerateCommonProps.processPaths(ctx, g)
 }
 
@@ -146,6 +157,14 @@ func (m *ModuleGenruleCommon) GetDirectFiles() file.Paths {
 
 func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext, g generatorBackend) {
 	m.Properties.ResolveFiles(ctx, g)
+}
+
+func (m *ModuleGenruleCommon) Features() *Features {
+	return &m.Properties.Features
+}
+
+func (m *ModuleGenruleCommon) FeaturableProperties() []interface{} {
+	return []interface{}{&m.Properties.AndroidGenerateCommonProps}
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
@@ -237,8 +256,15 @@ func (m ModuleGenrule) GetProperties() interface{} {
 	return m.Properties
 }
 
+func (m *ModuleGenrule) FeaturableProperties() []interface{} {
+	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.AndroidGenerateRuleProps)
+}
+
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGenrule{}
+
+	module.ModuleGenruleCommon.init(&config.Properties,
+		AndroidGenerateCommonProps{}, AndroidGenerateRuleProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}

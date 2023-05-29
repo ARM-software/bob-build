@@ -77,7 +77,6 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 		ruleparams.RspfileContent = *m.Properties.Rsp_content
 	}
 
-	//print("Keys:" + strings.Join(argkeys, ",") + "\n")
 	rule := ctx.Rule(pctx, "gen_"+m.Name(), ruleparams,
 		append(utils.SortedKeys(args), "depfile", "rspfile", "_out_")...)
 
@@ -224,19 +223,22 @@ func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx bluep
 	transformToolsAndroidToOld(gr, &proxyGenerateSource)
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Cmd = gr.ModuleGenruleCommon.Properties.Cmd
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Tools = gr.ModuleGenruleCommon.Properties.Tool_files
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, gr.ModuleGenruleCommon.Properties.Tools...)
+	deps := append(gr.ModuleGenruleCommon.Properties.Tools, gr.ModuleGenruleCommon.deps...)
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, deps...)
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Export_gen_include_dirs = gr.ModuleGenruleCommon.Properties.Export_include_dirs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = gr.ModuleGenruleCommon.Properties.Srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleGenruleCommon.Properties.Exclude_srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = gr.ModuleGenruleCommon.Properties.Depfile
 	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx, g)
 
-	proxyGenerateSource.Properties.Implicit_srcs = gr.ModuleGenruleCommon.Properties.Tool_files
+	proxyGenerateSource.Properties.Implicit_srcs = utils.MixedListToFiles(gr.ModuleGenruleCommon.Properties.Tool_files)
 	proxyGenerateSource.Properties.Out = gr.Properties.Out
 	proxyGenerateSource.ResolveFiles(ctx, g)
 
 	g.generateSourceActions(&proxyGenerateSource, ctx)
 
+	gr.includeDirs = proxyGenerateSource.ModuleGenerateCommon.includeDirs
+	gr.outputdir = proxyGenerateSource.outputdir
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
 	gr.ModuleGenruleCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs
 }

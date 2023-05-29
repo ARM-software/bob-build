@@ -18,7 +18,9 @@
 package core
 
 import (
+	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -28,6 +30,8 @@ import (
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
+
+var dependencyRegex = regexp.MustCompile(`\$\{([a-zA-Z0-9\/\.:_-]+)_out\}`)
 
 func (g *androidBpGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
 	if enabledAndRequired(m) {
@@ -127,12 +131,32 @@ func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, 
 func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
 	m.AddStringList("srcs", gc.Properties.Srcs)
 	m.AddStringList("exclude_srcs", gc.Properties.Exclude_srcs)
+	// `Cmd` has to be parsed back from ${(name)_out} to $(location name)
+	changeCmdToolFilesToLocation(gc)
 	m.AddOptionalString("cmd", gc.Properties.Cmd)
 	m.AddOptionalBool("depfile", gc.Properties.Depfile)
 	m.AddOptionalBool("enabled", gc.Properties.Enabled)
 	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
 	m.AddStringList("tool_files", gc.Properties.Tool_files)
 	m.AddStringList("tools", gc.Properties.Tools)
+}
+
+func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
+
+	tool_files_targets := utils.MixedListToBobTargets(gc.Properties.AndroidGenerateCommonProps.Tool_files)
+
+	// find all `${moduleName_out}`
+	matches := dependencyRegex.FindAllStringSubmatch(*gc.Properties.AndroidGenerateCommonProps.Cmd, -1)
+
+	for _, v := range matches {
+		tag := v[1]
+
+		if utils.Contains(tool_files_targets, tag) {
+			newString := fmt.Sprintf("$(location :%s)", tag)
+			newCmd := strings.Replace(*gc.Properties.AndroidGenerateCommonProps.Cmd, v[0], newString, 1)
+			gc.Properties.AndroidGenerateCommonProps.Cmd = &newCmd
+		}
+	}
 }
 
 func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
