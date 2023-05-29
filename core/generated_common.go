@@ -342,7 +342,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 
 	args["build_wrapper"], _ = props.getBuildWrapperAndDeps(ctx)
 
-	dependents := getDependentArgsAndFiles(ctx, args)
+	dependents, fullDeps := getDependentArgsAndFiles(ctx, args)
 
 	hostBin, hostBinSharedLibs, hostTarget := m.hostBinOuts(ctx)
 	if hostBin != "" {
@@ -356,7 +356,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 	// Ninja reserves the `${out}` property, but Bob needs it to contain all
 	// outputs, not just explicit ones. So replace that too.
 	cmd = strings.Replace(cmd, "${out}", "${_out_}", -1)
-	cmd, toolArgs, dependentTools := m.processCmdTools(ctx, cmd)
+	cmd, toolArgs, dependentTools := m.processCmdTools(ctx, cmd, fullDeps)
 
 	for k, v := range toolArgs {
 		args[k] = v
@@ -377,7 +377,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 	return cmd, args, dependents, hostTarget
 }
 
-func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string) (string, map[string]string, []string) {
+func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd string, fullDeps map[string][]string) (string, map[string]string, []string) {
 
 	dependentTools := []string{}
 	toolsLabels := map[string]string{}
@@ -399,9 +399,27 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 	if len(m.Properties.Tools) > 0 {
 		g := getBackend(ctx)
 		for _, tool := range m.Properties.Tools {
-			toolPath := getBackendPathInSourceDir(g, tool)
+			// If tool comes from other module with `:` notation
+			// just fill up `toolsLabels` to not duplicate
+			// `dependentTools` which has been already added by
+			// `GeneratedTag` dependencies.
+			toolPath := ""
+			if tool[0] == ':' {
+				for modName, deps := range fullDeps {
+					if modName == tool[1:] {
+						// Grab all the outputs,
+						// those will be packed in one
+						// `tool_x` in command
+						toolPath = strings.Join(deps, " ")
+						break
+					}
+				}
+
+			} else {
+				toolPath = getBackendPathInSourceDir(g, tool)
+				dependentTools = append(dependentTools, toolPath)
+			}
 			addToolsLabel(tool, toolPath)
-			dependentTools = append(dependentTools, toolPath)
 		}
 	}
 

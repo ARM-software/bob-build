@@ -80,7 +80,7 @@ func (b *Build) isRpathWanted() bool {
 func (b *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
 	if b.Build_wrapper != nil {
 		depargs := map[string]string{}
-		files := getDependentArgsAndFiles(ctx, depargs)
+		files, _ := getDependentArgsAndFiles(ctx, depargs)
 
 		// Replace any property usage in buildWrapper
 		buildWrapper := *b.Build_wrapper

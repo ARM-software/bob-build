@@ -41,7 +41,8 @@ func getSourcesGenerated(m dependentInterface) []string {
 // Returns the outputs of the generated dependencies of a module. This is used for more complex
 // dependencies, where the dependencies are not just binaries or headers, but where the paths are
 // used directly in a script
-func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]string) (depfiles []string) {
+func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]string) (depfiles []string, fullDeps map[string][]string) {
+	fullDeps = make(map[string][]string)
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
 			return ctx.OtherModuleDependencyTag(m) == GeneratedTag
@@ -64,6 +65,8 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 
 			depfiles = append(depfiles, gen.outputs()...)
 			depfiles = append(depfiles, gen.implicitOutputs()...)
+
+			fullDeps[gen.shortName()] = depfiles
 		})
 
 	return
@@ -142,6 +145,10 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 					parseAndAddVariationDeps(ctx, GeneratedTag,
 						s[1:])
 				}
+			}
+			for _, d := range agsc.deps {
+				// Add other module dependency
+				ctx.AddDependency(ctx.Module(), GeneratedTag, d)
 			}
 		}
 	}

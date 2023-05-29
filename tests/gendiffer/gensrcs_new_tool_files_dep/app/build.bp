@@ -1,0 +1,85 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_genrule {
+    name: "generate_config",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: ["generated.json"],
+
+    tool_files: ["generator.py"],
+    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+}
+
+bob_genrule {
+    name: "generate_source_colon_dep",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "out1.cpp",
+        "out2.cpp",
+    ],
+    tool_files: [
+        "generator.py",
+        ":generate_config",
+    ],
+    cmd: "python $(location) --in $(in) --json $(location :generate_config) --out $(out) --expect-in before_generate.in",
+}
+
+bob_genrule {
+    name: "generate_source_out_dep",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "out3.cpp",
+        "out4.cpp",
+    ],
+    tool_files: [
+        "generator.py",
+        ":generate_config",
+    ],
+    cmd: "python $(location) --in $(in) --json ${generate_config_out} --out $(out) --expect-in before_generate.in",
+}
+
+bob_genrule {
+    name: "generate_source_multiple_colon_dep",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "out5.cpp",
+        "out6.cpp",
+    ],
+    tool_files: [
+        "generator.py",
+        ":generate_source_colon_dep",
+    ],
+    cmd: "python $(location) --in $(in) --tools $(location :generate_source_colon_dep) --out $(out) --expect-in before_generate.in",
+}
+
+bob_binary {
+    name: "validate_link_generate_sources_new",
+    srcs: ["main.cpp"],
+    generated_sources: [
+        "generate_source_colon_dep",
+        "generate_source_out_dep",
+        "generate_source_multiple_colon_dep",
+    ],
+}
