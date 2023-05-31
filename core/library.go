@@ -382,7 +382,7 @@ func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSy
 
 		if pe, ok := dep.(propertyExporter); ok {
 			expLocalIncludes = append(expLocalIncludes, pe.exportLocalIncludeDirs()...)
-			expLocalSystemIncludes = append(expLocalIncludes, pe.exportLocalSystemIncludeDirs()...)
+			expLocalSystemIncludes = append(expLocalSystemIncludes, pe.exportLocalSystemIncludeDirs()...)
 			expIncludes = append(expIncludes, pe.exportIncludeDirs()...)
 			expSystemIncludes = append(expSystemIncludes, pe.exportSystemIncludeDirs()...)
 			expCflags = append(expCflags, pe.exportCflags()...)
