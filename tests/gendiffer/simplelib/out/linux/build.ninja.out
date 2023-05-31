@@ -67,7 +67,7 @@ rule g.bootstrap.cp
 # Defined: build.bp:95:1
 
 m.bin_consumer_target.asflags = -DASFLAGS_BIN
-m.bin_consumer_target.cflags = -DCFLAGS_BIN -DCFLAGS_PROVIDER_EXPORT -isystem ${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/include/lib/consumer -isystem ${g.bob.SrcDir}/export/local/system/include/lib/consumer -I${g.bob.SrcDir}/local/include/bin/consumer -Iinclude/bin/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/consumer
+m.bin_consumer_target.cflags = -DCFLAGS_BIN -DCFLAGS_PROVIDER_EXPORT -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/consumer -I${g.bob.SrcDir}/local/include/bin/consumer -Iinclude/bin/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/consumer
 m.bin_consumer_target.conlyflags = -DCONLYFLAGS_BIN
 m.bin_consumer_target.cxxflags = -DCXXFLAGS_BIN
 
@@ -116,7 +116,7 @@ default bin_consumer
 # Defined: build.bp:57:1
 
 m.lib_consumer_target.asflags = -DASFLAGS_LIB
-m.lib_consumer_target.cflags = -DCFLAGS_LIB -DCFLAGS_PROVIDER_EXPORT -isystem ${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider -I${g.bob.SrcDir}/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/system/include/lib/consumer -Iinclude/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider
+m.lib_consumer_target.cflags = -DCFLAGS_LIB -DCFLAGS_PROVIDER_EXPORT -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider -I${g.bob.SrcDir}/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/system/include/lib/consumer -Iinclude/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider
 m.lib_consumer_target.conlyflags = -DCONLYFLAGS_LIB
 m.lib_consumer_target.cxxflags = -DCXXFLAGS_LIB
 
