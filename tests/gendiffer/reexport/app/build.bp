@@ -1,0 +1,194 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_static_library {
+    name: "lib_internal",
+    srcs: ["hidden/hidden.cpp"],
+    export_local_include_dirs: ["hidden"],
+    export_cflags: ["-DSHOW_HIDDEN"],
+}
+
+bob_static_library {
+    name: "lib_reexport_level_1",
+    srcs: ["export.cpp"],
+    whole_static_libs: ["lib_internal"],
+    reexport_libs: ["lib_internal"],
+}
+
+bob_static_library {
+    name: "lib_reexport_level_2",
+    srcs: ["export_2.cpp"],
+    whole_static_libs: ["lib_reexport_level_1"],
+    reexport_libs: ["lib_reexport_level_1"],
+}
+
+bob_static_library {
+    name: "lib_reexport_level_3",
+    srcs: ["export_3.cpp"],
+    whole_static_libs: ["lib_reexport_level_2"],
+    reexport_libs: ["lib_reexport_level_2"],
+}
+
+bob_static_library {
+    name: "lib_no_reexport",
+    srcs: ["export.cpp"],
+    whole_static_libs: ["lib_internal"],
+}
+
+bob_binary {
+    name: "test_reexport_include_level_1",
+    srcs: ["main_include.cpp"],
+    static_libs: ["lib_reexport_level_1"],
+}
+
+bob_binary {
+    name: "test_reexport_cflags_level_1",
+    srcs: ["main_cflags.cpp"],
+    static_libs: ["lib_reexport_level_1"],
+}
+
+bob_binary {
+    name: "test_reexport_include_level_2",
+    srcs: ["main_include.cpp"],
+    static_libs: ["lib_reexport_level_2"],
+}
+
+bob_binary {
+    name: "test_reexport_cflags_level_2",
+    srcs: ["main_cflags.cpp"],
+    static_libs: ["lib_reexport_level_2"],
+}
+
+bob_binary {
+    name: "test_reexport_include_level_3",
+    srcs: ["main_include.cpp"],
+    static_libs: ["lib_reexport_level_3"],
+}
+
+bob_binary {
+    name: "test_reexport_cflags_level_3",
+    srcs: ["main_cflags.cpp"],
+    static_libs: ["lib_reexport_level_3"],
+}
+
+bob_binary {
+    name: "test_no_reexport",
+    srcs: ["main_no_reexport.cpp"],
+    static_libs: ["lib_no_reexport"],
+}
+
+bob_static_library {
+    name: "lib_internal_host",
+    srcs: ["hidden/hidden.cpp"],
+    export_local_include_dirs: ["hidden"],
+    export_cflags: [
+        "-DSHOW_HIDDEN",
+        "-DME_HOST",
+    ],
+    host_supported: true,
+}
+
+bob_static_library {
+    name: "lib_reexport_host",
+    srcs: ["export.cpp"],
+    whole_static_libs: ["lib_internal_host"],
+    host_supported: true,
+    reexport_libs: ["lib_internal_host"],
+}
+
+bob_binary {
+    name: "test_reexport_host",
+    srcs: ["main_cflags.cpp"],
+    static_libs: ["lib_reexport_host"],
+}
+
+bob_static_library {
+    name: "lib_internal_target",
+    srcs: ["hidden/hidden.cpp"],
+    export_local_include_dirs: ["hidden"],
+    export_cflags: [
+        "-DSHOW_HIDDEN",
+        "-DME_TARGET",
+    ],
+    host_supported: true,
+}
+
+bob_static_library {
+    name: "lib_reexport_host_2",
+    srcs: ["export.cpp"],
+    host_supported: true,
+    host: {
+        whole_static_libs: ["lib_internal_host"],
+        reexport_libs: ["lib_internal_host"],
+    },
+    target: {
+        whole_static_libs: ["lib_internal_target"],
+        reexport_libs: ["lib_internal_target"],
+    },
+}
+
+bob_binary {
+    name: "test_reexport_host_2",
+    srcs: ["main_cflags.cpp"],
+    static_libs: ["lib_reexport_host_2"],
+    host_supported: true,
+}
+
+bob_binary {
+    name: "test_reexport_passing_up",
+    srcs: ["passing/main.cpp"],
+    static_libs: ["lib_a"],
+}
+
+bob_static_library {
+    name: "lib_a",
+    srcs: ["passing/a.cpp"],
+    export_cflags: ["-DHAVE_A"],
+    whole_static_libs: [
+        "lib_b",
+        "lib_c",
+    ],
+    reexport_libs: ["lib_b"],
+}
+
+bob_static_library {
+    name: "lib_b",
+    srcs: ["passing/b.cpp"],
+    export_cflags: ["-DHAVE_B"],
+    whole_static_libs: ["lib_d"],
+    reexport_libs: ["lib_d"],
+}
+
+bob_static_library {
+    name: "lib_c",
+    srcs: ["passing/c.cpp"],
+    export_cflags: ["-DHAVE_C"],
+    whole_static_libs: ["lib_e"],
+    reexport_libs: ["lib_e"],
+}
+
+bob_static_library {
+    name: "lib_d",
+    srcs: ["passing/d.cpp"],
+    export_cflags: ["-DHAVE_D"],
+}
+
+bob_static_library {
+    name: "lib_e",
+    srcs: ["passing/e.cpp"],
+    export_cflags: ["-DHAVE_E"],
+}
