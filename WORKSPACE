@@ -42,7 +42,13 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/{}.tar.gz".format(rules_python_version),
 )
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+python_register_toolchains(
+    name = "python3_10",
+    python_version = "3.10",
+    register_coverage_tool = True,
+)
 
 py_repositories()
 

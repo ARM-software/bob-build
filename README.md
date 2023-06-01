@@ -162,6 +162,20 @@ To update `deps.bzl`:
 bazelisk run //:gazelle-update-repos
 ```
 
+### Generating Coverage
+
+Generate the LCOV files:
+
+```sh
+bazelisk coverage --instrument_test_targets --@io_bazel_rules_go//go/config:cover_format=lcov --combined_report=lcov //...
+```
+
+Generate a html report:
+
+```sh
+genhtml --output genhtml "$(bazelisk info output_path)/_coverage/_coverage_report.dat"
+```
+
 ## Documentation
 
 Detailed [documentation](docs/index.md) is in the docs directory of
