@@ -5,6 +5,9 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  GOPROXY: https://proxy.golang.org
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
