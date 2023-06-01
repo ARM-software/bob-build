@@ -89,7 +89,6 @@ rule m.gen_source_depfile_new_.gen_gen_source_depfile_new
 build ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt: $
         m.gen_source_depfile_new_.gen_gen_source_depfile_new $
         ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
-        ${g.bob.SrcDir}/nested/gen_with_dep.py $
         ${g.bob.SrcDir}/nested/gen_with_dep.py
     depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_new/gen_source_depfile_new.d
     _out_ = ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt
@@ -119,7 +118,6 @@ build $
         : $
         m.gen_source_depfile_with_implicit_outs_new_.gen_gen_source_depfile_with_implicit_outs_new $
         ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
-        ${g.bob.SrcDir}/nested/gen_with_dep.py $
         ${g.bob.SrcDir}/nested/gen_with_dep.py
     depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/gen_source_depfile_with_implicit_outs_new.d
     deps = gcc
@@ -146,8 +144,7 @@ rule m.generate_source_multiple_in_new_.gen_generate_source_multiple_in_new
 build ${g.bob.BuildDir}/gen/generate_source_multiple_in_new/multiple_in.cpp: $
         m.generate_source_multiple_in_new_.gen_generate_source_multiple_in_new $
         ${g.bob.SrcDir}/before_generate.in ${g.bob.SrcDir}/before_generate2.in $
-        ${g.bob.SrcDir}/before_generate3.in | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/before_generate3.in | ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_in_new/multiple_in.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -172,8 +169,7 @@ build $
         : $
         m.generate_source_multiple_in_out_new_.gen_generate_source_multiple_in_out_new $
         ${g.bob.SrcDir}/before_generate.in ${g.bob.SrcDir}/before_generate2.in $
-        ${g.bob.SrcDir}/before_generate3.in | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/before_generate3.in | ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_in_out_new/multiple_in_out.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_in_out_new/multiple_in_out2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -197,8 +193,7 @@ build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp $
         ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp $
         : $
         m.generate_source_multiple_out_new_.gen_generate_source_multiple_out_new $
-        ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -225,8 +220,7 @@ build $
         ${g.bob.SrcDir}/before_generate.in $
         ${g.bob.BuildDir}/gen/generate_source_single_dependend_new/deps.cpp | $
         ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_dependend_new/deps.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_dependend_new/deps.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_dependend_nested_new/deps2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -250,8 +244,7 @@ build ${g.bob.BuildDir}/gen/generate_source_single_dependend_new/deps.cpp: $
         ${g.bob.SrcDir}/before_generate.in $
         ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp | $
         ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_dependend_new/deps.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -276,8 +269,7 @@ build $
         m.generate_source_single_level1_new_.gen_generate_source_single_level1_new $
         ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp | $
         ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_level1_new/level_1_single.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -302,8 +294,7 @@ build $
         m.generate_source_single_level2_new_.gen_generate_source_single_level2_new $
         ${g.bob.BuildDir}/gen/generate_source_single_level1_new/level_1_single.cpp $
         | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_level1_new/level_1_single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_level1_new/level_1_single.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -328,8 +319,7 @@ build $
         m.generate_source_single_level3_new_.gen_generate_source_single_level3_new $
         ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp $
         | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_level3_new/level_3_single.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -355,8 +345,7 @@ build $
         ${g.bob.SrcDir}/before_generate.in $
         ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp $
         | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_level2_new/level_2_single.cpp
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_nested_with_extra_new/extra_single.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -378,7 +367,6 @@ rule m.generate_source_single_new_.gen_generate_source_single_new
 build ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp: $
         m.generate_source_single_new_.gen_generate_source_single_new $
         ${g.bob.SrcDir}/nested/before_generate.in | $
-        ${g.bob.SrcDir}/nested/generator.py $
         ${g.bob.SrcDir}/nested/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp
     tool_1 = ${g.bob.SrcDir}/nested/generator.py
@@ -466,8 +454,7 @@ build ${g.bob.BuildDir}/gen/multi_src_tag/deps.cpp: $
         m.multi_src_tag_.gen_multi_src_tag ${g.bob.SrcDir}/before_generate.in $
         ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp | $
         ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp $
-        ${g.bob.SrcDir}/generator.py
+        ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp
     _out_ = ${g.bob.BuildDir}/gen/multi_src_tag/deps.cpp
     generate_source_single_new_out = ${g.bob.BuildDir}/gen/generate_source_single_new/single.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
@@ -492,8 +479,6 @@ build ${g.bob.BuildDir}/gen/multi_tool_file/out.h: g.bob.touch $
 build ${g.bob.BuildDir}/gen/multi_tool_file/output.txt: $
         m.multi_tool_file_.gen_multi_tool_file $
         ${g.bob.SrcDir}/nested/depgen2.in | $
-        ${g.bob.SrcDir}/nested/gen_with_dep.py $
-        ${g.bob.SrcDir}/nested/depgen1.in $
         ${g.bob.SrcDir}/nested/gen_with_dep.py $
         ${g.bob.SrcDir}/nested/depgen1.in
     depfile = ${g.bob.BuildDir}/gen/multi_tool_file/multi_tool_file.d
