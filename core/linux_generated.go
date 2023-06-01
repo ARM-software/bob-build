@@ -113,12 +113,14 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 			deps = blueprint.DepsGCC
 		}
 
+		unique_implicits := utils.Unique(append(inout.implicitSrcs, implicits...))
+
 		buildparams := blueprint.BuildParams{
 			Rule:            rule,
 			Inputs:          inout.in,
 			Outputs:         mainRuleOuts,
 			ImplicitOutputs: mainRuleImplicitOuts,
-			Implicits:       append(inout.implicitSrcs, implicits...),
+			Implicits:       unique_implicits,
 			Args:            args,
 			Optional:        true,
 			Depfile:         inout.depfile,
