@@ -220,11 +220,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazel: ["latest", "6.0.0", "5.4.0"]
+        bazel: ["latest", "6.2.0", "6.0.0"]
         os: [ubuntu-latest]
-        include:
-          - bazel: "5.4.0"
-            os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -242,3 +239,33 @@ jobs:
       - name: Bazel test `bob-gazelle`
         run: bazel test --config=ci //...
         working-directory: ./gazelle
+
+  bazel-coverage:
+    name: "Bazel Coverage"
+    env:
+      USE_BAZEL_VERSION: latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: "true"
+      - uses: bazelbuild/setup-bazelisk@v2
+      - name: Mount bazel cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-coverage
+      - name: Setup LCOV
+        uses: hrishikesh-kadam/setup-lcov@v1
+      - name: Generate Coverage
+        run: |
+          bazel coverage --config=ci --instrument_test_targets --@io_bazel_rules_go//go/config:cover_format=lcov --combined_report=lcov //...
+          cp "$(bazelisk info output_path)/_coverage/_coverage_report.dat" coverage_report.dat
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v3
+        with:
+          coverage-files: coverage_report.dat
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-comment: true
