@@ -25,7 +25,7 @@ g.bootstrap.srcDir = redacted
 builddir = ${g.bootstrap.ninjaBuildDir}
 
 rule g.bob.cc
-    command = ${build_wrapper} ${ccompiler} -c ${cflags} ${conlyflags} -MMD -MF ${depfile} ${in} -o ${out}
+    command = ${build_wrapper} ${ccompiler} -c ${cflags} ${conlyflags} -MD -MF ${depfile} ${in} -o ${out}
     depfile = ${out}.d
     deps = gcc
     description = ${out}

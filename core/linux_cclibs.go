@@ -45,7 +45,7 @@ var ccRule = pctx.StaticRule("cc",
 	blueprint.RuleParams{
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
-		Command:     "$build_wrapper $ccompiler -c $cflags $conlyflags -MMD -MF $depfile $in -o $out",
+		Command:     "$build_wrapper $ccompiler -c $cflags $conlyflags -MD -MF $depfile $in -o $out",
 		Description: "$out",
 	}, "ccompiler", "cflags", "conlyflags", "build_wrapper", "depfile")
 
@@ -53,7 +53,7 @@ var cxxRule = pctx.StaticRule("cxx",
 	blueprint.RuleParams{
 		Depfile:     "$out.d",
 		Deps:        blueprint.DepsGCC,
-		Command:     "$build_wrapper $cxxcompiler -c $cflags $cxxflags -MMD -MF $depfile $in -o $out",
+		Command:     "$build_wrapper $cxxcompiler -c $cflags $cxxflags -MD -MF $depfile $in -o $out",
 		Description: "$out",
 	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper", "depfile")
 
