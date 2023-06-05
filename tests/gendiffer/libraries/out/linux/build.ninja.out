@@ -37,13 +37,13 @@ pool g.bob.link
 builddir = ${g.bootstrap.ninjaBuildDir}
 
 rule g.bob.cc
-    command = ${build_wrapper} ${ccompiler} -c ${cflags} ${conlyflags} -MMD -MF ${depfile} ${in} -o ${out}
+    command = ${build_wrapper} ${ccompiler} -c ${cflags} ${conlyflags} -MD -MF ${depfile} ${in} -o ${out}
     depfile = ${out}.d
     deps = gcc
     description = ${out}
 
 rule g.bob.cxx
-    command = ${build_wrapper} ${cxxcompiler} -c ${cflags} ${cxxflags} -MMD -MF ${depfile} ${in} -o ${out}
+    command = ${build_wrapper} ${cxxcompiler} -c ${cflags} ${cxxflags} -MD -MF ${depfile} ${in} -o ${out}
     depfile = ${out}.d
     deps = gcc
     description = ${out}
