@@ -104,9 +104,11 @@ func (m *ModuleGenerateSource) GetDirectFiles() file.Paths {
 	return gc.Properties.LegacySourceProps.GetDirectFiles()
 }
 
-func (m *ModuleGenerateSource) GetTargets() []string {
+func (m *ModuleGenerateSource) GetTargets() (tgts []string) {
 	gc, _ := getGenerateCommon(m)
-	return gc.Properties.Generated_sources
+	tgts = append(tgts, gc.Properties.LegacySourceProps.GetTargets()...)
+	tgts = append(tgts, gc.Properties.Generated_sources...)
+	return
 }
 
 func (m *ModuleGenerateSource) OutFiles() file.Paths {

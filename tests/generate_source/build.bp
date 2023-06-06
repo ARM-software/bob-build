@@ -21,10 +21,24 @@
 // On Android output path can look like: out/target/product/hikey960/gen/STATIC_LIBRARIES/generate_source_single/single.cpp
 // On Linux output path can look like: build/gen/generate_source_single/single.cpp
 
+bob_filegroup {
+    name: "generate_input",
+    srcs: [
+        "before_generate.in",
+    ],
+}
+
+bob_filegroup {
+    name: "generate_input_two",
+    srcs: [
+        "before_generate2.in",
+    ],
+}
+
 bob_generate_source {
     name: "generate_source_single",
     srcs: [
-        "before_generate.in",
+        ":generate_input",
     ],
     out: ["single.cpp"],
 
@@ -36,8 +50,10 @@ bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
         "before_generate.in",
-        "before_generate2.in",
         "before_generate3.in",
+    ],
+    filegroup_srcs: [
+        "generate_input_two",
     ],
     out: ["multiple_in.cpp"],
 
