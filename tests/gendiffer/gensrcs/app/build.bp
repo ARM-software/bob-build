@@ -15,12 +15,28 @@
  * limitations under the License.
  */
 
+bob_filegroup {
+    name: "generate_input",
+    srcs: [
+        "before_generate.in",
+    ],
+}
+
+bob_filegroup {
+    name: "generate_input_two",
+    srcs: [
+        "before_generate2.in",
+    ],
+}
+
 bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
-        "before_generate.in",
-        "before_generate2.in",
+        ":generate_input",
         "before_generate3.in",
+    ],
+    filegroup_srcs: [
+        "generate_input_two",
     ],
     out: ["multiple_in.cpp"],
 
