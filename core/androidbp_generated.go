@@ -194,6 +194,12 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx
 			return true
 		})
 
+	// Add `filegroup_srcs` and ':module_name' source dependencies.
+	// Both has to be in colon notation (`:module_name`)
+	// as `genrule_bob` does not support `filegroup_srcs`.
+	srcs = append(srcs, utils.PrefixAll(utils.MixedListToBobTargets(gs.ModuleGenerateCommon.Properties.Srcs), ":")...)
+	srcs = append(srcs, utils.PrefixAll(gs.ModuleGenerateCommon.Properties.Filegroup_srcs, ":")...)
+
 	m.AddStringList("srcs", srcs)
 	m.AddStringList("out", gs.Properties.Out)
 	m.AddStringList("implicit_srcs", implicits)

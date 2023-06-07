@@ -37,7 +37,7 @@ import (
 )
 
 type commonProps struct {
-	Srcs                    []string
+	Srcs                    []string `android:"path"`
 	Export_gen_include_dirs []string
 	Cmd                     string
 	Host_bin                string
@@ -252,6 +252,10 @@ func (m *genrulebobCommon) DepsMutator(ctx android.BottomUpMutatorContext) {
 		ctx.AddFarVariationDependencies(ctx.Config().BuildOSTarget.Variations(),
 			hostToolBinTag, m.Properties.Host_bin)
 	}
+
+	targets := utils.MixedListToBobTargets(m.Properties.Srcs)
+
+	ctx.AddFarVariationDependencies(nil, generatedSourceTag, targets...)
 
 	// `generated_deps` and `generated_sources` can refer not only to source
 	// generation modules, but to binaries and libraries. In this case we
