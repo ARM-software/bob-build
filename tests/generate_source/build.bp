@@ -49,7 +49,7 @@ bob_generate_source {
 bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
-        "before_generate.in",
+        ":generate_input",
         "before_generate3.in",
     ],
     filegroup_srcs: [
