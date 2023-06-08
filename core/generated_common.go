@@ -90,6 +90,7 @@ type ModuleGenerateCommon struct {
 		Features
 		FlagArgsBuild Build `blueprint:"mutated"`
 	}
+	deps []string
 }
 
 // ModuleGenerateCommon supports:
@@ -461,7 +462,10 @@ func (m *ModuleGenerateCommon) processPaths(ctx blueprint.BaseModuleContext) {
 	m.Properties.InstallableProps.processPaths(ctx)
 
 	if len(m.Properties.Tools) > 0 {
-		m.Properties.Tools = utils.PrefixDirs(m.Properties.Tools, projectModuleDir(ctx))
+		m.deps = utils.MixedListToBobTargets(m.Properties.Tools)
+		tools_targets := utils.PrefixAll(m.deps, ":")
+		m.Properties.Tools = utils.PrefixDirs(utils.MixedListToFiles(m.Properties.Tools), projectModuleDir(ctx))
+		m.Properties.Tools = append(m.Properties.Tools, tools_targets...)
 	}
 
 	prefix := projectModuleDir(ctx)
