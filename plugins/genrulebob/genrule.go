@@ -41,7 +41,7 @@ type commonProps struct {
 	Export_gen_include_dirs []string
 	Cmd                     string
 	Host_bin                string
-	Tools                   []string
+	Tools                   []string `android:"path"`
 	Depfile                 bool
 	Generated_deps          []string
 	Generated_sources       []string

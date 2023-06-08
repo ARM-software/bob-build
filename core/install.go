@@ -152,6 +152,30 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 		})
 }
 
+func getShortNamesForDirectDepsWithTagsForNonFilegroup(ctx blueprint.ModuleContext,
+	tags ...DependencyTag) (ret []string) {
+
+	return getShortNamesForDirectDepsIf(ctx,
+		func(m blueprint.Module) bool {
+			tag := ctx.OtherModuleDependencyTag(m)
+
+			// Do not count `ModuleFilegroup` as dependency.
+			// `ModuleFilegroup` are specified by `GeneratedTag`
+			// dependency tag but they are simple file providers
+			// and cannot be considered as `generated_deps`.
+			if _, ok := m.(*ModuleFilegroup); ok {
+				return false
+			}
+
+			for _, i := range tags {
+				if tag == i {
+					return true
+				}
+			}
+			return false
+		})
+}
+
 // InstallGroupProps describes the properties of bob_install_group modules
 type InstallGroupProps struct {
 	Install_path *string

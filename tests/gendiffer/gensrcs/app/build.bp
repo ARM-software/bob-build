@@ -29,6 +29,13 @@ bob_filegroup {
     ],
 }
 
+bob_filegroup {
+    name: "generate_tool",
+    srcs: [
+        "generator.py",
+    ],
+}
+
 bob_generate_source {
     name: "generate_source_multiple_in",
     srcs: [
@@ -40,7 +47,7 @@ bob_generate_source {
     ],
     out: ["multiple_in.cpp"],
 
-    tools: ["generator.py"],
+    tools: [":generate_tool"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 

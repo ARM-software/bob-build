@@ -66,7 +66,7 @@ genrule_bob {
     ],
     out: ["multiple_in.cpp"],
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
-    tools: ["generator.py"],
+    tools: [":generate_tool"],
     depfile: false,
 }
 
@@ -162,6 +162,11 @@ genrule_bob {
     tools: ["generator.py"],
     depfile: false,
     generated_sources: ["generate_source_single_level2"],
+}
+
+filegroup {
+    name: "generate_tool",
+    srcs: ["generator.py"],
 }
 
 cc_binary_host {

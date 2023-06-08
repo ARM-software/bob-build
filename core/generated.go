@@ -25,6 +25,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -49,6 +50,20 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			return ctx.OtherModuleDependencyTag(m) == GeneratedTag
 		},
 		func(m blueprint.Module) {
+
+			// Dependent `Tools` which are `ModuleFilegroup`
+			if fg, ok := m.(*ModuleFilegroup); ok {
+
+				fg.OutFiles().ForEach(
+					func(fp file.Path) bool {
+						depfiles = append(depfiles, fp.BuildPath())
+						return true
+					})
+
+				fullDeps[fg.shortName()] = depfiles
+				return
+			}
+
 			gen, ok := m.(dependentInterface)
 			if !ok {
 				utils.Die("%s is not a valid dependent interface", reflect.TypeOf(m).String())
@@ -135,6 +150,11 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 			gsc.Properties.Generated_deps...)
 		parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
 			gsc.Properties.Generated_sources...)
+
+		for _, d := range gsc.deps {
+			// Add other module dependency
+			ctx.AddDependency(ctx.Module(), GeneratedTag, d)
+		}
 	}
 
 	if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
