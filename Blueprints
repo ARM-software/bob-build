@@ -42,6 +42,7 @@ bootstrap_go_package {
         "bob-config",
         "bob-toolchain",
         "bob-file",
+        "bob-flag",
         "bob-backend",
     ],
     srcs: [
@@ -129,6 +130,29 @@ bootstrap_go_package {
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/backend",
 }
+
+bootstrap_go_package {
+    name: "bob-flag",
+    deps: [
+        "bob-config", // required for tests
+        "bob-backend",
+        "bob-utils",
+        "blueprint",
+    ],
+    srcs: [
+        "core/flag/flag.go",
+        "core/flag/flag_collection.go",
+        "core/flag/flag_consumer.go",
+        "core/flag/flag_provider.go",
+        "core/flag/flag_property_parser.go",
+    ],
+    testSrcs: [
+        "core/flag/flag_collection_test.go",
+        "core/flag/flag_test.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/flag",
+}
+
 
 bootstrap_go_package {
     name: "bob-file",
