@@ -450,12 +450,14 @@ func collectReexportLibsDependenciesMutator(ctx blueprint.TopDownMutatorContext)
 
 	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
 		depTag := ctx.OtherModuleDependencyTag(child)
+		recurse := false
+
 		if depTag == WholeStaticTag || depTag == StaticTag || depTag == SharedTag {
 			parentModule, ok1 := parent.(moduleWithBuildProps)
 			childModule, ok2 := child.(moduleWithBuildProps)
 
 			if !ok1 || !ok2 {
-				return false
+				return recurse
 			}
 
 			parentBuild := parentModule.build()
@@ -464,12 +466,22 @@ func collectReexportLibsDependenciesMutator(ctx blueprint.TopDownMutatorContext)
 			if len(childBuild.Reexport_libs) > 0 &&
 				(parent.Name() == mainModule.Name() || utils.Contains(parentBuild.Reexport_libs, child.Name())) {
 				mainBuild.ResolvedReexportedLibs = utils.AppendUnique(mainBuild.ResolvedReexportedLibs, childBuild.Reexport_libs)
-				return true
+				recurse = true
 			}
+
+			// Export_generated_headers works  exactly the same as Reexport_libs except for generated headers via genrules.
+			if len(childBuild.Export_generated_headers) > 0 &&
+				(parent.Name() == mainModule.Name() || utils.Contains(parentBuild.Export_generated_headers, child.Name())) {
+				mainBuild.ResolvedGeneratedHeaders = utils.AppendUnique(mainBuild.ResolvedGeneratedHeaders, childBuild.Export_generated_headers)
+				recurse = true
+			}
+
+			return recurse
 		}
 
-		return false
+		return recurse
 	})
+
 }
 
 func applyReexportLibsDependenciesMutator(ctx blueprint.BottomUpMutatorContext) {
@@ -485,6 +497,8 @@ func applyReexportLibsDependenciesMutator(ctx blueprint.BottomUpMutatorContext) 
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
 		build = buildProps.build()
 		ctx.AddVariationDependencies(nil, ReexportLibraryTag, build.ResolvedReexportedLibs...)
+		// Does not use variants as the resolved providers are not target aware (source generators)
+		ctx.AddDependency(mainModule, ReexportLibraryTag, build.ResolvedGeneratedHeaders...)
 	}
 }
 

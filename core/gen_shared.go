@@ -19,6 +19,7 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/google/blueprint"
 )
 
@@ -47,6 +48,14 @@ func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 		files = append(files, fp)
 	}
 
+	return
+}
+
+func (m *generateSharedLibrary) FlagsOut() (flags flag.Flags) {
+	gc, _ := getGenerateCommon(m)
+	for _, str := range gc.Properties.Export_gen_include_dirs {
+		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
+	}
 	return
 }
 
