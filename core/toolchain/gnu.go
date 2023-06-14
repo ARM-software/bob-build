@@ -199,9 +199,12 @@ func newToolchainGnuCommon(props *config.Properties, tgt TgtType) (tc toolchainG
 		tc.ldflags = append(tc.ldflags, "--sysroot="+sysroot)
 	}
 
-	flags := strings.Split(props.GetString(string(tgt)+"_gnu_flags"), " ")
-	tc.cflags = append(tc.cflags, flags...)
-	tc.ldflags = append(tc.ldflags, flags...)
+	gnuFlagsProp := props.GetString(string(tgt) + "_gnu_flags")
+	if gnuFlagsProp != "" {
+		flags := strings.Split(gnuFlagsProp, " ")
+		tc.cflags = append(tc.cflags, flags...)
+		tc.ldflags = append(tc.ldflags, flags...)
+	}
 
 	tc.linker = newDefaultLinker(tc.gxxBinary, tc.ldflags, []string{})
 	tc.flagCache = newFlagCache()
