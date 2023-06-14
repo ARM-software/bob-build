@@ -30,6 +30,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -63,45 +64,36 @@ func (m *ModuleLibrary) ObjDir() string {
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
 func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
-	expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, exportedCflags := l.GetExportedVariables(ctx)
-	// There are 2 sets of include dirs - "global" and "local".
-	// Local acts on the root source directory.
-
-	// The order we want is  local_include_dirs, export_local_include_dirs,
-	//                       include_dirs, export_include_dirs
-	localIncludeDirs := utils.NewStringSlice(l.Properties.Local_include_dirs, l.Properties.Export_local_include_dirs,
-		l.Properties.Export_local_system_include_dirs)
-
-	// Prefix all local includes with SrcDir
-	localIncludeDirs = utils.PrefixDirs(localIncludeDirs, "${SrcDir}")
-	expLocalIncludes = utils.PrefixDirs(expLocalIncludes, "${SrcDir}")
-	expLocalSystemIncludes = utils.PrefixDirs(expLocalSystemIncludes, "${SrcDir}")
-
-	gendirs, orderOnly := l.GetGeneratedHeaders(ctx)
-
-	includeDirs := append(localIncludeDirs, l.Properties.Include_dirs...)
-	includeDirs = append(includeDirs, l.Properties.Export_include_dirs...)
-	includeDirs = append(includeDirs, l.Properties.Export_system_include_dirs...)
-	includeDirs = append(includeDirs, expLocalIncludes...)
-	includeDirs = append(includeDirs, expIncludes...)
-	includeDirs = append(includeDirs, gendirs...)
-	includeFlags := utils.PrefixAll(includeDirs, "-I")
-
-	includeSystemDirs := append(expLocalSystemIncludes, expSystemIncludes...)
-	systemIncludeFlags := utils.PrefixAll(includeSystemDirs, "-isystem ")
-
-	cflagsList := utils.NewStringSlice(l.Properties.Cflags, l.Properties.Export_cflags,
-		exportedCflags, systemIncludeFlags, includeFlags)
+	_, orderOnly := l.GetGeneratedHeaders(ctx)
 
 	tc := backend.Get().GetToolchain(l.Properties.TargetType)
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
+	cflagsList := []string{}
 
-	ctx.Variable(pctx, "asflags", utils.Join(astargetflags, l.Properties.Asflags))
-	ctx.Variable(pctx, "cflags", utils.Join(cflagsList))
-	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags, l.Properties.Conlyflags))
-	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags, l.Properties.Cxxflags))
+	// Get all the required flags and group them into includes and everything else.
+	// This should make it easier to visually inspect the flags in logs/ninja files.
+	l.FlagsInTransitive(ctx).GroupByType(flag.TypeInclude).ForEach(
+		func(f flag.Flag) bool {
+			switch {
+			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
+				cctargetflags = append(cctargetflags, f.ToString())
+			case f.MatchesType(flag.TypeCC | flag.TypeInclude):
+				cflagsList = append(cflagsList, f.ToString())
+			case f.MatchesType(flag.TypeAsm):
+				astargetflags = append(astargetflags, f.ToString())
+			case f.MatchesType(flag.TypeCpp):
+				cxxtargetflags = append(cxxtargetflags, f.ToString())
+			}
+			return true
+		},
+	)
+
+	ctx.Variable(pctx, "asflags", strings.Join(astargetflags, " "))
+	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
+	ctx.Variable(pctx, "conlyflags", strings.Join(cctargetflags, " "))
+	ctx.Variable(pctx, "cxxflags", strings.Join(cxxtargetflags, " "))
 
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}

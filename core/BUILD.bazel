@@ -64,6 +64,7 @@ go_library(
         "//core/backend",
         "//core/config",
         "//core/file",
+        "//core/flag",
         "//core/module",
         "//core/toolchain",
         "//internal/bpwriter",

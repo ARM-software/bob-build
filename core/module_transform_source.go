@@ -22,6 +22,7 @@ import (
 	"regexp"
 
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
@@ -125,6 +126,14 @@ func (m *ModuleTransformSource) OutFiles() file.Paths {
 
 func (m *ModuleTransformSource) OutFileTargets() []string {
 	return []string{}
+}
+
+func (m *ModuleTransformSource) FlagsOut() (flags flag.Flags) {
+	gc, _ := getGenerateCommon(m)
+	for _, str := range gc.Properties.Export_gen_include_dirs {
+		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
+	}
+	return
 }
 
 func (m *ModuleTransformSource) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
