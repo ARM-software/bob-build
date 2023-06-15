@@ -17,17 +17,13 @@
 
 package flag
 
-import (
-	"reflect"
-)
-
 // Array of files as a helper for struct attribute collections
 // TODO: add the possibility to tag a group of files.
 type Flags []Flag
 
 func (fs Flags) Contains(query Flag) bool {
 	for _, f := range fs {
-		if reflect.DeepEqual(f, query) {
+		if f.ToString() == query.ToString() {
 			return true
 		}
 	}
