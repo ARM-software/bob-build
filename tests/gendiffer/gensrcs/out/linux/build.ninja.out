@@ -157,6 +157,28 @@ build gen_source_globbed_implicit_sources: phony $
 default gen_source_globbed_implicit_sources
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  generate_feature_command
+# Variant:
+# Type:    bob_generate_source
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:256:1
+
+rule m.generate_feature_command_.gen_generate_feature_command
+    command = python3 ${tool_1} --in ${in} --out ${_out_} --config linux_config_name
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/generate_feature_command/out1.out: $
+        m.generate_feature_command_.gen_generate_feature_command $
+        ${g.bob.SrcDir}/input1.in | ${g.bob.SrcDir}/generator.py
+    _out_ = ${g.bob.BuildDir}/gen/generate_feature_command/out1.out
+    tool_1 = ${g.bob.SrcDir}/generator.py
+
+build generate_feature_command: phony $
+        ${g.bob.BuildDir}/gen/generate_feature_command/out1.out
+default generate_feature_command
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generate_source_multiple_in
 # Variant:
 # Type:    bob_generate_source

@@ -178,3 +178,21 @@ bob_genrule {
     ],
     cmd: "touch $(out)",
 }
+
+bob_genrule {
+    name: "generate_feature_command_new",
+    srcs: [
+        "input1.in",
+    ],
+    out: [
+        "out1.out",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python3 $(location generator.py) --in $(in) --out $(out)",
+    android: {
+        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config android_config_name",
+    },
+    linux: {
+        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config linux_config_name",
+    },
+}
