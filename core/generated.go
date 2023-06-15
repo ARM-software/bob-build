@@ -53,14 +53,16 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 
 			// Dependent `Tools` which are `ModuleFilegroup`
 			if fg, ok := m.(*ModuleFilegroup); ok {
+				var buildPaths []string
 
 				fg.OutFiles().ForEach(
 					func(fp file.Path) bool {
-						depfiles = append(depfiles, fp.BuildPath())
+						buildPaths = append(buildPaths, fp.BuildPath())
 						return true
 					})
 
-				fullDeps[fg.shortName()] = depfiles
+				depfiles = append(depfiles, buildPaths...)
+				fullDeps[fg.shortName()] = buildPaths
 				return
 			}
 
