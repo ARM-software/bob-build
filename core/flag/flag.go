@@ -36,7 +36,6 @@ const (
 	TypeCpp
 	TypeCC
 	TypeLinker
-
 	TypeInclude
 	TypeIncludeLocal // Helper flag to mark local include dirs
 	TypeIncludeGenerated
@@ -131,6 +130,14 @@ func FromGeneratedIncludePath(path string, owner blueprint.Module, tag Type) Fla
 		owner: owner,
 		raw:   path,
 		tag:   tag | TypeInclude | TypeIncludeGenerated,
+	}
+}
+
+func FromDefineOwned(raw string, owner blueprint.Module, tag Type) Flag {
+	return Flag{
+		owner: owner,
+		raw:   "-D" + raw,
+		tag:   tag | TypeCC,
 	}
 }
 
