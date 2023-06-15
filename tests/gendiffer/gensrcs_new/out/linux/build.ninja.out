@@ -130,6 +130,27 @@ build gen_source_depfile_with_implicit_outs_new: phony $
         ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/out.h
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  generate_feature_command_new
+# Variant:
+# Type:    bob_genrule
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:182:1
+
+rule m.generate_feature_command_new_.gen_generate_feature_command_new
+    command = python3 ${tool_1} --in ${in} --out ${_out_} --config linux_config_name
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/generate_feature_command_new/out1.out: $
+        m.generate_feature_command_new_.gen_generate_feature_command_new $
+        ${g.bob.SrcDir}/input1.in | ${g.bob.SrcDir}/generator.py
+    _out_ = ${g.bob.BuildDir}/gen/generate_feature_command_new/out1.out
+    tool_1 = ${g.bob.SrcDir}/generator.py
+
+build generate_feature_command_new: phony $
+        ${g.bob.BuildDir}/gen/generate_feature_command_new/out1.out
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generate_source_multiple_in_new
 # Variant:
 # Type:    bob_genrule

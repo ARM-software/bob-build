@@ -53,6 +53,14 @@ genrule {
 }
 
 genrule {
+    name: "generate_feature_command_new",
+    srcs: ["input1.in"],
+    cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config android_config_name",
+    tool_files: ["generator.py"],
+    out: ["out1.out"],
+}
+
+genrule {
     name: "generate_source_multiple_in_new",
     srcs: [
         "before_generate.in",

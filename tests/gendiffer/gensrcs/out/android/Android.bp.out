@@ -47,6 +47,15 @@ genrule_bob {
     depfile: false,
 }
 
+genrule_bob {
+    name: "generate_feature_command",
+    srcs: ["input1.in"],
+    out: ["out1.out"],
+    cmd: "python3 ${tool generator.py} --in ${in} --out ${out} --config android_config_name",
+    tools: ["generator.py"],
+    depfile: false,
+}
+
 filegroup {
     name: "generate_input",
     srcs: ["before_generate.in"],

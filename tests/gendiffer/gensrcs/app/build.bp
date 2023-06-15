@@ -252,3 +252,22 @@ bob_generate_source {
     cmd: "test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${out}",
     build_by_default: true,
 }
+
+bob_generate_source {
+    name: "generate_feature_command",
+    srcs: [
+        "input1.in",
+    ],
+    out: [
+        "out1.out",
+    ],
+    tools: ["generator.py"],
+    cmd: "python3 ${tool generator.py} --in ${in} --out ${out}",
+    android: {
+        cmd: "python3 ${tool generator.py} --in ${in} --out ${out} --config android_config_name",
+    },
+    linux: {
+        cmd: "python3 ${tool generator.py} --in ${in} --out ${out} --config linux_config_name",
+    },
+    build_by_default: true,
+}
