@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -130,6 +131,62 @@ func (m *ModuleStrictLibrary) GetTargets() (tgts []string) {
 
 func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
+}
+
+func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Copts",
+			Tag:          flag.TypeCC,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Local_defines",
+			Tag:          flag.TypeUnset,
+			Factory:      flag.FromDefineOwned,
+		},
+		{
+			PropertyName: "Defines",
+			Tag:          flag.TypeUnset,
+			Factory:      flag.FromDefineOwned,
+		},
+	}
+
+	return flag.ParseFromProperties(nil, lut, m.Properties)
+}
+
+func (m *ModuleStrictLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (ret flag.Flags) {
+	m.FlagsIn().ForEachIf(
+		func(f flag.Flag) bool {
+			return !ret.Contains(f)
+		},
+		func(f flag.Flag) bool {
+			ret = append(ret, f)
+			return true
+		})
+
+	flag.ReferenceFlagsInTransitive(ctx).ForEachIf(
+		func(f flag.Flag) bool {
+			return !ret.Contains(f)
+		},
+		func(f flag.Flag) bool {
+			ret = append(ret, f)
+			return true
+		})
+
+	return
+}
+
+func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Defines",
+			Tag:          flag.TypeExported | flag.TypeTransitive,
+			Factory:      flag.FromDefineOwned,
+		},
+	}
+
+	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
 func (m *ModuleStrictLibrary) supportedVariants() (tgts []toolchain.TgtType) {
