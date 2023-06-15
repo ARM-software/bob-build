@@ -195,4 +195,5 @@ bob_genrule {
     linux: {
         cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config linux_config_name",
     },
+    build_by_default: true,
 }

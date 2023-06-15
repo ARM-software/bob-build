@@ -149,6 +149,7 @@ build ${g.bob.BuildDir}/gen/generate_feature_command_new/out1.out: $
 
 build generate_feature_command_new: phony $
         ${g.bob.BuildDir}/gen/generate_feature_command_new/out1.out
+default generate_feature_command_new
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generate_source_multiple_in_new

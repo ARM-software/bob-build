@@ -232,6 +232,8 @@ func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx bluep
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = gr.ModuleGenruleCommon.Properties.Srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleGenruleCommon.Properties.Exclude_srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = gr.ModuleGenruleCommon.Properties.Depfile
+	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Build_by_default = gr.ModuleGenruleCommon.Properties.EnableableProps.Build_by_default
+	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Enabled = gr.ModuleGenruleCommon.Properties.EnableableProps.Enabled
 	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
 
 	proxyGenerateSource.Properties.Implicit_srcs = utils.MixedListToFiles(gr.ModuleGenruleCommon.Properties.Tool_files)

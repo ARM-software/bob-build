@@ -34,6 +34,7 @@ cc_binary {
 phony {
     name: "bob_tests",
     required: [
+        "genrule",
         "generated_source",
         "nested_generated_source",
         "transform_source",
