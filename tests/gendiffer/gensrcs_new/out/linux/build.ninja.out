@@ -58,7 +58,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:167:1
+# Defined: build.bp:168:1
 
 rule m.exclude_support_.gen_exclude_support
     command = touch ${_out_}
@@ -134,7 +134,7 @@ build gen_source_depfile_with_implicit_outs_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:182:1
+# Defined: build.bp:183:1
 
 rule m.generate_feature_command_new_.gen_generate_feature_command_new
     command = python3 ${tool_1} --in ${in} --out ${_out_} --config linux_config_name
@@ -178,7 +178,7 @@ build generate_source_multiple_in_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:45:1
+# Defined: build.bp:46:1
 
 rule m.generate_source_multiple_in_out_new_.gen_generate_source_multiple_in_out_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in before_generate2.in before_generate3.in
@@ -207,16 +207,23 @@ build generate_source_multiple_in_out_new: phony $
 # Defined: build.bp:31:1
 
 rule m.generate_source_multiple_out_new_.gen_generate_source_multiple_out_new
-    command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in
+    command = python ${tool_1} --in ${in} --out ${_out_} --config ${bob_config} --depfile ${depfile} --out-src ${gen_dir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp $
-        ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp $
-        : $
+build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp $
+        : g.bob.touch $
+        ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp
+
+build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp: $
         m.generate_source_multiple_out_new_.gen_generate_source_multiple_out_new $
         ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py
+    depfile = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/generate_source_multiple_out_new.d
+    deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp
+    bob_config = %REDACTED_CONFIG_FILE%
+    bob_config_opts = 
+    gen_dir = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new
     tool_1 = ${g.bob.SrcDir}/generator.py
 
 build generate_source_multiple_out_new: phony $
@@ -228,7 +235,7 @@ build generate_source_multiple_out_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:115:1
+# Defined: build.bp:116:1
 
 rule m.generate_source_single_dependend_nested_new_.gen_generate_source_single_dependend_nested_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in deps.cpp
@@ -254,7 +261,7 @@ build generate_source_single_dependend_nested_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:103:1
+# Defined: build.bp:104:1
 
 rule m.generate_source_single_dependend_new_.gen_generate_source_single_dependend_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in single.cpp
@@ -278,7 +285,7 @@ build generate_source_single_dependend_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:61:1
+# Defined: build.bp:62:1
 
 rule m.generate_source_single_level1_new_.gen_generate_source_single_level1_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in single.cpp
@@ -303,7 +310,7 @@ build generate_source_single_level1_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:71:1
+# Defined: build.bp:72:1
 
 rule m.generate_source_single_level2_new_.gen_generate_source_single_level2_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in level_1_single.cpp
@@ -328,7 +335,7 @@ build generate_source_single_level2_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:81:1
+# Defined: build.bp:82:1
 
 rule m.generate_source_single_level3_new_.gen_generate_source_single_level3_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in level_2_single.cpp
@@ -353,7 +360,7 @@ build generate_source_single_level3_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:91:1
+# Defined: build.bp:92:1
 
 rule m.generate_source_single_nested_with_extra_new_.gen_generate_source_single_nested_with_extra_new
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in level_2_single.cpp
@@ -465,7 +472,7 @@ default host_and_target_supported_binary_new__target
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:155:1
+# Defined: build.bp:156:1
 
 rule m.multi_src_tag_.gen_multi_src_tag
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in ${generate_source_single_new_out}
@@ -539,7 +546,7 @@ build use_target_specific_library_new: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:149:1
+# Defined: build.bp:150:1
 
 rule m.validate_install_generate_sources_new_.gen_validate_install_generate_sources_new
     command = touch ${_out_}
@@ -560,7 +567,7 @@ build validate_install_generate_sources_new: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:127:1
+# Defined: build.bp:128:1
 
 m.validate_link_generate_sources_new_target.cflags = 
 m.validate_link_generate_sources_new_target.cxxflags = 

@@ -58,7 +58,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:175:1
+# Defined: build.bp:176:1
 
 rule m.gen_source_depfile_.gen_gen_source_depfile
     command = ${tool} -o ${_out_} -d ${depfile} ${in}
@@ -81,7 +81,7 @@ default gen_source_depfile
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:185:1
+# Defined: build.bp:186:1
 
 rule m.gen_source_depfile_with_implicit_outs_.gen_gen_source_depfile_with_implicit_outs
     command = ${tool} --gen-implicit-out -o ${gen_dir}/output.txt -d ${depfile} ${in}
@@ -111,7 +111,7 @@ default gen_source_depfile_with_implicit_outs
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:214:1
+# Defined: build.bp:215:1
 
 rule m.gen_source_globbed_exclude_implicit_sources_.gen_gen_source_globbed_exclude_implicit_sources
     command = python ${tool} --src-dir ${module_dir} --use-c --out ${_out_}
@@ -136,7 +136,7 @@ default gen_source_globbed_exclude_implicit_sources
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:205:1
+# Defined: build.bp:206:1
 
 rule m.gen_source_globbed_implicit_sources_.gen_gen_source_globbed_implicit_sources
     command = python ${tool} --src-dir ${module_dir} --use-a --out ${_out_}
@@ -161,7 +161,7 @@ default gen_source_globbed_implicit_sources
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:256:1
+# Defined: build.bp:257:1
 
 rule m.generate_feature_command_.gen_generate_feature_command
     command = python3 ${tool_1} --in ${in} --out ${_out_} --config linux_config_name
@@ -206,7 +206,7 @@ build generate_source_multiple_in: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:68:1
+# Defined: build.bp:69:1
 
 rule m.generate_source_multiple_in_out_.gen_generate_source_multiple_in_out
     command = python ${tool} --in ${in} --out ${_out_} --expect-in before_generate.in before_generate2.in before_generate3.in
@@ -235,15 +235,22 @@ build generate_source_multiple_in_out: phony $
 # Defined: build.bp:54:1
 
 rule m.generate_source_multiple_out_.gen_generate_source_multiple_out
-    command = python ${tool} --in ${in} --out ${_out_} --expect-in before_generate.in
+    command = python ${tool} --in ${in} --out ${_out_} --depfile ${depfile} --config ${bob_config} --out-src ${gen_dir}/common.cpp --expect-in before_generate.in
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out.cpp $
-        ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out2.cpp: $
+build ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out2.cpp: $
+        g.bob.touch $
+        ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out.cpp
+
+build ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out.cpp: $
         m.generate_source_multiple_out_.gen_generate_source_multiple_out $
         ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py
+    depfile = ${g.bob.BuildDir}/gen/generate_source_multiple_out/generate_source_multiple_out.d
+    deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_out/multiple_out2.cpp
+    bob_config = %REDACTED_CONFIG_FILE%
+    gen_dir = ${g.bob.BuildDir}/gen/generate_source_multiple_out
     tool = ${g.bob.SrcDir}/generator.py
 
 build generate_source_multiple_out: phony $
@@ -277,7 +284,7 @@ build generate_source_single: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:127:1
+# Defined: build.bp:128:1
 
 rule m.generate_source_single_dependend_.gen_generate_source_single_dependend
     command = python ${tool} --in ${in} ${generate_source_single_out} --out ${_out_} --expect-in before_generate.in single.cpp
@@ -301,7 +308,7 @@ build generate_source_single_dependend: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:140:1
+# Defined: build.bp:141:1
 
 rule m.generate_source_single_dependend_nested_.gen_generate_source_single_dependend_nested
     command = python ${tool} --in ${in} --out ${_out_} --expect-in before_generate.in deps.cpp
@@ -324,7 +331,7 @@ build generate_source_single_dependend_nested: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:84:1
+# Defined: build.bp:85:1
 
 rule m.generate_source_single_level1_.gen_generate_source_single_level1
     command = python ${tool} --in ${in} --out ${_out_} --expect-in single.cpp
@@ -346,7 +353,7 @@ build generate_source_single_level1: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:94:1
+# Defined: build.bp:95:1
 
 rule m.generate_source_single_level2_.gen_generate_source_single_level2
     command = python ${tool} --in ${in} --out ${_out_} --expect-in level_1_single.cpp
@@ -368,7 +375,7 @@ build generate_source_single_level2: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:104:1
+# Defined: build.bp:105:1
 
 rule m.generate_source_single_level3_.gen_generate_source_single_level3
     command = python ${tool} --in ${in} --out ${_out_} --expect-in level_2_single.cpp
@@ -390,7 +397,7 @@ build generate_source_single_level3: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:114:1
+# Defined: build.bp:115:1
 
 rule m.generate_source_single_nested_with_extra_.gen_generate_source_single_nested_with_extra
     command = python ${tool} --in ${in} --out ${_out_} --expect-in before_generate.in level_2_single.cpp
@@ -415,7 +422,7 @@ build generate_source_single_nested_with_extra: phony $
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:236:1
+# Defined: build.bp:237:1
 
 m.host_and_target_supported_binary_host.cflags = 
 m.host_and_target_supported_binary_host.conlyflags = 
@@ -446,7 +453,7 @@ default host_and_target_supported_binary__host
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:236:1
+# Defined: build.bp:237:1
 
 m.host_and_target_supported_binary_target.cflags = 
 m.host_and_target_supported_binary_target.conlyflags = 
@@ -507,7 +514,7 @@ default multiple_tools_generate_sources
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:227:1
+# Defined: build.bp:228:1
 
 m.use_miscellaneous_generated_source_tests_target.cflags = 
 m.use_miscellaneous_generated_source_tests_target.conlyflags = 
@@ -552,7 +559,7 @@ default use_miscellaneous_generated_source_tests
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:248:1
+# Defined: build.bp:249:1
 
 rule m.use_target_specific_library_.gen_use_target_specific_library
     command = test $$(basename ${host_and_target_supported_binary_out}) = host_binary && cp ${host_and_target_supported_binary_out} ${_out_}
@@ -574,7 +581,7 @@ default use_target_specific_library
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:198:1
+# Defined: build.bp:199:1
 
 rule m.validate_install_generate_sources_.gen_validate_install_generate_sources
     command = touch ${_out_}
@@ -596,7 +603,7 @@ default validate_install_generate_sources
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:153:1
+# Defined: build.bp:154:1
 
 m.validate_link_generate_sources_target.cflags = 
 m.validate_link_generate_sources_target.cxxflags = 

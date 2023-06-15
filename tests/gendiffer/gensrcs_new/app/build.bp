@@ -39,7 +39,8 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python $(location) --in $(in) --out $(out) --config ${bob_config} --depfile ${depfile} --out-src ${gen_dir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}",
+    depfile: true,
 }
 
 bob_genrule {
