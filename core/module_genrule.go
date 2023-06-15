@@ -49,7 +49,6 @@ type AndroidGenerateCommonProps struct {
 	Exclude_srcs        []string
 	Cmd                 *string
 	Depfile             *bool
-	Enabled             *bool
 	Export_include_dirs []string
 	Tool_files          []string
 	Tools               []string
@@ -122,10 +121,10 @@ func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) 
 
 type ModuleGenruleCommon struct {
 	module.ModuleBase
-	EnableableProps
 	simpleOutputProducer
 	headerProducer
 	Properties struct {
+		EnableableProps
 		Features
 		AndroidGenerateCommonProps
 	}
@@ -164,7 +163,11 @@ func (m *ModuleGenruleCommon) Features() *Features {
 }
 
 func (m *ModuleGenruleCommon) FeaturableProperties() []interface{} {
-	return []interface{}{&m.Properties.AndroidGenerateCommonProps}
+	return []interface{}{&m.Properties.EnableableProps, &m.Properties.AndroidGenerateCommonProps}
+}
+
+func (m *ModuleGenruleCommon) getEnableableProps() *EnableableProps {
+	return &m.Properties.EnableableProps
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
@@ -241,10 +244,6 @@ func (m *ModuleGenrule) shortName() string {
 	return m.Name()
 }
 
-func (m *ModuleGenrule) getEnableableProps() *EnableableProps {
-	return &m.EnableableProps
-}
-
 func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getGenerator(ctx)
@@ -264,7 +263,7 @@ func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interfac
 	module := &ModuleGenrule{}
 
 	module.ModuleGenruleCommon.init(&config.Properties,
-		AndroidGenerateCommonProps{}, AndroidGenerateRuleProps{})
+		AndroidGenerateCommonProps{}, AndroidGenerateRuleProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
