@@ -172,6 +172,29 @@ bob_generate_source {
     cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
 }
 
+// Verify `cmd` property with exposing variables
+/////////////////////////////////////////////////////////////////////////////////////
+bob_generate_source {
+    name: "generate_feature_command",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "out1.out",
+    ],
+    tools: ["generator.py"],
+    cmd: "python3 ${tool generator.py} --in ${in} --out ${out}",
+    linux: {
+        cmd: "python3 ${tool generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
+        depfile: true,
+    },
+    android: {
+        cmd: "python3 ${tool generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
+        depfile: true,
+    },
+    build_by_default: true,
+}
+
 // Depends cases
 /////////////////////////////////////////////////////////////////////////////////////
 

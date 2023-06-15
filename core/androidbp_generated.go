@@ -129,12 +129,47 @@ func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, 
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
+func expandGenruleCmd(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, s string) string {
+	return utils.Expand(s, func(s string) string {
+		switch s {
+		case "src_dir":
+			// TODO: Implement me
+			return "$(" + s + ")"
+		case "module_dir":
+			// TODO: Implement me
+			return "$(" + s + ")"
+		case "gen_dir":
+			return "$(genDir)"
+		case "bob_config":
+			if !proptools.Bool(gc.Properties.Depfile) {
+				utils.Die("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name())
+			}
+			return config.GetEnvironmentVariables().ConfigFile
+		case "bob_config_json":
+			if !proptools.Bool(gc.Properties.Depfile) {
+				utils.Die("%s references Bob config but depfile not enabled. "+
+					"Config dependencies must be declared via a depfile!", gc.Name())
+			}
+			return config.GetEnvironmentVariables().ConfigJSON
+		case "bob_config_opts":
+			return config.GetEnvironmentVariables().ConfigOpts
+		default:
+			return "$(" + s + ")"
+		}
+	})
+}
+
 func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
 	m.AddStringList("srcs", gc.Properties.Srcs)
 	m.AddStringList("exclude_srcs", gc.Properties.Exclude_srcs)
 	// `Cmd` has to be parsed back from ${(name)_out} to $(location name)
 	changeCmdToolFilesToLocation(gc)
-	m.AddOptionalString("cmd", gc.Properties.Cmd)
+
+	// expand special variables
+	cmd := expandGenruleCmd(gc, ctx, *gc.Properties.Cmd)
+
+	m.AddString("cmd", strings.TrimSpace(cmd))
 	m.AddOptionalBool("depfile", gc.Properties.Depfile)
 	m.AddOptionalBool("enabled", gc.Properties.Enabled)
 	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)

@@ -128,6 +128,29 @@ bob_genrule {
 // Nested cases
 /////////////////////////////////////////////////////////////////////////////////////
 
+// Verify `cmd` property with exposing variables
+/////////////////////////////////////////////////////////////////////////////////////
+bob_genrule {
+    name: "generate_feature_command_new",
+    srcs: [
+        "before_generate.in",
+    ],
+    out: [
+        "out1.out",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python3 $(location generator.py) --in $(in) --out $(out)",
+    linux: {
+        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --depfile ${depfile} --config ${bob_config}",
+        depfile: true,
+    },
+    android: {
+        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --depfile ${depfile} --config ${bob_config}",
+        depfile: true,
+    },
+    build_by_default: true,
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Depends cases
 

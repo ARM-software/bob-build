@@ -27,6 +27,8 @@ parser.add_argument(
 parser.add_argument(
     "--expect-in", nargs="*", action="store", help="Basenames of expected input files"
 )
+parser.add_argument("--config", nargs="?", action="store", help="config file")
+parser.add_argument("--depfile", nargs="?", action="store", help="dependency file")
 
 args = parser.parse_args()
 
@@ -43,8 +45,20 @@ for input_file in args.input:
         print("Input file doesn't exist: " + input_file)
         sys.exit(1)
 
+if args.depfile:
+    template = "{target}: {deps}\n"
+    dep_str = " \\\n\t".join(args.input)
+    with open(args.depfile, "w") as depfile:
+        depfile.write(template.format(target=args.output, deps=dep_str))
+
 for out in args.output:
     file_name = os.path.basename(out)
     without_extension = os.path.splitext(file_name)[0]
     with open(out, "w") as outfile:
         outfile.write("void output_%s(){}\n" % (without_extension))
+
+if args.config:
+    config_file = os.path.basename(args.config)
+    if config_file != "bob.config":
+        print("Wrong config file name: " + args.config)
+        sys.exit(1)

@@ -108,6 +108,8 @@ func redact(args *generationArgs, data []byte) []byte {
 	data = regexp.MustCompile(`(_check_buildbp_updates_)[a-f0-9]{10}`).ReplaceAll(data, redacted)
 	data = regexp.MustCompile(`(--hash )[a-f0-9]{40}`).ReplaceAll(data, redacted)
 	data = regexp.MustCompile(args.BobRootAbsolute).ReplaceAll(data, []byte("redacted"))
+	data = regexp.MustCompile(args.ConfigFile).ReplaceAll(data, []byte("%REDACTED_CONFIG_FILE%"))
+	data = regexp.MustCompile(args.ConfigJson).ReplaceAll(data, []byte("%REDACTED_CONFIG_JSON%"))
 	return data
 }
 

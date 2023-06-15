@@ -102,9 +102,9 @@ genrule_bob {
         "multiple_out.cpp",
         "multiple_out2.cpp",
     ],
-    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+    cmd: "python ${tool} --in ${in} --out ${out} --depfile ${depfile} --config %REDACTED_CONFIG_FILE% --out-src ${gen_dir}/common.cpp --expect-in before_generate.in",
     tools: ["generator.py"],
-    depfile: false,
+    depfile: true,
 }
 
 genrule_bob {
