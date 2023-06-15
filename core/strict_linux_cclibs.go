@@ -19,11 +19,12 @@ package core
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/toolchain"
-	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
 
@@ -69,21 +70,28 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
-	var cflagsList []string = nil
-	for _, local_define := range m.Properties.Local_defines {
-		cflagsList = append(cflagsList, ("-D" + local_define))
-	}
-	for _, local_define := range m.Properties.Defines {
-		// TODO: For legacy libraries, this gets set in the mutator, it is unsymmetrical to set
-		// this up here.
-		cflagsList = append(cflagsList, ("-D" + local_define))
-	}
-	cflagsList = append(cflagsList, m.Properties.Copts...)
+	cflagsList := []string{}
 
-	ctx.Variable(pctx, "asflags", utils.Join(astargetflags))
-	ctx.Variable(pctx, "cflags", utils.Join(cflagsList))
-	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags))
-	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags))
+	m.FlagsInTransitive(ctx).GroupByType(flag.TypeInclude).ForEach(
+		func(f flag.Flag) bool {
+			switch {
+			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
+				cctargetflags = append(cctargetflags, f.ToString())
+			case f.MatchesType(flag.TypeCC | flag.TypeInclude):
+				cflagsList = append(cflagsList, f.ToString())
+			case f.MatchesType(flag.TypeAsm):
+				astargetflags = append(astargetflags, f.ToString())
+			case f.MatchesType(flag.TypeCpp):
+				cxxtargetflags = append(cxxtargetflags, f.ToString())
+			}
+			return true
+		},
+	)
+
+	ctx.Variable(pctx, "asflags", strings.Join(astargetflags, " "))
+	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
+	ctx.Variable(pctx, "conlyflags", strings.Join(cctargetflags, " "))
+	ctx.Variable(pctx, "cxxflags", strings.Join(cxxtargetflags, " "))
 
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
