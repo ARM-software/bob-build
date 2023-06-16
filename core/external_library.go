@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 
@@ -77,6 +78,62 @@ func (m *ModuleExternalLibrary) exportLdlibs() []string                 { return
 func (m *ModuleExternalLibrary) exportSharedLibs() []string             { return []string{} }
 func (m *ModuleExternalLibrary) exportSystemIncludeDirs() []string      { return []string{} }
 func (m *ModuleExternalLibrary) exportLocalSystemIncludeDirs() []string { return []string{} }
+
+func (m *ModuleExternalLibrary) FlagsIn() flag.Flags {
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Export_cflags",
+			Tag:          flag.TypeCC,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Export_ldflags",
+			Tag:          flag.TypeLinker,
+			Factory:      flag.FromStringOwned,
+		},
+	}
+
+	return flag.ParseFromProperties(nil, lut, m.Properties)
+}
+
+func (m *ModuleExternalLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (ret flag.Flags) {
+	m.FlagsIn().ForEachIf(
+		func(f flag.Flag) bool {
+			return !ret.Contains(f)
+		},
+		func(f flag.Flag) bool {
+			ret = append(ret, f)
+			return true
+		})
+
+	flag.ReferenceFlagsInTransitive(ctx).ForEachIf(
+		func(f flag.Flag) bool {
+			return !ret.Contains(f)
+		},
+		func(f flag.Flag) bool {
+			ret = append(ret, f)
+			return true
+		})
+
+	return
+}
+
+func (m *ModuleExternalLibrary) FlagsOut() flag.Flags {
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Export_cflags",
+			Tag:          flag.TypeCC | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Export_ldflags",
+			Tag:          flag.TypeLinker | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+	}
+
+	return flag.ParseFromProperties(nil, lut, m.Properties)
+}
 
 var _ propertyExporter = (*ModuleExternalLibrary)(nil)
 var _ splittable = (*ModuleExternalLibrary)(nil)

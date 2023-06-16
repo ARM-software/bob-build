@@ -15,6 +15,23 @@
  * limitations under the License.
  */
 
+bob_external_shared_library {
+    name: "external_shared",
+    builder_ninja: {
+        export_cflags: ["-DEXTERNAL_SHARED"],
+        export_ldflags: ["ldflags"],
+        ldlibs: ["libs"],
+    },
+}
+
+bob_external_header_library {
+    name: "external_header",
+}
+
+bob_external_static_library {
+    name: "external_static",
+}
+
 bob_static_library {
     name: "lib_provider",
     export_local_system_include_dirs: [
@@ -28,6 +45,12 @@ bob_static_library {
     ],
     include_dirs: [
         "include/lib/provider",
+    ],
+
+    shared_libs: ["external_shared"],
+    static_libs: [
+        "external_static",
+        "external_header",
     ],
 
     srcs: [
@@ -52,11 +75,17 @@ bob_static_library {
     ],
 
     export_cflags: ["-DCFLAGS_PROVIDER_EXPORT"],
+
 }
 
 bob_static_library {
     name: "lib_consumer",
-    static_libs: ["lib_provider"],
+    static_libs: [
+        "lib_provider",
+        "external_static",
+        "external_header",
+    ],
+    shared_libs: ["external_shared"],
     export_local_system_include_dirs: [
         "export/local/system/include/lib/consumer",
     ],
@@ -97,7 +126,10 @@ bob_binary {
     static_libs: [
         "lib_provider",
         "lib_consumer",
+        "external_static",
+        "external_header",
     ],
+    shared_libs: ["external_shared"],
     local_include_dirs: [
         "local/include/bin/consumer",
     ],
@@ -125,4 +157,5 @@ bob_binary {
     ldflags: [
         "-O3",
     ],
+
 }

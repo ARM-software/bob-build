@@ -5,11 +5,14 @@ outside of Bob.
 
 ## Full specification of `bob_external_[header|shared|static]_library` properties
 
-The external library types only support a single property, `name`, which should
-match the name of the corresponding Android library.
+The `name` property should match the name of the corresponding Android library.
+For detailed documentation of the attributes shown below please see [common module properties](common_module_properties.md).
 
 ```bp
-bob_external_static_library {
+bob_external_shared_library {
     name: "libname",
+    export_cflags: ["..."],
+    export_ldflags: ["..."],
+    ldlibs: ["..."],
 }
 ```

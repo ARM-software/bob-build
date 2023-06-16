@@ -64,10 +64,10 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:95:1
+# Defined: build.bp:124:1
 
 m.bin_consumer_target.asflags = -DASFLAGS_BIN
-m.bin_consumer_target.cflags = -DCFLAGS_BIN -DCFLAGS_PROVIDER_EXPORT -I${g.bob.SrcDir}/local/include/bin/consumer -Iinclude/bin/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/consumer -isystem ${g.bob.SrcDir}/export/local/system/include/lib/consumer
+m.bin_consumer_target.cflags = -DCFLAGS_BIN -DCFLAGS_PROVIDER_EXPORT -DEXTERNAL_SHARED -I${g.bob.SrcDir}/local/include/bin/consumer -Iinclude/bin/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/consumer -isystem ${g.bob.SrcDir}/export/local/system/include/lib/consumer
 m.bin_consumer_target.conlyflags = -DCONLYFLAGS_BIN
 m.bin_consumer_target.cxxflags = -DCXXFLAGS_BIN
 
@@ -98,11 +98,11 @@ build ${g.bob.BuildDir}/target/executable/bin_consumer: g.bob.executable $
         ${g.bob.BuildDir}/target/static/lib_consumer.a $
         ${g.bob.BuildDir}/target/static/lib_provider.a
     build_wrapper = 
-    ldflags = -O3 -Wl,--as-needed
+    ldflags = -O3 -Wl,--as-needed ldflags
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    shared_libs_flags = libs -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = ${g.bob.BuildDir}/target/static/lib_consumer.a ${g.bob.BuildDir}/target/static/lib_provider.a
 
 build bin_consumer: phony ${g.bob.BuildDir}/target/executable/bin_consumer
@@ -113,10 +113,10 @@ default bin_consumer
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:57:1
+# Defined: build.bp:81:1
 
 m.lib_consumer_target.asflags = -DASFLAGS_LIB
-m.lib_consumer_target.cflags = -DCFLAGS_LIB -DCFLAGS_PROVIDER_EXPORT -I${g.bob.SrcDir}/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/system/include/lib/consumer -Iinclude/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider
+m.lib_consumer_target.cflags = -DCFLAGS_LIB -DCFLAGS_PROVIDER_EXPORT -DEXTERNAL_SHARED -I${g.bob.SrcDir}/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/consumer -I${g.bob.SrcDir}/export/local/system/include/lib/consumer -Iinclude/lib/consumer -I${g.bob.SrcDir}/export/local/include/lib/provider -isystem ${g.bob.SrcDir}/export/local/system/include/lib/provider
 m.lib_consumer_target.conlyflags = -DCONLYFLAGS_LIB
 m.lib_consumer_target.cxxflags = -DCXXFLAGS_LIB
 
@@ -154,10 +154,10 @@ build lib_consumer: phony ${g.bob.BuildDir}/target/static/lib_consumer.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:35:1
 
 m.lib_provider_target.asflags = -DASFLAGS_PROVIDER_LIB
-m.lib_provider_target.cflags = -DCFLAGS_PROVIDER_LIB -DCFLAGS_PROVIDER_EXPORT -I${g.bob.SrcDir}/local/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/provider -I${g.bob.SrcDir}/export/local/system/include/lib/provider -Iinclude/lib/provider
+m.lib_provider_target.cflags = -DCFLAGS_PROVIDER_LIB -DCFLAGS_PROVIDER_EXPORT -DEXTERNAL_SHARED -I${g.bob.SrcDir}/local/include/lib/provider -I${g.bob.SrcDir}/export/local/include/lib/provider -I${g.bob.SrcDir}/export/local/system/include/lib/provider -Iinclude/lib/provider
 m.lib_provider_target.conlyflags = -DCONLYFLAGS_PROVIDER_LIB
 m.lib_provider_target.cxxflags = -DCXXFLAGS_PROVIDER_LIB
 

@@ -22,9 +22,12 @@ cc_binary {
     cppflags: ["-DCXXFLAGS_BIN"],
     include_dirs: ["include/bin/consumer"],
     local_include_dirs: ["local/include/bin/consumer"],
+    shared_libs: ["external_shared"],
     static_libs: [
         "lib_consumer",
         "lib_provider",
+        "external_static",
+        "external_header",
     ],
     ldflags: ["-O3"],
 }
@@ -47,7 +50,12 @@ cc_library_static {
         "local/include/lib/consumer",
         "export/local/system/include/lib/consumer",
     ],
-    static_libs: ["lib_provider"],
+    shared_libs: ["external_shared"],
+    static_libs: [
+        "lib_provider",
+        "external_static",
+        "external_header",
+    ],
     ldflags: ["-O2"],
     export_include_dirs: ["export/local/include/lib/consumer"],
     export_system_include_dirs : ["export/local/system/include/lib/consumer"],
@@ -71,6 +79,11 @@ cc_library_static {
     local_include_dirs: [
         "local/include/lib/provider",
         "export/local/system/include/lib/provider",
+    ],
+    shared_libs: ["external_shared"],
+    static_libs: [
+        "external_static",
+        "external_header",
     ],
     ldflags: ["-O1"],
     export_include_dirs: ["export/local/include/lib/provider"],
