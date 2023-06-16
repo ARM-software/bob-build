@@ -24,7 +24,6 @@ import (
 	"regexp"
 
 	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -61,8 +60,6 @@ type libraryInterface interface {
 	propertyEscapeInterface
 	propertyExporter
 	FileConsumer
-	flag.Consumer
-	flag.Provider
 }
 
 var _ libraryInterface = (*ModuleLibrary)(nil) // impl check
@@ -213,134 +210,6 @@ func (m *ModuleLibrary) getEscapeProperties() []*[]string {
 		&m.Properties.Ldflags}
 }
 
-func (m *ModuleLibrary) getFlagInLut() flag.FlagParserTable {
-	return flag.FlagParserTable{
-		{
-			PropertyName: "Cflags",
-			Tag:          flag.TypeCC,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Export_cflags",
-			Tag:          flag.TypeCC,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Asflags",
-			Tag:          flag.TypeAsm,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Conlyflags",
-			Tag:          flag.TypeC,
-			Factory:      flag.FromStringOwned,
-		},
-
-		{
-			PropertyName: "Cxxflags",
-			Tag:          flag.TypeCpp,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Ldflags",
-			Tag:          flag.TypeLinker,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Export_ldflags",
-			Tag:          flag.TypeLinker,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Local_include_dirs",
-			Tag:          flag.TypeIncludeLocal,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_local_include_dirs",
-			Tag:          flag.TypeIncludeLocal,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		// For system includes, the path used to compile the current module uses `-I`,
-		// the path to consumer modules will be using `-isystem` instead. For this reason `flag.TypeIncludeSystem`
-		// is not present in this getter.
-		{
-			PropertyName: "Export_local_system_include_dirs",
-			Tag:          flag.TypeIncludeLocal,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Include_dirs",
-			Tag:          flag.TypeUnset,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_include_dirs",
-			Tag:          flag.TypeUnset,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_system_include_dirs",
-			Tag:          flag.TypeUnset,
-			Factory:      flag.FromIncludePathOwned,
-		},
-	}
-}
-
-func (m *ModuleLibrary) getFlagOutLut() flag.FlagParserTable {
-	return flag.FlagParserTable{
-		{
-			PropertyName: "Export_cflags",
-			Tag:          flag.TypeCC | flag.TypeExported,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Export_ldflags",
-			Tag:          flag.TypeLinker | flag.TypeExported,
-			Factory:      flag.FromStringOwned,
-		},
-		{
-			PropertyName: "Export_local_include_dirs",
-			Tag:          flag.TypeIncludeLocal | flag.TypeExported,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_local_system_include_dirs",
-			Tag:          flag.TypeIncludeLocal | flag.TypeExported | flag.TypeIncludeSystem,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_include_dirs",
-			Tag:          flag.TypeExported,
-			Factory:      flag.FromIncludePathOwned,
-		},
-		{
-			PropertyName: "Export_system_include_dirs",
-			Tag:          flag.TypeExported | flag.TypeIncludeSystem,
-			Factory:      flag.FromIncludePathOwned,
-		},
-	}
-}
-
-func (m *ModuleLibrary) FlagsIn() flag.Flags {
-	return flag.ParseFromProperties(nil, m.getFlagInLut(), m.Properties)
-}
-
-func (m *ModuleLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (flags flag.Flags) {
-	// TODO: Local flags should take priority, they do not currently to match the pre-refactor behaviour.
-	flags = append(flags, m.FlagsIn()...)
-	flags = append(flags, flag.ReferenceFlagsInTransitive(ctx)...)
-	return
-}
-
-func (m *ModuleLibrary) FlagsOut() flag.Flags {
-	return flag.ParseFromProperties(nil, m.getFlagOutLut(), m.Properties)
-}
-
-func (m *ModuleLibrary) FlagsOutTargets() []string {
-	return append(m.Properties.Reexport_libs, m.Properties.Export_generated_headers...)
-}
-
 func (m *ModuleLibrary) getLegacySourceProperties() *LegacySourceProps {
 	return &m.Properties.LegacySourceProps
 }
@@ -384,9 +253,6 @@ func (m *ModuleLibrary) shortName() string {
 }
 
 func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
-	// TODO: We no longer use the `includeDirs` part of this function, this is now replaced by the flag interface.
-	// orderOnly is still used by the backend and should be replaced by the file interface. Once that is done, this
-	// function can be removed.
 	visited := map[string]bool{}
 
 	mainModule := ctx.Module()

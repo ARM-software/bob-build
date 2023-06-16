@@ -19,7 +19,6 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -118,14 +117,6 @@ func (m *ModuleGenerateSource) OutFiles() file.Paths {
 
 func (m *ModuleGenerateSource) OutFileTargets() []string {
 	return []string{}
-}
-
-func (m *ModuleGenerateSource) FlagsOut() (flags flag.Flags) {
-	gc, _ := getGenerateCommon(m)
-	for _, str := range gc.Properties.Export_gen_include_dirs {
-		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
-	}
-	return
 }
 
 // Return an inouts structure naming all the files associated with a
