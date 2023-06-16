@@ -97,19 +97,13 @@ func (m *ModuleExternalLibrary) FlagsIn() flag.Flags {
 }
 
 func (m *ModuleExternalLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (ret flag.Flags) {
-	m.FlagsIn().ForEachIf(
-		func(f flag.Flag) bool {
-			return !ret.Contains(f)
-		},
+	m.FlagsIn().ForEach(
 		func(f flag.Flag) bool {
 			ret = append(ret, f)
 			return true
 		})
 
-	flag.ReferenceFlagsInTransitive(ctx).ForEachIf(
-		func(f flag.Flag) bool {
-			return !ret.Contains(f)
-		},
+	flag.ReferenceFlagsInTransitive(ctx).ForEach(
 		func(f flag.Flag) bool {
 			ret = append(ret, f)
 			return true
