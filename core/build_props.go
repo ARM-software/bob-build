@@ -67,9 +67,6 @@ type BuildProps struct {
 	Reexport_libs []string `bob:"first_overrides"`
 	// Internal property for collecting libraries with reexported flags and include paths
 	ResolvedReexportedLibs []string `blueprint:"mutated"`
-	// Same as above except for generated header providers which are not target variant aware and hence cannot
-	// re use the same tagging.
-	ResolvedGeneratedHeaders []string `blueprint:"mutated"`
 
 	ResolvedStaticLibs []string `blueprint:"mutated"`
 
