@@ -29,38 +29,19 @@ import (
 )
 
 func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
-	accumlatedDefines := []string{}
 	accumlatedDeps := []string{}
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
-		strictLib, ok := dep.(*ModuleStrictLibrary)
-		if ok {
-			for _, define := range strictLib.Properties.Defines {
-				accumlatedDefines = append(accumlatedDefines, define)
-			}
-			for _, dep := range strictLib.Properties.Deps {
-				accumlatedDeps = append(accumlatedDeps, dep)
-			}
-		}
-		legacyLib, ok := getLibrary(dep)
-		if ok {
-			for _, define := range legacyLib.Properties.Defines {
-				accumlatedDefines = append(accumlatedDefines, define)
-			}
+		if strictLib, ok := dep.(*ModuleStrictLibrary); ok {
+			accumlatedDeps = append(accumlatedDeps, strictLib.Properties.Deps...)
 		}
 	})
 
-	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
-		sl.Properties.Defines = append(sl.Properties.Defines, accumlatedDefines...)
-		sl.Properties.Deps = append(sl.Properties.Deps, accumlatedDeps...)
+	if l, ok := ctx.Module().(*ModuleStrictLibrary); ok {
+		l.Properties.Deps = append(l.Properties.Deps, accumlatedDeps...)
 		ctx.AddDependency(ctx.Module(), StaticTag, accumlatedDeps...)
 	} else if l, ok := getLibrary(ctx.Module()); ok {
-		for _, define := range accumlatedDefines {
-			l.Properties.Cflags = append(l.Properties.Cflags, "-D"+define)
-			l.Properties.Defines = append(l.Properties.Defines, define)
-			// TODO: how we decide on static vs. shared?
-			l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
-			ctx.AddVariationDependencies(nil, StaticTag, accumlatedDeps...)
-		}
+		l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
+		ctx.AddVariationDependencies(nil, StaticTag, accumlatedDeps...)
 	}
 }
 

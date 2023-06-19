@@ -27,6 +27,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/ccflags"
@@ -243,11 +244,21 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 			ctx.ModuleName(), m.Properties.Export_system_include_dirs)
 	}
 
-	// Soong deals with exported include directories between library
-	// modules, but it doesn't export cflags.
-	_, _, _, _, exported_cflags := m.GetExportedVariables(ctx)
+	cflags := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags)
 
-	cflags := utils.NewStringSlice(m.Properties.Cflags, m.Properties.Export_cflags, exported_cflags)
+	m.FlagsInTransitive(ctx).Filtered(
+		func(f flag.Flag) bool {
+			// Soong deals with exported include directories between library
+			// modules, but it doesn't export cflags.
+			return f.MatchesType(flag.TypeExported) &&
+				f.MatchesType(flag.TypeCC) &&
+				!f.MatchesType(flag.TypeInclude)
+		},
+	).ForEach(
+		func(f flag.Flag) {
+			cflags = append(cflags, f.ToString())
+		},
+	)
 
 	sharedLibs := bpModuleNamesForDeps(ctx, m.Properties.Shared_libs)
 	staticLibs := bpModuleNamesForDeps(ctx, m.Properties.ResolvedStaticLibs)
