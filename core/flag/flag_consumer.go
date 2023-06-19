@@ -60,7 +60,7 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 	})
 
 	// Handle transitive flags. Any previously visited module should be skipped as Transitive flags are normally exported as well.
-	ctx.WalkDeps(func(parent, child blueprint.Module) bool {
+	ctx.WalkDeps(func(child, parent blueprint.Module) bool {
 		if visited[child.Name()] {
 			return true
 		}
@@ -68,7 +68,7 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 		if provider, ok := child.(Provider); ok {
 			flags := provider.FlagsOut().Filtered(
 				func(f Flag) bool {
-					return f.IsType(TypeTransitive)
+					return f.MatchesType(TypeTransitive)
 				},
 			)
 

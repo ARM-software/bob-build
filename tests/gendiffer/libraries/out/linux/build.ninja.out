@@ -1321,7 +1321,7 @@ default sl_main_whole
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:432:1
 
-m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE -DFORWARDED_DEFINE
+m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_dep_host.cxxflags = 
 
 build $
@@ -1356,7 +1356,7 @@ default strict_lib_binary_with_dep
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:423:1
 
-m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE -DFORWARDED_DEFINE
+m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_forward_define_host.cxxflags = 
 
 build $
@@ -1391,7 +1391,7 @@ default strict_lib_binary_with_forward_define
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:398:1
 
-m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE -DFORWARDED_DEFINE
+m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE
 m.strict_lib_binary_with_transitive_define_host.cxxflags = 
 
 build $
