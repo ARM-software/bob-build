@@ -54,9 +54,8 @@ func (fs Flags) Iterate() <-chan Flag {
 
 func (fs Flags) Filtered(predicate func(Flag) bool) (ret Flags) {
 	fs.ForEachIf(predicate,
-		func(f Flag) bool {
+		func(f Flag) {
 			ret = append(ret, f)
-			return true
 		})
 	return
 }
@@ -70,18 +69,16 @@ func (fs Flags) Filtered(predicate func(Flag) bool) (ret Flags) {
 func (fs Flags) GroupByType(mask Type) (out Flags) {
 	buckets := map[Type]Flags{}
 
-	fs.ForEach(func(f Flag) bool {
+	fs.ForEach(func(f Flag) {
 		buckets[f.Type()&mask] = append(buckets[f.Type()&mask], f)
-		return true
 	})
 
 	// Keep the order of the result matching the order of tag declaration.
 	// The order of flags within a bucket should be unchanged.
 	for tag := TypeUnset; tag <= mask; tag++ {
 		if flags, ok := buckets[tag]; ok {
-			flags.ForEach(func(f Flag) bool {
+			flags.ForEach(func(f Flag) {
 				out = append(out, f)
-				return true
 			})
 		}
 	}
@@ -102,18 +99,14 @@ func (fs Flags) IteratePredicate(predicate func(Flag) bool) <-chan Flag {
 	return c
 }
 
-func (fs Flags) ForEach(functor func(Flag) bool) {
+func (fs Flags) ForEach(functor func(Flag)) {
 	for f := range fs.Iterate() {
-		if !functor(f) {
-			break
-		}
+		functor(f)
 	}
 }
 
-func (fs Flags) ForEachIf(predicate func(Flag) bool, functor func(Flag) bool) {
+func (fs Flags) ForEachIf(predicate func(Flag) bool, functor func(Flag)) {
 	for f := range fs.IteratePredicate(predicate) {
-		if !functor(f) {
-			break
-		}
+		functor(f)
 	}
 }

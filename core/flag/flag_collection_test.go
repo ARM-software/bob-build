@@ -64,9 +64,8 @@ func TestCollections(t *testing.T) {
 			},
 		)
 
-		no_exports.ForEach(func(f Flag) bool {
+		no_exports.ForEach(func(f Flag) {
 			assert.False(t, f.IsType(TypeExported))
-			return true
 		})
 	})
 

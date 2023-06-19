@@ -157,15 +157,13 @@ func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
 
 func (m *ModuleStrictLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (ret flag.Flags) {
 	m.FlagsIn().ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			ret = append(ret, f)
-			return true
 		})
 
 	flag.ReferenceFlagsInTransitive(ctx).ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			ret = append(ret, f)
-			return true
 		})
 
 	return
