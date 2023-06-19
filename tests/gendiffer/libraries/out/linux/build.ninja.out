@@ -305,6 +305,7 @@ m.lib_forward_defines_host.cxxflags =
 
 build ${g.bob.BuildDir}/host/objects/lib_forward_defines/src/libs/lib.cpp.o: $
         g.bob.cxx ${g.bob.SrcDir}/src/libs/lib.cpp
+    build_wrapper = 
     cflags = ${m.lib_forward_defines_host.cflags}
     cxxcompiler = g++
     cxxflags = ${m.lib_forward_defines_host.cxxflags}

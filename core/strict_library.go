@@ -232,6 +232,14 @@ func (m ModuleStrictLibrary) GetProperties() interface{} {
 	return m.Properties
 }
 
+func (m *ModuleStrictLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
+	return "", []string{}
+}
+
+func (m *ModuleStrictLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
+	return
+}
+
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})

@@ -343,7 +343,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 		"src_dir":         b.SourceDir(),
 	}
 
-	args["build_wrapper"], _ = props.getBuildWrapperAndDeps(ctx)
+	args["build_wrapper"], _ = props.GetBuildWrapperAndDeps(ctx)
 
 	dependents, fullDeps := getDependentArgsAndFiles(ctx, args)
 

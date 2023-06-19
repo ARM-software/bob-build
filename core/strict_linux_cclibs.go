@@ -19,11 +19,8 @@ package core
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
-	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
@@ -43,84 +40,6 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 		l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
 		ctx.AddVariationDependencies(nil, StaticTag, accumlatedDeps...)
 	}
-}
-
-func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
-	// TODO: Merge this backend with linux_cclibs once the interfaces are close enough.
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
-	as, astargetflags := tc.GetAssembler()
-	cc, cctargetflags := tc.GetCCompiler()
-	cxx, cxxtargetflags := tc.GetCXXCompiler()
-	cflagsList := []string{}
-
-	m.FlagsInTransitive(ctx).GroupByType(flag.TypeInclude).ForEach(
-		func(f flag.Flag) {
-			switch {
-			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
-				cctargetflags = append(cctargetflags, f.ToString())
-			case f.MatchesType(flag.TypeCC | flag.TypeInclude):
-				cflagsList = append(cflagsList, f.ToString())
-			case f.MatchesType(flag.TypeAsm):
-				astargetflags = append(astargetflags, f.ToString())
-			case f.MatchesType(flag.TypeCpp):
-				cxxtargetflags = append(cxxtargetflags, f.ToString())
-			}
-		},
-	)
-
-	ctx.Variable(pctx, "asflags", strings.Join(astargetflags, " "))
-	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
-	ctx.Variable(pctx, "conlyflags", strings.Join(cctargetflags, " "))
-	ctx.Variable(pctx, "cxxflags", strings.Join(cxxtargetflags, " "))
-
-	objectFiles := []string{}
-	nonCompiledDeps := []string{}
-
-	// TODO: use filetags here
-	m.GetFiles(ctx).ForEach(
-		func(source file.Path) bool {
-			var rule blueprint.Rule
-			args := make(map[string]string)
-			switch source.Ext() {
-			case ".s":
-				args["ascompiler"] = as
-				args["asflags"] = "$asflags"
-				rule = asRule
-			case ".S":
-				// Assembly with .S suffix must be preprocessed by the C compiler
-				fallthrough
-			case ".c":
-				args["ccompiler"] = cc
-				args["cflags"] = "$cflags"
-				args["conlyflags"] = "$conlyflags"
-				rule = ccRule
-			case ".cc":
-				fallthrough
-			case ".cpp":
-				args["cxxcompiler"] = cxx
-				args["cflags"] = "$cflags"
-				args["cxxflags"] = "$cxxflags"
-				rule = cxxRule
-			default:
-				nonCompiledDeps = append(nonCompiledDeps, source.BuildPath())
-				return true
-			}
-
-			output := m.ObjDir() + source.RelBuildPath() + ".o"
-
-			ctx.Build(pctx,
-				blueprint.BuildParams{
-					Rule:     rule,
-					Outputs:  []string{output},
-					Inputs:   []string{source.BuildPath()},
-					Args:     args,
-					Optional: true,
-				})
-			objectFiles = append(objectFiles, output)
-			return true
-		})
-
-	return objectFiles, nonCompiledDeps
 }
 
 func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
@@ -217,7 +136,10 @@ func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx 
 }
 
 func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
-	objectFiles, _ := m.CompileObjs(ctx)
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+
+	objectFiles, _ := CompileObjs(m, ctx, tc)
+
 	g.strictLibraryStaticActions(m, ctx, objectFiles)
 	// TODO: Stub the shared lib implementation and break it off of this patch.
 	// g.strictLibrarySharedActions(m, ctx, objectFiles)
@@ -251,5 +173,4 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	proxyStaticLib.Properties.ResolveFiles(ctx)
 	g.staticActions(&proxyStaticLib, ctx)
 	// TODO: Static lib dependency
-
 }
