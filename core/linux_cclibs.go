@@ -31,6 +31,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -62,11 +63,24 @@ func (m *ModuleLibrary) ObjDir() string {
 	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
+type Compilable interface {
+	flag.Consumer // Modules which are compilable need to support flags
+	FileConsumer  // Compilable objects must match the file consumer interface
+
+	// Until this can be removed, compilable objects also must support the generated headers interface
+	GetGeneratedHeaders(blueprint.ModuleContext) ([]string, []string)
+
+	// Output directory for object files
+	ObjDir() string
+
+	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+}
+
 // This function has common support to compile objs for static libs, shared libs and binaries.
-func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []string) {
+func CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
 	_, orderOnly := l.GetGeneratedHeaders(ctx)
 
-	tc := backend.Get().GetToolchain(l.Properties.TargetType)
+	// tc := backend.Get().GetToolchain(tgtType)
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
@@ -98,7 +112,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	nonCompiledDeps := []string{}
 
 	// TODO: use tags here instead of extensions
-	l.Properties.GetFiles(ctx).ForEach(
+	l.GetFiles(ctx).ForEach(
 		func(source file.Path) bool {
 			var rule blueprint.Rule
 			args := make(map[string]string)
@@ -127,7 +141,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 				return true
 			}
 
-			buildWrapper, buildWrapperDeps := l.Properties.Build.getBuildWrapperAndDeps(ctx)
+			buildWrapper, buildWrapperDeps := l.GetBuildWrapperAndDeps(ctx)
 			args["build_wrapper"] = buildWrapper
 
 			output := l.ObjDir() + source.RelBuildPath() + ".o"
@@ -230,7 +244,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	rule := staticLibraryRule
 
-	buildWrapper, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
+	buildWrapper, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	arBinary, _ := tc.GetArchiver()
@@ -250,7 +264,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	// The archiver rules do not allow adding arguments that the user can
 	// set, so does not support nonCompiledDeps
-	objectFiles, _ := m.ModuleLibrary.CompileObjs(ctx)
+	objectFiles, _ := CompileObjs(m, ctx, tc)
 
 	// OSX workaround, see rule for details.
 	if len(objectFiles) == 0 && len(wholeStaticLibs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
@@ -410,7 +424,7 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 	linker := tc.GetLinker().GetTool()
 	tcLdflags := tc.GetLinker().GetFlags()
 	tcLdlibs := tc.GetLinker().GetLibs()
-	buildWrapper, _ := m.Properties.Build.getBuildWrapperAndDeps(ctx)
+	buildWrapper, _ := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 
 	wholeStaticLibs := m.GetWholeStaticLibs(ctx)
 	staticLibs := m.GetStaticLibs(ctx)
@@ -508,10 +522,11 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	m.outputdir = backend.Get().SharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(m.outputDir(), m.getRealName())
 	m.outs = []string{soFile}
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
-	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
+	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
 
-	_, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
+	_, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 
 	installDeps := g.install(m, ctx)
 
@@ -582,12 +597,13 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 	// Calculate and record outputs
 	m.outputdir = g.binaryOutputDir(m.Properties.TargetType)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
-	objectFiles, nonCompiledDeps := m.CompileObjs(ctx)
+	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
 
-	_, buildWrapperDeps := m.Properties.Build.getBuildWrapperAndDeps(ctx)
+	_, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 
 	orderOnly := buildWrapperDeps
 	if enableToc {

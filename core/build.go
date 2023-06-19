@@ -77,7 +77,7 @@ func (b *Build) isRpathWanted() bool {
 	return *b.Add_lib_dirs_to_rpath
 }
 
-func (b *Build) getBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
+func (b *Build) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
 	if b.Build_wrapper != nil {
 		depargs := map[string]string{}
 		files, _ := getDependentArgsAndFiles(ctx, depargs)

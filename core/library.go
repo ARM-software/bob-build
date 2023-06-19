@@ -493,6 +493,10 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 	return
 }
 
+func (m *ModuleLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
+	return m.Properties.Build.GetBuildWrapperAndDeps(ctx)
+}
+
 func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == GeneratedSourcesTag },
