@@ -73,7 +73,7 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 	cflagsList := []string{}
 
 	m.FlagsInTransitive(ctx).GroupByType(flag.TypeInclude).ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			switch {
 			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
 				cctargetflags = append(cctargetflags, f.ToString())
@@ -84,7 +84,6 @@ func (m *ModuleStrictLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string
 			case f.MatchesType(flag.TypeCpp):
 				cxxtargetflags = append(cxxtargetflags, f.ToString())
 			}
-			return true
 		},
 	)
 

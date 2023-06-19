@@ -329,15 +329,13 @@ func (m *ModuleLibrary) FlagsIn() flag.Flags {
 func (m *ModuleLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContext) (ret flag.Flags) {
 	// TODO: Local flags should take priority, they do not currently to match the pre-refactor behaviour.
 	m.FlagsIn().ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			ret = append(ret, f)
-			return true
 		})
 
 	flag.ReferenceFlagsInTransitive(ctx).ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			ret = append(ret, f)
-			return true
 		})
 	return
 }

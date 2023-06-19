@@ -53,9 +53,8 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 				},
 			)
 
-			flags.ForEach(func(f Flag) bool {
+			flags.ForEach(func(f Flag) {
 				ret = ret.AppendIfUnique(f)
-				return true
 			})
 		}
 	})
@@ -73,9 +72,8 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 				},
 			)
 
-			flags.ForEach(func(f Flag) bool {
+			flags.ForEach(func(f Flag) {
 				ret = ret.AppendIfUnique(f)
-				return true
 			})
 		}
 

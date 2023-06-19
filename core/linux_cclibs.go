@@ -75,7 +75,7 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 	// Get all the required flags and group them into includes and everything else.
 	// This should make it easier to visually inspect the flags in logs/ninja files.
 	l.FlagsInTransitive(ctx).GroupByType(flag.TypeInclude).ForEach(
-		func(f flag.Flag) bool {
+		func(f flag.Flag) {
 			switch {
 			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
 				cctargetflags = append(cctargetflags, f.ToString())
@@ -86,7 +86,6 @@ func (l *ModuleLibrary) CompileObjs(ctx blueprint.ModuleContext) ([]string, []st
 			case f.MatchesType(flag.TypeCpp):
 				cxxtargetflags = append(cxxtargetflags, f.ToString())
 			}
-			return true
 		},
 	)
 
