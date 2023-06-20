@@ -22,13 +22,15 @@ import (
 	"path/filepath"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/toolchain"
 )
 
 type Type uint32
 
 const (
-	TypeUnset          = 0
-	TypeGenerated Type = 1 << iota
+	TypeUnset      = 0
+	TypeSrc   Type = 1 << iota
+	TypeGenerated
 	TypeTool
 	TypeBinary
 	TypeExecutable
@@ -37,6 +39,9 @@ const (
 	TypeCpp
 	TypeAsm
 	TypeHeader
+
+	TypeArchive
+	TypeShared
 
 	// Masks:
 	TypeCompilable = TypeC | TypeCpp | TypeAsm
@@ -95,7 +100,7 @@ func NewPath(relativePath string, namespace string, tag Type) Path {
 }
 
 func New(relativePath string, namespace string, tag Type) Path {
-	// TODO: add noncompiled dep tag
+
 	switch path.Ext(relativePath) {
 	case ".s", ".S":
 		tag |= TypeAsm
@@ -105,16 +110,23 @@ func New(relativePath string, namespace string, tag Type) Path {
 		tag |= TypeCpp
 	case ".h", ".hpp":
 		tag |= TypeHeader
-		// TODO: .so .a .o
+	case ".a":
+		tag |= TypeArchive
+	case ".so", ".dll":
+		tag |= TypeShared
 	}
 
 	var backendPath string
-	var scopedPath string
+	scopedPath := ""
 	if (tag & (TypeBinary | TypeExecutable)) != 0 {
 		backendPath = backend.Get().BuildDir()
 	} else if (tag & TypeGenerated) != 0 {
 		backendPath = filepath.Join(backend.Get().BuildDir(), "gen")
 		scopedPath = namespace
+	} else if (tag&TypeArchive) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
+		backendPath = backend.Get().StaticLibOutputDir(toolchain.TgtType(namespace))
+	} else if (tag&TypeShared) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
+		backendPath = backend.Get().SharedLibsDir(toolchain.TgtType(namespace))
 	} else {
 		backendPath = backend.Get().SourceDir()
 		scopedPath = FileNoNameSpace

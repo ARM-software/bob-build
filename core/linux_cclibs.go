@@ -169,16 +169,15 @@ func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
 		func(m blueprint.Module) {
-			if sl, ok := m.(*ModuleStaticLibrary); ok {
-				libs = append(libs, sl.outputs()...)
-			} else if sl, ok := m.(*generateStaticLibrary); ok {
-				libs = append(libs, sl.outputs()...)
-			} else if _, ok := m.(*ModuleExternalLibrary); ok {
-				utils.Die("%s is external, so cannot be used in whole_static_libs", ctx.OtherModuleName(m))
-			} else if _, ok := m.(*ModuleStrictLibrary); ok {
-				// TODO: append lib outputs here, or not, since this is whole_static_libs
-			} else {
-				utils.Die("%s is not a static library", ctx.OtherModuleName(m))
+			if provider, ok := m.(FileProvider); ok {
+				provider.OutFiles().ForEachIf(
+					func(fp file.Path) bool {
+						return fp.IsType(file.TypeArchive)
+					},
+					func(fp file.Path) bool {
+						libs = append(libs, fp.BuildPath())
+						return true
+					})
 			}
 		})
 

@@ -18,6 +18,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
 
@@ -37,6 +38,16 @@ func (m *ModuleStaticLibrary) outputFileName() string {
 
 func (m ModuleStaticLibrary) GetProperties() interface{} {
 	return m.ModuleLibrary.Properties
+}
+
+func (m *ModuleStaticLibrary) OutFiles() (srcs file.Paths) {
+	fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive) // TODO: refactor outputs() to use file.Paths
+	srcs = srcs.AppendIfUnique(fp)
+	return
+}
+
+func (m *ModuleStaticLibrary) OutFileTargets() []string {
+	return []string{}
 }
 
 func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
