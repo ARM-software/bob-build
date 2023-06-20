@@ -164,7 +164,7 @@ func CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolcha
 }
 
 // Returns the whole static dependencies for a library.
-func (m *ModuleLibrary) GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
+func GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	libs := []string{}
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
@@ -253,7 +253,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		"build_wrapper": buildWrapper,
 	}
 
-	wholeStaticLibs := m.ModuleLibrary.GetWholeStaticLibs(ctx)
+	wholeStaticLibs := GetWholeStaticLibs(ctx)
 	implicits := wholeStaticLibs
 
 	if len(wholeStaticLibs) > 0 {
@@ -425,7 +425,7 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 	tcLdlibs := tc.GetLinker().GetLibs()
 	buildWrapper, _ := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 
-	wholeStaticLibs := m.GetWholeStaticLibs(ctx)
+	wholeStaticLibs := GetWholeStaticLibs(ctx)
 	staticLibs := m.GetStaticLibs(ctx)
 	staticLibFlags := []string{}
 	if len(wholeStaticLibs) > 0 {
@@ -468,7 +468,7 @@ func (g *linuxGenerator) getBinaryArgs(m *ModuleBinary, ctx blueprint.ModuleCont
 // Returns the implicit dependencies for a library
 // When useToc is set, replace shared libraries with their toc files.
 func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext, useToc bool) []string {
-	implicits := utils.NewStringSlice(l.GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
+	implicits := utils.NewStringSlice(GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
 	if useToc {
 		implicits = append(implicits, g.getSharedLibTocPaths(ctx)...)
 	} else {
