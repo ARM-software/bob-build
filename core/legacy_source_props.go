@@ -77,7 +77,7 @@ func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	files := file.Paths{}
 
 	for _, match := range glob(ctx, utils.MixedListToFiles(s.Srcs), s.Exclude_srcs) {
-		fp := file.NewPath(match, ctx.ModuleName(), 0)
+		fp := file.NewPath(match, ctx.ModuleName(), file.TypeSrc)
 		files = files.AppendIfUnique(fp)
 	}
 
