@@ -133,6 +133,17 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
+func (m *ModuleStrictLibrary) OutFiles() (srcs file.Paths) {
+	fp := file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive)
+	srcs = srcs.AppendIfUnique(fp)
+	// TODO: impl shared lib output
+	return
+}
+
+func (m *ModuleStrictLibrary) OutFileTargets() []string {
+	return []string{}
+}
+
 func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
 	lut := flag.FlagParserTable{
 		{
