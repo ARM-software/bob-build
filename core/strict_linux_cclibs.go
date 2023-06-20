@@ -43,7 +43,7 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 }
 
 func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	m.Static.outputdir = m.ObjDir()
+	m.Static.outputdir = backend.Get().StaticLibOutputDir(m.Properties.TargetType)
 	m.Static.outs = []string{filepath.Join(m.Static.outputDir(), m.Name()+".a")}
 
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
