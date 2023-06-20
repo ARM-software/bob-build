@@ -39,7 +39,8 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
-	// TODO: implement me
+	fp := file.NewPath(m.outputFileName(), m.Name(), file.TypeArchive|file.TypeGenerated)
+	files = files.AppendIfUnique(fp)
 	return
 }
 

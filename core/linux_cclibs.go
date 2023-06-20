@@ -192,18 +192,15 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 		if dep == nil {
 			utils.Die("%s has no dependency on static lib %s", m.Name(), moduleName)
 		}
-		if sl, ok := dep.(*ModuleStaticLibrary); ok {
-			libs = append(libs, sl.outputs()...)
-		} else if sl, ok := dep.(*generateStaticLibrary); ok {
-			libs = append(libs, sl.outputs()...)
-		} else if _, ok := dep.(*ModuleExternalLibrary); ok {
-			// External static libraries are added to the link using the flags
-			// exported by their ldlibs and ldflags properties, rather than by
-			// specifying the filename here.
-		} else if sl, ok := dep.(*ModuleStrictLibrary); ok {
-			libs = append(libs, sl.Static.outputs()...)
-		} else {
-			utils.Die("%s is not a static library", ctx.OtherModuleName(dep))
+		if provider, ok := dep.(FileProvider); ok {
+			provider.OutFiles().ForEachIf(
+				func(fp file.Path) bool {
+					return fp.IsType(file.TypeArchive)
+				},
+				func(fp file.Path) bool {
+					libs = append(libs, fp.BuildPath())
+					return true
+				})
 		}
 	}
 
