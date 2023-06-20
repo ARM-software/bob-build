@@ -285,12 +285,11 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:415:1
 
-build ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a: g.bob.static_library $
-        || $
-        ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library || $
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     ar = ar
 
-build lib_dep.a: phony ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a
+build lib_dep.a: phony ${g.bob.BuildDir}/host/static/lib_dep.a
 default lib_dep.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -310,13 +309,13 @@ build ${g.bob.BuildDir}/host/objects/lib_forward_defines/src/libs/lib.cpp.o: $
     cxxcompiler = g++
     cxxflags = ${m.lib_forward_defines_host.cxxflags}
 
-build ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a $
-        : g.bob.static_library $
+build ${g.bob.BuildDir}/host/static/lib_forward_defines.a: $
+        g.bob.static_library $
         ${g.bob.BuildDir}/host/objects/lib_forward_defines/src/libs/lib.cpp.o
     ar = ar
 
 build lib_forward_defines.a: phony $
-        ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 default lib_forward_defines.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1336,15 +1335,15 @@ build $
 build ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_dep: $
         g.bob.executable $
         ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_dep/nested/src/main.cpp.o $
-        | ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a $
-        ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+        | ${g.bob.BuildDir}/host/static/lib_dep.a $
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/host/shared
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
-    static_libs = ${g.bob.BuildDir}/host/objects/lib_dep/lib_dep.a ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+    static_libs = ${g.bob.BuildDir}/host/static/lib_dep.a ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 
 build strict_lib_binary_with_dep: phony $
         ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_dep
@@ -1371,15 +1370,14 @@ build $
 build ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_forward_define: $
         g.bob.executable $
         ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_forward_define/nested/src/main.cpp.o $
-        | $
-        ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+        | ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/host/shared
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
-    static_libs = ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+    static_libs = ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 
 build strict_lib_binary_with_forward_define: phony $
         ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_forward_define
@@ -1408,14 +1406,14 @@ build $
         : g.bob.executable $
         ${g.bob.BuildDir}/host/objects/strict_lib_binary_with_transitive_define/nested/src/main.cpp.o $
         | ${g.bob.BuildDir}/host/static/lib_transitive_define.a $
-        ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/host/shared
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
-    static_libs = ${g.bob.BuildDir}/host/static/lib_transitive_define.a ${g.bob.BuildDir}/host/objects/lib_forward_defines/lib_forward_defines.a
+    static_libs = ${g.bob.BuildDir}/host/static/lib_transitive_define.a ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 
 build strict_lib_binary_with_transitive_define: phony $
         ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_transitive_define
