@@ -112,7 +112,7 @@ type sharedLibProducer interface {
 // by `ld` to produce a shared library or binary.
 type linkableModule interface {
 	getVersionScript(ctx blueprint.ModuleContext) *string
-	GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
+	// GetWholeStaticLibs(ctx blueprint.ModuleContext) []string
 	GetStaticLibs(ctx blueprint.ModuleContext) []string
 }
 
