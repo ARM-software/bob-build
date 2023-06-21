@@ -134,14 +134,6 @@ type ModuleGenruleCommon struct {
 
 var _ FileConsumer = (*ModuleGenruleCommon)(nil)
 
-func (m *ModuleGenruleCommon) implicitOutputs() []string {
-	return m.implicitOuts
-}
-
-func (m *ModuleGenruleCommon) outputs() []string {
-	return m.outs
-}
-
 func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 }
@@ -211,6 +203,18 @@ type androidGenerateRuleInterface interface {
 }
 
 var _ androidGenerateRuleInterface = (*ModuleGenrule)(nil) // impl check
+
+func (m *ModuleGenrule) implicitOutputs() []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
+		func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleGenrule) outputs() []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return f.IsNotType(file.TypeImplicit) },
+		func(f file.Path) string { return f.BuildPath() })
+}
 
 func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleGenruleCommon.processPaths(ctx)

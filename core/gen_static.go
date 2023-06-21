@@ -39,15 +39,30 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateStaticLibrary) implicitOutputs() []string {
-	return m.implicitOuts
+	return m.OutFiles().ToStringSliceIf(
+		// TODO: ideally we should just check for `TypeImplicit` here,
+		// but currently set up to mirror existing behaviour
+		func(f file.Path) bool { return f.IsNotType(file.TypeArchive) },
+		func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *generateStaticLibrary) outputs() []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+	return m.OutFiles().ToStringSliceIf(
+		// TODO: ideally we should just check for `TypeImplicit` here,
+		// but currently set up to mirror existing behaviour
+		func(f file.Path) bool { return f.IsType(file.TypeArchive) },
+		func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *generateStaticLibrary) OutFiles() file.Paths {
-	return file.Paths{file.NewPath(m.outputFileName(), m.Name(), file.TypeArchive|file.TypeGenerated)}
+func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
+	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated|file.TypeInstallable))
+
+	for _, h := range m.Properties.Headers {
+		fp := file.NewPath(h, m.Name(), file.TypeGenerated|file.TypeHeader)
+		files = append(files, fp)
+	}
+
+	return
 }
 
 func (m *generateStaticLibrary) FlagsOut() (flags flag.Flags) {

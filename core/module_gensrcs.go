@@ -38,6 +38,18 @@ type ModuleGensrcs struct {
 	}
 }
 
+func (m *ModuleGensrcs) implicitOutputs() []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
+		func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleGensrcs) outputs() []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return f.IsNotType(file.TypeImplicit) },
+		func(f file.Path) string { return f.BuildPath() })
+}
+
 func (m *ModuleGensrcs) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleGenruleCommon.processPaths(ctx)
 
