@@ -62,6 +62,10 @@ func (g *LinuxPlatform) BinaryOutputDir(tgt toolchain.TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "executable")
 }
 
+func (g *LinuxPlatform) KernelModOutputDir() string {
+	return filepath.Join("${BuildDir}", "target", "kernel_modules")
+}
+
 func (g *LinuxPlatform) EscapeFlag(s string) string {
 	return proptools.NinjaAndShellEscape(s)
 }

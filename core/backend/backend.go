@@ -39,6 +39,7 @@ type Platform interface {
 	SharedLibsDir(tgt toolchain.TgtType) string
 	StaticLibOutputDir(tgt toolchain.TgtType) string
 	BinaryOutputDir(tgt toolchain.TgtType) string
+	KernelModOutputDir() string
 	EscapeFlag(string) string
 	Init(*config.Properties)
 	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
