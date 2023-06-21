@@ -165,7 +165,8 @@ bootstrap_go_package {
         "core/file/filegroup.go",
     ],
     testSrcs: [
-        "core/file/file_test.go"
+        "core/file/file_test.go",
+        "core/file/filegroup_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/file",
 }

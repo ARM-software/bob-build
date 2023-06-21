@@ -89,3 +89,21 @@ func (fs Paths) Filtered(predicate func(Path) bool) (ret Paths) {
 		})
 	return
 }
+
+func (fs Paths) ToStringSliceIf(predicate func(Path) bool, converter func(Path) string) (ret []string) {
+	fs.ForEachIf(predicate,
+		func(f Path) bool {
+			ret = append(ret, converter(f))
+			return true
+		})
+	return
+}
+
+func (fs Paths) ToStringSlice(converter func(Path) string) (ret []string) {
+	fs.ForEach(
+		func(f Path) bool {
+			ret = append(ret, converter(f))
+			return true
+		})
+	return
+}
