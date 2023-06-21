@@ -18,9 +18,6 @@
 package core
 
 import (
-	"strings"
-
-	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
@@ -43,12 +40,7 @@ func (m *ModuleBinary) outputs() []string {
 }
 
 func (m *ModuleBinary) OutFiles() (srcs file.Paths) {
-	for _, out := range m.outputs() {
-		// TODO: Remove the need to know the buildDir here, this prevents the removal of generatorBackend
-		fp := file.NewPath(strings.TrimPrefix(out, backend.Get().BuildDir()), "", file.TypeBinary|file.TypeExecutable) // TODO: refactor outputs() to use file.Paths
-		srcs = srcs.AppendIfUnique(fp)
-	}
-	return
+	return file.Paths{file.NewPath(m.outputName(), string(m.getTarget()), file.TypeBinary|file.TypeExecutable)}
 }
 
 func (m *ModuleBinary) OutFileTargets() (tgts []string) {
