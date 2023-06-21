@@ -154,13 +154,6 @@ func (g *linuxGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, to
 		})
 }
 
-// Full path for a generated binary. This ensures generated binaries
-// are available in the same directory as compiled binaries
-func (g *linuxGenerator) getBinaryPath(t targetableModule) string {
-	// TODO: this should be part of core/backend
-	return filepath.Join(backend.Get().BinaryOutputDir(t.getTarget()), t.outputFileName())
-}
-
 func (*linuxGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
 	srcs := []string{}
 
