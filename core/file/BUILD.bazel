@@ -16,7 +16,10 @@ go_library(
 
 go_test(
     name = "file_test",
-    srcs = ["file_test.go"],
+    srcs = [
+        "file_test.go",
+        "filegroup_test.go",
+    ],
     embed = [":file"],
     deps = [
         "//core/backend",
