@@ -203,7 +203,6 @@ func (m *ModuleGenerateCommon) getMatchSourcePropNames() []string {
 func (m *ModuleGenerateCommon) recordOutputsFromInout(inouts []inout) {
 	for _, inout := range inouts {
 		m.outs = append(m.outs, inout.out...)
-		m.implicitOuts = append(m.implicitOuts, inout.implicitOuts...)
 	}
 }
 
