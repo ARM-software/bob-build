@@ -47,8 +47,8 @@ var (
 
 func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	ko.outputdir = filepath.Join(backend.Get().KernelModOutputDir(), ko.outputName())
-	ko.outs = []string{filepath.Join(ko.outputDir(), ko.outputName()+".ko")}
+	outputdir := filepath.Join(backend.Get().KernelModOutputDir(), ko.outputName())
+	ko.outs = []string{filepath.Join(outputdir, ko.outputName()+".ko")}
 	optional := !isBuiltByDefault(ko)
 
 	args := ko.generateKbuildArgs(ctx).toDict()
@@ -79,7 +79,7 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
 			Inputs:   ko.outputs(),
-			Outputs:  []string{filepath.Join(ko.outputDir(), "Module.symvers")},
+			Outputs:  []string{filepath.Join(outputdir, "Module.symvers")},
 			Optional: true,
 		})
 

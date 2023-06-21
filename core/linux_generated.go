@@ -43,12 +43,12 @@ var touchRule = pctx.StaticRule("touch",
 
 // Generate the build actions for a generateSource module and populates the outputs.
 func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blueprint.ModuleContext, inouts []inout) {
-	m.outputdir = backend.Get().SourceOutputDir(ctx.Module())
-	prefixInoutsWithOutputDir(inouts, m.outputDir())
+	outputdir := backend.Get().SourceOutputDir(ctx.Module())
+	prefixInoutsWithOutputDir(inouts, outputdir)
 
 	// Calculate and record outputs and include dirs
 	m.recordOutputsFromInout(inouts)
-	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, m.outputDir())
+	m.includeDirs = utils.PrefixDirs(m.Properties.Export_gen_include_dirs, outputdir)
 
 	cmd, args, implicits, hostTarget := m.getArgs(ctx)
 
@@ -243,7 +243,6 @@ func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleC
 
 	g.generateSourceActions(&proxyGenerateSource, ctx)
 
-	gr.outputdir = proxyGenerateSource.outputdir
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
 	gr.ModuleGenruleCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs
 }
@@ -280,7 +279,6 @@ func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleC
 
 	g.transformSourceActions(&proxygGensrcs, ctx)
 
-	gr.outputdir = proxygGensrcs.outputdir
 	// This is the generated paths for the outs, needed to correctly depend upon these rules
 	gr.ModuleGenruleCommon.outs = proxygGensrcs.ModuleGenerateCommon.outs
 }

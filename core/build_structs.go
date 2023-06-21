@@ -77,7 +77,6 @@ type dependentInterface interface {
 
 	outputs() []string
 	implicitOutputs() []string
-	outputDir() string
 }
 
 func getGenerator(ctx blueprint.BaseModuleContext) generatorBackend {
