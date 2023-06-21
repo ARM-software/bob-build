@@ -58,6 +58,10 @@ func (g *LinuxPlatform) StaticLibOutputDir(tgt toolchain.TgtType) string {
 	return filepath.Join("${BuildDir}", string(tgt), "static")
 }
 
+func (g *LinuxPlatform) BinaryOutputDir(tgt toolchain.TgtType) string {
+	return filepath.Join("${BuildDir}", string(tgt), "executable")
+}
+
 func (g *LinuxPlatform) EscapeFlag(s string) string {
 	return proptools.NinjaAndShellEscape(s)
 }

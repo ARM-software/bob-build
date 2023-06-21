@@ -77,6 +77,10 @@ func (g *AndroidPlatform) StaticLibOutputDir(tgt toolchain.TgtType) string {
 	return ""
 }
 
+func (g *AndroidPlatform) BinaryOutputDir(toolchain.TgtType) string {
+	return ""
+}
+
 func (g *AndroidPlatform) EscapeFlag(s string) string {
 	// Soong will handle the escaping of flags, so the androidbp backend
 	// just passes them through.

@@ -585,7 +585,7 @@ var executableRule = pctx.StaticRule("executable",
 
 func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = g.binaryOutputDir(m.Properties.TargetType)
+	m.outputdir = backend.Get().BinaryOutputDir(m.Properties.TargetType)
 	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 

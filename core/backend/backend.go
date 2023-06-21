@@ -38,6 +38,7 @@ type Platform interface {
 	SourceOutputDir(blueprint.Module) string
 	SharedLibsDir(tgt toolchain.TgtType) string
 	StaticLibOutputDir(tgt toolchain.TgtType) string
+	BinaryOutputDir(tgt toolchain.TgtType) string
 	EscapeFlag(string) string
 	Init(*config.Properties)
 	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
