@@ -80,3 +80,12 @@ func (fps Paths) ForEachIf(predicate func(Path) bool, functor func(Path) bool) {
 		}
 	}
 }
+
+func (fs Paths) Filtered(predicate func(Path) bool) (ret Paths) {
+	fs.ForEachIf(predicate,
+		func(f Path) bool {
+			ret = append(ret, f)
+			return true
+		})
+	return
+}
