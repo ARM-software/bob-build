@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -170,10 +171,12 @@ func (m *ModuleKernelObject) extraSymbolsModules(ctx blueprint.BaseModuleContext
 }
 
 func (m *ModuleKernelObject) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
-	for _, mod := range m.extraSymbolsModules(ctx) {
-		files = append(files, filepath.Join(mod.outputDir(), "Module.symvers"))
-	}
-
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == KernelModuleTag },
+		func(m blueprint.Module) {
+			path := filepath.Join(backend.Get().KernelModOutputDir(), m.Name(), "Module.symvers")
+			files = append(files, path)
+		})
 	return
 }
 
@@ -265,7 +268,7 @@ func (m *ModuleKernelObject) generateKbuildArgs(ctx blueprint.BaseModuleContext)
 		MakeArgs:           strings.Join(m.Properties.KernelProps.Make_args, " "),
 		// The kernel module builder replicates the out-of-tree module's source tree structure.
 		// The kernel module will be at its equivalent position in the output tree.
-		OutputModuleDir: filepath.Join(m.outputDir(), projectModuleDir(ctx)),
+		OutputModuleDir: filepath.Join(backend.Get().KernelModOutputDir(), m.Name(), projectModuleDir(ctx)),
 		CCFlag:          kernelToolchain,
 		HostCCFlag:      hostToolchain,
 		LDFlag:          ld,

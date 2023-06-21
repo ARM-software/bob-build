@@ -30,13 +30,6 @@ package core
 //
 // These must be set by the time GenerateBuildActions() completes.
 type simpleOutputProducer struct {
-	// The output directory used by the module. The value will depend
-	// on the generatorBackend in use. Where possible this should use
-	// build system variables (which will vary by generatorBackend) to
-	// identify the directory. This value is used to construct
-	// BackendPaths which modules will use to pick up the output of
-	// this module.
-	outputdir string
 
 	// List of all explicit outputs produced by this module, as we
 	// expect to see them named in the generated build definition.
@@ -53,10 +46,6 @@ type simpleOutputProducer struct {
 	// full paths, then BackendPaths (which use build system
 	// variables) rather than explicit paths should be used.
 	implicitOuts []string
-}
-
-func (m *simpleOutputProducer) outputDir() string {
-	return m.outputdir
 }
 
 func (m *simpleOutputProducer) implicitOutputs() []string {

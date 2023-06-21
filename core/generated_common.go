@@ -341,7 +341,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 		"ldflags":         utils.Join(ldtargetflags, props.Ldflags),
 		"ldlibs":          utils.Join(ldlibs, props.Ldlibs),
 		"linker":          linker,
-		"gen_dir":         m.outputDir(),
+		"gen_dir":         backend.Get().SourceOutputDir(ctx.Module()),
 		"module_dir":      getBackendPathInSourceDir(getGenerator(ctx), ctx.ModuleDir()),
 		"shared_libs_dir": b.SharedLibsDir(m.Properties.GenerateProps.Target),
 		"src_dir":         b.SourceDir(),

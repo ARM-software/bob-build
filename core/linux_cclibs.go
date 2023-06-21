@@ -225,8 +225,8 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
 
 	// Calculate and record outputs
-	m.outputdir = backend.Get().StaticLibOutputDir(m.Properties.TargetType)
-	m.outs = []string{filepath.Join(m.outputDir(), m.outputFileName())}
+	outputdir := backend.Get().StaticLibOutputDir(m.Properties.TargetType)
+	m.outs = []string{filepath.Join(outputdir, m.outputFileName())}
 
 	rule := staticLibraryRule
 
@@ -509,8 +509,8 @@ var symlinkRule = pctx.StaticRule("symlink",
 
 func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = backend.Get().SharedLibsDir(m.Properties.TargetType)
-	soFile := filepath.Join(m.outputDir(), m.getRealName())
+	outputdir := backend.Get().SharedLibsDir(m.Properties.TargetType)
+	soFile := filepath.Join(outputdir, m.getRealName())
 	m.outs = []string{soFile}
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
@@ -534,9 +534,9 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	// Create symlinks if needed
 	for _, name := range symlinkKeys {
 		symlinkTgt := symlinks[name]
-		symlink := filepath.Join(m.outputDir(), name)
+		symlink := filepath.Join(outputdir, name)
 
-		lib := filepath.Join(m.outputDir(), symlinkTgt)
+		lib := filepath.Join(outputdir, symlinkTgt)
 		ctx.Build(pctx,
 			blueprint.BuildParams{
 				Rule:     symlinkRule,
@@ -585,8 +585,8 @@ var executableRule = pctx.StaticRule("executable",
 
 func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	m.outputdir = backend.Get().BinaryOutputDir(m.Properties.TargetType)
-	m.outs = []string{filepath.Join(m.outputDir(), m.outputName())}
+	outputdir := backend.Get().BinaryOutputDir(m.Properties.TargetType)
+	m.outs = []string{filepath.Join(outputdir, m.outputName())}
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
