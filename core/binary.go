@@ -35,6 +35,10 @@ type binaryInterface interface {
 
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
+func (m *ModuleBinary) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *ModuleBinary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }

@@ -42,6 +42,10 @@ var _ linkableModule = (*ModuleSharedLibrary)(nil)
 var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
 
+func (m *ModuleSharedLibrary) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *ModuleSharedLibrary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }

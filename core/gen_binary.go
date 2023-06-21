@@ -37,6 +37,10 @@ func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generator
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
+func (m *generateBinary) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *generateBinary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }

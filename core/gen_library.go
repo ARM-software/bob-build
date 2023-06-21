@@ -150,6 +150,10 @@ func (m *generateLibrary) OutFileTargets() []string {
 	return []string{}
 }
 
+func (m *generateLibrary) implicitOutputs() []string {
+	return []string{}
+}
+
 //// Support splittable
 
 func (m *generateLibrary) supportedVariants() []toolchain.TgtType {

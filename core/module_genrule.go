@@ -134,6 +134,10 @@ type ModuleGenruleCommon struct {
 
 var _ FileConsumer = (*ModuleGenruleCommon)(nil)
 
+func (m *ModuleGenruleCommon) implicitOutputs() []string {
+	return m.implicitOuts
+}
+
 func (m *ModuleGenruleCommon) outputs() []string {
 	return m.outs
 }

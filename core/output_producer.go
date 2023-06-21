@@ -48,10 +48,6 @@ type simpleOutputProducer struct {
 	implicitOuts []string
 }
 
-func (m *simpleOutputProducer) implicitOutputs() []string {
-	return m.implicitOuts
-}
-
 // Modules that produce headers in the build output directory that may
 // be referenced by other modules must implement the genIncludeDirs()
 // function. This structure supplies a basic version of this function,

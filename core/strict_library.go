@@ -131,6 +131,10 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
+func (m *ModuleStrictLibrary) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *ModuleStrictLibrary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		// TODO: fixme, for now shared outputs are not supported
