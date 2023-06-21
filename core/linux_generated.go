@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -339,9 +340,11 @@ func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.Modul
 	// from gen_dir to the common binary directory
 	ctx.Build(pctx,
 		blueprint.BuildParams{
-			Rule:     copyRule,
-			Inputs:   m.outputs(),
-			Outputs:  []string{g.getBinaryPath(m)},
+			Rule:   copyRule,
+			Inputs: m.outputs(),
+			Outputs: []string{filepath.Join(
+				backend.Get().BinaryOutputDir(m.getTarget()),
+				m.outputFileName())},
 			Optional: true,
 		})
 
