@@ -356,6 +356,10 @@ func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
+func (m *ModuleLibrary) outputs() []string {
+	return m.outs
+}
+
 func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
