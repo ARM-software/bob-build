@@ -38,10 +38,12 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
-	fp := file.NewPath(m.outputFileName(), m.Name(), file.TypeArchive|file.TypeGenerated)
-	files = files.AppendIfUnique(fp)
-	return
+func (m *generateStaticLibrary) outputs() []string {
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *generateStaticLibrary) OutFiles() file.Paths {
+	return file.Paths{file.NewPath(m.outputFileName(), m.Name(), file.TypeArchive|file.TypeGenerated)}
 }
 
 func (m *generateStaticLibrary) FlagsOut() (flags flag.Flags) {

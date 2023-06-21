@@ -38,12 +38,17 @@ func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generator
 }
 
 func (m *generateBinary) outputs() []string {
-	return m.outs
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *generateBinary) OutFiles() (files file.Paths) {
-	// TODO: implement me
-	return
+	return file.Paths{
+		file.NewPath(
+			m.outputName(),
+			m.Name(),
+			file.TypeBinary|file.TypeExecutable|file.TypeGenerated,
+		),
+	}
 }
 
 //// Support generateLibraryInterface

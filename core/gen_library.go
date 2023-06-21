@@ -150,14 +150,6 @@ func (m *generateLibrary) OutFileTargets() []string {
 	return []string{}
 }
 
-func (m *generateLibrary) OutFiles() (files file.Paths) {
-	return
-}
-
-func (m *generateLibrary) outputs() []string {
-	return m.outs
-}
-
 //// Support splittable
 
 func (m *generateLibrary) supportedVariants() []toolchain.TgtType {

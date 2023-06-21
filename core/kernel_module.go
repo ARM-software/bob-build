@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -86,7 +87,11 @@ type kernelModuleInterface interface {
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
 
 func (m *ModuleKernelObject) outputs() []string {
-	return m.outs
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleKernelObject) OutFiles() file.Paths {
+	return file.Paths{file.NewPath(m.outputName()+".ko", m.Name(), file.TypeKernelModule)}
 }
 
 func (m *ModuleKernelObject) ResolveFiles(ctx blueprint.BaseModuleContext) {
