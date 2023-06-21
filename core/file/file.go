@@ -43,6 +43,7 @@ const (
 	TypeArchive
 	TypeShared
 	TypeKernelModule
+	TypeInstallable
 
 	// Masks:
 	TypeCompilable = TypeC | TypeCpp | TypeAsm
