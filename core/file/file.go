@@ -118,11 +118,12 @@ func New(relativePath string, namespace string, tag Type) Path {
 
 	var backendPath string
 	scopedPath := ""
-	if (tag & (TypeBinary | TypeExecutable)) != 0 {
-		backendPath = backend.Get().BuildDir()
-	} else if (tag & TypeGenerated) != 0 {
+
+	if (tag & TypeGenerated) != 0 {
 		backendPath = filepath.Join(backend.Get().BuildDir(), "gen")
 		scopedPath = namespace
+	} else if (tag & (TypeBinary | TypeExecutable)) != 0 {
+		backendPath = backend.Get().BinaryOutputDir(toolchain.TgtType(namespace))
 	} else if (tag&TypeArchive) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
 		backendPath = backend.Get().StaticLibOutputDir(toolchain.TgtType(namespace))
 	} else if (tag&TypeShared) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
