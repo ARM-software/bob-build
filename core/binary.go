@@ -38,6 +38,10 @@ type binaryInterface interface {
 
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
+func (m *ModuleBinary) outputs() []string {
+	return m.outs
+}
+
 func (m *ModuleBinary) OutFiles() (srcs file.Paths) {
 	for _, out := range m.outputs() {
 		// TODO: Remove the need to know the buildDir here, this prevents the removal of generatorBackend

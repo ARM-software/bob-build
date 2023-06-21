@@ -131,6 +131,10 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
+func (m *ModuleStrictLibrary) outputs() []string {
+	return m.outs
+}
+
 func (m *ModuleStrictLibrary) OutFiles() file.Paths {
 	return file.Paths{
 		file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive),

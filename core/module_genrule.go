@@ -134,6 +134,10 @@ type ModuleGenruleCommon struct {
 
 var _ FileConsumer = (*ModuleGenruleCommon)(nil)
 
+func (m *ModuleGenruleCommon) outputs() []string {
+	return m.outs
+}
+
 func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 }
