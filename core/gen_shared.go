@@ -40,6 +40,10 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
+func (m *generateSharedLibrary) implicitOutputs() []string {
+	return m.implicitOuts
+}
+
 func (m *generateSharedLibrary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		// TODO: fixme, this outputs headers as well so we need to filter it somewhere

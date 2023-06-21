@@ -107,6 +107,10 @@ var _ matchSourceInterface = (*ModuleGenerateCommon)(nil)
 var _ propertyEscapeInterface = (*ModuleGenerateCommon)(nil)
 var _ defaultable = (*ModuleGenerateCommon)(nil)
 
+func (m *ModuleGenerateCommon) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *ModuleGenerateCommon) outputs() []string {
 	return m.outs
 }
