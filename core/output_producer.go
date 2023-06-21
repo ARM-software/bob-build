@@ -38,14 +38,6 @@ type simpleOutputProducer struct {
 	// full paths, then BackendPaths (which use build system
 	// variables) rather than explicit paths should be used.
 	outs []string
-
-	// List of all implicit outputs produced by this module, as we
-	// expect to see them named in the generated build definition.
-	// Whether these are relative or absolute paths will depend on the
-	// generatorBackend in use. Where the generatorBackend requires
-	// full paths, then BackendPaths (which use build system
-	// variables) rather than explicit paths should be used.
-	implicitOuts []string
 }
 
 // Modules that produce headers in the build output directory that may
