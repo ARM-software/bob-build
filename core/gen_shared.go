@@ -40,6 +40,13 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
+func (m *generateSharedLibrary) outputs() []string {
+	return m.OutFiles().ToStringSliceIf(
+		// TODO: fixme, this outputs headers as well so we need to filter it somewhere
+		func(f file.Path) bool { return f.IsType(file.TypeShared) },
+		func(f file.Path) string { return f.BuildPath() })
+}
+
 func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated))
 

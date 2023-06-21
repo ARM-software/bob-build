@@ -36,7 +36,7 @@ type binaryInterface interface {
 var _ binaryInterface = (*ModuleBinary)(nil) // impl check
 
 func (m *ModuleBinary) outputs() []string {
-	return m.outs
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *ModuleBinary) OutFiles() (srcs file.Paths) {

@@ -132,7 +132,10 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleStrictLibrary) outputs() []string {
-	return m.outs
+	return m.OutFiles().ToStringSliceIf(
+		// TODO: fixme, for now shared outputs are not supported
+		func(f file.Path) bool { return f.IsType(file.TypeArchive) },
+		func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *ModuleStrictLibrary) OutFiles() file.Paths {

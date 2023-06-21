@@ -20,6 +20,7 @@ package core
 import (
 	"strings"
 
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -40,6 +41,15 @@ const (
 var _ linkableModule = (*ModuleSharedLibrary)(nil)
 var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
+
+func (m *ModuleSharedLibrary) outputs() []string {
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleSharedLibrary) OutFiles() file.Paths {
+	return file.Paths{
+		file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared)}
+}
 
 func (m *ModuleSharedLibrary) getLinkName() string {
 	return m.outputName() + m.fileNameExtension
