@@ -271,10 +271,20 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		args["ccompiler"] = cc
 	}
 
+	outs := []string{}
+	m.OutFiles().ForEachIf(
+		func(fp file.Path) bool {
+			return fp.IsType(file.TypeArchive)
+		},
+		func(fp file.Path) bool {
+			outs = append(outs, fp.BuildPath())
+			return true
+		})
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      rule,
-			Outputs:   m.outputs(),
+			Outputs:   outs,
 			Inputs:    objectFiles,
 			Implicits: implicits,
 			OrderOnly: buildWrapperDeps,
