@@ -20,6 +20,7 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/google/blueprint"
 )
@@ -44,13 +45,9 @@ var (
 		"kbuild_options", "make_args", "output_module_dir", "cc_flag", "hostcc_flag", "clang_triple_flag", "ld_flag")
 )
 
-func (g *linuxGenerator) kernelModOutputDir(ko *ModuleKernelObject) string {
-	return filepath.Join("${BuildDir}", "target", "kernel_modules", ko.outputName())
-}
-
 func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blueprint.ModuleContext) {
 	// Calculate and record outputs
-	ko.outputdir = g.kernelModOutputDir(ko)
+	ko.outputdir = filepath.Join(backend.Get().KernelModOutputDir(), ko.outputName())
 	ko.outs = []string{filepath.Join(ko.outputDir(), ko.outputName()+".ko")}
 	optional := !isBuiltByDefault(ko)
 

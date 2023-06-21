@@ -42,6 +42,7 @@ const (
 
 	TypeArchive
 	TypeShared
+	TypeKernelModule
 
 	// Masks:
 	TypeCompilable = TypeC | TypeCpp | TypeAsm
@@ -114,6 +115,8 @@ func New(relativePath string, namespace string, tag Type) Path {
 		tag |= TypeArchive
 	case ".so", ".dll":
 		tag |= TypeShared
+	case ".ko":
+		tag |= TypeKernelModule
 	}
 
 	var backendPath string
@@ -128,6 +131,8 @@ func New(relativePath string, namespace string, tag Type) Path {
 		backendPath = backend.Get().StaticLibOutputDir(toolchain.TgtType(namespace))
 	} else if (tag&TypeShared) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
 		backendPath = backend.Get().SharedLibsDir(toolchain.TgtType(namespace))
+	} else if (tag & TypeKernelModule) != 0 {
+		backendPath = filepath.Join(backend.Get().KernelModOutputDir(), namespace)
 	} else {
 		backendPath = backend.Get().SourceDir()
 		scopedPath = FileNoNameSpace
