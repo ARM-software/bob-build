@@ -170,14 +170,9 @@ func GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
 		func(m blueprint.Module) {
 			if provider, ok := m.(FileProvider); ok {
-				provider.OutFiles().ForEachIf(
-					func(fp file.Path) bool {
-						return fp.IsType(file.TypeArchive)
-					},
-					func(fp file.Path) bool {
-						libs = append(libs, fp.BuildPath())
-						return true
-					})
+				libs = append(libs, provider.OutFiles().ToStringSliceIf(
+					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+					func(p file.Path) string { return p.BuildPath() })...)
 			}
 		})
 
@@ -193,14 +188,9 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 			utils.Die("%s has no dependency on static lib %s", m.Name(), moduleName)
 		}
 		if provider, ok := dep.(FileProvider); ok {
-			provider.OutFiles().ForEachIf(
-				func(fp file.Path) bool {
-					return fp.IsType(file.TypeArchive)
-				},
-				func(fp file.Path) bool {
-					libs = append(libs, fp.BuildPath())
-					return true
-				})
+			libs = append(libs, provider.OutFiles().ToStringSliceIf(
+				func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+				func(p file.Path) string { return p.BuildPath() })...)
 		}
 	}
 
@@ -271,15 +261,9 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		args["ccompiler"] = cc
 	}
 
-	outs := []string{}
-	m.OutFiles().ForEachIf(
-		func(fp file.Path) bool {
-			return fp.IsType(file.TypeArchive)
-		},
-		func(fp file.Path) bool {
-			outs = append(outs, fp.BuildPath())
-			return true
-		})
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+		func(p file.Path) string { return p.BuildPath() })
 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
