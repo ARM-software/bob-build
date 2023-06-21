@@ -18,9 +18,8 @@
 package core
 
 import (
-	"path/filepath"
-
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
@@ -43,29 +42,39 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 }
 
 func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	m.Static.outputdir = backend.Get().StaticLibOutputDir(m.Properties.TargetType)
-	m.Static.outs = []string{filepath.Join(m.Static.outputDir(), m.Name()+".a")}
-
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 	arBinary, _ := tc.GetArchiver()
-
 	depfiles := []string{}
+
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool {
 			return ctx.OtherModuleDependencyTag(m) == StaticTag
 		},
 		func(m blueprint.Module) {
-			gen, _ := m.(*ModuleStrictLibrary)
-			depfiles = append(depfiles, gen.Static.outputs()...)
+			if provider, ok := m.(FileProvider); ok {
+				depfiles = append(depfiles, provider.OutFiles().ToStringSliceIf(
+					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+					func(p file.Path) string { return p.BuildPath() })...)
+			}
 		})
+
 	args := map[string]string{
 		"ar": arBinary,
 	}
+
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool {
+			return p.IsType(file.TypeArchive)
+		},
+		func(p file.Path) string {
+			return p.BuildPath()
+		})
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      staticLibraryRule,
-			Outputs:   m.Static.outputs(),
-			Inputs:    append(objectFiles),
+			Outputs:   outs,
+			Inputs:    objectFiles,
 			OrderOnly: depfiles,
 			Optional:  true,
 			Args:      args,
@@ -74,65 +83,13 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx 
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:    blueprint.Phony,
-			Inputs:  m.Static.outputs(),
+			Inputs:  outs,
 			Outputs: []string{m.shortName() + ".a"},
 		})
 }
 
 func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	m.Shared.outputdir = backend.Get().SharedLibsDir(m.Properties.TargetType)
-	soFile := filepath.Join(m.Shared.outputDir(), m.Name()+".so")
-	m.Shared.outs = []string{soFile}
-
-	//TODO: Do we need symlink rules?
-
-	// // Create symlinks if needed
-	// for name, symlinkTgt := range m.librarySymlinks(ctx) {
-	// 	symlink := filepath.Join(m.outputDir(), name)
-	// 	lib := filepath.Join(m.outputDir(), symlinkTgt)
-	// 	ctx.Build(pctx,
-	// 		blueprint.BuildParams{
-	// 			Rule:     symlinkRule,
-	// 			Inputs:   []string{lib},
-	// 			Outputs:  []string{symlink},
-	// 			Args:     map[string]string{"target": symlinkTgt},
-	// 			Optional: true,
-	// 		})
-	// 	installDeps = append(installDeps, symlink)
-	// }
-
-	// orderOnly := buildWrapperDeps
-	// if enableToc {
-	// 	// Add an order only dependecy on the actual libraries to cover
-	// 	// the case where the .so is deleted but the toc is still
-	// 	// present.
-	// 	orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
-	// }
-
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
-	linker := tc.GetLinker().GetTool()
-	args := map[string]string{
-		"linker":          linker,
-		"shared_libs_dir": m.Shared.outputdir,
-	}
-
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:     sharedLibraryRule,
-			Outputs:  m.Shared.outputs(),
-			Inputs:   objectFiles,
-			Optional: true,
-			Args:     args,
-		})
-
-	g.addSharedLibToc(ctx, soFile, m.Shared.outputDir()+"/"+m.Name()+".toc", m.getTarget())
-
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:    blueprint.Phony,
-			Inputs:  m.Shared.outputs(),
-			Outputs: []string{m.shortName() + ".so"},
-		})
+	//TODO: Implement me
 }
 
 func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {

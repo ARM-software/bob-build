@@ -69,14 +69,6 @@ type ModuleStrictLibrary struct {
 		SplittableProps
 		InstallableProps
 	}
-
-	Shared struct {
-		simpleOutputProducer
-	}
-
-	Static struct {
-		simpleOutputProducer
-	}
 }
 
 type strictLibraryInterface interface {
@@ -96,8 +88,14 @@ func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleStrictLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	// TODO: Header only installs
-	return append(m.Static.outputs(), m.Shared.outputs()...)
+	return m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool {
+			return p.IsType(file.TypeArchive) ||
+				p.IsType(file.TypeShared)
+		},
+		func(p file.Path) string {
+			return p.BuildPath()
+		})
 }
 
 func (m *ModuleStrictLibrary) outputName() string {
@@ -133,11 +131,11 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
-func (m *ModuleStrictLibrary) OutFiles() (srcs file.Paths) {
-	fp := file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive)
-	srcs = srcs.AppendIfUnique(fp)
-	// TODO: impl shared lib output
-	return
+func (m *ModuleStrictLibrary) OutFiles() file.Paths {
+	return file.Paths{
+		file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive),
+		file.NewPath(m.Name()+".so", string(m.getTarget()), file.TypeShared),
+	}
 }
 
 func (m *ModuleStrictLibrary) OutFileTargets() []string {
