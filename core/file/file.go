@@ -44,6 +44,8 @@ const (
 	TypeShared
 	TypeKernelModule
 	TypeInstallable
+	TypeDep
+	TypeRsp
 
 	// Masks:
 	TypeCompilable = TypeC | TypeCpp | TypeAsm

@@ -121,7 +121,8 @@ func (m *ModuleGenerateSource) GetTargets() (tgts []string) {
 }
 
 func (m *ModuleGenerateSource) OutFiles() file.Paths {
-	return m.Properties.ResolvedOut
+	gc, _ := getGenerateCommon(m)
+	return append(m.Properties.ResolvedOut, gc.OutFiles()...)
 }
 
 func (m *ModuleGenerateSource) OutFileTargets() []string {

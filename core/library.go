@@ -439,7 +439,8 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 				if provider, ok := child.(FileProvider); ok {
 					provider.OutFiles().ForEachIf(
 						func(fp file.Path) bool {
-							return fp.IsType(file.TypeGenerated) || fp.IsType(file.TypeImplicit)
+							return (fp.IsType(file.TypeGenerated) || fp.IsType(file.TypeImplicit)) &&
+								fp.IsNotType(file.TypeRsp) && fp.IsNotType(file.TypeDep)
 						},
 						func(fp file.Path) bool {
 							orderOnly = append(orderOnly, fp.BuildPath())

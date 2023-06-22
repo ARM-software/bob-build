@@ -143,7 +143,15 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 			_, isProvider := child.(FileProvider)
 
 			if isFilegroup && isProvider {
-				provided := child.(FileProvider).OutFiles()
+				var provided file.Paths
+				child.(FileProvider).OutFiles().ForEachIf(
+					func(fp file.Path) bool {
+						return fp.IsNotType(file.TypeRsp) && fp.IsNotType(file.TypeDep)
+					},
+					func(fp file.Path) bool {
+						provided = append(provided, fp)
+						return true
+					})
 				srcs = srcs.Merge(provided)
 			}
 

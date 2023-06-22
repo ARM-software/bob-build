@@ -25,6 +25,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -217,6 +218,18 @@ func (m *ModuleGenerateCommon) getRspfile() (name string, rspfile bool) {
 		return
 	}
 	return "", rspfile
+}
+
+func (m *ModuleGenerateCommon) OutFiles() (files file.Paths) {
+	if m.Properties.Rsp_content != nil {
+		files = append(files, file.NewPath("."+utils.FlattenPath(m.Name())+".rsp", m.Name(), file.TypeRsp))
+	}
+
+	if proptools.Bool(m.Properties.Depfile) {
+		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated))
+	}
+
+	return
 }
 
 func (m *ModuleGenerateCommon) defaultableProperties() []interface{} {

@@ -244,6 +244,7 @@ func (m *ModuleGenrule) GetTargets() []string {
 }
 
 func (m *ModuleGenrule) OutFiles() file.Paths {
+
 	return m.Properties.ResolvedOut
 }
 
