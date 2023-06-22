@@ -20,9 +20,7 @@ package core
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -541,32 +539,20 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	installDeps := g.install(m, ctx)
 
 	// Sort symlinks
-	symlinks := m.librarySymlinks(ctx)
-	symlinkKeys := make([]string, len(symlinks))
-	keys := reflect.ValueOf(symlinks).MapKeys()
-
-	for i, k := range keys {
-		symlinkKeys[i] = k.String()
-	}
-
-	sort.Strings(symlinkKeys)
-
-	// Create symlinks if needed
-	for _, name := range symlinkKeys {
-		symlinkTgt := symlinks[name]
-		symlink := filepath.Join(outputdir, name)
-
-		lib := filepath.Join(outputdir, symlinkTgt)
-		ctx.Build(pctx,
-			blueprint.BuildParams{
-				Rule:     symlinkRule,
-				Inputs:   []string{lib},
-				Outputs:  []string{symlink},
-				Args:     map[string]string{"target": symlinkTgt},
-				Optional: true,
-			})
-		installDeps = append(installDeps, symlink)
-	}
+	m.OutFiles().ForEachIf(
+		func(fp file.Path) bool { return fp.IsSymLink() },
+		func(fp file.Path) bool {
+			ctx.Build(pctx,
+				blueprint.BuildParams{
+					Rule:     symlinkRule,
+					Inputs:   []string{fp.ExpandLink().BuildPath()},
+					Outputs:  []string{fp.BuildPath()},
+					Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
+					Optional: true,
+				})
+			installDeps = append(installDeps, fp.BuildPath())
+			return true
+		})
 
 	orderOnly := buildWrapperDeps
 	if enableToc {
