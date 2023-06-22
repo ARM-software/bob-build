@@ -104,26 +104,6 @@ func (m *ModuleSharedLibrary) strip() bool {
 	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
-func (m *ModuleSharedLibrary) librarySymlinks(ctx blueprint.ModuleContext) map[string]string {
-	symlinks := map[string]string{}
-
-	if m.ModuleLibrary.Properties.Library_version != "" {
-		// To build you need a symlink from the link name and soname.
-		// At runtime only the soname symlink is required.
-		soname := m.getSoname()
-		realName := m.getRealName()
-		if soname == realName {
-			utils.Die("module %s has invalid library_version '%s'",
-				m.Name(),
-				m.ModuleLibrary.Properties.Library_version)
-		}
-		symlinks[m.getLinkName()] = soname
-		symlinks[soname] = realName
-	}
-
-	return symlinks
-}
-
 func (m *ModuleSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).sharedActions(m, ctx)
