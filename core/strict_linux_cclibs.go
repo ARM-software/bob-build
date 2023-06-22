@@ -19,7 +19,6 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/backend"
-	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
@@ -41,70 +40,13 @@ func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
-	arBinary, _ := tc.GetArchiver()
-	depfiles := []string{}
-
-	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(m) == StaticTag
-		},
-		func(m blueprint.Module) {
-			if provider, ok := m.(FileProvider); ok {
-				depfiles = append(depfiles, provider.OutFiles().ToStringSliceIf(
-					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
-					func(p file.Path) string { return p.BuildPath() })...)
-			}
-		})
-
-	args := map[string]string{
-		"ar": arBinary,
-	}
-
-	args["build_wrapper"], _ = m.GetBuildWrapperAndDeps(ctx)
-
-	outs := m.OutFiles().ToStringSliceIf(
-		func(p file.Path) bool {
-			return p.IsType(file.TypeArchive)
-		},
-		func(p file.Path) string {
-			return p.BuildPath()
-		})
-
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:      staticLibraryRule,
-			Outputs:   outs,
-			Inputs:    objectFiles,
-			OrderOnly: depfiles,
-			Optional:  true,
-			Args:      args,
-		})
-
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:    blueprint.Phony,
-			Inputs:  outs,
-			Outputs: []string{m.shortName() + ".a"},
-		})
-}
-
-func (g *linuxGenerator) strictLibrarySharedActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext, objectFiles []string) {
-	//TODO: Implement me
-}
-
 func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	objectFiles, _ := CompileObjs(m, ctx, tc)
 
-	// TODO: fix install/phony rules
-	// g.ArchivableActions(ctx, m, tc, objectFiles)
-
-	g.strictLibraryStaticActions(m, ctx, objectFiles)
-	// TODO: Stub the shared lib implementation and break it off of this patch.
-	// g.strictLibrarySharedActions(m, ctx, objectFiles)
+	g.ArchivableActions(ctx, m, tc, objectFiles)
+	// TODO: implement shared library outputs
 }
 
 func proxyCflags(m *ModuleStrictLibrary) []string {
