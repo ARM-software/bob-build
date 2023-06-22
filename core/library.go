@@ -469,34 +469,6 @@ func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext
 	return
 }
 
-func (m *ModuleLibrary) GetExportedVariables(ctx blueprint.ModuleContext) (expSystemIncludes, expLocalSystemIncludes, expLocalIncludes, expIncludes, expCflags []string) {
-	visited := map[string]bool{}
-	ctx.VisitDirectDeps(func(dep blueprint.Module) {
-
-		if !(ctx.OtherModuleDependencyTag(dep) == WholeStaticTag ||
-			ctx.OtherModuleDependencyTag(dep) == StaticTag ||
-			ctx.OtherModuleDependencyTag(dep) == SharedTag ||
-			ctx.OtherModuleDependencyTag(dep) == ReexportLibraryTag) {
-			return
-		} else if _, ok := visited[dep.Name()]; ok {
-			// VisitDirectDeps will visit a module once for each
-			// dependency. We've already done this module.
-			return
-		}
-		visited[dep.Name()] = true
-
-		if pe, ok := dep.(propertyExporter); ok {
-			expLocalIncludes = append(expLocalIncludes, pe.exportLocalIncludeDirs()...)
-			expLocalSystemIncludes = append(expLocalSystemIncludes, pe.exportLocalSystemIncludeDirs()...)
-			expIncludes = append(expIncludes, pe.exportIncludeDirs()...)
-			expSystemIncludes = append(expSystemIncludes, pe.exportSystemIncludeDirs()...)
-			expCflags = append(expCflags, pe.exportCflags()...)
-		}
-	})
-
-	return
-}
-
 func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
 	if m.Properties.VersionScriptModule != nil {
 		module, _ := ctx.GetDirectDep(*m.Properties.VersionScriptModule)
