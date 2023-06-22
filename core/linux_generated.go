@@ -273,6 +273,7 @@ func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleC
 	proxygGensrcs.Properties.Out.Replace = []string{fmt.Sprintf("$1.%s", gr.Properties.Output_extension)}
 
 	proxygGensrcs.ResolveFiles(ctx)
+	proxygGensrcs.ResolveOutFiles(ctx)
 
 	g.transformSourceActions(&proxygGensrcs, ctx)
 }
