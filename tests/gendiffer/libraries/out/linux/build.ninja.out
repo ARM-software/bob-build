@@ -285,13 +285,12 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:415:1
 
-build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library || $
-        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
+build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library
     ar = ar
     build_wrapper = 
 
-build lib_dep.a: phony ${g.bob.BuildDir}/host/static/lib_dep.a
-default lib_dep.a
+build lib_dep: phony ${g.bob.BuildDir}/host/static/lib_dep.a
+default lib_dep
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_forward_defines
@@ -316,9 +315,8 @@ build ${g.bob.BuildDir}/host/static/lib_forward_defines.a: $
     ar = ar
     build_wrapper = 
 
-build lib_forward_defines.a: phony $
+build lib_forward_defines: phony $
         ${g.bob.BuildDir}/host/static/lib_forward_defines.a
-default lib_forward_defines.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_transitive_define
