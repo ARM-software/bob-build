@@ -189,15 +189,6 @@ func (m *ModuleGenerateCommon) getMatchSourcePropNames() []string {
 	return []string{"Cmd", "Args"}
 }
 
-// Populate the output from inout structures that have already been
-// filled out. Note, if output directories need to be referenced, then
-// inouts should be updated before calling this function.
-func (m *ModuleGenerateCommon) recordOutputsFromInout(inouts []inout) {
-	for _, inout := range inouts {
-		m.outs = append(m.outs, inout.out...)
-	}
-}
-
 func (m *ModuleGenerateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
