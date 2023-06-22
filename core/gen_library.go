@@ -53,9 +53,7 @@ type generateLibrary struct {
 
 // Verify that the following interfaces are implemented
 var _ phonyInterface = (*generateLibrary)(nil)
-var _ dependentInterface = (*generateLibrary)(nil)
 var _ splittable = (*generateLibrary)(nil)
-var _ installable = (*generateLibrary)(nil)
 var _ FileConsumer = (*generateLibrary)(nil)
 
 // Modules implementing generateLibraryInterface support arbitrary commands
@@ -150,14 +148,6 @@ func (m *generateLibrary) OutFileTargets() []string {
 	return []string{}
 }
 
-func (m *generateLibrary) implicitOutputs() []string {
-	return []string{}
-}
-
-func (m *generateLibrary) outputs() []string {
-	return m.outs
-}
-
 //// Support splittable
 
 func (m *generateLibrary) supportedVariants() []toolchain.TgtType {
@@ -197,10 +187,4 @@ func (l *generateLibrary) altName() string {
 
 func (l *generateLibrary) altShortName() string {
 	return l.outputName()
-}
-
-//// Support installable
-
-func (m *generateLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.outputs()
 }

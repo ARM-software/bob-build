@@ -55,6 +55,10 @@ func (m *generateSharedLibrary) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
+func (m *generateSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+	return m.outputs()
+}
+
 func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	files = append(files, gc.OutFiles()...)
