@@ -395,18 +395,11 @@ func (m *ModuleLibrary) shortName() string {
 	return m.Name()
 }
 
-func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includeDirs []string, orderOnly []string) {
-	// TODO: We no longer use the `includeDirs` part of this function, this is now replaced by the flag interface.
-	// orderOnly is still used by the backend and should be replaced by the file interface. Once that is done, this
-	// function can be removed.
+func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) {
 	visited := map[string]bool{}
-
-	mainModule := ctx.Module()
-
+	root := ctx.Module()
 	ctx.WalkDeps(func(child, parent blueprint.Module) bool {
-
 		tag := ctx.OtherModuleDependencyTag(child)
-
 		/* We want all the export_gen_include_dirs from generated modules mentioned by the
 		 * main module, primarily from generated_headers, but also static_libs and
 		 * shared_libs where they refer to a bob_generated_[static|shared]_library.
@@ -421,8 +414,7 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 		 */
 		importHeaderDirs := false
 		visitChildren := false
-		childMustBeGenerated := true
-		if parent == mainModule {
+		if parent == root {
 			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
@@ -436,8 +428,6 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 				 */
 				importHeaderDirs = true
 				visitChildren = true
-				// We don't know the module type so disable the check
-				childMustBeGenerated = false
 			}
 		} else {
 			if tag == ExportGeneratedHeadersTag {
@@ -445,50 +435,26 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 				visitChildren = false
 			}
 		}
-
 		if importHeaderDirs {
-			// Add include directories for any generated modules
-			if _, ok := getGenerateCommon(child); ok {
-				// WalkDeps will visit a module once for each
-				// dependency tag. Only list the headers once.
-				if _, seen := visited[child.Name()]; !seen {
-					visited[child.Name()] = true
-
-					// Generated headers are "order-only". That means that a source file does not need to rebuild
-					// if a generated header changes, just that it must be built after a generated header.
-					// The source file _will_ be rebuilt if it uses the header (since that is registered in the
-					// depfile). Note that this means that generated headers cannot change which headers are used
-					// (by aliasing another header).
-					ds, ok := child.(dependentInterface)
-					if !ok {
-						utils.Die("generated_headers %s must have outputs()", child.Name())
-					}
-
-					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
+			if _, seen := visited[child.Name()]; !seen {
+				visited[child.Name()] = true
+				// Generated headers are "order-only". That means that a source file does not need to rebuild
+				// if a generated header changes, just that it must be built after a generated header.
+				// The source file _will_ be rebuilt if it uses the header (since that is registered in the
+				// depfile). Note that this means that generated headers cannot change which headers are used
+				// (by aliasing another header).
+				if provider, ok := child.(FileProvider); ok {
+					provider.OutFiles().ForEachIf(
+						func(fp file.Path) bool {
+							return fp.IsType(file.TypeGenerated) || fp.IsType(file.TypeImplicit)
+						},
+						func(fp file.Path) bool {
+							orderOnly = append(orderOnly, fp.BuildPath())
+							return true
+						})
 				}
-			} else if _, ok := getAndroidGenerateCommon(child); ok {
-				// WalkDeps will visit a module once for each
-				// dependency tag. Only list the headers once.
-				if _, seen := visited[child.Name()]; !seen {
-					visited[child.Name()] = true
-
-					// Generated headers are "order-only". That means that a source file does not need to rebuild
-					// if a generated header changes, just that it must be built after a generated header.
-					// The source file _will_ be rebuilt if it uses the header (since that is registered in the
-					// depfile). Note that this means that generated headers cannot change which headers are used
-					// (by aliasing another header).
-					ds, ok := child.(dependentInterface)
-					if !ok {
-						utils.Die("generated_headers %s must have outputs()", child.Name())
-					}
-
-					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
-				}
-			} else if childMustBeGenerated {
-				utils.Die("%s dependency on non-generated module %s", tag.(DependencyTag).name, child.Name())
 			}
 		}
-
 		return visitChildren
 	})
 	return
