@@ -21,21 +21,3 @@
  */
 
 package core
-
-// Modules that produce content in the build output directory that may
-// be referenced by other modules must implement the outputs() and
-// implicitOutputs() functions. This structure supplies basic versions
-// of these functions, where the modules just need to create the
-// relevant lists.
-//
-// These must be set by the time GenerateBuildActions() completes.
-type simpleOutputProducer struct {
-
-	// List of all explicit outputs produced by this module, as we
-	// expect to see them named in the generated build definition.
-	// Whether these are relative or absolute paths will depend on the
-	// generatorBackend in use. Where the generatorBackend requires
-	// full paths, then BackendPaths (which use build system
-	// variables) rather than explicit paths should be used.
-	outs []string
-}

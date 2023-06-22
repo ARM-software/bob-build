@@ -37,7 +37,6 @@ var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 // ModuleLibrary is a base class for modules which are generated from sets of object files
 type ModuleLibrary struct {
 	module.ModuleBase
-	simpleOutputProducer
 
 	Properties struct {
 		Features

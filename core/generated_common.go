@@ -84,7 +84,6 @@ func splitGeneratedComponent(comp string) (module string, lib string) {
 
 type ModuleGenerateCommon struct {
 	module.ModuleBase
-	simpleOutputProducer
 	Properties struct {
 		GenerateProps
 		Features

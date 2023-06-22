@@ -72,6 +72,9 @@ func (t *TargetSpecific) getTargetSpecificProps() interface{} {
 }
 
 // A type implementing dependentInterface can be depended upon by other modules.
+// TODO: Delete this interface and move over all usage to File providers.
+// All instances of `outputs` should eventually be replaced. For now they
+// are implemented by the file provider under the hood.
 type dependentInterface interface {
 	phonyInterface
 
