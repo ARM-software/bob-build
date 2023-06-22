@@ -65,7 +65,6 @@ func (k *KernelProps) processPaths(ctx blueprint.BaseModuleContext) {
 
 type ModuleKernelObject struct {
 	module.ModuleBase
-	simpleOutputProducer
 	Properties struct {
 		Features
 		CommonProps

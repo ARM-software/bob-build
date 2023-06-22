@@ -59,8 +59,7 @@ type StrictLibraryProps struct {
 
 type ModuleStrictLibrary struct {
 	module.ModuleBase
-	simpleOutputProducer // band-aid so legacy don't complain the interface isn't implemented
-	Properties           struct {
+	Properties struct {
 		StrictLibraryProps
 		SourceProps
 		TransitiveLibraryProps
