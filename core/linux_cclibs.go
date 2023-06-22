@@ -222,9 +222,6 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
 
 	// Calculate and record outputs
-	outputdir := backend.Get().StaticLibOutputDir(m.Properties.TargetType)
-	m.outs = []string{filepath.Join(outputdir, m.outputFileName())}
-
 	rule := staticLibraryRule
 
 	buildWrapper, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
@@ -508,7 +505,6 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	// Calculate and record outputs
 	outputdir := backend.Get().SharedLibsDir(m.Properties.TargetType)
 	soFile := filepath.Join(outputdir, m.getRealName())
-	m.outs = []string{soFile}
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
@@ -581,9 +577,6 @@ var executableRule = pctx.StaticRule("executable",
 	"shared_libs_flags", "static_libs")
 
 func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
-	// Calculate and record outputs
-	outputdir := backend.Get().BinaryOutputDir(m.Properties.TargetType)
-	m.outs = []string{filepath.Join(outputdir, m.outputName())}
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
