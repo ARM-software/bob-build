@@ -288,6 +288,7 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library || $
         ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     ar = ar
+    build_wrapper = 
 
 build lib_dep.a: phony ${g.bob.BuildDir}/host/static/lib_dep.a
 default lib_dep.a
@@ -313,6 +314,7 @@ build ${g.bob.BuildDir}/host/static/lib_forward_defines.a: $
         g.bob.static_library $
         ${g.bob.BuildDir}/host/objects/lib_forward_defines/src/libs/lib.cpp.o
     ar = ar
+    build_wrapper = 
 
 build lib_forward_defines.a: phony $
         ${g.bob.BuildDir}/host/static/lib_forward_defines.a
