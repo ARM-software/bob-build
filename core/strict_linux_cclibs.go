@@ -97,6 +97,9 @@ func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bluepr
 
 	objectFiles, _ := CompileObjs(m, ctx, tc)
 
+	// TODO: fix install/phony rules
+	// g.ArchivableActions(ctx, m, tc, objectFiles)
+
 	g.strictLibraryStaticActions(m, ctx, objectFiles)
 	// TODO: Stub the shared lib implementation and break it off of this patch.
 	// g.strictLibrarySharedActions(m, ctx, objectFiles)
