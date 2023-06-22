@@ -67,9 +67,6 @@ type Compilable interface {
 	flag.Consumer // Modules which are compilable need to support flags
 	FileConsumer  // Compilable objects must match the file consumer interface
 
-	// Until this can be removed, compilable objects also must support the generated headers interface
-	GetGeneratedHeaders(blueprint.ModuleContext) ([]string, []string)
-
 	// Output directory for object files
 	ObjDir() string
 
@@ -78,7 +75,7 @@ type Compilable interface {
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
 func CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
-	_, orderOnly := l.GetGeneratedHeaders(ctx)
+	orderOnly := GetGeneratedHeadersFiles(ctx)
 
 	// tc := backend.Get().GetToolchain(tgtType)
 	as, astargetflags := tc.GetAssembler()
