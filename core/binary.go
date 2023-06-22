@@ -33,13 +33,18 @@ type binaryInterface interface {
 	FileProvider // A binary can provide itself as a source
 }
 
-var _ binaryInterface = (*ModuleBinary)(nil) // impl check
+var _ binaryInterface = (*ModuleBinary)(nil)  // impl check
+var _ libraryInterface = (*ModuleBinary)(nil) // impl check
 
 func (m *ModuleBinary) implicitOutputs() []string {
 	return []string{}
 }
 
 func (m *ModuleBinary) outputs() []string {
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleBinary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 

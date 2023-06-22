@@ -41,12 +41,17 @@ const (
 var _ linkableModule = (*ModuleSharedLibrary)(nil)
 var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
+var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
 
 func (m *ModuleSharedLibrary) implicitOutputs() []string {
 	return []string{}
 }
 
 func (m *ModuleSharedLibrary) outputs() []string {
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
