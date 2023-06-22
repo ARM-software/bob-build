@@ -75,11 +75,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			// When the dependent module is another Bob generated
 			// module, provide all its outputs so the using module can
 			// pick and choose what it uses.
-			if gc, ok := getGenerateCommon(m); ok {
-				args[depName+"_out"] = strings.Join(gc.outputs(), " ")
-			} else {
-				args[depName+"_out"] = strings.Join(gen.outputs(), " ")
-			}
+			args[depName+"_out"] = strings.Join(gen.outputs(), " ")
 
 			depfiles = append(depfiles, gen.outputs()...)
 			depfiles = append(depfiles, gen.implicitOutputs()...)

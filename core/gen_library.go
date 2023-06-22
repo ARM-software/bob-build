@@ -154,6 +154,10 @@ func (m *generateLibrary) implicitOutputs() []string {
 	return []string{}
 }
 
+func (m *generateLibrary) outputs() []string {
+	return m.outs
+}
+
 //// Support splittable
 
 func (m *generateLibrary) supportedVariants() []toolchain.TgtType {
