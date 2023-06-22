@@ -10,6 +10,7 @@ bob_shared_library {
     },
     host_supported: true,
     target_supported: true,
+    library_version: "1.4.0",
 }
 
 bob_shared_library {

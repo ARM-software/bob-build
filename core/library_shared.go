@@ -48,16 +48,36 @@ func (m *ModuleSharedLibrary) implicitOutputs() []string {
 }
 
 func (m *ModuleSharedLibrary) outputs() []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+	return m.OutFiles().ToStringSliceIf(func(f file.Path) bool { return !f.IsSymLink() },
+		func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *ModuleSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return !f.IsSymLink() },
+		func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *ModuleSharedLibrary) OutFiles() file.Paths {
-	return file.Paths{
-		file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared)}
+func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
+
+	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared)
+	files = append(files, so)
+
+	if m.ModuleLibrary.Properties.Library_version != "" {
+		soname := m.getSoname()
+		realName := m.getRealName()
+		if soname == realName {
+			utils.Die("module %s has invalid library_version '%s'",
+				m.Name(),
+				m.ModuleLibrary.Properties.Library_version)
+		}
+
+		link1 := file.NewLink(soname, string(m.getTarget()), &so)
+		link2 := file.NewLink(realName, string(m.getTarget()), &link1)
+		files = append(files, link1, link2)
+	}
+
+	return
 }
 
 func (m *ModuleSharedLibrary) getLinkName() string {
