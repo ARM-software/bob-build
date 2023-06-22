@@ -104,6 +104,14 @@ func (file Path) IsSymLink() bool {
 	return file.symlink != nil
 }
 
+func (file Path) ExpandLink() *Path {
+	if file.symlink != nil {
+		return file.symlink
+	} else {
+		return &file
+	}
+}
+
 func (file Path) FollowLink() *Path {
 	if file.symlink != nil {
 		return file.symlink.FollowLink()
