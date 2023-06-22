@@ -47,6 +47,7 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 	prefixInoutsWithOutputDir(inouts, outputdir)
 
 	// Calculate and record outputs and include dirs
+	// TODO: figure out how the hell to remove this and replace it with FilesOut
 	m.recordOutputsFromInout(inouts)
 
 	cmd, args, implicits, hostTarget := m.getArgs(ctx)

@@ -56,6 +56,9 @@ func (m *generateSharedLibrary) outputs() []string {
 }
 
 func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
+	gc, _ := getGenerateCommon(m)
+	files = append(files, gc.OutFiles()...)
+
 	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated|file.TypeInstallable))
 
 	for _, h := range m.Properties.Headers {

@@ -43,7 +43,8 @@ bob_generate_source {
     out: ["single.cpp"],
 
     tools: ["generator.py"],
-    cmd: "python ${tool} --in ${in} --out ${out} --expect-in before_generate.in",
+    cmd: "python ${tool} --in ${in} --out ${out} --depfile ${depfile} --expect-in before_generate.in",
+    depfile: true,
 }
 
 bob_generate_source {
