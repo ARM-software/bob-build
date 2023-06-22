@@ -62,6 +62,8 @@ func (g *linuxGenerator) strictLibraryStaticActions(m *ModuleStrictLibrary, ctx 
 		"ar": arBinary,
 	}
 
+	args["build_wrapper"], _ = m.GetBuildWrapperAndDeps(ctx)
+
 	outs := m.OutFiles().ToStringSliceIf(
 		func(p file.Path) bool {
 			return p.IsType(file.TypeArchive)
