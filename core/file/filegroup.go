@@ -81,6 +81,15 @@ func (fps Paths) ForEachIf(predicate func(Path) bool, functor func(Path) bool) {
 	}
 }
 
+func (fps Paths) FindSingle(predicate func(Path) bool) (*Path, bool) {
+	for fp := range fps.Iterate() {
+		if predicate(fp) {
+			return &fp, true
+		}
+	}
+	return nil, false
+}
+
 func (fs Paths) Filtered(predicate func(Path) bool) (ret Paths) {
 	fs.ForEachIf(predicate,
 		func(f Path) bool {

@@ -68,7 +68,6 @@ type generateLibraryInterface interface {
 
 	libExtension() string
 	outputFileName() string
-	getDepfile() (string, bool)
 }
 
 // Map sources to outputs. This function is primarily to support
@@ -96,8 +95,9 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 		})
 
 	io.out = []string{m.outputFileName()}
-	if depfile, ok := m.getDepfile(); ok {
-		io.depfile = depfile
+	if depfile, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeDep) }); ok {
+		io.depfile = depfile.UnScopedPath()
 	}
 
 	io.implicitOuts = implicitOuts
