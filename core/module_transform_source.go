@@ -96,7 +96,13 @@ type transformSourceInterface interface {
 var _ transformSourceInterface = (*ModuleTransformSource)(nil) // impl check
 
 func (m *ModuleTransformSource) outputs() []string {
-	return m.outs
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool {
+			// TODO: Consider adding a better group tag
+			return f.IsNotType(file.TypeRsp) &&
+				f.IsNotType(file.TypeDep)
+		},
+		func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *ModuleTransformSource) implicitOutputs() []string {
