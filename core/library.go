@@ -448,13 +448,11 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 
 		if importHeaderDirs {
 			// Add include directories for any generated modules
-			if gs, ok := getGenerateCommon(child); ok {
+			if _, ok := getGenerateCommon(child); ok {
 				// WalkDeps will visit a module once for each
 				// dependency tag. Only list the headers once.
 				if _, seen := visited[child.Name()]; !seen {
 					visited[child.Name()] = true
-
-					includeDirs = append(includeDirs, gs.genIncludeDirs()...)
 
 					// Generated headers are "order-only". That means that a source file does not need to rebuild
 					// if a generated header changes, just that it must be built after a generated header.
@@ -468,13 +466,11 @@ func (m *ModuleLibrary) GetGeneratedHeaders(ctx blueprint.ModuleContext) (includ
 
 					orderOnly = append(orderOnly, getHeadersGenerated(ds)...)
 				}
-			} else if gs, ok := getAndroidGenerateCommon(child); ok {
+			} else if _, ok := getAndroidGenerateCommon(child); ok {
 				// WalkDeps will visit a module once for each
 				// dependency tag. Only list the headers once.
 				if _, seen := visited[child.Name()]; !seen {
 					visited[child.Name()] = true
-
-					includeDirs = append(includeDirs, gs.genIncludeDirs()...)
 
 					// Generated headers are "order-only". That means that a source file does not need to rebuild
 					// if a generated header changes, just that it must be built after a generated header.

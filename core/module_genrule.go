@@ -123,7 +123,6 @@ func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) 
 type ModuleGenruleCommon struct {
 	module.ModuleBase
 	simpleOutputProducer
-	headerProducer
 	Properties struct {
 		EnableableProps
 		Features
