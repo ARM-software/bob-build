@@ -123,6 +123,8 @@ func TestLinux(t *testing.T) {
 		assert.Equal(t, "${BuildDir}/gen/original/foo.c", link_to_original.FollowLink().BuildPath())
 		assert.Equal(t, "${BuildDir}/gen/original/foo.c", link_to_link.FollowLink().BuildPath())
 
+		assert.Equal(t, "${BuildDir}/gen/link/foo.c", link_to_link.ExpandLink().BuildPath())
+
 		assert.Equal(t, "${BuildDir}/gen/link/foo.c", link_to_original.BuildPath())
 		assert.Equal(t, "${BuildDir}/gen/link2/foo.c", link_to_link.BuildPath())
 
