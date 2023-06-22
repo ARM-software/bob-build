@@ -357,6 +357,7 @@ func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleLibrary) outputs() []string {
+	// TODO: switch to out files.
 	return m.outs
 }
 

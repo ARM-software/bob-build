@@ -398,9 +398,6 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 		return
 	}
 
-	// Calculate and record outputs
-	m.outs = []string{m.outputName()}
-
 	installBase, _, _ := getSoongInstallPath(m.getInstallableProps())
 
 	var modType string
@@ -456,9 +453,6 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 		return
 	}
 
-	// Calculate and record outputs
-	m.outs = []string{m.outputName() + m.fileNameExtension}
-
 	var modType string
 	switch m.Properties.TargetType {
 	case toolchain.TgtTypeHost:
@@ -494,9 +488,6 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint
 	if !enabledAndRequired(m) {
 		return
 	}
-
-	// Calculate and record outputs
-	m.outs = []string{m.outputName()}
 
 	var modType string
 	switch m.Properties.TargetType {

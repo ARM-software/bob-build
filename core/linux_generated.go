@@ -242,9 +242,6 @@ func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleC
 	proxyGenerateSource.ResolveFiles(ctx)
 
 	g.generateSourceActions(&proxyGenerateSource, ctx)
-
-	// This is the generated paths for the outs, needed to correctly depend upon these rules
-	gr.ModuleGenruleCommon.outs = proxyGenerateSource.ModuleGenerateCommon.outs
 }
 
 func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
@@ -278,9 +275,6 @@ func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleC
 	proxygGensrcs.ResolveFiles(ctx)
 
 	g.transformSourceActions(&proxygGensrcs, ctx)
-
-	// This is the generated paths for the outs, needed to correctly depend upon these rules
-	gr.ModuleGenruleCommon.outs = proxygGensrcs.ModuleGenerateCommon.outs
 }
 
 func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blueprint.ModuleContext) {
