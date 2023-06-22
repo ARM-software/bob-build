@@ -160,14 +160,14 @@ func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g gen
 
 	io.out = m.Properties.Out
 
-	// TODO: Add file type for this?
-	if depfile, ok := m.getDepfile(); ok {
-		io.depfile = depfile
+	if depfile, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeDep) }); ok {
+		io.depfile = depfile.UnScopedPath()
 	}
 
-	// TODO: Add file type for this?
-	if rspfile, ok := m.getRspfile(); ok {
-		io.rspfile = rspfile
+	if rspfile, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeRsp) }); ok {
+		io.rspfile = rspfile.UnScopedPath()
 	}
 
 	return []inout{io}

@@ -202,27 +202,9 @@ func (m *ModuleGenerateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *ModuleGenerateCommon) getDepfile() (name string, depfile bool) {
-	depfile = proptools.Bool(m.Properties.Depfile)
-	if depfile {
-		name = getDepfileName(m.Name())
-		return
-	}
-	return "", depfile
-}
-
-func (m *ModuleGenerateCommon) getRspfile() (name string, rspfile bool) {
-	rspfile = m.Properties.Rsp_content != nil
-	if rspfile {
-		name = getRspfileName(m.Name())
-		return
-	}
-	return "", rspfile
-}
-
 func (m *ModuleGenerateCommon) OutFiles() (files file.Paths) {
 	if m.Properties.Rsp_content != nil {
-		files = append(files, file.NewPath("."+utils.FlattenPath(m.Name())+".rsp", m.Name(), file.TypeRsp))
+		files = append(files, file.NewPath("."+utils.FlattenPath(m.Name())+".rsp", m.Name(), file.TypeRsp|file.TypeGenerated))
 	}
 
 	if proptools.Bool(m.Properties.Depfile) {
