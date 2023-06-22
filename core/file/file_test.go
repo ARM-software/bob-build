@@ -27,9 +27,9 @@ import (
 
 func Test_basic_paths_tests(t *testing.T) {
 	// TODO: fix collections
-	fp1 := Path{"${SrcDir}", "somemod/foo.c", "${SrcDir}/somemod/foo.c", TypeC}
-	fp2 := Path{"${BuildDir}/gen/somemod", "file.ext", "${BuildDir}/gen/somemod/file.ext", TypeGenerated}
-	fp3 := Path{"${BuildDir}/gen/othermod", "file.ext", "${BuildDir}/gen/othermod/file.ext", TypeGenerated}
+	fp1 := Path{"${SrcDir}", "somemod/foo.c", "${SrcDir}/somemod/foo.c", TypeC, nil}
+	fp2 := Path{"${BuildDir}/gen/somemod", "file.ext", "${BuildDir}/gen/somemod/file.ext", TypeGenerated, nil}
+	fp3 := Path{"${BuildDir}/gen/othermod", "file.ext", "${BuildDir}/gen/othermod/file.ext", TypeGenerated, nil}
 
 	fps := Paths{
 		fp1, fp2,
@@ -112,5 +112,23 @@ func TestLinux(t *testing.T) {
 		assert.True(t, fp.IsType(TypeC|TypeGenerated))
 		assert.True(t, fp.IsNotType(TypeAsm))
 		assert.False(t, fp.IsNotType(TypeGenerated))
+	})
+
+	t.Run("Symlink", func(t *testing.T) {
+		original := NewPath("foo.c", "original", TypeGenerated)
+		link_to_original := NewLink("foo.c", "link", &original)
+		link_to_link := NewLink("foo.c", "link2", &link_to_original)
+
+		assert.Equal(t, "${BuildDir}/gen/original/foo.c", original.FollowLink().BuildPath())
+		assert.Equal(t, "${BuildDir}/gen/original/foo.c", link_to_original.FollowLink().BuildPath())
+		assert.Equal(t, "${BuildDir}/gen/original/foo.c", link_to_link.FollowLink().BuildPath())
+
+		assert.Equal(t, "${BuildDir}/gen/link/foo.c", link_to_original.BuildPath())
+		assert.Equal(t, "${BuildDir}/gen/link2/foo.c", link_to_link.BuildPath())
+
+		assert.False(t, original.IsType(TypeLink))
+		assert.True(t, link_to_original.IsType(TypeLink))
+		assert.True(t, link_to_link.IsType(TypeLink))
+
 	})
 }

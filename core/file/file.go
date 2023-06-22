@@ -47,6 +47,8 @@ const (
 	TypeDep
 	TypeRsp
 
+	TypeLink // Special tag to indicate this file is a symlink
+
 	// Masks:
 	TypeCompilable = TypeC | TypeCpp | TypeAsm
 )
@@ -58,6 +60,7 @@ type Path struct {
 	relativePath  string
 	tag           Type // tag to indicate type
 
+	symlink *Path
 }
 
 func (file Path) RelBuildPath() string {
@@ -97,10 +100,29 @@ func (file Path) IsNotType(ft Type) bool {
 	return ((file.tag & ft) ^ ft) != 0
 }
 
+func (file Path) IsSymLink() bool {
+	return file.symlink != nil
+}
+
+func (file Path) FollowLink() *Path {
+	if file.symlink != nil {
+		return file.symlink.FollowLink()
+	} else {
+		return &file
+	}
+}
+
 var FileNoNameSpace string = ""
 
 func NewPath(relativePath string, namespace string, tag Type) Path {
 	return New(relativePath, namespace, tag)
+}
+
+func NewLink(relativePath string, namespace string, from *Path) Path {
+	link := New(relativePath, namespace, from.tag)
+	link.symlink = from
+	link.tag = from.tag | TypeLink
+	return link
 }
 
 func New(relativePath string, namespace string, tag Type) Path {
@@ -146,5 +168,6 @@ func New(relativePath string, namespace string, tag Type) Path {
 		namespacePath: scopedPath,
 		relativePath:  relativePath,
 		tag:           tag,
+		symlink:       nil,
 	}
 }
