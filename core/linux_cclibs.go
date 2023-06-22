@@ -219,14 +219,25 @@ var wholeStaticLibraryRule = pctx.StaticRule("whole_static_library",
 		Description: "$out",
 	}, "ar", "build_wrapper", "whole_static_libs")
 
-func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
+type Archivable interface {
+	enableable         // For build by default
+	dependentInterface // For phony targets
+	flag.Consumer      // Modules which are compilable need to support flags
+	FileConsumer       // Compilable objects must match the file consumer interface
+	FileProvider       // Must create valid output files
+	ObjDir() string    // Output directory for object files
 
-	// Calculate and record outputs
+	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+}
+
+func (g *linuxGenerator) ArchivableActions(ctx blueprint.ModuleContext,
+	m Archivable,
+	tc toolchain.Toolchain,
+	objs []string) {
+	wholeStaticLibs := GetWholeStaticLibs(ctx)
+
 	rule := staticLibraryRule
-
-	buildWrapper, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
-
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+	buildWrapper, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
 	arBinary, _ := tc.GetArchiver()
 
 	args := map[string]string{
@@ -234,20 +245,13 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		"build_wrapper": buildWrapper,
 	}
 
-	wholeStaticLibs := GetWholeStaticLibs(ctx)
 	implicits := wholeStaticLibs
 
 	if len(wholeStaticLibs) > 0 {
 		rule = wholeStaticLibraryRule
 		args["whole_static_libs"] = strings.Join(wholeStaticLibs, " ")
-	}
-
-	// The archiver rules do not allow adding arguments that the user can
-	// set, so does not support nonCompiledDeps
-	objectFiles, _ := CompileObjs(m, ctx, tc)
-
-	// OSX workaround, see rule for details.
-	if len(objectFiles) == 0 && len(wholeStaticLibs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
+	} else if len(objs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
+		// OSX workaround, see rule for details.
 		rule = emptyStaticLibraryRule
 		// To create an empty lib, we require a dummy object file,
 		// we use the detected compiler to emit it.
@@ -263,7 +267,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 		blueprint.BuildParams{
 			Rule:      rule,
 			Outputs:   outs,
-			Inputs:    objectFiles,
+			Inputs:    objs,
 			Implicits: implicits,
 			OrderOnly: buildWrapperDeps,
 			Optional:  true,
@@ -272,6 +276,20 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
+}
+
+func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
+
+	// Calculate and record outputs
+
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+
+	// The archiver rules do not allow adding arguments that the user can
+	// set, so does not support nonCompiledDeps
+	objectFiles, _ := CompileObjs(m, ctx, tc)
+
+	g.ArchivableActions(ctx, m, tc, objectFiles)
+
 }
 
 // This section contains functions that are common for shared libraries and executables.

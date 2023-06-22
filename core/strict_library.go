@@ -134,6 +134,10 @@ func (m *ModuleStrictLibrary) implicitOutputs() []string {
 	return []string{}
 }
 
+func (m *ModuleStrictLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
+	return []string{}
+}
+
 func (m *ModuleStrictLibrary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		// TODO: fixme, for now shared outputs are not supported
