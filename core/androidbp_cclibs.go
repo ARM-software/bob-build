@@ -505,3 +505,33 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
 }
+
+func proxyCflags(m *ModuleStrictLibrary) []string {
+	Cflags := m.Properties.Copts
+	for _, def := range m.Properties.Local_defines {
+		Cflags = append(Cflags, "-D"+def)
+	}
+	for _, def := range m.Properties.Defines {
+		Cflags = append(Cflags, "-D"+def)
+	}
+	return Cflags
+}
+
+func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
+	// TODO: Move this to it's own file
+
+	// TODO: Handle shared library versions too
+	var proxyStaticLib ModuleStaticLibrary
+	proxyStaticLib.SimpleName.Properties.Name = m.SimpleName.Properties.Name
+	proxyStaticLib.Properties.EnableableProps.Required = true
+	proxyStaticLib.Properties.Srcs = m.Properties.Srcs
+	proxyStaticLib.Properties.Cflags = proxyCflags(m)
+	proxyStaticLib.Properties.Host_supported = m.Properties.Host_supported
+	proxyStaticLib.Properties.Target_supported = m.Properties.Target_supported
+	// TODO: generate target for all supported target types
+	proxyStaticLib.Properties.TargetType = toolchain.TgtTypeHost
+
+	proxyStaticLib.Properties.ResolveFiles(ctx)
+	g.staticActions(&proxyStaticLib, ctx)
+	// TODO: Static lib dependency
+}

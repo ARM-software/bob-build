@@ -265,3 +265,20 @@ func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
+
+func propogateLibraryDefinesMutator(ctx blueprint.BottomUpMutatorContext) {
+	accumlatedDeps := []string{}
+	ctx.VisitDirectDeps(func(dep blueprint.Module) {
+		if strictLib, ok := dep.(*ModuleStrictLibrary); ok {
+			accumlatedDeps = append(accumlatedDeps, strictLib.Properties.Deps...)
+		}
+	})
+
+	if l, ok := ctx.Module().(*ModuleStrictLibrary); ok {
+		l.Properties.Deps = append(l.Properties.Deps, accumlatedDeps...)
+		ctx.AddDependency(ctx.Module(), StaticTag, accumlatedDeps...)
+	} else if l, ok := getLibrary(ctx.Module()); ok {
+		l.Properties.Static_libs = append(l.Properties.Static_libs, accumlatedDeps...)
+		ctx.AddVariationDependencies(nil, StaticTag, accumlatedDeps...)
+	}
+}

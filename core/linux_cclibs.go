@@ -292,6 +292,15 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 }
 
+func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+
+	objectFiles, _ := CompileObjs(m, ctx, tc)
+
+	g.ArchivableActions(ctx, m, tc, objectFiles)
+	// TODO: implement shared library outputs
+}
+
 // This section contains functions that are common for shared libraries and executables.
 
 // Convert a path to a library into a compiler flag.
