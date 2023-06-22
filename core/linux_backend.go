@@ -20,13 +20,12 @@ package core
 import (
 	"os"
 	"path/filepath"
-	"reflect"
-	"sort"
 	"strings"
 
 	"github.com/google/blueprint"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -292,33 +291,24 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		installedFiles = append(installedFiles, dest)
 	}
 
-	if symlinkIns, ok := m.(symlinkInstaller); ok {
-		symlinks := symlinkIns.librarySymlinks(ctx)
+	if provider, ok := m.(FileProvider); ok {
+		provider.OutFiles().ForEachIf(
+			func(fp file.Path) bool { return fp.IsSymLink() },
+			func(fp file.Path) bool {
+				symlink := filepath.Join(installPath, fp.UnScopedPath())
+				symlinkTgt := filepath.Join(installPath, fp.ExpandLink().UnScopedPath())
+				ctx.Build(pctx,
+					blueprint.BuildParams{
+						Rule:     symlinkRule,
+						Outputs:  []string{symlink},
+						Inputs:   []string{symlinkTgt},
+						Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
+						Optional: true,
+					})
 
-		symlinkKeys := make([]string, len(symlinks))
-		keys := reflect.ValueOf(symlinks).MapKeys()
-
-		for i, k := range keys {
-			symlinkKeys[i] = k.String()
-		}
-
-		sort.Strings(symlinkKeys)
-
-		for _, sym := range symlinkKeys {
-			value := symlinks[sym]
-			symlink := filepath.Join(installPath, sym)
-			symlinkTgt := filepath.Join(installPath, value)
-			ctx.Build(pctx,
-				blueprint.BuildParams{
-					Rule:     symlinkRule,
-					Outputs:  []string{symlink},
-					Inputs:   []string{symlinkTgt},
-					Args:     map[string]string{"target": value},
-					Optional: true,
-				})
-
-			installedFiles = append(installedFiles, symlink)
-		}
+				installedFiles = append(installedFiles, symlink)
+				return true
+			})
 	}
 
 	return append(installedFiles, ins.getInstallDepPhonyNames(ctx)...)

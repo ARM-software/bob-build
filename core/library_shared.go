@@ -53,8 +53,7 @@ func (m *ModuleSharedLibrary) outputs() []string {
 }
 
 func (m *ModuleSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return !f.IsSymLink() },
+	return m.OutFiles().ToStringSlice(
 		func(f file.Path) string { return f.BuildPath() })
 }
 
@@ -73,8 +72,8 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 		}
 
 		link1 := file.NewLink(soname, string(m.getTarget()), &so)
-		link2 := file.NewLink(realName, string(m.getTarget()), &link1)
-		files = append(files, link1, link2)
+		link2 := file.NewLink(m.getLinkName(), string(m.getTarget()), &link1)
+		files = append(files, link2, link1)
 	}
 
 	return
