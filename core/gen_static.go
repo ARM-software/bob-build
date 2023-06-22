@@ -54,6 +54,10 @@ func (m *generateStaticLibrary) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
+func (m *generateStaticLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+	return m.outputs()
+}
+
 func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	files = append(files, gc.OutFiles()...)
