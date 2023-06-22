@@ -65,8 +65,6 @@ type libraryInterface interface {
 	flag.Provider
 }
 
-var _ libraryInterface = (*ModuleLibrary)(nil) // impl check
-
 // TODO: These interfaces are causing a go build issue with 'duplicate functions'
 // when added to the group interface investigate why that is and fix it.
 var _ splittable = (*ModuleLibrary)(nil)            // impl check
@@ -356,11 +354,6 @@ func (m *ModuleLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
-func (m *ModuleLibrary) outputs() []string {
-	// TODO: switch to out files.
-	return m.outs
-}
-
 func (m *ModuleLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
@@ -534,10 +527,6 @@ func (m *ModuleLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 			*versionScript = filepath.Join(projectModuleDir(ctx), *versionScript)
 		}
 	}
-}
-
-func (m *ModuleLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.outputs()
 }
 
 func (m *ModuleLibrary) checkField(cond bool, fieldName string) {

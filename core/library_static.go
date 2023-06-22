@@ -26,6 +26,8 @@ type ModuleStaticLibrary struct {
 	ModuleLibrary
 }
 
+var _ libraryInterface = (*ModuleStaticLibrary)(nil) // impl check
+
 func (m *ModuleStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).staticActions(m, ctx)
@@ -45,6 +47,10 @@ func (m *ModuleStaticLibrary) implicitOutputs() []string {
 }
 
 func (m *ModuleStaticLibrary) outputs() []string {
+	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+}
+
+func (m *ModuleStaticLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
