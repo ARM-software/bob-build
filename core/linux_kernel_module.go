@@ -46,9 +46,7 @@ var (
 )
 
 func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blueprint.ModuleContext) {
-	// Calculate and record outputs
 	outputdir := filepath.Join(backend.Get().KernelModOutputDir(), ko.outputName())
-	ko.outs = []string{filepath.Join(outputdir, ko.outputName()+".ko")}
 	optional := !isBuiltByDefault(ko)
 
 	args := ko.generateKbuildArgs(ctx).toDict()

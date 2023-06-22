@@ -56,10 +56,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blu
 		panic(err)
 	}
 
-	// Calculate and record outputs
-	out := ko.outputName() + ".ko"
-	ko.outs = []string{out}
-
+	outs := []string{ko.outputName() + ".ko"}
 	kmod_build := getBackendPathInBobScriptsDir(g, "kmod_build.py")
 
 	sources_param := "${in}"
@@ -86,7 +83,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blu
 
 	bpmod.AddStringList("srcs", srcs)
 	bpmod.AddStringList("generated_deps", generated_deps)
-	bpmod.AddStringList("out", ko.outs)
+	bpmod.AddStringList("out", outs)
 	bpmod.AddStringList("implicit_outs", []string{"Module.symvers"})
 	bpmod.AddStringList("tools", []string{kmod_build})
 	bpmod.AddBool("depfile", true)
