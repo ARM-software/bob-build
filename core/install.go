@@ -201,11 +201,6 @@ func (m *ModuleInstallGroup) Features() *Features {
 	return &m.Properties.Features
 }
 
-// Modules implementing the symlinkInstaller interface are able to create symlinks in the install location
-type symlinkInstaller interface {
-	librarySymlinks(ctx blueprint.ModuleContext) map[string]string
-}
-
 // Modules implementing the installable interface can be install their output
 type installable interface {
 	filesToInstall(ctx blueprint.BaseModuleContext) []string
