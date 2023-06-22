@@ -106,14 +106,6 @@ var _ matchSourceInterface = (*ModuleGenerateCommon)(nil)
 var _ propertyEscapeInterface = (*ModuleGenerateCommon)(nil)
 var _ defaultable = (*ModuleGenerateCommon)(nil)
 
-func (m *ModuleGenerateCommon) implicitOutputs() []string {
-	return []string{}
-}
-
-func (m *ModuleGenerateCommon) outputs() []string {
-	return m.outs
-}
-
 func (m *ModuleGenerateCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 	m.Properties.FlagArgsBuild.Host.init(properties, CommonProps{}, BuildProps{})

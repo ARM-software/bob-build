@@ -58,6 +58,14 @@ type generateSourceInterface interface {
 
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
 
+func (m *ModuleGenerateSource) outputs() []string {
+	return m.outs
+}
+
+func (m *ModuleGenerateSource) implicitOutputs() []string {
+	return []string{}
+}
+
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).generateSourceActions(m, ctx)
