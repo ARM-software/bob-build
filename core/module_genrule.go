@@ -22,6 +22,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -237,6 +238,14 @@ func (m *ModuleGenrule) OutFiles() file.Paths {
 
 func (m *ModuleGenrule) OutFileTargets() (tgts []string) {
 	// does not forward any of it's source providers.
+	return
+}
+
+func (m *ModuleGenrule) FlagsOut() (flags flag.Flags) {
+	gc, _ := getAndroidGenerateCommon(m)
+	for _, str := range gc.Properties.Export_include_dirs {
+		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
+	}
 	return
 }
 

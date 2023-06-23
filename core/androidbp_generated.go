@@ -204,6 +204,15 @@ func (g *androidBpGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.Mod
 	m.AddStringList("out", gr.Properties.Out)
 }
 
+func (g *androidBpGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
+	m, err := AndroidBpFile().NewModule("gensrcs", gr.shortName())
+	if err != nil {
+		utils.Die("%v", err.Error())
+	}
+	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
+	m.AddString("output_extension", gr.Properties.Output_extension)
+}
+
 func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(gs) {
 		return

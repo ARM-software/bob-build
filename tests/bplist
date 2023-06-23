@@ -49,4 +49,5 @@
 ./target_specific_static_libs/build.bp
 ./templates/build.bp
 ./transform_source/build.bp
+./transform_source_new/build.bp
 ./version_script/build.bp

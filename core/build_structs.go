@@ -93,6 +93,7 @@ type generatorBackend interface {
 	binaryActions(*ModuleBinary, blueprint.ModuleContext)
 	generateSourceActions(*ModuleGenerateSource, blueprint.ModuleContext)
 	genruleActions(*ModuleGenrule, blueprint.ModuleContext)
+	gensrcsActions(*ModuleGensrcs, blueprint.ModuleContext)
 	transformSourceActions(*ModuleTransformSource, blueprint.ModuleContext)
 	genSharedActions(*generateSharedLibrary, blueprint.ModuleContext)
 	genStaticActions(*generateStaticLibrary, blueprint.ModuleContext)
@@ -604,6 +605,7 @@ func RegisterModuleTypes(register func(string, FactoryWithConfig)) {
 
 	// Swapping to new rules that are more strict and adhere to the Android Modules
 	register("bob_genrule", generateRuleAndroidFactory)
+	register("bob_gensrcs", gensrcsFactory)
 	register("bob_filegroup", filegroupFactory)
 	register("bob_glob", globFactory)
 	register("bob_library", LibraryFactory)
