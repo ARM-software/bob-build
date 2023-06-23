@@ -64,6 +64,7 @@ func (m *ModuleGenerateSource) outputs() []string {
 			// TODO: Consider adding a better group tag
 			return f.IsNotType(file.TypeRsp) &&
 				f.IsNotType(file.TypeDep)
+
 		},
 		func(f file.Path) string { return f.BuildPath() })
 }
@@ -154,7 +155,9 @@ func (m *ModuleGenerateSource) FlagsOut() (flags flag.Flags) {
 func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g generatorBackend) []inout {
 	var io inout
 
-	m.GetFiles(ctx).ForEach(
+	m.GetFiles(ctx).ForEachIf(
+		// TODO: The current generator does pass parse .toc files when consuming generated shared libraries.
+		func(fp file.Path) bool { return fp.IsNotType(file.TypeToc) },
 		func(fp file.Path) bool {
 			if fp.IsType(file.TypeImplicit) {
 				io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())

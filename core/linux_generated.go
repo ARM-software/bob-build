@@ -26,6 +26,7 @@ import (
 	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -47,7 +48,6 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 	prefixInoutsWithOutputDir(inouts, outputdir)
 
 	cmd, args, implicits, hostTarget := m.getArgs(ctx)
-
 	ldLibraryPath := ""
 	if _, ok := args["host_bin"]; ok {
 		ldLibraryPath += "LD_LIBRARY_PATH=" + backend.Get().SharedLibsDir(hostTarget) + ":$$LD_LIBRARY_PATH "
@@ -314,8 +314,10 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 			Optional: true,
 		})
 
-	tocFile := g.getSharedLibTocPath(m)
-	g.addSharedLibToc(ctx, soFile, tocFile, m.getTarget())
+	if toc, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
+	}
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
