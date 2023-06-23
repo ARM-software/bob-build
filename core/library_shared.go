@@ -48,12 +48,14 @@ func (m *ModuleSharedLibrary) implicitOutputs() []string {
 }
 
 func (m *ModuleSharedLibrary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(func(f file.Path) bool { return !f.IsSymLink() },
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return !f.IsSymLink() && !f.IsType(file.TypeToc) },
 		func(f file.Path) string { return f.BuildPath() })
 }
 
 func (m *ModuleSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSlice(
+	return m.OutFiles().ToStringSliceIf(
+		func(f file.Path) bool { return !f.IsType(file.TypeToc) && !f.IsSymLink() },
 		func(f file.Path) string { return f.BuildPath() })
 }
 
@@ -61,6 +63,9 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 
 	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared)
 	files = append(files, so)
+
+	toc := file.NewPath(m.getRealName()+tocExt, string(m.getTarget()), file.TypeToc)
+	files = append(files, toc)
 
 	if m.ModuleLibrary.Properties.Library_version != "" {
 		soname := m.getSoname()
@@ -78,6 +83,8 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 
 	return
 }
+
+func (m *ModuleSharedLibrary) OutFileTargets() []string { return []string{} }
 
 func (m *ModuleSharedLibrary) getLinkName() string {
 	return m.outputName() + m.fileNameExtension

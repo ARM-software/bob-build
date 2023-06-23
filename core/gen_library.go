@@ -82,7 +82,10 @@ func generateLibraryInouts(m generateLibraryInterface, ctx blueprint.ModuleConte
 	g generatorBackend, implicitOuts []string) []inout {
 	var io inout
 
-	m.GetFiles(ctx).ForEach(
+	m.GetFiles(ctx).ForEachIf(
+		func(fp file.Path) bool {
+			return !fp.IsType(file.TypeToc)
+		},
 		func(fp file.Path) bool {
 			if fp.IsType(file.TypeImplicit) {
 				io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())

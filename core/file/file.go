@@ -46,6 +46,7 @@ const (
 	TypeInstallable
 	TypeDep
 	TypeRsp
+	TypeToc
 
 	TypeLink // Special tag to indicate this file is a symlink
 
@@ -146,10 +147,12 @@ func New(relativePath string, namespace string, tag Type) Path {
 		tag |= TypeHeader
 	case ".a":
 		tag |= TypeArchive
-	case ".so", ".dll":
+	case ".so", ".dll", ".dylib":
 		tag |= TypeShared
 	case ".ko":
 		tag |= TypeKernelModule
+	case ".toc":
+		tag |= TypeToc
 	}
 
 	var backendPath string
@@ -162,7 +165,7 @@ func New(relativePath string, namespace string, tag Type) Path {
 		backendPath = backend.Get().BinaryOutputDir(toolchain.TgtType(namespace))
 	} else if (tag&TypeArchive) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
 		backendPath = backend.Get().StaticLibOutputDir(toolchain.TgtType(namespace))
-	} else if (tag&TypeShared) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
+	} else if (tag&(TypeShared|TypeToc)) != 0 && ((tag&TypeSrc)^TypeSrc) != 0 {
 		backendPath = backend.Get().SharedLibsDir(toolchain.TgtType(namespace))
 	} else if (tag & TypeKernelModule) != 0 {
 		backendPath = filepath.Join(backend.Get().KernelModOutputDir(), namespace)

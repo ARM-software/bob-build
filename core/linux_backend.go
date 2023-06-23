@@ -122,13 +122,6 @@ func (g *linuxGenerator) getSharedLibLinkPath(t targetableModule) string {
 	return filepath.Join(backend.Get().SharedLibsDir(t.getTarget()), t.outputFileName())
 }
 
-// Full path for shared library tables of content.
-// As long as the module is targetable, we can infer the library path.
-func (g *linuxGenerator) getSharedLibTocPath(l sharedLibProducer) string {
-	// TODO: this should be part of core/backend
-	return filepath.Join(backend.Get().SharedLibsDir(l.getTarget()), l.getTocName())
-}
-
 var _ = pctx.StaticVariable("toc", "${BobScriptsDir}/library_toc.py")
 var tocRule = pctx.StaticRule("shared_library_toc",
 	blueprint.RuleParams{

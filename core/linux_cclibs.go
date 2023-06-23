@@ -335,8 +335,13 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
 		func(m blueprint.Module) {
-			if l, ok := m.(sharedLibProducer); ok {
-				libs = append(libs, g.getSharedLibTocPath(l))
+			if _, ok := m.(sharedLibProducer); ok { //Remove this check and replace it with an API call
+				if m, ok := m.(FileProvider); ok {
+					if toc, ok := m.OutFiles().FindSingle(
+						func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+						libs = append(libs, toc.BuildPath())
+					}
+				}
 			} else if _, ok := m.(*ModuleExternalLibrary); ok {
 				// Don't try and guess the path to external libraries,
 				// and as they are outside of the build we don't need to
@@ -573,8 +578,10 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 			Args:      g.getSharedLibArgs(m, ctx),
 		})
 
-	tocFile := g.getSharedLibTocPath(m)
-	g.addSharedLibToc(ctx, soFile, tocFile, m.getTarget())
+	if toc, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
+	}
 
 	installDeps = append(installDeps, g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
