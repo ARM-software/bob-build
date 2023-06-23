@@ -39,6 +39,11 @@ bob_shared_library {
     name: "libsharedtest",
     srcs: ["srcs/lib.c"],
     cflags: ["-fPIC"],
+    ldlibs: [
+        "-lm",
+        "-lc",
+        "-ldl",
+    ],
     host_supported: true,
     target_supported: true,
     library_version: "1.2.1",
@@ -82,6 +87,11 @@ bob_shared_library {
     },
     host_supported: true,
     target_supported: true,
+    ldlibs: [
+        "-lm",
+        "-lc",
+        "-ldl",
+    ],
 }
 
 bob_shared_library {
