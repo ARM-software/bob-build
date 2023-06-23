@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -97,6 +98,16 @@ func (m *ModuleSharedLibrary) getSoname() string {
 		name += "." + v[0]
 	}
 	return name
+}
+
+func (m *ModuleSharedLibrary) FlagsIn() flag.Flags {
+	flags := flag.ParseFromProperties(nil, m.getFlagInLut(), m.Properties)
+
+	if m.Properties.Library_version != "" {
+		flags = append(flags, flag.FromString("-Wl,-soname,"+m.getSoname(), flag.TypeLinker))
+	}
+
+	return flags
 }
 
 func (m *ModuleSharedLibrary) getRealName() string {
