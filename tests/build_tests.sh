@@ -264,7 +264,7 @@ if [ "$OS" != "OSX" ] ; then
 
     # generated version script
     SRC=tests/version_script/exports1.map
-    UPDATE=("${build_dir}"/gen/vs_version_map/exports2.map
+    UPDATE=("${build_dir}"/gen/vs_version_map_gen/exports2.map
             "${build_dir}"/target/shared/libshared_vs_gen.so)
     check_dep_updated "generated version script" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
