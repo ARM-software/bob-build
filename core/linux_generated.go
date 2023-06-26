@@ -213,7 +213,7 @@ func transformToolsAndroidToOld(gr *ModuleGenrule, gs *ModuleGenerateSource) {
 	}
 }
 
-func (g *linuxGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
 	// TODO: remove proxy object and add a proper backend support.
 	// If needed, refactor backend to accept both objects.
 	// This approach is fragile, the generator runs after all the mutators have already executed and as such

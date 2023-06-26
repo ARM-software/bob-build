@@ -195,7 +195,7 @@ func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
 	}
 }
 
-func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
 	m, err := AndroidBpFile().NewModule("genrule", gr.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())

@@ -247,7 +247,7 @@ func (m *ModuleGenrule) shortName() string {
 func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getGenerator(ctx)
-		g.androidGenerateRuleActions(m, ctx)
+		g.genruleActions(m, ctx)
 	}
 }
 
