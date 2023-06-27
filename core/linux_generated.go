@@ -151,26 +151,13 @@ func transformCmdAndroidToOld(cmd string, agr *ModuleGenruleCommon) (retCmd *str
 		if toolDepsLength >= 1 && toolFilesLength >= 1 {
 			utils.Die("You cannot have default $(location) specified in Cmd if setting both tool_files and tools.")
 		} else if toolDepsLength >= 1 {
-			if strings.Contains(agr.Properties.Tools[0], ":") {
-				newCmd = strings.Replace(newCmd, "$(location)", "$(location "+strings.Split(agr.Properties.Tools[0], ":")[0]+")", -1)
-			} else {
-				newCmd = strings.Replace(newCmd, "$(location)", "$(location "+agr.Properties.Tools[0]+")", -1)
-			}
+			newCmd = strings.Replace(newCmd, "$(location)", "$(location "+agr.Properties.Tools[0]+")", -1)
 		} else {
 			newCmd = strings.Replace(newCmd, "$(location)", "$(location "+agr.Properties.Tool_files[0]+")", -1)
 		}
 	}
 
 	return &newCmd
-}
-
-func contains(s []string, elem string) bool {
-	for _, v := range s {
-		if elem == v {
-			return true
-		}
-	}
-	return false
 }
 
 func transformToolsAndroidToOld(gr *ModuleGenruleCommon) {
@@ -187,8 +174,9 @@ func transformToolsAndroidToOld(gr *ModuleGenruleCommon) {
 
 	for _, v := range matches {
 		tag := v[1]
+
 		// If the tag refers to a tool inside of tool_files, we can just convert it the old command.
-		if contains(gr.Properties.Tool_files, tag) || contains(gr.Properties.Tools, tag) {
+		if utils.Contains(gr.Properties.Tool_files, tag) {
 			newString := strings.Replace(v[0], "$(location", "${tool", 1)
 			newString = strings.Replace(newString, ")", "}", 1)
 			newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
@@ -204,11 +192,15 @@ func transformToolsAndroidToOld(gr *ModuleGenruleCommon) {
 			continue
 		}
 
-		// If we arrive here, currently assume the tag is for a tool dependency from the 'tools' android attribute.
-		// This should be the only other case, we leave it as the default with no check as the 'tools' attribute will not match
-		// the tag. This is because it will specify a variant with <tag>:host. Let the linux generator expand this for us and cause an error
-		// for now. On the linux backend we use generated_deps to support this, so add the correct prefix.
-		newString := "${" + tag + "_out}"
+		var newString string
+		// TODO: refactor while `bob_genrule` & `bob_gensrcs` will get
+		// rid of legacy proxy modules.
+		if utils.Contains(gr.Properties.Tools, tag) {
+			newString = "${host_bin}"
+		} else {
+			newString = "${" + tag + "_out}"
+		}
+
 		newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
 		gr.Properties.Cmd = &newCmd
 	}
@@ -223,20 +215,27 @@ func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleC
 	// Re-use old Bob Code during transition by creating a proxy generateSource object to pass to the old generator
 	var proxyGenerateSource ModuleGenerateSource
 	proxyGenerateSource.SimpleName.Properties.Name = gr.ModuleGenruleCommon.Properties.Name
+
 	gr.ModuleGenruleCommon.Properties.Cmd = transformCmdAndroidToOld(*gr.ModuleGenruleCommon.Properties.Cmd, &gr.ModuleGenruleCommon)
+
 	transformToolsAndroidToOld(&gr.ModuleGenruleCommon)
+
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Cmd = gr.ModuleGenruleCommon.Properties.Cmd
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Tools = gr.ModuleGenruleCommon.Properties.Tool_files
-	deps := append(gr.ModuleGenruleCommon.Properties.Tools, gr.ModuleGenruleCommon.deps...)
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, deps...)
+	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, gr.ModuleGenruleCommon.deps...)
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Export_gen_include_dirs = gr.ModuleGenruleCommon.Properties.Export_include_dirs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = gr.ModuleGenruleCommon.Properties.Srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleGenruleCommon.Properties.Exclude_srcs
 	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = gr.ModuleGenruleCommon.Properties.Depfile
 	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Build_by_default = gr.ModuleGenruleCommon.Properties.EnableableProps.Build_by_default
 	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Enabled = gr.ModuleGenruleCommon.Properties.EnableableProps.Enabled
-	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
 
+	if len(gr.ModuleGenruleCommon.Properties.Tools) > 0 {
+		// TODO: `Host_bin` supports only one binary.
+		proxyGenerateSource.ModuleGenerateCommon.Properties.Host_bin = &gr.ModuleGenruleCommon.Properties.Tools[0]
+	}
+
+	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
 	proxyGenerateSource.Properties.Implicit_srcs = utils.MixedListToFiles(gr.ModuleGenruleCommon.Properties.Tool_files)
 	proxyGenerateSource.Properties.Out = gr.Properties.Out
 	proxyGenerateSource.ResolveFiles(ctx)
@@ -258,16 +257,20 @@ func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleC
 
 	proxygGensrcs.ModuleGenerateCommon.Properties.Cmd = gr.ModuleGenruleCommon.Properties.Cmd
 	proxygGensrcs.ModuleGenerateCommon.Properties.Tools = gr.ModuleGenruleCommon.Properties.Tool_files
-	deps := append(gr.ModuleGenruleCommon.Properties.Tools, gr.ModuleGenruleCommon.deps...)
-	proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps = append(proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps, deps...)
+	proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps = append(proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps, gr.ModuleGenruleCommon.deps...)
 	proxygGensrcs.ModuleGenerateCommon.Properties.Export_gen_include_dirs = gr.ModuleGenruleCommon.Properties.Export_include_dirs
 	proxygGensrcs.ModuleGenerateCommon.Properties.Srcs = gr.ModuleGenruleCommon.Properties.Srcs
 	proxygGensrcs.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleGenruleCommon.Properties.Exclude_srcs
 	proxygGensrcs.ModuleGenerateCommon.Properties.Depfile = gr.ModuleGenruleCommon.Properties.Depfile
 	proxygGensrcs.ModuleGenerateCommon.Properties.EnableableProps.Build_by_default = gr.ModuleGenruleCommon.Properties.EnableableProps.Build_by_default
 	proxygGensrcs.ModuleGenerateCommon.Properties.EnableableProps.Enabled = gr.ModuleGenruleCommon.Properties.EnableableProps.Enabled
-	proxygGensrcs.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
 
+	if len(gr.ModuleGenruleCommon.Properties.Tools) > 0 {
+		// TODO: `Host_bin` supports only one binary
+		proxygGensrcs.ModuleGenerateCommon.Properties.Host_bin = &gr.ModuleGenruleCommon.Properties.Tools[0]
+	}
+
+	proxygGensrcs.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
 	proxygGensrcs.Properties.Out.Implicit_srcs = utils.MixedListToFiles(gr.ModuleGenruleCommon.Properties.Tool_files)
 	proxygGensrcs.Properties.Out.Match = "(.+)\\..*"
 	proxygGensrcs.Properties.Out.Replace = []string{fmt.Sprintf("$1.%s", gr.Properties.Output_extension)}

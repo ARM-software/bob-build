@@ -108,7 +108,7 @@ bob_binary {
         "-fno-exceptions",
     ],
     host_supported: true,
-    target_supported: true,
+    target_supported: false,
     build_by_default: true,
 }
 
@@ -127,6 +127,6 @@ bob_alias {
     name: "bob_test_gensrcs",
     srcs: [
         "bin_validate_gensrcs",
-        "gen_host_bin:host",
+        "gen_host_bin",
     ],
 }

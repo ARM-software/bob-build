@@ -528,7 +528,7 @@ build multi_tool_file: phony ${g.bob.BuildDir}/gen/multi_tool_file/output.txt $
 # Defined: nested/build.bp:40:1
 
 rule m.use_target_specific_library_new_.gen_use_target_specific_library_new
-    command = test $$(basename ${host_and_target_supported_binary_new_out}) = host_binary_new && cp ${host_and_target_supported_binary_new_out} ${_out_}
+    command = LD_LIBRARY_PATH=${g.bob.BuildDir}/host/shared:$$LD_LIBRARY_PATH test $$(basename ${host_bin}) = host_binary_new && cp ${host_bin} ${_out_}
     description = ${out}
     restat = true
 
@@ -536,7 +536,7 @@ build ${g.bob.BuildDir}/gen/use_target_specific_library_new/libout.a: $
         m.use_target_specific_library_new_.gen_use_target_specific_library_new $
         | ${g.bob.BuildDir}/host/executable/host_binary_new
     _out_ = ${g.bob.BuildDir}/gen/use_target_specific_library_new/libout.a
-    host_and_target_supported_binary_new_out = ${g.bob.BuildDir}/host/executable/host_binary_new
+    host_bin = ${g.bob.BuildDir}/host/executable/host_binary_new
 
 build use_target_specific_library_new: phony $
         ${g.bob.BuildDir}/gen/use_target_specific_library_new/libout.a

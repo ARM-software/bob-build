@@ -174,7 +174,34 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	m.AddOptionalBool("enabled", gc.Properties.Enabled)
 	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
 	m.AddStringList("tool_files", gc.Properties.Tool_files)
-	m.AddStringList("tools", gc.Properties.Tools)
+
+	var tools []string = []string{}
+
+	for _, t := range gc.Properties.Tools {
+		if strings.HasSuffix(t, ":host") || strings.HasSuffix(t, ":target") {
+			idx := strings.LastIndex(t, ":")
+			tgt := t[idx+1:]
+
+			hostBinModule := ctx.GetDirectDepWithTag(t[:idx], HostToolBinaryTag)
+
+			if hostBinModule != nil {
+				if s, ok := hostBinModule.(splittable); ok {
+					variants := s.supportedVariants()
+					if len(variants) > 1 {
+						tools = append(tools, hostBinModule.Name()+"__"+tgt)
+					} else {
+						tools = append(tools, t[:idx])
+					}
+				} else {
+					panic(fmt.Errorf("'%s' is not a host tool", t))
+				}
+			}
+		} else {
+			tools = append(tools, t)
+		}
+	}
+
+	m.AddStringList("tools", tools)
 }
 
 func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {

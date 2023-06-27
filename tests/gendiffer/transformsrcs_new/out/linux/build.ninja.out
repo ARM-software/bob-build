@@ -310,7 +310,7 @@ default verify_output_name
 # Defined: build.bp:115:1
 
 rule m.verify_tools_.gen_verify_tools
-    command = ${gen_host_bin_out} ${_out_}
+    command = LD_LIBRARY_PATH=${g.bob.BuildDir}/host/shared:$$LD_LIBRARY_PATH ${host_bin} ${_out_}
     description = ${out}
     restat = true
 
@@ -318,7 +318,7 @@ build ${g.bob.BuildDir}/gen/verify_tools/f5.cpp: $
         m.verify_tools_.gen_verify_tools ${g.bob.SrcDir}/f5.in | $
         ${g.bob.BuildDir}/host/executable/gen_host_bin
     _out_ = ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
-    gen_host_bin_out = ${g.bob.BuildDir}/host/executable/gen_host_bin
+    host_bin = ${g.bob.BuildDir}/host/executable/gen_host_bin
 
 build verify_tools: phony ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
 default verify_tools
