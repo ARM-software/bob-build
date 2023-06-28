@@ -22,6 +22,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -240,6 +241,14 @@ func (m *ModuleGenrule) OutFileTargets() (tgts []string) {
 	return
 }
 
+func (m *ModuleGenrule) FlagsOut() (flags flag.Flags) {
+	gc, _ := getAndroidGenerateCommon(m)
+	for _, str := range gc.Properties.Export_include_dirs {
+		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
+	}
+	return
+}
+
 func (m *ModuleGenrule) shortName() string {
 	return m.Name()
 }
@@ -247,7 +256,7 @@ func (m *ModuleGenrule) shortName() string {
 func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getGenerator(ctx)
-		g.androidGenerateRuleActions(m, ctx)
+		g.genruleActions(m, ctx)
 	}
 }
 

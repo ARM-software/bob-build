@@ -1,0 +1,132 @@
+/*
+ * Copyright 2023 Arm Limited.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+bob_filegroup {
+    name: "generator",
+    srcs: [
+        "generator.py",
+    ],
+}
+
+bob_gensrcs {
+    name: "gensrcs_single_cpp",
+    srcs: [
+        "f1.in",
+    ],
+    output_extension: "cpp",
+    export_include_dirs: [
+        ".",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+}
+
+bob_gensrcs {
+    name: "gensrcs_single_h",
+    srcs: [
+        "f1.in",
+    ],
+    output_extension: "h",
+    export_include_dirs: [
+        ".",
+    ],
+    tool_files: [":generator"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+}
+
+bob_gensrcs {
+    name: "gensrcs_multiple_cpp",
+    srcs: [
+        "f2.in",
+        "f3.in",
+    ],
+    output_extension: "cpp",
+    export_include_dirs: [
+        ".",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+}
+
+bob_gensrcs {
+    name: "gensrcs_multiple_h",
+    srcs: [
+        "f2.in",
+        "f3.in",
+    ],
+    output_extension: "h",
+    export_include_dirs: [
+        ".",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+}
+
+bob_binary {
+    name: "bin_validate_gensrcs",
+    generated_sources: [
+        "gensrcs_single_cpp",
+        "gensrcs_multiple_cpp",
+    ],
+    generated_headers: [
+        "gensrcs_single_h",
+        "gensrcs_multiple_h",
+    ],
+    srcs: ["main.cpp"],
+}
+
+bob_gensrcs {
+    name: "verify_output_name",
+    srcs: [
+        "f4.in",
+    ],
+    output_extension: "cpp",
+    tool_files: ["verify.py"],
+    cmd: "python $(location) $(in) $(out) f4.cpp",
+    build_by_default: true,
+}
+
+bob_binary {
+    name: "gen_host_bin",
+    srcs: ["gen.cpp"],
+    cxxflags: [
+        "-std=c++17",
+        "-fno-exceptions",
+    ],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
+bob_gensrcs {
+    name: "verify_tools",
+    srcs: [
+        "f5.in",
+    ],
+    output_extension: "cpp",
+    tools: ["gen_host_bin:host"],
+    cmd: "$(location) $(out)",
+    build_by_default: true,
+}
+
+bob_alias {
+    name: "bob_test_gensrcs",
+    srcs: [
+        "bin_validate_gensrcs",
+        "gen_host_bin",
+    ],
+}

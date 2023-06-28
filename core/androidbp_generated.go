@@ -174,7 +174,34 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	m.AddOptionalBool("enabled", gc.Properties.Enabled)
 	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
 	m.AddStringList("tool_files", gc.Properties.Tool_files)
-	m.AddStringList("tools", gc.Properties.Tools)
+
+	var tools []string = []string{}
+
+	for _, t := range gc.Properties.Tools {
+		if strings.HasSuffix(t, ":host") || strings.HasSuffix(t, ":target") {
+			idx := strings.LastIndex(t, ":")
+			tgt := t[idx+1:]
+
+			hostBinModule := ctx.GetDirectDepWithTag(t[:idx], HostToolBinaryTag)
+
+			if hostBinModule != nil {
+				if s, ok := hostBinModule.(splittable); ok {
+					variants := s.supportedVariants()
+					if len(variants) > 1 {
+						tools = append(tools, hostBinModule.Name()+"__"+tgt)
+					} else {
+						tools = append(tools, t[:idx])
+					}
+				} else {
+					panic(fmt.Errorf("'%s' is not a host tool", t))
+				}
+			}
+		} else {
+			tools = append(tools, t)
+		}
+	}
+
+	m.AddStringList("tools", tools)
 }
 
 func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
@@ -195,13 +222,22 @@ func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
 	}
 }
 
-func (g *androidBpGenerator) androidGenerateRuleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
 	m, err := AndroidBpFile().NewModule("genrule", gr.shortName())
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
 	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
 	m.AddStringList("out", gr.Properties.Out)
+}
+
+func (g *androidBpGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
+	m, err := AndroidBpFile().NewModule("gensrcs", gr.shortName())
+	if err != nil {
+		utils.Die("%v", err.Error())
+	}
+	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
+	m.AddString("output_extension", gr.Properties.Output_extension)
 }
 
 func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx blueprint.ModuleContext) {

@@ -15,7 +15,7 @@ bob_binary {
 }
 
 bob_generate_source {
-    name: "vs_version_map",
+    name: "vs_version_map_gen",
     srcs: ["exports1.map"],
     out: ["exports2.map"],
     cmd: "sed s/_func/func/ ${in} > ${out}",
@@ -24,8 +24,8 @@ bob_generate_source {
 bob_shared_library {
     name: "libshared_vs_gen",
     srcs: ["lib.c"],
-    generated_deps: ["vs_version_map"],
-    version_script: "${vs_version_map_out}",
+    generated_deps: ["vs_version_map_gen"],
+    version_script: "${vs_version_map_gen_out}",
 }
 
 bob_binary {

@@ -1,0 +1,109 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "bin_validate_gensrcs",
+    srcs: ["main.cpp"],
+    generated_sources: [
+        "gensrcs_single_cpp",
+        "gensrcs_multiple_cpp",
+    ],
+    generated_headers: [
+        "gensrcs_single_h",
+        "gensrcs_multiple_h",
+    ],
+}
+
+phony {
+    name: "bob_test_gensrcs",
+    required: [
+        "bin_validate_gensrcs",
+        "gen_host_bin__host",
+    ],
+}
+
+cc_binary_host {
+    name: "gen_host_bin__host",
+    stem: "gen_host_bin",
+    srcs: ["gen.cpp"],
+    cpp_std: "c++17",
+    cppflags: ["-fno-exceptions"],
+}
+
+cc_binary {
+    name: "gen_host_bin__target",
+    stem: "gen_host_bin",
+    srcs: ["gen.cpp"],
+    cpp_std: "c++17",
+    cppflags: ["-fno-exceptions"],
+}
+
+filegroup {
+    name: "generator",
+    srcs: ["generator.py"],
+}
+
+gensrcs {
+    name: "gensrcs_multiple_cpp",
+    srcs: [
+        "f2.in",
+        "f3.in",
+    ],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+    export_include_dirs: ["."],
+    tool_files: ["generator.py"],
+    output_extension: "cpp",
+}
+
+gensrcs {
+    name: "gensrcs_multiple_h",
+    srcs: [
+        "f2.in",
+        "f3.in",
+    ],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+    export_include_dirs: ["."],
+    tool_files: ["generator.py"],
+    output_extension: "h",
+}
+
+gensrcs {
+    name: "gensrcs_single_cpp",
+    srcs: ["f1.in"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+    export_include_dirs: ["."],
+    tool_files: ["generator.py"],
+    output_extension: "cpp",
+}
+
+gensrcs {
+    name: "gensrcs_single_h",
+    srcs: ["f1.in"],
+    cmd: "python $(location) --in $(in) --gen $(out)",
+    export_include_dirs: ["."],
+    tool_files: [":generator"],
+    output_extension: "h",
+}
+
+gensrcs {
+    name: "verify_output_name",
+    srcs: ["f4.in"],
+    cmd: "python $(location) $(in) $(out) f4.cpp",
+    tool_files: ["verify.py"],
+    output_extension: "cpp",
+}
+
+gensrcs {
+    name: "verify_tools",
+    srcs: ["f5.in"],
+    cmd: "$(location) $(out)",
+    tools: ["gen_host_bin__host"],
+    output_extension: "cpp",
+}
+

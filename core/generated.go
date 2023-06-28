@@ -176,25 +176,10 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
-	// These rules also need to support variants when depending on tools. This strictly breaks android's genrule definition.
-	// However, if a colon appears at the end of a module name with a text string, we assume there is a variant
-	// called <module_name>__<variant_name> generated. Which bob currently does. This will fix behaviour on Android, to
-	// ensure it works on Linux, the backend must see this as a generated_dep which is processing done in the linux backend.
+	// For strict generation rules, i.e. `bob_genule` & `bob_gensrcs`, the `tool` property
+	// is for the modules that produces the host executable. Thus those should follow with
+	// `HostToolBinaryTag` tag dependency.
 	if agsc, ok := getAndroidGenerateCommon((ctx.Module())); ok {
-		var removeList []string
-		for _, s := range agsc.Properties.Tools {
-			if strings.Contains(s, ":") {
-				if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
-					parseAndAddVariationDeps(ctx, GeneratedTag,
-						s)
-				} else {
-					agsc.Properties.Tools = append(agsc.Properties.Tools, strings.Replace(s, ":", "__", 1))
-					removeList = append(removeList, s)
-				}
-			}
-		}
-		for i := range removeList {
-			agsc.Properties.Tools = append(agsc.Properties.Tools[:i], agsc.Properties.Tools[i+1:]...)
-		}
+		parseAndAddVariationDeps(ctx, HostToolBinaryTag, agsc.Properties.Tools...)
 	}
 }

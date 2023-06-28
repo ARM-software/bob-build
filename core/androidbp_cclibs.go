@@ -107,6 +107,7 @@ func (m *ModuleLibrary) getGeneratedSourceModules(ctx blueprint.BaseModuleContex
 			case *ModuleGenerateSource:
 			case *ModuleTransformSource:
 			case *ModuleGenrule:
+			case *ModuleGensrcs:
 			default:
 				panic(fmt.Errorf("Dependency %s of %s is not a generated source",
 					dep.Name(), m.Name()))
@@ -133,6 +134,7 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(ctx blueprint.BaseModuleContex
 			case *ModuleGenerateSource:
 			case *ModuleTransformSource:
 			case *ModuleGenrule:
+			case *ModuleGensrcs:
 			default:
 				panic(fmt.Errorf("Dependency %s of %s is not a generated source",
 					dep.Name(), m.Name()))
