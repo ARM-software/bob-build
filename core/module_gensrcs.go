@@ -60,15 +60,6 @@ func (m *ModuleGensrcs) processPaths(ctx blueprint.BaseModuleContext) {
 
 func (m *ModuleGensrcs) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.ModuleGenruleCommon.ResolveFiles(ctx)
-
-	files := file.Paths{}
-	for _, out := range m.ModuleGenruleCommon.Properties.Srcs {
-		// replace extension
-		fp := file.NewPath(pathtools.ReplaceExtension(out, m.Properties.Output_extension), ctx.ModuleName(), file.TypeGenerated)
-		files = files.AppendIfUnique(fp)
-	}
-
-	m.Properties.ResolvedOut = files
 }
 
 func (m *ModuleGensrcs) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
@@ -90,6 +81,19 @@ func (m *ModuleGensrcs) OutFiles() file.Paths {
 func (m *ModuleGensrcs) OutFileTargets() (tgts []string) {
 	// does not forward any of it's source providers.
 	return
+}
+
+func (m *ModuleGensrcs) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
+	files := file.Paths{}
+
+	m.GetFiles(ctx).ForEach(
+		func(fp file.Path) bool {
+			fpOut := file.NewPath(pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension), ctx.ModuleName(), file.TypeGenerated)
+			files = files.AppendIfUnique(fpOut)
+			return true
+		})
+
+	m.Properties.ResolvedOut = files
 }
 
 func (m *ModuleGensrcs) shortName() string {
