@@ -264,6 +264,31 @@ func (m *ModuleGenrule) shortName() string {
 	return m.Name()
 }
 
+func (m *ModuleGenrule) generateInouts(ctx blueprint.ModuleContext) []inout {
+	var io inout
+
+	m.GetFiles(ctx).ForEachIf(
+		// TODO: The current generator does pass parse .toc files when consuming generated shared libraries.
+		func(fp file.Path) bool { return fp.IsNotType(file.TypeToc) },
+		func(fp file.Path) bool {
+			if fp.IsType(file.TypeImplicit) {
+				io.implicitSrcs = append(io.implicitSrcs, fp.BuildPath())
+			} else {
+				io.in = append(io.in, fp.BuildPath())
+			}
+			return true
+		})
+
+	io.out = m.Properties.Out
+
+	if depfile, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeDep) }); ok {
+		io.depfile = depfile.UnScopedPath()
+	}
+
+	return []inout{io}
+}
+
 func (m *ModuleGenrule) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		g := getGenerator(ctx)

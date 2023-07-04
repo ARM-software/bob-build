@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
+	"github.com/google/blueprint/proptools"
 )
 
 type GensrcsRuleProps struct {
@@ -98,6 +99,30 @@ func (m *ModuleGensrcs) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 
 func (m *ModuleGensrcs) shortName() string {
 	return m.Name()
+}
+
+func (m *ModuleGensrcs) generateInouts(ctx blueprint.ModuleContext) []inout {
+	var inouts []inout
+
+	m.GetFiles(ctx).ForEachIf(
+		func(fp file.Path) bool { return fp.IsNotType(file.TypeToc) },
+		func(fp file.Path) bool {
+			var io inout
+
+			io.in = []string{fp.BuildPath()}
+			io.out = []string{pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension)}
+
+			// TODO: check depfile
+			if proptools.Bool(m.ModuleGenruleCommon.Properties.Depfile) {
+				io.depfile = getDepfileName(fp.UnScopedPath())
+			}
+
+			inouts = append(inouts, io)
+
+			return true
+		})
+
+	return inouts
 }
 
 func (m *ModuleGensrcs) GenerateBuildActions(ctx blueprint.ModuleContext) {
