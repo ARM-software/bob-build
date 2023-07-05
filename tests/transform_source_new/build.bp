@@ -119,7 +119,7 @@ bob_gensrcs {
     ],
     output_extension: "cpp",
     tools: ["gen_host_bin:host"],
-    cmd: "$(location) $(out)",
+    cmd: "$(location gen_host_bin:host) $(out)",
     build_by_default: true,
 }
 

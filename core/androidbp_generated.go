@@ -169,13 +169,7 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	// expand special variables
 	cmd := expandGenruleCmd(gc, ctx, *gc.Properties.Cmd)
 
-	m.AddString("cmd", strings.TrimSpace(cmd))
-	m.AddOptionalBool("depfile", gc.Properties.Depfile)
-	m.AddOptionalBool("enabled", gc.Properties.Enabled)
-	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
-	m.AddStringList("tool_files", gc.Properties.Tool_files)
-
-	var tools []string = []string{}
+	toolsMap := make(map[string]string, len(gc.Properties.Tools))
 
 	for _, t := range gc.Properties.Tools {
 		if strings.HasSuffix(t, ":host") || strings.HasSuffix(t, ":target") {
@@ -188,19 +182,32 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 				if s, ok := hostBinModule.(splittable); ok {
 					variants := s.supportedVariants()
 					if len(variants) > 1 {
-						tools = append(tools, hostBinModule.Name()+"__"+tgt)
+						toolsMap[t] = hostBinModule.Name() + "__" + tgt
 					} else {
-						tools = append(tools, t[:idx])
+						toolsMap[t] = t[:idx]
 					}
 				} else {
 					panic(fmt.Errorf("'%s' is not a host tool", t))
 				}
 			}
 		} else {
-			tools = append(tools, t)
+			toolsMap[t] = t
 		}
 	}
 
+	var tools []string
+
+	// Grab all tools and replace used ones in `cmd`
+	for k, v := range toolsMap {
+		tools = append(tools, v)
+		cmd = strings.Replace(cmd, "$(location "+k+")", "$(location "+v+")", -1)
+	}
+
+	m.AddString("cmd", strings.TrimSpace(cmd))
+	m.AddOptionalBool("depfile", gc.Properties.Depfile)
+	m.AddOptionalBool("enabled", gc.Properties.Enabled)
+	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
+	m.AddStringList("tool_files", gc.Properties.Tool_files)
 	m.AddStringList("tools", tools)
 }
 
