@@ -150,27 +150,21 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 }
 
 func transformCmdAndroidToOld(cmd string, agr *ModuleGenruleCommon) (retCmd *string) {
-	// $(location) <label> -> ${tool} <label>
-	// $(in) -> ${in}
-	// $(out) -> ${out}
-	// $(depfile) -> ${depfile}
-	// $(genDir) -> ${gen_dir}
-	newCmd := strings.Replace(cmd, "$(in)", "${in}", -1)
-	newCmd = strings.Replace(newCmd, "$(out)", "${out}", -1)
-	// We do not support $(locations)
-	//newCmd = strings.Replace(newCmd, "$(locations)", "${tool}", -1)
-	newCmd = strings.Replace(newCmd, "$(depfile)", "${depfile}", -1)
-	newCmd = strings.Replace(newCmd, "$(genDir)", "${gen_dir}", -1)
-	if strings.Contains(cmd, "$(location)") {
+	newCmd := strings.Replace(cmd, "${genDir}", "${gen_dir}", -1)
+
+	// ${locations} is not supported but only ${location}
+	if strings.Contains(cmd, "${location}") {
 		toolFilesLength := len(agr.Properties.Tool_files)
 		toolDepsLength := len(agr.Properties.Tools)
-		if toolDepsLength >= 1 && toolFilesLength >= 1 {
-			utils.Die("You cannot have default $(location) specified in Cmd if setting both tool_files and tools.")
-		} else if toolDepsLength >= 1 {
-			newCmd = strings.Replace(newCmd, "$(location)", "$(location "+agr.Properties.Tools[0]+")", -1)
-		} else {
-			newCmd = strings.Replace(newCmd, "$(location)", "$(location "+agr.Properties.Tool_files[0]+")", -1)
+		usedTool := ""
+
+		if toolDepsLength > 0 {
+			usedTool = agr.Properties.Tools[0]
+		} else if toolFilesLength > 0 {
+			usedTool = agr.Properties.Tool_files[0]
 		}
+
+		newCmd = strings.Replace(newCmd, "${location}", "${location "+usedTool+"}", -1)
 	}
 
 	return &newCmd
@@ -193,8 +187,7 @@ func transformToolsAndroidToOld(gr *ModuleGenruleCommon) {
 
 		// If the tag refers to a tool inside of tool_files, we can just convert it the old command.
 		if utils.Contains(gr.Properties.Tool_files, tag) {
-			newString := strings.Replace(v[0], "$(location", "${tool", 1)
-			newString = strings.Replace(newString, ")", "}", 1)
+			newString := strings.Replace(v[0], "${location", "${tool", 1)
 			newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
 			gr.Properties.Cmd = &newCmd
 			continue

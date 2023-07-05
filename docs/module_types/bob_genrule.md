@@ -7,8 +7,8 @@ once.
 
 This is a new rule that is closer aligned to Android's genrule.
 
-The command will be run once - with `$(in)` being the paths in
-`srcs` and `$out` being the paths in `out`.
+The command will be run once - with `${in}` being the paths in
+`srcs` and `${out}` being the paths in `out`.
 The source and tool paths should be relative to the directory of the
 `build.bp` containing the `bob_genrule`.
 
@@ -46,7 +46,7 @@ bob_genrule {
     out: ["deps.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in single.cpp",
 }
 ```
 
@@ -63,7 +63,7 @@ Enable reading a file containing dependencies in gcc format after the command co
 
 ### **bob_genrule.tool_files** (required unless tools is set)
 
-Local file that is used as the tool in `$(location)` of the cmd.
+Local file that is used as the tool in `${location}` of the cmd.
 
 ### **bob_genrule.tools** (required unless tool_files is set)
 
@@ -80,7 +80,7 @@ bob_genrule {
     name: "use_target_specific_library_new",
     out: ["libout.a"],
     tools: ["host_and_target_supported_binary_new:host"],
-    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+    cmd: "test $$(basename ${location}) = host_binary_new && cp ${location} ${out}",
 }
 ```
 
@@ -90,12 +90,12 @@ The command that is to be run for this module. bob_genrule supports various
 substitutions in the command, by using `${name_of_var}`. The
 available substitutions are:
 
-- `$(location)`: the path to the first entry in tools or tool_files.
-- `$(location <label>)`: the path to the tool, tool_file, or src with name `<label>`. Use `$(location)` if `<label>` refers to a rule that outputs exactly one file.
-- `$(in)`: one or more input files.
-- `$(out)`: a single output file.
-- `$(depfile)`: a file to which dependencies will be written, if the depfile property is set to true.
-- `$(genDir)`: the sandbox directory for this tool; contains `$(out)`.
+- `${location}`: the path to the first entry in tools or tool_files.
+- `${location <label>}`: the path to the tool, tool_file, or src with name `<label>`. Use `${location}` if `<label>` refers to a rule that outputs exactly one file.
+- `${in}`: one or more input files.
+- `${out}`: a single output file.
+- `${depfile}`: a file to which dependencies will be written, if the depfile property is set to true.
+- `${genDir}`: the sandbox directory for this tool; contains `${out}`.
 - `$$`: a literal $
 
 ## Transition from `bob_generate_sources` to `bob_genrule` guide
@@ -137,7 +137,7 @@ bob_genrule {
     out: ["single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_generate_source {
@@ -165,7 +165,7 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_generate_source {
@@ -180,6 +180,6 @@ bob_genrule {
     name: "use_target_specific_library_new",
     out: ["libout.a"],
     tools: ["host_and_target_supported_binary_new:host"],
-    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+    cmd: "test $$(basename ${location}) = host_binary_new && cp ${location} ${out}",
 }
 ```

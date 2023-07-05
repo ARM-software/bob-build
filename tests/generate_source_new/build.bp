@@ -31,7 +31,7 @@ bob_genrule {
     out: ["single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_genrule {
@@ -44,7 +44,7 @@ bob_genrule {
     out: ["multiple_in.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
 bob_genrule {
@@ -58,7 +58,7 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_genrule {
@@ -74,7 +74,7 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
 // Simple cases
@@ -90,7 +90,7 @@ bob_genrule {
     out: ["level_1_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in single.cpp",
 }
 
 bob_genrule {
@@ -100,7 +100,7 @@ bob_genrule {
     out: ["level_2_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_1_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in level_1_single.cpp",
 }
 
 bob_genrule {
@@ -110,7 +110,7 @@ bob_genrule {
     out: ["level_3_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_2_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in level_2_single.cpp",
 }
 
 bob_genrule {
@@ -122,7 +122,7 @@ bob_genrule {
     out: ["extra_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in level_2_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in level_2_single.cpp",
 }
 
 // Nested cases
@@ -139,13 +139,13 @@ bob_genrule {
         "out1.out",
     ],
     tool_files: ["generator.py"],
-    cmd: "python3 $(location generator.py) --in $(in) --out $(out)",
+    cmd: "python3 ${location generator.py} --in ${in} --out ${out}",
     linux: {
-        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --depfile ${depfile} --config ${bob_config}",
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
         depfile: true,
     },
     android: {
-        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --depfile ${depfile} --config ${bob_config}",
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
         depfile: true,
     },
     build_by_default: true,
@@ -163,7 +163,7 @@ bob_genrule {
     out: ["deps.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in single.cpp",
 }
 
 bob_genrule {
@@ -175,7 +175,7 @@ bob_genrule {
     out: ["deps2.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in deps.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
 }
 
 // Depends cases
@@ -212,7 +212,7 @@ bob_genrule {
     out: ["output.txt"],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
+    cmd: "${location} -o ${out} -d ${depfile} --in ${in}",
 }
 
 bob_genrule {
@@ -227,13 +227,13 @@ bob_genrule {
     ],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
+    cmd: "${location} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${in}",
 }
 
 bob_genrule {
     name: "validate_install_generate_sources_new",
     out: ["validate_install_generate_sources.txt"],
-    cmd: "touch $(out)",
+    cmd: "touch ${out}",
 }
 
 // Check that generated modules can depend on a specific variant of a module
@@ -253,7 +253,7 @@ bob_genrule {
     name: "use_target_specific_library_new",
     out: ["libout.a"],
     tools: ["host_and_target_supported_binary_new:host"],
-    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+    cmd: "test $$(basename ${location}) = host_binary_new && cp ${location} ${out}",
 }
 
 bob_genrule {
@@ -268,7 +268,7 @@ bob_genrule {
         "depgen1.in",
     ],
     depfile: true,
-    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
+    cmd: "${location gen_with_dep.py} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${location depgen1.in} ${in}",
 }
 
 bob_genrule {
@@ -280,7 +280,7 @@ bob_genrule {
     out: ["deps.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location generator.py) --in $(in) --out $(out) --expect-in before_generate.in $(location :generate_source_single_new)",
+    cmd: "python ${location generator.py} --in ${in} --out ${out} --expect-in before_generate.in ${location :generate_source_single_new}",
 }
 
 bob_alias {

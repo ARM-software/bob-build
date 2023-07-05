@@ -23,7 +23,7 @@ bob_genrule {
     out: ["single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_binary {
@@ -41,7 +41,7 @@ bob_genrule {
     name: "use_target_specific_library_new",
     out: ["libout.a"],
     tools: ["host_and_target_supported_binary_new:host"],
-    cmd: "test $$(basename $(location)) = host_binary_new && cp $(location) $(out)",
+    cmd: "test $$(basename ${location}) = host_binary_new && cp ${location} ${out}",
 }
 
 bob_genrule {
@@ -56,7 +56,7 @@ bob_genrule {
         "depgen1.in",
     ],
     depfile: true,
-    cmd: "$(location gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location depgen1.in) $(in)",
+    cmd: "${location gen_with_dep.py} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${location depgen1.in} ${in}",
 }
 
 bob_genrule {
@@ -68,7 +68,7 @@ bob_genrule {
     out: ["output.txt"],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
+    cmd: "${location} -o ${out} -d ${depfile} --in ${in}",
 }
 
 bob_genrule {
@@ -83,5 +83,5 @@ bob_genrule {
     ],
     depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
+    cmd: "${location} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${in}",
 }

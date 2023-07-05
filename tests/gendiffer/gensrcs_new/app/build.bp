@@ -25,7 +25,7 @@ bob_genrule {
     out: ["multiple_in.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
 bob_genrule {
@@ -39,7 +39,7 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --config ${bob_config} --depfile ${depfile} --out-src ${gen_dir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}",
+    cmd: "python ${location} --in ${in} --out ${out} --config ${bob_config} --depfile ${depfile} --out-src ${gen_dir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}",
     depfile: true,
 }
 
@@ -56,7 +56,7 @@ bob_genrule {
     ],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in before_generate2.in before_generate3.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in before_generate2.in before_generate3.in",
 }
 
 bob_genrule {
@@ -66,7 +66,7 @@ bob_genrule {
     out: ["level_1_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in single.cpp",
 }
 
 bob_genrule {
@@ -76,7 +76,7 @@ bob_genrule {
     out: ["level_2_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_1_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in level_1_single.cpp",
 }
 
 bob_genrule {
@@ -86,7 +86,7 @@ bob_genrule {
     out: ["level_3_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in level_2_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in level_2_single.cpp",
 }
 
 bob_genrule {
@@ -98,7 +98,7 @@ bob_genrule {
     out: ["extra_single.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in level_2_single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in level_2_single.cpp",
 }
 
 bob_genrule {
@@ -110,7 +110,7 @@ bob_genrule {
     out: ["deps.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in single.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in single.cpp",
 }
 
 bob_genrule {
@@ -122,7 +122,7 @@ bob_genrule {
     out: ["deps2.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in deps.cpp",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in deps.cpp",
 }
 
 bob_binary {
@@ -150,7 +150,7 @@ bob_binary {
 bob_genrule {
     name: "validate_install_generate_sources_new",
     out: ["validate_install_generate_sources.txt"],
-    cmd: "touch $(out)",
+    cmd: "touch ${out}",
 }
 
 bob_genrule {
@@ -162,7 +162,7 @@ bob_genrule {
     out: ["deps.cpp"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location generator.py) --in $(in) --out $(out) --expect-in before_generate.in $(location :generate_source_single_new)",
+    cmd: "python ${location generator.py} --in ${in} --out ${out} --expect-in before_generate.in ${location :generate_source_single_new}",
 }
 
 bob_genrule {
@@ -177,7 +177,7 @@ bob_genrule {
         "input1.out",
         "input3.out",
     ],
-    cmd: "touch $(out)",
+    cmd: "touch ${out}",
 }
 
 bob_genrule {
@@ -189,12 +189,12 @@ bob_genrule {
         "out1.out",
     ],
     tool_files: ["generator.py"],
-    cmd: "python3 $(location generator.py) --in $(in) --out $(out)",
+    cmd: "python3 ${location generator.py} --in ${in} --out ${out}",
     android: {
-        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config android_config_name",
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --config android_config_name",
     },
     linux: {
-        cmd: "python3 $(location generator.py) --in $(in) --out $(out) --config linux_config_name",
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --config linux_config_name",
     },
     build_by_default: true,
 }
