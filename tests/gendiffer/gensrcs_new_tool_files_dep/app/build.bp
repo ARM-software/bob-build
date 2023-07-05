@@ -23,7 +23,7 @@ bob_genrule {
     out: ["generated.json"],
 
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --out ${out} --expect-in before_generate.in",
 }
 
 bob_genrule {
@@ -39,7 +39,7 @@ bob_genrule {
         "generator.py",
         ":generate_config",
     ],
-    cmd: "python $(location) --in $(in) --json $(location :generate_config) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --json ${location :generate_config} --out ${out} --expect-in before_generate.in",
 }
 
 bob_genrule {
@@ -55,7 +55,7 @@ bob_genrule {
         "generator.py",
         ":generate_config",
     ],
-    cmd: "python $(location) --in $(in) --json ${generate_config_out} --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --json ${generate_config_out} --out ${out} --expect-in before_generate.in",
 }
 
 bob_genrule {
@@ -71,7 +71,7 @@ bob_genrule {
         "generator.py",
         ":generate_source_colon_dep",
     ],
-    cmd: "python $(location) --in $(in) --tools $(location :generate_source_colon_dep) --out $(out) --expect-in before_generate.in",
+    cmd: "python ${location} --in ${in} --tools ${location :generate_source_colon_dep} --out ${out} --expect-in before_generate.in",
 }
 
 bob_binary {

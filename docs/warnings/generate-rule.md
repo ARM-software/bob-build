@@ -26,7 +26,7 @@ bob_genrule {
     ],
     out: ["main.cpp"],
     tool_files: ["tool.py"],
-    cmd: "python $(location) --in $(in) --out $(out),
+    cmd: "python ${location} --in ${in} --out ${out},
 }
 ```
 

@@ -18,6 +18,7 @@
 package core
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/config"
@@ -63,6 +64,7 @@ type AndroidGenerateCommonPropsInterface interface {
 	FileResolver
 }
 
+var variableRegex = regexp.MustCompile(`\$\(([A-Za-z- \._:0-9]+)\)`)
 var _ AndroidGenerateCommonPropsInterface = (*AndroidGenerateCommonProps)(nil) // impl check
 
 func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext) {
@@ -76,6 +78,8 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	ag.Srcs = append(utils.PrefixDirs(srcs, prefix), targets...)
 	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
 
+	ag.validateCmd(ctx)
+
 	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
 	// we must fix this by iterating through the command.
 	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
@@ -84,6 +88,7 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 		if tag[0] == ':' {
 			continue
 		}
+
 		// do not prefix paths for `Tools` which are host binary modules
 		if utils.Contains(ag.Tool_files, tag) {
 			newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
@@ -97,6 +102,23 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	tool_files_targets := utils.PrefixAll(utils.MixedListToBobTargets(ag.Tool_files), ":")
 	ag.Tool_files = utils.PrefixDirs(utils.MixedListToFiles(ag.Tool_files), prefix)
 	ag.Tool_files = append(ag.Tool_files, tool_files_targets...)
+}
+
+func (ag *AndroidGenerateCommonProps) validateCmd(ctx blueprint.BaseModuleContext) {
+
+	// for variables only curly brackets are allowed
+	matches := variableRegex.FindAllStringSubmatch(*ag.Cmd, -1)
+
+	for _, v := range matches {
+		ctx.ModuleErrorf("Only curly brackets are allowed in `cmd`. Use: '${%s}'", v[1])
+	}
+
+	// Check default tool
+	if strings.Contains(*ag.Cmd, "${location}") {
+		if len(ag.Tools) > 0 && len(ag.Tool_files) > 0 {
+			ctx.ModuleErrorf("You cannot have default $(location) specified in `cmd` if setting both `tool_files` and `tools`.")
+		}
+	}
 }
 
 func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext) {

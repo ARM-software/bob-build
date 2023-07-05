@@ -27,7 +27,7 @@ bob_genrule {
         "generated_noncompile_genrule.md",
     ],
 
-    cmd: "touch $(out)",
+    cmd: "touch ${out}",
 }
 
 bob_generate_source {

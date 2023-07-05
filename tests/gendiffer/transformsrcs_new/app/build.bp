@@ -32,7 +32,7 @@ bob_gensrcs {
         ".",
     ],
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --gen $(out)",
+    cmd: "python ${location} --in ${in} --gen ${out}",
 }
 
 bob_gensrcs {
@@ -45,7 +45,7 @@ bob_gensrcs {
         ".",
     ],
     tool_files: [":generator"],
-    cmd: "python $(location) --in $(in) --gen $(out)",
+    cmd: "python ${location} --in ${in} --gen ${out}",
 }
 
 bob_gensrcs {
@@ -59,7 +59,7 @@ bob_gensrcs {
         ".",
     ],
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --gen $(out)",
+    cmd: "python ${location} --in ${in} --gen ${out}",
 }
 
 bob_gensrcs {
@@ -73,7 +73,7 @@ bob_gensrcs {
         ".",
     ],
     tool_files: ["generator.py"],
-    cmd: "python $(location) --in $(in) --gen $(out)",
+    cmd: "python ${location} --in ${in} --gen ${out}",
 }
 
 bob_binary {
@@ -96,7 +96,7 @@ bob_gensrcs {
     ],
     output_extension: "cpp",
     tool_files: ["verify.py"],
-    cmd: "python $(location) $(in) $(out) f4.cpp",
+    cmd: "python ${location} ${in} ${out} f4.cpp",
     build_by_default: true,
 }
 
@@ -119,7 +119,7 @@ bob_gensrcs {
     ],
     output_extension: "cpp",
     tools: ["gen_host_bin:host"],
-    cmd: "$(location) $(out)",
+    cmd: "${location} ${out}",
     build_by_default: true,
 }
 
