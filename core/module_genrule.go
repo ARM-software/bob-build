@@ -76,10 +76,6 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	ag.Srcs = append(utils.PrefixDirs(srcs, prefix), targets...)
 	ag.Exclude_srcs = utils.PrefixDirs(ag.Exclude_srcs, prefix)
 
-	tool_files_targets := utils.PrefixAll(utils.MixedListToBobTargets(ag.Tool_files), ":")
-	ag.Tool_files = utils.PrefixDirs(utils.MixedListToFiles(ag.Tool_files), prefix)
-	ag.Tool_files = append(ag.Tool_files, tool_files_targets...)
-
 	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
 	// we must fix this by iterating through the command.
 	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
@@ -88,12 +84,19 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 		if tag[0] == ':' {
 			continue
 		}
-		newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
-		// Replacing with space allows us to not replace the same basename more than once if it appears
-		// multiple times.
-		newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
-		ag.Cmd = &newCmd
+		// do not prefix paths for `Tools` which are host binary modules
+		if utils.Contains(ag.Tool_files, tag) {
+			newTag := utils.PrefixDirs([]string{tag}, prefix)[0]
+			// Replacing with space allows us to not replace the same basename more than once if it appears
+			// multiple times.
+			newCmd := strings.Replace(*ag.Cmd, " "+tag, " "+newTag, -1)
+			ag.Cmd = &newCmd
+		}
 	}
+
+	tool_files_targets := utils.PrefixAll(utils.MixedListToBobTargets(ag.Tool_files), ":")
+	ag.Tool_files = utils.PrefixDirs(utils.MixedListToFiles(ag.Tool_files), prefix)
+	ag.Tool_files = append(ag.Tool_files, tool_files_targets...)
 }
 
 func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
