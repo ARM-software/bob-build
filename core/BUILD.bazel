@@ -53,6 +53,8 @@ go_library(
         "source_props.go",
         "splitter.go",
         "standalone.go",
+        "strict_generate_common.go",
+        "strict_generate_props.go",
         "strict_library.go",
         "strict_linux_cclibs.go",
         "strip.go",

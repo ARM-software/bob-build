@@ -27,6 +27,17 @@ import (
 	"github.com/google/blueprint/proptools"
 )
 
+/*
+	We are swapping from `bob_transform_source` to `bob_gensrcs`
+
+`bob_gensrcs` is made to be a stricter version that is compatible with Android.
+For easiest compatibility, we are using Androids format for `gensrcs`.
+Some properties in the struct may not be useful, but it is better to expose as many
+features as possible rather than too few. Some are commented out as they would take special
+implementation for features we do not already have in place.
+
+*/
+
 type GensrcsProps struct {
 	Output_extension string
 	ResolvedOut      file.Paths `blueprint:"mutated"`

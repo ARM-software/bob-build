@@ -96,6 +96,8 @@ bootstrap_go_package {
         "core/source_props.go",
         "core/splitter.go",
         "core/standalone.go",
+        "core/strict_generate_common.go",
+        "core/strict_generate_props.go",
         "core/strict_library.go",
         "core/strict_linux_cclibs.go",
         "core/strip.go",
