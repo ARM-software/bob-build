@@ -148,7 +148,7 @@ func (m ModuleGensrcs) GetProperties() interface{} {
 }
 
 func (m *ModuleGensrcs) FlagsOut() (flags flag.Flags) {
-	gc, _ := getStrictGenerateCommon(m)
+	gc := m.getStrictGenerateCommon()
 	for _, str := range gc.Properties.Export_include_dirs {
 		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
 	}
