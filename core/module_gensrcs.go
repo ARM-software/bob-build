@@ -50,6 +50,14 @@ type ModuleGensrcs struct {
 	}
 }
 
+type ModuleGensrcsInterface interface {
+	FileConsumer
+	FileResolver
+	pathProcessor
+}
+
+var _ ModuleGensrcsInterface = (*ModuleGensrcs)(nil) // impl check
+
 func (m *ModuleGensrcs) implicitOutputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
