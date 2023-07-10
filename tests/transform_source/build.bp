@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Arm Limited.
+ * Copyright 2018-2023 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,8 +78,9 @@ bob_transform_source {
         "generate_source_to_transform",
         "transform_source",
     ],
+    depfile: true,
     tools: ["generator.py"],
-    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    cmd: "python ${tool} --in ${in} --depfile ${depfile} --gen ${out} --gen-implicit-header",
 }
 
 bob_generate_source {

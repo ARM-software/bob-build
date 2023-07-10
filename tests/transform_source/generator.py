@@ -49,6 +49,8 @@ def parse_args():
         action="store_true",
         help="Generate a header alongside the generated source",
     )
+    ap.add_argument("--config", nargs="?", action="store", help="config file")
+    ap.add_argument("--depfile", nargs="?", action="store", help="dependency file")
 
     args = ap.parse_args()
 
@@ -137,6 +139,12 @@ def main():
 
     with open(args.gen_header, "wt") as outfile:
         outfile.write(header_template.format(func=func))
+
+    if args.depfile:
+        template = "{target}: {deps}\n"
+        dep_str = "{} \\\n\t".format(args.input)
+        with open(args.depfile, "w") as depfile:
+            depfile.write(template.format(target=args.gen_src, deps=dep_str))
 
 
 if __name__ == "__main__":

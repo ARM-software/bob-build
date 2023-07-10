@@ -20,8 +20,10 @@ package core
 import (
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
+	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 )
 
 /*
@@ -63,7 +65,7 @@ func (m *ModuleGenrule) implicitOutputs() []string {
 
 func (m *ModuleGenrule) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsNotType(file.TypeImplicit) },
+		func(f file.Path) bool { return f.IsNotType(file.TypeDep) && f.IsNotType(file.TypeImplicit) },
 		func(f file.Path) string { return f.BuildPath() })
 }
 
@@ -78,6 +80,10 @@ func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	for _, out := range m.Properties.Out {
 		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
 		files = files.AppendIfUnique(fp)
+	}
+
+	if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
+		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated))
 	}
 
 	m.Properties.ResolvedOut = files
