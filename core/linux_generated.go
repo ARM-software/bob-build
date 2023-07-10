@@ -149,6 +149,38 @@ func (g *linuxGenerator) generateCommonActions(m *ModuleGenerateCommon, ctx blue
 	g.buildRules(&rCtx, ctx)
 }
 
+// Generate the build actions for a `ModuleGenrule` & `ModuleGensrcs` module and populates the outputs.
+func (g *linuxGenerator) generateStrictCommonActions(m *ModuleStrictGenerateCommon, ctx blueprint.ModuleContext, inouts []inout) {
+	outputdir := backend.Get().SourceOutputDir(ctx.Module())
+	prefixInoutsWithOutputDir(inouts, outputdir)
+
+	cmd, args, implicits, hostLdLibraryPath := m.getArgs(ctx)
+
+	var pool blueprint.Pool
+	ruleparams := blueprint.RuleParams{
+		Command: hostLdLibraryPath + cmd,
+		// Restat is always set to true. This is due to wanting to enable scripts
+		// to only update the outputs if they have changed (keeping the same mtime if it
+		// has not). If there are no updates, the following rules will not have to update
+		// the output.
+		Restat:      true,
+		Pool:        pool,
+		Description: "$out",
+	}
+
+	rule := ctx.Rule(pctx, "gen_"+m.Name(), ruleparams,
+		append(utils.SortedKeys(args), "depfile", "_out_")...)
+
+	rCtx := ruleContext{
+		rule:      &rule,
+		inouts:    inouts,
+		args:      args,
+		implicits: implicits,
+	}
+
+	g.buildRules(&rCtx, ctx)
+}
+
 func transformCmdAndroidToOld(cmd string, agr *ModuleStrictGenerateCommon) (retCmd *string) {
 	newCmd := strings.Replace(cmd, "${genDir}", "${gen_dir}", -1)
 
