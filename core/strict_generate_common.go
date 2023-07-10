@@ -18,12 +18,17 @@
 package core
 
 import (
+	"regexp"
+
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
+
+var variableRegex = regexp.MustCompile(`\$\(([A-Za-z- \._:0-9]+)\)`)
+var locationRegex = regexp.MustCompile(`\$\{location ([a-zA-Z0-9\/\.:_-]+)\}`)
 
 type ModuleStrictGenerateCommon struct {
 	module.ModuleBase

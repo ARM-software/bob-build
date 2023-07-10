@@ -180,7 +180,7 @@ func transformToolsAndroidToOld(gr *ModuleStrictGenerateCommon) {
 		We must convert these correctly for the proxy object.
 	*/
 	// Extract each substr that is a 'location <tag>'
-	matches := locationTagRegex.FindAllStringSubmatch(*gr.Properties.Cmd, -1)
+	matches := locationRegex.FindAllStringSubmatch(*gr.Properties.Cmd, -1)
 
 	for _, v := range matches {
 		tag := v[1]
