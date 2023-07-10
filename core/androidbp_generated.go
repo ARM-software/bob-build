@@ -129,7 +129,7 @@ func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, 
 	m.AddStringList("ldlibs", gc.Properties.FlagArgsBuild.Ldlibs)
 }
 
-func expandGenruleCmd(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, s string) string {
+func expandGenruleCmd(gc *ModuleStrictGenerateCommon, ctx blueprint.ModuleContext, s string) string {
 	return utils.Expand(s, func(s string) string {
 		switch s {
 		case "src_dir":
@@ -160,7 +160,7 @@ func expandGenruleCmd(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, s st
 	})
 }
 
-func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
+func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleStrictGenerateCommon, ctx blueprint.ModuleContext, m bpwriter.Module) {
 	m.AddStringList("srcs", gc.Properties.Srcs)
 	m.AddStringList("exclude_srcs", gc.Properties.Exclude_srcs)
 	// `Cmd` has to be parsed back from ${(name)_out} to $(location name)
@@ -211,7 +211,7 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 	m.AddStringList("tools", tools)
 }
 
-func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
+func changeCmdToolFilesToLocation(gc *ModuleStrictGenerateCommon) {
 
 	tool_files_targets := utils.MixedListToBobTargets(gc.Properties.StrictGenerateProps.Tool_files)
 
@@ -234,7 +234,7 @@ func (g *androidBpGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.Mod
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
+	g.androidGenerateCommonActions(&gr.ModuleStrictGenerateCommon, ctx, m)
 	m.AddStringList("out", gr.Properties.Out)
 }
 
@@ -243,7 +243,7 @@ func (g *androidBpGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.Mod
 	if err != nil {
 		utils.Die("%v", err.Error())
 	}
-	g.androidGenerateCommonActions(&gr.ModuleGenruleCommon, ctx, m)
+	g.androidGenerateCommonActions(&gr.ModuleStrictGenerateCommon, ctx, m)
 	m.AddString("output_extension", gr.Properties.Output_extension)
 }
 
