@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:79:1
+# Defined: build.bp:80:1
 
 m.bin_validate_gensrcs_target.cflags = -I${g.bob.BuildDir}/gen/gensrcs_single_cpp -I${g.bob.BuildDir}/gen/gensrcs_multiple_cpp -I${g.bob.BuildDir}/gen/gensrcs_single_h -I${g.bob.BuildDir}/gen/gensrcs_multiple_h
 m.bin_validate_gensrcs_target.cxxflags = 
@@ -119,7 +119,7 @@ default bin_validate_gensrcs
 # Variant:
 # Type:    bob_alias
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:126:1
+# Defined: build.bp:127:1
 
 build bob_test_gensrcs: phony bin_validate_gensrcs gen_host_bin__host
 
@@ -128,7 +128,7 @@ build bob_test_gensrcs: phony bin_validate_gensrcs gen_host_bin__host
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:103:1
+# Defined: build.bp:104:1
 
 m.gen_host_bin_host.cflags = 
 m.gen_host_bin_host.cxxflags = -std=c++17 -fno-exceptions
@@ -158,7 +158,7 @@ default gen_host_bin__host
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:103:1
+# Defined: build.bp:104:1
 
 m.gen_host_bin_target.cflags = 
 m.gen_host_bin_target.cxxflags = -std=c++17 -fno-exceptions
@@ -192,19 +192,21 @@ default gen_host_bin__target
 # Defined: build.bp:51:1
 
 rule m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp
-    command = python ${tool_1} --in ${in} --gen ${_out_}
+    command = python ${tool_1} --in ${in} --depfile ${depfile} --gen ${_out_}
     description = ${out}
     restat = true
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f2.in $
         | ${g.bob.SrcDir}/f2.in ${g.bob.SrcDir}/generator.py
+    depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f3.in $
         | ${g.bob.SrcDir}/f3.in ${g.bob.SrcDir}/generator.py
+    depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -217,7 +219,7 @@ build gensrcs_multiple_cpp: phony $
 # Variant:
 # Type:    bob_gensrcs
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:65:1
+# Defined: build.bp:66:1
 
 rule m.gensrcs_multiple_h_.gen_gensrcs_multiple_h
     command = python ${tool_1} --in ${in} --gen ${_out_}
@@ -285,7 +287,7 @@ build gensrcs_single_h: phony ${g.bob.BuildDir}/gen/gensrcs_single_h/f1.h
 # Variant:
 # Type:    bob_gensrcs
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:92:1
+# Defined: build.bp:93:1
 
 rule m.verify_output_name_.gen_verify_output_name
     command = python ${tool_1} ${in} ${_out_} f4.cpp
@@ -307,7 +309,7 @@ default verify_output_name
 # Variant:
 # Type:    bob_gensrcs
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:115:1
+# Defined: build.bp:116:1
 
 rule m.verify_tools_.gen_verify_tools
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/host/shared:$$LD_LIBRARY_PATH ${host_bin} ${_out_}

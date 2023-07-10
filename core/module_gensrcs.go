@@ -18,6 +18,8 @@
 package core
 
 import (
+	"strings"
+
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -66,7 +68,7 @@ func (m *ModuleGensrcs) implicitOutputs() []string {
 
 func (m *ModuleGensrcs) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsNotType(file.TypeImplicit) },
+		func(f file.Path) bool { return f.IsNotType(file.TypeDep) && f.IsNotType(file.TypeImplicit) },
 		func(f file.Path) string { return f.BuildPath() })
 }
 
@@ -110,6 +112,12 @@ func (m *ModuleGensrcs) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 		func(fp file.Path) bool {
 			fpOut := file.NewPath(pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension), ctx.ModuleName(), file.TypeGenerated)
 			files = files.AppendIfUnique(fpOut)
+
+			if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
+				depOut := file.NewPath(fp.ScopedPath()+".d", ctx.ModuleName(), file.TypeDep|file.TypeGenerated)
+				files = files.AppendIfUnique(depOut)
+			}
+
 			return true
 		})
 
@@ -131,9 +139,11 @@ func (m *ModuleGensrcs) generateInouts(ctx blueprint.ModuleContext) []inout {
 			io.in = []string{fp.BuildPath()}
 			io.out = []string{pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension)}
 
-			// TODO: check depfile
-			if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
-				io.depfile = getDepfileName(fp.UnScopedPath())
+			if depfile, ok := m.OutFiles().FindSingle(
+				func(p file.Path) bool {
+					return p.IsType(file.TypeDep) && strings.HasSuffix(p.UnScopedPath(), fp.UnScopedPath()+".d")
+				}); ok {
+				io.depfile = depfile.UnScopedPath()
 			}
 
 			inouts = append(inouts, io)
