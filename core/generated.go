@@ -156,7 +156,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 
 	if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
-		if agsc, ok := getAndroidGenerateCommon(ctx.Module()); ok {
+		if agsc, ok := getStrictGenerateCommon(ctx.Module()); ok {
 			for _, s := range agsc.Properties.Srcs {
 				if s[0] == ':' {
 					parseAndAddVariationDeps(ctx, GeneratedSourcesTag,
@@ -175,7 +175,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	// For strict generation rules, i.e. `bob_genule` & `bob_gensrcs`, the `tool` property
 	// is for the modules that produces the host executable. Thus those should follow with
 	// `HostToolBinaryTag` tag dependency.
-	if agsc, ok := getAndroidGenerateCommon((ctx.Module())); ok {
+	if agsc, ok := getStrictGenerateCommon((ctx.Module())); ok {
 		parseAndAddVariationDeps(ctx, HostToolBinaryTag, agsc.Properties.Tools...)
 	}
 }

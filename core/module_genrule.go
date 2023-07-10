@@ -194,22 +194,19 @@ func (m *ModuleStrictGenerateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-// Module implementing getGenerateCommonInterface are able to generate output files
-type getAndroidGenerateCommonInterface interface {
-	getAndroidGenerateCommon() *ModuleStrictGenerateCommon
+// Module implementing `StrictGenerator`
+// are able to generate output files
+type StrictGenerator interface {
+	getStrictGenerateCommon() *ModuleStrictGenerateCommon
 }
 
-func (m *ModuleStrictGenerateCommon) getAndroidGenerateCommon() *ModuleStrictGenerateCommon {
-	return m
-}
-
-func getAndroidGenerateCommon(i interface{}) (*ModuleStrictGenerateCommon, bool) {
-	var gsc *ModuleStrictGenerateCommon
-	gsd, ok := i.(getAndroidGenerateCommonInterface)
+func getStrictGenerateCommon(i interface{}) (*ModuleStrictGenerateCommon, bool) {
+	var m *ModuleStrictGenerateCommon
+	sg, ok := i.(StrictGenerator)
 	if ok {
-		gsc = gsd.getAndroidGenerateCommon()
+		m = sg.getStrictGenerateCommon()
 	}
-	return gsc, ok
+	return m, ok
 }
 
 type ModuleGenrule struct {
@@ -278,7 +275,7 @@ func (m *ModuleGenrule) OutFileTargets() (tgts []string) {
 }
 
 func (m *ModuleGenrule) FlagsOut() (flags flag.Flags) {
-	gc, _ := getAndroidGenerateCommon(m)
+	gc, _ := getStrictGenerateCommon(m)
 	for _, str := range gc.Properties.Export_include_dirs {
 		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
 	}
@@ -327,6 +324,10 @@ func (m ModuleGenrule) GetProperties() interface{} {
 
 func (m *ModuleGenrule) FeaturableProperties() []interface{} {
 	return append(m.ModuleStrictGenerateCommon.FeaturableProperties(), &m.Properties.GenruleProps)
+}
+
+func (m *ModuleGenrule) getStrictGenerateCommon() *ModuleStrictGenerateCommon {
+	return &m.ModuleStrictGenerateCommon
 }
 
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
