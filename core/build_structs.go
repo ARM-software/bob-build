@@ -20,7 +20,6 @@ package core
 import (
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"strings"
 
 	"github.com/google/blueprint"
@@ -122,10 +121,6 @@ type AndroidProps struct {
 	// Value to use on Android for LOCAL_MODULE_OWNER
 	Owner *string
 }
-
-// For bob_genrule, we require the ability to extract substrings of the form
-// "$(location <tag>)", this regular expression enables this.
-var locationTagRegex = regexp.MustCompile(`\$\{location ([a-zA-Z0-9\/\.:_-]+)\}`)
 
 func (p *AndroidProps) isProprietary() bool {
 	return p.Owner != nil

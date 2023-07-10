@@ -18,7 +18,6 @@
 package core
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/file"
@@ -46,7 +45,6 @@ type StrictGeneratePropsInterface interface {
 	FileResolver
 }
 
-var variableRegex = regexp.MustCompile(`\$\(([A-Za-z- \._:0-9]+)\)`)
 var _ StrictGeneratePropsInterface = (*StrictGenerateProps)(nil) // impl check
 
 func (ag *StrictGenerateProps) processPaths(ctx blueprint.BaseModuleContext) {
@@ -64,7 +62,7 @@ func (ag *StrictGenerateProps) processPaths(ctx blueprint.BaseModuleContext) {
 
 	// When we specify a specific tag, its location will be incorrect as we move everything into a top level bp,
 	// we must fix this by iterating through the command.
-	matches := locationTagRegex.FindAllStringSubmatch(*ag.Cmd, -1)
+	matches := locationRegex.FindAllStringSubmatch(*ag.Cmd, -1)
 	for _, v := range matches {
 		tag := v[1]
 		if tag[0] == ':' {
