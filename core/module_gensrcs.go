@@ -152,7 +152,7 @@ func gensrcsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGensrcs{}
 
 	module.ModuleGenruleCommon.init(&config.Properties,
-		AndroidGenerateCommonProps{}, GensrcsRuleProps{}, EnableableProps{})
+		StrictGenerateProps{}, GensrcsRuleProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
