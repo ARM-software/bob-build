@@ -26,6 +26,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 )
@@ -165,6 +166,7 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 						s[1:])
 				}
 			}
+
 			for _, d := range agsc.deps {
 				// Add other module dependency
 				ctx.AddDependency(ctx.Module(), GeneratedTag, d)
@@ -178,4 +180,61 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	if agsc, ok := getStrictGenerateCommon((ctx.Module())); ok {
 		parseAndAddVariationDeps(ctx, HostToolBinaryTag, agsc.Properties.Tools...)
 	}
+}
+
+// hostBinOuts returns the tool binary ('host_bin') together with its
+// target type and shared library dependencies for a generator module.
+// This is different from the "tool" in that it used to depend on
+// a bob_binary module.
+func hostBinOuts(hostBin *string, ctx blueprint.ModuleContext) (string, []string, toolchain.TgtType) {
+	// No host_bin provided
+	if hostBin == nil {
+		return "", []string{}, toolchain.TgtTypeUnknown
+	}
+
+	hostBinOut := ""
+	hostBinSharedLibsDeps := []string{}
+	hostBinTarget := toolchain.TgtTypeUnknown
+	hostBinFound := false
+
+	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
+		depTag := ctx.OtherModuleDependencyTag(child)
+
+		if parent == ctx.Module() && depTag == HostToolBinaryTag {
+			var outputs []string
+			hostBinFound = true
+
+			if b, ok := child.(*ModuleBinary); ok {
+				outputs = b.outputs()
+				hostBinTarget = b.getTarget()
+			} else if gb, ok := child.(*generateBinary); ok {
+				outputs = gb.outputs()
+			} else {
+				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
+				return false
+			}
+
+			if len(outputs) != 1 {
+				ctx.OtherModuleErrorf(child, "outputs() returned %d outputs", len(outputs))
+			} else {
+				hostBinOut = outputs[0]
+			}
+
+			return true // keep visiting
+		} else if parent != ctx.Module() && depTag == SharedTag {
+			if l, ok := child.(*ModuleSharedLibrary); ok {
+				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
+			}
+
+			return true // keep visiting
+		} else {
+			return false // stop visiting
+		}
+	})
+
+	if !hostBinFound {
+		ctx.ModuleErrorf("Could not find module specified by `host_bin: %v`", hostBin)
+	}
+
+	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget
 }
