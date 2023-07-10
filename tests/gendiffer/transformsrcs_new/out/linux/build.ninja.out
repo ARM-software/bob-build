@@ -198,14 +198,14 @@ rule m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f2.in $
-        | ${g.bob.SrcDir}/f2.in ${g.bob.SrcDir}/generator.py
+        | ${g.bob.SrcDir}/generator.py
     depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f3.in $
-        | ${g.bob.SrcDir}/f3.in ${g.bob.SrcDir}/generator.py
+        | ${g.bob.SrcDir}/generator.py
     depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
@@ -228,13 +228,13 @@ rule m.gensrcs_multiple_h_.gen_gensrcs_multiple_h
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_h/f2.h: $
         m.gensrcs_multiple_h_.gen_gensrcs_multiple_h ${g.bob.SrcDir}/f2.in | $
-        ${g.bob.SrcDir}/f2.in ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_h/f2.h
     tool_1 = ${g.bob.SrcDir}/generator.py
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_h/f3.h: $
         m.gensrcs_multiple_h_.gen_gensrcs_multiple_h ${g.bob.SrcDir}/f3.in | $
-        ${g.bob.SrcDir}/f3.in ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_h/f3.h
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -255,7 +255,7 @@ rule m.gensrcs_single_cpp_.gen_gensrcs_single_cpp
 
 build ${g.bob.BuildDir}/gen/gensrcs_single_cpp/f1.cpp: $
         m.gensrcs_single_cpp_.gen_gensrcs_single_cpp ${g.bob.SrcDir}/f1.in | $
-        ${g.bob.SrcDir}/f1.in ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_single_cpp/f1.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
@@ -296,7 +296,7 @@ rule m.verify_output_name_.gen_verify_output_name
 
 build ${g.bob.BuildDir}/gen/verify_output_name/f4.cpp: $
         m.verify_output_name_.gen_verify_output_name ${g.bob.SrcDir}/f4.in | $
-        ${g.bob.SrcDir}/f4.in ${g.bob.SrcDir}/verify.py
+        ${g.bob.SrcDir}/verify.py
     _out_ = ${g.bob.BuildDir}/gen/verify_output_name/f4.cpp
     tool_1 = ${g.bob.SrcDir}/verify.py
 

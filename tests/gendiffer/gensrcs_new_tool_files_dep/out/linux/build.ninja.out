@@ -79,8 +79,9 @@ rule m.generate_source_colon_dep_.gen_generate_source_colon_dep
 build ${g.bob.BuildDir}/gen/generate_source_colon_dep/out1.cpp $
         ${g.bob.BuildDir}/gen/generate_source_colon_dep/out2.cpp: $
         m.generate_source_colon_dep_.gen_generate_source_colon_dep $
-        ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_config/generated.json
+        ${g.bob.SrcDir}/before_generate.in | $
+        ${g.bob.BuildDir}/gen/generate_config/generated.json $
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_colon_dep/out1.cpp ${g.bob.BuildDir}/gen/generate_source_colon_dep/out2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
     tool_2 = ${g.bob.BuildDir}/gen/generate_config/generated.json
@@ -104,9 +105,10 @@ rule m.generate_source_multiple_colon_dep_.gen_generate_source_multiple_colon_de
 build ${g.bob.BuildDir}/gen/generate_source_multiple_colon_dep/out5.cpp $
         ${g.bob.BuildDir}/gen/generate_source_multiple_colon_dep/out6.cpp: $
         m.generate_source_multiple_colon_dep_.gen_generate_source_multiple_colon_dep $
-        ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py $
+        ${g.bob.SrcDir}/before_generate.in | $
         ${g.bob.BuildDir}/gen/generate_source_colon_dep/out1.cpp $
-        ${g.bob.BuildDir}/gen/generate_source_colon_dep/out2.cpp
+        ${g.bob.BuildDir}/gen/generate_source_colon_dep/out2.cpp $
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_colon_dep/out5.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_colon_dep/out6.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
     tool_2 = ${g.bob.BuildDir}/gen/generate_source_colon_dep/out1.cpp ${g.bob.BuildDir}/gen/generate_source_colon_dep/out2.cpp
@@ -130,8 +132,9 @@ rule m.generate_source_out_dep_.gen_generate_source_out_dep
 build ${g.bob.BuildDir}/gen/generate_source_out_dep/out3.cpp $
         ${g.bob.BuildDir}/gen/generate_source_out_dep/out4.cpp: $
         m.generate_source_out_dep_.gen_generate_source_out_dep $
-        ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py $
-        ${g.bob.BuildDir}/gen/generate_config/generated.json
+        ${g.bob.SrcDir}/before_generate.in | $
+        ${g.bob.BuildDir}/gen/generate_config/generated.json $
+        ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_out_dep/out3.cpp ${g.bob.BuildDir}/gen/generate_source_out_dep/out4.cpp
     generate_config_out = ${g.bob.BuildDir}/gen/generate_config/generated.json
     tool_1 = ${g.bob.SrcDir}/generator.py
