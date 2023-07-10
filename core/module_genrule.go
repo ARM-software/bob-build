@@ -44,7 +44,7 @@ type GenruleProps struct {
 	ResolvedOut file.Paths `blueprint:"mutated"`
 }
 
-type AndroidGenerateCommonProps struct {
+type StrictGenerateProps struct {
 	// See https://ci.android.com/builds/submitted/8928481/linux/latest/view/soong_build.html
 	Name                string
 	Srcs                []string // TODO: This module should probalby make use of LegacySourceProps
@@ -58,16 +58,16 @@ type AndroidGenerateCommonProps struct {
 	ResolvedSrcs file.Paths `blueprint:"mutated"` // Glob results.
 }
 
-type AndroidGenerateCommonPropsInterface interface {
+type StrictGeneratePropsInterface interface {
 	pathProcessor
 	FileConsumer
 	FileResolver
 }
 
 var variableRegex = regexp.MustCompile(`\$\(([A-Za-z- \._:0-9]+)\)`)
-var _ AndroidGenerateCommonPropsInterface = (*AndroidGenerateCommonProps)(nil) // impl check
+var _ StrictGeneratePropsInterface = (*StrictGenerateProps)(nil) // impl check
 
-func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleContext) {
+func (ag *StrictGenerateProps) processPaths(ctx blueprint.BaseModuleContext) {
 
 	prefix := projectModuleDir(ctx)
 	// We don't want to process module dependencies as paths, we must filter them out first.
@@ -104,7 +104,7 @@ func (ag *AndroidGenerateCommonProps) processPaths(ctx blueprint.BaseModuleConte
 	ag.Tool_files = append(ag.Tool_files, tool_files_targets...)
 }
 
-func (ag *AndroidGenerateCommonProps) validateCmd(ctx blueprint.BaseModuleContext) {
+func (ag *StrictGenerateProps) validateCmd(ctx blueprint.BaseModuleContext) {
 
 	// for variables only curly brackets are allowed
 	matches := variableRegex.FindAllStringSubmatch(*ag.Cmd, -1)
@@ -121,7 +121,7 @@ func (ag *AndroidGenerateCommonProps) validateCmd(ctx blueprint.BaseModuleContex
 	}
 }
 
-func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
+func (ag *StrictGenerateProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Since globbing is supported we must call a resolver.
 	files := file.Paths{}
 
@@ -133,15 +133,15 @@ func (ag *AndroidGenerateCommonProps) ResolveFiles(ctx blueprint.BaseModuleConte
 	ag.ResolvedSrcs = files
 }
 
-func (ag *AndroidGenerateCommonProps) GetTargets() []string {
+func (ag *StrictGenerateProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(ag.Srcs)
 }
 
-func (ag *AndroidGenerateCommonProps) GetDirectFiles() file.Paths {
+func (ag *StrictGenerateProps) GetDirectFiles() file.Paths {
 	return ag.ResolvedSrcs
 }
 
-func (ag *AndroidGenerateCommonProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
+func (ag *StrictGenerateProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return ag.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
@@ -150,7 +150,7 @@ type ModuleGenruleCommon struct {
 	Properties struct {
 		EnableableProps
 		Features
-		AndroidGenerateCommonProps
+		StrictGenerateProps
 	}
 	deps []string
 }
@@ -162,8 +162,8 @@ func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interf
 }
 
 func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext) {
-	m.deps = utils.MixedListToBobTargets(m.Properties.AndroidGenerateCommonProps.Tool_files)
-	m.Properties.AndroidGenerateCommonProps.processPaths(ctx)
+	m.deps = utils.MixedListToBobTargets(m.Properties.StrictGenerateProps.Tool_files)
+	m.Properties.StrictGenerateProps.processPaths(ctx)
 }
 
 func (m *ModuleGenruleCommon) GetTargets() []string {
@@ -187,7 +187,7 @@ func (m *ModuleGenruleCommon) Features() *Features {
 }
 
 func (m *ModuleGenruleCommon) FeaturableProperties() []interface{} {
-	return []interface{}{&m.Properties.EnableableProps, &m.Properties.AndroidGenerateCommonProps}
+	return []interface{}{&m.Properties.EnableableProps, &m.Properties.StrictGenerateProps}
 }
 
 func (m *ModuleGenruleCommon) getEnableableProps() *EnableableProps {
@@ -333,7 +333,7 @@ func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interfac
 	module := &ModuleGenrule{}
 
 	module.ModuleGenruleCommon.init(&config.Properties,
-		AndroidGenerateCommonProps{}, GenruleProps{}, EnableableProps{})
+		StrictGenerateProps{}, GenruleProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}

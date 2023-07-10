@@ -213,18 +213,18 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleGenruleCommo
 
 func changeCmdToolFilesToLocation(gc *ModuleGenruleCommon) {
 
-	tool_files_targets := utils.MixedListToBobTargets(gc.Properties.AndroidGenerateCommonProps.Tool_files)
+	tool_files_targets := utils.MixedListToBobTargets(gc.Properties.StrictGenerateProps.Tool_files)
 
 	// find all `${moduleName_out}`
-	matches := dependencyRegex.FindAllStringSubmatch(*gc.Properties.AndroidGenerateCommonProps.Cmd, -1)
+	matches := dependencyRegex.FindAllStringSubmatch(*gc.Properties.StrictGenerateProps.Cmd, -1)
 
 	for _, v := range matches {
 		tag := v[1]
 
 		if utils.Contains(tool_files_targets, tag) {
 			newString := fmt.Sprintf("$(location :%s)", tag)
-			newCmd := strings.Replace(*gc.Properties.AndroidGenerateCommonProps.Cmd, v[0], newString, 1)
-			gc.Properties.AndroidGenerateCommonProps.Cmd = &newCmd
+			newCmd := strings.Replace(*gc.Properties.StrictGenerateProps.Cmd, v[0], newString, 1)
+			gc.Properties.StrictGenerateProps.Cmd = &newCmd
 		}
 	}
 }
