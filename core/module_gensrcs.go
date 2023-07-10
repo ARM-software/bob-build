@@ -137,7 +137,7 @@ func (m ModuleGensrcs) GetProperties() interface{} {
 }
 
 func (m *ModuleGensrcs) FlagsOut() (flags flag.Flags) {
-	gc, _ := getAndroidGenerateCommon(m)
+	gc, _ := getStrictGenerateCommon(m)
 	for _, str := range gc.Properties.Export_include_dirs {
 		flags = append(flags, flag.FromGeneratedIncludePath(str, m, flag.TypeExported))
 	}
@@ -146,6 +146,10 @@ func (m *ModuleGensrcs) FlagsOut() (flags flag.Flags) {
 
 func (m *ModuleGensrcs) FeaturableProperties() []interface{} {
 	return append(m.ModuleStrictGenerateCommon.FeaturableProperties(), &m.Properties.GensrcsProps)
+}
+
+func (m *ModuleGensrcs) getStrictGenerateCommon() *ModuleStrictGenerateCommon {
+	return &m.ModuleStrictGenerateCommon
 }
 
 func gensrcsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
