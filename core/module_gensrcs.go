@@ -33,7 +33,7 @@ type GensrcsProps struct {
 }
 
 type ModuleGensrcs struct {
-	ModuleGenruleCommon
+	ModuleStrictGenerateCommon
 	Properties struct {
 		GensrcsProps
 	}
@@ -52,27 +52,27 @@ func (m *ModuleGensrcs) outputs() []string {
 }
 
 func (m *ModuleGensrcs) processPaths(ctx blueprint.BaseModuleContext) {
-	m.ModuleGenruleCommon.processPaths(ctx)
+	m.ModuleStrictGenerateCommon.processPaths(ctx)
 
 	prefix := projectModuleDir(ctx)
 
-	m.ModuleGenruleCommon.Properties.Export_include_dirs = utils.PrefixDirs(m.ModuleGenruleCommon.Properties.Export_include_dirs, prefix)
+	m.ModuleStrictGenerateCommon.Properties.Export_include_dirs = utils.PrefixDirs(m.ModuleStrictGenerateCommon.Properties.Export_include_dirs, prefix)
 }
 
 func (m *ModuleGensrcs) ResolveFiles(ctx blueprint.BaseModuleContext) {
-	m.ModuleGenruleCommon.ResolveFiles(ctx)
+	m.ModuleStrictGenerateCommon.ResolveFiles(ctx)
 }
 
 func (m *ModuleGensrcs) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
-	return m.ModuleGenruleCommon.Properties.GetFiles(ctx)
+	return m.ModuleStrictGenerateCommon.Properties.GetFiles(ctx)
 }
 
 func (m *ModuleGensrcs) GetDirectFiles() file.Paths {
-	return m.ModuleGenruleCommon.Properties.GetDirectFiles()
+	return m.ModuleStrictGenerateCommon.Properties.GetDirectFiles()
 }
 
 func (m *ModuleGensrcs) GetTargets() []string {
-	return m.ModuleGenruleCommon.Properties.GetTargets()
+	return m.ModuleStrictGenerateCommon.Properties.GetTargets()
 }
 
 func (m *ModuleGensrcs) OutFiles() file.Paths {
@@ -113,7 +113,7 @@ func (m *ModuleGensrcs) generateInouts(ctx blueprint.ModuleContext) []inout {
 			io.out = []string{pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension)}
 
 			// TODO: check depfile
-			if proptools.Bool(m.ModuleGenruleCommon.Properties.Depfile) {
+			if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
 				io.depfile = getDepfileName(fp.UnScopedPath())
 			}
 
@@ -145,15 +145,15 @@ func (m *ModuleGensrcs) FlagsOut() (flags flag.Flags) {
 }
 
 func (m *ModuleGensrcs) FeaturableProperties() []interface{} {
-	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.GensrcsProps)
+	return append(m.ModuleStrictGenerateCommon.FeaturableProperties(), &m.Properties.GensrcsProps)
 }
 
 func gensrcsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGensrcs{}
 
-	module.ModuleGenruleCommon.init(&config.Properties,
+	module.ModuleStrictGenerateCommon.init(&config.Properties,
 		StrictGenerateProps{}, GensrcsProps{}, EnableableProps{})
 
-	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
+	return module, []interface{}{&module.ModuleStrictGenerateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }

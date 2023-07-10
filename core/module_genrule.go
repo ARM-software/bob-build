@@ -145,7 +145,7 @@ func (ag *StrictGenerateProps) GetFiles(ctx blueprint.BaseModuleContext) file.Pa
 	return ag.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
-type ModuleGenruleCommon struct {
+type ModuleStrictGenerateCommon struct {
 	module.ModuleBase
 	Properties struct {
 		EnableableProps
@@ -155,56 +155,56 @@ type ModuleGenruleCommon struct {
 	deps []string
 }
 
-var _ FileConsumer = (*ModuleGenruleCommon)(nil)
+var _ FileConsumer = (*ModuleStrictGenerateCommon)(nil)
 
-func (m *ModuleGenruleCommon) init(properties *config.Properties, list ...interface{}) {
+func (m *ModuleStrictGenerateCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
 }
 
-func (m *ModuleGenruleCommon) processPaths(ctx blueprint.BaseModuleContext) {
+func (m *ModuleStrictGenerateCommon) processPaths(ctx blueprint.BaseModuleContext) {
 	m.deps = utils.MixedListToBobTargets(m.Properties.StrictGenerateProps.Tool_files)
 	m.Properties.StrictGenerateProps.processPaths(ctx)
 }
 
-func (m *ModuleGenruleCommon) GetTargets() []string {
+func (m *ModuleStrictGenerateCommon) GetTargets() []string {
 	return m.Properties.GetTargets()
 }
 
-func (m *ModuleGenruleCommon) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
+func (m *ModuleStrictGenerateCommon) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return m.Properties.GetFiles(ctx)
 }
 
-func (m *ModuleGenruleCommon) GetDirectFiles() file.Paths {
+func (m *ModuleStrictGenerateCommon) GetDirectFiles() file.Paths {
 	return m.Properties.GetDirectFiles()
 }
 
-func (m *ModuleGenruleCommon) ResolveFiles(ctx blueprint.BaseModuleContext) {
+func (m *ModuleStrictGenerateCommon) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
 }
 
-func (m *ModuleGenruleCommon) Features() *Features {
+func (m *ModuleStrictGenerateCommon) Features() *Features {
 	return &m.Properties.Features
 }
 
-func (m *ModuleGenruleCommon) FeaturableProperties() []interface{} {
+func (m *ModuleStrictGenerateCommon) FeaturableProperties() []interface{} {
 	return []interface{}{&m.Properties.EnableableProps, &m.Properties.StrictGenerateProps}
 }
 
-func (m *ModuleGenruleCommon) getEnableableProps() *EnableableProps {
+func (m *ModuleStrictGenerateCommon) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
 // Module implementing getGenerateCommonInterface are able to generate output files
 type getAndroidGenerateCommonInterface interface {
-	getAndroidGenerateCommon() *ModuleGenruleCommon
+	getAndroidGenerateCommon() *ModuleStrictGenerateCommon
 }
 
-func (m *ModuleGenruleCommon) getAndroidGenerateCommon() *ModuleGenruleCommon {
+func (m *ModuleStrictGenerateCommon) getAndroidGenerateCommon() *ModuleStrictGenerateCommon {
 	return m
 }
 
-func getAndroidGenerateCommon(i interface{}) (*ModuleGenruleCommon, bool) {
-	var gsc *ModuleGenruleCommon
+func getAndroidGenerateCommon(i interface{}) (*ModuleStrictGenerateCommon, bool) {
+	var gsc *ModuleStrictGenerateCommon
 	gsd, ok := i.(getAndroidGenerateCommonInterface)
 	if ok {
 		gsc = gsd.getAndroidGenerateCommon()
@@ -213,7 +213,7 @@ func getAndroidGenerateCommon(i interface{}) (*ModuleGenruleCommon, bool) {
 }
 
 type ModuleGenrule struct {
-	ModuleGenruleCommon
+	ModuleStrictGenerateCommon
 	Properties struct {
 		GenruleProps
 	}
@@ -240,11 +240,11 @@ func (m *ModuleGenrule) outputs() []string {
 }
 
 func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
-	m.ModuleGenruleCommon.processPaths(ctx)
+	m.ModuleStrictGenerateCommon.processPaths(ctx)
 }
 
 func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
-	m.ModuleGenruleCommon.ResolveFiles(ctx)
+	m.ModuleStrictGenerateCommon.ResolveFiles(ctx)
 
 	files := file.Paths{}
 	for _, out := range m.Properties.Out {
@@ -256,15 +256,15 @@ func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleGenrule) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
-	return m.ModuleGenruleCommon.Properties.GetFiles(ctx)
+	return m.ModuleStrictGenerateCommon.Properties.GetFiles(ctx)
 }
 
 func (m *ModuleGenrule) GetDirectFiles() file.Paths {
-	return m.ModuleGenruleCommon.Properties.GetDirectFiles()
+	return m.ModuleStrictGenerateCommon.Properties.GetDirectFiles()
 }
 
 func (m *ModuleGenrule) GetTargets() []string {
-	return m.ModuleGenruleCommon.Properties.GetTargets()
+	return m.ModuleStrictGenerateCommon.Properties.GetTargets()
 }
 
 func (m *ModuleGenrule) OutFiles() file.Paths {
@@ -326,15 +326,15 @@ func (m ModuleGenrule) GetProperties() interface{} {
 }
 
 func (m *ModuleGenrule) FeaturableProperties() []interface{} {
-	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.GenruleProps)
+	return append(m.ModuleStrictGenerateCommon.FeaturableProperties(), &m.Properties.GenruleProps)
 }
 
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGenrule{}
 
-	module.ModuleGenruleCommon.init(&config.Properties,
+	module.ModuleStrictGenerateCommon.init(&config.Properties,
 		StrictGenerateProps{}, GenruleProps{}, EnableableProps{})
 
-	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
+	return module, []interface{}{&module.ModuleStrictGenerateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
 }
