@@ -18,9 +18,7 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -181,141 +179,18 @@ func (g *linuxGenerator) generateStrictCommonActions(m *ModuleStrictGenerateComm
 	g.buildRules(&rCtx, ctx)
 }
 
-func transformCmdAndroidToOld(cmd string, agr *ModuleStrictGenerateCommon) (retCmd *string) {
-	newCmd := strings.Replace(cmd, "${genDir}", "${gen_dir}", -1)
-
-	// ${locations} is not supported but only ${location}
-	if strings.Contains(cmd, "${location}") {
-		toolFilesLength := len(agr.Properties.Tool_files)
-		toolDepsLength := len(agr.Properties.Tools)
-		usedTool := ""
-
-		if toolDepsLength > 0 {
-			usedTool = agr.Properties.Tools[0]
-		} else if toolFilesLength > 0 {
-			usedTool = agr.Properties.Tool_files[0]
-		}
-
-		newCmd = strings.Replace(newCmd, "${location}", "${location "+usedTool+"}", -1)
-	}
-
-	return &newCmd
-}
-
-func transformToolsAndroidToOld(gr *ModuleStrictGenerateCommon) {
-	/*
-		Bob handles multiple tool files identically to android. e.g.
-		$(location tool2) == ${tool tool2}
-		However, android differs as it also allows you to use the tag to depend
-		on a tool created by a source dependency. Bob does this with special wildcards e.g.
-		$(location dependency) == ${dependency_out}
-		We must convert these correctly for the proxy object.
-	*/
-	// Extract each substr that is a 'location <tag>'
-	matches := locationRegex.FindAllStringSubmatch(*gr.Properties.Cmd, -1)
-
-	for _, v := range matches {
-		tag := v[1]
-
-		// If the tag refers to a tool inside of tool_files, we can just convert it the old command.
-		if utils.Contains(gr.Properties.Tool_files, tag) {
-			newString := strings.Replace(v[0], "${location", "${tool", 1)
-			newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
-			gr.Properties.Cmd = &newCmd
-			continue
-		}
-
-		if tag[0] == ':' { // Tag is a dependency
-			newString := strings.TrimPrefix(tag, ":")
-			newString = "${" + newString + "_out}"
-			newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
-			gr.Properties.Cmd = &newCmd
-			continue
-		}
-
-		var newString string
-		// TODO: refactor while `bob_genrule` & `bob_gensrcs` will get
-		// rid of legacy proxy modules.
-		if utils.Contains(gr.Properties.Tools, tag) {
-			newString = "${host_bin}"
-		} else {
-			newString = "${" + tag + "_out}"
-		}
-
-		newCmd := strings.Replace(*gr.Properties.Cmd, v[0], newString, 1)
-		gr.Properties.Cmd = &newCmd
-	}
-}
-
 func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleContext) {
-	// TODO: remove proxy object and add a proper backend support.
-	// If needed, refactor backend to accept both objects.
-	// This approach is fragile, the generator runs after all the mutators have already executed and as such
-	// we have to assume some properties may have been modified.
+	inouts := gr.generateInouts(ctx)
+	g.generateStrictCommonActions(&gr.ModuleStrictGenerateCommon, ctx, inouts)
 
-	// Re-use old Bob Code during transition by creating a proxy generateSource object to pass to the old generator
-	var proxyGenerateSource ModuleGenerateSource
-	proxyGenerateSource.SimpleName.Properties.Name = gr.ModuleStrictGenerateCommon.Properties.Name
-
-	gr.ModuleStrictGenerateCommon.Properties.Cmd = transformCmdAndroidToOld(*gr.ModuleStrictGenerateCommon.Properties.Cmd, &gr.ModuleStrictGenerateCommon)
-
-	transformToolsAndroidToOld(&gr.ModuleStrictGenerateCommon)
-
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Cmd = gr.ModuleStrictGenerateCommon.Properties.Cmd
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Tools = gr.ModuleStrictGenerateCommon.Properties.Tool_files
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps = append(proxyGenerateSource.ModuleGenerateCommon.Properties.Generated_deps, gr.ModuleStrictGenerateCommon.deps...)
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Export_gen_include_dirs = gr.ModuleStrictGenerateCommon.Properties.Export_include_dirs
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Srcs = gr.ModuleStrictGenerateCommon.Properties.Srcs
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleStrictGenerateCommon.Properties.Exclude_srcs
-	proxyGenerateSource.ModuleGenerateCommon.Properties.Depfile = gr.ModuleStrictGenerateCommon.Properties.Depfile
-	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Build_by_default = gr.ModuleStrictGenerateCommon.Properties.EnableableProps.Build_by_default
-	proxyGenerateSource.ModuleGenerateCommon.Properties.EnableableProps.Enabled = gr.ModuleStrictGenerateCommon.Properties.EnableableProps.Enabled
-
-	if len(gr.ModuleStrictGenerateCommon.Properties.Tools) > 0 {
-		// TODO: `Host_bin` supports only one binary.
-		proxyGenerateSource.ModuleGenerateCommon.Properties.Host_bin = &gr.ModuleStrictGenerateCommon.Properties.Tools[0]
-	}
-
-	proxyGenerateSource.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
-	proxyGenerateSource.Properties.Implicit_srcs = utils.MixedListToFiles(gr.ModuleStrictGenerateCommon.Properties.Tool_files)
-	proxyGenerateSource.Properties.Out = gr.Properties.Out
-	proxyGenerateSource.ResolveFiles(ctx)
-
-	g.generateSourceActions(&proxyGenerateSource, ctx)
+	addPhony(gr, ctx, g.getPhonyFiles(gr), !isBuiltByDefault(gr))
 }
 
 func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
-	var proxygGensrcs ModuleTransformSource
+	inouts := gr.generateInouts(ctx)
+	g.generateStrictCommonActions(&gr.ModuleStrictGenerateCommon, ctx, inouts)
 
-	proxygGensrcs.SimpleName.Properties.Name = gr.ModuleStrictGenerateCommon.Properties.Name
-	gr.ModuleStrictGenerateCommon.Properties.Cmd = transformCmdAndroidToOld(*gr.ModuleStrictGenerateCommon.Properties.Cmd, &gr.ModuleStrictGenerateCommon)
-
-	transformToolsAndroidToOld(&gr.ModuleStrictGenerateCommon)
-
-	proxygGensrcs.ModuleGenerateCommon.Properties.Cmd = gr.ModuleStrictGenerateCommon.Properties.Cmd
-	proxygGensrcs.ModuleGenerateCommon.Properties.Tools = gr.ModuleStrictGenerateCommon.Properties.Tool_files
-	proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps = append(proxygGensrcs.ModuleGenerateCommon.Properties.Generated_deps, gr.ModuleStrictGenerateCommon.deps...)
-	proxygGensrcs.ModuleGenerateCommon.Properties.Export_gen_include_dirs = gr.ModuleStrictGenerateCommon.Properties.Export_include_dirs
-	proxygGensrcs.ModuleGenerateCommon.Properties.Srcs = gr.ModuleStrictGenerateCommon.Properties.Srcs
-	proxygGensrcs.ModuleGenerateCommon.Properties.Exclude_srcs = gr.ModuleStrictGenerateCommon.Properties.Exclude_srcs
-	proxygGensrcs.ModuleGenerateCommon.Properties.Depfile = gr.ModuleStrictGenerateCommon.Properties.Depfile
-	proxygGensrcs.ModuleGenerateCommon.Properties.EnableableProps.Build_by_default = gr.ModuleStrictGenerateCommon.Properties.EnableableProps.Build_by_default
-	proxygGensrcs.ModuleGenerateCommon.Properties.EnableableProps.Enabled = gr.ModuleStrictGenerateCommon.Properties.EnableableProps.Enabled
-
-	if len(gr.ModuleStrictGenerateCommon.Properties.Tools) > 0 {
-		// TODO: `Host_bin` supports only one binary
-		proxygGensrcs.ModuleGenerateCommon.Properties.Host_bin = &gr.ModuleStrictGenerateCommon.Properties.Tools[0]
-	}
-
-	proxygGensrcs.ModuleGenerateCommon.Properties.ResolveFiles(ctx)
-	proxygGensrcs.Properties.Out.Implicit_srcs = utils.MixedListToFiles(gr.ModuleStrictGenerateCommon.Properties.Tool_files)
-	proxygGensrcs.Properties.Out.Match = "(.+)\\..*"
-	proxygGensrcs.Properties.Out.Replace = []string{fmt.Sprintf("$1.%s", gr.Properties.Output_extension)}
-
-	proxygGensrcs.ResolveFiles(ctx)
-	proxygGensrcs.ResolveOutFiles(ctx)
-
-	g.transformSourceActions(&proxygGensrcs, ctx)
+	addPhony(gr, ctx, g.getPhonyFiles(gr), !isBuiltByDefault(gr))
 }
 
 func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blueprint.ModuleContext) {
