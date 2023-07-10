@@ -233,63 +233,6 @@ func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name st
 	return
 }
 
-// hostBinOuts returns the tool binary ('host_bin') together with its
-// target type and shared library dependencies for a generator module.
-// This is different from the "tool" in that it used to depend on
-// a bob_binary module.
-func (m *ModuleGenerateCommon) hostBinOuts(ctx blueprint.ModuleContext) (string, []string, toolchain.TgtType) {
-	// No host_bin provided
-	if m.Properties.Host_bin == nil {
-		return "", []string{}, toolchain.TgtTypeUnknown
-	}
-
-	hostBinOut := ""
-	hostBinSharedLibsDeps := []string{}
-	hostBinTarget := toolchain.TgtTypeUnknown
-	hostBinFound := false
-
-	ctx.WalkDeps(func(child blueprint.Module, parent blueprint.Module) bool {
-		depTag := ctx.OtherModuleDependencyTag(child)
-
-		if parent == ctx.Module() && depTag == HostToolBinaryTag {
-			var outputs []string
-			hostBinFound = true
-
-			if b, ok := child.(*ModuleBinary); ok {
-				outputs = b.outputs()
-				hostBinTarget = b.getTarget()
-			} else if gb, ok := child.(*generateBinary); ok {
-				outputs = gb.outputs()
-			} else {
-				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
-				return false
-			}
-
-			if len(outputs) != 1 {
-				ctx.OtherModuleErrorf(child, "outputs() returned %d outputs", len(outputs))
-			} else {
-				hostBinOut = outputs[0]
-			}
-
-			return true // keep visiting
-		} else if parent != ctx.Module() && depTag == SharedTag {
-			if l, ok := child.(*ModuleSharedLibrary); ok {
-				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
-			}
-
-			return true // keep visiting
-		} else {
-			return false // stop visiting
-		}
-	})
-
-	if !hostBinFound {
-		ctx.ModuleErrorf("Could not find module specified by `host_bin: %v`", m.Properties.Host_bin)
-	}
-
-	return hostBinOut, hostBinSharedLibsDeps, hostBinTarget
-}
-
 func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map[string]string, []string, toolchain.TgtType) {
 	b := backend.Get()
 
@@ -330,7 +273,7 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 
 	dependents, fullDeps := getDependentArgsAndFiles(ctx, args)
 
-	hostBin, hostBinSharedLibs, hostTarget := m.hostBinOuts(ctx)
+	hostBin, hostBinSharedLibs, hostTarget := hostBinOuts(m.Properties.Host_bin, ctx)
 	if hostBin != "" {
 		args["host_bin"] = hostBin
 		dependents = append(dependents, hostBin)
