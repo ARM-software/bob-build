@@ -27,7 +27,7 @@ import (
 	"github.com/google/blueprint/proptools"
 )
 
-type GensrcsRuleProps struct {
+type GensrcsProps struct {
 	Output_extension string
 	ResolvedOut      file.Paths `blueprint:"mutated"`
 }
@@ -35,7 +35,7 @@ type GensrcsRuleProps struct {
 type ModuleGensrcs struct {
 	ModuleGenruleCommon
 	Properties struct {
-		GensrcsRuleProps
+		GensrcsProps
 	}
 }
 
@@ -145,14 +145,14 @@ func (m *ModuleGensrcs) FlagsOut() (flags flag.Flags) {
 }
 
 func (m *ModuleGensrcs) FeaturableProperties() []interface{} {
-	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.GensrcsRuleProps)
+	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.GensrcsProps)
 }
 
 func gensrcsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGensrcs{}
 
 	module.ModuleGenruleCommon.init(&config.Properties,
-		StrictGenerateProps{}, GensrcsRuleProps{}, EnableableProps{})
+		StrictGenerateProps{}, GensrcsProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
