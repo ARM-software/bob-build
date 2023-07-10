@@ -39,7 +39,7 @@ Some properties in the struct may not be useful, but it is better to expose as m
 features as possible rather than too few. Some are commented out as they would take special
 implementation for features we do not already have in place.
 */
-type AndroidGenerateRuleProps struct {
+type GenruleProps struct {
 	Out         []string
 	ResolvedOut file.Paths `blueprint:"mutated"`
 }
@@ -215,17 +215,17 @@ func getAndroidGenerateCommon(i interface{}) (*ModuleGenruleCommon, bool) {
 type ModuleGenrule struct {
 	ModuleGenruleCommon
 	Properties struct {
-		AndroidGenerateRuleProps
+		GenruleProps
 	}
 }
 
-type androidGenerateRuleInterface interface {
+type ModuleGenruleInterface interface {
 	FileConsumer
 	FileResolver
 	pathProcessor
 }
 
-var _ androidGenerateRuleInterface = (*ModuleGenrule)(nil) // impl check
+var _ ModuleGenruleInterface = (*ModuleGenrule)(nil) // impl check
 
 func (m *ModuleGenrule) implicitOutputs() []string {
 	return m.OutFiles().ToStringSliceIf(
@@ -326,14 +326,14 @@ func (m ModuleGenrule) GetProperties() interface{} {
 }
 
 func (m *ModuleGenrule) FeaturableProperties() []interface{} {
-	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.AndroidGenerateRuleProps)
+	return append(m.ModuleGenruleCommon.FeaturableProperties(), &m.Properties.GenruleProps)
 }
 
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGenrule{}
 
 	module.ModuleGenruleCommon.init(&config.Properties,
-		AndroidGenerateCommonProps{}, AndroidGenerateRuleProps{}, EnableableProps{})
+		AndroidGenerateCommonProps{}, GenruleProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.ModuleGenruleCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}
