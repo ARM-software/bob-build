@@ -35,7 +35,13 @@ type ModuleStrictGenerateCommon struct {
 	deps []string
 }
 
-var _ FileConsumer = (*ModuleStrictGenerateCommon)(nil)
+type StrictGenerateCommonInterface interface {
+	pathProcessor
+	FileConsumer
+	FileResolver
+}
+
+var _ StrictGenerateCommonInterface = (*ModuleStrictGenerateCommon)(nil)
 
 func (m *ModuleStrictGenerateCommon) init(properties *config.Properties, list ...interface{}) {
 	m.Properties.Features.Init(properties, list...)
