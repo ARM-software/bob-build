@@ -57,6 +57,16 @@ type ModuleGenruleInterface interface {
 
 var _ ModuleGenruleInterface = (*ModuleGenrule)(nil) // impl check
 
+func checkGenruleFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
+	m := ctx.Module()
+	if b, ok := m.(*ModuleGenrule); ok {
+		props := b.ModuleStrictGenerateCommon.Properties
+		if len(props.Export_include_dirs) != 0 {
+			utils.Die("`export_include_dirs` may lead to unexpected results on AOSP for `bob_genrule`, please use `bob_gensrc` rule type instead. In module %s", m.Name())
+		}
+	}
+}
+
 func (m *ModuleGenrule) implicitOutputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
