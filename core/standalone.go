@@ -172,6 +172,7 @@ func Main() {
 	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
 	ctx.RegisterTopDownMutator("template_applier", templateApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("check_lib_fields", checkLibraryFieldsMutator).Parallel()
+	ctx.RegisterBottomUpMutator("check_genrule_fields", checkGenruleFieldsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("strip_empty_components", stripEmptyComponentsMutator).Parallel()
 	ctx.RegisterBottomUpMutator("supported_variants", supportedVariantsMutator).Parallel()
 	ctx.RegisterBottomUpMutator(splitterMutatorName, splitterMutator).Parallel()
