@@ -42,6 +42,16 @@ type generationArgs struct {
 	ShouldUpdate            bool
 }
 
+func getOverrideablePath(t *testing.T, testDataPathAbsolute, path string) string {
+	filename := filepath.Base(path)
+	overridePath := filepath.Join(testDataPathAbsolute, "app", filename)
+	if _, err := os.Stat(overridePath); err == nil {
+		return overridePath
+	} else {
+		return path
+	}
+}
+
 func setCommonEnv(t *testing.T, args *generationArgs) {
 	os.Setenv("TOPNAME", "build.bp")
 	os.Setenv("SRCDIR", args.BobRootAbsolute)
@@ -49,8 +59,8 @@ func setCommonEnv(t *testing.T, args *generationArgs) {
 	os.Setenv("WORKDIR", args.BobRootAbsolute)
 	os.Setenv("BOB_DIR", args.BobRootAbsolute)
 	os.Setenv("BOB_LOG_WARNINGS_FILE", args.TestDataPathAbsolute+"bob_warnings.csv")
-	os.Setenv("CONFIG_FILE", args.ConfigFile)
-	os.Setenv("CONFIG_JSON", args.ConfigJson)
+	os.Setenv("CONFIG_FILE", getOverrideablePath(t, args.TestDataPathAbsolute, args.ConfigFile))
+	os.Setenv("CONFIG_JSON", getOverrideablePath(t, args.TestDataPathAbsolute, args.ConfigJson))
 	os.Setenv("BOB_LINK_PARALLELISM", "1")
 }
 
