@@ -44,7 +44,6 @@ type libraryInterface interface {
 	propertyExporter
 	FileConsumer
 	flag.Consumer
-	flag.Provider
 }
 
 // TODO: These interfaces are causing a go build issue with 'duplicate functions'
@@ -491,20 +490,9 @@ func (m *ModuleLibrary) checkField(cond bool, fieldName string) {
 }
 
 // All libraries must implement `propertyExporter`
-func (m *ModuleLibrary) exportCflags() []string      { return m.Properties.Export_cflags }
-func (m *ModuleLibrary) exportIncludeDirs() []string { return m.Properties.Export_include_dirs }
-func (m *ModuleLibrary) exportLocalIncludeDirs() []string {
-	return m.Properties.Export_local_include_dirs
-}
 func (m *ModuleLibrary) exportLdflags() []string    { return m.Properties.Export_ldflags }
 func (m *ModuleLibrary) exportLdlibs() []string     { return m.Properties.Ldlibs }
 func (m *ModuleLibrary) exportSharedLibs() []string { return m.Properties.Shared_libs }
-func (m *ModuleLibrary) exportSystemIncludeDirs() []string {
-	return m.Properties.Export_system_include_dirs
-}
-func (m *ModuleLibrary) exportLocalSystemIncludeDirs() []string {
-	return m.Properties.Export_local_system_include_dirs
-}
 
 func (m *ModuleLibrary) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
 	m.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})

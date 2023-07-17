@@ -53,14 +53,9 @@ func (m *ModuleExternalLibrary) getSplittableProps() *SplittableProps { return &
 // Implement the propertyExporter interface so that external libraries can pass
 // on properties e.g. from pkg-config
 
-func (m *ModuleExternalLibrary) exportCflags() []string                 { return m.Properties.Export_cflags }
-func (m *ModuleExternalLibrary) exportIncludeDirs() []string            { return []string{} }
-func (m *ModuleExternalLibrary) exportLocalIncludeDirs() []string       { return []string{} }
-func (m *ModuleExternalLibrary) exportLdflags() []string                { return m.Properties.Export_ldflags }
-func (m *ModuleExternalLibrary) exportLdlibs() []string                 { return m.Properties.Ldlibs }
-func (m *ModuleExternalLibrary) exportSharedLibs() []string             { return []string{} }
-func (m *ModuleExternalLibrary) exportSystemIncludeDirs() []string      { return []string{} }
-func (m *ModuleExternalLibrary) exportLocalSystemIncludeDirs() []string { return []string{} }
+func (m *ModuleExternalLibrary) exportLdflags() []string    { return m.Properties.Export_ldflags }
+func (m *ModuleExternalLibrary) exportLdlibs() []string     { return m.Properties.Ldlibs }
+func (m *ModuleExternalLibrary) exportSharedLibs() []string { return []string{} }
 
 func (m *ModuleExternalLibrary) FlagsIn() flag.Flags {
 	lut := flag.FlagParserTable{
