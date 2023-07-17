@@ -254,15 +254,10 @@ func (g *linuxGenerator) ArchivableActions(ctx blueprint.ModuleContext,
 			Optional:  true,
 			Args:      args,
 		})
-
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
-	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
-
 	// Calculate and record outputs
-
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
 	// The archiver rules do not allow adding arguments that the user can
@@ -270,6 +265,9 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 	objectFiles, _ := CompileObjs(m, ctx, tc)
 
 	g.ArchivableActions(ctx, m, tc, objectFiles)
+
+	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 
 }
 
@@ -279,7 +277,11 @@ func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bluepr
 	objectFiles, _ := CompileObjs(m, ctx, tc)
 
 	g.ArchivableActions(ctx, m, tc, objectFiles)
+
 	// TODO: implement shared library outputs
+
+	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 // This section contains functions that are common for shared libraries and executables.
