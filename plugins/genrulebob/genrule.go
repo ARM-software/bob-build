@@ -320,6 +320,21 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
 			args[varName+"_out"] = out.String()
+		} else if gsf, ok := dep.(android.OutputFileProducer); ok {
+			var outNames []string
+			outs, err := gsf.OutputFiles("")
+
+			if err != nil {
+				panic(err)
+			}
+
+			dependents = append(dependents, outs...)
+
+			for _, n := range outs {
+				outNames = append(outNames, n.String())
+			}
+
+			args[varName+"_out"] = utils.Join(outNames)
 		}
 	})
 
@@ -333,6 +348,8 @@ func (m *genrulebobCommon) getModuleSrcs(ctx android.ModuleContext) (srcs []andr
 			srcs = append(srcs, gdep.implicitOutputs().Paths()...)
 		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
 			srcs = append(srcs, ccmod.OutputFile().Path())
+		} else if gsf, ok := dep.(genrule.SourceFileGenerator); ok {
+			srcs = append(srcs, gsf.GeneratedSourceFiles()...)
 		}
 	})
 	return
