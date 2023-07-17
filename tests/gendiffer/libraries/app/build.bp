@@ -419,6 +419,7 @@ bob_library {
     srcs: ["src/libs/lib.cpp"],
     hdrs: ["src/libs/lib.h"],
     local_defines: ["LOCAL_DEFINE"],
+    includes: ["internal/include"],
     defines: ["FORWARDED_DEFINE"],
 }
 

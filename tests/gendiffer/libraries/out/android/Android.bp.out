@@ -64,6 +64,8 @@ cc_library_host_static {
         "-DLOCAL_DEFINE",
         "-DFORWARDED_DEFINE",
     ],
+    local_include_dirs: ["internal/include"],
+    export_system_include_dirs : ["internal/include"],
 }
 
 cc_library_host_static {

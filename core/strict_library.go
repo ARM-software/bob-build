@@ -57,6 +57,16 @@ type StrictLibraryProps struct {
 	TargetType toolchain.TgtType `blueprint:"mutated"`
 }
 
+// List of include dirs to be added to the compile line.
+//
+// Each string is prepended with `-I` when building the target itself
+// and `-isystem` when building modules who consumes it.
+// Unlike `Copts`, these flags are added for this rule and every
+// rule that depends on it.
+type IncludeProps struct {
+	Includes []string
+}
+
 type ModuleStrictLibrary struct {
 	module.ModuleBase
 	Properties struct {
@@ -67,6 +77,7 @@ type ModuleStrictLibrary struct {
 		EnableableProps
 		SplittableProps
 		InstallableProps
+		IncludeProps
 	}
 }
 
@@ -173,6 +184,11 @@ func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
 			Tag:          flag.TypeUnset,
 			Factory:      flag.FromDefineOwned,
 		},
+		{
+			PropertyName: "Includes",
+			Tag:          flag.TypeInclude,
+			Factory:      flag.FromIncludePathOwned,
+		},
 	}
 
 	return flag.ParseFromProperties(nil, lut, m.Properties)
@@ -198,6 +214,11 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 			PropertyName: "Defines",
 			Tag:          flag.TypeExported | flag.TypeTransitive,
 			Factory:      flag.FromDefineOwned,
+		},
+		{
+			PropertyName: "Includes",
+			Tag:          flag.TypeExported | flag.TypeTransitive | flag.TypeIncludeSystem,
+			Factory:      flag.FromIncludePathOwned,
 		},
 	}
 
