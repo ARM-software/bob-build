@@ -58,4 +58,15 @@ func TestCollections(t *testing.T) {
 		assert.True(t, grouped[len(grouped)-1].MatchesType(TypeTransitive))
 	})
 
+	t.Run("to_slice", func(t *testing.T) {
+		cc_only := flags.Filtered(
+			func(f Flag) bool {
+				return f.MatchesType(TypeCC)
+			},
+		)
+
+		slice := cc_only.ToStringSlice()
+		assert.Equal(t, slice, []string{"CC", "CC|Exported"})
+	})
+
 }

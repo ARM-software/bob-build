@@ -93,3 +93,10 @@ func (fs Flags) ForEachIf(predicate func(Flag) bool, functor func(Flag)) {
 		functor(f)
 	}
 }
+
+func (fs Flags) ToStringSlice() (ret []string) {
+	fs.ForEach(func(f Flag) {
+		ret = append(ret, f.ToString())
+	})
+	return
+}
