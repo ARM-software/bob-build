@@ -526,6 +526,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	proxyStaticLib.Properties.EnableableProps.Required = true
 	proxyStaticLib.Properties.Srcs = m.Properties.Srcs
 	proxyStaticLib.Properties.Cflags = proxyCflags(m)
+	proxyStaticLib.Properties.Export_local_system_include_dirs = utils.PrefixDirs(m.Properties.Includes, projectModuleDir(ctx))
 	proxyStaticLib.Properties.Host_supported = m.Properties.Host_supported
 	proxyStaticLib.Properties.Target_supported = m.Properties.Target_supported
 	// TODO: generate target for all supported target types

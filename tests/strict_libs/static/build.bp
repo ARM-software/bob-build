@@ -7,6 +7,7 @@ bob_library {
     name: "lib_forward_defines",
     srcs: ["src/libs/lib.cpp"],
     hdrs: ["src/libs/lib.h"],
+    includes: ["internal/include"],
     local_defines: ["LOCAL_DEFINE"],
     defines: ["FORWARDED_DEFINE"],
 }
