@@ -617,6 +617,7 @@ func RegisterModuleTypes(register func(string, FactoryWithConfig)) {
 	register("bob_filegroup", filegroupFactory)
 	register("bob_glob", globFactory)
 	register("bob_library", LibraryFactory)
+	register("bob_executable", StrictBinaryFactory)
 
 	register("bob_alias", aliasFactory)
 	register("bob_kernel_module", kernelModuleFactory)

@@ -16,3 +16,10 @@ func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 		getGenerator(ctx).strictBinaryActions(m, ctx)
 	}
 }
+
+func StrictBinaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
+	module := &ModuleStrictBinary{}
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})
+	return module, []interface{}{&module.Properties,
+		&module.SimpleName.Properties}
+}
