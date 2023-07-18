@@ -87,6 +87,7 @@ type generatorBackend interface {
 	staticActions(*ModuleStaticLibrary, blueprint.ModuleContext)
 	resourceActions(*ModuleResource, blueprint.ModuleContext)
 	filegroupActions(*ModuleFilegroup, blueprint.ModuleContext)
+	strictBinaryActions(*ModuleStrictBinary, blueprint.ModuleContext)
 	strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext)
 }
 

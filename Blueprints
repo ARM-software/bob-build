@@ -38,6 +38,7 @@ bootstrap_go_package {
         "core/androidbp_kernel_module.go",
         "core/androidbp_resource.go",
         "core/binary.go",
+        "core/strict_binary.go",
         "core/build.go",
         "core/build_props.go",
         "core/build_structs.go",
