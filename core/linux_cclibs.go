@@ -657,3 +657,7 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, optional)
 }
+
+func (g *linuxGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
+
+}

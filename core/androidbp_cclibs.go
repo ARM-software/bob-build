@@ -434,6 +434,10 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	}
 }
 
+func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
+
+}
+
 func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
