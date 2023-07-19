@@ -119,7 +119,7 @@ default bin_validate_gensrcs
 # Variant:
 # Type:    bob_alias
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:127:1
+# Defined: build.bp:158:1
 
 build bob_test_gensrcs: phony bin_validate_gensrcs gen_host_bin__host
 
@@ -183,6 +183,51 @@ build ${g.bob.BuildDir}/target/executable/gen_host_bin: g.bob.executable $
 build gen_host_bin__target: phony $
         ${g.bob.BuildDir}/target/executable/gen_host_bin
 default gen_host_bin__target
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  gen_new_out
+# Variant:
+# Type:    bob_generate_source
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:127:1
+
+rule m.gen_new_out_.gen_gen_new_out
+    command = cp ${in} ${_out_} && echo ${verify_tools_out}
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/gen_new_out/gen_new_out.cpp: $
+        m.gen_new_out_.gen_gen_new_out $
+        ${g.bob.BuildDir}/gen/verify_tools/f5.cpp | $
+        ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
+    _out_ = ${g.bob.BuildDir}/gen/gen_new_out/gen_new_out.cpp
+    verify_tools_out = ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
+
+build gen_new_out: phony ${g.bob.BuildDir}/gen/gen_new_out/gen_new_out.cpp
+default gen_new_out
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  gen_new_transform_out
+# Variant:
+# Type:    bob_transform_source
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:140:1
+
+rule m.gen_new_transform_out_.gen_gen_new_transform_out
+    command = cp ${in} ${_out_} && echo ${verify_tools_out}
+    description = ${out}
+    restat = true
+
+build ${g.bob.BuildDir}/gen/gen_new_transform_out/verify_tools/f5.dep: $
+        m.gen_new_transform_out_.gen_gen_new_transform_out $
+        ${g.bob.BuildDir}/gen/verify_tools/f5.cpp | $
+        ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
+    _out_ = ${g.bob.BuildDir}/gen/gen_new_transform_out/verify_tools/f5.dep
+    verify_tools_out = ${g.bob.BuildDir}/gen/verify_tools/f5.cpp
+
+build gen_new_transform_out: phony $
+        ${g.bob.BuildDir}/gen/gen_new_transform_out/verify_tools/f5.dep
+default gen_new_transform_out
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  gensrcs_multiple_cpp
