@@ -1,0 +1,59 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "binary_has_indirect_ldlibs",
+    srcs: ["src.c"],
+    static_libs: [
+        "libstatic_with_ldlibs2",
+        "libstatic_with_ldlibs1",
+    ],
+    ldflags: [
+        "--export_flag1",
+        "--export_flag_duplicate",
+        "--export_flag2",
+        "--export_flag_duplicate",
+    ],
+}
+
+cc_library_shared {
+    name: "libshared_has_indirect_ldlibs",
+    srcs: ["lib.c"],
+    static_libs: [
+        "libstatic_with_ldlibs2",
+        "libstatic_with_ldlibs1",
+    ],
+    ldflags: [
+        "--export_flag1",
+        "--export_flag_duplicate",
+        "--export_flag2",
+        "--export_flag_duplicate",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_with_ldlibs1",
+    srcs: ["lib.c"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_with_ldlibs2",
+    srcs: ["lib.c"],
+    static_libs: ["libstatic_with_ldlibs1"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "uses_shared",
+    srcs: ["src.c"],
+    shared_libs: ["libshared_has_indirect_ldlibs"],
+}
+
