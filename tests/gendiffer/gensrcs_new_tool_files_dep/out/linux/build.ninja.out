@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 rule m.generate_config_.gen_generate_config
     command = python ${tool_1} --in ${in} --out ${_out_} --expect-in before_generate.in
@@ -69,7 +69,7 @@ build generate_config: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:29:1
+# Defined: build.bp:redacted
 
 rule m.generate_source_colon_dep_.gen_generate_source_colon_dep
     command = python ${tool_1} --in ${in} --json ${tool_2} --out ${_out_} --expect-in before_generate.in
@@ -95,7 +95,7 @@ build generate_source_colon_dep: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:61:1
+# Defined: build.bp:redacted
 
 rule m.generate_source_multiple_colon_dep_.gen_generate_source_multiple_colon_dep
     command = python ${tool_1} --in ${in} --tools ${tool_2} --out ${_out_} --expect-in before_generate.in
@@ -122,7 +122,7 @@ build generate_source_multiple_colon_dep: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:45:1
+# Defined: build.bp:redacted
 
 rule m.generate_source_out_dep_.gen_generate_source_out_dep
     command = python ${tool_1} --in ${in} --json ${generate_config_out} --out ${_out_} --expect-in before_generate.in
@@ -148,7 +148,7 @@ build generate_source_out_dep: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:77:1
+# Defined: build.bp:redacted
 
 m.validate_link_generate_sources_new_target.cflags = 
 m.validate_link_generate_sources_new_target.cxxflags = 

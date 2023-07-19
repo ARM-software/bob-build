@@ -92,7 +92,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:481:1
+# Defined: build.bp:redacted
 
 m.bob_test_local_consumer_target.cflags = -Wconversion -Werror -isystem ${g.bob.SrcDir}/public
 m.bob_test_local_consumer_target.conlyflags = 
@@ -126,7 +126,7 @@ default bob_test_local_consumer
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:471:1
+# Defined: build.bp:redacted
 
 m.bob_test_local_libconsumer_target.cflags = -Wconversion -Werror -isystem ${g.bob.SrcDir}/public
 m.bob_test_local_libconsumer_target.conlyflags = 
@@ -156,7 +156,7 @@ build bob_test_local_libconsumer: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:452:1
+# Defined: build.bp:redacted
 
 m.bob_test_local_libpublic_target.cflags = -Wconversion -I${g.bob.SrcDir}/include -I${g.bob.SrcDir}/public
 m.bob_test_local_libpublic_target.conlyflags = 
@@ -183,7 +183,7 @@ build bob_test_local_libpublic: phony $
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:514:1
+# Defined: build.bp:redacted
 
 m.bob_test_target_specific_link_host.cflags = 
 m.bob_test_target_specific_link_host.conlyflags = 
@@ -216,7 +216,7 @@ default bob_test_target_specific_link__host
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:514:1
+# Defined: build.bp:redacted
 
 m.bob_test_target_specific_link_target.cflags = 
 m.bob_test_target_specific_link_target.conlyflags = 
@@ -250,7 +250,7 @@ default bob_test_target_specific_link__target
 # Variant: host
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:62:1
+# Defined: build.bp:redacted
 
 rule m.gen_output_host.gen_gen_output
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/host/shared:$$LD_LIBRARY_PATH ${tool} -u ${host_bin} -i ${in} -o ${_out_}
@@ -283,7 +283,7 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 # Variant: host
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:426:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library
     ar = ar
@@ -297,7 +297,7 @@ default lib_dep
 # Variant: host
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:417:1
+# Defined: build.bp:redacted
 
 m.lib_forward_defines_host.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -Iinternal/include
 m.lib_forward_defines_host.cxxflags = 
@@ -323,7 +323,7 @@ build lib_forward_defines: phony $
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:400:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/host/static/lib_transitive_define.a: $
         g.bob.static_library
@@ -339,7 +339,7 @@ default lib_transitive_define
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:491:1
+# Defined: build.bp:redacted
 
 m.libonly_works_on_target_host.cflags = -DFAIL=1
 m.libonly_works_on_target_host.conlyflags = 
@@ -366,7 +366,7 @@ build libonly_works_on_target__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:491:1
+# Defined: build.bp:redacted
 
 m.libonly_works_on_target_target.cflags = -DFAIL=0
 m.libonly_works_on_target_target.conlyflags = 
@@ -393,7 +393,7 @@ build libonly_works_on_target__target: phony $
 # Variant: host
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:38:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_host.cflags = -fPIC
 m.libsharedtest_host.conlyflags = 
@@ -439,7 +439,7 @@ build libsharedtest__host: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:38:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_target.cflags = -fPIC
 m.libsharedtest_target.conlyflags = 
@@ -485,7 +485,7 @@ build libsharedtest__target: phony $
 # Variant: host
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:78:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_installed_host.cflags = -DFUNC_NAME=sharedtest_installed
 m.libsharedtest_installed_host.conlyflags = 
@@ -526,7 +526,7 @@ build libsharedtest_installed__host: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:78:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_installed_target.cflags = -DFUNC_NAME=sharedtest_installed
 m.libsharedtest_installed_target.conlyflags = 
@@ -567,7 +567,7 @@ build libsharedtest_installed__target: phony $
 # Variant: host
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:97:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_not_installed_host.cflags = -DFUNC_NAME=sharedtest_not_installed
 m.libsharedtest_not_installed_host.conlyflags = 
@@ -604,7 +604,7 @@ build libsharedtest_not_installed__host: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:97:1
+# Defined: build.bp:redacted
 
 m.libsharedtest_not_installed_target.cflags = -DFUNC_NAME=sharedtest_not_installed
 m.libsharedtest_not_installed_target.conlyflags = 
@@ -641,7 +641,7 @@ build libsharedtest_not_installed__target: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:132:1
+# Defined: build.bp:redacted
 
 m.libstripped_library_target.cflags = -DFUNC_NAME=func
 m.libstripped_library_target.conlyflags = 
@@ -686,7 +686,7 @@ build libstripped_library: phony $
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:504:1
+# Defined: build.bp:redacted
 
 m.libuses_target_specific_link_host.cflags = 
 m.libuses_target_specific_link_host.conlyflags = 
@@ -712,7 +712,7 @@ build libuses_target_specific_link__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:504:1
+# Defined: build.bp:redacted
 
 m.libuses_target_specific_link_target.cflags = 
 m.libuses_target_specific_link_target.conlyflags = 
@@ -738,7 +738,7 @@ build libuses_target_specific_link__target: phony $
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:107:1
+# Defined: build.bp:redacted
 
 m.sharedtest_host.cflags = 
 m.sharedtest_host.conlyflags = 
@@ -771,7 +771,7 @@ build sharedtest__host: phony ${g.bob.BuildDir}/host/executable/sharedtest
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:107:1
+# Defined: build.bp:redacted
 
 m.sharedtest_target.cflags = 
 m.sharedtest_target.conlyflags = 
@@ -805,7 +805,7 @@ default sharedtest__target
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:184:1
+# Defined: build.bp:redacted
 
 m.sl_liba_target.cflags = -fPIC -DFOO=1
 m.sl_liba_target.conlyflags = 
@@ -829,7 +829,7 @@ build sl_liba: phony ${g.bob.BuildDir}/target/static/sl_liba.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:375:1
+# Defined: build.bp:redacted
 
 m.sl_liba_duplicates_target.cflags = -DFOO=1
 m.sl_liba_duplicates_target.conlyflags = 
@@ -863,7 +863,7 @@ build sl_liba_duplicates: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:384:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/target/static/sl_liba_duplicates_2.a: $
         g.bob.whole_static_library | ${g.bob.whole_static_tool} $
@@ -880,7 +880,7 @@ build sl_liba_duplicates_2: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:209:1
+# Defined: build.bp:redacted
 
 m.sl_libb_target.cflags = -fPIC -DFOO=1
 m.sl_libb_target.conlyflags = 
@@ -904,7 +904,7 @@ build sl_libb: phony ${g.bob.BuildDir}/target/static/sl_libb.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:257:1
+# Defined: build.bp:redacted
 
 m.sl_libb_export_static_target.cflags = -DFOO=1
 m.sl_libb_export_static_target.conlyflags = 
@@ -930,7 +930,7 @@ build sl_libb_export_static: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:238:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/target/shared/sl_libb_shared.so: g.bob.shared_library $
         | ${g.bob.BuildDir}/target/static/sl_libb.a $
@@ -955,7 +955,7 @@ build sl_libb_shared: phony ${g.bob.BuildDir}/target/shared/sl_libb_shared.so
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:193:1
+# Defined: build.bp:redacted
 
 m.sl_libb_whole_inclusion_target.cflags = -fPIC -DFOO=1
 m.sl_libb_whole_inclusion_target.conlyflags = 
@@ -983,7 +983,7 @@ build sl_libb_whole_inclusion: phony $
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:226:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/target/shared/sl_libb_whole_shared.so: $
         g.bob.shared_library | $
@@ -1009,7 +1009,7 @@ build sl_libb_whole_shared: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:291:1
+# Defined: build.bp:redacted
 
 m.sl_libc_target.cflags = -DFUNCTION=do_c -DCALL1=do_e1 -DCALL2=do_f
 m.sl_libc_target.conlyflags = 
@@ -1033,7 +1033,7 @@ build sl_libc: phony ${g.bob.BuildDir}/target/static/sl_libc.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:305:1
+# Defined: build.bp:redacted
 
 m.sl_libd_target.cflags = -DFUNCTION=do_d -DCALL1=do_g1 -DCALL2=do_h
 m.sl_libd_target.conlyflags = 
@@ -1057,7 +1057,7 @@ build sl_libd: phony ${g.bob.BuildDir}/target/static/sl_libd.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:339:1
+# Defined: build.bp:redacted
 
 m.sl_libe_target.cflags = -DFUNCTION=do_e
 m.sl_libe_target.conlyflags = 
@@ -1081,7 +1081,7 @@ build sl_libe: phony ${g.bob.BuildDir}/target/static/sl_libe.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:319:1
+# Defined: build.bp:redacted
 
 m.sl_libf_target.cflags = -DFUNCTION=do_f -DCALL=do_g2
 m.sl_libf_target.conlyflags = 
@@ -1105,7 +1105,7 @@ build sl_libf: phony ${g.bob.BuildDir}/target/static/sl_libf.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:347:1
+# Defined: build.bp:redacted
 
 m.sl_libg_target.cflags = -DFUNCTION=do_g
 m.sl_libg_target.conlyflags = 
@@ -1129,7 +1129,7 @@ build sl_libg: phony ${g.bob.BuildDir}/target/static/sl_libg.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:329:1
+# Defined: build.bp:redacted
 
 m.sl_libh_target.cflags = -DFUNCTION=do_h -DCALL=do_e2
 m.sl_libh_target.conlyflags = 
@@ -1153,7 +1153,7 @@ build sl_libh: phony ${g.bob.BuildDir}/target/static/sl_libh.a
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:355:1
+# Defined: build.bp:redacted
 
 m.sl_main_dd_target.cflags = 
 m.sl_main_dd_target.conlyflags = 
@@ -1189,7 +1189,7 @@ default sl_main_dd
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:389:1
+# Defined: build.bp:redacted
 
 m.sl_main_duplicates_target.cflags = -DFOO=1
 m.sl_main_duplicates_target.conlyflags = 
@@ -1221,7 +1221,7 @@ default sl_main_duplicates
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:263:1
+# Defined: build.bp:redacted
 
 m.sl_main_export_static_target.cflags = -DFOO=1
 m.sl_main_export_static_target.conlyflags = 
@@ -1255,7 +1255,7 @@ default sl_main_export_static
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:270:1
+# Defined: build.bp:redacted
 
 m.sl_main_ordered_target.cflags = -DFOO=1
 m.sl_main_ordered_target.conlyflags = 
@@ -1288,7 +1288,7 @@ default sl_main_ordered
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:251:1
+# Defined: build.bp:redacted
 
 m.sl_main_whole_target.cflags = 
 m.sl_main_whole_target.conlyflags = 
@@ -1319,7 +1319,7 @@ default sl_main_whole
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:443:1
+# Defined: build.bp:redacted
 
 m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
 m.strict_lib_binary_with_dep_host.cxxflags = 
@@ -1354,7 +1354,7 @@ default strict_lib_binary_with_dep
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:434:1
+# Defined: build.bp:redacted
 
 m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
 m.strict_lib_binary_with_forward_define_host.cxxflags = 
@@ -1388,7 +1388,7 @@ default strict_lib_binary_with_forward_define
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:408:1
+# Defined: build.bp:redacted
 
 m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
 m.strict_lib_binary_with_transitive_define_host.cxxflags = 
@@ -1424,7 +1424,7 @@ default strict_lib_binary_with_transitive_define
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:145:1
+# Defined: build.bp:redacted
 
 m.stripped_binary_target.cflags = -DFUNC_NAME=main
 m.stripped_binary_target.conlyflags = 
@@ -1465,7 +1465,7 @@ default stripped_binary
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:120:1
+# Defined: build.bp:redacted
 
 rule m.use_sharedtest_host_.gen_use_sharedtest_host
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/host/shared:$$LD_LIBRARY_PATH ${host_bin} ${_out_}
@@ -1488,7 +1488,7 @@ build use_sharedtest_host: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:127:1
+# Defined: build.bp:redacted
 
 m.use_sharedtest_host_gen_source_target.cflags = 
 m.use_sharedtest_host_gen_source_target.conlyflags = 
@@ -1522,7 +1522,7 @@ default use_sharedtest_host_gen_source
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:52:1
+# Defined: build.bp:redacted
 
 m.utility_host.cflags = 
 m.utility_host.conlyflags = 
@@ -1553,7 +1553,7 @@ build utility__host: phony ${g.bob.BuildDir}/host/executable/utility
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:52:1
+# Defined: build.bp:redacted
 
 m.utility_target.cflags = 
 m.utility_target.conlyflags = 

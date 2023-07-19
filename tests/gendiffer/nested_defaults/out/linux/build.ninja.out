@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:43:1
+# Defined: build.bp:redacted
 
 m.binary_target.cflags = -fno-exceptions -fexceptions -fno-exceptions
 m.binary_target.cxxflags = 

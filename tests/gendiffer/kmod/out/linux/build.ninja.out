@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_kernel_module
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:28:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/target/kernel_modules/test_module1/test_module1.ko: $
         g.bob.kbuild ${g.bob.SrcDir}/Kbuild ${g.bob.SrcDir}/test_module1.c | $
@@ -81,7 +81,7 @@ default test_module1
 # Variant:
 # Type:    bob_kernel_module
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:47:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/target/kernel_modules/test_module2/test_module2.ko: $
         g.bob.kbuild ${g.bob.SrcDir}/Kbuild ${g.bob.SrcDir}/test_module2.c $

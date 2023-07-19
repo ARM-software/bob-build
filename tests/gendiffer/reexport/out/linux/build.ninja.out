@@ -60,7 +60,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:157:1
+# Defined: build.bp:redacted
 
 m.lib_a_target.cflags = -DHAVE_A -DHAVE_B -DHAVE_C -DHAVE_D -DHAVE_E
 m.lib_a_target.cxxflags = 
@@ -87,7 +87,7 @@ build lib_a: phony ${g.bob.BuildDir}/target/static/lib_a.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:168:1
+# Defined: build.bp:redacted
 
 m.lib_b_target.cflags = -DHAVE_B -DHAVE_D
 m.lib_b_target.cxxflags = 
@@ -113,7 +113,7 @@ build lib_b: phony ${g.bob.BuildDir}/target/static/lib_b.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:176:1
+# Defined: build.bp:redacted
 
 m.lib_c_target.cflags = -DHAVE_C -DHAVE_E
 m.lib_c_target.cxxflags = 
@@ -139,7 +139,7 @@ build lib_c: phony ${g.bob.BuildDir}/target/static/lib_c.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:184:1
+# Defined: build.bp:redacted
 
 m.lib_d_target.cflags = -DHAVE_D
 m.lib_d_target.cxxflags = 
@@ -163,7 +163,7 @@ build lib_d: phony ${g.bob.BuildDir}/target/static/lib_d.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:190:1
+# Defined: build.bp:redacted
 
 m.lib_e_target.cflags = -DHAVE_E
 m.lib_e_target.cxxflags = 
@@ -187,7 +187,7 @@ build lib_e: phony ${g.bob.BuildDir}/target/static/lib_e.a
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 m.lib_internal_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.lib_internal_target.cxxflags = 
@@ -211,7 +211,7 @@ build lib_internal: phony ${g.bob.BuildDir}/target/static/lib_internal.a
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:94:1
+# Defined: build.bp:redacted
 
 m.lib_internal_host_host.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.lib_internal_host_host.cxxflags = 
@@ -236,7 +236,7 @@ build lib_internal_host__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:94:1
+# Defined: build.bp:redacted
 
 m.lib_internal_host_target.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.lib_internal_host_target.cxxflags = 
@@ -262,7 +262,7 @@ build lib_internal_host__target: phony $
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:119:1
+# Defined: build.bp:redacted
 
 m.lib_internal_target_host.cflags = -DSHOW_HIDDEN -DME_TARGET -I${g.bob.SrcDir}/hidden
 m.lib_internal_target_host.cxxflags = 
@@ -288,7 +288,7 @@ build lib_internal_target__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:119:1
+# Defined: build.bp:redacted
 
 m.lib_internal_target_target.cflags = -DSHOW_HIDDEN -DME_TARGET -I${g.bob.SrcDir}/hidden
 m.lib_internal_target_target.cxxflags = 
@@ -314,7 +314,7 @@ build lib_internal_target__target: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:46:1
+# Defined: build.bp:redacted
 
 m.lib_no_reexport_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.lib_no_reexport_target.cxxflags = 
@@ -342,7 +342,7 @@ build lib_no_reexport: phony ${g.bob.BuildDir}/target/static/lib_no_reexport.a
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:105:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_host_host.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.lib_reexport_host_host.cxxflags = 
@@ -371,7 +371,7 @@ build lib_reexport_host__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:105:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_host_target.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.lib_reexport_host_target.cxxflags = 
@@ -400,7 +400,7 @@ build lib_reexport_host__target: phony $
 # Variant: host
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:130:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_host_2_host.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.lib_reexport_host_2_host.cxxflags = 
@@ -429,7 +429,7 @@ build lib_reexport_host_2__host: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:130:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_host_2_target.cflags = -DSHOW_HIDDEN -DME_TARGET -I${g.bob.SrcDir}/hidden
 m.lib_reexport_host_2_target.cxxflags = 
@@ -458,7 +458,7 @@ build lib_reexport_host_2__target: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:25:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_level_1_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.lib_reexport_level_1_target.cxxflags = 
@@ -487,7 +487,7 @@ build lib_reexport_level_1: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:32:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_level_2_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.lib_reexport_level_2_target.cxxflags = 
@@ -516,7 +516,7 @@ build lib_reexport_level_2: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:39:1
+# Defined: build.bp:redacted
 
 m.lib_reexport_level_3_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.lib_reexport_level_3_target.cxxflags = 
@@ -545,7 +545,7 @@ build lib_reexport_level_3: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:88:1
+# Defined: build.bp:redacted
 
 m.test_no_reexport_target.cflags = 
 m.test_no_reexport_target.cxxflags = 
@@ -577,7 +577,7 @@ default test_no_reexport
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:58:1
+# Defined: build.bp:redacted
 
 m.test_reexport_cflags_level_1_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_cflags_level_1_target.cxxflags = 
@@ -611,7 +611,7 @@ default test_reexport_cflags_level_1
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:70:1
+# Defined: build.bp:redacted
 
 m.test_reexport_cflags_level_2_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_cflags_level_2_target.cxxflags = 
@@ -645,7 +645,7 @@ default test_reexport_cflags_level_2
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:82:1
+# Defined: build.bp:redacted
 
 m.test_reexport_cflags_level_3_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_cflags_level_3_target.cxxflags = 
@@ -679,7 +679,7 @@ default test_reexport_cflags_level_3
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:113:1
+# Defined: build.bp:redacted
 
 m.test_reexport_host_target.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.test_reexport_host_target.cxxflags = 
@@ -711,7 +711,7 @@ default test_reexport_host
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:144:1
+# Defined: build.bp:redacted
 
 m.test_reexport_host_2_host.cflags = -DSHOW_HIDDEN -DME_HOST -I${g.bob.SrcDir}/hidden
 m.test_reexport_host_2_host.cxxflags = 
@@ -742,7 +742,7 @@ build test_reexport_host_2__host: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:144:1
+# Defined: build.bp:redacted
 
 m.test_reexport_host_2_target.cflags = -DSHOW_HIDDEN -DME_TARGET -I${g.bob.SrcDir}/hidden
 m.test_reexport_host_2_target.cxxflags = 
@@ -775,7 +775,7 @@ default test_reexport_host_2__target
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:52:1
+# Defined: build.bp:redacted
 
 m.test_reexport_include_level_1_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_include_level_1_target.cxxflags = 
@@ -809,7 +809,7 @@ default test_reexport_include_level_1
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:64:1
+# Defined: build.bp:redacted
 
 m.test_reexport_include_level_2_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_include_level_2_target.cxxflags = 
@@ -843,7 +843,7 @@ default test_reexport_include_level_2
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:76:1
+# Defined: build.bp:redacted
 
 m.test_reexport_include_level_3_target.cflags = -DSHOW_HIDDEN -I${g.bob.SrcDir}/hidden
 m.test_reexport_include_level_3_target.cxxflags = 
@@ -877,7 +877,7 @@ default test_reexport_include_level_3
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:151:1
+# Defined: build.bp:redacted
 
 m.test_reexport_passing_up_target.cflags = -DHAVE_A -DHAVE_B -DHAVE_D
 m.test_reexport_passing_up_target.cxxflags = 

@@ -120,6 +120,7 @@ func redact(args *generationArgs, data []byte) []byte {
 	data = regexp.MustCompile(args.BobRootAbsolute).ReplaceAll(data, []byte("redacted"))
 	data = regexp.MustCompile(args.ConfigFile).ReplaceAll(data, []byte("%REDACTED_CONFIG_FILE%"))
 	data = regexp.MustCompile(args.ConfigJson).ReplaceAll(data, []byte("%REDACTED_CONFIG_JSON%"))
+	data = regexp.MustCompile("(?m)^(# Defined: .*/?build.bp:)[0-9]+:[0-9]+").ReplaceAll(data, redacted)
 	return data
 }
 

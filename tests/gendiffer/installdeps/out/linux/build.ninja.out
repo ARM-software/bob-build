@@ -56,7 +56,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:32:1
+# Defined: nested/build.bp:redacted
 
 m.bob_test_install_deps_target.cflags = 
 m.bob_test_install_deps_target.conlyflags = 
@@ -94,7 +94,7 @@ default bob_test_install_deps
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:18:1
+# Defined: nested/build.bp:redacted
 
 m.bob_test_install_deps_binary_target.cflags = 
 m.bob_test_install_deps_binary_target.conlyflags = 
@@ -131,7 +131,7 @@ build bob_test_install_deps_binary: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:11:1
+# Defined: nested/build.bp:redacted
 
 m.bob_test_install_deps_library_target.cflags = 
 m.bob_test_install_deps_library_target.conlyflags = 
@@ -163,7 +163,7 @@ build bob_test_install_deps_library: phony $
 # Variant:
 # Type:    bob_resource
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:25:1
+# Defined: nested/build.bp:redacted
 
 build ${g.bob.BuildDir}/data/resources/bob_test_install_deps_resource.txt: $
         g.bob.install $
