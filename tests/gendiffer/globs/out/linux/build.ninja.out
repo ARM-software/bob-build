@@ -54,7 +54,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:24:1
+# Defined: build.bp:redacted
 
 m.glob_test_target.cflags = 
 m.glob_test_target.conlyflags = 
@@ -116,7 +116,7 @@ default glob_test
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:34:1
+# Defined: build.bp:redacted
 
 m.glob_test_exclude_target.cflags = 
 m.glob_test_exclude_target.cxxflags = 
@@ -157,7 +157,7 @@ default glob_test_exclude
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:29:1
+# Defined: build.bp:redacted
 
 m.glob_test_nested_target.cflags = 
 m.glob_test_nested_target.conlyflags = 
@@ -221,7 +221,7 @@ default glob_test_nested
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: module/build.bp:23:1
+# Defined: module/build.bp:redacted
 
 m.nested_glob_test_target.cflags = 
 m.nested_glob_test_target.conlyflags = 
@@ -285,7 +285,7 @@ default nested_glob_test
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: module/build.bp:28:1
+# Defined: module/build.bp:redacted
 
 m.nested_glob_test_exclude_target.cflags = 
 m.nested_glob_test_exclude_target.cxxflags = 
@@ -327,7 +327,7 @@ default nested_glob_test_exclude
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: module/build.bp:44:1
+# Defined: module/build.bp:redacted
 
 m.nested_test_exclude_srcs_target.cflags = 
 m.nested_test_exclude_srcs_target.cxxflags = 
@@ -369,7 +369,7 @@ default nested_test_exclude_srcs
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:51:1
+# Defined: build.bp:redacted
 
 m.test_exclude_srcs_target.cflags = 
 m.test_exclude_srcs_target.cxxflags = 

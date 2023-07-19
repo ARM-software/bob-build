@@ -65,7 +65,7 @@ rule g.bootstrap.cp
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:64:1
+# Defined: build.bp:redacted
 
 m.binary_linked_to_gen_shared_host.cflags = -I${g.bob.BuildDir}/gen/libblah_shared/include
 m.binary_linked_to_gen_shared_host.conlyflags = 
@@ -107,7 +107,7 @@ default binary_linked_to_gen_shared
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:92:1
+# Defined: build.bp:redacted
 
 m.binary_linked_to_gen_shared_rename_host.cflags = -I${g.bob.BuildDir}/gen/libblah_shared_rename/include
 m.binary_linked_to_gen_shared_rename_host.conlyflags = 
@@ -145,7 +145,7 @@ default binary_linked_to_gen_shared_rename
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:78:1
+# Defined: build.bp:redacted
 
 m.binary_linked_to_gen_static_host.cflags = -I${g.bob.BuildDir}/gen/libblah_static/include
 m.binary_linked_to_gen_static_host.conlyflags = 
@@ -185,7 +185,7 @@ default binary_linked_to_gen_static
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:83:1
+# Defined: nested/build.bp:redacted
 
 rule m.check_renamed_gen_library_.gen_check_renamed_gen_library
     command = ${tool} --links-to libblah_shared2  ${in} && touch ${_out_}
@@ -208,7 +208,7 @@ default check_renamed_gen_library
 # Variant: host
 # Type:    bob_generate_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:43:1
+# Defined: nested/build.bp:redacted
 
 rule m.generated_binary_host.gen_generated_binary
     command = gcc -fPIE -o ${_out_} ${in}
@@ -235,7 +235,7 @@ default generated_binary
 # Variant: host
 # Type:    bob_generate_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:38:1
+# Defined: build.bp:redacted
 
 rule m.libblah_shared_host.gen_libblah_shared
     command = gcc -fPIC -o ${_out_} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.
@@ -273,7 +273,7 @@ build libblah_shared: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_shared.so $
 # Variant: host
 # Type:    bob_generate_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:60:1
+# Defined: nested/build.bp:redacted
 
 rule m.libblah_shared_rename_host.gen_libblah_shared_rename
     command = gcc -fPIC -o ${_out_} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.
@@ -309,7 +309,7 @@ build libblah_shared_rename: phony $
 # Variant: host
 # Type:    bob_generate_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:18:1
+# Defined: nested/build.bp:redacted
 
 rule m.libblah_static_host.gen_libblah_static
     command = gcc -c -o ${gen_dir}/libblah.o ${in}; ar rcs ${_out_} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.
@@ -337,7 +337,7 @@ build libblah_static: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:105:1
+# Defined: build.bp:redacted
 
 rule m.shared_library_input_.gen_shared_library_input
     command = ${tool} --links-to libblah_shared2  ${in} && touch ${_out_}

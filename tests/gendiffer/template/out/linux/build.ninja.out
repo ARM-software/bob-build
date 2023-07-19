@@ -43,7 +43,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 m.bob_test_templates_target.cflags = -DTEMPLATE_TEST_VALUE=6 -DTEMPLATE_TEST_VALUE_TARGET=6
 m.bob_test_templates_target.conlyflags = 

@@ -48,7 +48,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:95:1
+# Defined: build.bp:redacted
 
 rule m.combine_sources_.gen_combine_sources
     command = ${tool} --out ${_out_} ${in}
@@ -83,7 +83,7 @@ build combine_sources: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:74:1
+# Defined: build.bp:redacted
 
 rule m.generate_source_generated_sources_only_.gen_generate_source_generated_sources_only
     command = echo '// Dummy File' > ${_out_}
@@ -102,7 +102,7 @@ build generate_source_generated_sources_only: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:39:1
+# Defined: build.bp:redacted
 
 rule m.generate_source_to_transform_.gen_generate_source_to_transform
     command = echo '// Dummy File' > ${_out_}
@@ -121,7 +121,7 @@ build generate_source_to_transform: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:67:1
+# Defined: build.bp:redacted
 
 rule m.generate_template_source_used_by_transform_.gen_generate_template_source_used_by_transform
     command = python ${tool} ${_out_}
@@ -144,7 +144,7 @@ build generate_template_source_used_by_transform: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:36:1
+# Defined: nested/build.bp:redacted
 
 rule m.transform_source_generated_deps_.gen_transform_source_generated_deps
     command = python ${tool} --in ${in} --gen ${_out_} --src-template ${generate_template_source_used_by_transform_out}
@@ -170,7 +170,7 @@ build transform_source_generated_deps: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:80:1
+# Defined: build.bp:redacted
 
 rule m.transform_source_generated_sources_only_.gen_transform_source_generated_sources_only
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -197,7 +197,7 @@ default transform_source_generated_sources_only
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:45:1
+# Defined: build.bp:redacted
 
 rule m.transform_source_multiple_in_.gen_transform_source_multiple_in
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -240,7 +240,7 @@ build transform_source_multiple_in: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 rule m.transform_source_single_.gen_transform_source_single
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -263,7 +263,7 @@ build transform_source_single: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:18:1
+# Defined: nested/build.bp:redacted
 
 rule m.transform_source_single_dir_.gen_transform_source_single_dir
     command = python ${tool} --in ${in} --gen ${_out_} --gen-implicit-header
@@ -286,7 +286,7 @@ build transform_source_single_dir: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:121:1
+# Defined: build.bp:redacted
 
 rule m.validate_install_transform_source_.gen_validate_install_transform_source
     command = touch ${_out_}
@@ -317,7 +317,7 @@ default validate_install_transform_source
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:109:1
+# Defined: build.bp:redacted
 
 m.validate_link_transform_source_target.cflags = -I${g.bob.BuildDir}/gen/transform_source_single_dir/single/transform_source -I${g.bob.BuildDir}/gen/transform_source_single/transform_source -I${g.bob.BuildDir}/gen/transform_source_multiple_in/generate_source_to_transform -I${g.bob.BuildDir}/gen/transform_source_multiple_in/transform_source -I${g.bob.BuildDir}/gen/transform_source_generated_deps
 m.validate_link_transform_source_target.cxxflags = 
@@ -384,7 +384,7 @@ default validate_link_transform_source
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:151:1
+# Defined: build.bp:redacted
 
 rule m.validate_transform_source_flattened_output_.gen_validate_transform_source_flattened_output
     command = echo '${_out_}:' > ${depfile} && cat $$(cat ${rspfile}) > ${_out_}
@@ -417,7 +417,7 @@ default validate_transform_source_flattened_output
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:135:1
+# Defined: build.bp:redacted
 
 rule m.validate_transform_source_nested_output_.gen_validate_transform_source_nested_output
     command = echo '${_out_}:' > ${depfile} && cat $$(cat ${rspfile}) > ${_out_}

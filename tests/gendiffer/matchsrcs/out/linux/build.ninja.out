@@ -54,7 +54,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:28:1
+# Defined: build.bp:redacted
 
 m.match_source_bin_target.cflags = -include ${g.bob.SrcDir}/cflags.h
 m.match_source_bin_target.conlyflags = -include ${g.bob.SrcDir}/conlyflags.h
@@ -105,7 +105,7 @@ default match_source_bin
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 rule m.match_source_gen_.gen_match_source_gen
     command = cat ${g.bob.SrcDir}/function_def.txt ${g.bob.SrcDir}/main.c > ${_out_}

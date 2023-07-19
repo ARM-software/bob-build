@@ -52,7 +52,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:94:1
+# Defined: build.bp:redacted
 
 m.bin_target.cflags = 
 m.bin_target.conlyflags = 
@@ -158,7 +158,7 @@ default bin
 # Variant:
 # Type:    bob_alias
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:106:1
+# Defined: build.bp:redacted
 
 build bob_tests: phony genrule generated_source nested_generated_source $
         transform_source nested_transform_source glob lib bin
@@ -168,7 +168,7 @@ build bob_tests: phony genrule generated_source nested_generated_source $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:33:1
+# Defined: build.bp:redacted
 
 rule m.generated_source_.gen_generated_source
     command = touch ${_out_}
@@ -187,7 +187,7 @@ build generated_source: phony $
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 rule m.genrule_.gen_genrule
     command = touch ${_out_}
@@ -210,7 +210,7 @@ build genrule: phony ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:82:1
+# Defined: build.bp:redacted
 
 m.lib_target.cflags = 
 m.lib_target.conlyflags = 
@@ -308,7 +308,7 @@ build lib: phony ${g.bob.BuildDir}/target/static/lib.a
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:39:1
+# Defined: build.bp:redacted
 
 rule m.nested_generated_source_.gen_nested_generated_source
     command = touch ${_out_}
@@ -330,7 +330,7 @@ build nested_generated_source: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:62:1
+# Defined: build.bp:redacted
 
 rule m.nested_transform_source_.gen_nested_transform_source
     command = some_tool
@@ -368,7 +368,7 @@ build nested_transform_source: phony $
 # Variant:
 # Type:    bob_transform_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:49:1
+# Defined: build.bp:redacted
 
 rule m.transform_source_.gen_transform_source
     command = some_tool

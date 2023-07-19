@@ -66,7 +66,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:51:1
+# Defined: build.bp:redacted
 
 m.binary_has_indirect_ldlibs_target.cflags = 
 m.binary_has_indirect_ldlibs_target.conlyflags = 
@@ -100,7 +100,7 @@ default binary_has_indirect_ldlibs
 # Variant: target
 # Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:45:1
+# Defined: build.bp:redacted
 
 m.libshared_has_indirect_ldlibs_target.cflags = 
 m.libshared_has_indirect_ldlibs_target.conlyflags = 
@@ -139,7 +139,7 @@ build libshared_has_indirect_ldlibs: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 m.libstatic_with_ldlibs1_target.cflags = 
 m.libstatic_with_ldlibs1_target.conlyflags = 
@@ -165,7 +165,7 @@ build libstatic_with_ldlibs1: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:31:1
+# Defined: build.bp:redacted
 
 m.libstatic_with_ldlibs2_target.cflags = 
 m.libstatic_with_ldlibs2_target.conlyflags = 
@@ -191,7 +191,7 @@ build libstatic_with_ldlibs2: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:57:1
+# Defined: build.bp:redacted
 
 m.uses_shared_target.cflags = 
 m.uses_shared_target.conlyflags = 

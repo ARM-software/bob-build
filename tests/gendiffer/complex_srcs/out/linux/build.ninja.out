@@ -56,7 +56,7 @@ rule g.bootstrap.cp
 # Variant: host
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:158:1
+# Defined: nested/build.bp:redacted
 
 m.binary_host.cflags = -I${g.bob.SrcDir} -I${g.bob.SrcDir}/src -I${g.bob.BuildDir}/gen/test_host_configuration/include -I${g.bob.BuildDir}/gen/generated_srcs/include -I${g.bob.BuildDir}/gen/generated_srcs/include/lib
 m.binary_host.cxxflags = 
@@ -223,7 +223,7 @@ build binary: phony ${g.bob.BuildDir}/install/testcases/binary $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:24:1
+# Defined: nested/build.bp:redacted
 
 rule m.config_h_.gen_config_h
     command = bash -ec 'mkdir -p $$(dirname ${_out_}); ${tool} -o ${_out_} ${g.bob.SrcDir}/nested/config2.h.in $$(cat ${g.bob.SrcDir}/nested/config2.h.in) SOME_ARG1=foo SOME_ARG2='
@@ -243,7 +243,7 @@ build config_h: phony ${g.bob.BuildDir}/gen/config_h/include/config.h
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:90:1
+# Defined: nested/build.bp:redacted
 
 rule m.data_inc_.gen_data_inc
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/shared:$$LD_LIBRARY_PATH bash -c "${host_bin} -create-data  --write-if-changed -I ${src_dir}/. -o ${gen_dir}/lib/data.inc -d ${depfile}"
@@ -266,7 +266,7 @@ build data_inc: phony ${g.bob.BuildDir}/gen/data_inc/lib/data.inc
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:81:1
+# Defined: nested/build.bp:redacted
 
 rule m.file_cpp_.gen_file_cpp
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/shared:$$LD_LIBRARY_PATH bash -c "${host_bin} --create-source  -I ${src_dir}/. -o ${gen_dir}/source.cpp -d ${depfile}"
@@ -289,7 +289,7 @@ build file_cpp: phony ${g.bob.BuildDir}/gen/file_cpp/source.cpp
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:99:1
+# Defined: nested/build.bp:redacted
 
 rule m.generated_srcs_.gen_generated_srcs
     command = mkdir -p ${gen_dir}/include/lib; cp ${include_0_h_out} ${gen_dir}/include/lib/someheader0.h.inc;mkdir -p ${gen_dir}/include/lib; cp ${include_1_h_out} ${gen_dir}/include/lib/someheader1.h.inc;mkdir -p ${gen_dir}/include/lib; cp ${data_inc_out} ${gen_dir}/include/lib/data.inc;mkdir -p ${gen_dir}/lib; cp ${file_cpp_out} ${gen_dir}/lib/source.cpp;
@@ -324,7 +324,7 @@ build generated_srcs: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:63:1
+# Defined: nested/build.bp:redacted
 
 rule m.include_0_h_.gen_include_0_h
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/shared:$$LD_LIBRARY_PATH bash -c "${host_bin} -I ${src_dir} -o ${gen_dir}/include/lib/header0.h -d ${depfile}"
@@ -348,7 +348,7 @@ build include_0_h: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:72:1
+# Defined: nested/build.bp:redacted
 
 rule m.include_1_h_.gen_include_1_h
     command = LD_LIBRARY_PATH=${g.bob.BuildDir}/shared:$$LD_LIBRARY_PATH bash -c "${host_bin} -I ${src_dir} -o ${gen_dir}/include/lib/header1.h -d ${depfile}"
@@ -372,7 +372,7 @@ build include_1_h: phony $
 # Variant: host
 # Type:    bob_generate_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:3:1
+# Defined: build.bp:redacted
 
 rule m.special-tool_host.gen_special-tool
     pool = console
@@ -408,7 +408,7 @@ build special-tool: phony ${g.bob.BuildDir}/install/testcases/special-tool $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:13:1
+# Defined: nested/build.bp:redacted
 
 rule m.test_config_h_.gen_test_config_h
     command = bash -ec 'mkdir -p $$(dirname ${_out_}); ${tool} -o ${_out_} ${g.bob.SrcDir}/nested/config1.h.in $$(cat ${g.bob.SrcDir}/nested/config1.h.in) SOME_ARG1=foo SOME_ARG2='
@@ -429,7 +429,7 @@ build test_config_h: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:49:1
+# Defined: nested/build.bp:redacted
 
 rule m.test_host_configuration_.gen_test_host_configuration
     command = ${tool} -t ${gen_dir} ${test_config_h_out} ${config_h_out}
@@ -458,7 +458,7 @@ build test_host_configuration: phony $
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:35:1
+# Defined: nested/build.bp:redacted
 
 rule m.test_target_configuration_.gen_test_target_configuration
     command = ${tool} -t ${gen_dir} ${test_config_h_out} ${config_h_out}

@@ -37,7 +37,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_resource
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:51:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/install/bin/bob_tests/bob_resource_test_script.sh: $
         g.bob.install ${g.bob.SrcDir}/bob_resource_test_script.sh
@@ -55,7 +55,7 @@ default bob_test_resource_in_bin
 # Variant:
 # Type:    bob_resource
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:38:1
+# Defined: build.bp:redacted
 
 build ${g.bob.BuildDir}/install/testcases/y/main.c: g.bob.install $
         ${g.bob.SrcDir}/main.c
@@ -68,7 +68,7 @@ default bob_test_resources
 # Variant:
 # Type:    bob_alias
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:62:1
+# Defined: build.bp:redacted
 
 build bob_tests: phony bob_test_resources bob_test_resource_in_bin
 

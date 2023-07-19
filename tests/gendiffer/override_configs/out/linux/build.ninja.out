@@ -52,7 +52,7 @@ rule g.bootstrap.cp
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:23:1
+# Defined: build.bp:redacted
 
 m.hello_world_target.cflags = -Wall -pedantic
 m.hello_world_target.cxxflags = 

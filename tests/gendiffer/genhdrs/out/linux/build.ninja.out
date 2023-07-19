@@ -52,7 +52,7 @@ rule g.bootstrap.cp
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:25:1
+# Defined: build.bp:redacted
 
 rule m.generated_header_.gen_generated_header
     command = echo '#define H1 1' > ${_out_}
@@ -70,7 +70,7 @@ build generated_header: phony ${g.bob.BuildDir}/gen/generated_header/h1.h
 # Variant:
 # Type:    bob_generate_source
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:18:1
+# Defined: build.bp:redacted
 
 rule m.generated_header_single_.gen_generated_header_single
     command = echo '#define H2 2' > ${_out_}
@@ -89,7 +89,7 @@ build generated_header_single: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:32:1
+# Defined: build.bp:redacted
 
 m.public_interface_uses_generated_headers_target.cflags = -I${g.bob.BuildDir}/gen/generated_header -I${g.bob.BuildDir}/gen/generated_header_single
 m.public_interface_uses_generated_headers_target.conlyflags = 
@@ -119,7 +119,7 @@ build public_interface_uses_generated_headers: phony $
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:47:1
+# Defined: build.bp:redacted
 
 m.reexports_partially_generated_library_target.cflags = -I${g.bob.BuildDir}/gen/generated_header -I${g.bob.BuildDir}/gen/generated_header_single
 m.reexports_partially_generated_library_target.conlyflags = 
@@ -148,7 +148,7 @@ build reexports_partially_generated_library: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:66:1
+# Defined: build.bp:redacted
 
 m.uses_library_with_private_generated_headers_target.cflags = 
 m.uses_library_with_private_generated_headers_target.conlyflags = 
@@ -183,7 +183,7 @@ default uses_library_with_private_generated_headers
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:41:1
+# Defined: build.bp:redacted
 
 m.uses_partially_generated_library_target.cflags = -I${g.bob.BuildDir}/gen/generated_header -I${g.bob.BuildDir}/gen/generated_header_single
 m.uses_partially_generated_library_target.conlyflags = 
@@ -220,7 +220,7 @@ default uses_partially_generated_library
 # Variant: target
 # Type:    bob_static_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:60:1
+# Defined: build.bp:redacted
 
 m.uses_private_generated_headers_target.cflags = -I${g.bob.BuildDir}/gen/generated_header
 m.uses_private_generated_headers_target.conlyflags = 
@@ -247,7 +247,7 @@ build uses_private_generated_headers: phony $
 # Variant: target
 # Type:    bob_binary
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:54:1
+# Defined: build.bp:redacted
 
 m.uses_reexporting_library_target.cflags = -I${g.bob.BuildDir}/gen/generated_header -I${g.bob.BuildDir}/gen/generated_header_single
 m.uses_reexporting_library_target.conlyflags = 
