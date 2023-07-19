@@ -19,6 +19,7 @@ const (
 	TypeCpp
 	TypeCC
 	TypeLinker
+	TypeLinkLibrary
 	TypeInclude
 	TypeIncludeLocal // Helper flag to mark local include dirs
 	TypeIncludeGenerated

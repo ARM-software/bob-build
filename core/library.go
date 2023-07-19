@@ -298,6 +298,11 @@ func (m *ModuleLibrary) getFlagOutLut() flag.FlagParserTable {
 			Tag:          flag.TypeExported | flag.TypeIncludeSystem,
 			Factory:      flag.FromIncludePathOwned,
 		},
+		{
+			PropertyName: "Ldlibs",
+			Tag:          flag.TypeLinkLibrary | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
 	}
 }
 
@@ -489,9 +494,6 @@ func (m *ModuleLibrary) checkField(cond bool, fieldName string) {
 	}
 }
 
-// All libraries must implement `propertyExporter`
-func (m *ModuleLibrary) exportLdflags() []string    { return m.Properties.Export_ldflags }
-func (m *ModuleLibrary) exportLdlibs() []string     { return m.Properties.Ldlibs }
 func (m *ModuleLibrary) exportSharedLibs() []string { return m.Properties.Shared_libs }
 
 func (m *ModuleLibrary) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
@@ -614,12 +616,18 @@ func propagateOtherExportedProperties(m *ModuleLibrary, depLib propertyExporter)
 			props.ExtraSharedLibs = append(props.ExtraSharedLibs, shLib)
 		}
 	}
-	for _, ldlib := range depLib.exportLdlibs() {
-		if !utils.Contains(props.Ldlibs, ldlib) {
-			props.Ldlibs = append(props.Ldlibs, ldlib)
-		}
-	}
-	props.Ldflags = append(props.Ldflags, depLib.exportLdflags()...)
+
+	depLib.FlagsOut().Filtered(func(f flag.Flag) bool {
+		return f.MatchesType(flag.TypeLinkLibrary)
+	}).ForEachIf(
+		func(f flag.Flag) bool { return !utils.Contains(props.Ldlibs, f.ToString()) },
+		func(f flag.Flag) {
+			props.Ldlibs = append(props.Ldlibs, f.ToString())
+		})
+
+	props.Ldflags = append(props.Ldflags, depLib.FlagsOut().Filtered(func(f flag.Flag) bool {
+		return f.MatchesType(flag.TypeLinker)
+	}).ToStringSlice()...)
 
 	// Header libraries are *not* propagated here, because they are currently
 	// only supported on Android, which will automatically re-export them just
