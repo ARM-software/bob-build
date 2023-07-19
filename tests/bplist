@@ -1,6 +1,7 @@
 ./aliases/build.bp
 ./arg_order/build.bp
 ./binary/build.bp
+./strict_binary/build.bp
 ./bob/Blueprints
 ./bob/blueprint/Blueprints
 ./build.bp
