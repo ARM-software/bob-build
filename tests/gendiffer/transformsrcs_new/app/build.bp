@@ -124,6 +124,37 @@ bob_gensrcs {
     build_by_default: true,
 }
 
+bob_generate_source {
+    name: "gen_new_out",
+    generated_sources: [
+        "verify_tools",
+    ],
+    generated_deps: [
+        "verify_tools",
+    ],
+    out: ["gen_new_out.cpp"],
+    cmd: "cp ${in} ${out} && echo ${verify_tools_out}",
+    build_by_default: true,
+}
+
+bob_transform_source {
+    name: "gen_new_transform_out",
+    generated_sources: [
+        "verify_tools",
+    ],
+    generated_deps: [
+        "verify_tools",
+    ],
+    out: {
+        match: "(.+)\\.cpp",
+        replace: [
+            "$1.dep",
+        ],
+    },
+    cmd: "cp ${in} ${out} && echo ${verify_tools_out}",
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_gensrcs",
     srcs: [

@@ -44,6 +44,27 @@ cc_binary {
     cppflags: ["-fno-exceptions"],
 }
 
+genrule_bob {
+    name: "gen_new_out",
+    out: ["gen_new_out.cpp"],
+    cmd: "cp ${in} ${out} && echo ${verify_tools_out}",
+    depfile: false,
+    generated_deps: ["verify_tools"],
+    generated_sources: ["verify_tools"],
+}
+
+gensrcs_bob {
+    name: "gen_new_transform_out",
+    cmd: "cp ${in} ${out} && echo ${verify_tools_out}",
+    depfile: false,
+    generated_deps: ["verify_tools"],
+    generated_sources: ["verify_tools"],
+    out: {
+        match: "(.+)\\.cpp",
+        replace: ["$1.dep"],
+    },
+}
+
 filegroup {
     name: "generator",
     srcs: ["generator.py"],
