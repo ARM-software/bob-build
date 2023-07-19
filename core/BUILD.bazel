@@ -49,7 +49,6 @@ go_library(
         "module_transform_source.go",
         "output_producer.go",
         "properties.go",
-        "property_exporter.go",
         "source_props.go",
         "splitter.go",
         "standalone.go",

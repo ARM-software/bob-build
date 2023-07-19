@@ -41,7 +41,7 @@ type libraryInterface interface {
 	installable
 	matchSourceInterface
 	propertyEscapeInterface
-	propertyExporter
+	SharedLibraryExporter
 	FileConsumer
 	flag.Consumer
 }
@@ -607,8 +607,13 @@ func checkForMultipleLinking(topLevelModuleName string, staticLibs map[string]bo
 	}
 }
 
+type SharedLibraryExporter interface {
+	flag.Provider // Eventually the below functions will be removed
+	exportSharedLibs() []string
+}
+
 // While traversing the static library dependency tree, propagate extra properties.
-func propagateOtherExportedProperties(m *ModuleLibrary, depLib propertyExporter) {
+func propagateOtherExportedProperties(m *ModuleLibrary, depLib SharedLibraryExporter) {
 	props := &m.Properties.Build
 	for _, shLib := range depLib.exportSharedLibs() {
 		if !utils.Contains(props.Shared_libs, shLib) {
@@ -656,6 +661,7 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 		}
 
 		if depLib, ok := dep.(*ModuleStaticLibrary); ok {
+			// TODO: whole static libs should use a tag with relevant information.
 			for _, subLib := range depLib.Properties.Whole_static_libs {
 				if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
 					utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",
