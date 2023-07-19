@@ -75,7 +75,6 @@ bootstrap_go_package {
         "core/module_transform_source.go",
         "core/output_producer.go",
         "core/properties.go",
-        "core/property_exporter.go",
         "core/source_props.go",
         "core/splitter.go",
         "core/standalone.go",

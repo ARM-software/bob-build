@@ -50,7 +50,7 @@ func (m *ModuleExternalLibrary) setVariant(tgt toolchain.TgtType)     { m.Proper
 func (m *ModuleExternalLibrary) getTarget() toolchain.TgtType         { return m.Properties.TargetType }
 func (m *ModuleExternalLibrary) getSplittableProps() *SplittableProps { return &SplittableProps{} }
 
-// Implement the propertyExporter interface so that external libraries can pass
+// Implement the SharedLibraryExporter interface so that external libraries can pass
 // on properties e.g. from pkg-config
 
 func (m *ModuleExternalLibrary) exportSharedLibs() []string { return []string{} }
@@ -113,7 +113,7 @@ func (m *ModuleExternalLibrary) FlagsOut() flag.Flags {
 	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
-var _ propertyExporter = (*ModuleExternalLibrary)(nil)
+var _ SharedLibraryExporter = (*ModuleExternalLibrary)(nil)
 var _ splittable = (*ModuleExternalLibrary)(nil)
 
 // External libraries have no actions - they are already built.
