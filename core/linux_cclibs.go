@@ -374,8 +374,13 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if el, ok := m.(*ModuleExternalLibrary); ok {
-				ldlibs = append(ldlibs, el.exportLdlibs()...)
-				ldflags = append(ldflags, el.exportLdflags()...)
+				ldlibs = append(ldlibs, el.FlagsOut().Filtered(func(f flag.Flag) bool {
+					return f.MatchesType(flag.TypeLinkLibrary)
+				}).ToStringSlice()...)
+
+				ldflags = append(ldflags, el.FlagsOut().Filtered(func(f flag.Flag) bool {
+					return f.MatchesType(flag.TypeLinker)
+				}).ToStringSlice()...)
 			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.Name()+".so"))
 			} else {

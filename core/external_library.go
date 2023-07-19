@@ -53,12 +53,15 @@ func (m *ModuleExternalLibrary) getSplittableProps() *SplittableProps { return &
 // Implement the propertyExporter interface so that external libraries can pass
 // on properties e.g. from pkg-config
 
-func (m *ModuleExternalLibrary) exportLdflags() []string    { return m.Properties.Export_ldflags }
-func (m *ModuleExternalLibrary) exportLdlibs() []string     { return m.Properties.Ldlibs }
 func (m *ModuleExternalLibrary) exportSharedLibs() []string { return []string{} }
 
 func (m *ModuleExternalLibrary) FlagsIn() flag.Flags {
 	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Ldlibs",
+			Tag:          flag.TypeLinkLibrary,
+			Factory:      flag.FromStringOwned,
+		},
 		{
 			PropertyName: "Export_cflags",
 			Tag:          flag.TypeCC,
@@ -90,6 +93,11 @@ func (m *ModuleExternalLibrary) FlagsInTransitive(ctx blueprint.BaseModuleContex
 
 func (m *ModuleExternalLibrary) FlagsOut() flag.Flags {
 	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Ldlibs",
+			Tag:          flag.TypeLinkLibrary | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
 		{
 			PropertyName: "Export_cflags",
 			Tag:          flag.TypeCC | flag.TypeExported,
