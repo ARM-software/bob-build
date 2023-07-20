@@ -1,0 +1,40 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Contact: Arm Ltd. <developers@arm.com>
+
+Files:
+  *.py
+  *.sh
+  */Dockerfile
+  *.bzl
+  *.bazel
+  *.go
+  *.c
+  *.cpp
+  *WORKSPACE
+  *WORKSPACE.bzlmod
+  *bplist
+  *.bp
+  *Mconfig
+Copyright: 2023 Arm Ltd. <developers@arm.com>
+License: Apache-2.0
+
+Files:
+  *.md
+  tests/*
+  */tests/*
+  .github/*
+  config_system/pytest.ini
+  config_system/requirements_lock.txt
+  *go.mod
+  *go.sum
+  *go.work
+  master.xml
+  *.patch
+  default.xml
+  bob.bootstrap.version
+  .pre-commit-config.yaml
+  .gitmodules
+  *.gitignore
+  DCO.txt
+Copyright: 2023 Arm Ltd. <developers@arm.com>
+License: CC0-1.0
