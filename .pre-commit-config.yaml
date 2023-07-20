@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.4.0
     hooks:
       - id: trailing-whitespace
         exclude: (?x)(
@@ -22,12 +22,12 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+    rev: v3.0.0
     hooks:
       - id: prettier
 
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.7.0
     hooks:
       - id: black
         name: black
@@ -50,7 +50,7 @@ repos:
           - "--ignore=E203,E266,E501,W503,F403,F401,E402"
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.2
+    rev: v0.9.0.5
     hooks:
       - id: shellcheck
         name: shellcheck
@@ -59,6 +59,21 @@ repos:
         language: python
         types: [shell]
         require_serial: true
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v2.1.0
+    hooks:
+      - id: reuse
+        name: reuse
+        entry: reuse
+        args: ["lint"]
+        language: python
+        pass_filenames: false
+        description: "Lint the project directory for compliance with the REUSE Specification"
+        language_version: python3
+        types_or:
+          - text
+          - binary
 
   - repo: local
     hooks:
