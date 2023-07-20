@@ -263,6 +263,11 @@ func (m *ModuleLibrary) getFlagInLut() flag.FlagParserTable {
 			Tag:          flag.TypeUnset,
 			Factory:      flag.FromIncludePathOwned,
 		},
+		{
+			PropertyName: "Ldlibs",
+			Tag:          flag.TypeLinkLibrary,
+			Factory:      flag.FromStringOwned,
+		},
 	}
 }
 
@@ -442,6 +447,10 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 
 func (m *ModuleLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
 	return m.Properties.Build.GetBuildWrapperAndDeps(ctx)
+}
+
+func (m *ModuleLibrary) IsForwardingSharedLibrary() bool {
+	return m.Properties.isForwardingSharedLibrary()
 }
 
 func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
