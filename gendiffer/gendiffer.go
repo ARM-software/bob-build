@@ -141,6 +141,7 @@ func checkFileContents(args *generationArgs, filename string, data []byte) error
 		return err
 	}
 
+	// Early out in case the files are identical
 	if bytes.Equal(actual, data) {
 		return nil
 	}
@@ -148,6 +149,10 @@ func checkFileContents(args *generationArgs, filename string, data []byte) error
 	patch, err := diff(filename, actual, data)
 	if err != nil {
 		return err
+	} else if patch == nil {
+		// If the patch is nil it means the byte level files differ but not
+		// substantially enough to fail the tests. Refer to the diff flags for details.
+		return nil
 	}
 
 	_, suffix := split(patch, "\n")
