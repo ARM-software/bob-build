@@ -407,12 +407,30 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	return
 }
 
-func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.ModuleContext) map[string]string {
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+// Temporary interface to make library handlers generic between legacy and strict libraries
+type BackendCommonLibraryInterface interface {
+	flag.Consumer
+	targetableModule
+	linkableModule
 
-	ldflags := m.Properties.Ldflags
+	// Legacy functions which need a better interface
+	getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string)
+	IsForwardingSharedLibrary() bool
+	GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string)
+}
 
-	if m.Properties.Build.isForwardingSharedLibrary() {
+func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
+	tc := backend.Get().GetToolchain(m.getTarget())
+
+	ldflags := m.FlagsIn().Filtered(func(f flag.Flag) bool {
+		return f.MatchesType(flag.TypeLinker)
+	}).ToStringSlice()
+
+	ldlibs := m.FlagsIn().Filtered(func(f flag.Flag) bool {
+		return f.MatchesType(flag.TypeLinkLibrary)
+	}).ToStringSlice()
+
+	if m.IsForwardingSharedLibrary() {
 		ldflags = append(ldflags, tc.GetLinker().KeepUnusedDependencies())
 	} else {
 		ldflags = append(ldflags, tc.GetLinker().DropUnusedDependencies())
@@ -428,7 +446,7 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 	linker := tc.GetLinker().GetTool()
 	tcLdflags := tc.GetLinker().GetFlags()
 	tcLdlibs := tc.GetLinker().GetLibs()
-	buildWrapper, _ := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
+	buildWrapper, _ := m.GetBuildWrapperAndDeps(ctx)
 
 	wholeStaticLibs := GetWholeStaticLibs(ctx)
 	staticLibs := m.GetStaticLibs(ctx)
@@ -438,7 +456,8 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 			wholeStaticLibs))
 	}
 	staticLibFlags = append(staticLibFlags, staticLibs...)
-	sharedLibDir := backend.Get().SharedLibsDir(m.Properties.TargetType)
+	sharedLibDir := backend.Get().SharedLibsDir(m.getTarget())
+
 	args := map[string]string{
 		"build_wrapper":   buildWrapper,
 		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
@@ -447,27 +466,18 @@ func (g *linuxGenerator) getCommonLibArgs(m *ModuleLibrary, ctx blueprint.Module
 		"shared_libs_flags": utils.Join(append(sharedLibLdlibs,
 			tc.GetLinker().SetRpathLink(sharedLibDir))),
 		"static_libs": utils.Join(staticLibFlags),
-		"ldlibs":      utils.Join(m.Properties.Ldlibs, tcLdlibs),
+		"ldlibs":      utils.Join(ldlibs, tcLdlibs),
 	}
 	return args
 }
 
-func (g *linuxGenerator) getSharedLibArgs(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) map[string]string {
-	args := g.getCommonLibArgs(&m.ModuleLibrary, ctx)
-	ldflags := []string{}
-
-	if m.Properties.Library_version != "" {
-		var sonameFlag = "-Wl,-soname," + m.getSoname()
-		ldflags = append(ldflags, sonameFlag)
-	}
-
-	args["ldflags"] += " " + strings.Join(ldflags, " ")
-
+func (g *linuxGenerator) getSharedLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
+	args := g.getCommonLibArgs(m, ctx)
 	return args
 }
 
-func (g *linuxGenerator) getBinaryArgs(m *ModuleBinary, ctx blueprint.ModuleContext) map[string]string {
-	return g.getCommonLibArgs(&m.ModuleLibrary, ctx)
+func (g *linuxGenerator) getBinaryArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
+	return g.getCommonLibArgs(m, ctx)
 }
 
 // Returns the implicit dependencies for a library
