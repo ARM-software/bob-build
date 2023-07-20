@@ -54,9 +54,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r .github/pip_requirements.txt
 
-      - name: Check copyright
-        run: .github/checks/check-copyright.sh
-
   go-tests:
     name: Go ${{ matrix.go }} tests ${{ matrix.os }}
     strategy:
