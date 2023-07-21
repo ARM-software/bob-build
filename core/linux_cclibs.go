@@ -647,10 +647,15 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 	// if m.Name() == "shared_strict_lib_binary" {
 	// 	orderOnly = []string{"lib_simple.so"}
 	// }
+
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeBinary) },
+		func(p file.Path) string { return p.BuildPath() })
+
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:      executableRule,
-			Outputs:   m.outputs(),
+			Outputs:   outs,
 			Inputs:    objectFiles,
 			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
 			OrderOnly: orderOnly,
