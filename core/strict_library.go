@@ -263,6 +263,38 @@ func (m *ModuleStrictLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext
 	return "", []string{}
 }
 
+func (m *ModuleStrictLibrary) GetStaticLibs(ctx blueprint.ModuleContext) (libs []string) {
+	// Required for legacy backend implementation
+	return
+}
+
+func (m *ModuleStrictLibrary) IsForwardingSharedLibrary() bool {
+	// Required for legacy backend implementation
+	// Forwarding not supported yet
+	return false
+}
+
+func (m *ModuleStrictLibrary) IsRpathWanted() bool {
+	// Required for legacy backend implementation
+	// Rpath is not supported
+	return false
+}
+
+func (m *ModuleStrictLibrary) getLinkName() string {
+	return m.outputName() + ".so"
+}
+
+func (m *ModuleStrictLibrary) getRealName() string {
+	// Required for legacy backend implementation
+	return m.getLinkName()
+}
+
+func (m *ModuleStrictLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
+	// Required for legacy backend implementation
+	// Versioning not yet supported
+	return nil
+}
+
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})

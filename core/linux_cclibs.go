@@ -274,13 +274,16 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
-	objectFiles, _ := CompileObjs(m, ctx, tc)
+	objs, implicits := CompileObjs(m, ctx, tc)
 
-	g.ArchivableActions(ctx, m, tc, objectFiles)
+	g.SharedLinkActions(ctx, m, tc, objs, implicits)
+	g.SharedTocActions(ctx, m)
 
-	// TODO: implement shared library outputs
+	g.ArchivableActions(ctx, m, tc, objs)
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
+
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
