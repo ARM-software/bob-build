@@ -1,9 +1,6 @@
 package core
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
@@ -101,10 +98,6 @@ func (m *ModuleStrictLibrary) outputName() string {
 func (m *ModuleStrictLibrary) outputFileName() string {
 	utils.Die("Cannot use outputFileName on strict_library")
 	return "badName"
-}
-
-func (m *ModuleStrictLibrary) ObjDir() string {
-	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
 func (m *ModuleStrictLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
