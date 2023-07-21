@@ -2,3 +2,15 @@ bob_filegroup {
     name: "static_bin_srcs",
     srcs: ["src/main.cpp"],
 }
+
+bob_library {
+    name: "lib_new_shared",
+    srcs: ["src.cpp"],
+    linkstatic: false,
+}
+
+bob_library {
+    name: "depend_on_new_shared",
+    srcs: ["src.cpp"],
+    deps: ["lib_new_shared"],
+}

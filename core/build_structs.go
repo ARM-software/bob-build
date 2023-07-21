@@ -384,16 +384,17 @@ func ResolveGenericDepsMutator(ctx blueprint.BottomUpMutatorContext) {
 			case *ModuleSharedLibrary:
 				ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
 			case *ModuleStrictLibrary:
-				ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+				lib := dep.(*ModuleStrictLibrary)
 
-				/* TODO: if link shared */
-				// ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
-
-				// TODO: If only headers
-				// ctx.AddVariationDependencies(nil, HeaderTag, dep.Name())
-
-				/* TODO: if always link */
-				// ctx.AddVariationDependencies(nil, WholeStaticTag, dep.Name())
+				if proptools.Bool(lib.Properties.Alwayslink) &&
+					proptools.Bool(lib.Properties.Linkstatic) {
+					ctx.AddVariationDependencies(nil, WholeStaticTag, dep.Name())
+				} else if proptools.Bool(lib.Properties.Linkstatic) {
+					ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+				} else {
+					ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
+				}
+				// TODO: implement HeaderTag
 			}
 		})
 }
