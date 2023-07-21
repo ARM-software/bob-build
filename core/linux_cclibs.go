@@ -410,15 +410,22 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 
 // Temporary interface to make library handlers generic between legacy and strict libraries
 type BackendCommonLibraryInterface interface {
+	FileProvider
 	flag.Consumer
 	targetableModule
 	linkableModule
 	installable
 
 	// Legacy functions which need a better interface
+	outputs() []string
 	IsForwardingSharedLibrary() bool
 	IsRpathWanted() bool
 	GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string)
+}
+
+type BackendCommonSharedLibraryInterface interface {
+	BackendCommonLibraryInterface
+	getRealName() string
 }
 
 func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
@@ -533,19 +540,51 @@ var symlinkRule = pctx.StaticRule("symlink",
 		Description: "$out",
 	}, "target")
 
-func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
-	// Calculate and record outputs
-	outputdir := backend.Get().SharedLibsDir(m.Properties.TargetType)
-	soFile := filepath.Join(outputdir, m.getRealName())
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+func (g *linuxGenerator) SharedLinkActions(ctx blueprint.ModuleContext,
+	m BackendCommonLibraryInterface,
+	tc toolchain.Toolchain,
+	objs []string, implicits []string) {
 
-	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
+	_, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
 
-	_, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
+	orderOnly := buildWrapperDeps
+	if enableToc {
+		// Add an order only dependecy on the actual libraries to cover
+		// the case where the .so is deleted but the toc is still
+		// present.
+		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
+	}
 
-	installDeps := g.install(m, ctx)
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeShared) && !p.IsSymLink() },
+		func(p file.Path) string { return p.BuildPath() })
 
-	// Sort symlinks
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:      sharedLibraryRule,
+			Outputs:   outs,
+			Inputs:    objs,
+			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), implicits...),
+			OrderOnly: orderOnly,
+			Optional:  true,
+			Args:      g.getSharedLibArgs(m, ctx),
+		})
+
+}
+
+func (g *linuxGenerator) SharedTocActions(ctx blueprint.ModuleContext,
+	m BackendCommonSharedLibraryInterface) {
+	if toc, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+		outputdir := backend.Get().SharedLibsDir(m.getTarget())
+		soFile := filepath.Join(outputdir, m.getRealName())
+		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
+	}
+}
+
+func (g *linuxGenerator) SharedSymlinkActions(ctx blueprint.ModuleContext,
+	m BackendCommonLibraryInterface) (deps []string) {
+
 	m.OutFiles().ForEachIf(
 		func(fp file.Path) bool { return fp.IsSymLink() },
 		func(fp file.Path) bool {
@@ -557,33 +596,22 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 					Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
 					Optional: true,
 				})
-			installDeps = append(installDeps, fp.BuildPath())
+			deps = append(deps, fp.BuildPath())
 			return true
 		})
 
-	orderOnly := buildWrapperDeps
-	if enableToc {
-		// Add an order only dependecy on the actual libraries to cover
-		// the case where the .so is deleted but the toc is still
-		// present.
-		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
-	}
+	return
+}
 
-	ctx.Build(pctx,
-		blueprint.BuildParams{
-			Rule:      sharedLibraryRule,
-			Outputs:   m.outputs(),
-			Inputs:    objectFiles,
-			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
-			OrderOnly: orderOnly,
-			Optional:  true,
-			Args:      g.getSharedLibArgs(m, ctx),
-		})
+func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
+	tc := backend.Get().GetToolchain(m.getTarget())
+	objs, implicits := CompileObjs(m, ctx, tc)
 
-	if toc, ok := m.OutFiles().FindSingle(
-		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
-		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
-	}
+	installDeps := g.install(m, ctx)
+	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
+
+	g.SharedLinkActions(ctx, m, tc, objs, implicits)
+	g.SharedTocActions(ctx, m)
 
 	installDeps = append(installDeps, g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
