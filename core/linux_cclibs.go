@@ -40,22 +40,20 @@ var cxxRule = pctx.StaticRule("cxx",
 		Description: "$out",
 	}, "cxxcompiler", "cflags", "cxxflags", "build_wrapper", "depfile")
 
-func (m *ModuleLibrary) ObjDir() string {
-	return filepath.Join("${BuildDir}", string(m.Properties.TargetType), "objects", m.outputName()) + string(os.PathSeparator)
+func (g *linuxGenerator) ObjDir(m Compilable) string {
+	return filepath.Join("${BuildDir}", string(m.getTarget()), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
 type Compilable interface {
 	flag.Consumer // Modules which are compilable need to support flags
 	FileConsumer  // Compilable objects must match the file consumer interface
-
-	// Output directory for object files
-	ObjDir() string
+	targetableModule
 
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
-func CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
+func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
 	orderOnly := GetGeneratedHeadersFiles(ctx)
 
 	// tc := backend.Get().GetToolchain(tgtType)
@@ -122,7 +120,7 @@ func CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolcha
 			buildWrapper, buildWrapperDeps := l.GetBuildWrapperAndDeps(ctx)
 			args["build_wrapper"] = buildWrapper
 
-			output := l.ObjDir() + source.RelBuildPath() + ".o"
+			output := g.ObjDir(l) + source.RelBuildPath() + ".o"
 
 			ctx.Build(pctx,
 				blueprint.BuildParams{
@@ -206,7 +204,6 @@ type Archivable interface {
 	flag.Consumer      // Modules which are compilable need to support flags
 	FileConsumer       // Compilable objects must match the file consumer interface
 	FileProvider       // Must create valid output files
-	ObjDir() string    // Output directory for object files
 
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 }
@@ -262,7 +259,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	// The archiver rules do not allow adding arguments that the user can
 	// set, so does not support nonCompiledDeps
-	objectFiles, _ := CompileObjs(m, ctx, tc)
+	objectFiles, _ := g.CompileObjs(m, ctx, tc)
 
 	g.ArchivableActions(ctx, m, tc, objectFiles)
 
@@ -274,7 +271,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
-	objs, implicits := CompileObjs(m, ctx, tc)
+	objs, implicits := g.CompileObjs(m, ctx, tc)
 
 	g.SharedLinkActions(ctx, m, tc, objs, implicits)
 	g.SharedTocActions(ctx, m)
@@ -608,7 +605,7 @@ func (g *linuxGenerator) SharedSymlinkActions(ctx blueprint.ModuleContext,
 
 func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	tc := backend.Get().GetToolchain(m.getTarget())
-	objs, implicits := CompileObjs(m, ctx, tc)
+	objs, implicits := g.CompileObjs(m, ctx, tc)
 
 	installDeps := g.install(m, ctx)
 	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
@@ -632,7 +629,7 @@ var executableRule = pctx.StaticRule("executable",
 func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
-	objectFiles, nonCompiledDeps := CompileObjs(m, ctx, tc)
+	objectFiles, nonCompiledDeps := g.CompileObjs(m, ctx, tc)
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
 
