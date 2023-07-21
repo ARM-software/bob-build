@@ -453,6 +453,10 @@ func (m *ModuleLibrary) IsForwardingSharedLibrary() bool {
 	return m.Properties.isForwardingSharedLibrary()
 }
 
+func (m *ModuleLibrary) IsRpathWanted() bool {
+	return m.Properties.isRpathWanted()
+}
+
 func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == GeneratedSourcesTag },
