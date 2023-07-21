@@ -338,13 +338,13 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 	return
 }
 
-func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
+func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
-	useNoAsNeeded := !m.Properties.Build.isForwardingSharedLibrary()
+	useNoAsNeeded := !m.IsForwardingSharedLibrary()
 	hasForwardingLib := false
 	libPaths := []string{}
-	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+	tc := backend.Get().GetToolchain(m.getTarget())
 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
@@ -391,8 +391,9 @@ func (m *ModuleLibrary) getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs [
 	if hasForwardingLib {
 		ldlibs = append(ldlibs, tc.GetLinker().GetForwardingLibFlags())
 	}
-	if m.Properties.isRpathWanted() {
-		if installPath, ok := m.Properties.InstallableProps.getInstallPath(); ok {
+	if m.IsRpathWanted() {
+		props := m.getInstallableProps()
+		if installPath, ok := props.getInstallPath(); ok {
 			var rpaths []string
 			for _, path := range libPaths {
 				out, err := filepath.Rel(installPath, path)
@@ -412,10 +413,11 @@ type BackendCommonLibraryInterface interface {
 	flag.Consumer
 	targetableModule
 	linkableModule
+	installable
 
 	// Legacy functions which need a better interface
-	getSharedLibFlags(ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string)
 	IsForwardingSharedLibrary() bool
+	IsRpathWanted() bool
 	GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string)
 }
 
@@ -441,7 +443,7 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 		ldflags = append(ldflags, tc.GetLinker().SetVersionScript(*versionScript))
 	}
 
-	sharedLibLdlibs, sharedLibLdflags := m.getSharedLibFlags(ctx)
+	sharedLibLdlibs, sharedLibLdflags := g.getSharedLibFlags(m, ctx)
 
 	linker := tc.GetLinker().GetTool()
 	tcLdflags := tc.GetLinker().GetFlags()
