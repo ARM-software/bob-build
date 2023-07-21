@@ -26,6 +26,8 @@ type StrictLibraryProps struct {
 	//Includes               []string
 	//Include_prefixes       []string
 	//Strip_include_prefixes []string
+	Alwayslink *bool
+	Linkstatic *bool
 
 	Local_defines []string
 	Copts         []string
@@ -96,8 +98,9 @@ func (m *ModuleStrictLibrary) outputName() string {
 }
 
 func (m *ModuleStrictLibrary) outputFileName() string {
-	utils.Die("Cannot use outputFileName on strict_library")
-	return "badName"
+	// Only used for shared linking at the moment, should be removed all together.
+	out, _ := m.OutFiles().FindSingle(func(p file.Path) bool { return p.IsType(file.TypeShared) })
+	return out.BuildPath()
 }
 
 func (m *ModuleStrictLibrary) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
@@ -291,6 +294,10 @@ func (m *ModuleStrictLibrary) getVersionScript(ctx blueprint.ModuleContext) *str
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})
+
+	t := true
+	module.Properties.Linkstatic = &t //Default to static
+
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
