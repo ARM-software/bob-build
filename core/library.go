@@ -705,7 +705,9 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
-		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag && ctx.OtherModuleDependencyTag(dep) != StaticTag {
+		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag &&
+			ctx.OtherModuleDependencyTag(dep) != StaticTag &&
+			ctx.OtherModuleDependencyTag(dep) != DepTag {
 			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
 				dep.Name(), ctx.ModuleName())
 		}
