@@ -166,6 +166,7 @@ func Main() {
 
 	ctx.RegisterBottomUpMutator("default_applier", DefaultApplierMutator).Parallel()
 	ctx.RegisterBottomUpMutator("depender", dependerMutator).Parallel()
+	ctx.RegisterBottomUpMutator("generic_depender", ResolveGenericDepsMutator).Parallel()
 
 	// First resolve providers which are not dependant on other modules.
 	ctx.RegisterBottomUpMutator("resolve_files", resolveFilesMutator).Parallel()

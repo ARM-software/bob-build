@@ -23,6 +23,7 @@ var (
 	SharedTag                 = DependencyTag{name: "shared"}
 	StaticTag                 = DependencyTag{name: "static"}
 	WholeStaticTag            = DependencyTag{name: "whole_static"}
+	DepTag                    = DependencyTag{name: "dep"} // Generic deps used by new targets.
 )
 
 // DependencyTag contains the name of the tag used to track a particular type

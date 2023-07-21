@@ -348,9 +348,8 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		ctx.AddVariationDependencies(nil, SharedTag, build.Shared_libs...)
 	}
 
-	// TODO: Shared Lib dependencies
 	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
-		ctx.AddVariationDependencies(nil, StaticTag, sl.Properties.Deps...)
+		ctx.AddVariationDependencies(nil, DepTag, sl.Properties.Deps...)
 	}
 
 	if km, ok := ctx.Module().(*ModuleKernelObject); ok {
@@ -370,6 +369,33 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 			ctx.AddDependency(ctx.Module(), DebugInfoTag, *info)
 		}
 	}
+}
+
+func ResolveGenericDepsMutator(ctx blueprint.BottomUpMutatorContext) {
+	ctx.VisitDirectDepsIf(
+		func(dep blueprint.Module) bool {
+			return ctx.OtherModuleDependencyTag(dep) == DepTag
+		},
+		func(dep blueprint.Module) {
+
+			switch dep.(type) {
+			case *ModuleStaticLibrary:
+				ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+			case *ModuleSharedLibrary:
+				ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
+			case *ModuleStrictLibrary:
+				ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+
+				/* TODO: if link shared */
+				// ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
+
+				// TODO: If only headers
+				// ctx.AddVariationDependencies(nil, HeaderTag, dep.Name())
+
+				/* TODO: if always link */
+				// ctx.AddVariationDependencies(nil, WholeStaticTag, dep.Name())
+			}
+		})
 }
 
 // Applies target specific properties within each module. Must be done
