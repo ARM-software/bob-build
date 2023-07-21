@@ -480,15 +480,6 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 	return args
 }
 
-func (g *linuxGenerator) getSharedLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
-	args := g.getCommonLibArgs(m, ctx)
-	return args
-}
-
-func (g *linuxGenerator) getBinaryArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
-	return g.getCommonLibArgs(m, ctx)
-}
-
 // Returns the implicit dependencies for a library
 // When useToc is set, replace shared libraries with their toc files.
 func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext, useToc bool) []string {
@@ -567,7 +558,7 @@ func (g *linuxGenerator) SharedLinkActions(ctx blueprint.ModuleContext,
 			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), implicits...),
 			OrderOnly: orderOnly,
 			Optional:  true,
-			Args:      g.getSharedLibArgs(m, ctx),
+			Args:      g.getCommonLibArgs(m, ctx),
 		})
 
 }
@@ -660,7 +651,7 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
 			OrderOnly: orderOnly,
 			Optional:  true,
-			Args:      g.getBinaryArgs(m, ctx),
+			Args:      g.getCommonLibArgs(m, ctx),
 		})
 
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
