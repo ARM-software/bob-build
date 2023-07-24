@@ -502,21 +502,33 @@ func proxyCflags(m *ModuleStrictLibrary) []string {
 }
 
 func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
-	// TODO: Move this to it's own file
+	if !enabledAndRequired(m) {
+		return
+	}
 
-	// TODO: Handle shared library versions too
-	var proxyStaticLib ModuleStaticLibrary
-	proxyStaticLib.SimpleName.Properties.Name = m.SimpleName.Properties.Name
-	proxyStaticLib.Properties.EnableableProps.Required = true
-	proxyStaticLib.Properties.Srcs = m.Properties.Srcs
-	proxyStaticLib.Properties.Cflags = proxyCflags(m)
-	proxyStaticLib.Properties.Export_local_system_include_dirs = utils.PrefixDirs(m.Properties.Includes, projectModuleDir(ctx))
-	proxyStaticLib.Properties.Host_supported = m.Properties.Host_supported
-	proxyStaticLib.Properties.Target_supported = m.Properties.Target_supported
+	mod, err := AndroidBpFile().NewModule("cc_library", m.shortName())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var proxy ModuleStaticLibrary
+
+	// TODO: stich the deps
+	proxy.SimpleName.Properties.Name = m.SimpleName.Properties.Name
+	proxy.Properties.EnableableProps.Required = true
+	proxy.Properties.Srcs = m.Properties.Srcs
+	proxy.Properties.Cflags = proxyCflags(m)
+	proxy.Properties.Export_local_system_include_dirs = utils.PrefixDirs(m.Properties.Includes, projectModuleDir(ctx))
+	proxy.Properties.Host_supported = m.Properties.Host_supported
+	proxy.Properties.Target_supported = m.Properties.Target_supported
+
 	// TODO: generate target for all supported target types
-	proxyStaticLib.Properties.TargetType = toolchain.TgtTypeHost
+	proxy.Properties.TargetType = toolchain.TgtTypeHost
 
-	proxyStaticLib.Properties.ResolveFiles(ctx)
-	g.staticActions(&proxyStaticLib, ctx)
-	// TODO: Static lib dependency
+	proxy.Properties.ResolveFiles(ctx)
+
+	// TODO: refactor library props to work generically
+	// TODO: remove the proxy object
+	addCcLibraryProps(mod, proxy.ModuleLibrary, ctx)
+	addStaticOrSharedLibraryProps(mod, proxy.ModuleLibrary, ctx)
 }

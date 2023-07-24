@@ -52,17 +52,12 @@ cc_binary {
     ],
 }
 
-cc_library_host_static {
-    name: "depend_on_new_shared",
-    srcs: ["nested/src.cpp"],
-}
-
-cc_library_host_static {
+cc_library {
     name: "lib_dep",
     cflags: ["-DFORWARDED_DEFINE"],
 }
 
-cc_library_host_static {
+cc_library {
     name: "lib_forward_defines",
     srcs: ["src/libs/lib.cpp"],
     cflags: [
@@ -71,11 +66,6 @@ cc_library_host_static {
     ],
     local_include_dirs: ["internal/include"],
     export_system_include_dirs : ["internal/include"],
-}
-
-cc_library_host_static {
-    name: "lib_new_shared",
-    srcs: ["nested/src.cpp"],
 }
 
 cc_library_host_static {
