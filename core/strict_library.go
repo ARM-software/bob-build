@@ -35,8 +35,6 @@ type StrictLibraryProps struct {
 
 	// TODO: unused but needed for the output interface, no easy way to hide it
 	Out *string
-
-	TargetType toolchain.TgtType `blueprint:"mutated"`
 }
 
 // List of include dirs to be added to the compile line.
@@ -54,17 +52,22 @@ type ModuleStrictLibrary struct {
 	Properties struct {
 		StrictLibraryProps
 		SourceProps
+		IncludeProps
 		TransitiveLibraryProps
+
 		Features
 		EnableableProps
 		SplittableProps
 		InstallableProps
-		IncludeProps
+
+		TargetType toolchain.TgtType `blueprint:"mutated"`
+		Target     TargetSpecific
+		Host       TargetSpecific
 	}
 }
 
 type strictLibraryInterface interface {
-	splittable
+	targetSpecificLibrary
 	dependentInterface
 	FileConsumer
 	FileResolver
@@ -204,10 +207,47 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
+func (m *ModuleStrictLibrary) targetableProperties() []interface{} {
+	return []interface{}{
+		&m.Properties.StrictLibraryProps,
+		&m.Properties.SplittableProps,
+	}
+}
+
+func (m *ModuleStrictLibrary) isHostSupported() bool {
+	if m.Properties.Host_supported == nil {
+		return false
+	}
+	return *m.Properties.Host_supported
+}
+
+func (b *ModuleStrictLibrary) isTargetSupported() bool {
+	if b.Properties.Target_supported == nil {
+		return true
+	}
+	return *b.Properties.Target_supported
+}
+
 func (m *ModuleStrictLibrary) supportedVariants() (tgts []toolchain.TgtType) {
-	// TODO: Change tgts based on if host or target supported.
-	tgts = append(tgts, toolchain.TgtTypeHost)
+	if m.isHostSupported() {
+		tgts = append(tgts, toolchain.TgtTypeHost)
+	}
+	if m.isTargetSupported() {
+		tgts = append(tgts, toolchain.TgtTypeTarget)
+	}
+
 	return
+}
+
+func (m *ModuleStrictLibrary) getTargetSpecific(tgt toolchain.TgtType) *TargetSpecific {
+	if tgt == toolchain.TgtTypeHost {
+		return &m.Properties.Host
+	} else if tgt == toolchain.TgtTypeTarget {
+		return &m.Properties.Target
+	} else {
+		utils.Die("Unsupported target type: %s", tgt)
+	}
+	return nil
 }
 
 func (m *ModuleStrictLibrary) disable() {
@@ -240,6 +280,9 @@ func (m *ModuleStrictLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) 
 }
 
 func (m *ModuleStrictLibrary) shortName() string {
+	if len(m.supportedVariants()) > 1 {
+		return m.Name() + "__" + string(m.Properties.TargetType)
+	}
 	return m.Name()
 }
 
@@ -292,11 +335,14 @@ func (m *ModuleStrictLibrary) getVersionScript(ctx blueprint.ModuleContext) *str
 }
 
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &ModuleStrictLibrary{}
-	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{})
-
 	t := true
+
+	module := &ModuleStrictLibrary{}
 	module.Properties.Linkstatic = &t //Default to static
+
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, SplittableProps{})
+	module.Properties.Host.init(&config.Properties, StrictLibraryProps{})
+	module.Properties.Target.init(&config.Properties, StrictLibraryProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}

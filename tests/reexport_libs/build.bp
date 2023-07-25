@@ -25,6 +25,7 @@ bob_static_library {
     srcs: ["hidden/hidden.cpp"],
     export_local_include_dirs: ["hidden"],
     export_cflags: ["-DSHOW_HIDDEN"],
+    host_supported: true,
 }
 
 bob_static_library {

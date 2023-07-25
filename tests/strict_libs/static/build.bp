@@ -10,6 +10,7 @@ bob_library {
     includes: ["internal/include"],
     local_defines: ["LOCAL_DEFINE"],
     defines: ["FORWARDED_DEFINE"],
+    host_supported: true,
 }
 
 bob_library {
