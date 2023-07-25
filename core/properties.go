@@ -210,32 +210,6 @@ type Featurable interface {
 	Features() *Features
 }
 
-func templateApplierMutator(ctx blueprint.TopDownMutatorContext) {
-	module := ctx.Module()
-	cfg := getConfig(ctx)
-
-	if m, ok := module.(Featurable); ok {
-		cfgProps := &cfg.Properties
-
-		// TemplateApplier mutator is run before TargetApplier, so we
-		// need to apply templates with the core set, as well as
-		// host-specific and target-specific sets (where applicable).
-		props := append([]interface{}{}, m.FeaturableProperties()...)
-
-		if ts, ok := module.(targetSpecificLibrary); ok {
-			host := ts.getTargetSpecific(toolchain.TgtTypeHost)
-			target := ts.getTargetSpecific(toolchain.TgtTypeTarget)
-
-			props = append(props, host.getTargetSpecificProps())
-			props = append(props, target.getTargetSpecificProps())
-		}
-
-		for _, p := range props {
-			ApplyTemplate(p, cfgProps)
-		}
-	}
-}
-
 // Used to map a set of properties to destination properties
 type propmap struct {
 	dst []interface{}
@@ -255,6 +229,11 @@ func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
 		// supported, the host-specific and target-specific set.
 		var props = []propmap{{m.FeaturableProperties(), m.Features()}}
 
+		// TemplateApplier mutator is run before TargetApplier, so we
+		// need to apply templates with the core set, as well as
+		// host-specific and target-specific sets (where applicable).
+		templProps := append([]interface{}{}, m.FeaturableProperties()...)
+
 		// Apply features in target-specific properties.
 		// This should happen for all modules which support host:{} and target:{}
 		if ts, ok := module.(targetSpecificLibrary); ok {
@@ -267,6 +246,8 @@ func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
 			}
 			props = append(props, tgtprops...)
 
+			templProps = append(templProps, host.getTargetSpecificProps())
+			templProps = append(templProps, target.getTargetSpecificProps())
 		}
 
 		for _, prop := range props {
@@ -283,5 +264,13 @@ func featureApplierMutator(ctx blueprint.TopDownMutatorContext) {
 				}
 			}
 		}
+
+		for _, p := range templProps {
+			ApplyTemplate(p, cfgProps)
+		}
+
+		// Since now Features are no longer needed.
+		// Delete them to reduce memory usage.
+		m.Features().DeInit()
 	}
 }
