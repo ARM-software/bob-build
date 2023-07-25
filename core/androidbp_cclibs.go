@@ -63,6 +63,8 @@ func bpModuleNamesForDep(ctx blueprint.BaseModuleContext, name string) []string 
 
 	if l, ok := getLibrary(dep); ok {
 		return []string{l.shortName()}
+	} else if l, ok := dep.(*ModuleStrictLibrary); ok {
+		return []string{l.shortName()}
 	}
 
 	// Most cases should match the getLibrary() check above, but generated libraries,
@@ -511,9 +513,18 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 		panic(err.Error())
 	}
 
+	switch m.Properties.TargetType {
+	case toolchain.TgtTypeHost:
+		mod.AddBool("host_supported", true)
+		mod.AddBool("device_supported", false)
+
+	case toolchain.TgtTypeTarget:
+		mod.AddBool("host_supported", false)
+		mod.AddBool("device_supported", true)
+	}
+
 	var proxy ModuleStaticLibrary
 
-	// TODO: stich the deps
 	proxy.SimpleName.Properties.Name = m.SimpleName.Properties.Name
 	proxy.Properties.EnableableProps.Required = true
 	proxy.Properties.Srcs = m.Properties.Srcs
@@ -523,7 +534,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	proxy.Properties.Target_supported = m.Properties.Target_supported
 
 	// TODO: generate target for all supported target types
-	proxy.Properties.TargetType = toolchain.TgtTypeHost
+	proxy.Properties.TargetType = m.Properties.TargetType
 
 	proxy.Properties.ResolveFiles(ctx)
 

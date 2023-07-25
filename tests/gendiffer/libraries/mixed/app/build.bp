@@ -406,6 +406,7 @@ bob_library {
     local_defines: ["LOCAL_DEFINE"],
     includes: ["internal/include"],
     defines: ["FORWARDED_DEFINE"],
+    host_supported: true,
 }
 
 bob_library {

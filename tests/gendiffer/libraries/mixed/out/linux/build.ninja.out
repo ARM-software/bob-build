@@ -247,42 +247,42 @@ default bob_test_target_specific_link__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  depend_on_new_shared
-# Variant: host
+# Variant: target
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: nested/build.bp:redacted
 
-m.depend_on_new_shared_host.cflags = 
-m.depend_on_new_shared_host.cxxflags = 
+m.depend_on_new_shared_target.cflags = 
+m.depend_on_new_shared_target.cxxflags = 
 
-build ${g.bob.BuildDir}/host/objects/depend_on_new_shared/nested/src.cpp.o: $
+build ${g.bob.BuildDir}/target/objects/depend_on_new_shared/nested/src.cpp.o: $
         g.bob.cxx ${g.bob.SrcDir}/nested/src.cpp
     build_wrapper = 
-    cflags = ${m.depend_on_new_shared_host.cflags}
+    cflags = ${m.depend_on_new_shared_target.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.depend_on_new_shared_host.cxxflags}
+    cxxflags = ${m.depend_on_new_shared_target.cxxflags}
 
-build ${g.bob.BuildDir}/host/shared/depend_on_new_shared.so: $
+build ${g.bob.BuildDir}/target/shared/depend_on_new_shared.so: $
         g.bob.shared_library $
-        ${g.bob.BuildDir}/host/objects/depend_on_new_shared/nested/src.cpp.o $
+        ${g.bob.BuildDir}/target/objects/depend_on_new_shared/nested/src.cpp.o $
         || $
-        ${g.bob.BuildDir}/host/shared/${g.bob.BuildDir}/host/shared/lib_new_shared.so
+        ${g.bob.BuildDir}/target/shared/${g.bob.BuildDir}/target/shared/lib_new_shared.so
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/host/shared
-    shared_libs_flags = -l_new_shared -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -l_new_shared -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/host/static/depend_on_new_shared.a: $
+build ${g.bob.BuildDir}/target/static/depend_on_new_shared.a: $
         g.bob.static_library $
-        ${g.bob.BuildDir}/host/objects/depend_on_new_shared/nested/src.cpp.o
+        ${g.bob.BuildDir}/target/objects/depend_on_new_shared/nested/src.cpp.o
     ar = ar
     build_wrapper = 
 
 build depend_on_new_shared: phony $
-        ${g.bob.BuildDir}/host/static/depend_on_new_shared.a
+        ${g.bob.BuildDir}/target/static/depend_on_new_shared.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  gen_output
@@ -374,42 +374,79 @@ build ${g.bob.BuildDir}/host/static/lib_forward_defines.a: $
     ar = ar
     build_wrapper = 
 
-build lib_forward_defines: phony $
+build lib_forward_defines__host: phony $
         ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  lib_new_shared
-# Variant: host
+# Module:  lib_forward_defines
+# Variant: target
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:redacted
+# Defined: build.bp:redacted
 
-m.lib_new_shared_host.cflags = 
-m.lib_new_shared_host.cxxflags = 
+m.lib_forward_defines_target.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -Iinternal/include
+m.lib_forward_defines_target.cxxflags = 
 
-build ${g.bob.BuildDir}/host/objects/lib_new_shared/nested/src.cpp.o: $
-        g.bob.cxx ${g.bob.SrcDir}/nested/src.cpp
+build ${g.bob.BuildDir}/target/objects/lib_forward_defines/src/libs/lib.cpp.o: $
+        g.bob.cxx ${g.bob.SrcDir}/src/libs/lib.cpp
     build_wrapper = 
-    cflags = ${m.lib_new_shared_host.cflags}
+    cflags = ${m.lib_forward_defines_target.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.lib_new_shared_host.cxxflags}
+    cxxflags = ${m.lib_forward_defines_target.cxxflags}
 
-build ${g.bob.BuildDir}/host/shared/lib_new_shared.so: g.bob.shared_library $
-        ${g.bob.BuildDir}/host/objects/lib_new_shared/nested/src.cpp.o
+build ${g.bob.BuildDir}/target/shared/lib_forward_defines.so: $
+        g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/lib_forward_defines/src/libs/lib.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/host/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/host/static/lib_new_shared.a: g.bob.static_library $
-        ${g.bob.BuildDir}/host/objects/lib_new_shared/nested/src.cpp.o
+build ${g.bob.BuildDir}/target/static/lib_forward_defines.a: $
+        g.bob.static_library $
+        ${g.bob.BuildDir}/target/objects/lib_forward_defines/src/libs/lib.cpp.o
     ar = ar
     build_wrapper = 
 
-build lib_new_shared: phony ${g.bob.BuildDir}/host/static/lib_new_shared.a
+build lib_forward_defines__target: phony $
+        ${g.bob.BuildDir}/target/static/lib_forward_defines.a
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  lib_new_shared
+# Variant: target
+# Type:    bob_library
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: nested/build.bp:redacted
+
+m.lib_new_shared_target.cflags = 
+m.lib_new_shared_target.cxxflags = 
+
+build ${g.bob.BuildDir}/target/objects/lib_new_shared/nested/src.cpp.o: $
+        g.bob.cxx ${g.bob.SrcDir}/nested/src.cpp
+    build_wrapper = 
+    cflags = ${m.lib_new_shared_target.cflags}
+    cxxcompiler = g++
+    cxxflags = ${m.lib_new_shared_target.cxxflags}
+
+build ${g.bob.BuildDir}/target/shared/lib_new_shared.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/lib_new_shared/nested/src.cpp.o
+    build_wrapper = 
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build ${g.bob.BuildDir}/target/static/lib_new_shared.a: g.bob.static_library $
+        ${g.bob.BuildDir}/target/objects/lib_new_shared/nested/src.cpp.o
+    ar = ar
+    build_wrapper = 
+
+build lib_new_shared: phony ${g.bob.BuildDir}/target/static/lib_new_shared.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_transitive_define

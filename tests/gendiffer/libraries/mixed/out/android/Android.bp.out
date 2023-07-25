@@ -54,11 +54,16 @@ cc_binary {
 
 cc_library {
     name: "lib_dep",
+    host_supported: true,
+    device_supported: false,
     cflags: ["-DFORWARDED_DEFINE"],
 }
 
 cc_library {
-    name: "lib_forward_defines",
+    name: "lib_forward_defines__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "lib_forward_defines",
     srcs: ["src/libs/lib.cpp"],
     cflags: [
         "-DLOCAL_DEFINE",
@@ -71,7 +76,7 @@ cc_library {
 cc_library_host_static {
     name: "lib_transitive_define",
     cflags: ["-DFORWARDED_DEFINE"],
-    static_libs: ["lib_forward_defines"],
+    static_libs: ["lib_forward_defines__host"],
 }
 
 cc_library_static {
@@ -263,7 +268,7 @@ cc_binary_host {
     cflags: ["-DFORWARDED_DEFINE"],
     static_libs: [
         "lib_dep",
-        "lib_forward_defines",
+        "lib_forward_defines__host",
     ],
 }
 
@@ -271,7 +276,7 @@ cc_binary_host {
     name: "strict_lib_binary_with_forward_define",
     srcs: ["nested/src/main.cpp"],
     cflags: ["-DFORWARDED_DEFINE"],
-    static_libs: ["lib_forward_defines"],
+    static_libs: ["lib_forward_defines__host"],
 }
 
 cc_binary_host {
@@ -280,7 +285,7 @@ cc_binary_host {
     cflags: ["-DFORWARDED_DEFINE"],
     static_libs: [
         "lib_transitive_define",
-        "lib_forward_defines",
+        "lib_forward_defines__host",
     ],
 }
 
