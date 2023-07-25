@@ -104,6 +104,13 @@ func (f *Features) Init(properties *config.Properties, list ...interface{}) {
 
 }
 
+// Set internal `BlueprintEmbed` field to nil.
+//
+// Use it carefully as features won't be available anymore.
+func (f *Features) DeInit() {
+	f.BlueprintEmbed = nil
+}
+
 // coalesceTypes will squash multiple types to new type. This has different result
 // than Go composition of structs.
 //
