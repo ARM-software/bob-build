@@ -1,1 +1,1 @@
-[31merror:[0m redacted/build.bp:18:1: "test" depends on undefined module "missing"
+[31merror:[0m redacted/build.bp:3:1: "test" depends on undefined module "missing"

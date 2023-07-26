@@ -4,6 +4,7 @@ Upstream-Contact: Arm Ltd. <developers@arm.com>
 Files:
   *.py
   *.sh
+  *.bash
   */Dockerfile
   *.bzl
   *.bazel
@@ -15,7 +16,9 @@ Files:
   *bplist
   *.bp
   *Mconfig
-Copyright: 2023 Arm Ltd. <developers@arm.com>
+  *Blueprints
+  bob.bootstrap.in
+Copyright: 2018-2023 Arm Ltd. <developers@arm.com>
 License: Apache-2.0
 
 Files:
@@ -36,5 +39,5 @@ Files:
   .gitmodules
   *.gitignore
   DCO.txt
-Copyright: 2023 Arm Ltd. <developers@arm.com>
+Copyright: 2018-2023 Arm Ltd. <developers@arm.com>
 License: CC0-1.0
