@@ -295,23 +295,8 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 		// references in `cmd` are still correct.
 		varName := strings.TrimSuffix(strings.TrimSuffix(dep.Name(), "__host"), "__target")
 
-		if gdep, ok := dep.(genruleInterface); ok {
-			dependents = append(dependents, gdep.outputs().Paths()...)
-			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
-			args[varName+"_out"] = utils.Join(gdep.outputs().Strings())
-
-		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
-			out := ccmod.OutputFile()
-			dependents = append(dependents, out.Path())
-			args[varName+"_out"] = out.String()
-		} else if gsf, ok := dep.(android.OutputFileProducer); ok {
+		addOutputs := func(outs android.Paths) {
 			var outNames []string
-			outs, err := gsf.OutputFiles("")
-
-			if err != nil {
-				panic(err)
-			}
-
 			dependents = append(dependents, outs...)
 
 			for _, n := range outs {
@@ -319,6 +304,27 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			}
 
 			args[varName+"_out"] = utils.Join(outNames)
+		}
+
+		if gdep, ok := dep.(genruleInterface); ok {
+			dependents = append(dependents, gdep.outputs().Paths()...)
+			dependents = append(dependents, gdep.implicitOutputs().Paths()...)
+			args[varName+"_out"] = utils.Join(gdep.outputs().Strings())
+		} else if ccmod, ok := dep.(cc.LinkableInterface); ok {
+			out := ccmod.OutputFile()
+			dependents = append(dependents, out.Path())
+			args[varName+"_out"] = out.String()
+		} else if gsf, ok := dep.(android.OutputFileProducer); ok {
+			if outs, err := gsf.OutputFiles(""); err != nil {
+				panic(err)
+			} else {
+				addOutputs(outs)
+			}
+		} else if sfg, ok := dep.(genrule.SourceFileGenerator); ok {
+			// On Android 12 `genrule.Module` does not implement `android.OutputFileProducer` yet,
+			// does generated sources has to be grabbed by genrule.SourceFileGenerator
+			outs := sfg.GeneratedSourceFiles()
+			addOutputs(outs)
 		}
 	})
 
