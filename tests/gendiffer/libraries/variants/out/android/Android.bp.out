@@ -1,0 +1,54 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary_host {
+    name: "hello_shared__host",
+    stem: "hello_shared",
+    srcs: ["hello_shared.cpp"],
+    shared_libs: ["lib__host"],
+}
+
+cc_binary {
+    name: "hello_shared__target",
+    stem: "hello_shared",
+    srcs: ["hello_shared.cpp"],
+    shared_libs: ["lib__target"],
+}
+
+cc_binary_host {
+    name: "hello_static__host",
+    stem: "hello_static",
+    srcs: ["hello_static.cpp"],
+    static_libs: ["lib__host"],
+}
+
+cc_binary {
+    name: "hello_static__target",
+    stem: "hello_static",
+    srcs: ["hello_static.cpp"],
+    static_libs: ["lib__target"],
+}
+
+cc_library {
+    name: "lib__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "lib",
+    srcs: ["lib.cpp"],
+}
+
+cc_library {
+    name: "lib__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "lib",
+    srcs: ["lib.cpp"],
+    compile_multilib: "both",
+}
+
