@@ -57,6 +57,7 @@ cc_library {
     host_supported: true,
     device_supported: false,
     cflags: ["-DFORWARDED_DEFINE"],
+    static_libs: ["lib_forward_defines__host"],
 }
 
 cc_library {

@@ -46,9 +46,11 @@ func (g *linuxGenerator) ObjDir(m Compilable) string {
 
 type Compilable interface {
 	flag.Consumer // Modules which are compilable need to support flags
-	FileConsumer  // Compilable objects must match the file consumer interface
-	targetableModule
+	flag.Provider // Required for AOSP backend to check for exported flags
 
+	FileConsumer // Compilable objects must match the file consumer interface
+	targetableModule
+	phonyInterface
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 }
 
