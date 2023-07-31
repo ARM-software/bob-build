@@ -22,7 +22,7 @@ def check_depends(depends, value):
     """
     if depends is None:
         return False
-    assert type(depends) == tuple
+    assert type(depends) is tuple
     assert len(depends) in [2, 3]
 
     if depends[0] == "and":
@@ -42,14 +42,14 @@ def _expr_value(e):
     """Evaluate the value of the input expression.
     This isn't expected to use conditional operators.
     """
-    assert type(e) == tuple
+    assert type(e) is tuple
     assert len(e) in [2, 3]
     if len(e) == 3:
         left = _expr_value(e[1])
         right = _expr_value(e[2])
-        if type(left) != type(right):
+        if type(left) is not type(right):
             raise TypeError("'{}' operator is not valid with mixed types".format(e[0]))
-        elif type(left) == bool:
+        elif type(left) is bool:
             raise TypeError("'{}' operator is not valid on booleans".format(e[0]))
         elif e[0] == "+":
             return left + right
@@ -80,7 +80,7 @@ def expr_value(e):
 
 def _condexpr_value(e):
     """Evaluate the value of the input expression."""
-    assert type(e) == tuple
+    assert type(e) is tuple
     assert len(e) in [2, 3]
 
     if len(e) == 3:
@@ -89,7 +89,7 @@ def _condexpr_value(e):
 
         left = _condexpr_value(e[1])
         right = _condexpr_value(e[2])
-        if type(left) != type(right):
+        if type(left) is not type(right):
             # Boolean result expected
             return False
         elif e[0] == "and":
@@ -142,7 +142,7 @@ def expr_type(e):
     """Return the Mconfig type string for the input expression.
     This isn't expected to use conditional operators.
     """
-    assert type(e) == tuple
+    assert type(e) is tuple
     assert len(e) in [2, 3]
     if len(e) == 3:
         left = expr_type(e[1])
@@ -177,7 +177,7 @@ def dependency_list(e):
     """
     if e is None:
         return set()
-    assert type(e) == tuple
+    assert type(e) is tuple
 
     if e[0] in ["and", "or", "=", "!=", "<", "<=", ">", ">=", "+", "-"]:
         return dependency_list(e[1]) | dependency_list(e[2])
@@ -199,7 +199,7 @@ OPERATOR_FORMAT_MAP = {
 
 def format_dependency_list(depends, skip_parens=False):
     assert depends, "Empty dependency list"
-    assert type(depends) == tuple
+    assert type(depends) is tuple
 
     if len(depends) == 3:
         left = format_dependency_list(depends[1])

@@ -623,7 +623,7 @@ def force_config(key, value, source):
         return
 
     assert (
-        type(value) == bool
+        type(value) is bool
     ), "force_config value argument must be boolean, got %s" % str(value)
 
     if value is True:
