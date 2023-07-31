@@ -348,7 +348,7 @@ default lib_dep
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.lib_forward_defines_host.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -Iinternal/include
+m.lib_forward_defines_host.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -I${g.bob.SrcDir}/internal/include
 m.lib_forward_defines_host.cxxflags = 
 
 build ${g.bob.BuildDir}/host/objects/lib_forward_defines/src/libs/lib.cpp.o: $
@@ -385,7 +385,7 @@ build lib_forward_defines__host: phony $
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.lib_forward_defines_target.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -Iinternal/include
+m.lib_forward_defines_target.cflags = -DLOCAL_DEFINE -DFORWARDED_DEFINE -I${g.bob.SrcDir}/internal/include
 m.lib_forward_defines_target.cxxflags = 
 
 build ${g.bob.BuildDir}/target/objects/lib_forward_defines/src/libs/lib.cpp.o: $
@@ -1452,7 +1452,7 @@ default sl_main_whole
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
+m.strict_lib_binary_with_dep_host.cflags = -DFORWARDED_DEFINE -isystem ${g.bob.SrcDir}/internal/include
 m.strict_lib_binary_with_dep_host.cxxflags = 
 
 build $
@@ -1486,7 +1486,7 @@ default strict_lib_binary_with_dep
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
+m.strict_lib_binary_with_forward_define_host.cflags = -DFORWARDED_DEFINE -isystem ${g.bob.SrcDir}/internal/include
 m.strict_lib_binary_with_forward_define_host.cxxflags = 
 
 build $
@@ -1520,7 +1520,7 @@ default strict_lib_binary_with_forward_define
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE -isystem internal/include
+m.strict_lib_binary_with_transitive_define_host.cflags = -DFORWARDED_DEFINE -isystem ${g.bob.SrcDir}/internal/include
 m.strict_lib_binary_with_transitive_define_host.cxxflags = 
 
 build $

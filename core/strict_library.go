@@ -82,6 +82,7 @@ func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 	m.Properties.SourceProps.processPaths(ctx)
 	m.Properties.Hdrs = utils.PrefixDirs(m.Properties.Hdrs, prefix)
+	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
 }
 
 func (m *ModuleStrictLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
@@ -170,7 +171,7 @@ func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
 		},
 		{
 			PropertyName: "Includes",
-			Tag:          flag.TypeInclude,
+			Tag:          flag.TypeIncludeLocal | flag.TypeInclude,
 			Factory:      flag.FromIncludePathOwned,
 		},
 	}
@@ -201,7 +202,7 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 		},
 		{
 			PropertyName: "Includes",
-			Tag:          flag.TypeExported | flag.TypeTransitive | flag.TypeIncludeSystem,
+			Tag:          flag.TypeIncludeLocal | flag.TypeExported | flag.TypeTransitive | flag.TypeIncludeSystem,
 			Factory:      flag.FromIncludePathOwned,
 		},
 	}
