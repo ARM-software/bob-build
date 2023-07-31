@@ -266,10 +266,7 @@ cc_binary_host {
     name: "strict_lib_binary_with_dep",
     srcs: ["nested/src/main.cpp"],
     cflags: ["-DFORWARDED_DEFINE"],
-    static_libs: [
-        "lib_dep",
-        "lib_forward_defines__host",
-    ],
+    static_libs: ["lib_dep"],
 }
 
 cc_binary_host {

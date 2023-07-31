@@ -23,7 +23,7 @@ bob_library {
 
 bob_binary {
     name: "strict_lib_binary_with_forward_define",
-    srcs: [":static_bin_srcs"],
+    srcs: ["src/main.cpp"],
     static_libs: ["lib_forward_defines"],
     host_supported: true,
     target_supported: false,
@@ -32,7 +32,7 @@ bob_binary {
 
 bob_binary {
     name: "strict_lib_binary_with_dep",
-    srcs: [":static_bin_srcs"],
+    srcs: ["src/main_forwarded.cpp"],
     static_libs: ["lib_dep"],
     host_supported: true,
     target_supported: false,
