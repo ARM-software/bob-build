@@ -379,6 +379,146 @@ func addStripProp(m bpwriter.Module) {
 	g.AddBool("all", true)
 }
 
+func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleContext) {
+	// TODO: move this check to the module itself
+	// if len(m.Properties.Export_include_dirs) > 0 {
+	// 	utils.Die("Module %s exports non-local include dirs %v - this is not supported",
+	// 		ctx.ModuleName(), m.Properties.Export_include_dirs)
+	// }
+
+	// if len(m.Properties.Export_system_include_dirs) > 0 {
+	// 	utils.Die("Module %s exports non-local system include dirs %v - this is not supported",
+	// 		ctx.ModuleName(), m.Properties.Export_system_include_dirs)
+	// }
+
+	// Android properties
+	var cflags, conlyFlags, cxxFlags, ldflags,
+		srcs,
+		generated_sources,
+		generated_headers,
+		export_generated_headers,
+		include_dirs,
+		local_include_dirs,
+		export_include_dirs,
+		export_system_include_dirs,
+		static_libs,
+		shared_libs,
+		whole_static_libs []string
+
+	m.GetFiles(ctx).ForEachIf(
+		func(fp file.Path) bool {
+			// On Android, generated sources are passed to the modules via
+			// `generated_sources` so they are omitted here.
+			return fp.IsType(file.TypeCompilable) && fp.IsNotType(file.TypeGenerated)
+		},
+		func(fp file.Path) bool {
+			srcs = append(srcs, fp.UnScopedPath())
+			return true
+		})
+
+	m.FlagsInTransitive(ctx).ForEachIf(
+		func(f flag.Flag) bool {
+			// Includes are not part of cflags on AOSP, and the exporting of them is done by Soong itself,
+			// hence exclude processing of includes here and handle it seperately.
+			return !f.MatchesType(flag.TypeInclude)
+		},
+		func(f flag.Flag) {
+			switch {
+			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
+				conlyFlags = append(conlyFlags, f.ToString())
+			case f.MatchesType(flag.TypeCC | flag.TypeInclude):
+				cflags = append(cflags, f.ToString())
+			case f.MatchesType(flag.TypeCpp):
+				cxxFlags = append(cxxFlags, f.ToString())
+			case f.MatchesType(flag.TypeLinker):
+				ldflags = append(ldflags, f.ToString())
+			}
+		},
+	)
+
+	// Process includes for current module only.
+	m.FlagsIn().ForEachIf(
+		func(f flag.Flag) bool {
+			return f.MatchesType(flag.TypeInclude)
+		},
+		func(f flag.Flag) {
+			if f.MatchesType(flag.TypeIncludeLocal) {
+				local_include_dirs = append(local_include_dirs, f.Raw())
+			} else {
+				include_dirs = append(include_dirs, f.Raw())
+			}
+		},
+	)
+
+	// Check if any inclues are being exported
+	m.FlagsOut().ForEachIf(
+		func(f flag.Flag) bool {
+			return f.MatchesType(flag.TypeInclude) &&
+				f.MatchesType(flag.TypeExported) &&
+				f.MatchesType(flag.TypeIncludeLocal)
+		},
+		func(f flag.Flag) {
+			if f.MatchesType(flag.TypeIncludeSystem) {
+				export_system_include_dirs = append(export_system_include_dirs, f.Raw())
+			} else {
+				export_include_dirs = append(export_include_dirs, f.Raw())
+			}
+		},
+	)
+
+	ctx.VisitDirectDeps(
+		func(dep blueprint.Module) {
+			switch ctx.OtherModuleDependencyTag(dep) {
+			case SharedTag:
+				shared_libs = append(shared_libs, bpModuleNamesForDep(ctx, dep.Name())...)
+			case StaticTag:
+				static_libs = append(static_libs, bpModuleNamesForDep(ctx, dep.Name())...)
+			case WholeStaticTag:
+				whole_static_libs = append(whole_static_libs, bpModuleNamesForDep(ctx, dep.Name())...)
+			case GeneratedSourcesTag:
+				generated_sources = append(generated_sources, bpModuleNamesForDep(ctx, dep.Name())...)
+			case GeneratedHeadersTag:
+				generated_headers = append(generated_headers, bpModuleNamesForDep(ctx, dep.Name())...)
+			case ExportGeneratedHeadersTag:
+				export_generated_headers = append(export_generated_headers, dep.Name())
+			}
+		})
+
+	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
+		mod.AddString("c_std", std)
+	}
+
+	if std := ccflags.GetCompilerStandard(cflags, cxxFlags); std != "" {
+		mod.AddString("cpp_std", std)
+	}
+
+	if armMode, err := ccflags.GetArmMode(cflags, conlyFlags, cxxFlags); err == nil && armMode != "" {
+		mod.AddString("instruction_set", armMode)
+	}
+
+	if m.shortName() != m.outputName() {
+		mod.AddString("stem", m.outputName())
+	}
+
+	mod.AddStringList("srcs", srcs)
+	mod.AddStringList("cflags", utils.Filter(ccflags.AndroidCompileFlags, cflags))
+	mod.AddStringList("conlyflags", utils.Filter(ccflags.AndroidCompileFlags, conlyFlags))
+	mod.AddStringList("cppflags", utils.Filter(ccflags.AndroidCompileFlags, cxxFlags))
+	mod.AddStringList("ldflags", utils.Filter(ccflags.AndroidLinkFlags, ldflags))
+	mod.AddStringList("generated_sources", generated_sources)
+	mod.AddStringList("generated_headers", generated_headers)
+	mod.AddStringList("export_generated_headers", export_generated_headers)
+
+	mod.AddStringList("include_dirs", include_dirs)
+	mod.AddStringList("local_include_dirs", local_include_dirs)
+	mod.AddStringList("export_include_dirs", export_include_dirs)
+	mod.AddStringList("export_system_include_dirs ", export_system_include_dirs)
+
+	mod.AddStringList("shared_libs", shared_libs)
+	mod.AddStringList("static_libs", static_libs)
+	mod.AddStringList("whole_static_libs", whole_static_libs)
+}
+
 func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
@@ -530,23 +670,27 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 		mod.AddBool("device_supported", true)
 	}
 
-	var proxy ModuleStaticLibrary
+	addCompilableProps(mod, m, ctx)
 
-	proxy.SimpleName.Properties.Name = m.SimpleName.Properties.Name
-	proxy.Properties.EnableableProps.Required = true
-	proxy.Properties.Srcs = m.Properties.Srcs
-	proxy.Properties.Cflags = proxyCflags(m)
-	proxy.Properties.Export_local_system_include_dirs = utils.PrefixDirs(m.Properties.Includes, projectModuleDir(ctx))
-	proxy.Properties.Host_supported = m.Properties.Host_supported
-	proxy.Properties.Target_supported = m.Properties.Target_supported
+	// TODO: Enable relative install path
+	// _, installRel, ok := getSoongInstallPath(m.getInstallableProps())
+	// if ok && installRel != "" {
+	// 	mod.AddString("relative_install_path", installRel)
+	// }
 
-	// TODO: generate target for all supported target types
-	proxy.Properties.TargetType = m.Properties.TargetType
+	// TODO: Make addProvenanceProps generic and enable it if needed
+	// addProvenanceProps(mod, m.Properties.Build.AndroidProps)
 
-	proxy.Properties.ResolveFiles(ctx)
+	// TODO: Make addPGOProps generic and enable it if needed
+	// addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 
-	// TODO: refactor library props to work generically
-	// TODO: remove the proxy object
-	addCcLibraryProps(mod, proxy.ModuleLibrary, ctx)
-	addStaticOrSharedLibraryProps(mod, proxy.ModuleLibrary, ctx)
+	// TODO: Make addRequiredModules generic and enable it if needed
+	// addRequiredModules(mod, m, ctx)
+
+	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+		mod.AddString("compile_multilib", "both")
+	}
+
+	// TODO: figure out strip support
+
 }
