@@ -26,6 +26,16 @@ func (m *ModuleStrictBinary) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
+func (m *ModuleStrictBinary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool {
+			return p.IsType(file.TypeBinary)
+		},
+		func(p file.Path) string {
+			return p.BuildPath()
+		})
+}
+
 func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).strictBinaryActions(m, ctx)

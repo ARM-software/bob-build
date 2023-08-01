@@ -1,3 +1,5 @@
+// Test that we setup the toolchains correct for target type
+
 bob_executable {
     name: "simple_bob_executable_host",
     srcs: ["src.cpp"],
@@ -12,4 +14,28 @@ bob_executable {
     host_supported: false,
     target_supported: true,
     build_by_default: true,
+}
+
+// Ensure install group interopt works
+
+bob_install_group {
+    name: "bin",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "out/bin",
+    },
+}
+
+bob_binary {
+    name: "bob_binary_install_group",
+    srcs: ["hello_world.cpp"],
+    install_group: "bin",
+}
+
+bob_executable {
+    name: "bob_executable_install_group",
+    srcs: ["hello_world.cpp"],
+    install_group: "bin",
 }
