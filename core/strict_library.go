@@ -303,8 +303,16 @@ func (m *ModuleStrictLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext
 }
 
 func (m *ModuleStrictLibrary) GetStaticLibs(ctx blueprint.ModuleContext) (libs []string) {
-	// Required for legacy backend implementation
-	return
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == StaticTag },
+		func(m blueprint.Module) {
+			if provider, ok := m.(FileProvider); ok {
+				libs = append(libs, provider.OutFiles().ToStringSliceIf(
+					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+					func(p file.Path) string { return p.BuildPath() })...)
+			}
+		})
+	return libs
 }
 
 func (m *ModuleStrictLibrary) IsForwardingSharedLibrary() bool {

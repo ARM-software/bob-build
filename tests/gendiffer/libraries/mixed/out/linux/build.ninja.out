@@ -324,14 +324,15 @@ build gen_output: phony ${g.bob.BuildDir}/gen/gen_output/input_one.gen $
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-build ${g.bob.BuildDir}/host/shared/lib_dep.so: g.bob.shared_library
+build ${g.bob.BuildDir}/host/shared/lib_dep.so: g.bob.shared_library | $
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/host/shared
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
-    static_libs = 
+    static_libs = ${g.bob.BuildDir}/host/static/lib_forward_defines.a
 
 build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library
     ar = ar
