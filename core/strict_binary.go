@@ -11,8 +11,11 @@ type ModuleStrictBinary struct {
 
 type strictBinaryInterface interface {
 	splittable
+	enableable
 	FileConsumer
 }
+
+var _ strictLibraryInterface = (*ModuleStrictBinary)(nil)
 
 func (m *ModuleStrictBinary) OutFiles() file.Paths {
 	return file.Paths{

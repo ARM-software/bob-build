@@ -14,6 +14,9 @@ bob_executable {
     host_supported: false,
     target_supported: true,
     build_by_default: true,
+    builder_android_bp: {
+        enabled: false,
+    },
 }
 
 // Ensure install group interopt works
