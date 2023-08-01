@@ -438,7 +438,7 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 	if !enabledAndRequired(m) {
 		return
 	}
-	utils.Die("bob_executable has no implementation for Android yet. Please use android { enabled:false} or old bob_binary for now.")
+	utils.Die("bob_executable:%v has no implementation for Android yet. Please use builder_android_bp { enabled:false} or legacy bob_binary for now.", m.Name())
 }
 
 func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {

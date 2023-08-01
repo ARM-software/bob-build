@@ -14,8 +14,9 @@ bob_executable {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    android: {
-        enabled: false,
+    enabled: false,
+    builder_ninja: {
+        enabled: true,
     },
 }
 

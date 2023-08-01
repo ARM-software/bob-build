@@ -71,6 +71,8 @@ type strictLibraryInterface interface {
 	dependentInterface
 	FileConsumer
 	FileResolver
+	enableable
+	Featurable
 }
 
 var _ strictLibraryInterface = (*ModuleStrictLibrary)(nil)
@@ -207,11 +209,24 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
+func (m *ModuleStrictLibrary) FeaturableProperties() []interface{} {
+	return []interface{}{
+		&m.Properties.StrictLibraryProps,
+		&m.Properties.SplittableProps,
+		&m.Properties.EnableableProps,
+	}
+}
+
 func (m *ModuleStrictLibrary) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.StrictLibraryProps,
 		&m.Properties.SplittableProps,
+		&m.Properties.EnableableProps,
 	}
+}
+
+func (m *ModuleStrictLibrary) Features() *Features {
+	return &m.Properties.Features
 }
 
 func (m *ModuleStrictLibrary) isHostSupported() bool {
@@ -348,9 +363,9 @@ func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Linkstatic = &t //Default to static
 
-	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, SplittableProps{})
-	module.Properties.Host.init(&config.Properties, StrictLibraryProps{})
-	module.Properties.Target.init(&config.Properties, StrictLibraryProps{})
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, EnableableProps{}, SplittableProps{})
+	module.Properties.Host.init(&config.Properties, StrictLibraryProps{}, EnableableProps{})
+	module.Properties.Target.init(&config.Properties, StrictLibraryProps{}, EnableableProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
