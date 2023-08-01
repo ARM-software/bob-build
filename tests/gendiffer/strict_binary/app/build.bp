@@ -1,0 +1,15 @@
+bob_executable {
+    name: "simple_bob_executable_host",
+    srcs: ["src.cpp"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
+bob_executable {
+    name: "simple_bob_executable_target",
+    srcs: ["src.cpp"],
+    host_supported: false,
+    target_supported: true,
+    build_by_default: true,
+}
