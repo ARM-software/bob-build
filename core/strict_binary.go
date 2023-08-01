@@ -37,7 +37,7 @@ func StrictBinaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 
 	module := &ModuleStrictBinary{}
 	module.Properties.Linkstatic = &t // always true for executables
-	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, SplittableProps{})
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, SplittableProps{}, EnableableProps{})
 	module.Properties.Host.init(&config.Properties, StrictLibraryProps{})
 	module.Properties.Target.init(&config.Properties, StrictLibraryProps{})
 	return module, []interface{}{&module.Properties,
