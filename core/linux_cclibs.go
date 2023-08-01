@@ -659,5 +659,42 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 }
 
 func (g *linuxGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
 
+	objectFiles, nonCompiledDeps := g.CompileObjs(m, ctx, tc)
+	/* By default, build all target binaries */
+	optional := !isBuiltByDefault(m)
+
+	_, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
+
+	orderOnly := buildWrapperDeps
+	if enableToc {
+		// Add an order only dependecy on the actual libraries to cover
+		// the case where the .so is deleted but the toc is still
+		// present.
+		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
+	}
+
+	// TODO: Propogate shared library orderOnly dependencies correctly
+	// if m.Name() == "shared_strict_lib_binary" {
+	// 	orderOnly = []string{"lib_simple.so"}
+	// }
+
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeBinary) },
+		func(p file.Path) string { return p.BuildPath() })
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:      executableRule,
+			Outputs:   outs,
+			Inputs:    objectFiles,
+			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), nonCompiledDeps...),
+			OrderOnly: orderOnly,
+			Optional:  true,
+			Args:      g.getCommonLibArgs(m, ctx),
+		})
+
+	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	addPhony(m, ctx, installDeps, optional)
 }
