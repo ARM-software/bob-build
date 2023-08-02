@@ -574,13 +574,6 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	}
 }
 
-func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
-	if !enabledAndRequired(m) {
-		return
-	}
-	utils.Die("bob_executable:%v has no implementation for Android yet. Please use builder_android_bp { enabled:false} or legacy bob_binary for now.", m.Name())
-}
-
 func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
 	if !enabledAndRequired(m) {
 		return
@@ -692,5 +685,31 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	}
 
 	// TODO: figure out strip support
+
+}
+
+func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
+	if !enabledAndRequired(m) {
+		return
+	}
+
+	var modtype string
+	switch m.Properties.TargetType {
+	case toolchain.TgtTypeHost:
+		modtype = "cc_binary_host"
+	case toolchain.TgtTypeTarget:
+		modtype = "cc_binary"
+	}
+
+	mod, err := AndroidBpFile().NewModule(modtype, m.shortName())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	addCompilableProps(mod, m, ctx)
+
+	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+		mod.AddString("compile_multilib", "both")
+	}
 
 }
