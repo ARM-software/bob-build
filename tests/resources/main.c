@@ -1,11 +1,7 @@
-#include "b.h"
-
-#if FOO != 1
-    #error "FOO not propagated from sl_liba"
-#endif
+#include <stdio.h>
 
 int main(void)
 {
-    (void) do_b(50);
+    printf("Simple binary wants a file... Bye!\n");
     return 0;
 }

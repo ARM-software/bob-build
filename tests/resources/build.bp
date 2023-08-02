@@ -10,7 +10,7 @@ bob_install_group {
 
 bob_resource {
     name: "bob_test_resources",
-    srcs: ["main.c"],
+    srcs: ["main_link.in"],
     install_group: "IG_testcases",
     build_by_default: true,
     builder_android_bp: {
@@ -30,4 +30,15 @@ bob_resource {
     install_group: "IG_binaries",
     relative_install_path: "bob_tests",
     build_by_default: true,
+}
+
+bob_binary {
+    name: "resource_bin",
+    srcs: [
+        "main.c",
+    ],
+    install_deps: [
+        "bob_test_resources",
+    ],
+    install_group: "IG_binaries",
 }
