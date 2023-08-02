@@ -1,1 +1,0 @@
-bob_executable:simple_bob_executable_host has no implementation for Android yet. Please use builder_android_bp { enabled:false} or legacy bob_binary for now.
