@@ -1,13 +1,14 @@
 package plugin
 
 import (
-	"github.com/bazelbuild/bazel-gazelle/label"
 	"testing"
+
+	"github.com/bazelbuild/bazel-gazelle/label"
 )
 
 func Test_register_module(t *testing.T) {
 	registry := NewRegistry()
-	testLabel := label.Label{Repo: "repo", Pkg: "some/pkg", Name: "m_name"}
+	testLabel := label.Label{Repo: "", Pkg: "some/pkg", Name: "m_name"}
 	m := NewModule("m_name", "bob_binary", "some/pkg", "repo")
 
 	registry.register(m)

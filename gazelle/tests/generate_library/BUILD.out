@@ -1,0 +1,67 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
+# gazelle:bob_root
+
+bool_flag(
+    name = "feature_a",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_feature_a",
+    flag_values = {
+        ":feature_a": "true",
+    },
+)
+
+cc_library(
+    name = "lib_forward_defines",
+    srcs = [[
+        "src/libs/lib.cpp",
+    ]],
+    hdrs = [
+        [
+            "src/libs/liba.h",
+        ],
+        select({
+            ":config_feature_a": [
+                "src/libs/libb.h",
+            ],
+            "//conditions:default": [],
+        }),
+    ],
+    copts = [],
+    defines = [[
+        "FORWARDED_DEFINE",
+    ]],
+    linkstatic = True,
+    local_defines = [[
+        "LOCAL_DEFINE",
+    ]],
+    deps = [],
+)
+
+cc_library(
+    name = "lib_dep",
+    srcs = [],
+    hdrs = [],
+    copts = [],
+    defines = [],
+    linkstatic = True,
+    local_defines = [],
+    deps = [[
+        ":lib_forward_defines",
+    ]],
+)
+
+cc_library(
+    name = "lib_alwayslink",
+    srcs = [],
+    hdrs = [],
+    copts = [],
+    defines = [],
+    linkstatic = True,
+    local_defines = [],
+    deps = [],
+    alwayslink = True,
+)
