@@ -64,6 +64,7 @@ type Module struct {
 	features     map[string]AttributesMap
 	defaults     AttributesMap
 	idx          uint32
+	registry     *Registry
 }
 
 func (m Module) getName() string {
@@ -76,6 +77,10 @@ func (m Module) getRelativePath() string {
 
 func (m Module) getLabel() label.Label {
 	return m.bazelLabel
+}
+
+func (m Module) setRegistry(r *Registry) {
+	m.registry = r
 }
 
 func (m *Module) addDefaultAttribute(attribute string, a Attribute) {
@@ -101,7 +106,9 @@ func NewModule(moduleName string, moduleType string, relPath string, rootPath st
 	m.bobType = moduleType
 	m.moduleType = ParseModuleType(moduleType)
 	m.relativePath = relPath
-	m.bazelLabel = label.Label{Repo: rootPath, Pkg: relPath, Name: moduleName}
+	// Repo is set to "" as we do not expect to support
+	// external workspace dependencies.
+	m.bazelLabel = label.Label{Repo: "", Pkg: strings.TrimLeft(relPath, "."), Name: moduleName}
 	m.features = make(map[string]AttributesMap)
 	m.defaults = make(AttributesMap)
 
@@ -117,12 +124,99 @@ func (m *Module) generateRule() (r *rule.Rule, err error) {
 	case ModuleGlob:
 		// build Bazel `filegroup` from `bob_glob`
 		r = m.buildGlobFilegroup()
+	case ModuleLibrary:
+		r = m.buildLibrary()
 	default:
 		err = fmt.Errorf("Unsupported module '%s'", m.moduleType)
 		return nil, err
 	}
 
 	return r, nil
+}
+
+func resolveLabels(l []string, m *Module) []string {
+	var resolved []string
+	registry := m.registry
+	for _, v := range l {
+		if registry.nameExists(v) {
+			if dep, ok := registry.retrieveByName(v); ok {
+				depLabel := dep.getLabel()
+				relativeDepLabel := depLabel.Rel(m.bazelLabel.Repo, m.bazelLabel.Pkg)
+				// makes path relative
+				resolved = append(resolved, relativeDepLabel.String())
+			}
+		} else {
+			resolved = append(resolved, v)
+		}
+	}
+	return resolved
+}
+
+func buildListExpressionFromAttribute(m *Module, attr string) []bzl.Expr {
+	list := make([]bzl.Expr, 0, 1+len(m.features))
+
+	if d, ok := m.defaults[attr]; ok {
+		if srcs, ok := d.([]string); ok {
+			list = append(list, makeStringListWithGlob(resolveLabels(srcs, m)).BzlExpr())
+		}
+	}
+
+	features := make([]string, len(m.features))
+	keys := reflect.ValueOf(m.features).MapKeys()
+
+	for i, k := range keys {
+		features[i] = k.String()
+	}
+
+	sort.Strings(features)
+
+	for _, name := range features {
+		attribute := m.features[name]
+		data := make(SelectStringListWithGlob)
+		if srcs, ok := attribute[attr].([]string); ok {
+			data[getFeatureCondition(name)] = makeStringListWithGlob(resolveLabels(srcs, m))
+			list = append(list, data.BzlExpr())
+		}
+	}
+
+	return list
+}
+
+func buildBooleanExpressionFromAttribute(m *Module, attr string) (expr *bzl.LiteralExpr, err bool) {
+	if d, ok := m.defaults[attr]; ok {
+		if val, ok := d.(*bool); ok {
+			tok := "False"
+			if *val {
+				tok = "True"
+			}
+			return &bzl.LiteralExpr{Token: tok}, true
+		}
+	}
+
+	return nil, false
+}
+
+func (m *Module) buildLibrary() *rule.Rule {
+	// TODO: Currently only correctly translates StrictLibraryProps right now.
+	r := rule.NewRule(m.moduleType.String(), m.name)
+	r.SetKind(m.moduleType.String())
+
+	// These set of attributes are 1 to 1 string lists that have additive conditionals only.
+	r.SetAttr("srcs", buildListExpressionFromAttribute(m, "Srcs"))
+	r.SetAttr("hdrs", buildListExpressionFromAttribute(m, "Hdrs"))
+	r.SetAttr("local_defines", buildListExpressionFromAttribute(m, "Local_defines"))
+	r.SetAttr("defines", buildListExpressionFromAttribute(m, "Defines"))
+	r.SetAttr("copts", buildListExpressionFromAttribute(m, "Copts"))
+	r.SetAttr("deps", buildListExpressionFromAttribute(m, "Deps"))
+
+	if expr, ok := buildBooleanExpressionFromAttribute(m, "Alwayslink"); ok {
+		r.SetAttr("alwayslink", expr)
+	}
+	if expr, ok := buildBooleanExpressionFromAttribute(m, "Linkstatic"); ok {
+		r.SetAttr("linkstatic", expr)
+	}
+
+	return r
 }
 
 func (m *Module) buildFilegroup() *rule.Rule {

@@ -244,6 +244,10 @@ func checkSimpleType(propertyName string, v interface{}) bool {
 		if v.(*bool) != nil {
 			ret = true
 		}
+	case bool:
+		if v.(bool) == true || v.(bool) == false {
+			ret = true
+		}
 	case string:
 		if v.(string) != "" {
 			ret = true
