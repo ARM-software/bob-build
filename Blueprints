@@ -146,6 +146,7 @@ bootstrap_go_package {
         "bob-backend",
     ],
     srcs: [
+        "core/file/consumer.go",
         "core/file/file.go",
         "core/file/filegroup.go",
         "core/file/provider.go",

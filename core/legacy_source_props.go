@@ -29,7 +29,7 @@ type LegacySourceProps struct {
 // All interfaces supported by LegacySourceProps
 type LegacySourcePropsInterface interface {
 	pathProcessor
-	FileConsumer
+	file.Consumer
 	FileResolver
 }
 

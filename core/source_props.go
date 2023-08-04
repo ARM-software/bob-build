@@ -44,7 +44,7 @@ type SourceProps struct {
 
 // Reusable baseline implementation. Each module should match this interface.
 var _ pathProcessor = (*SourceProps)(nil)
-var _ FileConsumer = (*SourceProps)(nil)
+var _ file.Consumer = (*SourceProps)(nil)
 
 // Helper function to process source paths for Modules using `SourceProps`
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
@@ -62,31 +62,6 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 	s.Srcs = append(utils.PrefixDirs(srcs, prefix), utils.PrefixAll(targets, ":")...)
 }
 
-// `SourceFileConsumer` interface describes a module that is capable of consuming sources for its actions.
-// Example of this include:
-//   - bob_binary
-//   - bob{_static_,_shared_,_}library
-//
-// This interface can retrieve the required source file for this module only via `GetSrcs`, note that
-// each provider needs to be ready by the time these are accessed. This means, `GetSrcs` should be called
-// after `ResolveOutFiles` and `processPaths` for each of the dependant modules.
-//
-// The exception to this is `ResolveOutFiles` which may depend on other dynamic providers, in this case a bottom up
-// mutator is used to ensure the downstream dependencies of each module are ready.
-type FileConsumer interface {
-
-	// Returns all sources this module consumes. At this point assumes all providers are ready.
-	// Paths will be fully resolved.
-	GetFiles(blueprint.BaseModuleContext) file.Paths
-
-	// Returns a list of targets this consumer directly requires
-	GetTargets() []string
-
-	// Returns filepaths for current module only.
-	// Context is required for backend information but the accessor should only read current module.
-	GetDirectFiles() file.Paths
-}
-
 // Basic common implementation, certain targets will custmize this.
 func (s *SourceProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(s.Srcs)
@@ -97,7 +72,7 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
 			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
-			_, isConsumer := child.(FileConsumer)
+			_, isConsumer := child.(file.Consumer)
 			_, isProvider := child.(file.Provider)
 
 			if isFilegroup && isProvider {

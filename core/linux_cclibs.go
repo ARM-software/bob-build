@@ -48,7 +48,7 @@ type Compilable interface {
 	flag.Consumer // Modules which are compilable need to support flags
 	flag.Provider // Required for AOSP backend to check for exported flags
 
-	FileConsumer // Compilable objects must match the file consumer interface
+	file.Consumer // Compilable objects must match the file consumer interface
 	targetableModule
 	phonyInterface
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
@@ -204,7 +204,7 @@ type Archivable interface {
 	enableable         // For build by default
 	dependentInterface // For phony targets
 	flag.Consumer      // Modules which are compilable need to support flags
-	FileConsumer       // Compilable objects must match the file consumer interface
+	file.Consumer      // Compilable objects must match the file consumer interface
 	file.Provider      // Must create valid output files
 
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)

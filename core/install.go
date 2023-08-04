@@ -211,7 +211,7 @@ type ModuleResource struct {
 type resourceInterface interface {
 	pathProcessor
 	FileResolver
-	FileConsumer
+	file.Consumer
 }
 
 var _ resourceInterface = (*ModuleResource)(nil) // impl check

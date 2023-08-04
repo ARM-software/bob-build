@@ -69,7 +69,7 @@ type ModuleStrictLibrary struct {
 type strictLibraryInterface interface {
 	targetSpecificLibrary
 	dependentInterface
-	FileConsumer
+	file.Consumer
 	FileResolver
 	enableable
 	Featurable

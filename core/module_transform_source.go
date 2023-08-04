@@ -72,7 +72,7 @@ type ModuleTransformSource struct {
 type transformSourceInterface interface {
 	installable
 	DynamicFileProvider
-	FileConsumer
+	file.Consumer
 	FileResolver
 }
 

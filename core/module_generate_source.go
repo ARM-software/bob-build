@@ -36,7 +36,7 @@ type generateSourceInterface interface {
 	pathProcessor
 	FileResolver
 	file.Provider
-	FileConsumer
+	file.Consumer
 }
 
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
