@@ -13,6 +13,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -169,7 +170,7 @@ func Main() {
 	ctx.RegisterBottomUpMutator("generic_depender", ResolveGenericDepsMutator).Parallel()
 
 	// First resolve providers which are not dependant on other modules.
-	ctx.RegisterBottomUpMutator("resolve_files", resolveFilesMutator).Parallel()
+	ctx.RegisterBottomUpMutator("resolve_files", file.ResolveFilesMutator).Parallel()
 
 	// Now we can resolve remaining, dynamic file providers.
 	ctx.RegisterBottomUpMutator("resolve_dynamic_src_outputs", resolveDynamicFileOutputs) // Cannot be parallel.

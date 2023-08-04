@@ -12,3 +12,11 @@ type Resolver interface {
 	// TODO: This may not be neccessary.
 	ResolveFiles(blueprint.BaseModuleContext)
 }
+
+// TransformSources needs to figure out the output names based on it's inputs.
+// Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
+func ResolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
+	if m, ok := ctx.Module().(Resolver); ok {
+		m.ResolveFiles(ctx)
+	}
+}
