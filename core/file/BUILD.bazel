@@ -7,6 +7,7 @@ go_library(
         "file.go",
         "filegroup.go",
         "provider.go",
+        "resolver.go",
     ],
     importpath = "github.com/ARM-software/bob-build/core/file",
     visibility = ["//visibility:public"],

@@ -64,7 +64,7 @@ type kernelModuleInterface interface {
 	enableable  // module enabling/disabling
 	aliasable   // appending to aliases
 	pathProcessor
-	FileResolver
+	file.Resolver
 }
 
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check

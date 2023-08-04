@@ -70,7 +70,7 @@ type strictLibraryInterface interface {
 	targetSpecificLibrary
 	dependentInterface
 	file.Consumer
-	FileResolver
+	file.Resolver
 	enableable
 	Featurable
 }

@@ -73,7 +73,7 @@ type transformSourceInterface interface {
 	installable
 	file.DynamicProvider
 	file.Consumer
-	FileResolver
+	file.Resolver
 }
 
 var _ transformSourceInterface = (*ModuleTransformSource)(nil) // impl check

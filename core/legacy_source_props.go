@@ -30,7 +30,7 @@ type LegacySourceProps struct {
 type LegacySourcePropsInterface interface {
 	pathProcessor
 	file.Consumer
-	FileResolver
+	file.Resolver
 }
 
 var _ LegacySourcePropsInterface = (*LegacySourceProps)(nil) // impl check

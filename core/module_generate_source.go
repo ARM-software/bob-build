@@ -34,7 +34,7 @@ type ModuleGenerateSource struct {
 type generateSourceInterface interface {
 	installable
 	pathProcessor
-	FileResolver
+	file.Resolver
 	file.Provider
 	file.Consumer
 }

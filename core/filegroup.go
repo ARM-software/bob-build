@@ -18,7 +18,7 @@ type ModuleFilegroup struct {
 // All interfaces supported by filegroup
 type filegroupInterface interface {
 	pathProcessor
-	FileResolver
+	file.Resolver
 	file.Provider
 }
 

@@ -113,17 +113,6 @@ func resolveDynamicFileOutputs(ctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-// `processPaths` needs to run seperately to `SourceFileResolver`.
-// This is due to how the defaults are resolved and applied, meaning only defaultable properties will be merged.
-// The current flow is:
-//   - `processPaths` prepends the module subdirectory to source file.
-//   - `DefaultApplierMutator` runs, merging source attributes.
-//   - `ResolveSrcs` runs, setting up filepaths for distribution.
-type FileResolver interface {
-	// TODO: This may not be neccessary.
-	ResolveFiles(blueprint.BaseModuleContext)
-}
-
 func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Since globbing is supported we must call a resolver.
 	files := file.Paths{}
@@ -139,7 +128,7 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 // TransformSources needs to figure out the output names based on it's inputs.
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
 func resolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(FileResolver); ok {
+	if m, ok := ctx.Module().(file.Resolver); ok {
 		m.ResolveFiles(ctx)
 	}
 }
