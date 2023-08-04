@@ -1,5 +1,7 @@
 package file
 
+import "github.com/google/blueprint"
+
 // A `Provider` describes a class capable of providing source files,
 // either dynamically generated or by reference to other modules. For example:
 //   - bob_glob
@@ -23,4 +25,15 @@ type Provider interface {
 	// Targets to be forwarded to other modules
 	// Expected to be called from a context of another module.
 	OutFileTargets() []string
+}
+
+// A dynamic source provider is a module which needs to compute the output file names.
+//
+// `ResolveOutFiles`, is context aware, and runs bottom up in the dep graph. This means however it cannot run
+// in parallel, fortunately this is __only__ used for `bob_transform_source`.
+//
+// `ResolveOutFiles` is context aware specifically because it can depend on other dynamic providers.
+type DynamicProvider interface {
+	Provider
+	ResolveOutFiles(blueprint.BaseModuleContext)
 }
