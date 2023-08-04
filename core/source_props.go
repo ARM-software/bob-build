@@ -124,11 +124,3 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 
 	s.ResolvedSrcs = files
 }
-
-// TransformSources needs to figure out the output names based on it's inputs.
-// Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
-func resolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(file.Resolver); ok {
-		m.ResolveFiles(ctx)
-	}
-}
