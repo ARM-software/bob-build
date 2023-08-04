@@ -11,7 +11,7 @@ type generateStaticLibrary struct {
 }
 
 // Verify that the following interfaces are implemented
-var _ FileProvider = (*generateStaticLibrary)(nil)
+var _ file.Provider = (*generateStaticLibrary)(nil)
 var _ generateLibraryInterface = (*generateStaticLibrary)(nil)
 var _ singleOutputModule = (*generateStaticLibrary)(nil)
 var _ splittable = (*generateStaticLibrary)(nil)

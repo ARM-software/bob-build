@@ -13,7 +13,7 @@ type ModuleBinary struct {
 type binaryInterface interface {
 	stripable
 	linkableModule
-	FileProvider // A binary can provide itself as a source
+	file.Provider // A binary can provide itself as a source
 }
 
 var _ binaryInterface = (*ModuleBinary)(nil)  // impl check

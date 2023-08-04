@@ -35,7 +35,7 @@ type generateSourceInterface interface {
 	installable
 	pathProcessor
 	FileResolver
-	FileProvider
+	file.Provider
 	FileConsumer
 }
 

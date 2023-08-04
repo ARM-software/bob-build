@@ -147,7 +147,7 @@ func GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
 		func(m blueprint.Module) {
-			if provider, ok := m.(FileProvider); ok {
+			if provider, ok := m.(file.Provider); ok {
 				libs = append(libs, provider.OutFiles().ToStringSliceIf(
 					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
 					func(p file.Path) string { return p.BuildPath() })...)
@@ -165,7 +165,7 @@ func (m *ModuleLibrary) GetStaticLibs(ctx blueprint.ModuleContext) []string {
 		if dep == nil {
 			utils.Die("%s has no dependency on static lib %s", m.Name(), moduleName)
 		}
-		if provider, ok := dep.(FileProvider); ok {
+		if provider, ok := dep.(file.Provider); ok {
 			libs = append(libs, provider.OutFiles().ToStringSliceIf(
 				func(p file.Path) bool { return p.IsType(file.TypeArchive) },
 				func(p file.Path) string { return p.BuildPath() })...)
@@ -205,7 +205,7 @@ type Archivable interface {
 	dependentInterface // For phony targets
 	flag.Consumer      // Modules which are compilable need to support flags
 	FileConsumer       // Compilable objects must match the file consumer interface
-	FileProvider       // Must create valid output files
+	file.Provider      // Must create valid output files
 
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 }
@@ -323,7 +323,7 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
 		func(m blueprint.Module) {
 			if _, ok := m.(sharedLibProducer); ok { //Remove this check and replace it with an API call
-				if m, ok := m.(FileProvider); ok {
+				if m, ok := m.(file.Provider); ok {
 					if toc, ok := m.OutFiles().FindSingle(
 						func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
 						libs = append(libs, toc.BuildPath())
@@ -412,7 +412,7 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 
 // Temporary interface to make library handlers generic between legacy and strict libraries
 type BackendCommonLibraryInterface interface {
-	FileProvider
+	file.Provider
 	flag.Consumer
 	targetableModule
 	linkableModule

@@ -10,7 +10,7 @@ type generateBinary struct {
 }
 
 // Verify that the following interfaces are implemented
-var _ FileProvider = (*generateBinary)(nil)
+var _ file.Provider = (*generateBinary)(nil)
 var _ generateLibraryInterface = (*generateBinary)(nil)
 var _ singleOutputModule = (*generateBinary)(nil)
 var _ splittable = (*generateBinary)(nil)

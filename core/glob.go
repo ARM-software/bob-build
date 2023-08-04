@@ -41,7 +41,7 @@ type ModuleGlob struct {
 type moduleGlobInterface interface {
 	pathProcessor
 	FileResolver
-	FileProvider
+	file.Provider
 }
 
 var _ moduleGlobInterface = (*ModuleGlob)(nil) // impl check

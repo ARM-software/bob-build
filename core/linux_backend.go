@@ -267,7 +267,7 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		installedFiles = append(installedFiles, dest)
 	}
 
-	if provider, ok := m.(FileProvider); ok {
+	if provider, ok := m.(file.Provider); ok {
 		provider.OutFiles().ForEachIf(
 			func(fp file.Path) bool { return fp.IsSymLink() },
 			func(fp file.Path) bool {
