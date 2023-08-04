@@ -40,7 +40,7 @@ type ModuleGlob struct {
 // All interfaces supported by moduleGlob
 type moduleGlobInterface interface {
 	pathProcessor
-	FileResolver
+	file.Resolver
 	file.Provider
 }
 

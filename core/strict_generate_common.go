@@ -29,7 +29,7 @@ type ModuleStrictGenerateCommon struct {
 type StrictGenerateCommonInterface interface {
 	pathProcessor
 	file.Consumer
-	FileResolver
+	file.Resolver
 }
 
 var _ StrictGenerateCommonInterface = (*ModuleStrictGenerateCommon)(nil)

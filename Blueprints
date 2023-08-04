@@ -150,6 +150,7 @@ bootstrap_go_package {
         "core/file/file.go",
         "core/file/filegroup.go",
         "core/file/provider.go",
+        "core/file/resolver.go",
     ],
     testSrcs: [
         "core/file/file_test.go",

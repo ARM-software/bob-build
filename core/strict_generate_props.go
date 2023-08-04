@@ -25,7 +25,7 @@ type StrictGenerateProps struct {
 type StrictGeneratePropsInterface interface {
 	pathProcessor
 	file.Consumer
-	FileResolver
+	file.Resolver
 }
 
 var _ StrictGeneratePropsInterface = (*StrictGenerateProps)(nil) // impl check

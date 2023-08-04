@@ -210,7 +210,7 @@ type ModuleResource struct {
 
 type resourceInterface interface {
 	pathProcessor
-	FileResolver
+	file.Resolver
 	file.Consumer
 }
 
