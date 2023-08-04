@@ -105,21 +105,10 @@ func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
-// A dynamic source provider is a module which needs to compute the output file names.
-//
-// `ResolveOutFiles`, is context aware, and runs bottom up in the dep graph. This means however it cannot run
-// in parallel, fortunately this is __only__ used for `bob_transform_source`.
-//
-// `ResolveOutFiles` is context aware specifically because it can depend on other dynamic providers.
-type DynamicFileProvider interface {
-	file.Provider
-	ResolveOutFiles(blueprint.BaseModuleContext)
-}
-
 // TransformSources needs to figure out the output names based on it's inputs.
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
 func resolveDynamicFileOutputs(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(DynamicFileProvider); ok {
+	if m, ok := ctx.Module().(file.DynamicProvider); ok {
 		m.ResolveOutFiles(ctx)
 	}
 }

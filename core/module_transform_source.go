@@ -71,7 +71,7 @@ type ModuleTransformSource struct {
 // All interfaces supported by filegroup
 type transformSourceInterface interface {
 	installable
-	DynamicFileProvider
+	file.DynamicProvider
 	file.Consumer
 	FileResolver
 }
