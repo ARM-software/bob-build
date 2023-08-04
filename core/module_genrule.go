@@ -33,7 +33,7 @@ type ModuleGenrule struct {
 }
 
 type ModuleGenruleInterface interface {
-	FileConsumer
+	file.Consumer
 	FileResolver
 	pathProcessor
 }

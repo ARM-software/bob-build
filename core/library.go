@@ -42,7 +42,7 @@ type libraryInterface interface {
 	matchSourceInterface
 	propertyEscapeInterface
 	SharedLibraryExporter
-	FileConsumer
+	file.Consumer
 	flag.Consumer
 }
 

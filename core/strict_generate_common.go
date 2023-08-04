@@ -28,7 +28,7 @@ type ModuleStrictGenerateCommon struct {
 
 type StrictGenerateCommonInterface interface {
 	pathProcessor
-	FileConsumer
+	file.Consumer
 	FileResolver
 }
 

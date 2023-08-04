@@ -24,7 +24,7 @@ type StrictGenerateProps struct {
 
 type StrictGeneratePropsInterface interface {
 	pathProcessor
-	FileConsumer
+	file.Consumer
 	FileResolver
 }
 

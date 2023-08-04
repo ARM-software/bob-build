@@ -36,7 +36,7 @@ type ModuleGensrcs struct {
 }
 
 type ModuleGensrcsInterface interface {
-	FileConsumer
+	file.Consumer
 	FileResolver
 	pathProcessor
 }

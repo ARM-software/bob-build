@@ -37,7 +37,7 @@ type generateLibrary struct {
 // Verify that the following interfaces are implemented
 var _ phonyInterface = (*generateLibrary)(nil)
 var _ splittable = (*generateLibrary)(nil)
-var _ FileConsumer = (*generateLibrary)(nil)
+var _ file.Consumer = (*generateLibrary)(nil)
 
 // Modules implementing generateLibraryInterface support arbitrary commands
 // that either produce a static library, shared library or binary.
@@ -45,7 +45,7 @@ type generateLibraryInterface interface {
 	blueprint.Module
 	dependentInterface
 	file.Provider
-	FileConsumer
+	file.Consumer
 
 	libExtension() string
 	outputFileName() string

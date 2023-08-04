@@ -334,7 +334,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		ctx.AddDependency(ctx.Module(), FilegroupTag, m.OutFileTargets()...)
 	}
 
-	if m, ok := ctx.Module().(FileConsumer); ok {
+	if m, ok := ctx.Module().(file.Consumer); ok {
 		ctx.AddDependency(ctx.Module(), FilegroupTag, m.GetTargets()...)
 	}
 
