@@ -19,7 +19,7 @@ type ModuleFilegroup struct {
 type filegroupInterface interface {
 	pathProcessor
 	FileResolver
-	FileProvider
+	file.Provider
 }
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check

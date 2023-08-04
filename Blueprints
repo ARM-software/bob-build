@@ -148,6 +148,7 @@ bootstrap_go_package {
     srcs: [
         "core/file/file.go",
         "core/file/filegroup.go",
+        "core/file/provider.go",
     ],
     testSrcs: [
         "core/file/file_test.go",

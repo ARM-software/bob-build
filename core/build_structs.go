@@ -10,6 +10,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
+	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -329,7 +330,7 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
-	if m, ok := ctx.Module().(FileProvider); ok {
+	if m, ok := ctx.Module().(file.Provider); ok {
 		ctx.AddDependency(ctx.Module(), FilegroupTag, m.OutFileTargets()...)
 	}
 
