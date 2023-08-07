@@ -44,10 +44,14 @@ func isBuiltByDefault(e enableable) bool {
 	}
 
 	switch m := e.(type) {
-	case *ModuleBinary:
-		if m.Properties.TargetType == toolchain.TgtTypeTarget {
-			return true
+	case *ModuleBinary, *ModuleStrictBinary:
+		var tgt toolchain.TgtType = toolchain.TgtTypeUnknown
+
+		if m, ok := m.(splittable); ok {
+			tgt = m.getTarget()
 		}
+
+		return tgt == toolchain.TgtTypeTarget
 	case *ModuleKernelObject:
 		return true
 	}

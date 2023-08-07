@@ -119,6 +119,7 @@ build ${g.bob.BuildDir}/out/bin/bob_executable_install_group: g.bob.install $
 build bob_executable_install_group: phony $
         ${g.bob.BuildDir}/out/bin/bob_executable_install_group $
         ${g.bob.BuildDir}/target/executable/bob_executable_install_group
+default bob_executable_install_group
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  simple_bob_executable_host
