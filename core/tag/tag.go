@@ -22,6 +22,7 @@ var (
 	ReexportLibraryTag        = DependencyTag{Name: "reexport_libs"}
 	SharedTag                 = DependencyTag{Name: "shared"}
 	StaticTag                 = DependencyTag{Name: "static"}
+	ToolchainTag              = DependencyTag{Name: "toolchain"}
 	WholeStaticTag            = DependencyTag{Name: "whole_static"}
 	DepTag                    = DependencyTag{Name: "dep"} // Generic deps used by new targets.
 )
