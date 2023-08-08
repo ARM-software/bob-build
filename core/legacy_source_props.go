@@ -29,8 +29,8 @@ type LegacySourceProps struct {
 // All interfaces supported by LegacySourceProps
 type LegacySourcePropsInterface interface {
 	pathProcessor
-	FileConsumer
-	FileResolver
+	file.Consumer
+	file.Resolver
 }
 
 var _ LegacySourcePropsInterface = (*LegacySourceProps)(nil) // impl check

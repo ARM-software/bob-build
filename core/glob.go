@@ -40,8 +40,8 @@ type ModuleGlob struct {
 // All interfaces supported by moduleGlob
 type moduleGlobInterface interface {
 	pathProcessor
-	FileResolver
-	FileProvider
+	file.Resolver
+	file.Provider
 }
 
 var _ moduleGlobInterface = (*ModuleGlob)(nil) // impl check

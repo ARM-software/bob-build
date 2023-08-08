@@ -12,7 +12,7 @@ type ModuleStrictBinary struct {
 type strictBinaryInterface interface {
 	splittable
 	enableable
-	FileConsumer
+	file.Consumer
 }
 
 var _ strictLibraryInterface = (*ModuleStrictBinary)(nil)

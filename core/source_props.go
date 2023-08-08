@@ -44,7 +44,7 @@ type SourceProps struct {
 
 // Reusable baseline implementation. Each module should match this interface.
 var _ pathProcessor = (*SourceProps)(nil)
-var _ FileConsumer = (*SourceProps)(nil)
+var _ file.Consumer = (*SourceProps)(nil)
 
 // Helper function to process source paths for Modules using `SourceProps`
 func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
@@ -62,56 +62,6 @@ func (s *SourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 	s.Srcs = append(utils.PrefixDirs(srcs, prefix), utils.PrefixAll(targets, ":")...)
 }
 
-// A `SourceFileProvider` descibes a class capable of providing source files,
-// either dynamically generated or by reference to other modules. For example:
-//   - bob_glob
-//   - bob_filegroup
-//   - bob_{generate,transform}_source
-//   - bob_genrule
-//
-// A provider interface outputs it's source files for other modules, it can also optionally forward it's source targets
-// as is the case for `bob_filegroup`.
-//
-// `OutSrcs` is not context aware, this is because it is called from a context aware visitor (`GetSrcs`).
-// This means its output needs to be resolved prior to this call. This is typically done via `processPaths` for
-// static sources, and `ResolveOutFiles` for sources which use a dynamic pathing.
-//
-// `processPaths` should not require context and only operate on the current module.
-type FileProvider interface {
-	// Sources to be forwarded to other modules
-	// Expected to be called from a context of another module.
-	OutFiles() file.Paths
-
-	// Targets to be forwarded to other modules
-	// Expected to be called from a context of another module.
-	OutFileTargets() []string
-}
-
-// `SourceFileConsumer` interface describes a module that is capable of consuming sources for its actions.
-// Example of this include:
-//   - bob_binary
-//   - bob{_static_,_shared_,_}library
-//
-// This interface can retrieve the required source file for this module only via `GetSrcs`, note that
-// each provider needs to be ready by the time these are accessed. This means, `GetSrcs` should be called
-// after `ResolveOutFiles` and `processPaths` for each of the dependant modules.
-//
-// The exception to this is `ResolveOutFiles` which may depend on other dynamic providers, in this case a bottom up
-// mutator is used to ensure the downstream dependencies of each module are ready.
-type FileConsumer interface {
-
-	// Returns all sources this module consumes. At this point assumes all providers are ready.
-	// Paths will be fully resolved.
-	GetFiles(blueprint.BaseModuleContext) file.Paths
-
-	// Returns a list of targets this consumer directly requires
-	GetTargets() []string
-
-	// Returns filepaths for current module only.
-	// Context is required for backend information but the accessor should only read current module.
-	GetDirectFiles() file.Paths
-}
-
 // Basic common implementation, certain targets will custmize this.
 func (s *SourceProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(s.Srcs)
@@ -122,12 +72,12 @@ func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
 			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
-			_, isConsumer := child.(FileConsumer)
-			_, isProvider := child.(FileProvider)
+			_, isConsumer := child.(file.Consumer)
+			_, isProvider := child.(file.Provider)
 
 			if isFilegroup && isProvider {
 				var provided file.Paths
-				child.(FileProvider).OutFiles().ForEachIf(
+				child.(file.Provider).OutFiles().ForEachIf(
 					func(fp file.Path) bool {
 						return fp.IsNotType(file.TypeRsp) && fp.IsNotType(file.TypeDep)
 					},
@@ -155,34 +105,12 @@ func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
 	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
 }
 
-// A dynamic source provider is a module which needs to compute the output file names.
-//
-// `ResolveOutFiles`, is context aware, and runs bottom up in the dep graph. This means however it cannot run
-// in parallel, fortunately this is __only__ used for `bob_transform_source`.
-//
-// `ResolveOutFiles` is context aware specifically because it can depend on other dynamic providers.
-type DynamicFileProvider interface {
-	FileProvider
-	ResolveOutFiles(blueprint.BaseModuleContext)
-}
-
 // TransformSources needs to figure out the output names based on it's inputs.
 // Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
 func resolveDynamicFileOutputs(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(DynamicFileProvider); ok {
+	if m, ok := ctx.Module().(file.DynamicProvider); ok {
 		m.ResolveOutFiles(ctx)
 	}
-}
-
-// `processPaths` needs to run seperately to `SourceFileResolver`.
-// This is due to how the defaults are resolved and applied, meaning only defaultable properties will be merged.
-// The current flow is:
-//   - `processPaths` prepends the module subdirectory to source file.
-//   - `DefaultApplierMutator` runs, merging source attributes.
-//   - `ResolveSrcs` runs, setting up filepaths for distribution.
-type FileResolver interface {
-	// TODO: This may not be neccessary.
-	ResolveFiles(blueprint.BaseModuleContext)
 }
 
 func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
@@ -195,12 +123,4 @@ func (s *SourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	}
 
 	s.ResolvedSrcs = files
-}
-
-// TransformSources needs to figure out the output names based on it's inputs.
-// Since this cannot be done at `OutSrcs` time due to lack of module context we use a seperate mutator stage.
-func resolveFilesMutator(ctx blueprint.BottomUpMutatorContext) {
-	if m, ok := ctx.Module().(FileResolver); ok {
-		m.ResolveFiles(ctx)
-	}
 }

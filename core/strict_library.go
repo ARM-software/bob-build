@@ -69,8 +69,8 @@ type ModuleStrictLibrary struct {
 type strictLibraryInterface interface {
 	targetSpecificLibrary
 	dependentInterface
-	FileConsumer
-	FileResolver
+	file.Consumer
+	file.Resolver
 	enableable
 	Featurable
 }
@@ -322,7 +322,7 @@ func (m *ModuleStrictLibrary) GetStaticLibs(ctx blueprint.ModuleContext) (libs [
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == StaticTag },
 		func(m blueprint.Module) {
-			if provider, ok := m.(FileProvider); ok {
+			if provider, ok := m.(file.Provider); ok {
 				libs = append(libs, provider.OutFiles().ToStringSliceIf(
 					func(p file.Path) bool { return p.IsType(file.TypeArchive) },
 					func(p file.Path) string { return p.BuildPath() })...)

@@ -12,7 +12,7 @@ type generateSharedLibrary struct {
 }
 
 // Verify that the following interfaces are implemented
-var _ FileProvider = (*generateSharedLibrary)(nil)
+var _ file.Provider = (*generateSharedLibrary)(nil)
 var _ generateLibraryInterface = (*generateSharedLibrary)(nil)
 var _ singleOutputModule = (*generateSharedLibrary)(nil)
 var _ sharedLibProducer = (*generateSharedLibrary)(nil)

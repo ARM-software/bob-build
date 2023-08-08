@@ -18,8 +18,8 @@ type ModuleFilegroup struct {
 // All interfaces supported by filegroup
 type filegroupInterface interface {
 	pathProcessor
-	FileResolver
-	FileProvider
+	file.Resolver
+	file.Provider
 }
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check

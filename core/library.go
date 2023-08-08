@@ -42,7 +42,7 @@ type libraryInterface interface {
 	matchSourceInterface
 	propertyEscapeInterface
 	SharedLibraryExporter
-	FileConsumer
+	file.Consumer
 	flag.Consumer
 }
 
@@ -427,7 +427,7 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 				// The source file _will_ be rebuilt if it uses the header (since that is registered in the
 				// depfile). Note that this means that generated headers cannot change which headers are used
 				// (by aliasing another header).
-				if provider, ok := child.(FileProvider); ok {
+				if provider, ok := child.(file.Provider); ok {
 					provider.OutFiles().ForEachIf(
 						func(fp file.Path) bool {
 							return (fp.IsType(file.TypeGenerated) || fp.IsType(file.TypeImplicit)) &&

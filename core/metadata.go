@@ -41,7 +41,7 @@ func metaDataCollector(ctx blueprint.BottomUpMutatorContext) {
 
 	meta := ModuleMeta{}
 
-	if s, ok := ctx.Module().(FileConsumer); ok {
+	if s, ok := ctx.Module().(file.Consumer); ok {
 		s.GetFiles(ctx).ForEach(
 			func(fp file.Path) bool {
 				meta.Srcs = append(meta.Srcs, fp.UnScopedPath())

@@ -34,9 +34,9 @@ type ModuleGenerateSource struct {
 type generateSourceInterface interface {
 	installable
 	pathProcessor
-	FileResolver
-	FileProvider
-	FileConsumer
+	file.Resolver
+	file.Provider
+	file.Consumer
 }
 
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
