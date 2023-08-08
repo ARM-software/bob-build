@@ -152,7 +152,7 @@ func resolveLabels(l []string, m *Module) []string {
 	return resolved
 }
 
-func buildListExpressionFromAttribute(m *Module, attr string) []bzl.Expr {
+func buildListExpressionFromAttribute(m *Module, attr string) bzl.Expr {
 	list := make([]bzl.Expr, 0, 1+len(m.features))
 
 	if d, ok := m.defaults[attr]; ok {
@@ -178,8 +178,17 @@ func buildListExpressionFromAttribute(m *Module, attr string) []bzl.Expr {
 			list = append(list, data.BzlExpr())
 		}
 	}
+	var expr bzl.Expr
 
-	return list
+	if len(list) > 0 {
+		expr = list[0]
+
+		for _, l := range list[1:] {
+			expr = &bzl.BinaryExpr{X: expr, Y: l, Op: "+"}
+		}
+	}
+
+	return expr
 }
 
 func buildBooleanExpressionFromAttribute(m *Module, attr string) (expr *bzl.LiteralExpr, err bool) {
@@ -202,12 +211,24 @@ func (m *Module) buildLibrary() *rule.Rule {
 	r.SetKind(m.moduleType.String())
 
 	// These set of attributes are 1 to 1 string lists that have additive conditionals only.
-	r.SetAttr("srcs", buildListExpressionFromAttribute(m, "Srcs"))
-	r.SetAttr("hdrs", buildListExpressionFromAttribute(m, "Hdrs"))
-	r.SetAttr("local_defines", buildListExpressionFromAttribute(m, "Local_defines"))
-	r.SetAttr("defines", buildListExpressionFromAttribute(m, "Defines"))
-	r.SetAttr("copts", buildListExpressionFromAttribute(m, "Copts"))
-	r.SetAttr("deps", buildListExpressionFromAttribute(m, "Deps"))
+	if attr := buildListExpressionFromAttribute(m, "Srcs"); attr != nil {
+		r.SetAttr("srcs", attr)
+	}
+	if attr := buildListExpressionFromAttribute(m, "Hdrs"); attr != nil {
+		r.SetAttr("hdrs", attr)
+	}
+	if attr := buildListExpressionFromAttribute(m, "Local_defines"); attr != nil {
+		r.SetAttr("local_defines", attr)
+	}
+	if attr := buildListExpressionFromAttribute(m, "Defines"); attr != nil {
+		r.SetAttr("defines", attr)
+	}
+	if attr := buildListExpressionFromAttribute(m, "Copts"); attr != nil {
+		r.SetAttr("copts", attr)
+	}
+	if attr := buildListExpressionFromAttribute(m, "Deps"); attr != nil {
+		r.SetAttr("deps", attr)
+	}
 
 	if expr, ok := buildBooleanExpressionFromAttribute(m, "Alwayslink"); ok {
 		r.SetAttr("alwayslink", expr)
