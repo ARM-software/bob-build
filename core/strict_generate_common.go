@@ -137,7 +137,7 @@ func (m *ModuleStrictGenerateCommon) processCmd(ctx blueprint.ModuleContext, ful
 			// If tool comes from other module with `:` notation
 			// just fill up `toolsLabels` to not duplicate
 			// `dependentTools` which has been already added by
-			// `GeneratedTag` dependencies.
+			// `tag.GeneratedTag` dependencies.
 			toolPath := ""
 			if tool[0] == ':' {
 				for modName, deps := range fullDeps {

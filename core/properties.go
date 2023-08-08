@@ -7,6 +7,7 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -95,7 +96,7 @@ func DefaultApplierMutator(ctx blueprint.BottomUpMutatorContext) {
 	accumulatedDef := ModuleDefaults{}
 	accumulatedProps := accumulatedDef.defaultableProperties()
 	ctx.VisitDirectDeps(func(dep blueprint.Module) {
-		if ctx.OtherModuleDependencyTag(dep) == DefaultTag {
+		if ctx.OtherModuleDependencyTag(dep) == tag.DefaultTag {
 			def, ok := dep.(*ModuleDefaults)
 			if !ok {
 				utils.Die("module %s in %s's defaults is not a default",

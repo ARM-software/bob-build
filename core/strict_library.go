@@ -4,6 +4,7 @@ import (
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -320,7 +321,7 @@ func (m *ModuleStrictLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext
 
 func (m *ModuleStrictLibrary) GetStaticLibs(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == StaticTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.StaticTag },
 		func(m blueprint.Module) {
 			if provider, ok := m.(file.Provider); ok {
 				libs = append(libs, provider.OutFiles().ToStringSliceIf(

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
@@ -46,7 +47,7 @@ type stripable interface {
 
 func debugInfoMutator(ctx blueprint.TopDownMutatorContext) {
 	if m, ok := ctx.Module().(stripable); ok {
-		path := getInstallGroupPathFromTag(ctx, DebugInfoTag)
+		path := getInstallGroupPathFromTag(ctx, tag.DebugInfoTag)
 		m.setDebugPath(path)
 	}
 }

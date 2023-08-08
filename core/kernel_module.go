@@ -7,6 +7,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
@@ -134,7 +135,7 @@ func (m *ModuleKernelObject) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleKernelObject) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, InstallTag, KernelModuleTag)
+	return getShortNamesForDirectDepsWithTags(ctx, tag.InstallTag, tag.KernelModuleTag)
 }
 
 func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext) {
@@ -144,7 +145,7 @@ func (m *ModuleKernelObject) processPaths(ctx blueprint.BaseModuleContext) {
 
 func (m *ModuleKernelObject) extraSymbolsModules(ctx blueprint.BaseModuleContext) (modules []*ModuleKernelObject) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == KernelModuleTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.KernelModuleTag },
 		func(m blueprint.Module) {
 			if km, ok := m.(*ModuleKernelObject); ok {
 				modules = append(modules, km)
@@ -158,7 +159,7 @@ func (m *ModuleKernelObject) extraSymbolsModules(ctx blueprint.BaseModuleContext
 
 func (m *ModuleKernelObject) extraSymbolsFiles(ctx blueprint.BaseModuleContext) (files []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == KernelModuleTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.KernelModuleTag },
 		func(m blueprint.Module) {
 			path := filepath.Join(backend.Get().KernelModOutputDir(), m.Name(), "Module.symvers")
 			files = append(files, path)

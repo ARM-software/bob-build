@@ -11,6 +11,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -331,48 +332,48 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 
 	if m, ok := ctx.Module().(file.Provider); ok {
-		ctx.AddDependency(ctx.Module(), FilegroupTag, m.OutFileTargets()...)
+		ctx.AddDependency(ctx.Module(), tag.FilegroupTag, m.OutFileTargets()...)
 	}
 
 	if m, ok := ctx.Module().(file.Consumer); ok {
-		ctx.AddDependency(ctx.Module(), FilegroupTag, m.GetTargets()...)
+		ctx.AddDependency(ctx.Module(), tag.FilegroupTag, m.GetTargets()...)
 	}
 
 	if l, ok := getLibrary(ctx.Module()); ok {
 		build := &l.Properties.Build
 
-		ctx.AddVariationDependencies(nil, WholeStaticTag, build.Whole_static_libs...)
-		ctx.AddVariationDependencies(nil, StaticTag, build.Static_libs...)
+		ctx.AddVariationDependencies(nil, tag.WholeStaticTag, build.Whole_static_libs...)
+		ctx.AddVariationDependencies(nil, tag.StaticTag, build.Static_libs...)
 
-		ctx.AddVariationDependencies(nil, HeaderTag, build.Header_libs...)
-		ctx.AddVariationDependencies(nil, HeaderTag, build.Export_header_libs...)
+		ctx.AddVariationDependencies(nil, tag.HeaderTag, build.Header_libs...)
+		ctx.AddVariationDependencies(nil, tag.HeaderTag, build.Export_header_libs...)
 
-		ctx.AddVariationDependencies(nil, SharedTag, build.Shared_libs...)
+		ctx.AddVariationDependencies(nil, tag.SharedTag, build.Shared_libs...)
 	}
 
 	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
-		ctx.AddVariationDependencies(nil, DepTag, sl.Properties.Deps...)
+		ctx.AddVariationDependencies(nil, tag.DepTag, sl.Properties.Deps...)
 	}
 
 	if sl, ok := ctx.Module().(*ModuleStrictBinary); ok {
-		ctx.AddVariationDependencies(nil, DepTag, sl.Properties.Deps...)
+		ctx.AddVariationDependencies(nil, tag.DepTag, sl.Properties.Deps...)
 	}
 
 	if km, ok := ctx.Module().(*ModuleKernelObject); ok {
-		ctx.AddDependency(ctx.Module(), KernelModuleTag, km.Properties.Extra_symbols...)
+		ctx.AddDependency(ctx.Module(), tag.KernelModuleTag, km.Properties.Extra_symbols...)
 	}
 
 	if ins, ok := ctx.Module().(installable); ok {
 		props := ins.getInstallableProps()
 		if props.Install_group != nil {
-			ctx.AddDependency(ctx.Module(), InstallGroupTag, proptools.String(props.Install_group))
+			ctx.AddDependency(ctx.Module(), tag.InstallGroupTag, proptools.String(props.Install_group))
 		}
-		parseAndAddVariationDeps(ctx, InstallTag, props.Install_deps...)
+		parseAndAddVariationDeps(ctx, tag.InstallTag, props.Install_deps...)
 	}
 	if strlib, ok := ctx.Module().(stripable); ok {
 		info := strlib.getDebugInfo()
 		if info != nil {
-			ctx.AddDependency(ctx.Module(), DebugInfoTag, *info)
+			ctx.AddDependency(ctx.Module(), tag.DebugInfoTag, *info)
 		}
 	}
 }
@@ -380,27 +381,27 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 func ResolveGenericDepsMutator(ctx blueprint.BottomUpMutatorContext) {
 	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == DepTag
+			return ctx.OtherModuleDependencyTag(dep) == tag.DepTag
 		},
 		func(dep blueprint.Module) {
 
 			switch dep.(type) {
 			case *ModuleStaticLibrary:
-				ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+				ctx.AddVariationDependencies(nil, tag.StaticTag, dep.Name())
 			case *ModuleSharedLibrary:
-				ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
+				ctx.AddVariationDependencies(nil, tag.SharedTag, dep.Name())
 			case *ModuleStrictLibrary:
 				lib := dep.(*ModuleStrictLibrary)
 
 				if proptools.Bool(lib.Properties.Alwayslink) &&
 					proptools.Bool(lib.Properties.Linkstatic) {
-					ctx.AddVariationDependencies(nil, WholeStaticTag, dep.Name())
+					ctx.AddVariationDependencies(nil, tag.WholeStaticTag, dep.Name())
 				} else if proptools.Bool(lib.Properties.Linkstatic) {
-					ctx.AddVariationDependencies(nil, StaticTag, dep.Name())
+					ctx.AddVariationDependencies(nil, tag.StaticTag, dep.Name())
 				} else {
-					ctx.AddVariationDependencies(nil, SharedTag, dep.Name())
+					ctx.AddVariationDependencies(nil, tag.SharedTag, dep.Name())
 				}
-				// TODO: implement HeaderTag
+				// TODO: implement tag.HeaderTag
 			}
 		})
 }
@@ -466,7 +467,7 @@ func collectReexportLibsDependenciesMutator(ctx blueprint.TopDownMutatorContext)
 		depTag := ctx.OtherModuleDependencyTag(child)
 		recurse := false
 
-		if depTag == WholeStaticTag || depTag == StaticTag || depTag == SharedTag {
+		if depTag == tag.WholeStaticTag || depTag == tag.StaticTag || depTag == tag.SharedTag {
 			parentModule, ok1 := parent.(moduleWithBuildProps)
 			childModule, ok2 := child.(moduleWithBuildProps)
 
@@ -510,9 +511,9 @@ func applyReexportLibsDependenciesMutator(ctx blueprint.BottomUpMutatorContext) 
 	var build *Build
 	if buildProps, ok := mainModule.(moduleWithBuildProps); ok {
 		build = buildProps.build()
-		ctx.AddVariationDependencies(nil, ReexportLibraryTag, build.ResolvedReexportedLibs...)
+		ctx.AddVariationDependencies(nil, tag.ReexportLibraryTag, build.ResolvedReexportedLibs...)
 		// Does not use variants as the resolved providers are not target aware (source generators)
-		ctx.AddDependency(mainModule, ReexportLibraryTag, build.ResolvedGeneratedHeaders...)
+		ctx.AddDependency(mainModule, tag.ReexportLibraryTag, build.ResolvedGeneratedHeaders...)
 	}
 }
 

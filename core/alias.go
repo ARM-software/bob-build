@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 
 	"github.com/google/blueprint"
 )
@@ -70,11 +71,11 @@ func aliasFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 // Setup dependencies between aliases and their targets
 func aliasMutator(ctx blueprint.BottomUpMutatorContext) {
 	if a, ok := ctx.Module().(*ModuleAlias); ok {
-		parseAndAddVariationDeps(ctx, AliasTag, a.Properties.Srcs...)
+		parseAndAddVariationDeps(ctx, tag.AliasTag, a.Properties.Srcs...)
 	}
 	if a, ok := ctx.Module().(aliasable); ok {
 		for _, s := range a.getAliasList() {
-			ctx.AddReverseDependency(ctx.Module(), AliasTag, s)
+			ctx.AddReverseDependency(ctx.Module(), tag.AliasTag, s)
 		}
 	}
 }

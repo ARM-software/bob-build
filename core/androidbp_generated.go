@@ -11,6 +11,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -101,8 +102,8 @@ func populateCommonProps(gc *ModuleGenerateCommon, ctx blueprint.ModuleContext, 
 
 	m.AddBool("depfile", proptools.Bool(gc.Properties.Depfile))
 
-	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTagsForNonFilegroup(ctx, GeneratedTag))
-	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(ctx, GeneratedSourcesTag))
+	m.AddStringList("generated_deps", getShortNamesForDirectDepsWithTagsForNonFilegroup(ctx, tag.GeneratedTag))
+	m.AddStringList("generated_sources", getShortNamesForDirectDepsWithTags(ctx, tag.GeneratedSourcesTag))
 	m.AddStringList("export_gen_include_dirs", gc.Properties.Export_gen_include_dirs)
 	m.AddStringList("cflags", gc.Properties.FlagArgsBuild.Cflags)
 	m.AddStringList("conlyflags", gc.Properties.FlagArgsBuild.Conlyflags)
@@ -159,7 +160,7 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleStrictGenera
 			idx := strings.LastIndex(t, ":")
 			tgt := t[idx+1:]
 
-			hostBinModule := ctx.GetDirectDepWithTag(t[:idx], HostToolBinaryTag)
+			hostBinModule := ctx.GetDirectDepWithTag(t[:idx], tag.HostToolBinaryTag)
 
 			if hostBinModule != nil {
 				if s, ok := hostBinModule.(splittable); ok {

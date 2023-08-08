@@ -30,6 +30,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -71,7 +72,7 @@ func (s *SourceProps) GetTargets() []string {
 func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
 	ctx.WalkDeps(
 		func(child, parent blueprint.Module) bool {
-			isFilegroup := ctx.OtherModuleDependencyTag(child) == FilegroupTag
+			isFilegroup := ctx.OtherModuleDependencyTag(child) == tag.FilegroupTag
 			_, isConsumer := child.(file.Consumer)
 			_, isProvider := child.(file.Provider)
 
