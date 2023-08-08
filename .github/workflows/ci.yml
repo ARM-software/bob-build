@@ -236,6 +236,14 @@ jobs:
       - name: Bazel test `bob-gazelle`
         run: bazel test --config=ci //...
         working-directory: ./gazelle
+      - name: Bazel test `bob-gazelle integration tests`
+        run: |
+          bazel run @gazelle//:gazelle --config=ci
+          if [[ `git diff` ]]; then
+            exit 1
+          fi
+          bazel build //...
+        working-directory: ./gazelle/tests/integration_tests
 
   bazel-coverage:
     name: "Bazel Coverage"

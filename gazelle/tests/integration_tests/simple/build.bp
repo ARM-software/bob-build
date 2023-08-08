@@ -1,0 +1,6 @@
+bob_library {
+    name: "simple",
+    srcs: ["main.c"],
+    host_supported: true,
+    target_supported: false,
+}
