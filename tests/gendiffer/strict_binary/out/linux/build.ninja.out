@@ -170,9 +170,18 @@ build ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o: $
     cxxcompiler = g++
     cxxflags = ${m.simple_bob_executable_target_target.cxxflags}
 
+build $
+        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/linuxsrc.cpp.o $
+        : g.bob.cxx ${g.bob.SrcDir}/linuxsrc.cpp
+    build_wrapper = 
+    cflags = ${m.simple_bob_executable_target_target.cflags}
+    cxxcompiler = g++
+    cxxflags = ${m.simple_bob_executable_target_target.cxxflags}
+
 build ${g.bob.BuildDir}/target/executable/simple_bob_executable_target: $
         g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o
+        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o $
+        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/linuxsrc.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 

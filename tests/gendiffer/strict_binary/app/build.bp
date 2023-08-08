@@ -11,6 +11,9 @@ bob_executable {
 bob_executable {
     name: "simple_bob_executable_target",
     srcs: ["src.cpp"],
+    linux: {
+        srcs: ["linuxsrc.cpp"],
+    },
     host_supported: false,
     target_supported: true,
     build_by_default: true,

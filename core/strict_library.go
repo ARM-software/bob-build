@@ -21,6 +21,7 @@ func (m *TransitiveLibraryProps) defines() []string {
 }
 
 type StrictLibraryProps struct {
+	SourceProps
 	Hdrs []string
 	// TODO: Header inclusion
 	//Textual_hdrs           []string
@@ -52,7 +53,6 @@ type ModuleStrictLibrary struct {
 	module.ModuleBase
 	Properties struct {
 		StrictLibraryProps
-		SourceProps
 		IncludeProps
 		TransitiveLibraryProps
 
