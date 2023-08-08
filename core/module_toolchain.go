@@ -41,6 +41,22 @@ type ModuleToolchain struct {
 	}
 }
 
+type ModuleToolchainInterface interface {
+	Featurable
+}
+
+var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
+
+func (m *ModuleToolchain) FeaturableProperties() []interface{} {
+	return []interface{}{
+		&m.Properties.ModuleToolchainProps,
+	}
+}
+
+func (m *ModuleToolchain) Features() *Features {
+	return &m.Properties.Features
+}
+
 func (m *ModuleToolchain) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// `ModuleToolchain` does not generate any actions.
 	// It only provides flags to be consumed by other modules.
