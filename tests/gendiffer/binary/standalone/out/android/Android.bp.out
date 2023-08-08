@@ -1,0 +1,17 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "standalone",
+    srcs: ["main.c"],
+    cflags: ["-DEXTRA_CFLAGS"],
+    conlyflags: ["-DEXTRA_CONLYFLAGS"],
+    cppflags: ["-DEXTRA_CXXFLAGS"],
+}
+

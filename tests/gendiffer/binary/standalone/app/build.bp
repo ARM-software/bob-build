@@ -1,0 +1,8 @@
+// Simple standalone binary build without any dependencies
+bob_binary {
+    name: "standalone",
+    srcs: ["main.c"],
+    conlyflags: ["-DEXTRA_CONLYFLAGS"],
+    cflags: ["-DEXTRA_CFLAGS"],
+    cxxflags: ["-DEXTRA_CXXFLAGS"],
+}
