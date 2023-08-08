@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
@@ -46,6 +47,7 @@ type ModuleToolchain struct {
 type ModuleToolchainInterface interface {
 	Featurable
 	targetSpecificLibrary
+	flag.Provider
 }
 
 var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
@@ -101,6 +103,38 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.ModuleToolchainProps,
 	}
+}
+
+func (m *ModuleToolchain) FlagsOut() flag.Flags {
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Cflags",
+			Tag:          flag.TypeCC | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Conlyflags",
+			Tag:          flag.TypeC | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Cppflags",
+			Tag:          flag.TypeCpp | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Asflags",
+			Tag:          flag.TypeAsm | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+		{
+			PropertyName: "Ldflags",
+			Tag:          flag.TypeLinker | flag.TypeExported,
+			Factory:      flag.FromStringOwned,
+		},
+	}
+
+	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
