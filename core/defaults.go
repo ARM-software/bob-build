@@ -5,6 +5,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
@@ -264,6 +265,6 @@ func DefaultDepsStage2Mutator(ctx blueprint.BottomUpMutatorContext) {
 			}
 		}
 
-		ctx.AddDependency(ctx.Module(), DefaultTag, defaults...)
+		ctx.AddDependency(ctx.Module(), tag.DefaultTag, defaults...)
 	}
 }

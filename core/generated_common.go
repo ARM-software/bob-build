@@ -10,6 +10,7 @@ import (
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -129,7 +130,7 @@ func (m *ModuleGenerateCommon) getInstallableProps() *InstallableProps {
 }
 
 func (m *ModuleGenerateCommon) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, InstallTag)
+	return getShortNamesForDirectDepsWithTags(ctx, tag.InstallTag)
 }
 
 func (m *ModuleGenerateCommon) supportedVariants() []toolchain.TgtType {
@@ -201,7 +202,7 @@ func (m *ModuleGenerateCommon) defaults() []string {
 func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name string) {
 	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == HostToolBinaryTag
+			return ctx.OtherModuleDependencyTag(dep) == tag.HostToolBinaryTag
 		},
 		func(module blueprint.Module) {
 			_, bin_ok := module.(*ModuleBinary)
@@ -313,7 +314,7 @@ func (m *ModuleGenerateCommon) processCmdTools(ctx blueprint.ModuleContext, cmd 
 			// If tool comes from other module with `:` notation
 			// just fill up `toolsLabels` to not duplicate
 			// `dependentTools` which has been already added by
-			// `GeneratedTag` dependencies.
+			// `tag.GeneratedTag` dependencies.
 			toolPath := ""
 			if tool[0] == ':' {
 				for modName, deps := range fullDeps {

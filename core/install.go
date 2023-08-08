@@ -5,6 +5,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -125,7 +126,7 @@ func getShortNamesForDirectDepsIf(ctx blueprint.ModuleContext,
 }
 
 func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
-	tags ...DependencyTag) (ret []string) {
+	tags ...tag.DependencyTag) (ret []string) {
 
 	return getShortNamesForDirectDepsIf(ctx,
 		func(m blueprint.Module) bool {
@@ -140,14 +141,14 @@ func getShortNamesForDirectDepsWithTags(ctx blueprint.ModuleContext,
 }
 
 func getShortNamesForDirectDepsWithTagsForNonFilegroup(ctx blueprint.ModuleContext,
-	tags ...DependencyTag) (ret []string) {
+	tags ...tag.DependencyTag) (ret []string) {
 
 	return getShortNamesForDirectDepsIf(ctx,
 		func(m blueprint.Module) bool {
 			tag := ctx.OtherModuleDependencyTag(m)
 
 			// Do not count `ModuleFilegroup` as dependency.
-			// `ModuleFilegroup` are specified by `GeneratedTag`
+			// `ModuleFilegroup` are specified by `tag.GeneratedTag`
 			// dependency tag but they are simple file providers
 			// and cannot be considered as `generated_deps`.
 			if _, ok := m.(*ModuleFilegroup); ok {
@@ -235,7 +236,7 @@ func (m *ModuleResource) Features() *Features {
 }
 
 func (m *ModuleResource) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
-	return getShortNamesForDirectDepsWithTags(ctx, InstallTag)
+	return getShortNamesForDirectDepsWithTags(ctx, tag.InstallTag)
 }
 
 func (m *ModuleResource) shortName() string {
@@ -314,20 +315,20 @@ func resourceFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 		&module.SimpleName.Properties}
 }
 
-func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag DependencyTag) *string {
+func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, inputTag tag.DependencyTag) *string {
 	var installGroupPath *string
 
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == inputTag },
 		func(m blueprint.Module) {
 			insg, ok := m.(*ModuleInstallGroup)
 			if !ok {
 				utils.Die("%s dependency of %s not an install group",
-					tag.name, ctx.ModuleName())
+					inputTag.Name, ctx.ModuleName())
 			}
 			if installGroupPath != nil {
 				utils.Die("Multiple %s dependencies for %s",
-					tag.name, ctx.ModuleName())
+					inputTag.Name, ctx.ModuleName())
 			}
 			installGroupPath = insg.Properties.Install_path
 		})
@@ -337,7 +338,7 @@ func getInstallGroupPathFromTag(ctx blueprint.TopDownMutatorContext, tag Depende
 
 func installGroupMutator(ctx blueprint.TopDownMutatorContext) {
 	if ins, ok := ctx.Module().(installable); ok {
-		path := getInstallGroupPathFromTag(ctx, InstallGroupTag)
+		path := getInstallGroupPathFromTag(ctx, tag.InstallGroupTag)
 		if path != nil {
 			if *path == "" {
 				utils.Die("Module %s has empty install path", ctx.ModuleName())

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -134,7 +135,7 @@ func (*linuxGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext)
 
 	/* Only depend on enabled targets */
 	ctx.VisitDirectDepsIf(
-		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == AliasTag },
+		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == tag.AliasTag },
 		func(p blueprint.Module) {
 			if e, ok := p.(enableable); ok {
 				if !isEnabled(e) {

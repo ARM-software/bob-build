@@ -12,6 +12,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -145,7 +146,7 @@ func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, 
 func GetWholeStaticLibs(ctx blueprint.ModuleContext) []string {
 	libs := []string{}
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == WholeStaticTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.WholeStaticTag },
 		func(m blueprint.Module) {
 			if provider, ok := m.(file.Provider); ok {
 				libs = append(libs, provider.OutFiles().ToStringSliceIf(
@@ -303,7 +304,7 @@ func pathToLibFlag(path string) string {
 
 func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.SharedTag },
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
 				libs = append(libs, g.getSharedLibLinkPath(t))
@@ -320,7 +321,7 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 
 func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.SharedTag },
 		func(m blueprint.Module) {
 			if _, ok := m.(sharedLibProducer); ok { //Remove this check and replace it with an API call
 				if m, ok := m.(file.Provider); ok {
@@ -349,7 +350,7 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 	tc := backend.Get().GetToolchain(m.getTarget())
 
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == SharedTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.SharedTag },
 		func(m blueprint.Module) {
 			if sl, ok := m.(*ModuleSharedLibrary); ok {
 				b := &sl.ModuleLibrary.Properties.Build

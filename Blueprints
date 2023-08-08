@@ -27,6 +27,7 @@ bootstrap_go_package {
         "bob-file",
         "bob-flag",
         "bob-backend",
+        "bob-tag",
     ],
     srcs: [
         "core/alias.go",
@@ -84,7 +85,6 @@ bootstrap_go_package {
         "core/strict_library.go",
         "core/strict_linux_cclibs.go",
         "core/strip.go",
-        "core/tag.go",
         "core/template.go",
     ],
     testSrcs: [
@@ -144,6 +144,7 @@ bootstrap_go_package {
     name: "bob-file",
     deps: [
         "bob-backend",
+        "bob-tag",
     ],
     srcs: [
         "core/file/consumer.go",
@@ -157,6 +158,17 @@ bootstrap_go_package {
         "core/file/filegroup_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/file",
+}
+
+bootstrap_go_package {
+    name: "bob-tag",
+    deps: [
+        "blueprint",
+    ],
+    srcs: [
+        "core/tag/tag.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/tag",
 }
 
 bootstrap_go_package {

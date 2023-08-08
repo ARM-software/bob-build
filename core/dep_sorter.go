@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/graph"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -136,9 +137,9 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 
 	extraStaticLibsDependencies := utils.Difference(mainBuild.ResolvedStaticLibs, mainBuild.Static_libs)
 
-	ctx.AddVariationDependencies(nil, StaticTag, extraStaticLibsDependencies...)
+	ctx.AddVariationDependencies(nil, tag.StaticTag, extraStaticLibsDependencies...)
 
 	// This module may now depend on extra shared libraries, inherited from included
 	// static libraries. Add that dependency here.
-	ctx.AddVariationDependencies(nil, SharedTag, mainBuild.ExtraSharedLibs...)
+	ctx.AddVariationDependencies(nil, tag.SharedTag, mainBuild.ExtraSharedLibs...)
 }

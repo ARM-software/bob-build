@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/blueprint"
 
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
@@ -213,10 +214,10 @@ func linksToGeneratedLibrary(ctx blueprint.ModuleContext) bool {
 	seenGeneratedLib := false
 	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
 		// Only consider dependencies that get linked
-		tag := ctx.OtherModuleDependencyTag(dep)
-		if tag == StaticTag ||
-			tag == SharedTag ||
-			tag == WholeStaticTag {
+		depTag := ctx.OtherModuleDependencyTag(dep)
+		if depTag == tag.StaticTag ||
+			depTag == tag.SharedTag ||
+			depTag == tag.WholeStaticTag {
 			_, staticLib := dep.(*generateStaticLibrary)
 			_, sharedLib := dep.(*generateSharedLibrary)
 			if sharedLib || staticLib {

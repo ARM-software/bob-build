@@ -12,6 +12,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/ccflags"
@@ -86,7 +87,7 @@ func bpModuleNamesForDeps(ctx blueprint.BaseModuleContext, nameLists ...[]string
 func (m *ModuleLibrary) getGeneratedSourceModules(ctx blueprint.BaseModuleContext) (srcs []string) {
 	ctx.VisitDirectDepsIf(
 		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == GeneratedSourcesTag
+			return ctx.OtherModuleDependencyTag(dep) == tag.GeneratedSourcesTag
 		},
 		func(dep blueprint.Module) {
 			switch dep.(type) {
@@ -108,9 +109,9 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(ctx blueprint.BaseModuleContex
 	ctx.VisitDirectDeps(
 		func(dep blueprint.Module) {
 			switch ctx.OtherModuleDependencyTag(dep) {
-			case GeneratedHeadersTag:
+			case tag.GeneratedHeadersTag:
 				headers = append(headers, dep.Name())
-			case ExportGeneratedHeadersTag:
+			case tag.ExportGeneratedHeadersTag:
 				exportHeaders = append(exportHeaders, dep.Name())
 			default:
 				return
@@ -469,17 +470,17 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 	ctx.VisitDirectDeps(
 		func(dep blueprint.Module) {
 			switch ctx.OtherModuleDependencyTag(dep) {
-			case SharedTag:
+			case tag.SharedTag:
 				shared_libs = append(shared_libs, bpModuleNamesForDep(ctx, dep.Name())...)
-			case StaticTag:
+			case tag.StaticTag:
 				static_libs = append(static_libs, bpModuleNamesForDep(ctx, dep.Name())...)
-			case WholeStaticTag:
+			case tag.WholeStaticTag:
 				whole_static_libs = append(whole_static_libs, bpModuleNamesForDep(ctx, dep.Name())...)
-			case GeneratedSourcesTag:
+			case tag.GeneratedSourcesTag:
 				generated_sources = append(generated_sources, bpModuleNamesForDep(ctx, dep.Name())...)
-			case GeneratedHeadersTag:
+			case tag.GeneratedHeadersTag:
 				generated_headers = append(generated_headers, bpModuleNamesForDep(ctx, dep.Name())...)
-			case ExportGeneratedHeadersTag:
+			case tag.ExportGeneratedHeadersTag:
 				export_generated_headers = append(export_generated_headers, dep.Name())
 			}
 		})

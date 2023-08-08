@@ -9,6 +9,7 @@ import (
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 
@@ -101,13 +102,13 @@ func (m *ModuleLibrary) getInstallableProps() *InstallableProps {
 func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
 	return getShortNamesForDirectDepsIf(ctx,
 		func(m blueprint.Module) bool {
-			tag := ctx.OtherModuleDependencyTag(m)
+			depTag := ctx.OtherModuleDependencyTag(m)
 			// External libraries do not have a build target so don't
 			// try to add a dependency on them.
 			if _, ok := m.(*ModuleExternalLibrary); ok {
 				return false
 			}
-			if tag == InstallTag || tag == SharedTag {
+			if depTag == tag.InstallTag || depTag == tag.SharedTag {
 				return true
 			}
 			return false
@@ -383,7 +384,7 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 	visited := map[string]bool{}
 	root := ctx.Module()
 	ctx.WalkDeps(func(child, parent blueprint.Module) bool {
-		tag := ctx.OtherModuleDependencyTag(child)
+		childTag := ctx.OtherModuleDependencyTag(child)
 		/* We want all the export_gen_include_dirs from generated modules mentioned by the
 		 * main module, primarily from generated_headers, but also static_libs and
 		 * shared_libs where they refer to a bob_generated_[static|shared]_library.
@@ -399,10 +400,10 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 		importHeaderDirs := false
 		visitChildren := false
 		if parent == root {
-			if tag == GeneratedHeadersTag || tag == ExportGeneratedHeadersTag {
+			if childTag == tag.GeneratedHeadersTag || childTag == tag.ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
-			} else if tag == StaticTag || tag == SharedTag || tag == ReexportLibraryTag {
+			} else if childTag == tag.StaticTag || childTag == tag.SharedTag || childTag == tag.ReexportLibraryTag {
 				/* Try to import generated header dirs from static|shared_libs too:
 				 * - The library could be a bob_generate_shared_library or
 				 *   bob_generate_static_library, in which case we need to import
@@ -414,7 +415,7 @@ func GetGeneratedHeadersFiles(ctx blueprint.ModuleContext) (orderOnly []string) 
 				visitChildren = true
 			}
 		} else {
-			if tag == ExportGeneratedHeadersTag {
+			if childTag == tag.ExportGeneratedHeadersTag {
 				importHeaderDirs = true
 				visitChildren = false
 			}
@@ -459,7 +460,7 @@ func (m *ModuleLibrary) IsRpathWanted() bool {
 
 func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext) (modules []string) {
 	ctx.VisitDirectDepsIf(
-		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == GeneratedSourcesTag },
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.GeneratedSourcesTag },
 		func(m blueprint.Module) {
 			if gs, ok := getGenerateCommon(m); ok {
 				// Add our own name
@@ -587,8 +588,8 @@ func getLinkableModules(ctx blueprint.TopDownMutatorContext) map[blueprint.Modul
 	ctx.WalkDeps(func(dep blueprint.Module, parent blueprint.Module) bool {
 		// Stop iteration once we get to other kinds of dependency which won't
 		// actually be linked.
-		if ctx.OtherModuleDependencyTag(dep) != StaticTag &&
-			ctx.OtherModuleDependencyTag(dep) != WholeStaticTag {
+		if ctx.OtherModuleDependencyTag(dep) != tag.StaticTag &&
+			ctx.OtherModuleDependencyTag(dep) != tag.WholeStaticTag {
 			return false
 		}
 		ret[dep] = true
@@ -705,9 +706,9 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 
 		// Don't add whole_static_lib components to the library list, because their
 		// contents are already included in the parent library.
-		if ctx.OtherModuleDependencyTag(dep) != WholeStaticTag &&
-			ctx.OtherModuleDependencyTag(dep) != StaticTag &&
-			ctx.OtherModuleDependencyTag(dep) != DepTag {
+		if ctx.OtherModuleDependencyTag(dep) != tag.WholeStaticTag &&
+			ctx.OtherModuleDependencyTag(dep) != tag.StaticTag &&
+			ctx.OtherModuleDependencyTag(dep) != tag.DepTag {
 			utils.Die("Non WholeStatic or Static dep tag encountered visiting %s from %s",
 				dep.Name(), ctx.ModuleName())
 		}
