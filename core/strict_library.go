@@ -64,6 +64,8 @@ type ModuleStrictLibrary struct {
 		TargetType toolchain.TgtType `blueprint:"mutated"`
 		Target     TargetSpecific
 		Host       TargetSpecific
+
+		ToolchainFlagsProps
 	}
 }
 

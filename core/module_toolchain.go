@@ -24,6 +24,11 @@ type ModuleToolchainProps struct {
 	Ldflags []string
 }
 
+type ToolchainFlagsProps struct {
+	// `ModuleToolchain` module.
+	Toolchain *string
+}
+
 // Strict targets will not support defaults by design.
 //
 // With this in mind, we will need a way to propagate
