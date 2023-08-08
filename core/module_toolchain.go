@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/google/blueprint"
 )
 
 type ModuleToolchainProps struct {
@@ -38,4 +39,20 @@ type ModuleToolchain struct {
 
 		Features
 	}
+}
+
+func (m *ModuleToolchain) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	// `ModuleToolchain` does not generate any actions.
+	// It only provides flags to be consumed by other modules.
+}
+
+func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
+	module := &ModuleToolchain{}
+
+	module.Properties.Features.Init(&config.Properties, ModuleToolchainProps{})
+	module.Properties.Host.init(&config.Properties, ModuleToolchainProps{})
+	module.Properties.Target.init(&config.Properties, ModuleToolchainProps{})
+
+	return module, []interface{}{&module.Properties,
+		&module.SimpleName.Properties}
 }
