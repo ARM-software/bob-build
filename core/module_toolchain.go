@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
 )
 
@@ -34,8 +35,9 @@ type ModuleToolchain struct {
 	Properties struct {
 		ModuleToolchainProps
 
-		Target TargetSpecific
-		Host   TargetSpecific
+		Target     TargetSpecific
+		Host       TargetSpecific
+		TargetType toolchain.TgtType `blueprint:"mutated"`
 
 		Features
 	}
@@ -43,6 +45,7 @@ type ModuleToolchain struct {
 
 type ModuleToolchainInterface interface {
 	Featurable
+	targetSpecificLibrary
 }
 
 var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
@@ -60,6 +63,44 @@ func (m *ModuleToolchain) Features() *Features {
 func (m *ModuleToolchain) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	// `ModuleToolchain` does not generate any actions.
 	// It only provides flags to be consumed by other modules.
+}
+
+func (m *ModuleToolchain) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{toolchain.TgtTypeHost, toolchain.TgtTypeTarget}
+}
+
+func (m *ModuleToolchain) disable() {
+	// always enabled
+}
+
+func (m *ModuleToolchain) setVariant(tgt toolchain.TgtType) {
+	m.Properties.TargetType = tgt
+}
+
+func (m *ModuleToolchain) getTarget() toolchain.TgtType {
+	return m.Properties.TargetType
+}
+
+func (m *ModuleToolchain) getSplittableProps() *SplittableProps {
+	return &m.SplittableProps
+}
+
+func (m *ModuleToolchain) getTargetSpecific(tgt toolchain.TgtType) *TargetSpecific {
+	if tgt == toolchain.TgtTypeHost {
+		return &m.Properties.Host
+	} else if tgt == toolchain.TgtTypeTarget {
+		return &m.Properties.Target
+	}
+
+	return nil
+}
+
+// Get the set of the module main properties for
+// that target specific properties would be applied to
+func (m *ModuleToolchain) targetableProperties() []interface{} {
+	return []interface{}{
+		&m.Properties.ModuleToolchainProps,
+	}
 }
 
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
