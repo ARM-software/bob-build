@@ -30,7 +30,6 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -68,42 +67,12 @@ func (s *SourceProps) GetTargets() []string {
 	return utils.MixedListToBobTargets(s.Srcs)
 }
 
-// Basic common implementation, certain targets may wish to customize this.
-func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs file.Paths) {
-	ctx.WalkDeps(
-		func(child, parent blueprint.Module) bool {
-			isFilegroup := ctx.OtherModuleDependencyTag(child) == tag.FilegroupTag
-			_, isConsumer := child.(file.Consumer)
-			_, isProvider := child.(file.Provider)
-
-			if isFilegroup && isProvider {
-				var provided file.Paths
-				child.(file.Provider).OutFiles().ForEachIf(
-					func(fp file.Path) bool {
-						return fp.IsNotType(file.TypeRsp) && fp.IsNotType(file.TypeDep)
-					},
-					func(fp file.Path) bool {
-						provided = append(provided, fp)
-						return true
-					})
-				srcs = srcs.Merge(provided)
-			}
-
-			// Only continue if the child is a provider and not a consumer.
-			// This means if a consumer eats up downstream providers it should process and output them first.
-			return isProvider && !isConsumer
-		},
-	)
-
-	return
-}
-
 func (s *SourceProps) GetDirectFiles() file.Paths {
 	return s.ResolvedSrcs
 }
 
 func (s *SourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
-	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
+	return s.GetDirectFiles().Merge(file.ReferenceGetFilesImpl(ctx))
 }
 
 // TransformSources needs to figure out the output names based on it's inputs.

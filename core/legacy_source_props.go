@@ -72,7 +72,7 @@ func (s *LegacySourceProps) GetTargets() []string {
 }
 
 func (s *LegacySourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
-	return s.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
+	return s.GetDirectFiles().Merge(file.ReferenceGetFilesImpl(ctx))
 }
 
 func (s *LegacySourceProps) GetDirectFiles() file.Paths {

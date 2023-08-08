@@ -105,5 +105,5 @@ func (ag *StrictGenerateProps) GetDirectFiles() file.Paths {
 }
 
 func (ag *StrictGenerateProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {
-	return ag.GetDirectFiles().Merge(ReferenceGetFilesImpl(ctx))
+	return ag.GetDirectFiles().Merge(file.ReferenceGetFilesImpl(ctx))
 }

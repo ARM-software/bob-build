@@ -1,6 +1,7 @@
 package file
 
 import (
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/google/blueprint"
 )
 
@@ -27,4 +28,34 @@ type Consumer interface {
 	// Returns filepaths for current module only.
 	// Context is required for backend information but the accessor should only read current module.
 	GetDirectFiles() Paths
+}
+
+// Basic common implementation, certain targets may wish to customize this.
+func ReferenceGetFilesImpl(ctx blueprint.BaseModuleContext) (srcs Paths) {
+	ctx.WalkDeps(
+		func(child, parent blueprint.Module) bool {
+			isFilegroup := ctx.OtherModuleDependencyTag(child) == tag.FilegroupTag
+			_, isConsumer := child.(Consumer)
+			_, isProvider := child.(Provider)
+
+			if isFilegroup && isProvider {
+				var provided Paths
+				child.(Provider).OutFiles().ForEachIf(
+					func(fp Path) bool {
+						return fp.IsNotType(TypeRsp) && fp.IsNotType(TypeDep)
+					},
+					func(fp Path) bool {
+						provided = append(provided, fp)
+						return true
+					})
+				srcs = srcs.Merge(provided)
+			}
+
+			// Only continue if the child is a provider and not a consumer.
+			// This means if a consumer eats up downstream providers it should process and output them first.
+			return isProvider && !isConsumer
+		},
+	)
+
+	return
 }
