@@ -1,0 +1,32 @@
+bob_binary {
+    name: "binA",
+    srcs: ["binA.c"],
+    add_to_alias: ["alias"],
+}
+
+bob_static_library {
+    name: "libA",
+    srcs: ["binB.c"],
+    host_supported: true,
+}
+
+bob_binary {
+    name: "binB",
+    srcs: ["binB.c"],
+}
+
+bob_alias {
+    name: "alias",
+    srcs: [
+        "libA:host",
+        "binB",
+    ],
+}
+
+bob_alias {
+    name: "alias_all_variants",
+    srcs: [
+        "libA:host",
+        "libA:target",
+    ],
+}
