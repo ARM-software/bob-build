@@ -391,6 +391,16 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 			}
 		})
 
+	ctx.VisitDirectDepsIf(
+		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.ToolchainTag },
+		func(m blueprint.Module) {
+			if t, ok := m.(*ModuleToolchain); ok {
+				ldflags = append(ldflags, t.FlagsOut().Filtered(func(f flag.Flag) bool {
+					return f.MatchesType(flag.TypeLinker)
+				}).ToStringSlice()...)
+			}
+		})
+
 	if hasForwardingLib {
 		ldlibs = append(ldlibs, tc.GetLinker().GetForwardingLibFlags())
 	}
