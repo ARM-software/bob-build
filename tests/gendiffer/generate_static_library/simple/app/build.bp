@@ -1,0 +1,10 @@
+
+
+bob_binary {
+    name: "binary_linked_to_gen_static",
+    srcs: ["main.c"],
+    static_libs: ["libblah_static"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}

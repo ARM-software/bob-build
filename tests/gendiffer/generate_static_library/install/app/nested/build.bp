@@ -1,0 +1,24 @@
+
+
+bob_generate_static_library {
+    name: "libblah_static",
+    srcs: ["libblah/libblah.c"],
+    implicit_srcs: [
+        "libblah/libblah.h",
+        "libblah/libblah_feature.h",
+    ],
+    install_group: "IG_genlib_lib",
+
+    headers: ["include/libblah.h"],
+    always_enabled_feature: {
+        headers: ["include/libblah_feature.h"],
+    },
+    export_gen_include_dirs: ["include"],
+
+    /* To avoid checking in a binary, call gcc directly.
+     * Note that we make this a host library to avoid having to figure
+     * out GCC arguments.
+     */
+    cmd: "{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${out} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    target: "host",
+}

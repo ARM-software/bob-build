@@ -1,0 +1,1 @@
+Generated static libraries are not supported (libblah_static)
