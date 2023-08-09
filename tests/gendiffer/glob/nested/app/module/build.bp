@@ -1,0 +1,11 @@
+
+
+bob_glob {
+    name: "nested_src_glob",
+    srcs: ["**/*.c"],
+}
+
+bob_binary {
+    name: "nested_glob_test",
+    srcs: [":nested_src_glob"],
+}
