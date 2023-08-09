@@ -39,87 +39,9 @@ rule g.bob.executable
     command = ${build_wrapper} ${linker} ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
     description = ${out}
 
-rule g.bob.install
-    command = rm -f ${out}; cp ${in} ${out}
-    description = ${out}
-
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bob_binary_install_group
-# Variant: target
-# Type:    bob_binary
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-m.bob_binary_install_group_target.cflags = 
-m.bob_binary_install_group_target.cxxflags = 
-
-build $
-        ${g.bob.BuildDir}/target/objects/bob_binary_install_group/hello_world.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/hello_world.cpp
-    build_wrapper = 
-    cflags = ${m.bob_binary_install_group_target.cflags}
-    cxxcompiler = g++
-    cxxflags = ${m.bob_binary_install_group_target.cxxflags}
-
-build ${g.bob.BuildDir}/target/executable/bob_binary_install_group: $
-        g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/bob_binary_install_group/hello_world.cpp.o
-    build_wrapper = 
-    ldflags = -Wl,--as-needed
-    ldlibs = 
-    linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
-    static_libs = 
-
-build ${g.bob.BuildDir}/out/bin/bob_binary_install_group: g.bob.install $
-        ${g.bob.BuildDir}/target/executable/bob_binary_install_group
-
-build bob_binary_install_group: phony $
-        ${g.bob.BuildDir}/out/bin/bob_binary_install_group $
-        ${g.bob.BuildDir}/target/executable/bob_binary_install_group
-default bob_binary_install_group
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bob_executable_install_group
-# Variant: target
-# Type:    bob_executable
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-m.bob_executable_install_group_target.cflags = 
-m.bob_executable_install_group_target.cxxflags = 
-
-build $
-        ${g.bob.BuildDir}/target/objects/bob_executable_install_group/hello_world.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/hello_world.cpp
-    build_wrapper = 
-    cflags = ${m.bob_executable_install_group_target.cflags}
-    cxxcompiler = g++
-    cxxflags = ${m.bob_executable_install_group_target.cxxflags}
-
-build ${g.bob.BuildDir}/target/executable/bob_executable_install_group: $
-        g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/bob_executable_install_group/hello_world.cpp.o
-    build_wrapper = 
-    ldflags = -Wl,--as-needed
-    ldlibs = 
-    linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
-    static_libs = 
-
-build ${g.bob.BuildDir}/out/bin/bob_executable_install_group: g.bob.install $
-        ${g.bob.BuildDir}/target/executable/bob_executable_install_group
-
-build bob_executable_install_group: phony $
-        ${g.bob.BuildDir}/out/bin/bob_executable_install_group $
-        ${g.bob.BuildDir}/target/executable/bob_executable_install_group
-default bob_executable_install_group
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  simple_bob_executable_host
@@ -170,18 +92,9 @@ build ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o: $
     cxxcompiler = g++
     cxxflags = ${m.simple_bob_executable_target_target.cxxflags}
 
-build $
-        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/linuxsrc.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/linuxsrc.cpp
-    build_wrapper = 
-    cflags = ${m.simple_bob_executable_target_target.cflags}
-    cxxcompiler = g++
-    cxxflags = ${m.simple_bob_executable_target_target.cxxflags}
-
 build ${g.bob.BuildDir}/target/executable/simple_bob_executable_target: $
         g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o $
-        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/linuxsrc.cpp.o
+        ${g.bob.BuildDir}/target/objects/simple_bob_executable_target/src.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
