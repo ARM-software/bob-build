@@ -1,0 +1,34 @@
+
+
+bob_generate_source {
+    name: "match_source_gen",
+    srcs: [
+        "main.c",
+        "function_def.txt",
+    ],
+    out: ["gen_main.c"],
+    cmd: "cat {{match_srcs \"function_def.txt\"}} {{match_srcs \"main.c\"}} > ${out}",
+}
+
+bob_binary {
+    name: "match_source_bin",
+    srcs: [
+        "source.c",
+        "test_cpp.cpp",
+        "cflags.h",
+        "conlyflags.h",
+        "cxxflags.h",
+    ],
+    generated_sources: ["match_source_gen"],
+    not_osx: {
+        srcs: ["exports.txt"],
+        ldflags: ["-Wl,--dynamic-list,{{match_srcs \"*.txt\"}}"],
+    },
+    osx: {
+        srcs: ["order_file.txt"],
+        ldflags: ["-Wl,-order_file,{{match_srcs \"*.txt\"}}"],
+    },
+    cflags: ["-include {{match_srcs \"cflags.h\"}}"],
+    conlyflags: ["-include {{match_srcs \"conlyflags.h\"}}"],
+    cxxflags: ["-include {{match_srcs \"cxxflags.h\"}}"],
+}

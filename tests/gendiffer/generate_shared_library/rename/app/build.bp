@@ -17,10 +17,6 @@ bob_generate_shared_library {
      */
     cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
     target: "host",
-    builder_android_bp: {
-        /* On Android BP generated libraries are not supported. */
-        enabled: false,
-    },
 }
 
 bob_binary {
@@ -30,8 +26,4 @@ bob_binary {
     host_supported: true,
     target_supported: false,
     build_by_default: true,
-    builder_android_bp: {
-        /* On Android BP generated libraries are not supported. */
-        enabled: false,
-    },
 }
