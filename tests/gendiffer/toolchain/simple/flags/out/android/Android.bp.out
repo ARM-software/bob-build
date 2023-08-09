@@ -1,0 +1,58 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library {
+    name: "foo__host",
+    host_supported: true,
+    device_supported: false,
+    c_std: "c99",
+    cpp_std: "c++11",
+    stem: "foo",
+    srcs: [
+        "f_simple.c",
+        "f_complex.cpp",
+    ],
+    asflags: ["-Dasflag"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-pedantic",
+    ],
+    cppflags: ["-Dcppflag_host"],
+    ldflags: [
+        "-Wl,--stats",
+        "-Wl,--allow-shlib-undefined",
+    ],
+}
+
+cc_library {
+    name: "foo__target",
+    host_supported: false,
+    device_supported: true,
+    c_std: "c99",
+    cpp_std: "c++11",
+    stem: "foo",
+    srcs: [
+        "f_simple.c",
+        "f_complex.cpp",
+    ],
+    asflags: ["-Dasflag"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-pedantic",
+    ],
+    conlyflags: ["-Dconlyflag_target"],
+    ldflags: [
+        "-Wl,--stats",
+        "-Wl,--no-allow-shlib-undefined",
+    ],
+    compile_multilib: "both",
+}
+
