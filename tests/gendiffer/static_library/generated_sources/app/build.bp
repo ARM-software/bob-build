@@ -58,46 +58,12 @@ bob_transform_source {
     generated_sources: ["transform_source"],
 }
 
-bob_glob {
-    name: "glob",
-    srcs: ["**/main.c"],
-    allow_empty: false,
-}
-
 bob_static_library {
     name: "lib",
-    srcs: [
-        ":all_filegroup",
-    ],
+
     generated_sources: [
         "nested_generated_source",
         "nested_transform_source",
         "genrule",
-    ],
-}
-
-bob_binary {
-    name: "bin",
-    srcs: [
-        ":all_filegroup",
-    ],
-    generated_sources: [
-        "nested_generated_source",
-        "nested_transform_source",
-        "genrule",
-    ],
-}
-
-bob_alias {
-    name: "bob_tests",
-    srcs: [
-        "genrule",
-        "generated_source",
-        "nested_generated_source",
-        "transform_source",
-        "nested_transform_source",
-        "glob",
-        "lib",
-        "bin",
     ],
 }
