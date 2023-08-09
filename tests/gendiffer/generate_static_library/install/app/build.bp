@@ -1,0 +1,32 @@
+
+
+bob_install_group {
+    name: "IG_genlib_lib",
+    builder_android_bp: {
+        install_path: "gen_sh_lib",
+    },
+    builder_ninja: {
+        install_path: "gen_sh_lib",
+    },
+}
+
+bob_install_group {
+    name: "IG_genlib_bin",
+    builder_android_bp: {
+        install_path: "gen_sh_lib",
+    },
+    builder_ninja: {
+        install_path: "gen_sh_bin",
+    },
+}
+
+bob_binary {
+    name: "binary_linked_to_gen_static",
+    install_group: "IG_genlib_bin",
+
+    srcs: ["main.c"],
+    static_libs: ["libblah_static"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}

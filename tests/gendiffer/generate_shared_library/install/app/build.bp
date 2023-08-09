@@ -1,0 +1,53 @@
+
+
+bob_install_group {
+    name: "IG_genlib_lib",
+    builder_android_bp: {
+        install_path: "gen_sh_lib",
+    },
+    builder_ninja: {
+        install_path: "gen_sh_lib",
+    },
+}
+
+bob_install_group {
+    name: "IG_genlib_bin",
+    builder_android_bp: {
+        install_path: "gen_sh_lib",
+    },
+    builder_ninja: {
+        install_path: "gen_sh_bin",
+    },
+}
+
+bob_generate_shared_library {
+    name: "libblah_shared",
+    srcs: ["libblah/libblah.c"],
+    implicit_srcs: [
+        "libblah/libblah.h",
+        "libblah/libblah_feature.h",
+    ],
+    headers: ["include/libblah.h"],
+    always_enabled_feature: {
+        headers: ["include/libblah_feature.h"],
+    },
+    install_group: "IG_genlib_lib",
+    export_gen_include_dirs: ["include"],
+
+    /* To avoid checking in a binary, call gcc directly.
+     * Note that we make this a host library to avoid having to figure
+     * out GCC arguments.
+     */
+    cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    target: "host",
+}
+
+bob_binary {
+    name: "binary_linked_to_gen_shared",
+    srcs: ["main.c"],
+    shared_libs: ["libblah_shared"],
+    install_group: "IG_genlib_bin",
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}

@@ -1,0 +1,16 @@
+bob_generate_shared_library {
+    name: "libblah_shared_rename",
+    out: "libblah_shared2",
+    srcs: ["libblah/libblah.c"],
+    implicit_srcs: [
+        "libblah/libblah.h",
+        "libblah/libblah_feature.h",
+    ],
+    headers: [
+        "include/libblah.h",
+        "include/libblah_feature.h",
+    ],
+    export_gen_include_dirs: ["include"],
+    cmd: "{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.",
+    target: "host",
+}

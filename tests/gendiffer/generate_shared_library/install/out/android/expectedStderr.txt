@@ -1,0 +1,1 @@
+Generated shared libraries are not supported (libblah_shared)
