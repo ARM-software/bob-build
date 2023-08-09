@@ -22,21 +22,12 @@ g.bootstrap.ninjaBuildDir = redacted
 
 g.bootstrap.srcDir = redacted
 
-# Limit the parallelization of linking, which is memory intensive
-pool g.bob.link
-    depth = 1
-
 builddir = ${g.bootstrap.ninjaBuildDir}
 
 rule g.bob.cc
     command = ${build_wrapper} ${ccompiler} -c ${cflags} ${conlyflags} -MD -MF ${depfile} ${in} -o ${out}
     depfile = ${out}.d
     deps = gcc
-    description = ${out}
-
-rule g.bob.executable
-    pool = g.bob.link
-    command = ${build_wrapper} ${linker} ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
     description = ${out}
 
 rule g.bob.static_library
@@ -46,122 +37,6 @@ rule g.bob.static_library
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bin
-# Variant: target
-# Type:    bob_binary
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-m.bin_target.cflags = 
-m.bin_target.conlyflags = 
-
-build ${g.bob.BuildDir}/target/objects/bin/main.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/main.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/objects/bin/nested/src/dummy01.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/nested/src/dummy01.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_generated_source/nested_generated.c.o $
-        : g.bob.cc $
-        ${g.bob.BuildDir}/gen/nested_generated_source/nested_generated.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out01.c.o $
-        : g.bob.cc $
-        ${g.bob.BuildDir}/gen/nested_transform_source/nested_out01.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out02.c.o $
-        : g.bob.cc $
-        ${g.bob.BuildDir}/gen/nested_transform_source/nested_out02.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out01.c.o $
-        : g.bob.cc $
-        ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out01.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out02.c.o $
-        : g.bob.cc $
-        ${g.bob.BuildDir}/gen/nested_transform_source/transform_source/out02.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy01.c.o: $
-        g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o: $
-        g.bob.cc ${g.bob.BuildDir}/gen/genrule/genrule_dummy02.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/executable/bin: g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/bin/main.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/nested/src/dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_generated_source/nested_generated.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/nested_out02.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/nested_transform_source/transform_source/out02.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy01.c.o $
-        ${g.bob.BuildDir}/target/objects/bin/gen/genrule/genrule_dummy02.c.o | $
-        ${g.bob.BuildDir}/gen/nested_generated_source/generated_noncompile_gensrc.md $
-        ${g.bob.BuildDir}/gen/genrule/generated_noncompile_genrule.md
-    build_wrapper = 
-    ldflags = -Wl,--as-needed
-    ldlibs = 
-    linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
-    static_libs = 
-
-build bin: phony ${g.bob.BuildDir}/target/executable/bin
-default bin
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bob_tests
-# Variant:
-# Type:    bob_alias
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-build bob_tests: phony genrule generated_source nested_generated_source $
-        transform_source nested_transform_source glob lib bin
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generated_source
@@ -214,20 +89,6 @@ build genrule: phony ${g.bob.BuildDir}/gen/genrule/genrule_dummy01.c $
 
 m.lib_target.cflags = 
 m.lib_target.conlyflags = 
-
-build ${g.bob.BuildDir}/target/objects/lib/main.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/main.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.lib_target.cflags}
-    conlyflags = ${m.lib_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/objects/lib/nested/src/dummy01.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/nested/src/dummy01.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.lib_target.cflags}
-    conlyflags = ${m.lib_target.conlyflags}
 
 build $
         ${g.bob.BuildDir}/target/objects/lib/gen/nested_generated_source/nested_generated.c.o $
@@ -289,8 +150,6 @@ build ${g.bob.BuildDir}/target/objects/lib/gen/genrule/genrule_dummy02.c.o: $
     conlyflags = ${m.lib_target.conlyflags}
 
 build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
-        ${g.bob.BuildDir}/target/objects/lib/main.c.o $
-        ${g.bob.BuildDir}/target/objects/lib/nested/src/dummy01.c.o $
         ${g.bob.BuildDir}/target/objects/lib/gen/nested_generated_source/nested_generated.c.o $
         ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out01.c.o $
         ${g.bob.BuildDir}/target/objects/lib/gen/nested_transform_source/nested_out02.c.o $

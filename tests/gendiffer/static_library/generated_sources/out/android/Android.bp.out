@@ -1,0 +1,23 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+genrule {
+    name: "genrule",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    cmd: "touch $(out)",
+    out: [
+        "genrule_dummy01.c",
+        "genrule_dummy02.c",
+        "generated_noncompile_genrule.md",
+    ],
+}
+

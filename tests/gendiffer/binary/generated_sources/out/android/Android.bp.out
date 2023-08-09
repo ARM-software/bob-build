@@ -1,57 +1,19 @@
 
 genrule {
     name: "_check_buildbp_updates_redacted",
-    srcs: [
-        "build.bp",
-        "nested/build.bp",
-    ],
+    srcs: ["build.bp"],
     out: ["androidbp_up_to_date"],
     tool_files: ["scripts/verify_hash.py"],
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
 }
 
-filegroup {
-    name: "all_filegroup",
-    srcs: [
-        ":glob",
-        ":forward_filegroup",
-    ],
-}
-
 cc_binary {
     name: "bin",
-    srcs: [
-        "main.c",
-        "nested/src/dummy01.c",
-    ],
     generated_sources: [
         "nested_generated_source",
         "nested_transform_source",
         "genrule",
     ],
-}
-
-phony {
-    name: "bob_tests",
-    required: [
-        "genrule",
-        "generated_source",
-        "nested_generated_source",
-        "transform_source",
-        "nested_transform_source",
-        "glob",
-        "bin",
-    ],
-}
-
-filegroup {
-    name: "filegroup",
-    srcs: ["nested/src/dummy01.c"],
-}
-
-filegroup {
-    name: "forward_filegroup",
-    srcs: [":filegroup"],
 }
 
 genrule_bob {

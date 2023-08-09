@@ -1,0 +1,68 @@
+
+
+bob_genrule {
+    name: "genrule",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: [
+        "genrule_dummy01.c",
+        "genrule_dummy02.c",
+        "generated_noncompile_genrule.md",
+    ],
+
+    cmd: "touch ${out}",
+}
+
+bob_generate_source {
+    name: "generated_source",
+    out: ["generated.c"],
+    cmd: "touch ${out}",
+}
+
+bob_generate_source {
+    name: "nested_generated_source",
+    out: [
+        "nested_generated.c",
+        "generated_noncompile_gensrc.md",
+    ],
+    cmd: "touch ${out}",
+    generated_sources: ["generated_source"],
+}
+
+bob_transform_source {
+    name: "transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["out$1.c"],
+    },
+    cmd: "some_tool",
+}
+
+bob_transform_source {
+    name: "nested_transform_source",
+    srcs: [
+        "dummy01.c",
+        "dummy02.c",
+    ],
+    out: {
+        match: "dummy([0-9]+)\\.c",
+        replace: ["nested_out$1.c"],
+    },
+    cmd: "some_tool",
+    generated_sources: ["transform_source"],
+}
+
+bob_binary {
+    name: "bin",
+    generated_sources: [
+        "nested_generated_source",
+        "nested_transform_source",
+        "genrule",
+    ],
+}
