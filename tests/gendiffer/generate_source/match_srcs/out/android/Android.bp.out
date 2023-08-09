@@ -1,0 +1,33 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "match_source_bin",
+    srcs: [
+        "source.c",
+        "test_cpp.cpp",
+    ],
+    generated_sources: ["match_source_gen"],
+    cflags: ["-include redacted/cflags.h"],
+    conlyflags: ["-include redacted/conlyflags.h"],
+    cppflags: ["-include redacted/cxxflags.h"],
+    ldflags: ["-Wl,--dynamic-list,redacted/exports.txt"],
+}
+
+genrule_bob {
+    name: "match_source_gen",
+    srcs: [
+        "main.c",
+        "function_def.txt",
+    ],
+    out: ["gen_main.c"],
+    cmd: "cat redacted/function_def.txt redacted/main.c > ${out}",
+    depfile: false,
+}
+
