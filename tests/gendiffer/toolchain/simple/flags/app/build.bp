@@ -1,0 +1,56 @@
+bob_toolchain {
+    name: "main_toolchain",
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    conlyflags: [
+        "-std=c99",
+    ],
+    cppflags: [
+        "-std=c++11",
+    ],
+    asflags: [
+        "-Dasflag",
+    ],
+    ldflags: [
+        "-Wl,--stats",
+    ],
+    target: {
+        conlyflags: [
+            "-Dconlyflag_target",
+        ],
+        ldflags: [
+            "-Wl,--no-allow-shlib-undefined",
+        ],
+    },
+    host: {
+        cppflags: [
+            "-Dcppflag_host",
+        ],
+        ldflags: [
+            "-Wl,--allow-shlib-undefined",
+        ],
+    },
+    always_enabled_feature: {
+        cflags: [
+            "-pedantic",
+        ],
+    },
+}
+
+bob_library {
+    name: "foo",
+    srcs: [
+        "f_simple.c",
+        "f_complex.cpp",
+    ],
+    hdrs: [
+        "f_simple.h",
+        "f_complex.h",
+    ],
+    toolchain: "main_toolchain",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}
