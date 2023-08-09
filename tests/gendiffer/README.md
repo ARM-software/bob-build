@@ -7,6 +7,7 @@ The tests are organized in the following manner:
 ```
 	.
 	├── example                   // Gendiffer boilerplate, copy this to add new test case
+	├── config                    // Testing Mconfig variations, such as toolchain setup
 	├── alias
 	├── binary                    // Bob module name without `bob_` prefix
 	│   ├── dependent             // Specific test case
