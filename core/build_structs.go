@@ -629,4 +629,6 @@ func RegisterModuleTypes(register func(string, FactoryWithConfig)) {
 	register("bob_kernel_module", kernelModuleFactory)
 	register("bob_resource", resourceFactory)
 	register("bob_install_group", installGroupFactory)
+
+	register("bob_toolchain", ModuleToolchainFactory)
 }

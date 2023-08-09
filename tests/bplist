@@ -49,6 +49,7 @@
 ./strict_libs/static/build.bp
 ./target_specific_static_libs/build.bp
 ./templates/build.bp
+./toolchain_flags/build.bp
 ./transform_source/build.bp
 ./transform_source_new/build.bp
 ./version_script/build.bp
