@@ -1,0 +1,23 @@
+bob_library {
+    name: "lib",
+    srcs: ["lib.cpp"],
+    host_supported: true,
+    build_by_default: true,
+}
+
+bob_binary {
+    name: "hello_shared",
+    shared_libs: ["lib"],
+    srcs: ["hello_shared.cpp"],
+    host_supported: true,
+    build_by_default: true,
+
+}
+
+bob_binary {
+    name: "hello_static",
+    static_libs: ["lib"],
+    srcs: ["hello_static.cpp"],
+    host_supported: true,
+    build_by_default: true,
+}
