@@ -1,0 +1,17 @@
+bob_glob {
+    name: "src_glob_exclude",
+    srcs: ["src/**/*.cpp"],
+    exclude: [
+        "src/**/main.cpp",
+        "**/exclude_this_file.cpp",
+        "src/inside/a/exclude_this_too.cpp",
+    ],
+}
+
+bob_binary {
+    name: "bin",
+    srcs: [
+        "src/inside/a/namespace/main.cpp",
+        ":src_glob_exclude",
+    ],
+}

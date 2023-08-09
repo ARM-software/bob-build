@@ -1,0 +1,15 @@
+
+
+bob_glob {
+    name: "src_glob",
+    srcs: ["**/*.c"],
+    exclude: ["module/**/*"],
+}
+
+bob_binary {
+    name: "glob_test_nested",
+    srcs: [
+        ":nested_glob_test",
+        ":src_glob",
+    ],
+}
