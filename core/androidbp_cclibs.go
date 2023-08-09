@@ -393,7 +393,7 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 	// }
 
 	// Android properties
-	var cflags, conlyFlags, cxxFlags, ldflags,
+	var cflags, conlyFlags, cxxFlags, ldflags, asflags,
 		srcs,
 		generated_sources,
 		generated_headers,
@@ -433,6 +433,8 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 				cxxFlags = append(cxxFlags, f.ToString())
 			case f.MatchesType(flag.TypeLinker):
 				ldflags = append(ldflags, f.ToString())
+			case f.MatchesType(flag.TypeAsm):
+				asflags = append(asflags, f.ToString())
 			}
 		},
 	)
@@ -502,6 +504,7 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 	}
 
 	mod.AddStringList("srcs", srcs)
+	mod.AddStringList("asflags", utils.Filter(ccflags.AndroidCompileFlags, asflags))
 	mod.AddStringList("cflags", utils.Filter(ccflags.AndroidCompileFlags, cflags))
 	mod.AddStringList("conlyflags", utils.Filter(ccflags.AndroidCompileFlags, conlyFlags))
 	mod.AddStringList("cppflags", utils.Filter(ccflags.AndroidCompileFlags, cxxFlags))
