@@ -1,0 +1,9 @@
+// This is an example build definition that builds a single binary,
+// hello_world from hello_world.cpp, and puts it in the
+// ${BUILDDIR}/out/bin directory.
+
+bob_binary {
+    name: "hello_world",
+    srcs: ["hello_world.cpp"],
+    host_supported: true,
+}
