@@ -2,9 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "tag",
-    srcs = [
-        "tag.go",
-    ],
+    srcs = ["tag.go"],
     importpath = "github.com/ARM-software/bob-build/core/tag",
     visibility = ["//visibility:public"],
     deps = [
