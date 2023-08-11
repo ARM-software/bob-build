@@ -5,8 +5,8 @@ repos:
       - id: trailing-whitespace
         exclude: (?x)(
           ^config_system/tests/formatter/|
-          tests/gendiffer.*build.ninja|
-          tests/gendiffer.*Android.bp|
+          gendiffer/tests.*build.ninja|
+          gendiffer/tests.*Android.bp|
           gazelle/tests/.*/expectedStderr.txt|
           patches/
           )
@@ -15,8 +15,8 @@ repos:
           (?x)(
             ^config_system/tests/formatter/|
             expectedExitCode.txt|
-            tests/gendiffer.*build.ninja|
-            tests/gendiffer.*Android.bp|
+            gendiffer/tests.*build.ninja|
+            gendiffer/tests.*Android.bp|
             patches/
           )
       - id: check-yaml

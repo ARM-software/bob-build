@@ -10,7 +10,7 @@ _NOTE_: 'Diff' is required on `PATH` for gendiffer to work.
 
 ## Example
 
-An example is setup under `tests/gendiffer/example`. It will require a dir tree structure of:
+An example is setup under `gendiffer/tests/example`. It will require a dir tree structure of:
 
 ```
 ├── WORKSPACE
@@ -46,7 +46,7 @@ For Bazel to setup these tests, you must setup a `BUILD.bazel` file to invoke th
 See:
 
 ```
-# tests/gendiffer/BUILD.bazel
+# gendiffer/tests/BUILD.bazel
 
 
 load("//gendiffer:gendiffer.bzl", "bob_generation_test")
@@ -65,6 +65,6 @@ load("//gendiffer:gendiffer.bzl", "bob_generation_test")
 
 To update the expected outputs locally, you must run:
 
-`UPDATE_SNAPSNOTS="true" bazel run //tests/gendiffer:<target>`
+`UPDATE_SNAPSNOTS="true" bazel run //gendiffer/tests:<target>`
 
 where target is e.g. `example_linux` or `example_android`
