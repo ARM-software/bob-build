@@ -1,0 +1,2 @@
+# gazelle:bob_root
+# gazelle:map_kind config_setting my_config_setting //tools/bob:def.bzl
