@@ -212,10 +212,10 @@ func (m *Module) buildLibrary() *rule.Rule {
 
 	// These set of attributes are 1 to 1 string lists that have additive conditionals only.
 	if attr := buildListExpressionFromAttribute(m, "Srcs"); attr != nil {
-		r.SetAttr("srcs", attr)
+		r.SetAttr("srcs", &SrcsAttribute{expr: attr})
 	}
 	if attr := buildListExpressionFromAttribute(m, "Hdrs"); attr != nil {
-		r.SetAttr("hdrs", attr)
+		r.SetAttr("hdrs", &SrcsAttribute{expr: attr})
 	}
 	if attr := buildListExpressionFromAttribute(m, "Local_defines"); attr != nil {
 		r.SetAttr("local_defines", attr)
@@ -283,7 +283,7 @@ func (m *Module) buildFilegroup() *rule.Rule {
 		}
 	}
 
-	r.SetAttr("srcs", expr)
+	r.SetAttr("srcs", &SrcsAttribute{expr: expr})
 
 	return r
 }
@@ -311,7 +311,7 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 		g.ExcludeDirectories = excludeDir.(*bool)
 	}
 
-	r.SetAttr("srcs", g.BzlExpr())
+	r.SetAttr("srcs", &SrcsAttribute{expr: g.BzlExpr()})
 
 	return r
 }
