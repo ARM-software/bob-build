@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: CJ Winslow <whoaa512@gmail.com>
+Date: Sat, 1 Jul 2023 23:27:00 -0700
+Subject: Add SortedStrings and UnsortedStrings expression values
+
+
+diff --git a/rule/value.go b/rule/value.go
+index 3ca4711..9ca9709 100644
+--- a/rule/value.go
++++ b/rule/value.go
+@@ -43,6 +43,21 @@ type BzlExprValue interface {
+ 	BzlExpr() bzl.Expr
+ }
+ 
++type SortedStrings []string
++
++func (s SortedStrings) BzlExpr() bzl.Expr {
++	list := make([]bzl.Expr, len(s))
++	for i, v := range s {
++		list[i] = &bzl.StringExpr{Value: v}
++	}
++	listExpr := &bzl.ListExpr{List: list}
++	sortExprLabels(listExpr, []bzl.Expr{})
++	return listExpr
++}
++
++type UnsortedStrings []string
++
++
+ // SelectStringListValue is a value that can be translated to a Bazel
+ // select expression that picks a string list based on a string condition.
+ type SelectStringListValue map[string][]string
+diff --git a/rule/value_test.go b/rule/value_test.go
+index 18d8c2d..c14f4ee 100644
+--- a/rule/value_test.go
++++ b/rule/value_test.go
+@@ -55,6 +55,26 @@ func TestExprFromValue(t *testing.T) {
+ 				},
+ 			},
+ 		},
++		"sorted strings": {
++			val: SortedStrings{"@b", ":a", "//:target"},
++			want: &bzl.ListExpr{
++				List: []bzl.Expr{
++					&bzl.StringExpr{Value: ":a"},
++					&bzl.StringExpr{Value: "//:target"},
++					&bzl.StringExpr{Value: "@b"},
++				},
++			},
++		},
++		"unsorted strings": {
++			val: UnsortedStrings{"@d", ":a", "//:b"},
++			want: &bzl.ListExpr{
++				List: []bzl.Expr{
++					&bzl.StringExpr{Value: "@d"},
++					&bzl.StringExpr{Value: ":a"},
++					&bzl.StringExpr{Value: "//:b"},
++				},
++			},
++		},
+ 	} {
+ 		t.Run(name, func(t *testing.T) {
+ 			got := ExprFromValue(tt.val)
+-- 
+2.25.1
+
