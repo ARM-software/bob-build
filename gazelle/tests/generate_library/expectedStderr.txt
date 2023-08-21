@@ -2,4 +2,12 @@ gazelle: RegisterFlags() - NOT IMPLEMENTED
 gazelle: CheckFlags() - NOT IMPLEMENTED
 gazelle: Fix() - NOT IMPLEMENTED
 gazelle: Imports() - NOT IMPLEMENTED
+gazelle: Imports() - NOT IMPLEMENTED
+gazelle: Imports() - NOT IMPLEMENTED
+gazelle: Imports() - NOT IMPLEMENTED
+gazelle: Imports() - NOT IMPLEMENTED
+gazelle: Resolve() - NOT IMPLEMENTED
+gazelle: Resolve() - NOT IMPLEMENTED
+gazelle: Resolve() - NOT IMPLEMENTED
+gazelle: Resolve() - NOT IMPLEMENTED
 gazelle: Resolve() - NOT IMPLEMENTED

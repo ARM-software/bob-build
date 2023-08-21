@@ -1,0 +1,26 @@
+// Main build file
+
+bob_library {
+    name: "lib_merge_defines",
+    srcs: ["libfoo.cpp"],
+    hdrs: ["libfoo.h"],
+    feature_a: {
+        hdrs: ["src/libs/libb.h"],
+    },
+    local_defines: ["NEW_LOCAL_DEFINE"],
+    defines: [
+        "NEW_FORWARDED_DEFINE",
+        "PRESERVE_DEF",
+    ],
+    host_supported: true,
+}
+
+bob_filegroup {
+    name: "merge_filegroup",
+    srcs: ["srcs/*.c"],
+    feature_a: {
+        srcs: [
+            "internal/file2.c",
+        ],
+    },
+}
