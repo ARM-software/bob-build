@@ -1,0 +1,285 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: CJ Winslow <whoaa512@gmail.com>
+Date: Sun, 2 Jul 2023 00:33:23 -0700
+Subject: Add the new Merger interface
+
+This enables users to implement `Merge` metods on values assigned in `rule.SetAttr`
+
+Fixes #1072
+
+diff --git a/rule/merge.go b/rule/merge.go
+index e13e547..bdf7a55 100644
+--- a/rule/merge.go
++++ b/rule/merge.go
+@@ -48,12 +48,11 @@ func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
+ 
+ 	// Process attributes that are in dst but not in src.
+ 	for key, dstAttr := range dst.attrs {
+-		if _, ok := src.attrs[key]; ok || !mergeable[key] || ShouldKeep(dstAttr) {
++		if _, ok := src.attrs[key]; ok || !mergeable[key] || ShouldKeep(dstAttr.expr) {
+ 			continue
+ 		}
+-		dstValue := dstAttr.RHS
+-		if mergedValue, err := mergeExprs(nil, dstValue); err != nil {
+-			start, end := dstValue.Span()
++		if mergedValue, err := mergeAttrValues(nil, &dstAttr); err != nil {
++			start, end := dstAttr.expr.RHS.Span()
+ 			log.Printf("%s:%d.%d-%d.%d: could not merge expression", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+ 		} else if mergedValue == nil {
+ 			dst.DelAttr(key)
+@@ -64,13 +63,11 @@ func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
+ 
+ 	// Merge attributes from src into dst.
+ 	for key, srcAttr := range src.attrs {
+-		srcValue := srcAttr.RHS
+ 		if dstAttr, ok := dst.attrs[key]; !ok {
+-			dst.SetAttr(key, srcValue)
+-		} else if mergeable[key] && !ShouldKeep(dstAttr) {
+-			dstValue := dstAttr.RHS
+-			if mergedValue, err := mergeExprs(srcValue, dstValue); err != nil {
+-				start, end := dstValue.Span()
++			dst.SetAttr(key, srcAttr.expr.RHS)
++		} else if mergeable[key] && !ShouldKeep(dstAttr.expr) {
++			if mergedValue, err := mergeAttrValues(&srcAttr, &dstAttr); err != nil {
++				start, end := dstAttr.expr.RHS.Span()
+ 				log.Printf("%s:%d.%d-%d.%d: could not merge expression", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+ 			} else if mergedValue == nil {
+ 				dst.DelAttr(key)
+@@ -83,7 +80,7 @@ func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
+ 	dst.private = src.private
+ }
+ 
+-// mergeExprs combines information from src and dst and returns a merged
++// mergeAttrValues combines information from src and dst and returns a merged
+ // expression. dst may be modified during this process. The returned expression
+ // may be different from dst when a structural change is needed.
+ //
+@@ -96,24 +93,41 @@ func MergeRules(src, dst *Rule, mergeable map[string]bool, filename string) {
+ //     and the values must be lists of strings.
+ //   * a list of strings combined with a select call using +. The list must
+ //     be the left operand.
++//   * an attr value that implements the Merger interface.
+ //
+ // An error is returned if the expressions can't be merged, for example
+ // because they are not in one of the above formats.
+-func mergeExprs(src, dst bzl.Expr) (bzl.Expr, error) {
+-	if ShouldKeep(dst) {
++func mergeAttrValues(srcAttr, dstAttr *attrValue) (bzl.Expr, error) {
++	if ShouldKeep(dstAttr.expr.RHS) {
+ 		return nil, nil
+ 	}
+-	if src == nil && (dst == nil || isScalar(dst)) {
++	dst := dstAttr.expr.RHS
++	if srcAttr == nil && (dst == nil || isScalar(dst)) {
+ 		return nil, nil
+ 	}
+-	if isScalar(src) {
+-		return src, nil
++	if srcAttr != nil && isScalar(srcAttr.expr.RHS) {
++		return srcAttr.expr.RHS, nil
+ 	}
+ 
+-	srcExprs, err := extractPlatformStringsExprs(src)
+-	if err != nil {
+-		return nil, err
++	_, ok := dstAttr.val.(Merger)
++	if srcAttr == nil && ok {
++		return nil, nil
+ 	}
++
++	if srcAttr != nil {
++		if srcMerger, ok := srcAttr.val.(Merger); ok {
++			return srcMerger.Merge(dst), nil
++		}
++	}
++	var srcExprs platformStringsExprs
++	var err error
++	if srcAttr != nil {
++		srcExprs, err = extractPlatformStringsExprs(srcAttr.expr.RHS)
++		if err != nil {
++			return nil, err
++		}
++	}
++
+ 	dstExprs, err := extractPlatformStringsExprs(dst)
+ 	if err != nil {
+ 		return nil, err
+@@ -279,11 +293,11 @@ func SquashRules(src, dst *Rule, filename string) error {
+ 	}
+ 
+ 	for key, srcAttr := range src.attrs {
+-		srcValue := srcAttr.RHS
++		srcValue := srcAttr.expr.RHS
+ 		if dstAttr, ok := dst.attrs[key]; !ok {
+ 			dst.SetAttr(key, srcValue)
+-		} else if !ShouldKeep(dstAttr) {
+-			dstValue := dstAttr.RHS
++		} else if !ShouldKeep(dstAttr.expr) {
++			dstValue := dstAttr.expr.RHS
+ 			if squashedValue, err := squashExprs(srcValue, dstValue); err != nil {
+ 				start, end := dstValue.Span()
+ 				return fmt.Errorf("%s:%d.%d-%d.%d: could not squash expression", filename, start.Line, start.LineRune, end.Line, end.LineRune)
+diff --git a/rule/rule.go b/rule/rule.go
+index 2d7f696..8caca41 100644
+--- a/rule/rule.go
++++ b/rule/rule.go
+@@ -715,10 +715,19 @@ type Rule struct {
+ 	stmt
+ 	kind    bzl.Expr
+ 	args    []bzl.Expr
+-	attrs   map[string]*bzl.AssignExpr
++	attrs   map[string]attrValue
+ 	private map[string]interface{}
+ }
+ 
++type attrValue struct {
++	// expr is the expression that defines the attribute assignment. If mergeable
++	// this will be replaced with a call to the merge function.
++	expr *bzl.AssignExpr
++	// val is the value of the attribute. If the attribute is mergeable
++	// the value must implement the Merger interface. could be nil.
++	val interface{}
++}
++
+ // NewRule creates a new, empty rule with the given kind and name.
+ func NewRule(kind, name string) *Rule {
+ 	kindIdent := &bzl.Ident{Name: kind}
+@@ -726,16 +735,18 @@ func NewRule(kind, name string) *Rule {
+ 	r := &Rule{
+ 		stmt:    stmt{expr: call},
+ 		kind:    kindIdent,
+-		attrs:   map[string]*bzl.AssignExpr{},
++		attrs:   map[string]attrValue{},
+ 		private: map[string]interface{}{},
+ 	}
+ 	if name != "" {
+-		nameAttr := &bzl.AssignExpr{
+-			LHS: &bzl.Ident{Name: "name"},
+-			RHS: &bzl.StringExpr{Value: name},
+-			Op:  "=",
+-		}
+-		call.List = []bzl.Expr{nameAttr}
++		nameAttr := attrValue{
++			expr: &bzl.AssignExpr{
++				LHS: &bzl.Ident{Name: "name"},
++				RHS: &bzl.StringExpr{Value: name},
++				Op:  "=",
++			},
++			val: name}
++		call.List = []bzl.Expr{nameAttr.expr}
+ 		r.attrs["name"] = nameAttr
+ 	}
+ 	return r
+@@ -766,11 +777,11 @@ func ruleFromExpr(index int, expr bzl.Expr) *Rule {
+ 	}
+ 
+ 	var args []bzl.Expr
+-	attrs := make(map[string]*bzl.AssignExpr)
++	attrs := make(map[string]attrValue)
+ 	for _, arg := range call.List {
+ 		if attr, ok := arg.(*bzl.AssignExpr); ok {
+ 			key := attr.LHS.(*bzl.Ident) // required by parser
+-			attrs[key.Name] = attr
++			attrs[key.Name] = attrValue{expr: attr}
+ 		} else {
+ 			args = append(args, arg)
+ 		}
+@@ -839,7 +850,7 @@ func (r *Rule) Attr(key string) bzl.Expr {
+ 	if !ok {
+ 		return nil
+ 	}
+-	return attr.RHS
++	return attr.expr.RHS
+ }
+ 
+ // AttrString returns the value of the named attribute if it is a scalar string.
+@@ -849,7 +860,7 @@ func (r *Rule) AttrString(key string) string {
+ 	if !ok {
+ 		return ""
+ 	}
+-	str, ok := attr.RHS.(*bzl.StringExpr)
++	str, ok := attr.expr.RHS.(*bzl.StringExpr)
+ 	if !ok {
+ 		return ""
+ 	}
+@@ -864,7 +875,7 @@ func (r *Rule) AttrStrings(key string) []string {
+ 	if !ok {
+ 		return nil
+ 	}
+-	list, ok := attr.RHS.(*bzl.ListExpr)
++	list, ok := attr.expr.RHS.(*bzl.ListExpr)
+ 	if !ok {
+ 		return nil
+ 	}
+@@ -883,17 +894,22 @@ func (r *Rule) DelAttr(key string) {
+ 	r.updated = true
+ }
+ 
+-// SetAttr adds or replaces the named attribute with an expression produced
+-// by ExprFromValue.
++// SetAttr adds or replaces the named attribute with value. If the attribute is
++// mergeable, then the value must implement the Merger interface, or an error will
++// be returned.
+ func (r *Rule) SetAttr(key string, value interface{}) {
+ 	rhs := ExprFromValue(value)
+ 	if attr, ok := r.attrs[key]; ok {
+-		attr.RHS = rhs
++		attr.expr.RHS = rhs
++		attr.val = value
+ 	} else {
+-		r.attrs[key] = &bzl.AssignExpr{
+-			LHS: &bzl.Ident{Name: key},
+-			RHS: rhs,
+-			Op:  "=",
++		r.attrs[key] = attrValue{
++			expr: &bzl.AssignExpr{
++				LHS: &bzl.Ident{Name: key},
++				RHS: rhs,
++				Op:  "=",
++			},
++			val: value,
+ 		}
+ 	}
+ 	r.updated = true
+@@ -976,7 +992,7 @@ func (r *Rule) sync() {
+ 
+ 	for _, k := range []string{"srcs", "deps"} {
+ 		if attr, ok := r.attrs[k]; ok {
+-			bzl.Walk(attr.RHS, sortExprLabels)
++			bzl.Walk(attr.expr.RHS, sortExprLabels)
+ 		}
+ 	}
+ 
+@@ -990,7 +1006,7 @@ func (r *Rule) sync() {
+ 	list := make([]bzl.Expr, 0, len(r.args)+len(r.attrs))
+ 	list = append(list, r.args...)
+ 	for _, attr := range r.attrs {
+-		list = append(list, attr)
++		list = append(list, attr.expr)
+ 	}
+ 	sortedAttrs := list[len(r.args):]
+ 	key := func(e bzl.Expr) string { return e.(*bzl.AssignExpr).LHS.(*bzl.Ident).Name }
+diff --git a/rule/value.go b/rule/value.go
+index 9ca9709..65c8ce0 100644
+--- a/rule/value.go
++++ b/rule/value.go
+@@ -43,6 +43,16 @@ type BzlExprValue interface {
+ 	BzlExpr() bzl.Expr
+ }
+ 
++// Merger is implemented by types that can merge their data into an
++// existing Starlark expression.
++//
++// When Merge is invoked, it is responsible for returning a Starlark expression that contains the
++// result of merging its data into the previously-existing expression provided as other.
++// Note that other can be nil, if no previous attr with this name existed.
++type Merger interface {
++	Merge(other bzl.Expr) bzl.Expr
++}
++
+ type SortedStrings []string
+ 
+ func (s SortedStrings) BzlExpr() bzl.Expr {
+-- 
+2.25.1
+
