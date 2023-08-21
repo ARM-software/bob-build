@@ -46,6 +46,9 @@ cc_library(
 
 cc_library(
     name = "lib_alwayslink",
+    srcs = [
+        "libfoo.cc",
+    ],
     linkstatic = True,
     alwayslink = True,
 )

@@ -22,5 +22,11 @@ bob_library {
 
 bob_library {
     name: "lib_alwayslink",
+    srcs: ["libfoo.cc"],
+    alwayslink: true,
+}
+
+bob_library {
+    name: "lib_empty_do_not_generate",
     alwayslink: true,
 }

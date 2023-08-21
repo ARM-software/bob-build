@@ -1,0 +1,58 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "int_flag", "string_flag")
+
+# gazelle:bob_root
+
+bool_flag(
+    name = "feature_a",
+    build_setting_default = False,
+)
+
+string_flag(
+    name = "option_b",
+    build_setting_default = "--secret",
+)
+
+int_flag(
+    name = "max_counter",
+    build_setting_default = 44,
+)
+
+cc_library(
+    name = "lib_merge_defines",
+    srcs = [
+        "libfoo.cpp",
+    ],
+    hdrs = [
+        "libfoo.h",
+    ] + select({
+        ":config_feature_a": [
+            "src/libs/libb.h",
+        ],
+        "//conditions:default": [],
+    }),
+    defines = [
+        "PRESERVE_DEF",
+        "NEW_FORWARDED_DEFINE",
+    ],
+    linkstatic = True,
+    local_defines = [
+        "NEW_LOCAL_DEFINE",
+    ],
+)
+
+filegroup(
+    name = "merge_filegroup",
+    srcs = glob(["srcs/*.c"]) + select({
+        ":config_feature_a": [
+            "internal/file2.c",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+config_setting(
+    name = "config_feature_a",
+    flag_values = {
+        ":feature_a": "true",
+    },
+)
