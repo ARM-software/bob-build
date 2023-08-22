@@ -1,0 +1,39 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary_host {
+    name: "bar__host",
+    stem: "bar",
+    srcs: ["main.c"],
+}
+
+cc_binary {
+    name: "bar__target",
+    stem: "bar",
+    srcs: ["main.c"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "libfoo__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libfoo",
+    srcs: ["main.c"],
+}
+
+cc_library {
+    name: "libfoo__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libfoo",
+    srcs: ["main.c"],
+    compile_multilib: "both",
+}
+
