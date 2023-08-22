@@ -1,0 +1,44 @@
+bob_toolchain {
+    name: "toolchain_with_strip",
+    // strip: true,
+    // debug_info: "debug_install_group",
+}
+
+bob_install_group {
+    name: "bin_install_group",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/bin",
+    },
+}
+
+bob_install_group {
+    name: "debug_install_group",
+    install_path: "/tmp/some/special/path",
+}
+
+bob_library {
+    name: "libfoo",
+    srcs: [
+        "main.c",
+    ],
+    toolchain: "toolchain_with_strip",
+    install_group: "bin_install_group",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}
+
+bob_executable {
+    name: "bar",
+    srcs: [
+        "main.c",
+    ],
+    toolchain: "toolchain_with_strip",
+    install_group: "bin_install_group",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}
