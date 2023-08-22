@@ -1,0 +1,34 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library_shared {
+    name: "libstripped_library",
+    srcs: ["lib.c"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "stripped_binary",
+    srcs: ["lib.c"],
+    shared_libs: ["libstripped_library"],
+    required: ["libstripped_library"],
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            relative_install_path: "",
+        },
+        lib64: {
+            relative_install_path: "64",
+        },
+    },
+    strip: {
+        all: true,
+    },
+}
+

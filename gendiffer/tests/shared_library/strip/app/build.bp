@@ -1,0 +1,34 @@
+
+
+bob_install_group {
+    name: "libs_host_install_group",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/host/lib",
+    },
+}
+
+bob_install_group {
+    name: "libs_install_group",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+}
+
+bob_shared_library {
+    name: "libstripped_library",
+    srcs: ["lib.c"],
+    strip: true,
+    host: {
+        install_group: "libs_host_install_group",
+    },
+    target: {
+        install_group: "libs_install_group",
+    },
+    build_by_default: true,
+}
