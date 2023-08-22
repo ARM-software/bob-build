@@ -23,6 +23,7 @@ single_version_override(
         "//patches:gazelle/0002-Add-the-new-Merger-interface.patch",
         "//patches:gazelle/0003-Implement-Merge-for-SortedStrings-UnsortedStrings.patch",
         "//patches:gazelle/0004-Expose-the-MergeList-MergeDict-helpers.patch",
+        "//patches:gazelle/0005-fix-correct-rule-s-kind-stmt.patch",
     ],
     version = "0.32.0",
 )
