@@ -76,6 +76,12 @@ var bobLoads = []rule.LoadInfo{
 			"int_flag",
 		},
 	},
+	{
+		Name: "@bazel_skylib//lib:selects.bzl",
+		Symbols: []string{
+			"selects",
+		},
+	},
 }
 
 // Kinds returns a map of maps rule names (kinds) and information on how to
