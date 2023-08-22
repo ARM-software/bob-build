@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "Blueprints": "blueprint",
+    "Android.bp.out": "blueprint",
+    "*.bp": "blueprint",
+    "*.ninja.out": "ninja",
+    "*.config": "kconfig",
+    "*.Mconfig": "kconfig",
+    "Mconfig": "kconfig"
+  }
+}

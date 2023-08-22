@@ -38,6 +38,7 @@ Files:
   .pre-commit-config.yaml
   .gitmodules
   *.gitignore
+  .vscode/*
   DCO.txt
 Copyright: 2018-2023 Arm Ltd. <developers@arm.com>
 License: CC0-1.0
