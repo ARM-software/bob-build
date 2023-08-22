@@ -1,0 +1,86 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sebastian Birunt <sebastian.birunt@arm.com>
+Date: Thu, 17 Aug 2023 11:23:59 +0200
+Subject: fix: correct rule's kind & stmt
+
+Created rule with `NewRule()` is different
+to the rule created with `ruleFromExpr()`
+(when parsing input data).
+
+In the first case (`NewRule()`) kind is set to
+`build.Ident{Name: string}` while it's parsed
+expression in the second case (`ruleFromExpr()`).
+
+For rules packed in a struct like
+`selects.config_setting_group` there is no way
+to create/generate the same rule as the one
+parsed from the file as both will have
+different kinds.
+
+This change unifies kinds for two ways of
+creating rules and correctly sets the identifier
+while fixing loads (`FixLoads()`).
+
+diff --git a/rule/rule.go b/rule/rule.go
+index 502698f..82c14bb 100644
+--- a/rule/rule.go
++++ b/rule/rule.go
+@@ -730,8 +730,20 @@ type attrValue struct {
+ 
+ // NewRule creates a new, empty rule with the given kind and name.
+ func NewRule(kind, name string) *Rule {
++	var call *bzl.CallExpr
+ 	kindIdent := &bzl.Ident{Name: kind}
+-	call := &bzl.CallExpr{X: kindIdent}
++
++	parts := strings.Split(kind, ".")
++	if len(parts) > 1 {
++		// Create the same `CallExpr` like parser does
++		call = &bzl.CallExpr{X: &bzl.DotExpr{
++			Name: strings.Join(parts[1:], "."),
++			X:    &bzl.Ident{Name: parts[0]},
++		}}
++	} else {
++		call = &bzl.CallExpr{X: kindIdent}
++	}
++
+ 	r := &Rule{
+ 		stmt:    stmt{expr: call},
+ 		kind:    kindIdent,
+@@ -771,11 +783,12 @@ func ruleFromExpr(index int, expr bzl.Expr) *Rule {
+ 		return nil
+ 	}
+ 
+-	kind := call.X
+-	if !isNestedDotOrIdent(kind) {
++	if !isNestedDotOrIdent(call.X) {
+ 		return nil
+ 	}
+ 
++	kind := &bzl.Ident{Name: bzl.FormatString(call.X)}
++
+ 	var args []bzl.Expr
+ 	attrs := make(map[string]attrValue)
+ 	for _, arg := range call.List {
+@@ -999,7 +1012,17 @@ func (r *Rule) sync() {
+ 	}
+ 
+ 	call := r.expr.(*bzl.CallExpr)
+-	call.X = r.kind
++
++	// update `call.X` (e.g.: "# gazelle:map_kind")
++	parts := strings.Split(r.Kind(), ".")
++	if len(parts) > 1 {
++		call.X = &bzl.DotExpr{
++			Name: strings.Join(parts[1:], "."),
++			X:    &bzl.Ident{Name: parts[0]},
++		}
++	} else {
++		call.X = &bzl.Ident{Name: r.Kind()}
++	}
+ 
+ 	if len(r.attrs) > 1 {
+ 		call.ForceMultiLine = true
+-- 
+2.25.1
+

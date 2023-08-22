@@ -32,6 +32,7 @@ http_archive(
         "//patches:gazelle/0002-Add-the-new-Merger-interface.patch",
         "//patches:gazelle/0003-Implement-Merge-for-SortedStrings-UnsortedStrings.patch",
         "//patches:gazelle/0004-Expose-the-MergeList-MergeDict-helpers.patch",
+        "//patches:gazelle/0005-fix-correct-rule-s-kind-stmt.patch",
     ],
     sha256 = "29218f8e0cebe583643cbf93cae6f971be8a2484cdcfa1e45057658df8d54002",
     urls = [
