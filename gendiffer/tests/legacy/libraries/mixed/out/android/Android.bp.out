@@ -126,16 +126,6 @@ cc_library_shared {
     compile_multilib: "both",
 }
 
-cc_library_shared {
-    name: "libstripped_library",
-    srcs: ["lib.c"],
-    cflags: ["-DFUNC_NAME=func"],
-    compile_multilib: "both",
-    strip: {
-        all: true,
-    },
-}
-
 cc_library_host_static {
     name: "libuses_target_specific_link__host",
     stem: "libuses_target_specific_link",
@@ -285,26 +275,6 @@ cc_binary_host {
         "lib_transitive_define",
         "lib_forward_defines__host",
     ],
-}
-
-cc_binary {
-    name: "stripped_binary",
-    srcs: ["lib.c"],
-    cflags: ["-DFUNC_NAME=main"],
-    shared_libs: ["libstripped_library"],
-    required: ["libstripped_library"],
-    compile_multilib: "both",
-    multilib: {
-        lib32: {
-            relative_install_path: "",
-        },
-        lib64: {
-            relative_install_path: "64",
-        },
-    },
-    strip: {
-        all: true,
-    },
 }
 
 genrule_bob {

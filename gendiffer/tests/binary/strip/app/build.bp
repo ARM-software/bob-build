@@ -1,0 +1,37 @@
+bob_install_group {
+    name: "bin_host_install_group",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/host/bin",
+    },
+}
+
+bob_install_group {
+    name: "bin_target_install_group",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/target/bin",
+    },
+}
+
+bob_shared_library {
+    name: "libstripped_library",
+    srcs: ["lib.c"],
+}
+
+bob_binary {
+    name: "stripped_binary",
+    srcs: ["lib.c"],
+    shared_libs: ["libstripped_library"],
+    strip: true,
+    host: {
+        install_group: "bin_host_install_group",
+    },
+    target: {
+        install_group: "bin_target_install_group",
+    },
+}

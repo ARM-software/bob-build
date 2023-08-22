@@ -16,8 +16,6 @@ g.bob.BuildDir = redacted
 
 g.bob.SrcDir = redacted
 
-g.bob.strip = ${g.bob.BobScriptsDir}/strip.py
-
 g.bob.toc = ${g.bob.BobScriptsDir}/library_toc.py
 
 g.bob.whole_static_tool = ${g.bob.BobScriptsDir}/whole_static.py
@@ -70,10 +68,6 @@ rule g.bob.shared_library_toc
 rule g.bob.static_library
     command = rm -f ${out} && ${build_wrapper} ${ar} -rcs ${out} ${in}
     description = ${out}
-
-rule g.bob.strip
-    command = ${g.bob.strip} ${args} -o ${out} ${in}
-    description = strip ${out}
 
 rule g.bob.symlink
     command = for i in ${out}; do ln -nsf ${target} $$i; done;
@@ -766,51 +760,6 @@ build ${g.bob.BuildDir}/target/shared/libsharedtest_not_installed.so.toc: $
 
 build libsharedtest_not_installed__target: phony $
         ${g.bob.BuildDir}/target/shared/libsharedtest_not_installed.so
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  libstripped_library
-# Variant: target
-# Type:    bob_shared_library
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-m.libstripped_library_target.cflags = -DFUNC_NAME=func
-m.libstripped_library_target.conlyflags = 
-
-build ${g.bob.BuildDir}/target/objects/libstripped_library/lib.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/lib.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.libstripped_library_target.cflags}
-    conlyflags = ${m.libstripped_library_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/strip/libstripped_library.so: g.bob.strip $
-        ${g.bob.BuildDir}/target/shared/libstripped_library.so | $
-        ${g.bob.strip}
-    args = --format elf --objcopy-tool objcopy --strip
-
-build ${g.bob.BuildDir}/install/lib/libstripped_library.so: g.bob.install $
-        ${g.bob.BuildDir}/target/strip/libstripped_library.so
-
-build ${g.bob.BuildDir}/target/shared/libstripped_library.so: $
-        g.bob.shared_library $
-        ${g.bob.BuildDir}/target/objects/libstripped_library/lib.c.o
-    build_wrapper = 
-    ldflags = -Wl,--as-needed
-    ldlibs = 
-    linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
-    static_libs = 
-
-build ${g.bob.BuildDir}/target/shared/libstripped_library.so.toc: $
-        g.bob.shared_library_toc $
-        ${g.bob.BuildDir}/target/shared/libstripped_library.so | ${g.bob.toc}
-    tocflags = --format elf --objdump-tool objdump
-
-build libstripped_library: phony $
-        ${g.bob.BuildDir}/install/lib/libstripped_library.so $
-        ${g.bob.BuildDir}/target/shared/libstripped_library.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  libuses_target_specific_link
@@ -1548,47 +1497,6 @@ build $
 build strict_lib_binary_with_transitive_define: phony $
         ${g.bob.BuildDir}/host/executable/strict_lib_binary_with_transitive_define
 default strict_lib_binary_with_transitive_define
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  stripped_binary
-# Variant: target
-# Type:    bob_binary
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-m.stripped_binary_target.cflags = -DFUNC_NAME=main
-m.stripped_binary_target.conlyflags = 
-
-build ${g.bob.BuildDir}/target/objects/stripped_binary/lib.c.o: g.bob.cc $
-        ${g.bob.SrcDir}/lib.c
-    build_wrapper = 
-    ccompiler = gcc
-    cflags = ${m.stripped_binary_target.cflags}
-    conlyflags = ${m.stripped_binary_target.conlyflags}
-
-build ${g.bob.BuildDir}/target/executable/stripped_binary: g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/stripped_binary/lib.c.o | $
-        ${g.bob.BuildDir}/target/shared/libstripped_library.so.toc || $
-        ${g.bob.BuildDir}/target/shared/libstripped_library.so
-    build_wrapper = 
-    ldflags = -Wl,--as-needed
-    ldlibs = 
-    linker = g++
-    shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -lstripped_library -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
-    static_libs = 
-
-build ${g.bob.BuildDir}/target/strip/stripped_binary: g.bob.strip $
-        ${g.bob.BuildDir}/target/executable/stripped_binary | ${g.bob.strip}
-    args = --format elf --objcopy-tool objcopy --strip
-
-build ${g.bob.BuildDir}/install/bin/stripped_binary: g.bob.install $
-        ${g.bob.BuildDir}/target/strip/stripped_binary
-
-build stripped_binary: phony ${g.bob.BuildDir}/install/bin/stripped_binary $
-        libstripped_library $
-        ${g.bob.BuildDir}/target/executable/stripped_binary
-default stripped_binary
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  use_sharedtest_host

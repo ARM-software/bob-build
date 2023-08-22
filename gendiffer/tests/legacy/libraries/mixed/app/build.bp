@@ -114,33 +114,6 @@ bob_binary {
     generated_sources: ["use_sharedtest_host"],
 }
 
-bob_shared_library {
-    name: "libstripped_library",
-    srcs: ["lib.c"],
-    cflags: ["-DFUNC_NAME=func"],
-    strip: true,
-    host: {
-        install_group: "IG_host_libs",
-    },
-    target: {
-        install_group: "IG_libs",
-    },
-}
-
-bob_binary {
-    name: "stripped_binary",
-    srcs: ["lib.c"],
-    cflags: ["-DFUNC_NAME=main"],
-    shared_libs: ["libstripped_library"],
-    strip: true,
-    host: {
-        install_group: "IG_host_binaries",
-    },
-    target: {
-        install_group: "IG_binaries",
-    },
-}
-
 bob_install_group {
     name: "IG_host_binaries",
     builder_android_bp: {
