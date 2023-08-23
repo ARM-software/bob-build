@@ -1,0 +1,34 @@
+bob_install_group {
+    name: "install_group",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+}
+
+bob_install_group {
+    name: "host_install_group",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/host/lib",
+    },
+}
+
+bob_library {
+    name: "libfoo",
+    srcs: ["main.cpp"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+
+    host: {
+        install_group: "host_install_group",
+    },
+    target: {
+        install_group: "install_group",
+    },
+}

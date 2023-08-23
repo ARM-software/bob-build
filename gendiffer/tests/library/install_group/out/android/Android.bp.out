@@ -7,16 +7,20 @@ genrule {
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
 }
 
-cc_binary_host {
-    name: "bob_executable_install_group__host",
-    stem: "bob_executable_install_group",
-    srcs: ["hello_world.cpp"],
+cc_library {
+    name: "libfoo__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libfoo",
+    srcs: ["main.cpp"],
 }
 
-cc_binary {
-    name: "bob_executable_install_group__target",
-    stem: "bob_executable_install_group",
-    srcs: ["hello_world.cpp"],
+cc_library {
+    name: "libfoo__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libfoo",
+    srcs: ["main.cpp"],
     compile_multilib: "both",
 }
 
