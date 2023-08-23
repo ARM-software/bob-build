@@ -1,0 +1,38 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary_host {
+    name: "hello__host",
+    stem: "hello",
+    srcs: ["hello.cpp"],
+    local_include_dirs: [
+        "android_app/includes",
+        "android_app/host/includes",
+    ],
+    export_system_include_dirs : [
+        "android_app/includes",
+        "android_app/host/includes",
+    ],
+}
+
+cc_binary {
+    name: "hello__target",
+    stem: "hello",
+    srcs: ["hello.cpp"],
+    local_include_dirs: [
+        "android_app/includes",
+        "android_app/target/includes",
+    ],
+    export_system_include_dirs : [
+        "android_app/includes",
+        "android_app/target/includes",
+    ],
+    compile_multilib: "both",
+}
+
