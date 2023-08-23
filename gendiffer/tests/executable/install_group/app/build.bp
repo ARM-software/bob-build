@@ -1,15 +1,34 @@
 bob_install_group {
-    name: "bin",
+    name: "bin_install_group",
     builder_android_bp: {
         install_path: "bin",
     },
     builder_ninja: {
-        install_path: "out/bin",
+        install_path: "install/bin",
+    },
+}
+
+bob_install_group {
+    name: "bin_host_install_group",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/host/bin",
     },
 }
 
 bob_executable {
     name: "bob_executable_install_group",
     srcs: ["hello_world.cpp"],
-    install_group: "bin",
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+
+    host: {
+        install_group: "bin_host_install_group",
+    },
+    target: {
+        install_group: "bin_install_group",
+    },
 }

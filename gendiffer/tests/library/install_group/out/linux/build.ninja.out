@@ -34,13 +34,17 @@ rule g.bob.cxx
     deps = gcc
     description = ${out}
 
-rule g.bob.executable
-    pool = g.bob.link
-    command = ${build_wrapper} ${linker} ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
-    description = ${out}
-
 rule g.bob.install
     command = rm -f ${out}; cp ${in} ${out}
+    description = ${out}
+
+rule g.bob.shared_library
+    pool = g.bob.link
+    command = ${build_wrapper} ${linker} -shared ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
+    description = ${out}
+
+rule g.bob.static_library
+    command = rm -f ${out} && ${build_wrapper} ${ar} -rcs ${out} ${in}
     description = ${out}
 
 rule g.bootstrap.cp
@@ -48,26 +52,24 @@ rule g.bootstrap.cp
     description = cp ${out}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bob_executable_install_group
+# Module:  libfoo
 # Variant: host
-# Type:    bob_executable
+# Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.bob_executable_install_group_host.cflags = 
-m.bob_executable_install_group_host.cxxflags = 
+m.libfoo_host.cflags = 
+m.libfoo_host.cxxflags = 
 
-build $
-        ${g.bob.BuildDir}/host/objects/bob_executable_install_group/hello_world.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/hello_world.cpp
+build ${g.bob.BuildDir}/host/objects/libfoo/main.cpp.o: g.bob.cxx $
+        ${g.bob.SrcDir}/main.cpp
     build_wrapper = 
-    cflags = ${m.bob_executable_install_group_host.cflags}
+    cflags = ${m.libfoo_host.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.bob_executable_install_group_host.cxxflags}
+    cxxflags = ${m.libfoo_host.cxxflags}
 
-build ${g.bob.BuildDir}/host/executable/bob_executable_install_group: $
-        g.bob.executable $
-        ${g.bob.BuildDir}/host/objects/bob_executable_install_group/hello_world.cpp.o
+build ${g.bob.BuildDir}/host/shared/libfoo.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/host/objects/libfoo/main.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -76,36 +78,41 @@ build ${g.bob.BuildDir}/host/executable/bob_executable_install_group: $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/install/host/bin/bob_executable_install_group: $
-        g.bob.install $
-        ${g.bob.BuildDir}/host/executable/bob_executable_install_group
+build ${g.bob.BuildDir}/host/static/libfoo.a: g.bob.static_library $
+        ${g.bob.BuildDir}/host/objects/libfoo/main.cpp.o
+    ar = ar
+    build_wrapper = 
 
-build bob_executable_install_group__host: phony $
-        ${g.bob.BuildDir}/install/host/bin/bob_executable_install_group $
-        ${g.bob.BuildDir}/host/executable/bob_executable_install_group
-default bob_executable_install_group__host
+build ${g.bob.BuildDir}/install/host/lib/libfoo.a: g.bob.install $
+        ${g.bob.BuildDir}/host/static/libfoo.a
+
+build ${g.bob.BuildDir}/install/host/lib/libfoo.so: g.bob.install $
+        ${g.bob.BuildDir}/host/shared/libfoo.so
+
+build libfoo__host: phony ${g.bob.BuildDir}/install/host/lib/libfoo.a $
+        ${g.bob.BuildDir}/install/host/lib/libfoo.so $
+        ${g.bob.BuildDir}/host/static/libfoo.a
+default libfoo__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bob_executable_install_group
+# Module:  libfoo
 # Variant: target
-# Type:    bob_executable
+# Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.bob_executable_install_group_target.cflags = 
-m.bob_executable_install_group_target.cxxflags = 
+m.libfoo_target.cflags = 
+m.libfoo_target.cxxflags = 
 
-build $
-        ${g.bob.BuildDir}/target/objects/bob_executable_install_group/hello_world.cpp.o $
-        : g.bob.cxx ${g.bob.SrcDir}/hello_world.cpp
+build ${g.bob.BuildDir}/target/objects/libfoo/main.cpp.o: g.bob.cxx $
+        ${g.bob.SrcDir}/main.cpp
     build_wrapper = 
-    cflags = ${m.bob_executable_install_group_target.cflags}
+    cflags = ${m.libfoo_target.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.bob_executable_install_group_target.cxxflags}
+    cxxflags = ${m.libfoo_target.cxxflags}
 
-build ${g.bob.BuildDir}/target/executable/bob_executable_install_group: $
-        g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/bob_executable_install_group/hello_world.cpp.o
+build ${g.bob.BuildDir}/target/shared/libfoo.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/libfoo/main.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -114,14 +121,21 @@ build ${g.bob.BuildDir}/target/executable/bob_executable_install_group: $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/install/bin/bob_executable_install_group: $
-        g.bob.install $
-        ${g.bob.BuildDir}/target/executable/bob_executable_install_group
+build ${g.bob.BuildDir}/target/static/libfoo.a: g.bob.static_library $
+        ${g.bob.BuildDir}/target/objects/libfoo/main.cpp.o
+    ar = ar
+    build_wrapper = 
 
-build bob_executable_install_group__target: phony $
-        ${g.bob.BuildDir}/install/bin/bob_executable_install_group $
-        ${g.bob.BuildDir}/target/executable/bob_executable_install_group
-default bob_executable_install_group__target
+build ${g.bob.BuildDir}/install/lib/libfoo.a: g.bob.install $
+        ${g.bob.BuildDir}/target/static/libfoo.a
+
+build ${g.bob.BuildDir}/install/lib/libfoo.so: g.bob.install $
+        ${g.bob.BuildDir}/target/shared/libfoo.so
+
+build libfoo__target: phony ${g.bob.BuildDir}/install/lib/libfoo.a $
+        ${g.bob.BuildDir}/install/lib/libfoo.so $
+        ${g.bob.BuildDir}/target/static/libfoo.a
+default libfoo__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
