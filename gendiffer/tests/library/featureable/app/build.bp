@@ -1,0 +1,41 @@
+bob_library {
+    name: "lib",
+    srcs: ["lib.cpp"],
+    host_supported: true,
+    target_supported: true,
+    linux: {
+        includes: [
+            "linux_lib/includes",
+        ],
+    },
+    android: {
+        includes: [
+            "android_lib/includes",
+        ],
+    },
+    host: {
+        linux: {
+            includes: [
+                "linux_lib/host/includes",
+            ],
+        },
+        android: {
+            includes: [
+                "android_lib/host/includes",
+            ],
+        },
+    },
+    target: {
+        linux: {
+            includes: [
+                "linux_lib/target/includes",
+            ],
+        },
+        android: {
+            includes: [
+                "android_lib/target/includes",
+            ],
+        },
+    },
+    build_by_default: true,
+}

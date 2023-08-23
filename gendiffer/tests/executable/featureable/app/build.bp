@@ -1,0 +1,41 @@
+bob_executable {
+    name: "hello",
+    srcs: ["hello.cpp"],
+    host_supported: true,
+    target_supported: true,
+    linux: {
+        includes: [
+            "linux_app/includes",
+        ],
+    },
+    android: {
+        includes: [
+            "android_app/includes",
+        ],
+    },
+    host: {
+        linux: {
+            includes: [
+                "linux_app/host/includes",
+            ],
+        },
+        android: {
+            includes: [
+                "android_app/host/includes",
+            ],
+        },
+    },
+    target: {
+        linux: {
+            includes: [
+                "linux_app/target/includes",
+            ],
+        },
+        android: {
+            includes: [
+                "android_app/target/includes",
+            ],
+        },
+    },
+    build_by_default: true,
+}

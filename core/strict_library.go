@@ -221,6 +221,7 @@ func (m *ModuleStrictLibrary) FeaturableProperties() []interface{} {
 		&m.Properties.SplittableProps,
 		&m.Properties.EnableableProps,
 		&m.Properties.InstallableProps,
+		&m.Properties.IncludeProps,
 	}
 }
 
@@ -230,6 +231,7 @@ func (m *ModuleStrictLibrary) targetableProperties() []interface{} {
 		&m.Properties.SplittableProps,
 		&m.Properties.EnableableProps,
 		&m.Properties.InstallableProps,
+		&m.Properties.IncludeProps,
 	}
 }
 
@@ -385,9 +387,9 @@ func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Linkstatic = &t //Default to static
 
-	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, EnableableProps{}, InstallableProps{}, SplittableProps{})
-	module.Properties.Host.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{})
-	module.Properties.Target.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{})
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, EnableableProps{}, InstallableProps{}, SplittableProps{}, IncludeProps{})
+	module.Properties.Host.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{})
+	module.Properties.Target.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
