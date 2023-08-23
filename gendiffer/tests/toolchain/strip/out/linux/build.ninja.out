@@ -10,9 +10,13 @@
 #
 ninja_required_version = 1.7.0
 
+g.bob.BobScriptsDir = redacted/scripts
+
 g.bob.BuildDir = redacted
 
 g.bob.SrcDir = redacted
+
+g.bob.strip = ${g.bob.BobScriptsDir}/strip.py
 
 g.bootstrap.BinDir = redacted/.bootstrap/bin
 
@@ -52,6 +56,10 @@ rule g.bob.static_library
     command = rm -f ${out} && ${build_wrapper} ${ar} -rcs ${out} ${in}
     description = ${out}
 
+rule g.bob.strip
+    command = ${g.bob.strip} ${args} -o ${out} ${in}
+    description = strip ${out}
+
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
@@ -83,8 +91,12 @@ build ${g.bob.BuildDir}/host/executable/bar: g.bob.executable $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/host/shared
     static_libs = 
 
+build ${g.bob.BuildDir}/host/strip/bar: g.bob.strip $
+        ${g.bob.BuildDir}/host/executable/bar | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
+
 build ${g.bob.BuildDir}/install/bin/bar: g.bob.install $
-        ${g.bob.BuildDir}/host/executable/bar
+        ${g.bob.BuildDir}/host/strip/bar
 
 build bar__host: phony ${g.bob.BuildDir}/install/bin/bar $
         ${g.bob.BuildDir}/host/executable/bar
@@ -117,8 +129,12 @@ build ${g.bob.BuildDir}/target/executable/bar: g.bob.executable $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
+build ${g.bob.BuildDir}/target/strip/bar: g.bob.strip $
+        ${g.bob.BuildDir}/target/executable/bar | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
+
 build ${g.bob.BuildDir}/install/bin/bar: g.bob.install $
-        ${g.bob.BuildDir}/target/executable/bar
+        ${g.bob.BuildDir}/target/strip/bar
 
 build bar__target: phony ${g.bob.BuildDir}/install/bin/bar $
         ${g.bob.BuildDir}/target/executable/bar
@@ -156,11 +172,19 @@ build ${g.bob.BuildDir}/host/static/libfoo.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
+build ${g.bob.BuildDir}/host/strip/libfoo.a: g.bob.strip $
+        ${g.bob.BuildDir}/host/static/libfoo.a | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
+
 build ${g.bob.BuildDir}/install/bin/libfoo.a: g.bob.install $
-        ${g.bob.BuildDir}/host/static/libfoo.a
+        ${g.bob.BuildDir}/host/strip/libfoo.a
+
+build ${g.bob.BuildDir}/host/strip/libfoo.so: g.bob.strip $
+        ${g.bob.BuildDir}/host/shared/libfoo.so | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
 
 build ${g.bob.BuildDir}/install/bin/libfoo.so: g.bob.install $
-        ${g.bob.BuildDir}/host/shared/libfoo.so
+        ${g.bob.BuildDir}/host/strip/libfoo.so
 
 build libfoo__host: phony ${g.bob.BuildDir}/install/bin/libfoo.a $
         ${g.bob.BuildDir}/install/bin/libfoo.so $
@@ -199,11 +223,19 @@ build ${g.bob.BuildDir}/target/static/libfoo.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
+build ${g.bob.BuildDir}/target/strip/libfoo.a: g.bob.strip $
+        ${g.bob.BuildDir}/target/static/libfoo.a | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
+
 build ${g.bob.BuildDir}/install/bin/libfoo.a: g.bob.install $
-        ${g.bob.BuildDir}/target/static/libfoo.a
+        ${g.bob.BuildDir}/target/strip/libfoo.a
+
+build ${g.bob.BuildDir}/target/strip/libfoo.so: g.bob.strip $
+        ${g.bob.BuildDir}/target/shared/libfoo.so | ${g.bob.strip}
+    args = --format elf --objcopy-tool objcopy --strip
 
 build ${g.bob.BuildDir}/install/bin/libfoo.so: g.bob.install $
-        ${g.bob.BuildDir}/target/shared/libfoo.so
+        ${g.bob.BuildDir}/target/strip/libfoo.so
 
 build libfoo__target: phony ${g.bob.BuildDir}/install/bin/libfoo.a $
         ${g.bob.BuildDir}/install/bin/libfoo.so $

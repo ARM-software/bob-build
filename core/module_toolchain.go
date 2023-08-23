@@ -40,6 +40,7 @@ type ModuleToolchain struct {
 
 	Properties struct {
 		ModuleToolchainProps
+		StripProps
 
 		Target     TargetSpecific
 		Host       TargetSpecific
@@ -56,6 +57,7 @@ type ModuleToolchainInterface interface {
 }
 
 var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
+var _ stripable = (*ModuleToolchain)(nil)
 
 func (m *ModuleToolchain) FeaturableProperties() []interface{} {
 	return []interface{}{
@@ -140,6 +142,26 @@ func (m *ModuleToolchain) FlagsOut() flag.Flags {
 	}
 
 	return flag.ParseFromProperties(nil, lut, m.Properties)
+}
+
+func (m *ModuleToolchain) getDebugInfo() *string {
+	return m.Properties.getDebugInfo()
+}
+
+func (m *ModuleToolchain) getDebugPath() *string {
+	return m.Properties.getDebugPath()
+}
+
+func (m *ModuleToolchain) setDebugPath(path *string) {
+	m.Properties.setDebugPath(path)
+}
+
+func (m *ModuleToolchain) stripOutputDir(g generatorBackend) string {
+	return getBackendPathInBuildDir(g, string(m.Properties.TargetType), "strip")
+}
+
+func (m *ModuleToolchain) strip() bool {
+	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {

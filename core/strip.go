@@ -45,6 +45,12 @@ type stripable interface {
 	setDebugPath(*string)
 }
 
+// A module which can return a stripable object such as `bob_toolchain`.
+// In the case of legacy modules, it will often return itself.
+type StripCapable interface {
+	GetStripable(blueprint.ModuleContext) stripable
+}
+
 func debugInfoMutator(ctx blueprint.TopDownMutatorContext) {
 	if m, ok := ctx.Module().(stripable); ok {
 		path := getInstallGroupPathFromTag(ctx, tag.DebugInfoTag)

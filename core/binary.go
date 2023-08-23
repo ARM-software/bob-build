@@ -14,6 +14,7 @@ type binaryInterface interface {
 	stripable
 	linkableModule
 	file.Provider // A binary can provide itself as a source
+	StripCapable
 }
 
 var _ binaryInterface = (*ModuleBinary)(nil)  // impl check
@@ -56,6 +57,10 @@ func (m *ModuleBinary) outputFileName() string {
 
 func (m ModuleBinary) GetProperties() interface{} {
 	return m.ModuleLibrary.Properties
+}
+
+func (m *ModuleBinary) GetStripable(ctx blueprint.ModuleContext) stripable {
+	return m
 }
 
 func binaryFactory(config *BobConfig) (blueprint.Module, []interface{}) {

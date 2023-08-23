@@ -1,6 +1,6 @@
 bob_toolchain {
     name: "toolchain_with_strip",
-    // strip: true,
+    strip: true,
 }
 
 bob_install_group {
