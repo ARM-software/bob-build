@@ -1,7 +1,7 @@
 bob_toolchain {
     name: "toolchain_with_strip",
-    // strip: true,
-    // debug_info: "debug_install_group",
+    strip: true,
+    debug_info: "debug_install_group",
 }
 
 bob_install_group {

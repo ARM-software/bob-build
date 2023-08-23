@@ -105,6 +105,10 @@ func (m *ModuleSharedLibrary) strip() bool {
 	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
+func (m *ModuleSharedLibrary) GetStripable(ctx blueprint.ModuleContext) stripable {
+	return m
+}
+
 func (m *ModuleSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).sharedActions(m, ctx)

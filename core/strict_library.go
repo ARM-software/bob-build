@@ -76,6 +76,8 @@ type strictLibraryInterface interface {
 	file.Resolver
 	enableable
 	Featurable
+	StripCapable
+	installable
 }
 
 var _ strictLibraryInterface = (*ModuleStrictLibrary)(nil)
@@ -361,6 +363,20 @@ func (m *ModuleStrictLibrary) getVersionScript(ctx blueprint.ModuleContext) *str
 	// Required for legacy backend implementation
 	// Versioning not yet supported
 	return nil
+}
+
+func (m *ModuleStrictLibrary) GetStripable(ctx blueprint.ModuleContext) stripable {
+	var ret stripable = nil
+
+	ctx.VisitDirectDepsIf(
+		func(dep blueprint.Module) bool {
+			return ctx.OtherModuleDependencyTag(dep) == tag.ToolchainTag
+		},
+		func(dep blueprint.Module) {
+			ret = dep.(stripable)
+		})
+
+	return ret
 }
 
 func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {

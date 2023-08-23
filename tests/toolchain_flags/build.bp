@@ -37,6 +37,9 @@ bob_toolchain {
             "-pedantic",
         ],
     },
+
+    strip: true,
+    debug_info: "IG_resources",
 }
 
 bob_library {
@@ -50,6 +53,13 @@ bob_library {
         "f_complex.h",
     ],
     toolchain: "main_toolchain",
+    host: {
+        install_group: "IG_host_libs",
+    },
+    target: {
+        install_group: "IG_libs",
+    },
+
     host_supported: true,
     target_supported: true,
     build_by_default: true,

@@ -561,9 +561,11 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addBinaryProps(mod, *m, ctx, g)
-	if m.strip() {
+
+	if m.GetStripable(ctx).strip() {
 		addStripProp(mod)
 	}
+
 	if useCcTest {
 		// Avoid using cc_test default setup
 		mod.AddBool("no_named_install_directory", true)
@@ -604,7 +606,8 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
-	if m.strip() {
+
+	if m.GetStripable(ctx).strip() {
 		addStripProp(mod)
 	}
 
@@ -669,6 +672,10 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 
 	addCompilableProps(mod, m, ctx)
 
+	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+		addStripProp(mod)
+	}
+
 	// TODO: Enable relative install path
 	// _, installRel, ok := getSoongInstallPath(m.getInstallableProps())
 	// if ok && installRel != "" {
@@ -687,8 +694,6 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
-
-	// TODO: figure out strip support
 
 }
 
@@ -711,6 +716,10 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 	}
 
 	addCompilableProps(mod, m, ctx)
+
+	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+		addStripProp(mod)
+	}
 
 	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")

@@ -215,43 +215,44 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 		dest := filepath.Join(installPath, filepath.Base(src))
 
 		// Interpose strip target
-		if lib, ok := m.(stripable); ok {
-			debugPath := lib.getDebugPath()
-			separateDebugInfo := debugPath != nil
-			if separateDebugInfo {
-				if *debugPath == "" {
-					// Install next to library by default
-					debugPath = &installPath
-				} else {
-					*debugPath = filepath.Join("${BuildDir}", *debugPath)
-				}
-			}
+		if capable, ok := m.(StripCapable); ok {
+			if lib := capable.GetStripable(ctx); lib != nil {
 
-			if lib.strip() || separateDebugInfo {
-				tc := backend.Get().GetToolchain(lib.getTarget())
-				basename := filepath.Base(src)
-				strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
-				stArgs := tc.GetStripFlags()
-				if lib.strip() {
-					stArgs = append(stArgs, "--strip")
+				debugPath := lib.getDebugPath()
+				separateDebugInfo := debugPath != nil
+
+				debugPathPrefix := installPath //Default to install path
+				if separateDebugInfo && *debugPath != "" {
+					debugPathPrefix = filepath.Join("${BuildDir}", *debugPath)
 				}
-				if separateDebugInfo {
-					dbgFile := filepath.Join(*debugPath, basename+".dbg")
-					stArgs = append(stArgs, "--debug-file")
-					stArgs = append(stArgs, dbgFile)
+
+				if lib.strip() || separateDebugInfo {
+					tc := backend.Get().GetToolchain(lib.getTarget())
+					basename := filepath.Base(src)
+					strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
+					stArgs := tc.GetStripFlags()
+					if lib.strip() {
+						stArgs = append(stArgs, "--strip")
+					}
+					if separateDebugInfo {
+						// TODO: This should really be using file interface when enabled
+						dbgFile := filepath.Join(debugPathPrefix, basename+".dbg")
+						stArgs = append(stArgs, "--debug-file")
+						stArgs = append(stArgs, dbgFile)
+					}
+					stripArgs := map[string]string{
+						"args": strings.Join(stArgs, " "),
+					}
+					ctx.Build(pctx,
+						blueprint.BuildParams{
+							Rule:     stripRule,
+							Outputs:  []string{strippedSrc},
+							Inputs:   []string{src},
+							Args:     stripArgs,
+							Optional: true,
+						})
+					src = strippedSrc
 				}
-				stripArgs := map[string]string{
-					"args": strings.Join(stArgs, " "),
-				}
-				ctx.Build(pctx,
-					blueprint.BuildParams{
-						Rule:     stripRule,
-						Outputs:  []string{strippedSrc},
-						Inputs:   []string{src},
-						Args:     stripArgs,
-						Optional: true,
-					})
-				src = strippedSrc
 			}
 		}
 
