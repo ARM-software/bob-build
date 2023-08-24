@@ -1,0 +1,28 @@
+
+
+bob_gensrcs {
+    name: "gensrcs_single_cpp",
+    srcs: [
+        "f1.in",
+    ],
+    output_extension: "cpp",
+    export_include_dirs: [
+        ".",
+    ],
+    tool_files: ["generator.py"],
+    cmd: "python ${location} --in ${in} --gen ${out}",
+
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+
+    linux: {
+        tags: ["linux"],
+    },
+
+    android: {
+        tags: ["android"],
+    },
+}

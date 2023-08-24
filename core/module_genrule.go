@@ -1,6 +1,8 @@
 package core
 
 import (
+	"regexp"
+
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -36,6 +38,7 @@ type ModuleGenruleInterface interface {
 	file.Consumer
 	file.Resolver
 	pathProcessor
+	Tagable
 }
 
 var _ ModuleGenruleInterface = (*ModuleGenrule)(nil) // impl check
@@ -160,11 +163,27 @@ func (m *ModuleGenrule) getStrictGenerateCommon() *ModuleStrictGenerateCommon {
 	return &m.ModuleStrictGenerateCommon
 }
 
+func (m *ModuleGenrule) HasTagRegex(query *regexp.Regexp) bool {
+	return m.ModuleStrictGenerateCommon.HasTagRegex(query)
+}
+
+func (m *ModuleGenrule) HasTag(query string) bool {
+	return m.ModuleStrictGenerateCommon.HasTag(query)
+}
+
+func (m *ModuleGenrule) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.ModuleStrictGenerateCommon.GetTagsRegex(query)
+}
+
+func (m *ModuleGenrule) GetTags() []string {
+	return m.ModuleStrictGenerateCommon.GetTags()
+}
+
 func generateRuleAndroidFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGenrule{}
 
 	module.ModuleStrictGenerateCommon.init(&config.Properties,
-		StrictGenerateProps{}, GenruleProps{}, EnableableProps{})
+		StrictGenerateProps{}, GenruleProps{}, EnableableProps{}, TagableProps{})
 
 	return module, []interface{}{&module.ModuleStrictGenerateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}

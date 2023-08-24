@@ -1,0 +1,34 @@
+bob_executable {
+    name: "tagable",
+    srcs: ["src.cpp"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+}
+
+bob_executable {
+    name: "tagable_features",
+    srcs: ["src.cpp"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+
+    target: {
+        tags: ["target"],
+    },
+    host: {
+        tags: ["host"],
+    },
+
+    linux: {
+        tags: ["linux"],
+    },
+
+    android: {
+        tags: ["android"],
+    },
+}

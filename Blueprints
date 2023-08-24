@@ -86,6 +86,7 @@ bootstrap_go_package {
         "core/strict_library.go",
         "core/strict_linux_cclibs.go",
         "core/strip.go",
+        "core/tagable.go",
         "core/template.go",
     ],
     testSrcs: [
@@ -94,6 +95,7 @@ bootstrap_go_package {
         "core/feature_test.go",
         "core/template_test.go",
         "core/filepaths_test.go",
+        "core/tagable_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/core",
 }
