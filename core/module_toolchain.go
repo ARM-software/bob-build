@@ -62,6 +62,7 @@ var _ stripable = (*ModuleToolchain)(nil)
 func (m *ModuleToolchain) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.ModuleToolchainProps,
+		&m.Properties.StripProps,
 	}
 }
 
@@ -109,6 +110,7 @@ func (m *ModuleToolchain) getTargetSpecific(tgt toolchain.TgtType) *TargetSpecif
 func (m *ModuleToolchain) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.ModuleToolchainProps,
+		&m.Properties.StripProps,
 	}
 }
 
@@ -167,9 +169,9 @@ func (m *ModuleToolchain) strip() bool {
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleToolchain{}
 
-	module.Properties.Features.Init(&config.Properties, ModuleToolchainProps{})
-	module.Properties.Host.init(&config.Properties, ModuleToolchainProps{})
-	module.Properties.Target.init(&config.Properties, ModuleToolchainProps{})
+	module.Properties.Features.Init(&config.Properties, ModuleToolchainProps{}, StripProps{})
+	module.Properties.Host.init(&config.Properties, ModuleToolchainProps{}, StripProps{})
+	module.Properties.Target.init(&config.Properties, ModuleToolchainProps{}, StripProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
