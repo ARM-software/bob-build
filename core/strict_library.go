@@ -1,6 +1,8 @@
 package core
 
 import (
+	"regexp"
+
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
@@ -55,6 +57,7 @@ type ModuleStrictLibrary struct {
 		StrictLibraryProps
 		IncludeProps
 		TransitiveLibraryProps
+		TagableProps
 
 		Features
 		EnableableProps
@@ -78,6 +81,7 @@ type strictLibraryInterface interface {
 	Featurable
 	StripCapable
 	installable
+	Tagable
 }
 
 var _ strictLibraryInterface = (*ModuleStrictLibrary)(nil)
@@ -215,6 +219,22 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 	return flag.ParseFromProperties(nil, lut, m.Properties)
 }
 
+func (m *ModuleStrictLibrary) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleStrictLibrary) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleStrictLibrary) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleStrictLibrary) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
+}
+
 func (m *ModuleStrictLibrary) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.StrictLibraryProps,
@@ -222,6 +242,7 @@ func (m *ModuleStrictLibrary) FeaturableProperties() []interface{} {
 		&m.Properties.EnableableProps,
 		&m.Properties.InstallableProps,
 		&m.Properties.IncludeProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -231,6 +252,7 @@ func (m *ModuleStrictLibrary) targetableProperties() []interface{} {
 		&m.Properties.EnableableProps,
 		&m.Properties.InstallableProps,
 		&m.Properties.IncludeProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -386,9 +408,9 @@ func LibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStrictLibrary{}
 	module.Properties.Linkstatic = &t //Default to static
 
-	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, EnableableProps{}, InstallableProps{}, SplittableProps{}, IncludeProps{})
-	module.Properties.Host.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{})
-	module.Properties.Target.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{})
+	module.Properties.Features.Init(&config.Properties, StrictLibraryProps{}, EnableableProps{}, InstallableProps{}, SplittableProps{}, IncludeProps{}, TagableProps{})
+	module.Properties.Host.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{}, TagableProps{})
+	module.Properties.Target.init(&config.Properties, StrictLibraryProps{}, InstallableProps{}, EnableableProps{}, IncludeProps{}, TagableProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}

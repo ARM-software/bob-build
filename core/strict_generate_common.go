@@ -20,6 +20,7 @@ type ModuleStrictGenerateCommon struct {
 	module.ModuleBase
 	Properties struct {
 		EnableableProps
+		TagableProps
 		Features
 		StrictGenerateProps
 	}
@@ -30,6 +31,7 @@ type StrictGenerateCommonInterface interface {
 	pathProcessor
 	file.Consumer
 	file.Resolver
+	Tagable
 }
 
 var _ StrictGenerateCommonInterface = (*ModuleStrictGenerateCommon)(nil)
@@ -64,7 +66,10 @@ func (m *ModuleStrictGenerateCommon) Features() *Features {
 }
 
 func (m *ModuleStrictGenerateCommon) FeaturableProperties() []interface{} {
-	return []interface{}{&m.Properties.EnableableProps, &m.Properties.StrictGenerateProps}
+	return []interface{}{
+		&m.Properties.EnableableProps,
+		&m.Properties.StrictGenerateProps,
+		&m.Properties.TagableProps}
 }
 
 func (m *ModuleStrictGenerateCommon) getEnableableProps() *EnableableProps {
@@ -233,6 +238,22 @@ func (m *ModuleStrictGenerateCommon) preprocessCmd() string {
 	cmd = strings.Replace(cmd, "${out}", "${_out_}", -1)
 
 	return cmd
+}
+
+func (m *ModuleStrictGenerateCommon) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleStrictGenerateCommon) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleStrictGenerateCommon) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleStrictGenerateCommon) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
 }
 
 // Module implementing `StrictGenerator`

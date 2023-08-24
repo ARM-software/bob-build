@@ -1,6 +1,7 @@
 package core
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/file"
@@ -39,6 +40,7 @@ type ModuleGensrcsInterface interface {
 	file.Consumer
 	file.Resolver
 	pathProcessor
+	Tagable
 }
 
 var _ ModuleGensrcsInterface = (*ModuleGensrcs)(nil) // impl check
@@ -164,11 +166,27 @@ func (m *ModuleGensrcs) getStrictGenerateCommon() *ModuleStrictGenerateCommon {
 	return &m.ModuleStrictGenerateCommon
 }
 
+func (m *ModuleGensrcs) HasTagRegex(query *regexp.Regexp) bool {
+	return m.ModuleStrictGenerateCommon.HasTagRegex(query)
+}
+
+func (m *ModuleGensrcs) HasTag(query string) bool {
+	return m.ModuleStrictGenerateCommon.HasTag(query)
+}
+
+func (m *ModuleGensrcs) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.ModuleStrictGenerateCommon.GetTagsRegex(query)
+}
+
+func (m *ModuleGensrcs) GetTags() []string {
+	return m.ModuleStrictGenerateCommon.GetTags()
+}
+
 func gensrcsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleGensrcs{}
 
 	module.ModuleStrictGenerateCommon.init(&config.Properties,
-		StrictGenerateProps{}, GensrcsProps{}, EnableableProps{})
+		StrictGenerateProps{}, GensrcsProps{}, EnableableProps{}, TagableProps{})
 
 	return module, []interface{}{&module.ModuleStrictGenerateCommon.Properties, &module.Properties,
 		&module.SimpleName.Properties}

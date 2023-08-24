@@ -1,0 +1,26 @@
+
+
+bob_genrule {
+    name: "gen",
+    srcs: [
+        "src.in",
+    ],
+    out: ["out.json"],
+
+    tool_files: ["generator.py"],
+    cmd: "python ${location} --in ${in} --out ${out}",
+
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+
+    linux: {
+        tags: ["linux"],
+    },
+
+    android: {
+        tags: ["android"],
+    },
+}
