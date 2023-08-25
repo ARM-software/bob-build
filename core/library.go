@@ -80,7 +80,6 @@ func (m *ModuleLibrary) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
-		&m.Properties.Build.SplittableProps,
 	}
 }
 

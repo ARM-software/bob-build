@@ -228,7 +228,6 @@ func (m *ModuleStrictLibrary) FeaturableProperties() []interface{} {
 func (m *ModuleStrictLibrary) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.StrictLibraryProps,
-		&m.Properties.SplittableProps,
 		&m.Properties.EnableableProps,
 		&m.Properties.InstallableProps,
 		&m.Properties.IncludeProps,
