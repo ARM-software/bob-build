@@ -1,0 +1,61 @@
+bob_binary {
+    name: "tagable",
+    srcs: ["src.cpp"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:{{.tag_owner}}",
+    ],
+    owner: "baz",
+}
+
+bob_defaults {
+    name: "tagable_defaults",
+    tags: [
+        "owner:{{.tag_owner}}",
+    ],
+}
+
+bob_binary {
+    name: "bin_tagable_defaults",
+    srcs: ["src.cpp"],
+    defaults: ["tagable_defaults"],
+    owner: "baz",
+}
+
+bob_defaults {
+    name: "tagable_targetable",
+    target: {
+        tags: ["owner:target"],
+    },
+    host: {
+        tags: ["owner:host"],
+    },
+}
+
+bob_binary {
+    name: "bin_tagable_targetable",
+    srcs: ["src.cpp"],
+    defaults: ["tagable_targetable"],
+    owner: "baz",
+    host_supported: true,
+    build_by_default: true,
+}
+
+bob_defaults {
+    name: "tagable_featurable",
+    linux: {
+        tags: ["owner:linux"],
+    },
+
+    android: {
+        tags: ["owner:android"],
+    },
+}
+
+bob_binary {
+    name: "bin_tagable_featurable",
+    srcs: ["src.cpp"],
+    defaults: ["tagable_featurable"],
+    owner: "baz",
+}

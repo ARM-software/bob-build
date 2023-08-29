@@ -9,13 +9,11 @@ bob_genrule {
 
     tool_files: ["generator.py"],
     cmd: "python ${location} --in ${in} --out ${out}",
-
     tags: [
         "foo",
         "bar",
-        "owner:baz",
+        "owner:{{.tag_owner}}",
     ],
-
     linux: {
         tags: ["linux"],
     },
@@ -23,4 +21,5 @@ bob_genrule {
     android: {
         tags: ["android"],
     },
+
 }

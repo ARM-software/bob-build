@@ -7,3 +7,19 @@ genrule {
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
 }
 
+cc_library {
+    name: "tagable",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["src.cpp"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "tagable_features",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["src.cpp"],
+    compile_multilib: "both",
+}
+

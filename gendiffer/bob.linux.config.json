@@ -398,5 +398,9 @@
   "zlib_ldlibs": {
     "ignore": false,
     "value": "-lz"
+  },
+  "tag_owner": {
+    "ignore": false,
+    "value": "baz"
   }
 }

@@ -1,0 +1,29 @@
+
+
+bob_install_group {
+    name: "IG_binaries",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/bin",
+    },
+}
+
+bob_resource {
+    name: "bob_test_resource_in_bin",
+    srcs: [
+        "bob_resource_test_script.sh",
+        "bob_resource_test_data.json",
+    ],
+    install_group: "IG_binaries",
+
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+    owner: "baz",
+    relative_install_path: "bob_tests",
+    build_by_default: true,
+}
