@@ -1,0 +1,50 @@
+bob_toolchain {
+    name: "toolchainA",
+    mte: {
+        memtag_heap: true,
+        diag_memtag_heap: true,
+    },
+}
+
+bob_executable {
+    name: "appA",
+    srcs: ["appA.cpp"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    toolchain: "toolchainA",
+}
+
+bob_toolchain {
+    name: "toolchainB",
+    mte: {
+        memtag_heap: true,
+        diag_memtag_heap: false,
+    },
+}
+
+bob_executable {
+    name: "appB",
+    srcs: ["appB.cpp"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    toolchain: "toolchainB",
+}
+
+bob_toolchain {
+    name: "toolchainC",
+    mte: {
+        memtag_heap: false,
+        diag_memtag_heap: false,
+    },
+}
+
+bob_executable {
+    name: "appC",
+    srcs: ["appC.cpp"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+    toolchain: "toolchainC",
+}

@@ -1,0 +1,78 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library {
+    name: "libA__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libA",
+    srcs: ["libA.cpp"],
+    sanitize: {
+        memtag_heap: true,
+        diag: {
+            memtag_heap: true,
+        },
+    },
+}
+
+cc_library {
+    name: "libA__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libA",
+    srcs: ["libA.cpp"],
+    compile_multilib: "both",
+    sanitize: {
+        memtag_heap: true,
+        diag: {
+            memtag_heap: true,
+        },
+    },
+}
+
+cc_library {
+    name: "libB__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libB",
+    srcs: ["libB.cpp"],
+    sanitize: {
+        memtag_heap: true,
+    },
+}
+
+cc_library {
+    name: "libB__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libB",
+    srcs: ["libB.cpp"],
+    compile_multilib: "both",
+    sanitize: {
+        memtag_heap: true,
+    },
+}
+
+cc_library {
+    name: "libC__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libC",
+    srcs: ["libC.cpp"],
+}
+
+cc_library {
+    name: "libC__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libC",
+    srcs: ["libC.cpp"],
+    compile_multilib: "both",
+}
+

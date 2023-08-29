@@ -46,6 +46,9 @@ type ModuleToolchain struct {
 		Host       TargetSpecific
 		TargetType toolchain.TgtType `blueprint:"mutated"`
 
+		// Arm Memory Tagging Extension
+		AndroidMTEProps
+
 		Features
 	}
 }

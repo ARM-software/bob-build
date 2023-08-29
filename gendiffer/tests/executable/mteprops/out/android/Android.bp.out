@@ -1,0 +1,66 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary_host {
+    name: "appA__host",
+    stem: "appA",
+    srcs: ["appA.cpp"],
+    sanitize: {
+        memtag_heap: true,
+        diag: {
+            memtag_heap: true,
+        },
+    },
+}
+
+cc_binary {
+    name: "appA__target",
+    stem: "appA",
+    srcs: ["appA.cpp"],
+    compile_multilib: "both",
+    sanitize: {
+        memtag_heap: true,
+        diag: {
+            memtag_heap: true,
+        },
+    },
+}
+
+cc_binary_host {
+    name: "appB__host",
+    stem: "appB",
+    srcs: ["appB.cpp"],
+    sanitize: {
+        memtag_heap: true,
+    },
+}
+
+cc_binary {
+    name: "appB__target",
+    stem: "appB",
+    srcs: ["appB.cpp"],
+    compile_multilib: "both",
+    sanitize: {
+        memtag_heap: true,
+    },
+}
+
+cc_binary_host {
+    name: "appC__host",
+    stem: "appC",
+    srcs: ["appC.cpp"],
+}
+
+cc_binary {
+    name: "appC__target",
+    stem: "appC",
+    srcs: ["appC.cpp"],
+    compile_multilib: "both",
+}
+

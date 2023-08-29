@@ -50,6 +50,12 @@ bob_toolchain {
             "-pedantic",
         ],
     },
+
+    // Applies only for Android
+    mte: {
+        memtag_heap: true,
+        diag_memtag_heap: false,
+    },
 }
 ```
 
@@ -82,6 +88,16 @@ Flags that will be used for .S compiles.
 ### **bob_toolchain.aslags** (optional)
 
 Flags that will be used for all link steps.
+
+---
+
+### **bob_toolchain.mte** (optional)
+
+Flags to be used to enable the Arm Memory Tagging Extension.
+Only supported on Android.
+
+- **memtag_heap** - Memory-tagging, only available on arm64 if `diag_memtag_heap` unset or false, enables async memory tagging.
+- **diag_memtag_heap** - Memory-tagging, only available on arm64 requires `memtag_heap`: true if set, enables sync memory tagging.
 
 # Usage
 
