@@ -1,22 +1,24 @@
-bob_library {
-    name: "tagable",
+bob_shared_library {
+    name: "libtagable",
     srcs: ["src.cpp"],
     tags: [
         "foo",
         "bar",
-        "owner:{{.tag_owner}}",
+        "owner:baz",
     ],
-    build_by_default: true,
+    owner: "baz",
+
 }
 
-bob_library {
-    name: "tagable_features",
+bob_shared_library {
+    name: "libtagable_features",
     srcs: ["src.cpp"],
     tags: [
         "foo",
         "bar",
-        "owner:{{.tag_owner}}",
+        "owner:baz",
     ],
+    owner: "baz",
 
     target: {
         tags: ["target"],
@@ -32,5 +34,4 @@ bob_library {
     android: {
         tags: ["android"],
     },
-    build_by_default: true,
 }

@@ -1,0 +1,56 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "bin_tagable_defaults",
+    srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+cc_binary {
+    name: "bin_tagable_featurable",
+    srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+cc_binary_host {
+    name: "bin_tagable_targetable__host",
+    stem: "bin_tagable_targetable",
+    srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+cc_binary {
+    name: "bin_tagable_targetable__target",
+    stem: "bin_tagable_targetable",
+    srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+cc_binary {
+    name: "tagable",
+    srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+

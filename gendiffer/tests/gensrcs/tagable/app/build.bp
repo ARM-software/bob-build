@@ -15,7 +15,7 @@ bob_gensrcs {
     tags: [
         "foo",
         "bar",
-        "owner:baz",
+        "owner:{{.tag_owner}}",
     ],
 
     linux: {

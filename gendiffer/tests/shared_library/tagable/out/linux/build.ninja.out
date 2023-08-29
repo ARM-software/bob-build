@@ -10,9 +10,13 @@
 #
 ninja_required_version = 1.7.0
 
+g.bob.BobScriptsDir = redacted/scripts
+
 g.bob.BuildDir = redacted
 
 g.bob.SrcDir = redacted
+
+g.bob.toc = ${g.bob.BobScriptsDir}/library_toc.py
 
 g.bootstrap.BinDir = redacted/.bootstrap/bin
 
@@ -39,33 +43,34 @@ rule g.bob.shared_library
     command = ${build_wrapper} ${linker} -shared ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
     description = ${out}
 
-rule g.bob.static_library
-    command = rm -f ${out} && ${build_wrapper} ${ar} -rcs ${out} ${in}
-    description = ${out}
+rule g.bob.shared_library_toc
+    command = ${g.bob.toc} ${in} -o ${out} ${tocflags}
+    description = Generate toc ${out}
+    restat = true
 
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  tagable
+# Module:  libtagable
 # Variant: target
-# Type:    bob_library
+# Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.tagable_target.cflags = 
-m.tagable_target.cxxflags = 
+m.libtagable_target.cflags = 
+m.libtagable_target.cxxflags = 
 
-build ${g.bob.BuildDir}/target/objects/tagable/src.cpp.o: g.bob.cxx $
+build ${g.bob.BuildDir}/target/objects/libtagable/src.cpp.o: g.bob.cxx $
         ${g.bob.SrcDir}/src.cpp
     build_wrapper = 
-    cflags = ${m.tagable_target.cflags}
+    cflags = ${m.libtagable_target.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.tagable_target.cxxflags}
+    cxxflags = ${m.libtagable_target.cxxflags}
 
-build ${g.bob.BuildDir}/target/shared/tagable.so: g.bob.shared_library $
-        ${g.bob.BuildDir}/target/objects/tagable/src.cpp.o
+build ${g.bob.BuildDir}/target/shared/libtagable.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/libtagable/src.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -74,34 +79,33 @@ build ${g.bob.BuildDir}/target/shared/tagable.so: g.bob.shared_library $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/target/static/tagable.a: g.bob.static_library $
-        ${g.bob.BuildDir}/target/objects/tagable/src.cpp.o
-    ar = ar
-    build_wrapper = 
+build ${g.bob.BuildDir}/target/shared/libtagable.so.toc: $
+        g.bob.shared_library_toc ${g.bob.BuildDir}/target/shared/libtagable.so $
+        | ${g.bob.toc}
+    tocflags = --format elf --objdump-tool objdump
 
-build tagable: phony ${g.bob.BuildDir}/target/static/tagable.a
-default tagable
+build libtagable: phony ${g.bob.BuildDir}/target/shared/libtagable.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  tagable_features
+# Module:  libtagable_features
 # Variant: target
-# Type:    bob_library
+# Type:    bob_shared_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.tagable_features_target.cflags = 
-m.tagable_features_target.cxxflags = 
+m.libtagable_features_target.cflags = 
+m.libtagable_features_target.cxxflags = 
 
-build ${g.bob.BuildDir}/target/objects/tagable_features/src.cpp.o: g.bob.cxx $
-        ${g.bob.SrcDir}/src.cpp
+build ${g.bob.BuildDir}/target/objects/libtagable_features/src.cpp.o: $
+        g.bob.cxx ${g.bob.SrcDir}/src.cpp
     build_wrapper = 
-    cflags = ${m.tagable_features_target.cflags}
+    cflags = ${m.libtagable_features_target.cflags}
     cxxcompiler = g++
-    cxxflags = ${m.tagable_features_target.cxxflags}
+    cxxflags = ${m.libtagable_features_target.cxxflags}
 
-build ${g.bob.BuildDir}/target/shared/tagable_features.so: $
+build ${g.bob.BuildDir}/target/shared/libtagable_features.so: $
         g.bob.shared_library $
-        ${g.bob.BuildDir}/target/objects/tagable_features/src.cpp.o
+        ${g.bob.BuildDir}/target/objects/libtagable_features/src.cpp.o
     build_wrapper = 
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -110,14 +114,13 @@ build ${g.bob.BuildDir}/target/shared/tagable_features.so: $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/target/static/tagable_features.a: g.bob.static_library $
-        ${g.bob.BuildDir}/target/objects/tagable_features/src.cpp.o
-    ar = ar
-    build_wrapper = 
+build ${g.bob.BuildDir}/target/shared/libtagable_features.so.toc: $
+        g.bob.shared_library_toc $
+        ${g.bob.BuildDir}/target/shared/libtagable_features.so | ${g.bob.toc}
+    tocflags = --format elf --objdump-tool objdump
 
-build tagable_features: phony $
-        ${g.bob.BuildDir}/target/static/tagable_features.a
-default tagable_features
+build libtagable_features: phony $
+        ${g.bob.BuildDir}/target/shared/libtagable_features.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
