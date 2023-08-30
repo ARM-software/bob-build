@@ -1,0 +1,15 @@
+bob_glob {
+    name: "src_glob",
+    srcs: ["**/*.c"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+
+}
+
+bob_binary {
+    name: "glob_test",
+    srcs: [":src_glob"],
+}
