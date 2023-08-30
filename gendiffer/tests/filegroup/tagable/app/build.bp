@@ -1,0 +1,31 @@
+bob_filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+}
+
+bob_filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+}
+
+bob_filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":forward_filegroup",
+    ],
+    tags: [
+        "foo",
+        "bar",
+        "owner:baz",
+    ],
+}
