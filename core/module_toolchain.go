@@ -1,6 +1,8 @@
 package core
 
 import (
+	"regexp"
+
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
@@ -41,6 +43,7 @@ type ModuleToolchain struct {
 	Properties struct {
 		ModuleToolchainProps
 		StripProps
+		TagableProps
 
 		Target     TargetSpecific
 		Host       TargetSpecific
@@ -57,6 +60,7 @@ type ModuleToolchainInterface interface {
 	Featurable
 	targetSpecificLibrary
 	flag.Provider
+	Tagable
 }
 
 var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
@@ -66,6 +70,7 @@ func (m *ModuleToolchain) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.ModuleToolchainProps,
 		&m.Properties.StripProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -114,6 +119,7 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.ModuleToolchainProps,
 		&m.Properties.StripProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -169,12 +175,28 @@ func (m *ModuleToolchain) strip() bool {
 	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
+func (m *ModuleToolchain) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleToolchain) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleToolchain) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleToolchain) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
+}
+
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleToolchain{}
 
-	module.Properties.Features.Init(&config.Properties, ModuleToolchainProps{}, StripProps{})
-	module.Properties.Host.init(&config.Properties, ModuleToolchainProps{}, StripProps{})
-	module.Properties.Target.init(&config.Properties, ModuleToolchainProps{}, StripProps{})
+	module.Properties.Features.Init(&config.Properties, ModuleToolchainProps{}, StripProps{}, TagableProps{})
+	module.Properties.Host.init(&config.Properties, ModuleToolchainProps{}, StripProps{}, TagableProps{})
+	module.Properties.Target.init(&config.Properties, ModuleToolchainProps{}, StripProps{}, TagableProps{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
