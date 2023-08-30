@@ -1,0 +1,25 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+gensrcs_bob {
+    name: "transform_source_single",
+    srcs: ["f2.in"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+    tools: ["generator.py"],
+    depfile: false,
+    export_gen_include_dirs: ["transform_source"],
+    out: {
+        match: "(.+)\\.in",
+        replace: [
+            "$1.cpp",
+            "$1.h",
+        ],
+    },
+}
+

@@ -1,0 +1,32 @@
+
+
+bob_transform_source {
+    name: "transform_source_single",
+    srcs: [
+        "f2.in",
+    ],
+    out: {
+        match: "(.+)\\.in",
+    },
+    always_enabled_feature: {
+        out: {
+            replace: [
+                "$1.cpp",
+                "$1.h",
+            ],
+        },
+    },
+    export_gen_include_dirs: ["transform_source"],
+    tools: ["generator.py"],
+    cmd: "python ${tool} --in ${in} --gen ${out} --gen-implicit-header",
+
+    build_by_default: true,
+
+    tags: [
+        "foo",
+        "bar",
+    ],
+    linux: {
+        tags: ["linux"],
+    },
+}
