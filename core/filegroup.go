@@ -11,6 +11,7 @@ type ModuleFilegroup struct {
 	module.ModuleBase
 	Properties struct {
 		SourceProps
+		TagableProps
 		Features
 	}
 }
@@ -51,6 +52,7 @@ func (m *ModuleFilegroup) processPaths(ctx blueprint.BaseModuleContext) {
 func (m *ModuleFilegroup) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.SourceProps,
+		&m.Properties.TagableProps,
 	}
 }
 

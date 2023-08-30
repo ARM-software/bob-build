@@ -318,7 +318,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 		mod.AddString("relative_install_path", installRel)
 	}
 
-	addProvenanceProps(mod, m.Properties.Build.AndroidProps)
+	addProvenanceProps(mod, &m)
 	addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 	addRequiredModules(mod, m, ctx)
 
@@ -694,8 +694,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	// 	mod.AddString("relative_install_path", installRel)
 	// }
 
-	// TODO: Make addProvenanceProps generic and enable it if needed
-	// addProvenanceProps(mod, m.Properties.Build.AndroidProps)
+	addProvenanceProps(mod, m)
 
 	// TODO: Make addPGOProps generic and enable it if needed
 	// addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
@@ -737,4 +736,5 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 		mod.AddString("compile_multilib", "both")
 	}
 
+	addProvenanceProps(mod, m)
 }

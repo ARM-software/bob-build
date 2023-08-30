@@ -256,6 +256,10 @@ func (m *ModuleStrictGenerateCommon) GetTags() []string {
 	return m.Properties.TagableProps.GetTags()
 }
 
+func (m *ModuleStrictGenerateCommon) GenerateBuildActions(blueprint.ModuleContext) {
+	// Stub to fullfill blueprint.Module
+}
+
 // Module implementing `StrictGenerator`
 // are able to generate output files
 type StrictGenerator interface {

@@ -2,6 +2,7 @@ package core
 
 import (
 	"path/filepath"
+	"regexp"
 
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
@@ -210,6 +211,7 @@ type ModuleResource struct {
 	Properties struct {
 		ResourceProps
 		Features
+		TagableProps
 	}
 }
 
@@ -217,6 +219,7 @@ type resourceInterface interface {
 	pathProcessor
 	file.Resolver
 	file.Consumer
+	Tagable
 }
 
 var _ resourceInterface = (*ModuleResource)(nil) // impl check
@@ -299,6 +302,22 @@ func (m ModuleInstallGroup) GetProperties() interface{} {
 
 func (m ModuleResource) GetProperties() interface{} {
 	return m.Properties
+}
+
+func (m *ModuleResource) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleResource) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleResource) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleResource) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
 }
 
 func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {

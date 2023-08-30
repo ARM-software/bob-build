@@ -26,6 +26,8 @@ type ModuleLibrary struct {
 		Features
 		TransitiveLibraryProps
 		Build
+		TagableProps
+
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
 
@@ -45,6 +47,7 @@ type libraryInterface interface {
 	SharedLibraryExporter
 	file.Consumer
 	flag.Consumer
+	Tagable
 }
 
 // TODO: These interfaces are causing a go build issue with 'duplicate functions'
@@ -61,6 +64,7 @@ func (m *ModuleLibrary) defaultableProperties() []interface{} {
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
 		&m.Properties.Build.SplittableProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -73,6 +77,7 @@ func (m *ModuleLibrary) FeaturableProperties() []interface{} {
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
 		&m.Properties.Build.SplittableProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -80,6 +85,7 @@ func (m *ModuleLibrary) targetableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -509,12 +515,42 @@ func (m *ModuleLibrary) checkField(cond bool, fieldName string) {
 
 func (m *ModuleLibrary) exportSharedLibs() []string { return m.Properties.Shared_libs }
 
+func (m *ModuleLibrary) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleLibrary) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleLibrary) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleLibrary) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
+}
+
 func (m *ModuleLibrary) LibraryFactory(config *BobConfig, module blueprint.Module) (blueprint.Module, []interface{}) {
-	m.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, SplittableProps{})
-	m.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{})
-	m.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{})
+	m.Properties.Features.Init(&config.Properties,
+		CommonProps{},
+		BuildProps{},
+		SplittableProps{},
+		TagableProps{})
+	m.Properties.Host.init(&config.Properties,
+		CommonProps{},
+		BuildProps{},
+		TagableProps{})
+	m.Properties.Target.init(&config.Properties,
+		CommonProps{},
+		BuildProps{},
+		TagableProps{})
 
 	return module, []interface{}{&m.Properties, &m.SimpleName.Properties}
+}
+
+func (m *ModuleLibrary) GenerateBuildActions(blueprint.ModuleContext) {
+	// Stub to fullfill blueprint.Module
 }
 
 func getBinaryOrSharedLib(m blueprint.Module) (*ModuleLibrary, bool) {
