@@ -1,0 +1,36 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+filegroup {
+    name: "all_filegroup",
+    srcs: [":forward_filegroup"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+
+filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
+}
+

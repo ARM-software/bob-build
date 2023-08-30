@@ -1,6 +1,8 @@
 package core
 
 import (
+	"regexp"
+
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 
@@ -21,6 +23,7 @@ type filegroupInterface interface {
 	pathProcessor
 	file.Resolver
 	file.Provider
+	Tagable
 }
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check
@@ -64,9 +67,25 @@ func (m ModuleFilegroup) GetProperties() interface{} {
 	return m.Properties
 }
 
+func (m *ModuleFilegroup) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleFilegroup) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleFilegroup) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleFilegroup) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
+}
+
 func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleFilegroup{}
-	module.Properties.Features.Init(&config.Properties, SourceProps{})
+	module.Properties.Features.Init(&config.Properties, SourceProps{}, TagableProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
