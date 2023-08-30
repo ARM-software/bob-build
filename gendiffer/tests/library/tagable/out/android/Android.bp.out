@@ -12,6 +12,10 @@ cc_library {
     host_supported: false,
     device_supported: true,
     srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
     compile_multilib: "both",
 }
 
@@ -20,6 +24,10 @@ cc_library {
     host_supported: false,
     device_supported: true,
     srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
     compile_multilib: "both",
 }
 

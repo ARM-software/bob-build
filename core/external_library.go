@@ -20,12 +20,16 @@ type ModuleExternalLibrary struct {
 	module.ModuleBase
 	Properties struct {
 		ExternalLibProps
+		TagableProps
 		Features
 	}
 }
 
 func (m *ModuleExternalLibrary) FeaturableProperties() []interface{} {
-	return []interface{}{&m.Properties.ExternalLibProps}
+	return []interface{}{
+		&m.Properties.ExternalLibProps,
+		&m.Properties.TagableProps,
+	}
 }
 
 func (m *ModuleExternalLibrary) Features() *Features {

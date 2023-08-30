@@ -2,6 +2,7 @@ package core
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
@@ -53,6 +54,7 @@ type ModuleKernelObject struct {
 		Features
 		CommonProps
 		KernelProps
+		TagableProps
 		Defaults []string
 	}
 }
@@ -66,6 +68,7 @@ type kernelModuleInterface interface {
 	aliasable   // appending to aliases
 	pathProcessor
 	file.Resolver
+	Tagable
 }
 
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
@@ -165,6 +168,22 @@ func (m *ModuleKernelObject) extraSymbolsFiles(ctx blueprint.BaseModuleContext) 
 			files = append(files, path)
 		})
 	return
+}
+
+func (m *ModuleKernelObject) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleKernelObject) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleKernelObject) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleKernelObject) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
 }
 
 type kbuildArgs struct {

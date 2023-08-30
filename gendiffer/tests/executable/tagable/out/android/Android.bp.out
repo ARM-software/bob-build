@@ -11,11 +11,19 @@ cc_binary {
     name: "tagable",
     srcs: ["src.cpp"],
     compile_multilib: "both",
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
 }
 
 cc_binary {
     name: "tagable_features",
     srcs: ["src.cpp"],
     compile_multilib: "both",
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
 }
 

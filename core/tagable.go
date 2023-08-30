@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/ARM-software/bob-build/internal/utils"
+	"github.com/google/blueprint"
 )
 
 type TagableProps struct {
@@ -11,6 +12,8 @@ type TagableProps struct {
 }
 
 type Tagable interface {
+	blueprint.Module
+
 	// Returns true if any of the tags match the expression
 	HasTagRegex(*regexp.Regexp) bool
 

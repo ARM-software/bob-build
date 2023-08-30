@@ -20,6 +20,7 @@ type ModuleDefaults struct {
 		Features
 		Build
 		KernelProps
+		TagableProps
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
 	}
@@ -55,6 +56,7 @@ func (m *ModuleDefaults) defaultableProperties() []interface{} {
 		&m.Properties.Build.BuildProps,
 		&m.Properties.Build.SplittableProps,
 		&m.Properties.KernelProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -64,6 +66,7 @@ func (m *ModuleDefaults) FeaturableProperties() []interface{} {
 		&m.Properties.Build.BuildProps,
 		&m.Properties.Build.SplittableProps,
 		&m.Properties.KernelProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -72,6 +75,7 @@ func (m *ModuleDefaults) targetableProperties() []interface{} {
 		&m.Properties.Build.CommonProps,
 		&m.Properties.Build.BuildProps,
 		&m.Properties.KernelProps,
+		&m.Properties.TagableProps,
 	}
 }
 
@@ -125,9 +129,9 @@ func (m ModuleDefaults) GetProperties() interface{} {
 func defaultsFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleDefaults{}
 
-	module.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, SplittableProps{})
-	module.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{})
-	module.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{})
+	module.Properties.Features.Init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, SplittableProps{}, TagableProps{})
+	module.Properties.Host.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, TagableProps{})
+	module.Properties.Target.init(&config.Properties, CommonProps{}, BuildProps{}, KernelProps{}, TagableProps{})
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }

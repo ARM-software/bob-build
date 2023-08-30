@@ -9,10 +9,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
@@ -85,13 +85,25 @@ func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleCo
 	mod.AddStringList("required", srcs)
 }
 
-func addProvenanceProps(m bpwriter.Module, props AndroidProps) {
-	if props.isProprietary() {
-		m.AddString("owner", proptools.String(props.Owner))
-		m.AddBool("vendor", true)
-		m.AddBool("proprietary", true)
-		m.AddBool("soc_specific", true)
+var ownerTagRegex = regexp.MustCompile(`^owner:[a-zA-Z0-9_-]+`)
+
+func addProvenanceProps(writer bpwriter.Module, mod Tagable) {
+
+	tags := mod.GetTagsRegex(ownerTagRegex)
+
+	switch len(tags) {
+	case 0:
+		// No owner tag set.
+	default:
+		panic(fmt.Errorf("Cannot set multiple 'owner:' tags on '%s'", mod.Name()))
+	case 1:
+		tagVals := strings.Split(tags[0], ":")
+		writer.AddString("owner", tagVals[1])
+		writer.AddBool("vendor", true)
+		writer.AddBool("proprietary", true)
+		writer.AddBool("soc_specific", true)
 	}
+
 }
 
 func addInstallProps(m bpwriter.Module, props *InstallableProps, proprietary bool) {
