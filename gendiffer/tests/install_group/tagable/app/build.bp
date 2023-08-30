@@ -1,0 +1,27 @@
+bob_install_group {
+    name: "IG_binaries",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "install/bin",
+    },
+    tags: ["install"],
+    linux: {
+        tags: ["linux"],
+    },
+}
+
+bob_install_group {
+    name: "IG_libs",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+    tags: ["install"],
+    linux: {
+        tags: ["linux"],
+    },
+}

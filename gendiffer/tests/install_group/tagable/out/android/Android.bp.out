@@ -1,0 +1,59 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: [
+        "build.bp",
+        "nested/build.bp",
+    ],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "bob_test_install_deps",
+    srcs: ["nested/main.c"],
+    required: [
+        "bob_test_install_deps_binary",
+        "bob_test_install_deps_library",
+        "bob_test_install_deps_resource__nested_bob_test_install_deps_resource.txt",
+    ],
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            relative_install_path: "",
+        },
+        lib64: {
+            relative_install_path: "64",
+        },
+    },
+}
+
+cc_binary {
+    name: "bob_test_install_deps_binary",
+    srcs: ["nested/main.c"],
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            relative_install_path: "",
+        },
+        lib64: {
+            relative_install_path: "64",
+        },
+    },
+}
+
+cc_library_static {
+    name: "bob_test_install_deps_library",
+    srcs: ["nested/library.c"],
+    compile_multilib: "both",
+}
+
+prebuilt_data_bob {
+    name: "bob_test_install_deps_resource__nested_bob_test_install_deps_resource.txt",
+    src: "nested/bob_test_install_deps_resource.txt",
+    sub_dir: "resources",
+    filename_from_src: true,
+    installable: true,
+}
+
