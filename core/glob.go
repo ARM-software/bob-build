@@ -2,6 +2,7 @@ package core
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
@@ -34,6 +35,7 @@ type ModuleGlob struct {
 	module.ModuleBase
 	Properties struct {
 		GlobProps
+		TagableProps
 	}
 }
 
@@ -42,6 +44,7 @@ type moduleGlobInterface interface {
 	pathProcessor
 	file.Resolver
 	file.Provider
+	Tagable
 }
 
 var _ moduleGlobInterface = (*ModuleGlob)(nil) // impl check
@@ -100,6 +103,22 @@ func (m *ModuleGlob) GenerateBuildActions(ctx blueprint.ModuleContext) {
 
 func (m ModuleGlob) GetProperties() interface{} {
 	return m.Properties
+}
+
+func (m *ModuleGlob) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleGlob) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleGlob) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleGlob) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
 }
 
 func globFactory(config *BobConfig) (blueprint.Module, []interface{}) {
