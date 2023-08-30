@@ -1,0 +1,28 @@
+bob_toolchain {
+    name: "main_toolchain",
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    tags: ["toolchain"],
+    target: {
+
+        tags: ["target"],
+    },
+    host: {
+
+        tags: ["host"],
+    },
+    always_enabled_feature: {
+
+        tags: ["feature"],
+    },
+}
+
+bob_library {
+    name: "lib",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "main_toolchain",
+}
