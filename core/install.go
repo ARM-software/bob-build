@@ -174,6 +174,7 @@ type ModuleInstallGroup struct {
 	module.ModuleBase
 	Properties struct {
 		InstallGroupProps
+		TagableProps
 		Features
 	}
 }
@@ -183,11 +184,27 @@ func (m *ModuleInstallGroup) GenerateBuildActions(ctx blueprint.ModuleContext) {
 }
 
 func (m *ModuleInstallGroup) FeaturableProperties() []interface{} {
-	return []interface{}{&m.Properties.InstallGroupProps}
+	return []interface{}{&m.Properties.InstallGroupProps, &m.Properties.TagableProps}
 }
 
 func (m *ModuleInstallGroup) Features() *Features {
 	return &m.Properties.Features
+}
+
+func (m *ModuleInstallGroup) HasTagRegex(query *regexp.Regexp) bool {
+	return m.Properties.TagableProps.HasTagRegex(query)
+}
+
+func (m *ModuleInstallGroup) HasTag(query string) bool {
+	return m.Properties.TagableProps.HasTag(query)
+}
+
+func (m *ModuleInstallGroup) GetTagsRegex(query *regexp.Regexp) []string {
+	return m.Properties.TagableProps.GetTagsRegex(query)
+}
+
+func (m *ModuleInstallGroup) GetTags() []string {
+	return m.Properties.TagableProps.GetTags()
 }
 
 // Modules implementing the installable interface can be install their output
@@ -204,6 +221,7 @@ type ResourceProps struct {
 	InstallableProps
 	EnableableProps
 	AndroidProps
+	TagableProps
 }
 
 type ModuleResource struct {
@@ -211,7 +229,6 @@ type ModuleResource struct {
 	Properties struct {
 		ResourceProps
 		Features
-		TagableProps
 	}
 }
 
@@ -322,7 +339,7 @@ func (m *ModuleResource) GetTags() []string {
 
 func installGroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleInstallGroup{}
-	module.Properties.Features.Init(&config.Properties, InstallGroupProps{})
+	module.Properties.Features.Init(&config.Properties, InstallGroupProps{}, TagableProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }
