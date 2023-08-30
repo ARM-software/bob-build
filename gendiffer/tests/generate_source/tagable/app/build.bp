@@ -1,0 +1,19 @@
+
+
+bob_generate_source {
+    name: "match_source_gen",
+    out: ["foo.c"],
+    cmd: "touch ${out}",
+
+    tags: [
+        "foo",
+        "bar",
+        "owner:{{.tag_owner}}",
+    ],
+
+    linux: {
+        tags: ["linux"],
+    },
+
+    build_by_default: true,
+}
