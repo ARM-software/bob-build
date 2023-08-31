@@ -1,5 +1,4 @@
 load("//gendiffer:gendiffer.bzl", "bob_generation_test")
-load("@rules_multirun//:defs.bzl", "multirun")
 
 [bob_generation_test(
     name = file[0:-len("/WORKSPACE")],
@@ -9,14 +8,16 @@ load("@rules_multirun//:defs.bzl", "multirun")
     ),
 ) for file in glob(["**/WORKSPACE"])]
 
-multirun(
-    name = "verify_snapshots",
-    commands = [
-        (file[0:-len("/WORKSPACE")] + platform)
-        for platform in [
-            "_android",
-            "_linux",
-        ]
-        for file in glob(["**/WORKSPACE"])
-    ],
-)
+# This target is currently broken. It executes the binary in the current path, unlike running a test directly,
+# which outputs all the files in the local work tree with incorrect permissions.
+# multirun(
+#     name = "verify_snapshots",
+#     commands = [
+#         (file[0:-len("/WORKSPACE")] + platform)
+#         for platform in [
+#             "_android",
+#             "_linux",
+#         ]
+#         for file in glob(["**/WORKSPACE"])
+#     ],
+# )
