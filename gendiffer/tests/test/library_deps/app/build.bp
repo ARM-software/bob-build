@@ -1,0 +1,18 @@
+// Test that checks `bob_test` library dependency
+
+bob_library {
+    name: "libFoo",
+    srcs: ["libFoo.cpp"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}
+
+bob_test {
+    name: "bob_test_lib_deps",
+    srcs: ["main.cpp"],
+    deps: ["libFoo"],
+    host_supported: true,
+    target_supported: true,
+    build_by_default: true,
+}

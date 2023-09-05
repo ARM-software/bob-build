@@ -1,0 +1,17 @@
+// Test for targetable `bob_test` module
+
+bob_test {
+    name: "simple_bob_test_host",
+    srcs: ["main.cpp"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
+bob_test {
+    name: "simple_bob_test_target",
+    srcs: ["main.cpp"],
+    host_supported: false,
+    target_supported: true,
+    build_by_default: true,
+}
