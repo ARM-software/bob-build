@@ -16,6 +16,16 @@ bob_executable {
     build_by_default: true,
 }
 
+bob_test {
+    name: "bob_test_simple_strict_binary_test",
+    deps: ["bob_test_static_lib"],
+    srcs: ["main.c"],
+    copts: ["-DBIN_FLAG=1"],
+    host_supported: true,
+    target_supported: false,
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_strict_bins",
     srcs: [

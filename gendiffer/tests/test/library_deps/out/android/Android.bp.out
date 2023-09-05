@@ -1,0 +1,46 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_test_host {
+    name: "bob_test_lib_deps__host",
+    stem: "bob_test_lib_deps",
+    srcs: ["main.cpp"],
+    static_libs: ["libFoo__host"],
+    include_build_directory: false,
+    auto_gen_config: false,
+    gtest: false,
+}
+
+cc_test {
+    name: "bob_test_lib_deps__target",
+    stem: "bob_test_lib_deps",
+    srcs: ["main.cpp"],
+    static_libs: ["libFoo__target"],
+    include_build_directory: false,
+    auto_gen_config: false,
+    gtest: false,
+}
+
+cc_library {
+    name: "libFoo__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libFoo",
+    srcs: ["libFoo.cpp"],
+}
+
+cc_library {
+    name: "libFoo__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libFoo",
+    srcs: ["libFoo.cpp"],
+    compile_multilib: "both",
+}
+
