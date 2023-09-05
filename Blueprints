@@ -74,6 +74,7 @@ bootstrap_go_package {
         "core/module_generate_source.go",
         "core/module_genrule.go",
         "core/module_gensrcs.go",
+        "core/module_test_binary.go",
         "core/module_toolchain.go",
         "core/module_transform_source.go",
         "core/output_producer.go",

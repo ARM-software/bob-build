@@ -46,6 +46,7 @@ go_library(
         "module_generate_source.go",
         "module_genrule.go",
         "module_gensrcs.go",
+        "module_test_binary.go",
         "module_toolchain.go",
         "module_transform_source.go",
         "output_producer.go",
