@@ -7,7 +7,9 @@ type ModuleTest struct {
 }
 
 func (m *ModuleTest) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	// TODO: implement
+	if isEnabled(m) {
+		getGenerator(ctx).executableTestActions(m, ctx)
+	}
 }
 
 func executableTestFactory(config *BobConfig) (blueprint.Module, []interface{}) {
