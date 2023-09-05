@@ -365,6 +365,13 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
+	if t, ok := ctx.Module().(*ModuleTest); ok {
+		ctx.AddVariationDependencies(nil, tag.DepTag, t.Properties.Deps...)
+		if t.Properties.Toolchain != nil {
+			ctx.AddVariationDependencies(nil, tag.ToolchainTag, *t.Properties.Toolchain)
+		}
+	}
+
 	if km, ok := ctx.Module().(*ModuleKernelObject); ok {
 		ctx.AddDependency(ctx.Module(), tag.KernelModuleTag, km.Properties.Extra_symbols...)
 	}
