@@ -91,6 +91,7 @@ type generatorBackend interface {
 	filegroupActions(*ModuleFilegroup, blueprint.ModuleContext)
 	strictBinaryActions(*ModuleStrictBinary, blueprint.ModuleContext)
 	strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext)
+	executableTestActions(*ModuleTest, blueprint.ModuleContext)
 }
 
 // The `BobConfig` type is stored against the Blueprint context, and allows us to

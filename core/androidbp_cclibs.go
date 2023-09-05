@@ -705,7 +705,46 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
+}
 
+func (g *androidBpGenerator) executableTestActions(m *ModuleTest, ctx blueprint.ModuleContext) {
+	if !enabledAndRequired(m) {
+		return
+	}
+
+	var modType string
+
+	switch m.Properties.TargetType {
+	case toolchain.TgtTypeHost:
+		modType = "cc_test_host"
+	case toolchain.TgtTypeTarget:
+		modType = "cc_test"
+	}
+
+	mod, err := AndroidBpFile().NewModule(modType, m.shortName())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	addCompilableProps(mod, m, ctx)
+
+	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+		addStripProp(mod)
+	}
+
+	// TODO: For executables we need to be clear about where to
+	// install both 32 and 64 bit versions of the
+	// binaries.
+	// if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	// 	mod.AddString("compile_multilib", "both")
+	// }
+
+	// Avoid using cc_test default setup
+	// TODO: `relative_install_path` needed - Module install directory may only be disabled if relative_install_path is set
+	// mod.AddBool("no_named_install_directory", true)
+	mod.AddBool("include_build_directory", false)
+	mod.AddBool("auto_gen_config", false)
+	mod.AddBool("gtest", false)
 }
 
 func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {

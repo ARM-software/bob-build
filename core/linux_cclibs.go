@@ -711,3 +711,8 @@ func (g *linuxGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprin
 	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
 	addPhony(m, ctx, installDeps, optional)
 }
+
+func (g *linuxGenerator) executableTestActions(m *ModuleTest, ctx blueprint.ModuleContext) {
+	// Duplicate behaviour of `bob_executable`
+	g.strictBinaryActions(&m.ModuleStrictBinary, ctx)
+}
