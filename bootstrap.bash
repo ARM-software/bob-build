@@ -42,7 +42,7 @@ if [ "$(printf "%s\n1.20\n" "$go_version" | sort -t '.' -k 1,1 -k 2,2 -g | head 
     echo 'WARNING: Go >=1.20 is not fully supported by Bob/Blueprint and requires a pre-installed Go `std` package on the system. Attempting workaround. You may disable this workaround by setting `GO120_NO_STD_INSTALL=1`'
 
     ret=0
-    (GODEBUG=installgoroot=all go install std) || ret=$?
+    (GODEBUG=installgoroot=all CC="gcc" go install std) || ret=$?
 
     if [ $ret -eq 126 ]; then
       echo 'WARNING: Permissions failed when installing Go standard library. Build will proceed assuming a sandboxed envrioment, if you are not in a sandbox with a pre-existing Go `std` library installed please run `GODEBUG=installgoroot=all go install std` with sudo.'
