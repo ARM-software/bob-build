@@ -527,8 +527,14 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 
 	mod.AddStringList("include_dirs", include_dirs)
 	mod.AddStringList("local_include_dirs", local_include_dirs)
-	mod.AddStringList("export_include_dirs", export_include_dirs)
-	mod.AddStringList("export_system_include_dirs ", export_system_include_dirs)
+
+	// only `cc_library` contains those properties
+	_, ok1 := ctx.Module().(*ModuleStrictBinary)
+	_, ok2 := ctx.Module().(*ModuleTest)
+	if !ok1 && !ok2 {
+		mod.AddStringList("export_include_dirs", export_include_dirs)
+		mod.AddStringList("export_system_include_dirs ", export_system_include_dirs)
+	}
 
 	mod.AddStringList("shared_libs", shared_libs)
 	mod.AddStringList("static_libs", static_libs)

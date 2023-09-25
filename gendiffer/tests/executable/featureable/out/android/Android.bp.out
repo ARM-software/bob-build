@@ -15,10 +15,6 @@ cc_binary_host {
         "android_app/includes",
         "android_app/host/includes",
     ],
-    export_system_include_dirs : [
-        "android_app/includes",
-        "android_app/host/includes",
-    ],
 }
 
 cc_binary {
@@ -26,10 +22,6 @@ cc_binary {
     stem: "hello",
     srcs: ["hello.cpp"],
     local_include_dirs: [
-        "android_app/includes",
-        "android_app/target/includes",
-    ],
-    export_system_include_dirs : [
         "android_app/includes",
         "android_app/target/includes",
     ],
