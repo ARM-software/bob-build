@@ -1,125 +1,49 @@
 # Module: bob_toolchain
 
+> ⚠ Warning, this target is experimental & the attributes/interface are likely to keep changing. ⚠
+
+```bp
+bob_toolchain {
+    name, cflags, conlyflags, cppflags, asflags, ldflags, target, host, mte,
+}
+```
+
 This module is never instantiated but provides toolchain flags
 only to strict modules i.e. `bob_executable` & `bob_library`.
 
 The toolchain module will export flags via flag provider and a
 dependency tag of `ToolchainTag`.
 
-## Full specification of `bob_toolchain` properties
+Supports:
 
-`bob_toolchain` supports [features](../features.md)
+- [features](../features.md)
 
-```bp
-bob_toolchain {
-    name: "main_toolchain",
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
-    conlyflags: [
-        "-std=c99",
-    ],
-    cppflags: [
-        "-std=c++11",
-    ],
-    asflags: [
-        "-Dasflag",
-    ],
-    ldflags: [
-        "-Wl,--stats",
-    ],
-    target: {
-        conlyflags: [
-            "-Dconlyflag_target",
-        ],
-        ldflags: [
-            "-Wl,--no-allow-shlib-undefined",
-        ],
-    },
-    host: {
-        cppflags: [
-            "-Dcppflag_host",
-        ],
-        ldflags: [
-            "-Wl,--allow-shlib-undefined",
-        ],
-    },
-    always_enabled_feature: {
-        cflags: [
-            "-pedantic",
-        ],
-    },
+## Properties
 
-    // Applies only for Android
-    mte: {
-        memtag_heap: true,
-        diag_memtag_heap: false,
-    },
-}
-```
+|                                                      |                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`name`](properties/common_properties.md#name)       | String; required                                                                                                                                                                                                                                                                                                                                                                                      |
+| [`target`](properties/common_properties.md#target)   | Property map; default is `{}`.                                                                                                                                                                                                                                                                                                                                                                        |
+| [`host`](<(properties/common_properties.md#host)>)   | Property map; default is `{}`.                                                                                                                                                                                                                                                                                                                                                                        |
+| [`cflags`](properties/legacy_properties.md#cflags)   | List of strings; default is `[]`<br>Flags used for C/C++ compilation.                                                                                                                                                                                                                                                                                                                                 |
+| `conlyflags`                                         | List of strings; default is `[]`<br>Flags used for C compilation.<br>See [`cflags`](properties/legacy_properties.md#cflags)                                                                                                                                                                                                                                                                           |
+| `cppflags`                                           | List of strings; default is `[]`<br>Flags used for C++ compilation.<br>See [`cflags`](properties/legacy_properties.md#cflags)                                                                                                                                                                                                                                                                         |
+| [`asflags`](properties/legacy_properties.md#asflags) | List of strings; default is `[]`<br>Flags used for assembly compilation.                                                                                                                                                                                                                                                                                                                              |
+| [`ldflags`](properties/legacy_properties.md#ldflags) | List of strings; default is `[]`<br>Flags used for linking.                                                                                                                                                                                                                                                                                                                                           |
+| `mte`                                                | Property map; default is `{}`.<br>Flags to be used to enable the Arm Memory Tagging Extension.<br>Only supported on Android.<br>- **memtag_heap** - Memory-tagging, only available on arm64 if `diag_memtag_heap` unset or false, enables async memory tagging.<br>- **diag_memtag_heap** - Memory-tagging, only available on arm64 requires `memtag_heap`: true if set, enables sync memory tagging. |
 
----
-
-### **bob_toolchain.cflags** (optional)
-
-Flags that will be used for C and C++ compiles.
-
----
-
-### **bob_toolchain.conlyflags** (optional)
-
-Flags that will be used for C compiles
-
----
-
-### **bob_toolchain.cppflags** (optional)
-
-Flags that will be used for C++ compiles.
-
----
-
-### **bob_toolchain.ldlags** (optional)
-
-Flags that will be used for .S compiles.
-
----
-
-### **bob_toolchain.aslags** (optional)
-
-Flags that will be used for all link steps.
-
----
-
-### **bob_toolchain.mte** (optional)
-
-Flags to be used to enable the Arm Memory Tagging Extension.
-Only supported on Android.
-
-- **memtag_heap** - Memory-tagging, only available on arm64 if `diag_memtag_heap` unset or false, enables async memory tagging.
-- **diag_memtag_heap** - Memory-tagging, only available on arm64 requires `memtag_heap`: true if set, enables sync memory tagging.
-
-# Usage
+## Example
 
 To specify correct `bob_toolchain` dependency use `toolchain` property e.g.:
 
 ```bp
 bob_toolchain {
     name: "main",
-    ...
 }
 
 bob_library {
     name: "foo",
-    ...
     toolchain: "main",
-    ...
 }
 
-bob_executable {
-    name: "app",
-    ...
-    toolchain: "main",
-    ...
-}
 ```

@@ -1,4 +1,12 @@
-# Module: bob_alias
+# `bob_alias`
+
+> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
+
+```bp
+bob_alias {
+name, srcs, add_to_alias,
+}
+```
 
 This target is used to trigger builds of multiple other targets.
 This target itself does not build anything, it just ensures all
@@ -12,36 +20,14 @@ An alias will not try to build a target that is disabled. This
 simplifies the use of aliases, so you don't have to try and
 replicate the enable conditions on the target to avoid errors.
 
-`bob_alias` supports [features](../features.md)
+Supports:
 
-## Full specification of `bob_alias` properties
+- [features](../features.md)
 
-```bp
-bob_alias {
-    name: "custom_name",
-    srcs: ["module_name_foo", "module_name_bar"],
+## Properties
 
-    add_to_alias: ["bob_alias_module_name"],
-
-    // features available
-}
-```
-
----
-
-### **bob_alias.name** (required)
-
-The unique identifier that can be used to refer to this module.
-
----
-
-### **bob_alias.srcs** (optional)
-
-Modules that this alias will cause to build.
-
----
-
-### **bob_alias.add_to_alias** (optional)
-
-Allows this alias to add itself to another alias.
-`bob_alias_module_name` should refer to existing `bob_alias`.
+|                                                |                                                                                                                         |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [`name`](properties/common_properties.md#name) | String; required                                                                                                        |
+| `srcs`                                         | List of targets; default is `[]`<br>Modules that this alias will cause to build.                                        |
+| `add_to_alias`                                 | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`. |

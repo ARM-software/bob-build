@@ -1,53 +1,23 @@
-# Module: bob_glob
+# `bob_glob`
+
+```bp
+bob_glob {
+    name, srcs, exclude, allow_empty,
+}
+```
 
 Glob is a helper module that finds all files that match certain path patterns
 and returns a list of their paths.
 
-## Full specification of `bob_glob` properties
+Supports:
 
-```bp
-bob_glob {
-    name: "glob_lib_srcs",
-    srcs: ["src/**/*.cpp"],
-    exclude: ["src/**/exclude_*.cpp"],
-    allow_empty: False
-}
-```
+- [Gazelle generation](../../gazelle/README.md)
 
----
+## Properties
 
-### **bob_glob.name** (required)
-
-The unique identifier that can be used to refer to this module.
-
----
-
-### **bob_glob.srcs** (required)
-
-Path patterns that are relative to the current module.
-
----
-
-### **bob_glob.exclude** (optional)
-
-Path patterns that are relative to the current module
-to exclude from `srcs`.
-
-<!--
-
-
-### **bob_glob.exclude_directories** (optional)
-
-If the `exclude_directories` argument is set to `true` (default),
-the directories will be omitted from the results.
-
-TODO: Directories are not yet supported
-
--->
-
----
-
-### **bob_glob.allow_empty** (optional)
-
-If the `allow_empty` argument is set to `false`, the glob function will
-error-out if the result is the empty list. By default it is set to `true`.
+|                                                |                                                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`name`](properties/common_properties.md#name) | String; required                                                                                                                                 |
+| [`srcs`](properties/strict_properties.md)      | List of sources; default is `[]`<br>Supports glob patterns.                                                                                      |
+| `exclude`                                      | List of sources; default is `[]`<br>Path patterns that are relative to the current module to exclude from `srcs`.                                |
+| `allow_empty`                                  | Boolean; default is `true`<br>If the `allow_empty` argument is set to `false`, the glob function will error-out if the result is the empty list. |

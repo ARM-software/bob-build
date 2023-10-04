@@ -1,37 +1,23 @@
-# Module: bob_install_group
+# `bob_install_group`
+
+> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
+
+```bp
+bob_install_group {
+    name, install_path
+}
+```
 
 This target is used to identify a common directory in which to
 copy outputs after the build completes.
 
-`bob_install_group` supports [features](../features.md)
+Supports:
 
-## Full specification of `bob_install_group` properties
+- [features](../features.md)
 
-```bp
-bob_install_group {
-    name: "custom_name",
+## Properties
 
-    install_path: "{{.lib_path}}",
-
-    // features available
-}
-```
-
----
-
-### **bob_install_group.name** (required)
-
-The unique identifier that can be used to refer to this module.
-
----
-
-### **bob_install_group.install_path** (optional)
-
-Path to install output of aggregated targets.
-
-Note that on the Android.bp backend, the first path element is treated
-specially, see
-[user guide](../user_guide/android.md#androidbp-backend-install-paths)
-for detail. The path does not reference the system or vendor
-partition, and the item will be installed in system or vendor
-based on whether the `owner` property has been set.
+|                                                |                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`name`](properties/common_properties.md#name) | String; required                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `install_path`                                 | String; default is `none`<br>Path to install output of aggregated targets.<br>Note that on the Android.bp backend, the first path element is treated specially, see [user guide](../user_guide/android.md#androidbp-backend-install-paths) for detail. The path does not reference the system or vendor partition, and the item will be installed in system or vendor based on whether the `owner` property has been set. |

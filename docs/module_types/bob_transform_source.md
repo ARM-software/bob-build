@@ -1,4 +1,12 @@
-# Module: bob_transform_source
+# `bob_transform_source`
+
+> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md), please refer to the [migration guide](./migration/bob_transform_source.md).
+
+```bp
+bob_transform_source {
+    name, srcs, exclude_srcs, out, depfile, enabled, build_by_default, add_to_alias, cmd, tools, host_bin, tags, generated_deps, generated_sources, args, console, export_gen_include_dirs, flag_defaults, target, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, rsp_content,
+}
+```
 
 This target generates files via a custom shell command. This is usually source
 code (headers or C files), but it could be anything. A single module generates
@@ -13,86 +21,58 @@ See [https://golang.org/pkg/regexp/](https://golang.org/pkg/regexp/) for more in
 The working directory will be the source directory, and all paths
 will be relative to the source directory if not else noted.
 
-The module type is `bob_transform_source`.
+Supports:
 
-## Full specification of `bob_transform_source` properties
+- [features](../features.md)
 
-For general common properties please
-[check detailed documentation](common_module_properties.md).
+## Properties
 
-For generate common properties please
-[check detailed documentation](common_generate_module_properties.md).
+|                                                                          |                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`name`](properties/common_properties.md#name)                           | String; required                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `srcs`                                                                   | List of targets; default is `[]`<br>Modules that this alias will cause to build.                                                                                                                                                                                                                                                                                                                                           |
+| `exclude_srcs`                                                           | List of exclude patterns; default is `[]`<br> Files to be removed from `srcs`.<br>Supports wildcards, with the same caveat as `srcs`.                                                                                                                                                                                                                                                                                      |
+| `out.match`                                                              | String; required<br>Regular expression to capture groups from srcs. There is support for catching groups.                                                                                                                                                                                                                                                                                                                  |
+| `out.replace`                                                            | List of strings; required<br>Names of outputs, which can use capture groups from match. We can use catch groups e.g. `$1` for first group.                                                                                                                                                                                                                                                                                 |
+| `out.implicit_srcs`                                                      | List of strings; required<br>Implicit sources are input files that do not get mentioned on the command line and are not specified in the explicit sources.                                                                                                                                                                                                                                                                 |
+| `out.implicit_outs`                                                      | List of strings; required<br>Implicit outputs are output files that do not get mentioned on the command line, which can use capture groups from match.                                                                                                                                                                                                                                                                     |
+| `add_to_alias`                                                           | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`.                                                                                                                                                                                                                                                                                                    |
+| [`enabled`](properties/common_properties.md#enabled)                     | Boolean; default is `true`.                                                                                                                                                                                                                                                                                                                                                                                                |
+| `build_by_default`                                                       | Boolean; default is `true`<br>Whether it is built by default in a build with no targets requested.                                                                                                                                                                                                                                                                                                                         |
+| `post_install_tool`                                                      | String <br>Script used during post install. Not supported on Android.                                                                                                                                                                                                                                                                                                                                                      |
+| [`post_install_cmd`](properties/legacy_properties.md#post_install_cmd)   | String; default is `none`<br>Command to execute on file(s) after they are installed.                                                                                                                                                                                                                                                                                                                                       |
+| [`post_install_args`](properties/legacy_properties.md#post_install_args) | List of strings; default is `[]`<br>Arguments to insert into `post_install_cmd`.                                                                                                                                                                                                                                                                                                                                           |
+| `relative_install_path`                                                  | String; default is `none`<br>Path to install to, relative to the install_group's path.                                                                                                                                                                                                                                                                                                                                     |
+| [`generated_sources`](properties/legacy_properties.md#generated_sources) | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                       |
+| [`generated_deps`](properties/legacy_properties.md#generated_deps)       | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                       |
+| [`install_group`](properties/legacy_properties.md#install_group)         | Target; default is `none`<br>Module name of a `bob_install_group` specifying an installation directory.                                                                                                                                                                                                                                                                                                                    |
+| [`install_deps`](properties/legacy_properties.md#install_deps)           | List of targets; default is `[]`<br>Other modules which must be installed.                                                                                                                                                                                                                                                                                                                                                 |
+| [`tags`](properties/common_properties.md#tags)                           | List of strings; default is `[]`                                                                                                                                                                                                                                                                                                                                                                                           |
+| `depfile`                                                                | Boolean; default is `false`.<br>If true, a dependency file describing discovered dependencies will be generated with a specific name, derived from module name.                                                                                                                                                                                                                                                            |
+| [`cmd`](properties/legacy_properties.md#cmd)                             | String; required<br> The command that is to be run for this module.                                                                                                                                                                                                                                                                                                                                                        |
+| `tools`                                                                  | List of strings. Default is `[]`<br> A path to the tools that are to be used in `cmd`.                                                                                                                                                                                                                                                                                                                                     |
+| `host_bin`                                                               | Target.<br>Refers to a `bob_binary.name` with `host_supported: true` which is used in this module's command.<br>Specifying this in `host_bin` ensures that the host tool will be built before the `bob_generated`.                                                                                                                                                                                                         |
+| `args`                                                                   | List of strings; default is `[]`<br> A list of `args` that will be space separated and added to the `cmd`.<br>The [`match_srcs`](../strings.md#match_srcs) function can be used in this property to reference files listed in `srcs`.                                                                                                                                                                                      |
+| `console`                                                                | Boolean; default is `false`<br>This will use Ninja's [console pool](https://ninja-build.org/manual.html#_the_literal_console_literal_pool)<br>When `true` one job will run at a time - they won't be concurrent.                                                                                                                                                                                                           |
+| `export_gen_include_dirs`                                                | List of strings; default is `[]`<br>Additional include paths to add for modules that use `generated_headers`. This will be defined relative to the module-specific build directory.                                                                                                                                                                                                                                        |
+| `flag_defaults`                                                          | List of targets; default is `[]`<br>Generated sources may wish to access the build flags being used for "normal" library or executable modules. `flag_defaults` should contain the name of a `bob_defaults` module, whose flags will be accessible from this one, by allowing extra variables to be used in `bob_generated.cmd`: `ar`, `cc`, `cxx`, `asflags`, `cflags`, `conlyflags`, `cxxflags`, `ldflags` and `ldlibs`. |
+| `target`                                                                 | String; one of `["target", "host"]`<br>The target type. This is to choose between the host and target variant of the `bob_defaults` specified in `bob_generate.flag_defaults`.                                                                                                                                                                                                                                             |
+| `rsp_content`                                                            | String; default is `none`<br>If set, the value provided will be expanded and written to a file immediately before command execution, and the file name will be made available to the command as `${rspfile}`. This allows commands to use argument lists greater than the command line length limit, by writing e.g. the input or output list to a file.                                                                   |
+
+## Example
 
 ```bp
 bob_transform_source {
     name: "custom_name",
     srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
     exclude_srcs: ["src/common/skip_this.cpp"],
-
     out: {
         match: "file_([0-9])+.cpp",
         replace: ["new_$1.o"],
         implicit_srcs: ["my_file.scu"],
     },
-    depfile: true,
-
-    enabled: false,
-    build_by_default: true,
-
-    add_to_alias: ["bob_alias.name"],
-
     cmd: "python ${tool} ${args} ${in} -d ${depfile}",
     tools: ["my_script.py"],
-
     host_bin: "clang-tblgen",
-    tags: ["optional"],
-
-    generated_deps: ["bob_generate_source.name"],
-    generated_sources: ["bob_generate_source.name"],
-
-    args: ["-i graphic/ui.h"],
-
-    console: true,
-
-    export_gen_include_dirs: ["."],
-
-    flag_defaults: ["bob_default.name"],
-
-    target: "host",
-
-    install_group: "bob_install_group.name",
-    install_deps: ["bob_resource.name"],
-    relative_install_path: "unit/objects",
-    post_install_tool: "post_install.py",
-    post_install_cmd: "${tool} ${args} ${out}",
-    post_install_args: ["arg1", "arg2"],
-    rsp_content: "${in}",
 }
 ```
-
----
-
-### **bob_transform_source.out.match** (required)
-
-Regular expression to capture groups from srcs. There is support for catching groups.
-
----
-
-### **bob_transform_source.out.replace** (required)
-
-Names of outputs, which can use capture groups from match.
-We can use catch groups e.g. `$1` for first group.
-
----
-
-### **bob_transform_source.out.implicit_srcs** (optional)
-
-List of implicit sources. Implicit sources are input files that do not get mentioned on
-the command line and are not specified in the explicit sources.
-
----
-
-### **bob_generate_source.out.implicit_outs** (optional)
-
-List of implicit outputs. Implicit outputs are output files that do not get mentioned on
-the command line, which can use capture groups from match.

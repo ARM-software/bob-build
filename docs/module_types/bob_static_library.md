@@ -1,4 +1,12 @@
-# Module: bob_static_lib
+# `bob_static_lib`
+
+> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md)
+
+```bp
+bob_static_library {
+    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, target_supported, target, host_supported, host, out, cflags, export_cflags, cxxflags, asflags, conlyflags, ldflags, static_libs, shared_libs, reexport_libs, whole_static_libs, ldlibs, generated_headers, generated_sources, generated_deps, tags, owner, strip, include_dirs, local_include_dirs, export_local_include_dirs, export_include_dirs, export_local_system_include_dirs, export_system_include_dirs, build_wrapper, forwarding_shlib, add_lib_dirs_to_rpath, install_group, install_deps, relative_install_path, debug_info, post_install_tool, post_install_cmd, post_install_args,
+}
+```
 
 Used to create a static library, i.e. `.a` file.
 
@@ -18,168 +26,57 @@ are sorted and added to the command line. Bob also allows static libraries to
 specify dependent shared libraries and ldlibs, and these will all propagate to
 the link commands of binaries and shared libraries that use the static library.
 `whole_static_libs` can also be used to aggregate static libraries.
+Supports:
 
-## Full specification of `bob_static_library` properties
+- [features](../features.md)
+- [defaults](./bob_defaults.md)
 
-`bob_static_library` supports [features](../features.md)
+## Properties
 
-Most properties are optional. For detailed documentation
-please go to [common module properties](common_module_properties.md).
-
-```bp
-bob_static_library {
-    name: "custom_name",
-    srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
-    exclude_srcs: ["src/common/skip_this.cpp"],
-
-    enabled: false,
-    build_by_default: true,
-
-    add_to_alias: ["bob_alias.name"],
-
-    defaults: ["bob_default.name"],
-
-    target_supported: true,
-    target: { ... },
-
-    host_supported: true,
-    host: { ... },
-
-    out: "alternate_output_name",
-
-    cflags: ["-DDEBUG=1", "-Wall"],
-    export_cflags: ["..."],
-
-    cxxflags: ["..."],
-    asflags: ["..."],
-    conlyflags: ["..."],
-
-    ldflags: ["..."],
-    export_ldflags: ["..."],
-
-    static_libs: ["libFooStatic"],
-
-    shared_libs: ["..."],
-
-    reexport_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
-    whole_static_libs: ["bob_static_lib.name"],
-
-    ldlibs: ["-llog"],
-
-    generated_headers: ["bob_generate_source.name"],
-    generated_sources: ["bob_transform_source.name"],
-    generated_deps: ["bob_generate_source.name"],
-
-    tags: ["optional"],
-    owner: "{{.android_module_owner}}",
-
-    include_dirs: ["include/"],
-    local_include_dirs: ["include/"],
-    export_local_include_dirs: ["include/"],
-    export_include_dirs: ["include/"],
-    export_local_system_include_dirs: ["include/"],
-    export_system_include_dirs: ["include/"],
-
-    build_wrapper: "ccache",
-
-    install_group: "bob_install_group.name",
-    install_deps: ["bob_resource.name"],
-    relative_install_path: "unit/objects",
-    post_install_tool: "post_install.py",
-    post_install_cmd: "${tool} ${args} ${out}",
-    post_install_args: ["arg1", "arg2"],
-}
-```
-
----
-
-### **bob_module.export_ldflags** (optional)
-
-Linker flags to be propagated to the top-level shared library or binary.
-
----
-
-### **bob_static_lib.static_libs** (optional)
-
-Static libraries can use the `static_libs` property to tell Bob about any other
-static libraries they depend on. Bob ensures that all static libraries are
-placed earlier in the link order than their dependents. The earlier example
-could therefore be resolved as follows:
-
-```bp
-bob_static_library {
-    name: "libB",
-    srcs: ["b.c"],
-}
-
-bob_static_library {
-    name: "libA",
-    static_libs: ["libB"],
-    srcs: ["a.c"],
-}
-
-bob_binary {
-    name: "binary_using_libA",
-    static_libs: ["libA"],
-}
-```
-
-The link command for `binary_using_libA` would contain `libA` first, then
-`libB`.
-
----
-
-### **bob_static_lib.whole_static_libs** (optional)
-
-The `whole_static_libs` property allows a library to completely include the
-contents of another. For example, if the above example was changed as follows:
-
-```bp
-bob_static_library {
-    name: "libA",
-    whole_static_libs: ["libB"],
-    srcs: ["a.c"],
-}
-```
-
-...then `libA.a` would contain _two_ object files - `a.o` and `b.o`. The link
-command for `binary_using_libA` would then _only_ mention `libA`.
-
-#### Circular dependencies
-
-The main reason for a 'parent' library to use `whole_static_libs` is circular
-dependencies.
-
-Suppose something inside `libB` now calls function `a()` in `libA`. The link
-order needs to be such that:
-
-- `libA` is before `libB`, because `libA` requires function `b()`, AND:
-- `libB` is before `libA`, because `libB` requires function `a()`.
-
-This is clearly impossible. The situation can be resolved by creating a new
-static library, which can hold the contents of `libA` and `libB`
-simultaneously. This will be passed to the linker instead of `libA` or `libB`,
-enabling the link to succeed with the mutually-dependent components.
-
-```bp
-bob_static_library {
-    name: "libAandB",
-    whole_static_libs: ["libA", "libB"],
-}
-```
-
----
-
-### **bob_static_lib.shared_libs** (optional)
-
-The libraries mentioned here will be appended to `shared_libs` of the top-level
-build object (shared library or binary) linking with this module.
-`shared_libs` is an indication that this module is using a shared
-library, and users of this module need to link it.
-
----
-
-### **bob_static_lib.ldlibs** (optional)
-
-Library dependency-related linker flags which should be added to the link
-command of the top-level build object (shared library or binary).
+|                                                                                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`name`](properties/common_properties.md#name)                                                         | String; required                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| [`srcs`](properties/common_properties.md#srcs)                                                         | List of sources; default is `[]`                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `exclude_srcs`                                                                                         | List of exclude patterns; default is `[]`<br> Files to be removed from `srcs`.<br>Supports wildcards, with the same caveat as `srcs`.                                                                                                                                                                                                                                                                                                                       |
+| [`enabled`](properties/common_properties.md#enabled)                                                   | Boolean; default is `true`.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `build_by_default`                                                                                     | Boolean; default is `true`<br>Whether it is built by default in a build with no targets requested.                                                                                                                                                                                                                                                                                                                                                          |
+| `add_to_alias`                                                                                         | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`.                                                                                                                                                                                                                                                                                                                                     |
+| [`defaults`](properties/legacy_properties.md#defaults)                                                 | List of [`bob_defaults`](bob_defaults.md); default is `[]`                                                                                                                                                                                                                                                                                                                                                                                                  |
+| [`target_supported`](properties/common_properties.md#target_supported)                                 | Boolean; default is `true`.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| [`target`](properties/common_properties.md#target)                                                     | Property map; default is `{}`.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| [`host_supported`](<(properties/common_properties.md#host_supported)>)                                 | Boolean; default is `false`.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| [`host`](<(properties/common_properties.md#host)>)                                                     | Property map; default is `{}`.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `out`                                                                                                  | String;<br>Alternate output name, used for the file name and Android rules.                                                                                                                                                                                                                                                                                                                                                                                 |
+| [`cflags`](properties/legacy_properties.md#cflags)                                                     | List of strings; default is `[]`<br>Flags used for C/C++ compilation.                                                                                                                                                                                                                                                                                                                                                                                       |
+| [`export_cflags`](properties/legacy_properties.md#export_cflags)                                       | List of strings; default is `[]`<br>Same as [`cflags`](properties/legacy_properties.md#cflags) but flags are also propagated to the users of the library.                                                                                                                                                                                                                                                                                                   |
+| `conlyflags`                                                                                           | List of strings; default is `[]`<br>Flags used for C compilation.<br>See [`cflags`](properties/legacy_properties.md#cflags)                                                                                                                                                                                                                                                                                                                                 |
+| `cxxflags`                                                                                             | List of strings; default is `[]`<br>Flags used for C++ compilation.<br>See [`cflags`](properties/legacy_properties.md#cflags)                                                                                                                                                                                                                                                                                                                               |
+| [`asflags`](properties/legacy_properties.md#asflags)                                                   | List of strings; default is `[]`<br>Flags used for assembly compilation.                                                                                                                                                                                                                                                                                                                                                                                    |
+| [`ldflags`](properties/legacy_properties.md#ldflags)                                                   | List of strings; default is `[]`<br>Flags used for linking.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| [`ldlibs`](properties/legacy_properties.md#ldlibs)                                                     | List of strings; default is `[]`<br>Linker flags required to link to the necessary system libraries.                                                                                                                                                                                                                                                                                                                                                        |
+| [`static_libs`](properties/legacy_properties.md#static_libs)                                           | List of targets; default is `[]`<br>The list of static lib modules that this library depends on.                                                                                                                                                                                                                                                                                                                                                            |
+| [`shared_libs`](properties/legacy_properties.md#shared_libs)                                           | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| [`reexport_libs`](properties/legacy_properties.md#reexport_libs)                                       | List of targets; default is `[]`<br>The exported cflags and includes of dependencies listed in `reexport_libs` are also exported to users of the current module.                                                                                                                                                                                                                                                                                            |
+| [`whole_static_libs`](properties/legacy_properties.md#whole_static_libs)                               | <br>Static libraries linked with a shared library using `whole_static_libs` will be linked with the `-Wl,--whole-archive` linker flag. This ensures that the entire contents of the static libraries are include in the shared library. Without this, the linker may remove unused object files.<br>This will include all the static libs' objects in the shared library (as opposed to normal static linking, which will only include unresolved symbols). |
+| [`generated_headers`](properties/legacy_properties.md#generated_headers)                               | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| [`generated_sources`](properties/legacy_properties.md#generated_sources)                               | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| [`generated_deps`](properties/legacy_properties.md#generated_deps)                                     | List of targets; default is `[]`<br>                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| [`owner`](properties/legacy_properties.md#owner)                                                       | String; default is `none`; **deprecated**<br> If set, then the module is considered proprietary.                                                                                                                                                                                                                                                                                                                                                            |
+| [`strip`](properties/legacy_properties.md#strip)                                                       | Boolean; default is `false`.<br> When set, strip symbols and debug information from libraries and binaries.                                                                                                                                                                                                                                                                                                                                                 |
+| [`include_dirs`](properties/legacy_properties.md#include_dirs)                                         | List of strings; default is `[]`<br>A list of include directories to use. These are expected to be system headers, and will usually be an absolute path.                                                                                                                                                                                                                                                                                                    |
+| [`local_include_dirs`](properties/legacy_properties.md#local_include_dirs)                             | List of strings; default is `[]`<br>A list of include directories to use. These are relative to the `build.bp` containing the module definition                                                                                                                                                                                                                                                                                                             |
+| [`export_local_include_dirs`](properties/legacy_properties.md#export_local_include_dirs)               | List of strings; default is `[]`<br>Same as `local_include_dirs` but paths are exported to users of the library.                                                                                                                                                                                                                                                                                                                                            |
+| [`export_include_dirs`](properties/legacy_properties.md#export_include_dirs)                           | List of strings; default is `[]`<br>Same as `include_dirs` but paths are exported to users of the library.                                                                                                                                                                                                                                                                                                                                                  |
+| [`export_local_system_include_dirs`](properties/legacy_properties.md#export_local_system_include_dirs) | List of strings; default is `[]`<br>Same as `local_include_dirs` but paths are exported to users of the library using `-isystem`                                                                                                                                                                                                                                                                                                                            |
+| [`export_system_include_dirs`](properties/legacy_properties.md#export_system_include_dirs)             | List of strings; default is `[]`<br>Same as `include_dirs` but paths are exported to users of the library using `-isystem`.                                                                                                                                                                                                                                                                                                                                 |
+| [`forwarding_shlib`](properties/legacy_properties.md#forwarding_shlib)                                 | Boolean; default is `false`<br>This is a shared library that pulls in one or more shared libraries to resolve symbols that the binary needs.                                                                                                                                                                                                                                                                                                                |
+| [`build_wrapper`](properties/legacy_properties.md#build_wrapper)                                       | String; default is `none`.<br>Wrapper for all build commands.                                                                                                                                                                                                                                                                                                                                                                                               |
+| [`add_lib_dirs_to_rpath`](properties/legacy_properties.md#add_lib_dirs_to_rpath)                       | Boolean; default is `false`<br>If true, the module's shared libraries' directories will be added to its DT_RUNPATH entry.                                                                                                                                                                                                                                                                                                                                   |
+| [`install_group`](properties/legacy_properties.md#install_group)                                       | Target; default is `none`<br>Module name of a `bob_install_group` specifying an installation directory.                                                                                                                                                                                                                                                                                                                                                     |
+| [`install_deps`](properties/legacy_properties.md#install_deps)                                         | List of targets; default is `[]`<br>Other modules which must be installed.                                                                                                                                                                                                                                                                                                                                                                                  |
+| `relative_install_path`                                                                                | String; default is `none`<br>Path to install to, relative to the install_group's path.                                                                                                                                                                                                                                                                                                                                                                      |
+| [`debug_info`](properties/legacy_properties.md#debug_info)                                             | Target; default is `none`<br>Module name of a `bob_install_group` specifying an installation directory for debug information.                                                                                                                                                                                                                                                                                                                               |
+| `post_install_tool`                                                                                    | String <br>Script used during post install. Not supported on Android.                                                                                                                                                                                                                                                                                                                                                                                       |
+| [`post_install_cmd`](properties/legacy_properties.md#post_install_cmd)                                 | String; default is `none`<br>Command to execute on file(s) after they are installed.                                                                                                                                                                                                                                                                                                                                                                        |
+| [`post_install_args`](properties/legacy_properties.md#post_install_args)                               | List of strings; default is `[]`<br>Arguments to insert into `post_install_cmd`.                                                                                                                                                                                                                                                                                                                                                                            |
+| [`tags`](properties/common_properties.md#tags)                                                         | List of strings; default is `[]`                                                                                                                                                                                                                                                                                                                                                                                                                            |

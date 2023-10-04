@@ -1,22 +1,16 @@
-# `bob_generate_source`
+# `bob_generate_binary`
 
-> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md), please refer to the [migration guide](./migration/bob_generate_source.md).
+> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
 
 ```bp
-bob_generate_source {
-    name, srcs, exclude_srcs, out, depfile, implicit_srcs, exclude_implicit_srcs, enabled, build_by_default, add_to_alias, cmd, tools, host_bin, tags, generated_deps, generated_sources, args, console, export_gen_include_dirs, flag_defaults, target, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, rsp_content,
+bob_generate_binary {
+    name, srcs, exclude_srcs, implicit_srcs, exclude_implicit_srcs, headers, enabled, build_by_default, add_to_alias, cmd, tools, host_bin, tags, generated_deps, generated_sources, args, console, export_gen_include_dirs, flag_defaults, target, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, rsp_content,
 }
 ```
 
-This target generates files via a custom shell command. This is usually source
-code (headers or C files), but it could be anything. A single module will
-generate multiple outputs from common inputs, and the command is run exactly
-once.
-
-The command will be run once - with `$in` being the paths in
-`srcs` and `$out` being the paths in `out`.
-The source and tool paths should be relative to the directory of the
-`build.bp` containing the `bob_generate_source`.
+This target generates a binary using a custom command instead of via the default compiler and linker.
+The libraries can be linked to other modules using the normal properties that reference shared/static libraries.
+Headers for the libraries can be generated at the same time.
 
 Supports:
 
@@ -29,9 +23,9 @@ Supports:
 | [`name`](properties/common_properties.md#name)                           | String; required                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `srcs`                                                                   | List of targets; default is `[]`<br>Modules that this alias will cause to build.                                                                                                                                                                                                                                                                                                                                           |
 | `exclude_srcs`                                                           | List of exclude patterns; default is `[]`<br> Files to be removed from `srcs`.<br>Supports wildcards, with the same caveat as `srcs`.                                                                                                                                                                                                                                                                                      |
-| `out`                                                                    | List of strings; required<br>The list of files that will be output.                                                                                                                                                                                                                                                                                                                                                        |
 | `implicit_srcs`                                                          | List of strings; default is `[]`<br>Implicit sources are input files that do not get mentioned on the command line and are not specified in the explicit sources.                                                                                                                                                                                                                                                          |
 | `exclude_implicit_srcs`                                                  | List of strings; default is `[]`<br> Used in combination with glob patterns in `implicit_srcs` to exclude files that are not sources.                                                                                                                                                                                                                                                                                      |
+| `headers`                                                                | List of strings; default is `[]`<br> List of headers that are created (if any).                                                                                                                                                                                                                                                                                                                                            |
 | `implicit_outs`                                                          | List of strings; default is `[]`<br>Implicit outputs are output files that do not get mentioned on the command line, which can use capture groups from match.                                                                                                                                                                                                                                                              |
 | `add_to_alias`                                                           | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`.                                                                                                                                                                                                                                                                                                    |
 | [`enabled`](properties/common_properties.md#enabled)                     | Boolean; default is `true`.                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -55,24 +49,3 @@ Supports:
 | `flag_defaults`                                                          | List of targets; default is `[]`<br>Generated sources may wish to access the build flags being used for "normal" library or executable modules. `flag_defaults` should contain the name of a `bob_defaults` module, whose flags will be accessible from this one, by allowing extra variables to be used in `bob_generated.cmd`: `ar`, `cc`, `cxx`, `asflags`, `cflags`, `conlyflags`, `cxxflags`, `ldflags` and `ldlibs`. |
 | `target`                                                                 | String; one of `["target", "host"]`<br>The target type. This is to choose between the host and target variant of the `bob_defaults` specified in `bob_generate.flag_defaults`.                                                                                                                                                                                                                                             |
 | `rsp_content`                                                            | String; default is `none`<br>If set, the value provided will be expanded and written to a file immediately before command execution, and the file name will be made available to the command as `${rspfile}`. This allows commands to use argument lists greater than the command line length limit, by writing e.g. the input or output list to a file.                                                                   |
-
-## Example
-
-```bp
-bob_generate_source {
-    name: "custom_name",
-    srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
-    exclude_srcs: ["src/common/skip_this.cpp"],
-    out: ["my_out.cpp"],
-    depfile: true,
-    implicit_srcs: ["foo/scatter.scat"],
-    exclude_implicit_srcs: ["foo/skip.scat"],
-    cmd: "python ${tool} ${args} ${in} -d ${depfile}",
-    tools: ["my_script.py"],
-    host_bin: "clang-tblgen",
-    args: ["-i graphic/ui.h"],
-    console: true,
-    export_gen_include_dirs: ["."],
-    rsp_content: "${in}",
-}
-```
