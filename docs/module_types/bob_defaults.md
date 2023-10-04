@@ -1,102 +1,25 @@
-# Module: bob_defaults
-
-Defaults are used to share common settings between multiple modules.
-
-`bob_defaults` can be used by `bob_static_lib`, `bob_shared_lib`, `bob_binary`,
-and `bob_kernel_module`.
-
-## Full specification of `bob_defaults` properties
-
-Most properties are optional.
-
-`bob_defaults` supports [features](../features.md)
-
-For detailed documentation please go to [common module properties](common_module_properties.md).
-For kernel module related stuff please check [bob_kernel_module](bob_kernel_module.md)
+# bob_defaults
 
 ```bp
 bob_defaults {
-    name: "custom_name",
-    srcs: ["src/a.cpp", "src/b.cpp", "src/common/*.cpp"],
-    exclude_srcs: ["src/common/skip_this.cpp"],
-
-    enabled: false,
-    build_by_default: true,
-
-    add_to_alias: ["bob_alias.name"],
-
-    defaults: ["bob_default.name"],
-
-    target_supported: true,
-    target: { ... },
-
-    host_supported: true,
-    host: { ... },
-
-    out: "alternate_output_name",
-
-    cflags: ["-DDEBUG=1", "-Wall"],
-    export_cflags: ["..."],
-
-    cxxflags: ["..."],
-    asflags: ["..."],
-    conlyflags: ["..."],
-
-    ldflags: ["..."],
-    export_ldflags: ["..."],
-
-    static_libs: ["bob_static_lib.name", "..."],
-
-    shared_libs: ["bob_shared_lib.name", "..."],
-
-    reexport_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
-
-    whole_static_libs: ["bob_shared_lib.name", "bob_static_lib.name"],
-
-    ldlibs: ["-lz", "..."],
-
-    generated_headers: ["bob_generate_source.name"],
-    generated_sources: ["bob_transform_source.name"],
-    generated_deps: ["bob_generate_source.name"],
-
-    tags: ["optional"],
-    owner: "my_company",
-    strip: true,
-
-    include_dirs: ["include/"],
-    local_include_dirs: ["include/"],
-    export_local_include_dirs: ["include/"],
-    export_include_dirs: ["include/"],
-
-    build_wrapper: "ccache",
-    forwarding_shlib: true,
-
-    // kernel module related stuff
-    kbuild_options: ["CONFIG_MY_OPTION=y"],
-    extra_symbols: ["bob_kernel_module.name"],
-    make_args: ["--ignore-errors"],
-    kernel_dir: "/kernel/linux/",
-    kernel_cross_compile: "prefix",
-    kernel_cc: "target",
-    kernel_hostcc: "host",
-    kernel_clang_triple: "triple",
-    // ^^ kernel module building related stuff
-
-    install_group: "bob_install_group.name",
-    install_deps: ["bob_resource.name"],
-    relative_install_path: "unit/objects",
-    debug_info: "bob_install_group.name",
-    post_install_tool: "post_install.py",
-    post_install_cmd: "${tool} ${args} ${out}",
-    post_install_args: ["arg1", "arg2"],
-
-    // features available
+    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, target_supported, target, host_supported, host, out, cflags, export_cflags, cxxflags, asflags, conlyflags, ldflags, export_ldflags, static_libs, shared_libs, reexport_libs, whole_static_libs, ldlibs, generated_headers, generated_sources, generated_deps, tags, owner, strip, include_dirs, local_include_dirs, export_local_include_dirs, export_include_dirs, build_wrapper, forwarding_shlib, kbuild_options, extra_symbols, make_args, kernel_dir, kernel_cross_compile, kernel_cc, kernel_hostcc, kernel_clang_triple, install_group, install_deps, relative_install_path, debug_info, post_install_tool, post_install_cmd, post_install_args, tags
 }
 ```
 
----
+Defaults are used to share common settings between modules.
 
-# Examples
+Supports:
+
+- [features](../features.md)
+- [defaults](./bob_defaults.md) (recursive defaults are supported)
+
+## Attributes
+
+`bob_defaults` supports the same attributes as its consuming module. Refer to each module for detailed attribute documentation.
+
+## Examples
+
+### Simple
 
 Here, the `-lncurses` flag is used with linking the `less` binary,
 because it has been propagated through the default.
@@ -113,6 +36,8 @@ bob_binary {
     srcs: ["src/less.c"],
 }
 ```
+
+### Nested Defaults
 
 Defaults can be hierarchical by including other defaults. Here, the
 `my_unit_test` binary will inherit both the `-Wall` and `-UNDEBUG` flags.
