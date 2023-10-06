@@ -84,6 +84,9 @@ func (m *ModuleKernelObject) outputs() []string {
 func (m *ModuleKernelObject) OutFiles() file.Paths {
 	return file.Paths{file.NewPath(m.outputName()+".ko", m.Name(), file.TypeKernelModule)}
 }
+func (m *ModuleKernelObject) OutFileTargets() []string {
+	return []string{}
+}
 
 func (m *ModuleKernelObject) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
