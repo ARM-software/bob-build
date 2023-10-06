@@ -99,8 +99,8 @@ func TestLinux(t *testing.T) {
 
 	t.Run("Symlink", func(t *testing.T) {
 		original := NewPath("foo.c", "original", TypeGenerated)
-		link_to_original := NewLink("foo.c", "link", &original)
-		link_to_link := NewLink("foo.c", "link2", &link_to_original)
+		link_to_original := NewLink("foo.c", "link", &original, TypeImplicit)
+		link_to_link := NewLink("foo.c", "link2", &link_to_original, TypeImplicit)
 
 		assert.Equal(t, "${BuildDir}/gen/original/foo.c", original.FollowLink().BuildPath())
 		assert.Equal(t, "${BuildDir}/gen/original/foo.c", link_to_original.FollowLink().BuildPath())
@@ -115,5 +115,8 @@ func TestLinux(t *testing.T) {
 		assert.True(t, link_to_original.IsType(TypeLink))
 		assert.True(t, link_to_link.IsType(TypeLink))
 
+		assert.True(t, link_to_link.IsType(TypeImplicit))
+		assert.True(t, link_to_original.IsType(TypeImplicit))
+		assert.False(t, original.IsType(TypeImplicit))
 	})
 }
