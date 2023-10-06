@@ -37,3 +37,24 @@ type DynamicProvider interface {
 	Provider
 	ResolveOutFiles(blueprint.BaseModuleContext)
 }
+
+// Commonly used filter to get module output files
+func GetOutputs(m Provider) []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f Path) bool { return !f.IsType(TypeImplicit) },
+		func(f Path) string { return f.BuildPath() })
+}
+
+// Commonly used filter to get module installable files
+func GetInstallableOutputs(m Provider) []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f Path) bool { return f.IsType(TypeInstallable) },
+		func(f Path) string { return f.BuildPath() })
+}
+
+// Commonly used filter to get module implicit outputs
+func GetImplicitOutputs(m Provider) []string {
+	return m.OutFiles().ToStringSliceIf(
+		func(f Path) bool { return f.IsType(TypeImplicit) },
+		func(f Path) string { return f.BuildPath() })
+}
