@@ -1,0 +1,35 @@
+bob_install_group {
+    name: "IG_host_libs",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/host/lib",
+    },
+}
+
+bob_install_group {
+    name: "IG_libs",
+    builder_android_bp: {
+        install_path: "lib",
+    },
+    builder_ninja: {
+        install_path: "install/lib",
+    },
+}
+
+bob_shared_library {
+    name: "libsharedtest_installed",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_installed"],
+    host: {
+        install_group: "IG_host_libs",
+    },
+    target: {
+        install_group: "IG_libs",
+    },
+    host_supported: true,
+    target_supported: true,
+    library_version: "1.4.0",
+    build_by_default: true,
+}
