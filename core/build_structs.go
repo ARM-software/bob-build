@@ -61,6 +61,7 @@ func (t *TargetSpecific) getTargetSpecificProps() interface{} {
 // are implemented by the file provider under the hood.
 type dependentInterface interface {
 	phonyInterface
+	file.Provider
 
 	outputs() []string
 	implicitOutputs() []string

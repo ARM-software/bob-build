@@ -44,7 +44,6 @@ var _ file.Consumer = (*generateLibrary)(nil)
 type generateLibraryInterface interface {
 	blueprint.Module
 	dependentInterface
-	file.Provider
 	file.Consumer
 
 	libExtension() string

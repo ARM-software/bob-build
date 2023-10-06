@@ -206,7 +206,6 @@ type Archivable interface {
 	dependentInterface // For phony targets
 	flag.Consumer      // Modules which are compilable need to support flags
 	file.Consumer      // Compilable objects must match the file consumer interface
-	file.Provider      // Must create valid output files
 
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 }
