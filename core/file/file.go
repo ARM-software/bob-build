@@ -110,10 +110,9 @@ func NewPath(relativePath string, namespace string, tag Type) Path {
 	return New(relativePath, namespace, tag)
 }
 
-func NewLink(relativePath string, namespace string, from *Path) Path {
-	link := New(relativePath, namespace, from.tag)
+func NewLink(relativePath string, namespace string, from *Path, tag Type) Path {
+	link := New(relativePath, namespace, from.tag|tag|TypeLink)
 	link.symlink = from
-	link.tag = from.tag | TypeLink
 	return link
 }
 

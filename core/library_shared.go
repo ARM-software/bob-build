@@ -60,8 +60,8 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 				m.ModuleLibrary.Properties.Library_version)
 		}
 
-		link1 := file.NewLink(soname, string(m.getTarget()), &so)
-		link2 := file.NewLink(m.getLinkName(), string(m.getTarget()), &link1)
+		link1 := file.NewLink(soname, string(m.getTarget()), &so, file.TypeUnset)
+		link2 := file.NewLink(m.getLinkName(), string(m.getTarget()), &link1, file.TypeUnset)
 		files = append(files, link2, link1)
 	}
 
