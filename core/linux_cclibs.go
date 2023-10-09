@@ -265,7 +265,7 @@ func (g *linuxGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.Mod
 
 	g.ArchivableActions(ctx, m, tc, objectFiles)
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 
 }
@@ -280,7 +280,7 @@ func (g *linuxGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bluepr
 
 	g.ArchivableActions(ctx, m, tc, objs)
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
 
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
@@ -613,7 +613,7 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	g.SharedLinkActions(ctx, m, tc, objs, implicits)
 	g.SharedTocActions(ctx, m)
 
-	installDeps = append(installDeps, g.getPhonyFiles(m)...)
+	installDeps = append(installDeps, file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -663,7 +663,7 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 			Args:      g.getCommonLibArgs(m, ctx),
 		})
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, optional)
 }
 
@@ -704,7 +704,7 @@ func (g *linuxGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprin
 			Args:      g.getCommonLibArgs(m, ctx),
 		})
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, optional)
 }
 
