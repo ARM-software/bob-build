@@ -428,7 +428,6 @@ type BackendCommonLibraryInterface interface {
 	installable
 
 	// Legacy functions which need a better interface
-	outputs() []string
 	IsForwardingSharedLibrary() bool
 	IsRpathWanted() bool
 	GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string)

@@ -62,8 +62,6 @@ func (t *TargetSpecific) getTargetSpecificProps() interface{} {
 type dependentInterface interface {
 	phonyInterface
 	file.Provider
-
-	outputs() []string
 }
 
 func getGenerator(ctx blueprint.BaseModuleContext) generatorBackend {

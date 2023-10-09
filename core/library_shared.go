@@ -27,10 +27,6 @@ var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
 var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
 
-func (m *ModuleSharedLibrary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 
 	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared|file.TypeInstallable)

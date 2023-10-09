@@ -47,7 +47,7 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     kbuildRule,
-			Outputs:  ko.outputs(),
+			Outputs:  file.GetOutputs(ko),
 			Inputs:   sources,
 			Optional: true,
 			Args:     args,
@@ -59,7 +59,7 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     blueprint.Phony,
-			Inputs:   ko.outputs(),
+			Inputs:   file.GetOutputs(ko),
 			Outputs:  []string{filepath.Join(outputdir, "Module.symvers")},
 			Optional: true,
 		})

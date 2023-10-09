@@ -25,12 +25,8 @@ func (m ModuleStaticLibrary) GetProperties() interface{} {
 	return m.ModuleLibrary.Properties
 }
 
-func (m *ModuleStaticLibrary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleStaticLibrary) OutFiles() (srcs file.Paths) {
-	fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive|file.TypeInstallable) // TODO: refactor outputs() to use file.Paths
+	fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive|file.TypeInstallable)
 	srcs = srcs.AppendIfUnique(fp)
 	return
 }

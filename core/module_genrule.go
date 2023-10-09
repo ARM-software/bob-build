@@ -53,10 +53,6 @@ func checkGenruleFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 	}
 }
 
-func (m *ModuleGenrule) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleStrictGenerateCommon.processPaths(ctx)
 }

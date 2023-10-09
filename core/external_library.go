@@ -41,10 +41,6 @@ func (m *ModuleExternalLibrary) altName() string      { return m.outputName() }
 func (m *ModuleExternalLibrary) altShortName() string { return m.altName() }
 func (m *ModuleExternalLibrary) shortName() string    { return m.Name() }
 
-// External libraries have no outputs - they are already built.
-func (m *ModuleExternalLibrary) outputs() []string         { return []string{} }
-func (m *ModuleExternalLibrary) implicitOutputs() []string { return []string{} }
-
 // Implement the splittable interface so "normal" libraries can depend on external ones.
 func (m *ModuleExternalLibrary) supportedVariants() []toolchain.TgtType {
 	return []toolchain.TgtType{toolchain.TgtTypeHost, toolchain.TgtTypeTarget}

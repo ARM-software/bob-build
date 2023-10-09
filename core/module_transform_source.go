@@ -79,10 +79,6 @@ type transformSourceInterface interface {
 
 var _ transformSourceInterface = (*ModuleTransformSource)(nil) // impl check
 
-func (m *ModuleTransformSource) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleTransformSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }

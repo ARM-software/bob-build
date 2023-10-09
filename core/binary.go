@@ -20,10 +20,6 @@ type binaryInterface interface {
 var _ binaryInterface = (*ModuleBinary)(nil)  // impl check
 var _ libraryInterface = (*ModuleBinary)(nil) // impl check
 
-func (m *ModuleBinary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleBinary) OutFiles() (srcs file.Paths) {
 	return file.Paths{file.NewPath(m.outputName(), string(m.getTarget()), file.TypeBinary|file.TypeExecutable|file.TypeInstallable)}
 }

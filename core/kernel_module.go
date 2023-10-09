@@ -73,10 +73,6 @@ type kernelModuleInterface interface {
 
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
 
-func (m *ModuleKernelObject) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleKernelObject) OutFiles() file.Paths {
 	return file.Paths{file.NewPath(m.outputName()+".ko", m.Name(), file.TypeKernelModule|file.TypeInstallable)}
 }
