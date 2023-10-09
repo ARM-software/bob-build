@@ -1,0 +1,15 @@
+bob_toolchain {
+    name: "overwrites_toolchain_config",
+    cflags: [
+        "-DOVERWRITES_TOOLCHAIN=1",
+    ],
+}
+
+bob_library {
+    name: "overwrites",
+    srcs: [
+        "src.c",
+    ],
+    build_by_default: true,
+
+}

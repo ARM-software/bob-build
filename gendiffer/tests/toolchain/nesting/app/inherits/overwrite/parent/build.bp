@@ -1,0 +1,10 @@
+
+
+bob_library {
+    name: "parent",
+    srcs: [
+        "src.c",
+    ],
+    build_by_default: true,
+
+}

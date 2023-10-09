@@ -1,0 +1,4 @@
+inherits/overwrite/parent/build.bp
+inherits/overwrite/build.bp
+inherits/build.bp
+build.bp

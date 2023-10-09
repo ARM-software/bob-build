@@ -350,24 +350,30 @@ func dependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		ctx.AddVariationDependencies(nil, tag.SharedTag, build.Shared_libs...)
 	}
 
+	toolchainDefault := ToolchainModuleMap.Get(ctx.ModuleDir())
+
+	// TODO: refactor this given the duplicated code pattern here.
 	if sl, ok := ctx.Module().(*ModuleStrictLibrary); ok {
 		ctx.AddVariationDependencies(nil, tag.DepTag, sl.Properties.Deps...)
-		if sl.Properties.Toolchain != nil {
-			ctx.AddVariationDependencies(nil, tag.ToolchainTag, *sl.Properties.Toolchain)
+		toolchain := proptools.StringDefault(sl.Properties.Toolchain, toolchainDefault)
+		if toolchain != "" {
+			ctx.AddVariationDependencies(nil, tag.ToolchainTag, toolchain)
 		}
 	}
 
 	if sb, ok := ctx.Module().(*ModuleStrictBinary); ok {
 		ctx.AddVariationDependencies(nil, tag.DepTag, sb.Properties.Deps...)
-		if sb.Properties.Toolchain != nil {
-			ctx.AddVariationDependencies(nil, tag.ToolchainTag, *sb.Properties.Toolchain)
+		toolchain := proptools.StringDefault(sb.Properties.Toolchain, toolchainDefault)
+		if toolchain != "" {
+			ctx.AddVariationDependencies(nil, tag.ToolchainTag, toolchain)
 		}
 	}
 
 	if t, ok := ctx.Module().(*ModuleTest); ok {
 		ctx.AddVariationDependencies(nil, tag.DepTag, t.Properties.Deps...)
-		if t.Properties.Toolchain != nil {
-			ctx.AddVariationDependencies(nil, tag.ToolchainTag, *t.Properties.Toolchain)
+		toolchain := proptools.StringDefault(t.Properties.Toolchain, toolchainDefault)
+		if toolchain != "" {
+			ctx.AddVariationDependencies(nil, tag.ToolchainTag, toolchain)
 		}
 	}
 

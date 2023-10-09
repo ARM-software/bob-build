@@ -47,3 +47,34 @@ bob_library {
 }
 
 ```
+
+## Default Behaviour
+
+A `bob_toolchain` will be applied to the current directory scope and recursively into child directories, unless
+overwritten by another `bob_toolchain`.
+
+This toolchain is only applied to modules which support it.
+
+Take the following project structure as an example:
+
+```
+.
+├── build.bp >>> `bob_toolchain("A")`
+├── inherits
+│   ├── build.bp
+│   └── overwrite
+│       ├── build.bp >>> `bob_toolchain("B")`
+│       └── parent
+│           └── build.bp
+```
+
+In this case the mapping will be:
+
+```
+`.` -> `A`
+`./inherits` -> `A`
+`./inherits/overwrite` -> `B`
+`./inherits/overwrite/parent` -> `B`
+```
+
+> `bob_toolchain` module attributes are overwritten, and **_not_** merged.
