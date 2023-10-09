@@ -53,7 +53,7 @@ func (m *ModuleGenerateSource) outputs() []string {
 }
 
 func (m *ModuleGenerateSource) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {

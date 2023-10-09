@@ -128,7 +128,7 @@ func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleStrictLibrary) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleStrictLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {

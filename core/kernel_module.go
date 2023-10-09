@@ -74,7 +74,7 @@ type kernelModuleInterface interface {
 var _ kernelModuleInterface = (*ModuleKernelObject)(nil) // impl check
 
 func (m *ModuleKernelObject) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleKernelObject) outputs() []string {

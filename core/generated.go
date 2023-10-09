@@ -53,7 +53,7 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			args[depName+"_out"] = strings.Join(gen.outputs(), " ")
 
 			depfiles = append(depfiles, gen.outputs()...)
-			depfiles = append(depfiles, gen.implicitOutputs()...)
+			depfiles = append(depfiles, file.GetImplicitOutputs(gen)...)
 
 			fullDeps[gen.shortName()] = depfiles
 		})

@@ -26,7 +26,7 @@ func (m ModuleStaticLibrary) GetProperties() interface{} {
 }
 
 func (m *ModuleStaticLibrary) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleStaticLibrary) outputs() []string {

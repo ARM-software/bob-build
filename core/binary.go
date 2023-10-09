@@ -21,7 +21,7 @@ var _ binaryInterface = (*ModuleBinary)(nil)  // impl check
 var _ libraryInterface = (*ModuleBinary)(nil) // impl check
 
 func (m *ModuleBinary) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleBinary) outputs() []string {
