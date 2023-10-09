@@ -74,7 +74,10 @@ type ModuleStrictLibrary struct {
 
 type strictLibraryInterface interface {
 	targetSpecificLibrary
-	dependentInterface
+	// dependentInterface  clashes with `installable` on older Go versions
+	phonyInterface
+	outputs() []string
+	implicitOutputs() []string
 	file.Consumer
 	file.Resolver
 	enableable
@@ -92,17 +95,6 @@ func (m *ModuleStrictLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 	m.Properties.SourceProps.processPaths(ctx)
 	m.Properties.Hdrs = utils.PrefixDirs(m.Properties.Hdrs, prefix)
 	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
-}
-
-func (m *ModuleStrictLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(p file.Path) bool {
-			return p.IsType(file.TypeArchive) ||
-				p.IsType(file.TypeShared)
-		},
-		func(p file.Path) string {
-			return p.BuildPath()
-		})
 }
 
 func (m *ModuleStrictLibrary) outputName() string {
@@ -152,8 +144,8 @@ func (m *ModuleStrictLibrary) outputs() []string {
 
 func (m *ModuleStrictLibrary) OutFiles() file.Paths {
 	return file.Paths{
-		file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive),
-		file.NewPath(m.Name()+".so", string(m.getTarget()), file.TypeShared),
+		file.NewPath(m.Name()+".a", string(m.getTarget()), file.TypeArchive|file.TypeInstallable),
+		file.NewPath(m.Name()+".so", string(m.getTarget()), file.TypeShared|file.TypeInstallable),
 	}
 }
 

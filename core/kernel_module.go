@@ -82,7 +82,7 @@ func (m *ModuleKernelObject) outputs() []string {
 }
 
 func (m *ModuleKernelObject) OutFiles() file.Paths {
-	return file.Paths{file.NewPath(m.outputName()+".ko", m.Name(), file.TypeKernelModule)}
+	return file.Paths{file.NewPath(m.outputName()+".ko", m.Name(), file.TypeKernelModule|file.TypeInstallable)}
 }
 func (m *ModuleKernelObject) OutFileTargets() []string {
 	return []string{}
@@ -130,10 +130,6 @@ func (m *ModuleKernelObject) getEnableableProps() *EnableableProps {
 
 func (m *ModuleKernelObject) getAliasList() []string {
 	return m.Properties.getAliasList()
-}
-
-func (m *ModuleKernelObject) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.outputs()
 }
 
 func (m *ModuleKernelObject) getInstallableProps() *InstallableProps {

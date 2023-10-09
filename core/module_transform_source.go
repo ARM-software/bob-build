@@ -71,7 +71,8 @@ type ModuleTransformSource struct {
 // All interfaces supported by filegroup
 type transformSourceInterface interface {
 	installable
-	file.DynamicProvider
+	// file.DynamicProvider clashes with `installable` on older Go versions
+	ResolveOutFiles(blueprint.BaseModuleContext)
 	file.Consumer
 	file.Resolver
 }
@@ -144,7 +145,7 @@ func (m *ModuleTransformSource) ResolveOutFiles(ctx blueprint.BaseModuleContext)
 			io := m.Properties.inoutForSrc(re, fp, m.ModuleGenerateCommon.Properties.Depfile,
 				m.ModuleGenerateCommon.Properties.Rsp_content != nil)
 			for _, out := range io.out {
-				fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
+				fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated|file.TypeInstallable)
 				m.Properties.ResolvedOut = m.Properties.ResolvedOut.AppendIfUnique(fp)
 			}
 			return true
@@ -170,11 +171,6 @@ func (m *ModuleTransformSource) generateInouts(ctx blueprint.ModuleContext, g ge
 	}
 
 	return inouts
-}
-
-func (m *ModuleTransformSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	// Install everything that we generate
-	return m.outputs()
 }
 
 func (m *ModuleTransformSource) GenerateBuildActions(ctx blueprint.ModuleContext) {

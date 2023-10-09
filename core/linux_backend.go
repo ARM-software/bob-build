@@ -211,80 +211,80 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 			utils.SortedKeys(args)...)
 	}
 
-	for _, src := range ins.filesToInstall(ctx) {
-		dest := filepath.Join(installPath, filepath.Base(src))
-
-		// Interpose strip target
-		if capable, ok := m.(StripCapable); ok {
-			if lib := capable.GetStripable(ctx); lib != nil {
-
-				debugPath := lib.getDebugPath()
-				separateDebugInfo := debugPath != nil
-
-				debugPathPrefix := installPath //Default to install path
-				if separateDebugInfo && *debugPath != "" {
-					debugPathPrefix = filepath.Join("${BuildDir}", *debugPath)
-				}
-
-				if lib.strip() || separateDebugInfo {
-					tc := backend.Get().GetToolchain(lib.getTarget())
-					basename := filepath.Base(src)
-					strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
-					stArgs := tc.GetStripFlags()
-					if lib.strip() {
-						stArgs = append(stArgs, "--strip")
-					}
-					if separateDebugInfo {
-						// TODO: This should really be using file interface when enabled
-						dbgFile := filepath.Join(debugPathPrefix, basename+".dbg")
-						stArgs = append(stArgs, "--debug-file")
-						stArgs = append(stArgs, dbgFile)
-					}
-					stripArgs := map[string]string{
-						"args": strings.Join(stArgs, " "),
-					}
-					ctx.Build(pctx,
-						blueprint.BuildParams{
-							Rule:     stripRule,
-							Outputs:  []string{strippedSrc},
-							Inputs:   []string{src},
-							Args:     stripArgs,
-							Optional: true,
-						})
-					src = strippedSrc
-				}
-			}
-		}
-
-		ctx.Build(pctx,
-			blueprint.BuildParams{
-				Rule:      rule,
-				Outputs:   []string{dest},
-				Inputs:    []string{src},
-				Args:      args,
-				Implicits: deps,
-				Optional:  true,
-			})
-
-		installedFiles = append(installedFiles, dest)
-	}
-
 	if provider, ok := m.(file.Provider); ok {
 		provider.OutFiles().ForEachIf(
-			func(fp file.Path) bool { return fp.IsSymLink() },
+			func(fp file.Path) bool { return fp.IsType(file.TypeInstallable) },
 			func(fp file.Path) bool {
-				symlink := filepath.Join(installPath, fp.UnScopedPath())
-				symlinkTgt := filepath.Join(installPath, fp.ExpandLink().UnScopedPath())
-				ctx.Build(pctx,
-					blueprint.BuildParams{
-						Rule:     symlinkRule,
-						Outputs:  []string{symlink},
-						Inputs:   []string{symlinkTgt},
-						Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
-						Optional: true,
-					})
+				if fp.IsSymLink() {
+					symlink := filepath.Join(installPath, fp.UnScopedPath())
+					symlinkTgt := filepath.Join(installPath, fp.ExpandLink().UnScopedPath())
+					ctx.Build(pctx,
+						blueprint.BuildParams{
+							Rule:     symlinkRule,
+							Outputs:  []string{symlink},
+							Inputs:   []string{symlinkTgt},
+							Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
+							Optional: true,
+						})
 
-				installedFiles = append(installedFiles, symlink)
+					installedFiles = append(installedFiles, symlink)
+				} else {
+					src := fp.BuildPath()
+					dest := filepath.Join(installPath, filepath.Base(src))
+					// Interpose strip target
+					if capable, ok := m.(StripCapable); ok {
+						if lib := capable.GetStripable(ctx); lib != nil {
+
+							debugPath := lib.getDebugPath()
+							separateDebugInfo := debugPath != nil
+
+							debugPathPrefix := installPath //Default to install path
+							if separateDebugInfo && *debugPath != "" {
+								debugPathPrefix = filepath.Join("${BuildDir}", *debugPath)
+							}
+
+							if lib.strip() || separateDebugInfo {
+								tc := backend.Get().GetToolchain(lib.getTarget())
+								basename := filepath.Base(src)
+								strippedSrc := filepath.Join(lib.stripOutputDir(g), basename)
+								stArgs := tc.GetStripFlags()
+								if lib.strip() {
+									stArgs = append(stArgs, "--strip")
+								}
+								if separateDebugInfo {
+									// TODO: This should really be using file interface when enabled
+									dbgFile := filepath.Join(debugPathPrefix, basename+".dbg")
+									stArgs = append(stArgs, "--debug-file")
+									stArgs = append(stArgs, dbgFile)
+								}
+								stripArgs := map[string]string{
+									"args": strings.Join(stArgs, " "),
+								}
+								ctx.Build(pctx,
+									blueprint.BuildParams{
+										Rule:     stripRule,
+										Outputs:  []string{strippedSrc},
+										Inputs:   []string{src},
+										Args:     stripArgs,
+										Optional: true,
+									})
+								src = strippedSrc
+							}
+						}
+					}
+
+					ctx.Build(pctx,
+						blueprint.BuildParams{
+							Rule:      rule,
+							Outputs:   []string{dest},
+							Inputs:    []string{src},
+							Args:      args,
+							Implicits: deps,
+							Optional:  true,
+						})
+
+					installedFiles = append(installedFiles, dest)
+				}
 				return true
 			})
 	}
