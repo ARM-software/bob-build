@@ -23,10 +23,6 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateSharedLibrary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	files = append(files, gc.OutFiles()...)

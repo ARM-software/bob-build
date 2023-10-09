@@ -33,17 +33,12 @@ type ModuleGenerateSource struct {
 
 type generateSourceInterface interface {
 	installable
-	// file.Provider clashes with `installable` on older Go versions
 	pathProcessor
 	file.Resolver
 	file.Consumer
 }
 
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
-
-func (m *ModuleGenerateSource) outputs() []string {
-	return file.GetOutputs(m)
-}
 
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {

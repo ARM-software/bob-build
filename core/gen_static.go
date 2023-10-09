@@ -21,10 +21,6 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateStaticLibrary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *generateStaticLibrary) OutFiles() (files file.Paths) {
 	gc, _ := getGenerateCommon(m)
 	files = append(files, gc.OutFiles()...)

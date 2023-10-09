@@ -24,10 +24,6 @@ func (m *ModuleStrictBinary) OutFiles() file.Paths {
 	}
 }
 
-func (m *ModuleStrictBinary) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).strictBinaryActions(m, ctx)

@@ -45,10 +45,6 @@ type ModuleGensrcsInterface interface {
 
 var _ ModuleGensrcsInterface = (*ModuleGensrcs)(nil) // impl check
 
-func (m *ModuleGensrcs) outputs() []string {
-	return file.GetOutputs(m)
-}
-
 func (m *ModuleGensrcs) processPaths(ctx blueprint.BaseModuleContext) {
 	m.ModuleStrictGenerateCommon.processPaths(ctx)
 

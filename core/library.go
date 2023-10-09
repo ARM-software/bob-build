@@ -478,7 +478,7 @@ func (m *ModuleLibrary) getAllGeneratedSourceModules(ctx blueprint.ModuleContext
 func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
 	if m.Properties.VersionScriptModule != nil {
 		module, _ := ctx.GetDirectDep(*m.Properties.VersionScriptModule)
-		outputs := module.(dependentInterface).outputs()
+		outputs := file.GetOutputs(module.(dependentInterface))
 		if len(outputs) != 1 {
 			panic(errors.New(ctx.OtherModuleName(module) + " must have exactly one output"))
 		}

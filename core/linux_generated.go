@@ -211,7 +211,7 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:     copyRule,
-			Inputs:   m.outputs(),
+			Inputs:   file.GetOutputs(m),
 			Outputs:  []string{soFile},
 			Optional: true,
 		})
@@ -234,7 +234,7 @@ func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.Modul
 	ctx.Build(pctx,
 		blueprint.BuildParams{
 			Rule:   copyRule,
-			Inputs: m.outputs(),
+			Inputs: file.GetOutputs(m),
 			Outputs: []string{filepath.Join(
 				backend.Get().BinaryOutputDir(m.getTarget()),
 				m.outputFileName())},

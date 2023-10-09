@@ -50,10 +50,9 @@ func getDependentArgsAndFiles(ctx blueprint.ModuleContext, args map[string]strin
 			// When the dependent module is another Bob generated
 			// module, provide all its outputs so the using module can
 			// pick and choose what it uses.
-			args[depName+"_out"] = strings.Join(gen.outputs(), " ")
-
-			depfiles = append(depfiles, gen.outputs()...)
-
+			outs := file.GetOutputs(gen)
+			args[depName+"_out"] = strings.Join(outs, " ")
+			depfiles = append(depfiles, outs...)
 			fullDeps[gen.shortName()] = depfiles
 		})
 
@@ -80,7 +79,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.GeneratedSourcesTag },
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
-				srcs = append(srcs, gs.outputs()...)
+				srcs = append(srcs, file.GetOutputs(gs)...)
 				srcs = append(srcs, file.GetImplicitOutputs(gs)...)
 			} else {
 				utils.Die("%s does not have outputs", ctx.OtherModuleName(m))
@@ -178,10 +177,10 @@ func hostBinOuts(hostBin *string, ctx blueprint.ModuleContext) (string, []string
 			hostBinFound = true
 
 			if b, ok := child.(*ModuleBinary); ok {
-				outputs = b.outputs()
+				outputs = file.GetOutputs(b)
 				hostBinTarget = b.getTarget()
 			} else if gb, ok := child.(*generateBinary); ok {
-				outputs = gb.outputs()
+				outputs = file.GetOutputs(gb)
 			} else {
 				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
 				return false
@@ -196,7 +195,7 @@ func hostBinOuts(hostBin *string, ctx blueprint.ModuleContext) (string, []string
 			return true // keep visiting
 		} else if parent != ctx.Module() && depTag == tag.SharedTag {
 			if l, ok := child.(*ModuleSharedLibrary); ok {
-				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, l.outputs()...)
+				hostBinSharedLibsDeps = append(hostBinSharedLibsDeps, file.GetOutputs(l)...)
 			}
 
 			return true // keep visiting
