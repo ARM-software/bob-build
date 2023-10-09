@@ -89,10 +89,6 @@ func (m *ModuleTransformSource) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *ModuleTransformSource) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
-}
-
 func (m *ModuleTransformSource) FeaturableProperties() []interface{} {
 	return append(m.ModuleGenerateCommon.FeaturableProperties(), &m.Properties.TransformSourceProps)
 }

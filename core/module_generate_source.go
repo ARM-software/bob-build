@@ -52,10 +52,6 @@ func (m *ModuleGenerateSource) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *ModuleGenerateSource) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
-}
-
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {
 		getGenerator(ctx).generateSourceActions(m, ctx)

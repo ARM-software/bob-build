@@ -82,7 +82,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 		func(m blueprint.Module) {
 			if gs, ok := m.(dependentInterface); ok {
 				srcs = append(srcs, gs.outputs()...)
-				srcs = append(srcs, gs.implicitOutputs()...)
+				srcs = append(srcs, file.GetImplicitOutputs(gs)...)
 			} else {
 				utils.Die("%s does not have outputs", ctx.OtherModuleName(m))
 			}

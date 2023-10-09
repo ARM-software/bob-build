@@ -25,10 +25,6 @@ func (m ModuleStaticLibrary) GetProperties() interface{} {
 	return m.ModuleLibrary.Properties
 }
 
-func (m *ModuleStaticLibrary) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
-}
-
 func (m *ModuleStaticLibrary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }

@@ -27,10 +27,6 @@ var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
 var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
 
-func (m *ModuleSharedLibrary) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
-}
-
 func (m *ModuleSharedLibrary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		func(f file.Path) bool { return !f.IsSymLink() && !f.IsType(file.TypeToc) },

@@ -77,7 +77,6 @@ type strictLibraryInterface interface {
 	// dependentInterface  clashes with `installable` on older Go versions
 	phonyInterface
 	outputs() []string
-	implicitOutputs() []string
 	file.Consumer
 	file.Resolver
 	enableable
@@ -125,10 +124,6 @@ func (m *ModuleStrictLibrary) GetTargets() (tgts []string) {
 
 func (m *ModuleStrictLibrary) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
-}
-
-func (m *ModuleStrictLibrary) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleStrictLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string {
