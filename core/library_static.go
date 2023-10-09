@@ -26,7 +26,7 @@ func (m ModuleStaticLibrary) GetProperties() interface{} {
 }
 
 func (m *ModuleStaticLibrary) outputs() []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleStaticLibrary) OutFiles() (srcs file.Paths) {

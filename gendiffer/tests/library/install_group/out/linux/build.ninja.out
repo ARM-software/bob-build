@@ -91,7 +91,8 @@ build ${g.bob.BuildDir}/install/host/lib/libfoo.so: g.bob.install $
 
 build libfoo__host: phony ${g.bob.BuildDir}/install/host/lib/libfoo.a $
         ${g.bob.BuildDir}/install/host/lib/libfoo.so $
-        ${g.bob.BuildDir}/host/static/libfoo.a
+        ${g.bob.BuildDir}/host/static/libfoo.a $
+        ${g.bob.BuildDir}/host/shared/libfoo.so
 default libfoo__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -134,7 +135,8 @@ build ${g.bob.BuildDir}/install/lib/libfoo.so: g.bob.install $
 
 build libfoo__target: phony ${g.bob.BuildDir}/install/lib/libfoo.a $
         ${g.bob.BuildDir}/install/lib/libfoo.so $
-        ${g.bob.BuildDir}/target/static/libfoo.a
+        ${g.bob.BuildDir}/target/static/libfoo.a $
+        ${g.bob.BuildDir}/target/shared/libfoo.so
 default libfoo__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

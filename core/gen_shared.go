@@ -24,12 +24,7 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateSharedLibrary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		// TODO: fixme, this outputs headers as well so we need to filter it somewhere
-		func(f file.Path) bool {
-			return f.IsNotType(file.TypeImplicit) && f.IsType(file.TypeShared)
-		},
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
@@ -38,7 +33,7 @@ func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 
 	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated|file.TypeInstallable))
 
-	toc := file.NewPath(m.getTocName(), string(m.getTarget()), file.TypeUnset)
+	toc := file.NewPath(m.getTocName(), string(m.getTarget()), file.TypeImplicit)
 	files = append(files, toc)
 
 	for _, h := range m.Properties.Headers {

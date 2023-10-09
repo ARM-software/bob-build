@@ -610,8 +610,7 @@ func (g *linuxGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.Mod
 	objs, implicits := g.CompileObjs(m, ctx, tc)
 
 	installDeps := g.install(m, ctx)
-	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
-
+	g.SharedSymlinkActions(ctx, m)
 	g.SharedLinkActions(ctx, m, tc, objs, implicits)
 	g.SharedTocActions(ctx, m)
 

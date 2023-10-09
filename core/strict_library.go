@@ -131,10 +131,7 @@ func (m *ModuleStrictLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContex
 }
 
 func (m *ModuleStrictLibrary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		// TODO: fixme, for now shared outputs are not supported
-		func(f file.Path) bool { return f.IsType(file.TypeArchive) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleStrictLibrary) OutFiles() file.Paths {

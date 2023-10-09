@@ -22,11 +22,7 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateStaticLibrary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		// TODO: ideally we should just check for not `TypeImplicit` here,
-		// but currently set up to mirror existing behaviour
-		func(f file.Path) bool { return f.IsType(file.TypeArchive) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *generateStaticLibrary) OutFiles() (files file.Paths) {

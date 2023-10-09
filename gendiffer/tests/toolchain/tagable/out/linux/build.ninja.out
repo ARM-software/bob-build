@@ -79,7 +79,8 @@ build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build lib: phony ${g.bob.BuildDir}/target/static/lib.a
+build lib: phony ${g.bob.BuildDir}/target/static/lib.a $
+        ${g.bob.BuildDir}/target/shared/lib.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

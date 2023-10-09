@@ -121,9 +121,9 @@ build libsharedtest_installed__host: phony $
         ${g.bob.BuildDir}/install/host/lib/libsharedtest_installed.so.1.4.0 $
         ${g.bob.BuildDir}/install/host/lib/libsharedtest_installed.so $
         ${g.bob.BuildDir}/install/host/lib/libsharedtest_installed.so.1 $
+        ${g.bob.BuildDir}/host/shared/libsharedtest_installed.so.1.4.0 $
         ${g.bob.BuildDir}/host/shared/libsharedtest_installed.so $
-        ${g.bob.BuildDir}/host/shared/libsharedtest_installed.so.1 $
-        ${g.bob.BuildDir}/host/shared/libsharedtest_installed.so.1.4.0
+        ${g.bob.BuildDir}/host/shared/libsharedtest_installed.so.1
 default libsharedtest_installed__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -187,9 +187,9 @@ build libsharedtest_installed__target: phony $
         ${g.bob.BuildDir}/install/lib/libsharedtest_installed.so.1.4.0 $
         ${g.bob.BuildDir}/install/lib/libsharedtest_installed.so $
         ${g.bob.BuildDir}/install/lib/libsharedtest_installed.so.1 $
+        ${g.bob.BuildDir}/target/shared/libsharedtest_installed.so.1.4.0 $
         ${g.bob.BuildDir}/target/shared/libsharedtest_installed.so $
-        ${g.bob.BuildDir}/target/shared/libsharedtest_installed.so.1 $
-        ${g.bob.BuildDir}/target/shared/libsharedtest_installed.so.1.4.0
+        ${g.bob.BuildDir}/target/shared/libsharedtest_installed.so.1
 default libsharedtest_installed__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

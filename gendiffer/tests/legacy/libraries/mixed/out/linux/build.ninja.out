@@ -276,7 +276,8 @@ build ${g.bob.BuildDir}/target/static/depend_on_new_shared.a: $
     build_wrapper = 
 
 build depend_on_new_shared: phony $
-        ${g.bob.BuildDir}/target/static/depend_on_new_shared.a
+        ${g.bob.BuildDir}/target/static/depend_on_new_shared.a $
+        ${g.bob.BuildDir}/target/shared/depend_on_new_shared.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  gen_output
@@ -294,6 +295,8 @@ build ${g.bob.BuildDir}/gen/gen_output/input_one.gen: $
         m.gen_output_host.gen_gen_output ${g.bob.SrcDir}/input/input_one.in | $
         ${g.bob.BuildDir}/host/executable/utility $
         ${g.bob.BuildDir}/host/shared/libsharedtest.so.1.2.1 $
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so $
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1 $
         ${g.bob.SrcDir}/transform.py
     _out_ = ${g.bob.BuildDir}/gen/gen_output/input_one.gen
     host_bin = ${g.bob.BuildDir}/host/executable/utility
@@ -303,6 +306,8 @@ build ${g.bob.BuildDir}/gen/gen_output/input_two.gen: $
         m.gen_output_host.gen_gen_output ${g.bob.SrcDir}/input/input_two.in | $
         ${g.bob.BuildDir}/host/executable/utility $
         ${g.bob.BuildDir}/host/shared/libsharedtest.so.1.2.1 $
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so $
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1 $
         ${g.bob.SrcDir}/transform.py
     _out_ = ${g.bob.BuildDir}/gen/gen_output/input_two.gen
     host_bin = ${g.bob.BuildDir}/host/executable/utility
@@ -332,7 +337,8 @@ build ${g.bob.BuildDir}/host/static/lib_dep.a: g.bob.static_library
     ar = ar
     build_wrapper = 
 
-build lib_dep: phony ${g.bob.BuildDir}/host/static/lib_dep.a
+build lib_dep: phony ${g.bob.BuildDir}/host/static/lib_dep.a $
+        ${g.bob.BuildDir}/host/shared/lib_dep.so
 default lib_dep
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -370,7 +376,8 @@ build ${g.bob.BuildDir}/host/static/lib_forward_defines.a: $
     build_wrapper = 
 
 build lib_forward_defines__host: phony $
-        ${g.bob.BuildDir}/host/static/lib_forward_defines.a
+        ${g.bob.BuildDir}/host/static/lib_forward_defines.a $
+        ${g.bob.BuildDir}/host/shared/lib_forward_defines.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_forward_defines
@@ -407,7 +414,8 @@ build ${g.bob.BuildDir}/target/static/lib_forward_defines.a: $
     build_wrapper = 
 
 build lib_forward_defines__target: phony $
-        ${g.bob.BuildDir}/target/static/lib_forward_defines.a
+        ${g.bob.BuildDir}/target/static/lib_forward_defines.a $
+        ${g.bob.BuildDir}/target/shared/lib_forward_defines.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_new_shared
@@ -441,7 +449,8 @@ build ${g.bob.BuildDir}/target/static/lib_new_shared.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build lib_new_shared: phony ${g.bob.BuildDir}/target/static/lib_new_shared.a
+build lib_new_shared: phony ${g.bob.BuildDir}/target/static/lib_new_shared.a $
+        ${g.bob.BuildDir}/target/shared/lib_new_shared.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib_transitive_define
@@ -555,9 +564,9 @@ build ${g.bob.BuildDir}/host/shared/libsharedtest.so.1.2.1.toc: $
     tocflags = --format elf --objdump-tool objdump
 
 build libsharedtest__host: phony $
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1.2.1 $
         ${g.bob.BuildDir}/host/shared/libsharedtest.so $
-        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1 $
-        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1.2.1
+        ${g.bob.BuildDir}/host/shared/libsharedtest.so.1
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  libsharedtest
@@ -601,9 +610,9 @@ build ${g.bob.BuildDir}/target/shared/libsharedtest.so.1.2.1.toc: $
     tocflags = --format elf --objdump-tool objdump
 
 build libsharedtest__target: phony $
+        ${g.bob.BuildDir}/target/shared/libsharedtest.so.1.2.1 $
         ${g.bob.BuildDir}/target/shared/libsharedtest.so $
-        ${g.bob.BuildDir}/target/shared/libsharedtest.so.1 $
-        ${g.bob.BuildDir}/target/shared/libsharedtest.so.1.2.1
+        ${g.bob.BuildDir}/target/shared/libsharedtest.so.1
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  libsharedtest_installed

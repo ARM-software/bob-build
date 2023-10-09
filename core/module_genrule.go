@@ -54,9 +54,7 @@ func checkGenruleFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 }
 
 func (m *ModuleGenrule) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsNotType(file.TypeDep) && f.IsNotType(file.TypeImplicit) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleGenrule) processPaths(ctx blueprint.BaseModuleContext) {
@@ -73,7 +71,7 @@ func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	}
 
 	if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
-		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated))
+		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated|file.TypeImplicit))
 	}
 
 	m.Properties.ResolvedOut = files

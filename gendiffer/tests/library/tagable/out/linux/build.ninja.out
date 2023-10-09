@@ -79,7 +79,8 @@ build ${g.bob.BuildDir}/target/static/tagable.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build tagable: phony ${g.bob.BuildDir}/target/static/tagable.a
+build tagable: phony ${g.bob.BuildDir}/target/static/tagable.a $
+        ${g.bob.BuildDir}/target/shared/tagable.so
 default tagable
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -116,7 +117,8 @@ build ${g.bob.BuildDir}/target/static/tagable_features.a: g.bob.static_library $
     build_wrapper = 
 
 build tagable_features: phony $
-        ${g.bob.BuildDir}/target/static/tagable_features.a
+        ${g.bob.BuildDir}/target/static/tagable_features.a $
+        ${g.bob.BuildDir}/target/shared/tagable_features.so
 default tagable_features
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
