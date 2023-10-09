@@ -103,6 +103,18 @@ bootstrap_go_package {
 
 
 bootstrap_go_package {
+    name: "bob-toolchain-mapper",
+    srcs: [
+        "core/toolchain/mapper/mapper.go",
+    ],
+    testSrcs: [
+        "core/toolchain/mapper/mapper_test.go",
+    ],
+    pkgPath: "github.com/ARM-software/bob-build/core/toolchain/mapper",
+}
+
+
+bootstrap_go_package {
     name: "bob-backend",
     deps: [
         "blueprint",
