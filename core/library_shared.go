@@ -28,9 +28,7 @@ var _ stripable = (*ModuleSharedLibrary)(nil)
 var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
 
 func (m *ModuleSharedLibrary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return !f.IsSymLink() && !f.IsType(file.TypeToc) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
@@ -38,7 +36,7 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared|file.TypeInstallable)
 	files = append(files, so)
 
-	toc := file.NewPath(m.getRealName()+tocExt, string(m.getTarget()), file.TypeToc)
+	toc := file.NewPath(m.getRealName()+tocExt, string(m.getTarget()), file.TypeToc|file.TypeImplicit)
 	files = append(files, toc)
 
 	if m.ModuleLibrary.Properties.Library_version != "" {

@@ -79,7 +79,8 @@ build ${g.bob.BuildDir}/host/static/libA.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libA__host: phony ${g.bob.BuildDir}/host/static/libA.a
+build libA__host: phony ${g.bob.BuildDir}/host/static/libA.a $
+        ${g.bob.BuildDir}/host/shared/libA.so
 default libA__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -114,7 +115,8 @@ build ${g.bob.BuildDir}/target/static/libA.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libA__target: phony ${g.bob.BuildDir}/target/static/libA.a
+build libA__target: phony ${g.bob.BuildDir}/target/static/libA.a $
+        ${g.bob.BuildDir}/target/shared/libA.so
 default libA__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -149,7 +151,8 @@ build ${g.bob.BuildDir}/host/static/libB.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libB__host: phony ${g.bob.BuildDir}/host/static/libB.a
+build libB__host: phony ${g.bob.BuildDir}/host/static/libB.a $
+        ${g.bob.BuildDir}/host/shared/libB.so
 default libB__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -184,7 +187,8 @@ build ${g.bob.BuildDir}/target/static/libB.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libB__target: phony ${g.bob.BuildDir}/target/static/libB.a
+build libB__target: phony ${g.bob.BuildDir}/target/static/libB.a $
+        ${g.bob.BuildDir}/target/shared/libB.so
 default libB__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -219,7 +223,8 @@ build ${g.bob.BuildDir}/host/static/libC.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libC__host: phony ${g.bob.BuildDir}/host/static/libC.a
+build libC__host: phony ${g.bob.BuildDir}/host/static/libC.a $
+        ${g.bob.BuildDir}/host/shared/libC.so
 default libC__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -254,7 +259,8 @@ build ${g.bob.BuildDir}/target/static/libC.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build libC__target: phony ${g.bob.BuildDir}/target/static/libC.a
+build libC__target: phony ${g.bob.BuildDir}/target/static/libC.a $
+        ${g.bob.BuildDir}/target/shared/libC.so
 default libC__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

@@ -42,14 +42,7 @@ type generateSourceInterface interface {
 var _ generateSourceInterface = (*ModuleGenerateSource)(nil) // impl check
 
 func (m *ModuleGenerateSource) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool {
-			// TODO: Consider adding a better group tag
-			return f.IsNotType(file.TypeRsp) &&
-				f.IsNotType(file.TypeDep)
-
-		},
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleGenerateSource) GenerateBuildActions(ctx blueprint.ModuleContext) {
@@ -81,7 +74,7 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	}
 
 	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
-		fp := file.NewPath(implicit, ctx.ModuleName(), file.TypeImplicit|file.TypeInstallable)
+		fp := file.NewPath(implicit, ctx.ModuleName(), file.TypeImplicit)
 		gc.Properties.LegacySourceProps.ResolvedSrcs = gc.Properties.LegacySourceProps.ResolvedSrcs.AppendIfUnique(fp)
 	}
 

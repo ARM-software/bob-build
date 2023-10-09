@@ -46,9 +46,7 @@ type ModuleGensrcsInterface interface {
 var _ ModuleGensrcsInterface = (*ModuleGensrcs)(nil) // impl check
 
 func (m *ModuleGensrcs) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsNotType(file.TypeDep) && f.IsNotType(file.TypeImplicit) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleGensrcs) processPaths(ctx blueprint.BaseModuleContext) {
@@ -93,7 +91,7 @@ func (m *ModuleGensrcs) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 			files = files.AppendIfUnique(fpOut)
 
 			if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
-				depOut := file.NewPath(fp.ScopedPath()+".d", ctx.ModuleName(), file.TypeDep|file.TypeGenerated)
+				depOut := file.NewPath(fp.ScopedPath()+".d", ctx.ModuleName(), file.TypeDep|file.TypeGenerated|file.TypeImplicit)
 				files = files.AppendIfUnique(depOut)
 			}
 

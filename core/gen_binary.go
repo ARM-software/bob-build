@@ -21,7 +21,7 @@ func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generator
 }
 
 func (m *generateBinary) outputs() []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *generateBinary) OutFiles() (files file.Paths) {

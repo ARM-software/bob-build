@@ -210,7 +210,8 @@ build ${g.bob.BuildDir}/host/static/lib.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build lib__host: phony ${g.bob.BuildDir}/host/static/lib.a
+build lib__host: phony ${g.bob.BuildDir}/host/static/lib.a $
+        ${g.bob.BuildDir}/host/shared/lib.so
 default lib__host
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -245,7 +246,8 @@ build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
     ar = ar
     build_wrapper = 
 
-build lib__target: phony ${g.bob.BuildDir}/target/static/lib.a
+build lib__target: phony ${g.bob.BuildDir}/target/static/lib.a $
+        ${g.bob.BuildDir}/target/shared/lib.so
 default lib__target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

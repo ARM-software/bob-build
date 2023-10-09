@@ -25,9 +25,7 @@ func (m *ModuleStrictBinary) OutFiles() file.Paths {
 }
 
 func (m *ModuleStrictBinary) outputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsType(file.TypeBinary) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetOutputs(m)
 }
 
 func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
