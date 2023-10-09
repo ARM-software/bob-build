@@ -116,6 +116,12 @@ func NewLink(relativePath string, namespace string, from *Path, tag Type) Path {
 	return link
 }
 
+func FromWithTag(from *Path, tag Type) Path {
+	new := *from
+	new.tag |= tag
+	return new
+}
+
 func New(relativePath string, namespace string, tag Type) Path {
 
 	switch path.Ext(relativePath) {

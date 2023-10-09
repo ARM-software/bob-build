@@ -422,7 +422,6 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 
 // Temporary interface to make library handlers generic between legacy and strict libraries
 type BackendCommonLibraryInterface interface {
-	file.Provider
 	flag.Consumer
 	targetableModule
 	linkableModule

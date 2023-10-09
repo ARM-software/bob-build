@@ -28,16 +28,12 @@ func (m *generateBinary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *generateBinary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.outputs()
-}
-
 func (m *generateBinary) OutFiles() (files file.Paths) {
 	return file.Paths{
 		file.NewPath(
 			m.outputName(),
 			m.Name(),
-			file.TypeBinary|file.TypeExecutable|file.TypeGenerated,
+			file.TypeBinary|file.TypeExecutable|file.TypeGenerated|file.TypeInstallable,
 		),
 	}
 }

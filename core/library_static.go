@@ -33,12 +33,8 @@ func (m *ModuleStaticLibrary) outputs() []string {
 	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *ModuleStaticLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSlice(func(f file.Path) string { return f.BuildPath() })
-}
-
 func (m *ModuleStaticLibrary) OutFiles() (srcs file.Paths) {
-	fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive) // TODO: refactor outputs() to use file.Paths
+	fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive|file.TypeInstallable) // TODO: refactor outputs() to use file.Paths
 	srcs = srcs.AppendIfUnique(fp)
 	return
 }

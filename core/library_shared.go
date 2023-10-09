@@ -37,15 +37,9 @@ func (m *ModuleSharedLibrary) outputs() []string {
 		func(f file.Path) string { return f.BuildPath() })
 }
 
-func (m *ModuleSharedLibrary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return !f.IsType(file.TypeToc) && !f.IsSymLink() },
-		func(f file.Path) string { return f.BuildPath() })
-}
-
 func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 
-	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared)
+	so := file.NewPath(m.getRealName(), string(m.getTarget()), file.TypeShared|file.TypeInstallable)
 	files = append(files, so)
 
 	toc := file.NewPath(m.getRealName()+tocExt, string(m.getTarget()), file.TypeToc)
@@ -60,8 +54,8 @@ func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 				m.ModuleLibrary.Properties.Library_version)
 		}
 
-		link1 := file.NewLink(soname, string(m.getTarget()), &so, file.TypeUnset)
-		link2 := file.NewLink(m.getLinkName(), string(m.getTarget()), &link1, file.TypeUnset)
+		link1 := file.NewLink(soname, string(m.getTarget()), &so, file.TypeInstallable)
+		link2 := file.NewLink(m.getLinkName(), string(m.getTarget()), &link1, file.TypeInstallable)
 		files = append(files, link2, link1)
 	}
 

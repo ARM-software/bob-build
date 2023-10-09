@@ -178,11 +178,11 @@ func (m *ModuleGenerateCommon) getEnableableProps() *EnableableProps {
 
 func (m *ModuleGenerateCommon) OutFiles() (files file.Paths) {
 	if m.Properties.Rsp_content != nil {
-		files = append(files, file.NewPath("."+utils.FlattenPath(m.Name())+".rsp", m.Name(), file.TypeRsp|file.TypeGenerated))
+		files = append(files, file.NewPath("."+utils.FlattenPath(m.Name())+".rsp", m.Name(), file.TypeRsp|file.TypeGenerated|file.TypeImplicit))
 	}
 
 	if proptools.Bool(m.Properties.Depfile) {
-		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated))
+		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated|file.TypeImplicit))
 	}
 
 	return

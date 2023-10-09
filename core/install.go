@@ -211,7 +211,7 @@ func (m *ModuleInstallGroup) GetTags() []string {
 
 // Modules implementing the installable interface can be install their output
 type installable interface {
-	filesToInstall(ctx blueprint.BaseModuleContext) []string
+	file.Provider
 	getInstallableProps() *InstallableProps
 	getInstallDepPhonyNames(ctx blueprint.ModuleContext) []string
 }
@@ -238,6 +238,7 @@ type resourceInterface interface {
 	pathProcessor
 	file.Resolver
 	file.Consumer
+	file.Provider
 	Tagable
 }
 
@@ -277,14 +278,17 @@ func (m *ModuleResource) getEnableableProps() *EnableableProps {
 	return &m.Properties.EnableableProps
 }
 
-func (m *ModuleResource) filesToInstall(ctx blueprint.BaseModuleContext) (files []string) {
-	m.Properties.LegacySourceProps.GetFiles(ctx).ForEach(
+func (m *ModuleResource) OutFiles() (files file.Paths) {
+	m.Properties.LegacySourceProps.GetDirectFiles().ForEach(
 		func(fp file.Path) bool {
-			files = append(files, fp.BuildPath())
+			files = append(files, file.FromWithTag(&fp, file.TypeInstallable))
 			return true
-		})
+		},
+	)
 	return
 }
+
+func (m *ModuleResource) OutFileTargets() []string { return []string{} }
 
 func (m *ModuleResource) getInstallableProps() *InstallableProps {
 	return &m.Properties.InstallableProps

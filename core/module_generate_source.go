@@ -33,9 +33,9 @@ type ModuleGenerateSource struct {
 
 type generateSourceInterface interface {
 	installable
+	// file.Provider clashes with `installable` on older Go versions
 	pathProcessor
 	file.Resolver
-	file.Provider
 	file.Consumer
 }
 
@@ -80,12 +80,12 @@ func (m *ModuleGenerateSource) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	// Resolve output files
 	outs := file.Paths{}
 	for _, out := range m.Properties.Out {
-		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
+		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated|file.TypeInstallable)
 		outs = outs.AppendIfUnique(fp)
 	}
 
 	for _, implicit := range glob(ctx, m.Properties.Implicit_srcs, m.Properties.Exclude_implicit_srcs) {
-		fp := file.NewPath(implicit, ctx.ModuleName(), file.TypeImplicit)
+		fp := file.NewPath(implicit, ctx.ModuleName(), file.TypeImplicit|file.TypeInstallable)
 		gc.Properties.LegacySourceProps.ResolvedSrcs = gc.Properties.LegacySourceProps.ResolvedSrcs.AppendIfUnique(fp)
 	}
 
@@ -163,11 +163,6 @@ func (m *ModuleGenerateSource) generateInouts(ctx blueprint.ModuleContext, g gen
 	}
 
 	return []inout{io}
-}
-
-func (m *ModuleGenerateSource) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	// Install everything that we generate
-	return m.outputs()
 }
 
 func (m ModuleGenerateSource) GetProperties() interface{} {

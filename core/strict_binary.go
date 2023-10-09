@@ -20,7 +20,7 @@ var _ strictLibraryInterface = (*ModuleStrictBinary)(nil)
 
 func (m *ModuleStrictBinary) OutFiles() file.Paths {
 	return file.Paths{
-		file.NewPath(m.Name(), string(m.getTarget()), file.TypeBinary),
+		file.NewPath(m.Name(), string(m.getTarget()), file.TypeBinary|file.TypeInstallable),
 	}
 }
 
@@ -28,16 +28,6 @@ func (m *ModuleStrictBinary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		func(f file.Path) bool { return f.IsType(file.TypeBinary) },
 		func(f file.Path) string { return f.BuildPath() })
-}
-
-func (m *ModuleStrictBinary) filesToInstall(ctx blueprint.BaseModuleContext) []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(p file.Path) bool {
-			return p.IsType(file.TypeBinary)
-		},
-		func(p file.Path) string {
-			return p.BuildPath()
-		})
 }
 
 func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {
