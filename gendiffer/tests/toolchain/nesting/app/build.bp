@@ -1,0 +1,14 @@
+bob_toolchain {
+    name: "default_toolchain_config",
+    cflags: [
+        "-DROOT_TOOLCHAIN=1",
+    ],
+}
+
+bob_library {
+    name: "foo",
+    srcs: [
+        "src.c",
+    ],
+    build_by_default: true,
+}

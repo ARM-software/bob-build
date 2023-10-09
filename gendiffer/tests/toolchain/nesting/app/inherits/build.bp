@@ -1,0 +1,8 @@
+bob_library {
+    name: "uses_root",
+    srcs: [
+        "src.c",
+    ],
+    build_by_default: true,
+
+}

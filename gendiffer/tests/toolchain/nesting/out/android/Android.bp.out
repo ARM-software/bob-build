@@ -1,0 +1,50 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: [
+        "build.bp",
+        "inherits/build.bp",
+        "inherits/overwrite/build.bp",
+        "inherits/overwrite/parent/build.bp",
+    ],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library {
+    name: "foo",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["src.c"],
+    cflags: ["-DROOT_TOOLCHAIN=1"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "overwrites",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["inherits/overwrite/src.c"],
+    cflags: ["-DOVERWRITES_TOOLCHAIN=1"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "parent",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["inherits/overwrite/parent/src.c"],
+    cflags: ["-DOVERWRITES_TOOLCHAIN=1"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "uses_root",
+    host_supported: false,
+    device_supported: true,
+    srcs: ["inherits/src.c"],
+    cflags: ["-DROOT_TOOLCHAIN=1"],
+    compile_multilib: "both",
+}
+

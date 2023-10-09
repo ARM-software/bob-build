@@ -73,6 +73,7 @@ go_library(
         "//core/module",
         "//core/tag",
         "//core/toolchain",
+        "//core/toolchain/mapper",
         "//internal/bpwriter",
         "//internal/ccflags",
         "//internal/escape",

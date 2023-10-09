@@ -6,6 +6,7 @@ import (
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/core/toolchain"
+	"github.com/ARM-software/bob-build/core/toolchain/mapper"
 	"github.com/google/blueprint"
 )
 
@@ -200,4 +201,12 @@ func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{})
 
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
+}
+
+var ToolchainModuleMap = mapper.New() // Global lookup for toolchain names
+
+func RegisterToolchainModules(ctx blueprint.EarlyMutatorContext) {
+	if _, ok := ctx.Module().(*ModuleToolchain); ok {
+		ToolchainModuleMap.Add(ctx.ModuleDir(), ctx.ModuleName())
+	}
 }

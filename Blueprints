@@ -28,6 +28,7 @@ bootstrap_go_package {
         "bob-flag",
         "bob-backend",
         "bob-tag",
+        "bob-toolchain-mapper",
     ],
     srcs: [
         "core/alias.go",

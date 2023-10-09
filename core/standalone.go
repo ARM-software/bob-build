@@ -151,6 +151,7 @@ func Main() {
 	// The depender mutator adds the dependencies between binaries and libraries.
 	//
 	// The generated depender mutator add dependencies to generated source modules.
+	ctx.RegisterEarlyMutator("register_toolchains", RegisterToolchainModules)
 	ctx.RegisterBottomUpMutator("default_deps1", DefaultDepsStage1Mutator).Parallel()
 	ctx.RegisterBottomUpMutator("default_deps2", DefaultDepsStage2Mutator).Parallel()
 	ctx.RegisterTopDownMutator("features_applier", featureApplierMutator).Parallel()
