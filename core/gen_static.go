@@ -21,10 +21,6 @@ func (m *generateStaticLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 	return generateLibraryInouts(m, ctx, g, m.Properties.Headers)
 }
 
-func (m *generateStaticLibrary) implicitOutputs() []string {
-	return file.GetImplicitOutputs(m)
-}
-
 func (m *generateStaticLibrary) outputs() []string {
 	return m.OutFiles().ToStringSliceIf(
 		// TODO: ideally we should just check for not `TypeImplicit` here,

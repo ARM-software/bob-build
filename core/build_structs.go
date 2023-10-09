@@ -64,7 +64,6 @@ type dependentInterface interface {
 	file.Provider
 
 	outputs() []string
-	implicitOutputs() []string
 }
 
 func getGenerator(ctx blueprint.BaseModuleContext) generatorBackend {
