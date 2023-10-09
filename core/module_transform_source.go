@@ -90,7 +90,7 @@ func (m *ModuleTransformSource) outputs() []string {
 }
 
 func (m *ModuleTransformSource) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleTransformSource) FeaturableProperties() []interface{} {

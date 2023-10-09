@@ -21,7 +21,7 @@ func (m *generateBinary) generateInouts(ctx blueprint.ModuleContext, g generator
 }
 
 func (m *generateBinary) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *generateBinary) outputs() []string {

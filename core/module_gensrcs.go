@@ -46,9 +46,7 @@ type ModuleGensrcsInterface interface {
 var _ ModuleGensrcsInterface = (*ModuleGensrcs)(nil) // impl check
 
 func (m *ModuleGensrcs) implicitOutputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleGensrcs) outputs() []string {

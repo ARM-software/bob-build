@@ -24,11 +24,7 @@ func (m *generateSharedLibrary) generateInouts(ctx blueprint.ModuleContext, g ge
 }
 
 func (m *generateSharedLibrary) implicitOutputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		// TODO: ideally we should just check for `TypeImplicit` here,
-		// but currently set up to mirror existing behaviour
-		func(f file.Path) bool { return f.IsNotType(file.TypeShared) && f.IsNotType(file.TypeToc) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *generateSharedLibrary) outputs() []string {
@@ -46,11 +42,11 @@ func (m *generateSharedLibrary) OutFiles() (files file.Paths) {
 
 	files = append(files, file.NewPath(m.outputFileName(), m.Name(), file.TypeGenerated|file.TypeInstallable))
 
-	toc := file.NewPath(m.getTocName(), string(m.getTarget()), file.TypeImplicit)
+	toc := file.NewPath(m.getTocName(), string(m.getTarget()), file.TypeUnset)
 	files = append(files, toc)
 
 	for _, h := range m.Properties.Headers {
-		fp := file.NewPath(h, m.Name(), file.TypeGenerated|file.TypeHeader)
+		fp := file.NewPath(h, m.Name(), file.TypeGenerated|file.TypeHeader|file.TypeImplicit)
 		files = append(files, fp)
 	}
 

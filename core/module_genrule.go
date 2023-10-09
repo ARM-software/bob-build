@@ -54,9 +54,7 @@ func checkGenruleFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 }
 
 func (m *ModuleGenrule) implicitOutputs() []string {
-	return m.OutFiles().ToStringSliceIf(
-		func(f file.Path) bool { return f.IsType(file.TypeImplicit) },
-		func(f file.Path) string { return f.BuildPath() })
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleGenrule) outputs() []string {

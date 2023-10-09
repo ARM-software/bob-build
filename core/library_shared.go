@@ -28,7 +28,7 @@ var _ stripable = (*ModuleSharedLibrary)(nil)
 var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
 
 func (m *ModuleSharedLibrary) implicitOutputs() []string {
-	return []string{}
+	return file.GetImplicitOutputs(m)
 }
 
 func (m *ModuleSharedLibrary) outputs() []string {
