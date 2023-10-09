@@ -64,6 +64,6 @@ func (g *linuxGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx bluepri
 			Optional: true,
 		})
 
-	installDeps := append(g.install(ko, ctx), g.getPhonyFiles(ko)...)
+	installDeps := append(g.install(ko, ctx), file.GetOutputs(ko)...)
 	addPhony(ko, ctx, installDeps, optional)
 }

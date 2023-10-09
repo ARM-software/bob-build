@@ -70,10 +70,6 @@ func addPhony(p phonyInterface, ctx blueprint.ModuleContext,
 		})
 }
 
-func (g *linuxGenerator) getPhonyFiles(p dependentInterface) []string {
-	return file.GetOutputs(p)
-}
-
 type singleOutputModule interface {
 	blueprint.Module
 	outputName() string

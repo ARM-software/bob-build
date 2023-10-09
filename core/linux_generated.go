@@ -166,14 +166,14 @@ func (g *linuxGenerator) genruleActions(gr *ModuleGenrule, ctx blueprint.ModuleC
 	inouts := gr.generateInouts(ctx)
 	g.generateStrictCommonActions(&gr.ModuleStrictGenerateCommon, ctx, inouts)
 
-	addPhony(gr, ctx, g.getPhonyFiles(gr), !isBuiltByDefault(gr))
+	addPhony(gr, ctx, file.GetOutputs(gr), !isBuiltByDefault(gr))
 }
 
 func (g *linuxGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
 	inouts := gr.generateInouts(ctx)
 	g.generateStrictCommonActions(&gr.ModuleStrictGenerateCommon, ctx, inouts)
 
-	addPhony(gr, ctx, g.getPhonyFiles(gr), !isBuiltByDefault(gr))
+	addPhony(gr, ctx, file.GetOutputs(gr), !isBuiltByDefault(gr))
 }
 
 func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blueprint.ModuleContext) {
@@ -181,7 +181,7 @@ func (g *linuxGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blue
 
 	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -189,7 +189,7 @@ func (g *linuxGenerator) transformSourceActions(m *ModuleTransformSource, ctx bl
 	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -197,7 +197,7 @@ func (g *linuxGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprin
 	inouts := m.generateInouts(ctx, g)
 	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -221,7 +221,7 @@ func (g *linuxGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprin
 		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
 	}
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
@@ -241,6 +241,6 @@ func (g *linuxGenerator) genBinaryActions(m *generateBinary, ctx blueprint.Modul
 			Optional: true,
 		})
 
-	installDeps := append(g.install(m, ctx), g.getPhonyFiles(m)...)
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
 	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
