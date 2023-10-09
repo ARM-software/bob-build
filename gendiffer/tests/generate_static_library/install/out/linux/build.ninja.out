@@ -114,9 +114,7 @@ build ${g.bob.BuildDir}/gen_sh_lib/libblah_static.a: g.bob.install $
         ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a
 
 build libblah_static: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_static.a $
-        ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a $
-        ${g.bob.BuildDir}/gen/libblah_static/include/libblah.h $
-        ${g.bob.BuildDir}/gen/libblah_static/include/libblah_feature.h
+        ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

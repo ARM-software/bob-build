@@ -103,9 +103,7 @@ build ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a | $
     module_dir = ${g.bob.SrcDir}/nested
 
 build libblah_static: phony $
-        ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a $
-        ${g.bob.BuildDir}/gen/libblah_static/include/libblah.h $
-        ${g.bob.BuildDir}/gen/libblah_static/include/libblah_feature.h
+        ${g.bob.BuildDir}/gen/libblah_static/libblah_static.a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

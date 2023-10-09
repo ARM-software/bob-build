@@ -125,9 +125,7 @@ build ${g.bob.BuildDir}/host/shared/libblah_shared.so.toc: $
     tocflags = --format elf --objdump-tool objdump
 
 build libblah_shared: phony $
-        ${g.bob.BuildDir}/gen/libblah_shared/libblah_shared.so $
-        ${g.bob.BuildDir}/gen/libblah_shared/include/libblah.h $
-        ${g.bob.BuildDir}/gen/libblah_shared/include/libblah_feature.h
+        ${g.bob.BuildDir}/gen/libblah_shared/libblah_shared.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  libblah_shared_rename
@@ -161,9 +159,7 @@ build ${g.bob.BuildDir}/host/shared/libblah_shared2.so.toc: $
     tocflags = --format elf --objdump-tool objdump
 
 build libblah_shared_rename: phony $
-        ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so $
-        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah.h $
-        ${g.bob.BuildDir}/gen/libblah_shared_rename/include/libblah_feature.h
+        ${g.bob.BuildDir}/gen/libblah_shared_rename/libblah_shared2.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
