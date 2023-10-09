@@ -136,9 +136,7 @@ build ${g.bob.BuildDir}/gen_sh_lib/libblah_shared.so: g.bob.install $
         ${g.bob.BuildDir}/gen/libblah_shared/libblah_shared.so
 
 build libblah_shared: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_shared.so $
-        ${g.bob.BuildDir}/gen/libblah_shared/libblah_shared.so $
-        ${g.bob.BuildDir}/gen/libblah_shared/include/libblah.h $
-        ${g.bob.BuildDir}/gen/libblah_shared/include/libblah_feature.h
+        ${g.bob.BuildDir}/gen/libblah_shared/libblah_shared.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
