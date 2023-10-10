@@ -25,6 +25,9 @@ type ModuleToolchainProps struct {
 
 	// Flags that will be used for all link steps.
 	Ldflags []string
+
+	// Wrapper for all build commands (object file compilation *and* linking)
+	Build_wrapper *string
 }
 
 type ToolchainFlagsProps struct {
