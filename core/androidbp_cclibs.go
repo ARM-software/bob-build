@@ -579,8 +579,8 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addBinaryProps(mod, *m, ctx, g)
-
-	if m.GetStripable(ctx).strip() {
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc.strip() {
 		addStripProp(mod)
 	}
 
@@ -625,7 +625,8 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
 
-	if m.GetStripable(ctx).strip() {
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc.strip() {
 		addStripProp(mod)
 	}
 
@@ -678,6 +679,8 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 		panic(err.Error())
 	}
 
+	bc := GetModuleBackendConfiguration(ctx, m)
+
 	switch m.Properties.TargetType {
 	case toolchain.TgtTypeHost:
 		mod.AddBool("host_supported", true)
@@ -690,7 +693,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 
 	addCompilableProps(mod, m, ctx)
 
-	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+	if bc != nil && bc.strip() {
 		addStripProp(mod)
 	}
 
@@ -732,9 +735,11 @@ func (g *androidBpGenerator) executableTestActions(m *ModuleTest, ctx blueprint.
 		panic(err.Error())
 	}
 
+	bc := GetModuleBackendConfiguration(ctx, m)
+
 	addCompilableProps(mod, m, ctx)
 
-	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+	if bc != nil && bc.strip() {
 		addStripProp(mod)
 	}
 
@@ -772,10 +777,11 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 	if err != nil {
 		panic(err.Error())
 	}
+	bc := GetModuleBackendConfiguration(ctx, m)
 
 	addCompilableProps(mod, m, ctx)
 
-	if strip := m.GetStripable(ctx); strip != nil && strip.strip() {
+	if bc != nil && bc.strip() {
 		addStripProp(mod)
 	}
 

@@ -48,6 +48,8 @@ type libraryInterface interface {
 	file.Consumer
 	flag.Consumer
 	Tagable
+	BackendConfiguration
+	BackendConfigurationProvider
 }
 
 // TODO: These interfaces are causing a go build issue with 'duplicate functions'
