@@ -2,6 +2,7 @@ package core
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
@@ -148,6 +149,19 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 }
 
 func (m *ModuleToolchain) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
+	// Copies the behaviour from core/build.go
+	if m.Properties.Build_wrapper != nil {
+		depargs := map[string]string{}
+		files, _ := getDependentArgsAndFiles(ctx, depargs)
+
+		// Replace any property usage in buildWrapper
+		buildWrapper := *m.Properties.Build_wrapper
+		for k, v := range depargs {
+			buildWrapper = strings.Replace(buildWrapper, "${"+k+"}", v, -1)
+		}
+
+		return buildWrapper, files
+	}
 	return "", []string{}
 }
 
