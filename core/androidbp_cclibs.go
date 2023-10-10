@@ -745,6 +745,8 @@ func (g *androidBpGenerator) executableTestActions(m *ModuleTest, ctx blueprint.
 	// 	mod.AddString("compile_multilib", "both")
 	// }
 
+	addProvenanceProps(mod, m)
+
 	// Avoid using cc_test default setup
 	// TODO: `relative_install_path` needed - Module install directory may only be disabled if relative_install_path is set
 	// mod.AddBool("no_named_install_directory", true)
