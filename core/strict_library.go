@@ -321,10 +321,6 @@ func (m ModuleStrictLibrary) GetProperties() interface{} {
 	return m.Properties
 }
 
-func (m *ModuleStrictLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
-	return "", []string{}
-}
-
 func (m *ModuleStrictLibrary) GetStaticLibs(ctx blueprint.ModuleContext) (libs []string) {
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.StaticTag },
