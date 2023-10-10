@@ -233,6 +233,19 @@ func (m *ModuleToolchain) GetTags() []string {
 	return m.Properties.TagableProps.GetTags()
 }
 
+func (m *ModuleToolchain) processPaths(ctx blueprint.BaseModuleContext) {
+	if m.Properties.Build_wrapper != nil {
+		// Copies core/build_props.go to duplicate the behaviour for `build_wrapper`
+		*m.Properties.Build_wrapper = strings.TrimSpace(*m.Properties.Build_wrapper)
+		firstWord := strings.SplitN(*m.Properties.Build_wrapper, " ", 1)[0]
+		if firstWord[0] != '/' {
+			if strings.ContainsAny(firstWord, "/") {
+				*m.Properties.Build_wrapper = getBackendPathInSourceDir(getGenerator(ctx), *m.Properties.Build_wrapper)
+			}
+		}
+	}
+}
+
 func ModuleToolchainFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleToolchain{}
 
