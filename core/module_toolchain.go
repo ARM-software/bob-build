@@ -60,6 +60,25 @@ type ModuleToolchain struct {
 	}
 }
 
+type BackendConfiguration interface {
+	stripable
+	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+}
+
+// This interface provides configuration features
+type BackendConfigurationProvider interface {
+	GetBackendConfiguration(blueprint.ModuleContext) BackendConfiguration
+}
+
+func GetModuleBackendConfiguration(ctx blueprint.ModuleContext, m blueprint.Module) BackendConfiguration {
+	if capable, ok := m.(BackendConfigurationProvider); ok {
+		if bc := capable.GetBackendConfiguration(ctx); bc != nil {
+			return bc
+		}
+	}
+	return nil
+}
+
 type ModuleToolchainInterface interface {
 	Featurable
 	targetSpecificLibrary
@@ -69,6 +88,7 @@ type ModuleToolchainInterface interface {
 
 var _ ModuleToolchainInterface = (*ModuleToolchain)(nil)
 var _ stripable = (*ModuleToolchain)(nil)
+var _ BackendConfiguration = (*ModuleToolchain)(nil)
 
 func (m *ModuleToolchain) FeaturableProperties() []interface{} {
 	return []interface{}{
@@ -125,6 +145,10 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 		&m.Properties.StripProps,
 		&m.Properties.TagableProps,
 	}
+}
+
+func (m *ModuleToolchain) GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string) {
+	return "", []string{}
 }
 
 func (m *ModuleToolchain) FlagsOut() flag.Flags {

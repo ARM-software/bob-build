@@ -89,7 +89,7 @@ func (m *ModuleSharedLibrary) strip() bool {
 	return m.Properties.Strip != nil && *m.Properties.Strip
 }
 
-func (m *ModuleSharedLibrary) GetStripable(ctx blueprint.ModuleContext) stripable {
+func (m *ModuleSharedLibrary) GetBackendConfiguration(ctx blueprint.ModuleContext) BackendConfiguration {
 	return m
 }
 

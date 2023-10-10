@@ -35,6 +35,15 @@ func (m *ModuleStaticLibrary) OutFileTargets() []string {
 	return []string{}
 }
 
+func (m *ModuleStaticLibrary) GetBackendConfiguration(ctx blueprint.ModuleContext) BackendConfiguration {
+	return m
+}
+
+func (m *ModuleStaticLibrary) strip() bool {
+	// Static library does not support stripping.
+	return false
+}
+
 func staticLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleStaticLibrary{}
 	return module.LibraryFactory(config, module)

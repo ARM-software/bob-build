@@ -228,8 +228,8 @@ func (g *linuxGenerator) install(m interface{}, ctx blueprint.ModuleContext) []s
 					src := fp.BuildPath()
 					dest := filepath.Join(installPath, filepath.Base(src))
 					// Interpose strip target
-					if capable, ok := m.(StripCapable); ok {
-						if lib := capable.GetStripable(ctx); lib != nil {
+					if capable, ok := m.(BackendConfigurationProvider); ok {
+						if lib := capable.GetBackendConfiguration(ctx); lib != nil {
 
 							debugPath := lib.getDebugPath()
 							separateDebugInfo := debugPath != nil
