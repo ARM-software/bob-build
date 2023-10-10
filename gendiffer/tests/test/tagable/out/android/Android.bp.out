@@ -10,6 +10,10 @@ genrule {
 cc_test {
     name: "tagable",
     srcs: ["src.cpp"],
+    owner: "baz",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
     include_build_directory: false,
     auto_gen_config: false,
     gtest: false,
