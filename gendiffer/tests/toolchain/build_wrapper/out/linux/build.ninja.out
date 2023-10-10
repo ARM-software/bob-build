@@ -53,24 +53,24 @@ rule g.bootstrap.cp
     description = cp ${out}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  bin
+# Module:  bin_a
 # Variant: target
 # Type:    bob_executable
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.bin_target.cflags = 
-m.bin_target.conlyflags = 
+m.bin_a_target.cflags = 
+m.bin_a_target.conlyflags = 
 
-build ${g.bob.BuildDir}/target/objects/bin/src.c.o: g.bob.cc $
+build ${g.bob.BuildDir}/target/objects/bin_a/src.c.o: g.bob.cc $
         ${g.bob.SrcDir}/src.c
     build_wrapper = ccache
     ccompiler = gcc
-    cflags = ${m.bin_target.cflags}
-    conlyflags = ${m.bin_target.conlyflags}
+    cflags = ${m.bin_a_target.cflags}
+    conlyflags = ${m.bin_a_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/executable/bin: g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/bin/src.c.o
+build ${g.bob.BuildDir}/target/executable/bin_a: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/bin_a/src.c.o
     build_wrapper = ccache
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -79,28 +79,58 @@ build ${g.bob.BuildDir}/target/executable/bin: g.bob.executable $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build bin: phony ${g.bob.BuildDir}/target/executable/bin
-default bin
+build bin_a: phony ${g.bob.BuildDir}/target/executable/bin_a
+default bin_a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  lib
+# Module:  bin_b
+# Variant: target
+# Type:    bob_executable
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:redacted
+
+m.bin_b_target.cflags = 
+m.bin_b_target.conlyflags = 
+
+build ${g.bob.BuildDir}/target/objects/bin_b/src.c.o: g.bob.cc $
+        ${g.bob.SrcDir}/src.c
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ccompiler = gcc
+    cflags = ${m.bin_b_target.cflags}
+    conlyflags = ${m.bin_b_target.conlyflags}
+
+build ${g.bob.BuildDir}/target/executable/bin_b: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/bin_b/src.c.o
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build bin_b: phony ${g.bob.BuildDir}/target/executable/bin_b
+default bin_b
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  lib_a
 # Variant: target
 # Type:    bob_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.lib_target.cflags = 
-m.lib_target.conlyflags = 
+m.lib_a_target.cflags = 
+m.lib_a_target.conlyflags = 
 
-build ${g.bob.BuildDir}/target/objects/lib/src.c.o: g.bob.cc $
+build ${g.bob.BuildDir}/target/objects/lib_a/src.c.o: g.bob.cc $
         ${g.bob.SrcDir}/src.c
     build_wrapper = ccache
     ccompiler = gcc
-    cflags = ${m.lib_target.cflags}
-    conlyflags = ${m.lib_target.conlyflags}
+    cflags = ${m.lib_a_target.cflags}
+    conlyflags = ${m.lib_a_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/shared/lib.so: g.bob.shared_library $
-        ${g.bob.BuildDir}/target/objects/lib/src.c.o
+build ${g.bob.BuildDir}/target/shared/lib_a.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/lib_a/src.c.o
     build_wrapper = ccache
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -109,33 +139,68 @@ build ${g.bob.BuildDir}/target/shared/lib.so: g.bob.shared_library $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
-        ${g.bob.BuildDir}/target/objects/lib/src.c.o
+build ${g.bob.BuildDir}/target/static/lib_a.a: g.bob.static_library $
+        ${g.bob.BuildDir}/target/objects/lib_a/src.c.o
     ar = ar
     build_wrapper = ccache
 
-build lib: phony ${g.bob.BuildDir}/target/static/lib.a $
-        ${g.bob.BuildDir}/target/shared/lib.so
+build lib_a: phony ${g.bob.BuildDir}/target/static/lib_a.a $
+        ${g.bob.BuildDir}/target/shared/lib_a.so
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  test
+# Module:  lib_b
+# Variant: target
+# Type:    bob_library
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:redacted
+
+m.lib_b_target.cflags = 
+m.lib_b_target.conlyflags = 
+
+build ${g.bob.BuildDir}/target/objects/lib_b/src.c.o: g.bob.cc $
+        ${g.bob.SrcDir}/src.c
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ccompiler = gcc
+    cflags = ${m.lib_b_target.cflags}
+    conlyflags = ${m.lib_b_target.conlyflags}
+
+build ${g.bob.BuildDir}/target/shared/lib_b.so: g.bob.shared_library $
+        ${g.bob.BuildDir}/target/objects/lib_b/src.c.o
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build ${g.bob.BuildDir}/target/static/lib_b.a: g.bob.static_library $
+        ${g.bob.BuildDir}/target/objects/lib_b/src.c.o
+    ar = ar
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+
+build lib_b: phony ${g.bob.BuildDir}/target/static/lib_b.a $
+        ${g.bob.BuildDir}/target/shared/lib_b.so
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  test_a
 # Variant: target
 # Type:    bob_test
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.test_target.cflags = 
-m.test_target.conlyflags = 
+m.test_a_target.cflags = 
+m.test_a_target.conlyflags = 
 
-build ${g.bob.BuildDir}/target/objects/test/src.c.o: g.bob.cc $
+build ${g.bob.BuildDir}/target/objects/test_a/src.c.o: g.bob.cc $
         ${g.bob.SrcDir}/src.c
     build_wrapper = ccache
     ccompiler = gcc
-    cflags = ${m.test_target.cflags}
-    conlyflags = ${m.test_target.conlyflags}
+    cflags = ${m.test_a_target.cflags}
+    conlyflags = ${m.test_a_target.conlyflags}
 
-build ${g.bob.BuildDir}/target/executable/test: g.bob.executable $
-        ${g.bob.BuildDir}/target/objects/test/src.c.o
+build ${g.bob.BuildDir}/target/executable/test_a: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/test_a/src.c.o
     build_wrapper = ccache
     ldflags = -Wl,--as-needed
     ldlibs = 
@@ -144,8 +209,38 @@ build ${g.bob.BuildDir}/target/executable/test: g.bob.executable $
     shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
-build test: phony ${g.bob.BuildDir}/target/executable/test
-default test
+build test_a: phony ${g.bob.BuildDir}/target/executable/test_a
+default test_a
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  test_b
+# Variant: target
+# Type:    bob_test
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:redacted
+
+m.test_b_target.cflags = 
+m.test_b_target.conlyflags = 
+
+build ${g.bob.BuildDir}/target/objects/test_b/src.c.o: g.bob.cc $
+        ${g.bob.SrcDir}/src.c
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ccompiler = gcc
+    cflags = ${m.test_b_target.cflags}
+    conlyflags = ${m.test_b_target.conlyflags}
+
+build ${g.bob.BuildDir}/target/executable/test_b: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/test_b/src.c.o
+    build_wrapper = ${g.bob.SrcDir}/src/wrapper.py objcopy
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build test_b: phony ${g.bob.BuildDir}/target/executable/test_b
+default test_b
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

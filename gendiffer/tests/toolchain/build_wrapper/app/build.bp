@@ -3,8 +3,14 @@ bob_toolchain {
     build_wrapper: "ccache",
 }
 
+bob_toolchain {
+    name: "wraps_with_local_file",
+    // Test source files and Mconfig vars
+    build_wrapper: "src/wrapper.py {{.target_objcopy_binary}}",
+}
+
 bob_library {
-    name: "lib",
+    name: "lib_a",
     srcs: [
         "src.c",
     ],
@@ -12,7 +18,7 @@ bob_library {
 }
 
 bob_executable {
-    name: "bin",
+    name: "bin_a",
     srcs: [
         "src.c",
     ],
@@ -20,9 +26,33 @@ bob_executable {
 }
 
 bob_test {
-    name: "test",
+    name: "test_a",
     srcs: [
         "src.c",
     ],
     toolchain: "toolchain",
+}
+
+bob_library {
+    name: "lib_b",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "wraps_with_local_file",
+}
+
+bob_executable {
+    name: "bin_b",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "wraps_with_local_file",
+}
+
+bob_test {
+    name: "test_b",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "wraps_with_local_file",
 }

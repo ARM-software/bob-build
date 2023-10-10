@@ -8,7 +8,13 @@ genrule {
 }
 
 cc_binary {
-    name: "bin",
+    name: "bin_a",
+    srcs: ["src.c"],
+    compile_multilib: "both",
+}
+
+cc_binary {
+    name: "bin_b",
     srcs: ["src.c"],
     compile_multilib: "both",
 }
