@@ -87,7 +87,7 @@ func (g *androidBpGenerator) resourceActions(r *ModuleResource, ctx blueprint.Mo
 				utils.Die(err.Error())
 			}
 
-			addProvenanceProps(m, r)
+			addProvenanceProps(ctx, m, r)
 
 			// TODO: temporary workaround for broken symlinks
 			// Remove while Bob plugins won't be used anymore

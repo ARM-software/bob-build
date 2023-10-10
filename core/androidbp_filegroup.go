@@ -11,5 +11,5 @@ func (g *androidBpGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.
 		utils.Die("%v", err.Error())
 	}
 	mod.AddStringList("srcs", m.Properties.Srcs)
-	addProvenanceProps(mod, m)
+	addProvenanceProps(ctx, mod, m)
 }

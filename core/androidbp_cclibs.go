@@ -318,7 +318,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 		mod.AddString("relative_install_path", installRel)
 	}
 
-	addProvenanceProps(mod, &m)
+	addProvenanceProps(ctx, mod, &m)
 	addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 	addRequiredModules(mod, m, ctx)
 
@@ -700,7 +700,7 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	// 	mod.AddString("relative_install_path", installRel)
 	// }
 
-	addProvenanceProps(mod, m)
+	addProvenanceProps(ctx, mod, m)
 
 	// TODO: Make addPGOProps generic and enable it if needed
 	// addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
@@ -745,7 +745,7 @@ func (g *androidBpGenerator) executableTestActions(m *ModuleTest, ctx blueprint.
 	// 	mod.AddString("compile_multilib", "both")
 	// }
 
-	addProvenanceProps(mod, m)
+	addProvenanceProps(ctx, mod, m)
 
 	// Avoid using cc_test default setup
 	// TODO: `relative_install_path` needed - Module install directory may only be disabled if relative_install_path is set
@@ -783,5 +783,5 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 		mod.AddString("compile_multilib", "both")
 	}
 
-	addProvenanceProps(mod, m)
+	addProvenanceProps(ctx, mod, m)
 }

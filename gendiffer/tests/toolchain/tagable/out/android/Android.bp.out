@@ -15,6 +15,10 @@ cc_binary {
         "-Werror",
     ],
     compile_multilib: "both",
+    owner: "toolchain",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
 }
 
 cc_test {
@@ -24,6 +28,10 @@ cc_test {
         "-Wall",
         "-Werror",
     ],
+    owner: "toolchain",
+    vendor: true,
+    proprietary: true,
+    soc_specific: true,
     include_build_directory: false,
     auto_gen_config: false,
     gtest: false,
