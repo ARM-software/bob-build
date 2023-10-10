@@ -1,0 +1,17 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_test {
+    name: "tagable",
+    srcs: ["src.cpp"],
+    include_build_directory: false,
+    auto_gen_config: false,
+    gtest: false,
+}
+
