@@ -1,0 +1,28 @@
+bob_toolchain {
+    name: "toolchain",
+    build_wrapper: "ccache",
+}
+
+bob_library {
+    name: "lib",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "toolchain",
+}
+
+bob_executable {
+    name: "bin",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "toolchain",
+}
+
+bob_test {
+    name: "test",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "toolchain",
+}
