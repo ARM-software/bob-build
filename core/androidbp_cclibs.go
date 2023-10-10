@@ -353,7 +353,10 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 		}
 	}
 
-	addMTEProps(mod, m.Properties.Build.AndroidMTEProps)
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		addMTEProps(mod, bc.GetMteProps(ctx))
+	}
 	addHWASANProps(mod, m.Properties.Build)
 }
 
@@ -487,17 +490,10 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 			}
 		})
 
-	ctx.VisitDirectDepsIf(
-		func(dep blueprint.Module) bool {
-			return ctx.OtherModuleDependencyTag(dep) == tag.ToolchainTag
-		},
-		func(dep blueprint.Module) {
-			if t, ok := dep.(*ModuleToolchain); ok {
-				addMTEProps(mod, t.Properties.AndroidMTEProps)
-			} else {
-				panic(fmt.Errorf("dependency '%s' of '%s' is not a toolchain module", dep.Name(), ctx.ModuleName()))
-			}
-		})
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		addMTEProps(mod, bc.GetMteProps(ctx))
+	}
 
 	if std := ccflags.GetCompilerStandard(cflags, conlyFlags); std != "" {
 		mod.AddString("c_std", std)
