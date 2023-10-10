@@ -4,7 +4,7 @@
 
 ```bp
 bob_toolchain {
-    name, cflags, conlyflags, cppflags, asflags, ldflags, target, host, mte,
+    name, cflags, conlyflags, cppflags, asflags, ldflags, target, host, mte, tags
 }
 ```
 
@@ -31,6 +31,7 @@ Supports:
 | [`asflags`](properties/legacy_properties.md#asflags) | List of strings; default is `[]`<br>Flags used for assembly compilation.                                                                                                                                                                                                                                                                                                                              |
 | [`ldflags`](properties/legacy_properties.md#ldflags) | List of strings; default is `[]`<br>Flags used for linking.                                                                                                                                                                                                                                                                                                                                           |
 | `mte`                                                | Property map; default is `{}`.<br>Flags to be used to enable the Arm Memory Tagging Extension.<br>Only supported on Android.<br>- **memtag_heap** - Memory-tagging, only available on arm64 if `diag_memtag_heap` unset or false, enables async memory tagging.<br>- **diag_memtag_heap** - Memory-tagging, only available on arm64 requires `memtag_heap`: true if set, enables sync memory tagging. |
+| [`tags`](properties/common_properties.md#tags)       | List of strings; default is `[]`<br>This list of tags will be appended to any module using this toolchain configuration.                                                                                                                                                                                                                                                                              |
 
 ## Example
 

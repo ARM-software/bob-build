@@ -55,7 +55,7 @@ func (g *androidBpGenerator) kernelModuleActions(ko *ModuleKernelObject, ctx blu
 		kdir = getPathInSourceDir(kdir)
 	}
 
-	addProvenanceProps(bpmod, ko)
+	addProvenanceProps(ctx, bpmod, ko)
 
 	srcs := []string{}
 	ko.Properties.GetFiles(ctx).ForEach(

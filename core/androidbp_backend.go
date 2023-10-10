@@ -16,6 +16,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/fileutils"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -87,9 +88,18 @@ func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleCo
 
 var ownerTagRegex = regexp.MustCompile(`^owner:[a-zA-Z0-9_-]+`)
 
-func addProvenanceProps(writer bpwriter.Module, mod Tagable) {
+func addProvenanceProps(ctx blueprint.ModuleContext, writer bpwriter.Module, mod Tagable) {
 
 	tags := mod.GetTagsRegex(ownerTagRegex)
+
+	// Append any tags applied from the toolchain.
+	ctx.VisitDirectDepsIf(
+		func(dep blueprint.Module) bool {
+			return ctx.OtherModuleDependencyTag(dep) == tag.ToolchainTag
+		},
+		func(dep blueprint.Module) {
+			tags = append(tags, dep.(*ModuleToolchain).GetTagsRegex(ownerTagRegex)...)
+		})
 
 	switch len(tags) {
 	case 0:
