@@ -34,6 +34,11 @@ rule g.bob.cc
     deps = gcc
     description = ${out}
 
+rule g.bob.executable
+    pool = g.bob.link
+    command = ${build_wrapper} ${linker} ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
+    description = ${out}
+
 rule g.bob.shared_library
     pool = g.bob.link
     command = ${build_wrapper} ${linker} -shared ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
@@ -46,6 +51,36 @@ rule g.bob.static_library
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  exe
+# Variant: target
+# Type:    bob_executable
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:redacted
+
+m.exe_target.cflags = -Wall -Werror
+m.exe_target.conlyflags = 
+
+build ${g.bob.BuildDir}/target/objects/exe/src.c.o: g.bob.cc $
+        ${g.bob.SrcDir}/src.c
+    build_wrapper = 
+    ccompiler = gcc
+    cflags = ${m.exe_target.cflags}
+    conlyflags = ${m.exe_target.conlyflags}
+
+build ${g.bob.BuildDir}/target/executable/exe: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/exe/src.c.o
+    build_wrapper = 
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build exe: phony ${g.bob.BuildDir}/target/executable/exe
+default exe
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  lib
@@ -81,6 +116,36 @@ build ${g.bob.BuildDir}/target/static/lib.a: g.bob.static_library $
 
 build lib: phony ${g.bob.BuildDir}/target/static/lib.a $
         ${g.bob.BuildDir}/target/shared/lib.so
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  test
+# Variant: target
+# Type:    bob_test
+# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
+# Defined: build.bp:redacted
+
+m.test_target.cflags = -Wall -Werror
+m.test_target.conlyflags = 
+
+build ${g.bob.BuildDir}/target/objects/test/src.c.o: g.bob.cc $
+        ${g.bob.SrcDir}/src.c
+    build_wrapper = 
+    ccompiler = gcc
+    cflags = ${m.test_target.cflags}
+    conlyflags = ${m.test_target.conlyflags}
+
+build ${g.bob.BuildDir}/target/executable/test: g.bob.executable $
+        ${g.bob.BuildDir}/target/objects/test/src.c.o
+    build_wrapper = 
+    ldflags = -Wl,--as-needed
+    ldlibs = 
+    linker = g++
+    shared_libs_dir = ${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    static_libs = 
+
+build test: phony ${g.bob.BuildDir}/target/executable/test
+default test
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

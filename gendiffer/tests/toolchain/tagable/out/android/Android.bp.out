@@ -7,3 +7,25 @@ genrule {
     cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
 }
 
+cc_binary {
+    name: "exe",
+    srcs: ["src.c"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    compile_multilib: "both",
+}
+
+cc_test {
+    name: "test",
+    srcs: ["src.c"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    include_build_directory: false,
+    auto_gen_config: false,
+    gtest: false,
+}
+

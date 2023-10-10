@@ -4,7 +4,10 @@ bob_toolchain {
         "-Wall",
         "-Werror",
     ],
-    tags: ["toolchain"],
+    tags: [
+        "toolchain",
+        "owner:toolchain",
+    ],
     target: {
 
         tags: ["target"],
@@ -17,6 +20,7 @@ bob_toolchain {
 
         tags: ["feature"],
     },
+
 }
 
 bob_library {
@@ -24,5 +28,23 @@ bob_library {
     srcs: [
         "src.c",
     ],
+    toolchain: "main_toolchain",
+}
+
+bob_executable {
+    name: "exe",
+    srcs: [
+        "src.c",
+    ],
+    toolchain: "main_toolchain",
+}
+
+bob_test {
+    name: "test",
+    srcs: [
+        "src.c",
+    ],
+
+    build_by_default: true,
     toolchain: "main_toolchain",
 }
