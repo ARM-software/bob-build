@@ -457,6 +457,10 @@ func (m *ModuleLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (str
 	return m.Properties.Build.GetBuildWrapperAndDeps(ctx)
 }
 
+func (m *ModuleLibrary) GetMteProps(blueprint.ModuleContext) AndroidMTEProps {
+	return m.Properties.AndroidMTEProps
+}
+
 func (m *ModuleLibrary) IsForwardingSharedLibrary() bool {
 	return m.Properties.isForwardingSharedLibrary()
 }

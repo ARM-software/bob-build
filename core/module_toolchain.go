@@ -29,6 +29,8 @@ type ModuleToolchainProps struct {
 
 	// Wrapper for all build commands (object file compilation *and* linking)
 	Build_wrapper *string
+
+	AndroidMTEProps
 }
 
 type ToolchainFlagsProps struct {
@@ -54,9 +56,6 @@ type ModuleToolchain struct {
 		Host       TargetSpecific
 		TargetType toolchain.TgtType `blueprint:"mutated"`
 
-		// Arm Memory Tagging Extension
-		AndroidMTEProps
-
 		Features
 	}
 }
@@ -64,6 +63,7 @@ type ModuleToolchain struct {
 type BackendConfiguration interface {
 	stripable
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+	GetMteProps(blueprint.ModuleContext) AndroidMTEProps
 }
 
 // This interface provides configuration features
@@ -146,6 +146,10 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 		&m.Properties.StripProps,
 		&m.Properties.TagableProps,
 	}
+}
+
+func (m *ModuleToolchain) GetMteProps(blueprint.ModuleContext) AndroidMTEProps {
+	return m.Properties.AndroidMTEProps
 }
 
 func (m *ModuleToolchain) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
