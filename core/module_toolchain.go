@@ -70,7 +70,7 @@ type BackendConfigurationProvider interface {
 	GetBackendConfiguration(blueprint.ModuleContext) BackendConfiguration
 }
 
-func GetModuleBackendConfiguration(ctx blueprint.ModuleContext, m blueprint.Module) BackendConfiguration {
+func GetModuleBackendConfiguration(ctx blueprint.ModuleContext, m interface{}) BackendConfiguration {
 	if capable, ok := m.(BackendConfigurationProvider); ok {
 		if bc := capable.GetBackendConfiguration(ctx); bc != nil {
 			return bc
@@ -147,7 +147,7 @@ func (m *ModuleToolchain) targetableProperties() []interface{} {
 	}
 }
 
-func (m *ModuleToolchain) GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string) {
+func (m *ModuleToolchain) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string) {
 	return "", []string{}
 }
 

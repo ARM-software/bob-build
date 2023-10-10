@@ -52,7 +52,7 @@ type Compilable interface {
 	file.Consumer // Compilable objects must match the file consumer interface
 	targetableModule
 	phonyInterface
-	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+	BackendConfigurationProvider
 }
 
 // This function has common support to compile objs for static libs, shared libs and binaries.
@@ -120,8 +120,14 @@ func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, 
 				return true
 			}
 
-			buildWrapper, buildWrapperDeps := l.GetBuildWrapperAndDeps(ctx)
-			args["build_wrapper"] = buildWrapper
+			bc := GetModuleBackendConfiguration(ctx, l)
+
+			buildWrapperDeps := []string{}
+			if bc != nil {
+				args["build_wrapper"], buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+			} else {
+				args["build_wrapper"] = ""
+			}
 
 			output := g.ObjDir(l) + source.RelBuildPath() + ".o"
 
@@ -206,8 +212,7 @@ type Archivable interface {
 	dependentInterface // For phony targets
 	flag.Consumer      // Modules which are compilable need to support flags
 	file.Consumer      // Compilable objects must match the file consumer interface
-
-	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
+	BackendConfigurationProvider
 }
 
 func (g *linuxGenerator) ArchivableActions(ctx blueprint.ModuleContext,
@@ -217,12 +222,18 @@ func (g *linuxGenerator) ArchivableActions(ctx blueprint.ModuleContext,
 	wholeStaticLibs := GetWholeStaticLibs(ctx)
 
 	rule := staticLibraryRule
-	buildWrapper, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
 	arBinary, _ := tc.GetArchiver()
 
 	args := map[string]string{
 		"ar":            arBinary,
-		"build_wrapper": buildWrapper,
+		"build_wrapper": "",
+	}
+
+	bc := GetModuleBackendConfiguration(ctx, m)
+	buildWrapperDeps := []string{}
+	if bc != nil {
+		args["build_wrapper"], buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+
 	}
 
 	implicits := wholeStaticLibs
@@ -430,7 +441,7 @@ type BackendCommonLibraryInterface interface {
 	// Legacy functions which need a better interface
 	IsForwardingSharedLibrary() bool
 	IsRpathWanted() bool
-	GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (string, []string)
+	BackendConfigurationProvider
 }
 
 type BackendCommonSharedLibraryInterface interface {
@@ -465,7 +476,6 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 	linker := tc.GetLinker().GetTool()
 	tcLdflags := tc.GetLinker().GetFlags()
 	tcLdlibs := tc.GetLinker().GetLibs()
-	buildWrapper, _ := m.GetBuildWrapperAndDeps(ctx)
 
 	wholeStaticLibs := GetWholeStaticLibs(ctx)
 	staticLibs := m.GetStaticLibs(ctx)
@@ -478,7 +488,7 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 	sharedLibDir := backend.Get().SharedLibsDir(m.getTarget())
 
 	args := map[string]string{
-		"build_wrapper":   buildWrapper,
+		"build_wrapper":   "",
 		"ldflags":         utils.Join(tcLdflags, ldflags, sharedLibLdflags),
 		"linker":          linker,
 		"shared_libs_dir": sharedLibDir,
@@ -487,6 +497,12 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 		"static_libs": utils.Join(staticLibFlags),
 		"ldlibs":      utils.Join(ldlibs, tcLdlibs),
 	}
+
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		args["build_wrapper"], _ = bc.GetBuildWrapperAndDeps(ctx)
+	}
+
 	return args
 }
 
@@ -546,7 +562,11 @@ func (g *linuxGenerator) SharedLinkActions(ctx blueprint.ModuleContext,
 	tc toolchain.Toolchain,
 	objs []string, implicits []string) {
 
-	_, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
+	buildWrapperDeps := []string{}
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		_, buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+	}
 
 	orderOnly := buildWrapperDeps
 	if enableToc {
@@ -633,7 +653,11 @@ func (g *linuxGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleCont
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
 
-	_, buildWrapperDeps := m.Properties.Build.GetBuildWrapperAndDeps(ctx)
+	buildWrapperDeps := []string{}
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		_, buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+	}
 
 	orderOnly := buildWrapperDeps
 	if enableToc {
@@ -674,7 +698,11 @@ func (g *linuxGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprin
 	/* By default, build all target binaries */
 	optional := !isBuiltByDefault(m)
 
-	_, buildWrapperDeps := m.GetBuildWrapperAndDeps(ctx)
+	buildWrapperDeps := []string{}
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		_, buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+	}
 
 	orderOnly := buildWrapperDeps
 	if enableToc {
