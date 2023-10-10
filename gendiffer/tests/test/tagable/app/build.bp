@@ -1,0 +1,10 @@
+bob_test {
+    name: "tagable",
+    srcs: ["src.cpp"],
+    tags: [
+        "foo",
+        "bar",
+        "owner:{{.tag_owner}}",
+    ],
+    build_by_default: true,
+}
