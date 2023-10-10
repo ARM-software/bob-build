@@ -39,3 +39,4 @@
 - [bob_filegroup](module_types/bob_filegroup.md)
 - [bob_genrule](module_types/bob_genrule.md)
 - [bob_gensrcs](module_types/bob_gensrcs.md)
+- [bob_test](module_types/bob_test.md)
