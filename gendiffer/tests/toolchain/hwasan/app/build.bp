@@ -1,0 +1,27 @@
+bob_toolchain {
+    name: "toolchain",
+    // hwasan_enabled: true, not supported yet
+}
+
+bob_library {
+    name: "bob_library",
+    srcs: [
+        "main.c",
+    ],
+    build_by_default: true,
+}
+
+bob_executable {
+    name: "bob_executable",
+    srcs: [
+        "main.c",
+    ],
+}
+
+bob_test {
+    name: "bob_test",
+    srcs: [
+        "main.c",
+    ],
+    build_by_default: true,
+}
