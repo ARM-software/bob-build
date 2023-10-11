@@ -1,0 +1,14 @@
+
+
+bob_static_library {
+    name: "bob_static_library",
+    srcs: ["src.cpp"],
+    hwasan_enabled: true,
+}
+
+bob_binary {
+    hwasan_enabled: true,
+    name: "bob_binary",
+    srcs: ["src.cpp"],
+    static_libs: ["bob_static_library"],
+}
