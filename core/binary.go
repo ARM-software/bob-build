@@ -16,9 +16,10 @@ type binaryInterface interface {
 	file.Provider // A binary can provide itself as a source
 }
 
-var _ binaryInterface = (*ModuleBinary)(nil)      // impl check
-var _ libraryInterface = (*ModuleBinary)(nil)     // impl check
-var _ BackendConfiguration = (*ModuleBinary)(nil) // impl check
+var _ binaryInterface = (*ModuleBinary)(nil)              // impl check
+var _ libraryInterface = (*ModuleBinary)(nil)             // impl check
+var _ BackendConfiguration = (*ModuleBinary)(nil)         // impl check
+var _ BackendConfigurationProvider = (*ModuleBinary)(nil) // impl check
 
 func (m *ModuleBinary) OutFiles() (srcs file.Paths) {
 	return file.Paths{file.NewPath(m.outputName(), string(m.getTarget()), file.TypeBinary|file.TypeExecutable|file.TypeInstallable)}

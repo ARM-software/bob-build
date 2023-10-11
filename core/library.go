@@ -14,6 +14,7 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 )
 
 var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
@@ -459,6 +460,10 @@ func (m *ModuleLibrary) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (str
 
 func (m *ModuleLibrary) GetMteProps(blueprint.ModuleContext) AndroidMTEProps {
 	return m.Properties.AndroidMTEProps
+}
+
+func (m *ModuleLibrary) IsHwAsanEnabled() bool {
+	return proptools.Bool(m.Properties.Build.Hwasan_enabled)
 }
 
 func (m *ModuleLibrary) IsForwardingSharedLibrary() bool {
