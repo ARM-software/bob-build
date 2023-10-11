@@ -11,6 +11,9 @@ cc_binary {
     name: "bob_executable",
     srcs: ["main.c"],
     compile_multilib: "both",
+    sanitize: {
+        hwaddress: true,
+    },
 }
 
 cc_library {
@@ -19,6 +22,9 @@ cc_library {
     device_supported: true,
     srcs: ["main.c"],
     compile_multilib: "both",
+    sanitize: {
+        hwaddress: true,
+    },
 }
 
 cc_test {
@@ -27,5 +33,8 @@ cc_test {
     include_build_directory: false,
     auto_gen_config: false,
     gtest: false,
+    sanitize: {
+        hwaddress: true,
+    },
 }
 

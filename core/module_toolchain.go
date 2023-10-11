@@ -9,6 +9,7 @@ import (
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/core/toolchain/mapper"
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 )
 
 type ModuleToolchainProps struct {
@@ -31,6 +32,8 @@ type ModuleToolchainProps struct {
 	Build_wrapper *string
 
 	AndroidMTEProps
+
+	Hwasan_enabled *bool
 }
 
 type ToolchainFlagsProps struct {
@@ -64,6 +67,7 @@ type BackendConfiguration interface {
 	stripable
 	GetBuildWrapperAndDeps(blueprint.ModuleContext) (string, []string)
 	GetMteProps(blueprint.ModuleContext) AndroidMTEProps
+	IsHwAsanEnabled() bool
 }
 
 // This interface provides configuration features
@@ -71,11 +75,9 @@ type BackendConfigurationProvider interface {
 	GetBackendConfiguration(blueprint.ModuleContext) BackendConfiguration
 }
 
-func GetModuleBackendConfiguration(ctx blueprint.ModuleContext, m interface{}) BackendConfiguration {
-	if capable, ok := m.(BackendConfigurationProvider); ok {
-		if bc := capable.GetBackendConfiguration(ctx); bc != nil {
-			return bc
-		}
+func GetModuleBackendConfiguration(ctx blueprint.ModuleContext, m BackendConfigurationProvider) BackendConfiguration {
+	if bc := m.GetBackendConfiguration(ctx); bc != nil {
+		return bc
 	}
 	return nil
 }
@@ -167,6 +169,10 @@ func (m *ModuleToolchain) GetBuildWrapperAndDeps(ctx blueprint.ModuleContext) (s
 		return buildWrapper, files
 	}
 	return "", []string{}
+}
+
+func (m *ModuleToolchain) IsHwAsanEnabled() bool {
+	return proptools.Bool(m.Properties.Hwasan_enabled)
 }
 
 func (m *ModuleToolchain) FlagsOut() flag.Flags {

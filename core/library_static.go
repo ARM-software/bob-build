@@ -9,7 +9,9 @@ type ModuleStaticLibrary struct {
 	ModuleLibrary
 }
 
-var _ libraryInterface = (*ModuleStaticLibrary)(nil) // impl check
+var _ libraryInterface = (*ModuleStaticLibrary)(nil)             // impl check
+var _ BackendConfiguration = (*ModuleStaticLibrary)(nil)         // impl check
+var _ BackendConfigurationProvider = (*ModuleStaticLibrary)(nil) // impl check
 
 func (m *ModuleStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	if isEnabled(m) {

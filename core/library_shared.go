@@ -25,7 +25,9 @@ const (
 var _ linkableModule = (*ModuleSharedLibrary)(nil)
 var _ sharedLibProducer = (*ModuleSharedLibrary)(nil)
 var _ stripable = (*ModuleSharedLibrary)(nil)
-var _ libraryInterface = (*ModuleSharedLibrary)(nil) // impl check
+var _ libraryInterface = (*ModuleSharedLibrary)(nil)             // impl check
+var _ BackendConfiguration = (*ModuleSharedLibrary)(nil)         // impl check
+var _ BackendConfigurationProvider = (*ModuleSharedLibrary)(nil) // impl check
 
 func (m *ModuleSharedLibrary) OutFiles() (files file.Paths) {
 

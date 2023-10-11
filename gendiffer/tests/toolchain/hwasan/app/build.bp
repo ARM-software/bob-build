@@ -1,6 +1,6 @@
 bob_toolchain {
     name: "toolchain",
-    // hwasan_enabled: true, not supported yet
+    hwasan_enabled: true,
 }
 
 bob_library {

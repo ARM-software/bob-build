@@ -172,15 +172,9 @@ func addMTEProps(m bpwriter.Module, props AndroidMTEProps) {
 	}
 }
 
-func addHWASANProps(m bpwriter.Module, props Build) {
-	memtagHeap := proptools.Bool(props.AndroidMTEProps.Mte.Memtag_heap)
-	if memtagHeap {
-		return
-	}
-	if proptools.Bool(props.Hwasan_enabled) {
-		g := m.NewGroup("sanitize")
-		g.AddBool("hwaddress", true)
-	}
+func addHWASANProps(m bpwriter.Module) {
+	g := m.NewGroup("sanitize")
+	g.AddBool("hwaddress", true)
 }
 
 func addRequiredModules(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
@@ -330,7 +324,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 	}
 }
 
-func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleContext, g *androidBpGenerator) {
+func addBinaryProps(mod bpwriter.Module, m *ModuleBinary, ctx blueprint.ModuleContext, g *androidBpGenerator) {
 	// Handle installation
 	if _, installRel, ok := getSoongInstallPath(m.getInstallableProps()); ok {
 		// Only setup multilib for target modules.
@@ -356,8 +350,11 @@ func addBinaryProps(mod bpwriter.Module, m ModuleBinary, ctx blueprint.ModuleCon
 	bc := GetModuleBackendConfiguration(ctx, m)
 	if bc != nil {
 		addMTEProps(mod, bc.GetMteProps(ctx))
+		if !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+			addHWASANProps(mod)
+		}
 	}
-	addHWASANProps(mod, m.Properties.Build)
+
 }
 
 func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
@@ -375,7 +372,6 @@ func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blu
 	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
 		mod.AddString("compile_multilib", "both")
 	}
-	addHWASANProps(mod, m.Properties.Build)
 }
 
 func addStripProp(m bpwriter.Module) {
@@ -574,7 +570,7 @@ func (g *androidBpGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Module
 	}
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
-	addBinaryProps(mod, *m, ctx, g)
+	addBinaryProps(mod, m, ctx, g)
 	bc := GetModuleBackendConfiguration(ctx, m)
 	if bc.strip() {
 		addStripProp(mod)
@@ -626,6 +622,10 @@ func (g *androidBpGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint
 		addStripProp(mod)
 	}
 
+	if !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+		addHWASANProps(mod)
+	}
+
 	versionScript := g.getVersionScript(&m.ModuleLibrary, ctx)
 	if versionScript != nil {
 		mod.AddString("version_script", *versionScript)
@@ -652,6 +652,13 @@ func (g *androidBpGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint
 
 	addCcLibraryProps(mod, m.ModuleLibrary, ctx)
 	addStaticOrSharedLibraryProps(mod, m.ModuleLibrary, ctx)
+
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		if !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+			addHWASANProps(mod)
+		}
+	}
 }
 
 func proxyCflags(m *ModuleStrictLibrary) []string {
@@ -701,6 +708,10 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 
 	addProvenanceProps(ctx, mod, m)
 
+	if bc != nil && !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+		addHWASANProps(mod)
+	}
+
 	// TODO: Make addPGOProps generic and enable it if needed
 	// addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 
@@ -748,6 +759,10 @@ func (g *androidBpGenerator) executableTestActions(m *ModuleTest, ctx blueprint.
 
 	addProvenanceProps(ctx, mod, m)
 
+	if bc != nil && !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+		addHWASANProps(mod)
+	}
+
 	// Avoid using cc_test default setup
 	// TODO: `relative_install_path` needed - Module install directory may only be disabled if relative_install_path is set
 	// mod.AddBool("no_named_install_directory", true)
@@ -779,6 +794,10 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 
 	if bc != nil && bc.strip() {
 		addStripProp(mod)
+	}
+
+	if bc != nil && !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
+		addHWASANProps(mod)
 	}
 
 	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
