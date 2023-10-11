@@ -1,0 +1,14 @@
+
+
+bob_shared_library {
+    name: "libshared",
+    srcs: ["src.cpp"],
+    hwasan_enabled: true,
+}
+
+bob_binary {
+    hwasan_enabled: true,
+    name: "bob_binary",
+    srcs: ["src.cpp"],
+    shared_libs: ["libshared"],
+}
