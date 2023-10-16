@@ -48,7 +48,7 @@ func checkGenruleFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 	if b, ok := m.(*ModuleGenrule); ok {
 		props := b.ModuleStrictGenerateCommon.Properties
 		if len(props.Export_include_dirs) != 0 {
-			utils.Die("`export_include_dirs` may lead to unexpected results on AOSP for `bob_genrule`, please use `bob_gensrc` rule type instead. In module %s", m.Name())
+			utils.Die("`export_include_dirs` may lead to unexpected results on AOSP for `bob_genrule`, please use `bob_gensrcs` rule type instead. In module %s", m.Name())
 		}
 	}
 }
