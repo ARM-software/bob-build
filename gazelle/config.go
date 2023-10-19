@@ -8,6 +8,7 @@ import (
 
 	bob "github.com/ARM-software/bob-build/core"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
+	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
@@ -70,11 +71,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	}
 
 	for _, ignored := range pc.BobIgnoreDir {
-		rpath, err := filepath.Rel(ignored, rel)
-		if err != nil {
-			continue
-		}
-		if !strings.HasPrefix(rpath, ".."+string(os.PathSeparator)) && rpath != ".." {
+		if isChild, _ := util.IsChildFilepath(ignored, rel); isChild {
 			isBobRoot = false // This path is in the ignored list
 		}
 	}
