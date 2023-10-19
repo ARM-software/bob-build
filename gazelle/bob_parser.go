@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"sync"
 	"text/scanner"
 
 	bob "github.com/ARM-software/bob-build/core"
 	bob_file "github.com/ARM-software/bob-build/core/file"
 	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
+	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
@@ -79,7 +79,7 @@ func (p *bobParser) parse() []*Module {
 		modules = append(modules, m)
 	}).Parallel()
 
-	bpToParse, err := findBpFiles(filepath.Join(p.rootPath, p.relPath), p.BobIgnoreDir)
+	bpToParse, err := findBpFiles(p.rootPath, p.relPath, p.BobIgnoreDir)
 	if err != nil {
 		log.Fatalf("Creating bplist failed: %v\n", err)
 	}
@@ -112,13 +112,17 @@ func (p *bobParser) parse() []*Module {
 	return modules
 }
 
-func findBpFiles(root string, ignoreDirs []string) ([]string, error) {
+func findBpFiles(root string, rel string, ignoreDirs []string) ([]string, error) {
 	var files []string
 
-	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(filepath.Join(root, rel), func(path string, d fs.DirEntry, err error) error {
+
+		rel, _ := filepath.Rel(root, path)
+
 		for _, ignoreDir := range ignoreDirs {
-			if strings.TrimPrefix(path, root+"/") == ignoreDir {
+			if ignore, _ := util.IsChildFilepath(ignoreDir, rel); ignore {
 				return filepath.SkipDir
+
 			}
 		}
 
