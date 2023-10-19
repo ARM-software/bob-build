@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"log"
-
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/resolve"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -14,6 +12,5 @@ import (
 // If nil is returned, the rule will not be indexed. If any non-nil slice is
 // returned, including an empty slice, the rule will be indexed.
 func (e *BobExtension) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
-	log.Printf("Imports() - NOT IMPLEMENTED\n")
 	return nil
 }

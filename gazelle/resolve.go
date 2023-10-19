@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"log"
-
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/repo"
@@ -17,5 +15,4 @@ import (
 // the appropriate language-specific equivalent) for each import according to
 // language-specific rules and heuristics.
 func (e *BobExtension) Resolve(c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache, r *rule.Rule, imports interface{}, from label.Label) {
-	log.Printf("Resolve() - NOT IMPLEMENTED\n")
 }

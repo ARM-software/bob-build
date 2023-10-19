@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"log"
-
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -30,6 +28,5 @@ func (e *BobExtension) Name() string {
 // the embedding rule will be indexed. The embedding rule will inherit
 // the imports of the embedded rule.
 func (e *BobExtension) Embeds(r *rule.Rule, from label.Label) []label.Label {
-	log.Printf("Embeds() - NOT IMPLEMENTED\n")
 	return nil
 }
