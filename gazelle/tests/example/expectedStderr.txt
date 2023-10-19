@@ -1,3 +1,0 @@
-gazelle: RegisterFlags() - NOT IMPLEMENTED
-gazelle: CheckFlags() - NOT IMPLEMENTED
-gazelle: Fix() - NOT IMPLEMENTED
