@@ -41,7 +41,6 @@ func (e *BobExtension) KnownDirectives() []string {
 func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 	isBobRoot := false
-
 	if _, exists := c.Exts[BobExtensionName]; !exists {
 		rootCfg := pluginConfig.NewRootConfig(c.RepoRoot)
 		c.Exts[BobExtensionName] = pluginConfig.ConfigMap{"": rootCfg}
@@ -70,6 +69,16 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 	}
 
+	for _, ignored := range pc.BobIgnoreDir {
+		rpath, err := filepath.Rel(ignored, rel)
+		if err != nil {
+			continue
+		}
+		if !strings.HasPrefix(rpath, ".."+string(os.PathSeparator)) && rpath != ".." {
+			isBobRoot = false // This path is in the ignored list
+		}
+	}
+
 	if isBobRoot {
 
 		if _, err := os.Stat(filepath.Join(c.RepoRoot, rel, "Mconfig")); err != nil {
@@ -89,6 +98,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
+
 		bobParser := newBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
 
 		modules := bobParser.parse()

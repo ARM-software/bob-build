@@ -18,6 +18,7 @@ func (c *Config) NewChild() *Config {
 		parent:                  c,
 		RepositoryRootPath:      c.RepositoryRootPath,
 		BobWorkspaceRootRelPath: c.BobWorkspaceRootRelPath,
+		BobIgnoreDir:            c.BobIgnoreDir,
 	}
 }
 
