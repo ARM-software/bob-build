@@ -65,3 +65,37 @@ config_setting(
         ":debug": "true",
     },
 )
+
+# depends on: //:debug
+bool_flag(
+    name = "an_option",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "interim_config_an_option",
+    flag_values = {
+        ":an_option": "true",
+    },
+)
+
+selects.config_setting_group(
+    name = "config_an_option",
+    match_all = [
+        ":interim_config_an_option",
+        "//:config_debug",
+    ],
+    visibility = [":__subpackages__"],
+)
+
+bool_flag(
+    name = "foo_menu",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "config_foo_menu",
+    flag_values = {
+        ":foo_menu": "true",
+    },
+)

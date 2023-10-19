@@ -60,8 +60,13 @@ def p_menuconfig_stmt(p):
 
     title = p[4].get("title")
 
+    relPath = p.slice[2].lexer.relPath
+
+    config_options = merge(
+        p[4], {"type": "menuconfig", "position": order_count, "relPath": relPath}
+    )
     p[0] = {
-        "config": {p[2]: merge(p[4], {"type": "menuconfig", "position": order_count})},
+        "config": {p[2]: config_options},
         "order": {order_count: ("menuconfig", p[2])},
         "menu": {p[2]: {"title": title}},
     }

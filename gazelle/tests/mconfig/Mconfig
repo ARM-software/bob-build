@@ -20,4 +20,17 @@ config DEBUG
     bool "Set debug flags"
     default y
 
+menu "A menu"
+	depends on DEBUG
+
+config AN_OPTION
+	bool "An option in the menu"
+	default y
+
+endmenu
+
+menuconfig FOO_MENU
+	bool "Foo menu"
+
+
 source "internal/Mconfig"
