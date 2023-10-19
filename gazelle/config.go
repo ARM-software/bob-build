@@ -110,6 +110,8 @@ func createBobConfigSpoof(c *map[string]configData) *bob.BobConfig {
 	config.Properties.Features = make(map[string]bool)
 	config.Properties.Properties = make(map[string]interface{})
 
+	config.Properties.Properties["osx"] = bool(false) // shared lib factory requires this.
+
 	for k, v := range *c {
 		if v.Ignore != "y" {
 			config.Properties.FeatureList = append(config.Properties.FeatureList, strings.ToLower(k))
