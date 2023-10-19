@@ -1,0 +1,23 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
+# gazelle:bob_root
+
+bool_flag(
+    name = "feature_a",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "config_feature_a",
+    flag_values = {
+        ":feature_a": "true",
+    },
+)
+
+cc_library(
+    name = "lib",
+    srcs = [
+        "lib.cpp",
+    ],
+    linkstatic = True,
+)
