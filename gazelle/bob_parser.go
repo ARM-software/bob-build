@@ -25,13 +25,15 @@ type valueHandler func(feature string, attribute string, v interface{})
 
 type bobParser struct {
 	rootPath     string
+	relPath      string // Relative path from workspace to bob_root
 	BobIgnoreDir []string
 	config       *bob.BobConfig
 }
 
-func newBobParser(rootPath string, BobIgnoreDir []string, config *bob.BobConfig) *bobParser {
+func newBobParser(rootPath string, relPath string, BobIgnoreDir []string, config *bob.BobConfig) *bobParser {
 	return &bobParser{
 		rootPath:     rootPath,
+		relPath:      relPath,
 		BobIgnoreDir: BobIgnoreDir,
 		config:       config,
 	}
@@ -61,7 +63,11 @@ func (p *bobParser) parse() []*Module {
 	var modulesMutex sync.RWMutex
 
 	bp.RegisterBottomUpMutator("register_bob_modules", func(ctx blueprint.BottomUpMutatorContext) {
-		m := NewModule(ctx.ModuleName(), ctx.ModuleType(), ctx.ModuleDir(), p.rootPath)
+		m := NewModule(
+			ctx.ModuleName(),
+			ctx.ModuleType(),
+			filepath.Join(p.relPath, ctx.ModuleDir()),
+			p.rootPath)
 
 		parseBpModule(ctx.Module(), func(feature string, attribute string, v interface{}) {
 			m.addFeatureAttribute(feature, attribute, v)
@@ -73,12 +79,12 @@ func (p *bobParser) parse() []*Module {
 		modules = append(modules, m)
 	}).Parallel()
 
-	bpToParse, err := findBpFiles(p.rootPath, p.BobIgnoreDir)
+	bpToParse, err := findBpFiles(filepath.Join(p.rootPath, p.relPath), p.BobIgnoreDir)
 	if err != nil {
 		log.Fatalf("Creating bplist failed: %v\n", err)
 	}
 
-	_, errs := bp.ParseFileList(p.rootPath, bpToParse, nil)
+	_, errs := bp.ParseFileList(filepath.Join(p.rootPath, p.relPath), bpToParse, nil)
 
 	if len(errs) > 0 {
 		for _, e := range errs {

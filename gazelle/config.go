@@ -71,17 +71,16 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	}
 
 	if isBobRoot {
+
 		if _, err := os.Stat(filepath.Join(c.RepoRoot, rel, "Mconfig")); err != nil {
 			log.Fatalf("No root Mconfig file: %v\n", err)
 		}
-
 		fileNames := []string{"Mconfig"}
 
 		mconfigParser := newMconfigParser(c.RepoRoot, rel)
-
 		configs, err := mconfigParser.parse(&fileNames)
 		if err != nil {
-			log.Fatalf("Parse failed: %v\n", err)
+			log.Fatalf("Mconfig parse failed: %v\n", err)
 		}
 
 		// Register all `configData`s
@@ -90,7 +89,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
-		bobParser := newBobParser(c.RepoRoot, pc.BobIgnoreDir, bobConfig)
+		bobParser := newBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
 
 		modules := bobParser.parse()
 
