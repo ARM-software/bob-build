@@ -8,7 +8,6 @@ import (
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
 )
 
@@ -26,7 +25,6 @@ type Platform interface {
 	EscapeFlag(string) string
 	Init(*config.Properties)
 	GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain
-	GetLogger() *warnings.WarningLogger
 }
 
 var platform Platform
@@ -44,16 +42,16 @@ func Get() Platform {
 	return platform
 }
 
-func Setup(env *config.EnvironmentVariables, cfg *config.Properties, logger *warnings.WarningLogger) {
+func Setup(env *config.EnvironmentVariables, cfg *config.Properties) {
 	if platform == nil {
 		lock.Lock()
 		defer lock.Unlock()
 		if platform == nil {
 			switch {
 			case cfg.GetBool("builder_ninja"):
-				platform = NewLinuxPlatform(env, cfg, logger)
+				platform = NewLinuxPlatform(env, cfg)
 			case cfg.GetBool("builder_android_bp"):
-				platform = NewAndroidPlatform(env, cfg, logger)
+				platform = NewAndroidPlatform(env, cfg)
 			default:
 				utils.Die("Unknown builder backend")
 			}

@@ -7,7 +7,6 @@ import (
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 
-	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
@@ -91,7 +90,7 @@ func getGeneratedFiles(ctx blueprint.ModuleContext) []string {
 func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 
 	if _, ok := ctx.Module().(*ModuleGenerateSource); ok {
-		backend.Get().GetLogger().Warn(warnings.GenerateRuleWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+		GetLogger().Warn(warnings.GenerateRuleWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 
 	if e, ok := ctx.Module().(enableable); ok {

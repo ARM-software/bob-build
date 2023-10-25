@@ -6,6 +6,7 @@
 package core
 
 import (
+	"io"
 	"os"
 
 	"github.com/google/blueprint"
@@ -52,6 +53,36 @@ func getSourceDir() string {
 func getBobDir() string {
 	// TODO: This should be part of the backend.
 	return config.GetEnvironmentVariables().BobDir
+}
+
+var logger *warnings.WarningLogger = nil
+var loggerFile *os.File = nil
+
+func GetLogger() *warnings.WarningLogger {
+	return logger
+}
+
+func SetupLogger(env *config.EnvironmentVariables) {
+	if env == nil {
+		logger = warnings.New(io.Discard, "")
+	} else {
+		f, err := os.OpenFile(env.LogWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+		if err != nil {
+			utils.Die("Failed to setup logger, error opening '%s' file: %v", env.LogWarningsFile, err)
+		}
+		loggerFile = f
+		logger = warnings.New(loggerFile, env.LogWarnings)
+	}
+}
+
+func TearDownLogger() {
+	if loggerFile != nil {
+		errCnt := logger.ErrorWarnings()
+		loggerFile.Close()
+		if errCnt > 0 {
+			utils.Die("%d error(s) ocurred!\n\n%s\n", errCnt, logger.InfoMessage())
+		}
+	}
 }
 
 // Main is the entry point for the bob primary builder.
@@ -215,22 +246,8 @@ func Main() {
 		ctx.RegisterTopDownMutator("late_template_mutator", lateTemplateMutator).Parallel()
 	}
 
-	f, err := os.OpenFile(env.LogWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		utils.Die("error opening '%s' file: %v", env.LogWarningsFile, err)
-	}
-
-	logger := warnings.New(f, env.LogWarnings)
-
-	defer func() {
-		errCnt := logger.ErrorWarnings()
-		f.Close()
-
-		if errCnt > 0 {
-			utils.Die("%d error(s) ocurred!\n\n%s\n", errCnt, logger.InfoMessage())
-		}
-	}()
-
+	SetupLogger(env)
+	defer TearDownLogger()
 	defer MetaDataWriteToFile(env.BuildMetaFile)
 
 	if builder_ninja {
@@ -246,10 +263,6 @@ func Main() {
 	}
 
 	// It is safe to call `backend.Get()` after this call.
-	backend.Setup(env,
-		&cfg.Properties,
-		logger,
-	)
-
+	backend.Setup(env, &cfg.Properties)
 	bootstrap.Main(ctx, cfg)
 }

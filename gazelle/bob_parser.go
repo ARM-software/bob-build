@@ -84,6 +84,7 @@ func (p *bobParser) parse() []*Module {
 		log.Fatalf("Creating bplist failed: %v\n", err)
 	}
 
+	bob.SetupLogger(nil)
 	_, errs := bp.ParseFileList(filepath.Join(p.rootPath, p.relPath), bpToParse, nil)
 
 	if len(errs) > 0 {
