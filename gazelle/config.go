@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	bob "github.com/ARM-software/bob-build/core"
+
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -95,7 +96,6 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
-
 		bobParser := newBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
 
 		modules := bobParser.parse()

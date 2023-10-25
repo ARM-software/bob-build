@@ -1,23 +1,18 @@
-gazelle: Dependency failed: panic in bottom up mutator "default_deps1" for module "bob_defaults"
-The Backend Platform has not been configured, please call Setup() before use.
-goroutine 24 [running]:
-github.com/google/blueprint.newPanicErrorf({0x83a400, 0x984610}, {0xc00025c680, 0x3b}, {0x0, 0x0, 0x0})
-	external/com_github_google_blueprint/context.go:3748 +0x79
-github.com/google/blueprint.(*Context).runMutator.func1.1.1()
-	external/com_github_google_blueprint/context.go:2199 +0x393
-panic({0x83a400, 0x984610})
-	GOROOT/src/runtime/panic.go:838 +0x207
-github.com/ARM-software/bob-build/core/backend.Get()
-	external/bob/core/backend/backend.go:40 +0xf5
-github.com/ARM-software/bob-build/core.DefaultDepsStage1Mutator({0x98c7a8, 0xc0001bc600})
-	external/bob/core/defaults.go:190 +0x8b
-github.com/google/blueprint.bottomUpMutatorImpl.run(...)
-	external/com_github_google_blueprint/context.go:2114
-github.com/google/blueprint.(*Context).runMutator.func1.1({0x988c70?, 0xc59ac0?}, 0x0?, 0x0?, 0x0?)
-	external/com_github_google_blueprint/context.go:2203 +0x88
-github.com/google/blueprint.(*Context).runMutator.func1(0xc000113d40)
-	external/com_github_google_blueprint/context.go:2204 +0x151
-github.com/google/blueprint.(*Context).parallelVisit.func1.1()
-	external/com_github_google_blueprint/context.go:1839 +0x38
-created by github.com/google/blueprint.(*Context).parallelVisit.func1
-	external/com_github_google_blueprint/context.go:1838 +0x158
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'cc_binary'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'
+gazelle: Unsupported module 'unknown'

@@ -5,13 +5,11 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
-	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
 )
 
 type AndroidPlatform struct {
 	toolchains toolchain.ToolchainSet
-	logger     *warnings.WarningLogger
 	env        *config.EnvironmentVariables
 }
 
@@ -74,10 +72,6 @@ func (g *AndroidPlatform) EscapeFlag(s string) string {
 	return s
 }
 
-func (g *AndroidPlatform) GetLogger() *warnings.WarningLogger {
-	return g.logger
-}
-
 func (g *AndroidPlatform) Init(config *config.Properties) {
 	g.toolchains.Configure(config)
 }
@@ -86,10 +80,9 @@ func (g *AndroidPlatform) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchai
 	return g.toolchains.GetToolchain(tgt)
 }
 
-func NewAndroidPlatform(env *config.EnvironmentVariables, cfg *config.Properties, logger *warnings.WarningLogger) Platform {
+func NewAndroidPlatform(env *config.EnvironmentVariables, cfg *config.Properties) Platform {
 	p := AndroidPlatform{
-		logger: logger,
-		env:    env,
+		env: env,
 	}
 
 	p.Init(cfg)

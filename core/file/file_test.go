@@ -68,7 +68,6 @@ func TestLinux(t *testing.T) {
 		config.CreateMockConfig(map[string]interface{}{
 			"builder_ninja": true,
 		}),
-		nil, // logger is nil here, not used in these tests
 	)
 
 	t.Run("SourcePath", func(t *testing.T) {

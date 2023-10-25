@@ -5,14 +5,12 @@ import (
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
-	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
 )
 
 type LinuxPlatform struct {
 	toolchains toolchain.ToolchainSet
-	logger     *warnings.WarningLogger
 }
 
 var _ Platform = (*LinuxPlatform)(nil)
@@ -61,14 +59,8 @@ func (g *LinuxPlatform) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain 
 	return g.toolchains.GetToolchain(tgt)
 }
 
-func (g *LinuxPlatform) GetLogger() *warnings.WarningLogger {
-	return g.logger
-}
-
-func NewLinuxPlatform(_ *config.EnvironmentVariables, cfg *config.Properties, logger *warnings.WarningLogger) Platform {
-	l := LinuxPlatform{
-		logger: logger,
-	}
+func NewLinuxPlatform(_ *config.EnvironmentVariables, cfg *config.Properties) Platform {
+	l := LinuxPlatform{}
 
 	l.Init(cfg)
 

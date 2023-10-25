@@ -1,1 +1,31 @@
 # gazelle:bob_root
+
+cc_library(
+    name = "libbob_static_library",
+    srcs = [
+        "lib.c",
+    ],
+)
+
+filegroup(
+    name = "bob_glob",
+    srcs = glob(
+        ["lib/**/*.c"],
+        allow_empty = False,
+        exclude = ["lib/**/exclude_*.cpp"],
+        exclude_directories = 1,
+    ),
+)
+
+filegroup(
+    name = "bob_filegroup",
+    srcs = glob(["*.c"]),
+)
+
+cc_library(
+    name = "libbob_library",
+    srcs = [
+        "src.c",
+    ],
+    linkstatic = True,
+)

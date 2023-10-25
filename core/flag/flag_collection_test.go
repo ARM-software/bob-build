@@ -14,7 +14,6 @@ func TestCollections(t *testing.T) {
 		config.CreateMockConfig(map[string]interface{}{
 			"builder_ninja": true,
 		}),
-		nil, // logger is nil here, not used in these tests
 	)
 
 	flags := Flags{

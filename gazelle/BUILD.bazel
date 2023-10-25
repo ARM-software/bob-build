@@ -36,6 +36,7 @@ go_library(
         "@bazel_gazelle//resolve:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
         "@bob//core",
+        "@bob//core/config",
         "@bob//core/file",
         "@bob//core/toolchain",
         "@bob//internal/utils",

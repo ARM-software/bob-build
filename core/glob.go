@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/module"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -61,7 +60,7 @@ func (m *ModuleGlob) processPaths(ctx blueprint.BaseModuleContext) {
 
 	for _, s := range append(m.Properties.Srcs, m.Properties.Exclude...) {
 		if strings.HasPrefix(filepath.Clean(s), "../") {
-			backend.Get().GetLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+			GetLogger().Warn(warnings.RelativeUpLinkWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 		}
 	}
 

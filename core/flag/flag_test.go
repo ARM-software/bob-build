@@ -14,7 +14,6 @@ func TestLinux(t *testing.T) {
 		config.CreateMockConfig(map[string]interface{}{
 			"builder_ninja": true,
 		}),
-		nil, // logger is nil here, not used in these tests
 	)
 
 	raw_local_path := "local/foo"

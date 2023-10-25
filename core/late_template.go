@@ -184,7 +184,7 @@ func verifyMatchSources(ctx blueprint.BaseModuleContext, matchedNonCompiledSourc
 	}
 
 	if unmatchedCount > 0 {
-		backend.Get().GetLogger().Warn(warnings.UnmatchedNonCompileSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
+		GetLogger().Warn(warnings.UnmatchedNonCompileSrcsWarning, ctx.BlueprintsFile(), ctx.ModuleName())
 	}
 }
 
