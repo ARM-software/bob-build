@@ -1,0 +1,171 @@
+bob_alias {
+    name: "bob_alias",
+    srcs: [
+        "bob_binary",
+    ],
+}
+
+bob_binary {
+    name: "bob_binary",
+    defaults: ["bob_defaults"],
+    srcs: ["src.cpp"],
+    install_group: "bin",
+    host_supported: true,
+}
+
+bob_defaults {
+    name: "bob_defaults",
+    cflags: [
+        "-Wall",
+        "-pedantic",
+    ],
+
+    srcs: ["forbidden"], // Ensure we do not crash here
+
+    target: {
+        cflags: [
+            "-DTARGET",
+        ],
+    },
+
+    host: {
+        cflags: [
+            "-DHOST",
+        ],
+    },
+}
+
+bob_external_header_library {
+    name: "bob_external_header_library",
+}
+
+bob_external_static_library {
+    name: "bob_external_static_library",
+}
+
+bob_external_shared_library {
+    name: "bob_external_shared_library",
+}
+
+bob_generate_binary {
+    name: "bob_generate_binary",
+    cmd: "touch ${out}",
+    srcs: [
+        "bob_generate_binary.md",
+    ],
+    target: "host",
+}
+
+bob_generate_shared_library {
+    name: "bob_generate_shared_library",
+    srcs: ["bob_generate_shared_library.c"],
+    cmd: "touch ${out}",
+    target: "host",
+}
+
+bob_generate_source {
+    name: "bob_generate_source",
+    out: ["bob_generate_source.c"],
+    cmd: "touch ${out}",
+}
+
+bob_generate_static_library {
+    name: "bob_generate_static_library",
+    srcs: ["bob_generate_static_library.c"],
+    cmd: "touch ${out}",
+    target: "host",
+}
+
+bob_install_group {
+    name: "bob_install_group",
+}
+
+bob_kernel_module {
+    name: "bob_kernel_module",
+    kernel_dir: "/tmp/thispathdoesnotexist",
+    kernel_cc: "{{.kernel_cc}}",
+    kernel_clang_triple: "{{.kernel_clang_triple}}",
+    srcs: [
+        "Kbuild",
+        "bob_kernel_module.c",
+    ],
+    enabled: false,
+}
+
+bob_resource {
+    name: "bob_resource",
+    srcs: ["bob_resource.txt"],
+}
+
+bob_shared_library {
+    name: "libbob_shared_library",
+    srcs: ["lib.c"],
+}
+
+bob_static_library {
+    name: "libbob_static_library",
+    srcs: ["lib.c"],
+    host_supported: true,
+}
+
+bob_transform_source {
+    name: "bob_transform_source",
+    srcs: [
+        "in01.c",
+        "in02.c",
+    ],
+    out: {
+        match: "in([0-9]+)\\.c",
+        replace: ["out$1.c"],
+    },
+}
+
+bob_glob {
+    name: "bob_glob",
+    srcs: ["lib/**/*.c"],
+    exclude: ["lib/**/exclude_*.cpp"],
+    exclude_directories: true,
+    allow_empty: false,
+}
+
+bob_filegroup {
+    name: "bob_filegroup",
+    srcs: ["*.c"],
+}
+
+bob_genrule {
+    name: "bob_genrule",
+    srcs: [
+        "in.c",
+    ],
+    out: [
+        "out.c",
+    ],
+    cmd: "touch ${out}",
+}
+
+bob_gensrcs {
+    name: "bob_gensrcs",
+    srcs: [
+        "in.in",
+    ],
+    output_extension: "cpp",
+    export_include_dirs: [
+        ".",
+    ],
+    cmd: "touch ${out}",
+}
+
+bob_test {
+    name: "bob_test",
+    srcs: ["main.cpp"],
+    host_supported: false,
+    target_supported: true,
+    build_by_default: true,
+}
+
+bob_library {
+    name: "libbob_library",
+    srcs: ["src.c"],
+    host_supported: true,
+}
