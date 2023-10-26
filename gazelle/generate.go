@@ -138,11 +138,16 @@ func generateConfigs(r *Registry, relPath string) []*rule.Rule {
 			// 'build_setting_default' value is mandatory
 			if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
 				setBuildSettingDefault(rFlag, d[1])
-			} else if _, ok := v.Condition.([]interface{}); ok {
-				// TODO: handle condition
-				setBuildSettingDefault(rFlag, false)
 			} else {
-				setBuildSettingDefault(rFlag, false)
+				// TODO: handle conditional defaults
+				switch v.Datatype {
+				case "bool":
+					setBuildSettingDefault(rFlag, false)
+				case "int":
+					setBuildSettingDefault(rFlag, 0)
+				case "string":
+					setBuildSettingDefault(rFlag, "")
+				}
 			}
 
 			rules = append(rules, rFlag)

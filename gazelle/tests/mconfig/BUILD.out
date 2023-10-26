@@ -68,12 +68,12 @@ config_setting(
 
 string_flag(
     name = "string_option",
-    build_setting_default = False,
+    build_setting_default = "",
 )
 
 int_flag(
     name = "int_option",
-    build_setting_default = False,
+    build_setting_default = 0,
 )
 
 # depends on: //:debug
