@@ -19,6 +19,7 @@ const (
 	TypeCpp
 	TypeCC
 	TypeLinker
+	TypeTransitiveLinker // Only for strict targets to comply with Bazel
 	TypeLinkLibrary
 	TypeInclude
 	TypeIncludeLocal // Helper flag to mark local include dirs

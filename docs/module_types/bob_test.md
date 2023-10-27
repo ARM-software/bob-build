@@ -4,7 +4,7 @@
 
 ```bp
 bob_test {
-    name, srcs, hdrs, copts, deps, tags
+    name, srcs, hdrs, copts, deps, tags, linkopts
 }
 ```
 
@@ -26,3 +26,4 @@ Supports:
 | `copts`                                        | List of strings; default is `[]`<br>This options are included as cflags in the compile/link commands. |
 | `deps`                                         | List of targets; default is `[]`<br>The list of other libraries to be linked in to the binary target. |
 | [`tags`](properties/common_properties.md#tags) | List of strings; default is `[]`                                                                      |
+| [`linkopts`](properties/linkopts.md)           | List of strings; default is `[]`<br>List of additional flags to the linker command.                   |

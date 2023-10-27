@@ -419,7 +419,7 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 	m.FlagsInTransitive(ctx).ForEachIf(
 		func(f flag.Flag) bool {
 			// Includes are not part of cflags on AOSP, and the exporting of them is done by Soong itself,
-			// hence exclude processing of includes here and handle it seperately.
+			// hence exclude processing of includes here and handle it separately.
 			return !f.MatchesType(flag.TypeInclude)
 		},
 		func(f flag.Flag) {
@@ -431,6 +431,8 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 			case f.MatchesType(flag.TypeCpp):
 				cxxFlags = append(cxxFlags, f.ToString())
 			case f.MatchesType(flag.TypeLinker):
+				ldflags = append(ldflags, f.ToString())
+			case f.MatchesType(flag.TypeTransitiveLinker):
 				ldflags = append(ldflags, f.ToString())
 			case f.MatchesType(flag.TypeAsm):
 				asflags = append(asflags, f.ToString())
@@ -452,7 +454,7 @@ func addCompilableProps(mod bpwriter.Module, m Compilable, ctx blueprint.ModuleC
 		},
 	)
 
-	// Check if any inclues are being exported
+	// Check if any includes are being exported
 	m.FlagsOut().ForEachIf(
 		func(f flag.Flag) bool {
 			return f.MatchesType(flag.TypeInclude) &&

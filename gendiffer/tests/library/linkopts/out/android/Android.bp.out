@@ -1,0 +1,86 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library {
+    name: "libameba__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libameba",
+    srcs: ["libameba.cpp"],
+    ldflags: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+}
+
+cc_library {
+    name: "libameba__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libameba",
+    srcs: ["libameba.cpp"],
+    ldflags: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "libanimalcule__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libanimalcule",
+    srcs: ["libanimalcule.cpp"],
+    ldflags: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+}
+
+cc_library {
+    name: "libanimalcule__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libanimalcule",
+    srcs: ["libanimalcule.cpp"],
+    ldflags: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "libeuglena__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libeuglena",
+    srcs: ["libeuglena.cpp"],
+    ldflags: [
+        "-lssl",
+        "-lcrypto",
+    ],
+    static_libs: ["libameba__host"],
+}
+
+cc_library {
+    name: "libeuglena__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libeuglena",
+    srcs: ["libeuglena.cpp"],
+    ldflags: [
+        "-lssl",
+        "-lcrypto",
+    ],
+    static_libs: ["libameba__target"],
+    compile_multilib: "both",
+}
+

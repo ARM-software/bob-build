@@ -1,0 +1,37 @@
+bob_library {
+    name: "libA",
+    srcs: ["libA.cpp"],
+    host_supported: true,
+    build_by_default: true,
+    linkstatic: false,
+    linkopts: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+}
+
+bob_library {
+    name: "libB",
+    srcs: ["libB.cpp"],
+    host_supported: true,
+    build_by_default: true,
+    linkstatic: false,
+    linkopts: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+}
+
+bob_test {
+    name: "hello",
+    srcs: ["hello.cpp"],
+    deps: [
+        "libA",
+        "libB",
+    ],
+    linkopts: [
+        "-Wl,-Fake,fakeing",
+    ],
+    host_supported: true,
+    build_by_default: true,
+}

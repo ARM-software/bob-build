@@ -1,0 +1,86 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary_host {
+    name: "hello__host",
+    stem: "hello",
+    srcs: ["hello.cpp"],
+    ldflags: [
+        "-Wl,-Fake,fakeing",
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+    shared_libs: ["libB__host"],
+    static_libs: ["libA__host"],
+}
+
+cc_binary {
+    name: "hello__target",
+    stem: "hello",
+    srcs: ["hello.cpp"],
+    ldflags: [
+        "-Wl,-Fake,fakeing",
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+    shared_libs: ["libB__target"],
+    static_libs: ["libA__target"],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "libA__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libA",
+    srcs: ["libA.cpp"],
+    ldflags: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+}
+
+cc_library {
+    name: "libA__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libA",
+    srcs: ["libA.cpp"],
+    ldflags: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library {
+    name: "libB__host",
+    host_supported: true,
+    device_supported: false,
+    stem: "libB",
+    srcs: ["libB.cpp"],
+    ldflags: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+}
+
+cc_library {
+    name: "libB__target",
+    host_supported: false,
+    device_supported: true,
+    stem: "libB",
+    srcs: ["libB.cpp"],
+    ldflags: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+    compile_multilib: "both",
+}
+
