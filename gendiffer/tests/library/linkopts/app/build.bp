@@ -1,0 +1,94 @@
+bob_library {
+    name: "libameba",
+    srcs: ["libameba.cpp"],
+    host_supported: true,
+    build_by_default: true,
+    linkopts: [
+        "-lfoo",
+        "-Wl,--use-me,$$VAR",
+    ],
+}
+
+bob_library {
+    name: "libanimalcule",
+    srcs: ["libanimalcule.cpp"],
+    host_supported: true,
+    build_by_default: true,
+    linkstatic: false,
+    linkopts: [
+        "-lbar",
+        "-Wl,-Map,output.map",
+    ],
+}
+
+bob_library {
+    name: "libeuglena",
+    srcs: ["libeuglena.cpp"],
+    host_supported: true,
+    build_by_default: true,
+    deps: [
+        "libameba",
+    ],
+    linkopts: [
+        "-lssl",
+        "-lcrypto",
+    ],
+}
+
+// bob_shared_library {
+//     name: "libB",
+//     srcs: ["libB.cpp"],
+//     host_supported: true,
+//     build_by_default: true,
+//     ldlibs: [
+//         "-lbaz",
+//         "-Wl,--no-as-needed",
+//     ],
+// }
+
+// bob_static_library {
+//     name: "libC",
+//     srcs: ["libC.cpp"],
+//     host_supported: true,
+//     build_by_default: true,
+//     ldlibs: [
+//         "-lbeef",
+//     ],
+// }
+
+// bob_binary {
+//     name: "hello_shared",
+//     shared_libs: [
+//         "libeuglena",
+//         "libB",
+//     ],
+//     srcs: ["hello_shared.cpp"],
+//     host_supported: true,
+//     build_by_default: true,
+// }
+
+// bob_executable {
+//     name: "hello_shared_new",
+//     deps: [
+//         "libeuglena",
+//         "libanimalcule",
+//         "libB",
+//     ],
+//     linkopts: [
+//         "-Wl,-Fake,fakeing",
+//     ],
+//     srcs: ["hello_shared.cpp"],
+//     host_supported: true,
+//     build_by_default: true,
+// }
+
+// bob_binary {
+//     name: "hello_static",
+//     static_libs: [
+//         "libeuglena",
+//         "libC",
+//     ],
+//     srcs: ["hello_static.cpp"],
+//     host_supported: true,
+//     build_by_default: true,
+// }

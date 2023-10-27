@@ -33,6 +33,8 @@ type StrictLibraryProps struct {
 	Alwayslink *bool
 	Linkstatic *bool
 
+	Linkopts []string
+
 	Local_defines []string
 	Copts         []string
 	Deps          []string
@@ -160,6 +162,11 @@ func (m *ModuleStrictLibrary) FlagsIn() flag.Flags {
 			Tag:          flag.TypeIncludeLocal | flag.TypeInclude,
 			Factory:      flag.FromIncludePathOwned,
 		},
+		{
+			PropertyName: "Linkopts",
+			Tag:          flag.TypeTransitiveLinker,
+			Factory:      flag.FromStringOwned,
+		},
 	}
 
 	return flag.ParseFromProperties(nil, lut, m.Properties)
@@ -190,6 +197,11 @@ func (m *ModuleStrictLibrary) FlagsOut() flag.Flags {
 			PropertyName: "Includes",
 			Tag:          flag.TypeIncludeLocal | flag.TypeExported | flag.TypeTransitive | flag.TypeIncludeSystem,
 			Factory:      flag.FromIncludePathOwned,
+		},
+		{
+			PropertyName: "Linkopts",
+			Tag:          flag.TypeTransitiveLinker,
+			Factory:      flag.FromStringOwned,
 		},
 	}
 

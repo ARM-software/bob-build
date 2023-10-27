@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/google/blueprint"
 )
 
@@ -22,6 +24,39 @@ func (m *ModuleStrictBinary) OutFiles() file.Paths {
 	return file.Paths{
 		file.NewPath(m.Name(), string(m.getTarget()), file.TypeBinary|file.TypeInstallable),
 	}
+}
+
+func (m *ModuleStrictBinary) FlagsInTransitive(ctx blueprint.BaseModuleContext) flag.Flags {
+
+	flags := m.ModuleStrictLibrary.FlagsInTransitive(ctx)
+
+	visited := map[string]bool{}
+
+	ctx.VisitDirectDepsIf(
+		func(dep blueprint.Module) bool {
+			name := ctx.OtherModuleName(dep)
+			if _, ok := visited[name]; !ok && ctx.OtherModuleDependencyTag(dep) == tag.SharedTag {
+				visited[name] = true
+				return visited[name]
+			}
+
+			return false
+		},
+		func(child blueprint.Module) {
+			if provider, ok := child.(flag.Provider); ok {
+				linkopts := provider.FlagsOut().Filtered(
+					func(f flag.Flag) bool {
+						return f.MatchesType(flag.TypeTransitiveLinker)
+					},
+				)
+
+				linkopts.ForEach(func(f flag.Flag) {
+					flags = flags.AppendIfUnique(f)
+				})
+			}
+		})
+
+	return flags
 }
 
 func (m *ModuleStrictBinary) GenerateBuildActions(ctx blueprint.ModuleContext) {

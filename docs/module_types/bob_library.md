@@ -4,7 +4,7 @@
 
 ```bp
 bob_library {
-    name, srcs, hdrs, copts, local_defines, defines, deps
+    name, srcs, hdrs, copts, local_defines, defines, deps, linkopts
 }
 ```
 
@@ -21,3 +21,4 @@ This target replaces `bob_static_library` & `bob_shared_library` to mimic Bazel 
 | `local_defines`                                | List of strings; default is `[]`<br>Defines that are local to the module and are not added to modules that depend upon this.                      |
 | `copts`                                        | List of strings; default is `[]`<br>This options are included as cflags in the compile/link commands.                                             |
 | `deps`                                         | List of targets; default is `[]`<br>The list of other libraries to be linked in to the binary target.                                             |
+| [`linkopts`](properties/linkopts.md)           | List of strings; default is `[]`<br>List of additional flags to the linker command.                                                               |

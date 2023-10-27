@@ -460,6 +460,15 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 		return f.MatchesType(flag.TypeLinkLibrary)
 	}).ToStringSlice()
 
+	m.FlagsInTransitive(ctx).ForEachIf(
+		func(f flag.Flag) bool {
+			return f.MatchesType(flag.TypeTransitiveLinker)
+		},
+		func(f flag.Flag) {
+			ldlibs = append(ldlibs, f.ToString())
+		},
+	)
+
 	if m.IsForwardingSharedLibrary() {
 		ldflags = append(ldflags, tc.GetLinker().KeepUnusedDependencies())
 	} else {
