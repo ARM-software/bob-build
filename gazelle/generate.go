@@ -72,7 +72,7 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 		}
 
 		sort.Slice(modulesToGen, func(i, j int) bool {
-			return (*modulesToGen[i]).idx < (*modulesToGen[j]).idx
+			return (*modulesToGen[i]).GetIndex() < (*modulesToGen[j]).GetIndex()
 		})
 
 		for _, mod := range modulesToGen {
