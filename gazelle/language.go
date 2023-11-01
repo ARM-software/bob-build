@@ -1,17 +1,18 @@
 package plugin
 
 import (
+	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
 type BobExtension struct {
-	registry *Registry
+	registry *registry.Registry
 }
 
 func NewLanguage() language.Language {
-	return &BobExtension{registry: NewRegistry()}
+	return &BobExtension{registry: registry.NewRegistry()}
 }
 
 const BobExtensionName = "bob_build"

@@ -18,7 +18,6 @@ go_library(
         "mconfig_parser.go",
         "merge.go",
         "module.go",
-        "registry.go",
         "resolve.go",
     ],
     data = [
@@ -29,6 +28,7 @@ go_library(
     deps = [
         "//common",
         "//config",
+        "//registry",
         "//util",
         "@bazel_gazelle//config:go_default_library",
         "@bazel_gazelle//label:go_default_library",
@@ -80,7 +80,6 @@ go_test(
     srcs = [
         "bob_parser_test.go",
         "config_test.go",
-        "registry_test.go",
     ],
     # TODO: we need to keep here as it sets the embed to `:gazelle` incorrectly.
     embed = [":plugin"],  # keep
