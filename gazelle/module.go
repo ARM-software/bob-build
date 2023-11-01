@@ -8,6 +8,7 @@ import (
 
 	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/ARM-software/bob-build/gazelle/registry"
+	"github.com/ARM-software/bob-build/gazelle/types"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	bzl "github.com/bazelbuild/buildtools/build"
@@ -214,10 +215,10 @@ func (m *Module) buildLibrary() *rule.Rule {
 
 	// These set of attributes are 1 to 1 string lists that have additive conditionals only.
 	if attr := buildListExpressionFromAttribute(m, "Srcs"); attr != nil {
-		r.SetAttr("srcs", &SrcsAttribute{expr: attr})
+		r.SetAttr("srcs", &types.SrcsAttribute{Expr: attr})
 	}
 	if attr := buildListExpressionFromAttribute(m, "Hdrs"); attr != nil {
-		r.SetAttr("hdrs", &SrcsAttribute{expr: attr})
+		r.SetAttr("hdrs", &types.SrcsAttribute{Expr: attr})
 	}
 	if attr := buildListExpressionFromAttribute(m, "Local_defines"); attr != nil {
 		r.SetAttr("local_defines", attr)
@@ -285,7 +286,7 @@ func (m *Module) buildFilegroup() *rule.Rule {
 		}
 	}
 
-	r.SetAttr("srcs", &SrcsAttribute{expr: expr})
+	r.SetAttr("srcs", &types.SrcsAttribute{Expr: expr})
 
 	return r
 }
@@ -313,7 +314,7 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 		g.ExcludeDirectories = excludeDir.(*bool)
 	}
 
-	r.SetAttr("srcs", &SrcsAttribute{expr: g.BzlExpr()})
+	r.SetAttr("srcs", &types.SrcsAttribute{Expr: g.BzlExpr()})
 
 	return r
 }

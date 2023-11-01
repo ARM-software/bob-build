@@ -1,4 +1,4 @@
-package plugin
+package types
 
 import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -15,7 +15,7 @@ import (
 // `select` is sticked with defined platforms only:
 // https://github.com/bazelbuild/bazel-gazelle/issues/1051
 type SrcsAttribute struct {
-	expr bzl.Expr
+	Expr bzl.Expr
 }
 
 var _ rule.BzlExprValue = (*SrcsAttribute)(nil)
@@ -25,9 +25,9 @@ func (m *SrcsAttribute) Merge(other bzl.Expr) bzl.Expr {
 	// TODO: implement custom merging
 	// For now return newly generated expression.
 	// It means it will replace existing expression.
-	return m.expr
+	return m.Expr
 }
 
 func (m SrcsAttribute) BzlExpr() bzl.Expr {
-	return m.expr
+	return m.Expr
 }
