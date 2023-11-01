@@ -6,6 +6,7 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/gazelle/types",
     visibility = ["//visibility:public"],
     deps = [
+        "//common",
         "@bazel_gazelle//rule:go_default_library",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
     ],

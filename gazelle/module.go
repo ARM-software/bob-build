@@ -160,7 +160,7 @@ func buildListExpressionFromAttribute(m *Module, attr string) bzl.Expr {
 
 	if d, ok := m.defaults[attr]; ok {
 		if srcs, ok := d.([]string); ok {
-			list = append(list, makeStringListWithGlob(resolveLabels(srcs, m)).BzlExpr())
+			list = append(list, types.MakeStringListWithGlob(resolveLabels(srcs, m)).BzlExpr())
 		}
 	}
 
@@ -175,9 +175,9 @@ func buildListExpressionFromAttribute(m *Module, attr string) bzl.Expr {
 
 	for _, name := range features {
 		attribute := m.features[name]
-		data := make(SelectStringListWithGlob)
+		data := make(types.SelectStringListWithGlob)
 		if srcs, ok := attribute[attr].([]string); ok {
-			data[getFeatureCondition(name)] = makeStringListWithGlob(resolveLabels(srcs, m))
+			data[getFeatureCondition(name)] = types.MakeStringListWithGlob(resolveLabels(srcs, m))
 			list = append(list, data.BzlExpr())
 		}
 	}
@@ -252,7 +252,7 @@ func (m *Module) buildFilegroup() *rule.Rule {
 
 	if d, ok := m.defaults["Srcs"]; ok {
 		if srcs, ok := d.([]string); ok {
-			list = append(list, makeStringListWithGlob(srcs).BzlExpr())
+			list = append(list, types.MakeStringListWithGlob(srcs).BzlExpr())
 		}
 	}
 
@@ -269,9 +269,9 @@ func (m *Module) buildFilegroup() *rule.Rule {
 
 	for _, name := range features {
 		attr := m.features[name]
-		data := make(SelectStringListWithGlob)
+		data := make(types.SelectStringListWithGlob)
 		if srcs, ok := attr["Srcs"].([]string); ok {
-			data[getFeatureCondition(name)] = makeStringListWithGlob(srcs)
+			data[getFeatureCondition(name)] = types.MakeStringListWithGlob(srcs)
 			list = append(list, data.BzlExpr())
 		}
 	}
@@ -296,7 +296,7 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 	r := rule.NewRule(m.moduleType.String(), m.name)
 	r.SetKind(m.moduleType.String())
 
-	g := &GlobValue{}
+	g := &types.GlobValue{}
 
 	// `bob_glob` is not featurable
 	// thus only `m.defaults` data is used
