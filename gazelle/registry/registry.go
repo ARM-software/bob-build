@@ -1,13 +1,13 @@
-package plugin
+package registry
 
 import (
 	"github.com/bazelbuild/bazel-gazelle/label"
 )
 
 type Registrable interface {
-	getName() string
-	getRelativePath() string // from bob root
-	getLabel() label.Label
+	GetName() string
+	GetRelativePath() string // from bob root
+	GetLabel() label.Label
 }
 
 type Registry struct {
@@ -16,33 +16,33 @@ type Registry struct {
 	pathMap       map[string][]Registrable
 }
 
-func (r *Registry) register(m Registrable) {
-	r.globalNameMap[m.getName()] = m
-	r.pathMap[m.getRelativePath()] = append(r.pathMap[m.getRelativePath()], m)
-	r.labelMap[m.getLabel()] = m
+func (r *Registry) Register(m Registrable) {
+	r.globalNameMap[m.GetName()] = m
+	r.pathMap[m.GetRelativePath()] = append(r.pathMap[m.GetRelativePath()], m)
+	r.labelMap[m.GetLabel()] = m
 }
 
-func (r *Registry) nameExists(name string) bool {
+func (r *Registry) NameExists(name string) bool {
 	_, ok := r.globalNameMap[name]
 	return ok
 }
 
-func (r *Registry) labelExists(l label.Label) bool {
+func (r *Registry) LabelExists(l label.Label) bool {
 	_, ok := r.labelMap[l]
 	return ok
 }
 
-func (r *Registry) retrieveByName(name string) (reg Registrable, ok bool) {
+func (r *Registry) RetrieveByName(name string) (reg Registrable, ok bool) {
 	reg, ok = r.globalNameMap[name]
 	return reg, ok
 }
 
-func (r *Registry) retrieveByLabel(l label.Label) (reg Registrable, ok bool) {
+func (r *Registry) RetrieveByLabel(l label.Label) (reg Registrable, ok bool) {
 	reg, ok = r.labelMap[l]
 	return reg, ok
 }
 
-func (r *Registry) retrieveByPath(path string) (regs []Registrable, ok bool) {
+func (r *Registry) RetrieveByPath(path string) (regs []Registrable, ok bool) {
 	regs, ok = r.pathMap[path]
 	return regs, ok
 }

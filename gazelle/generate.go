@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
+	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -56,7 +57,7 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 	rel := filepath.Clean(args.Rel)
 	rules := generateConfigs(e.registry, rel)
 
-	if regs, ok := e.registry.retrieveByPath(rel); ok {
+	if regs, ok := e.registry.RetrieveByPath(rel); ok {
 		// To properly test generation of multiple modules
 		// at once the order needs to be preserved
 		// Sort modules by its `idx` index
@@ -74,7 +75,7 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 		})
 
 		for _, mod := range modulesToGen {
-			m, _ := e.registry.retrieveByName(mod.getName())
+			m, _ := e.registry.RetrieveByName(mod.GetName())
 
 			if g, ok := m.(generator); ok {
 
@@ -101,22 +102,22 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 	return result
 }
 
-func generateConfigs(r *Registry, relPath string) []*rule.Rule {
+func generateConfigs(r *registry.Registry, relPath string) []*rule.Rule {
 	rules := make([]*rule.Rule, 0)
 
 	if r != nil {
 		// To properly test generation of multiple configs
 		// at once the order needs to be preserved
 		// Sort all configs by its Position
-		configsToGen := make([]configData, 0)
+		configsToGen := make([]*configData, 0)
 
-		regs, ok := r.retrieveByPath(relPath)
+		regs, ok := r.RetrieveByPath(relPath)
 		if !ok {
 			return rules
 		}
 
 		for _, reg := range regs {
-			if cfg, ok := reg.(configData); ok && cfg.Ignore != "y" {
+			if cfg, ok := reg.(*configData); ok && cfg.Ignore != "y" {
 				configsToGen = append(configsToGen, cfg)
 			}
 		}
@@ -171,7 +172,7 @@ func generateConfigs(r *Registry, relPath string) []*rule.Rule {
 	return rules
 }
 
-func generateDependencies(name string, value interface{}, r *Registry) ([]*rule.Rule, string) {
+func generateDependencies(name string, value interface{}, r *registry.Registry) ([]*rule.Rule, string) {
 
 	// idx = 0, helper index to start enumerating from
 	// for interim rules of `depends on` equation
@@ -189,7 +190,7 @@ func generateDependencies(name string, value interface{}, r *Registry) ([]*rule.
 	return rules, comment
 }
 
-func generateDependenciesInner(name string, value interface{}, r *Registry, idx int64) ([]*rule.Rule, string, string) {
+func generateDependenciesInner(name string, value interface{}, r *registry.Registry, idx int64) ([]*rule.Rule, string, string) {
 	var comment string
 	var ruleLabel string
 	rules := make([]*rule.Rule, 0)
@@ -203,13 +204,13 @@ func generateDependenciesInner(name string, value interface{}, r *Registry, idx 
 		switch t {
 		case "identifier":
 			depName := strings.ToLower(fmt.Sprintf("%s", v.Index(1).Interface()))
-			r, ok := r.retrieveByName(depName)
+			r, ok := r.RetrieveByName(depName)
 
 			if !ok {
 				log.Printf("Could not retrieve `Registrable` for '%s' name", depName)
 			}
 
-			l := r.getLabel()
+			l := r.GetLabel()
 			comment = l.String()
 			// `selects.config_setting_group` needs a flag's
 			// `config_setting` but not flag itself.

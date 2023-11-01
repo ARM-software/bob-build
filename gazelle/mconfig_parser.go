@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 )
@@ -89,17 +90,17 @@ type configData struct {
 	Name       string
 }
 
-var _ Registrable = (*configData)(nil)
+var _ registry.Registrable = (*configData)(nil)
 
-func (c configData) getName() string {
+func (c *configData) GetName() string {
 	return c.Name
 }
 
-func (c configData) getRelativePath() string {
+func (c *configData) GetRelativePath() string {
 	return c.RelPath
 }
 
-func (c configData) getLabel() label.Label {
+func (c *configData) GetLabel() label.Label {
 	return c.BazelLabel
 }
 
@@ -111,11 +112,11 @@ func newMconfigParser(repoRoot string, relPackagePath string) *mconfigParser {
 	}
 }
 
-func (p *mconfigParser) parse(fileNames *[]string) (*map[string]configData, error) {
+func (p *mconfigParser) parse(fileNames *[]string) (*map[string]*configData, error) {
 	parserMutex.Lock()
 	defer parserMutex.Unlock()
 
-	var configs map[string]configData
+	var configs map[string]*configData
 
 	for _, f := range *fileNames {
 
@@ -153,7 +154,7 @@ func (p *mconfigParser) parse(fileNames *[]string) (*map[string]configData, erro
 	return &configs, nil
 }
 
-func resolveConfigLabels(c *map[string]configData, root string) {
+func resolveConfigLabels(c *map[string]*configData, root string) {
 	for k, v := range *c {
 		relPath := filepath.Clean(v.RelPath)
 

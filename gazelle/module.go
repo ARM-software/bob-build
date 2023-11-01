@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
+	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	bzl "github.com/bazelbuild/buildtools/build"
@@ -65,22 +66,22 @@ type Module struct {
 	features     map[string]AttributesMap
 	defaults     AttributesMap
 	idx          uint32
-	registry     *Registry
+	registry     *registry.Registry
 }
 
-func (m Module) getName() string {
+func (m *Module) GetName() string {
 	return m.name
 }
 
-func (m Module) getRelativePath() string {
+func (m *Module) GetRelativePath() string {
 	return m.relativePath
 }
 
-func (m Module) getLabel() label.Label {
+func (m *Module) GetLabel() label.Label {
 	return m.bazelLabel
 }
 
-func (m Module) setRegistry(r *Registry) {
+func (m Module) setRegistry(r *registry.Registry) {
 	m.registry = r
 }
 
@@ -139,9 +140,9 @@ func resolveLabels(l []string, m *Module) []string {
 	var resolved []string
 	registry := m.registry
 	for _, v := range l {
-		if registry.nameExists(v) {
-			if dep, ok := registry.retrieveByName(v); ok {
-				depLabel := dep.getLabel()
+		if registry.NameExists(v) {
+			if dep, ok := registry.RetrieveByName(v); ok {
+				depLabel := dep.GetLabel()
 				relativeDepLabel := depLabel.Rel(m.bazelLabel.Repo, m.bazelLabel.Pkg)
 				// makes path relative
 				resolved = append(resolved, relativeDepLabel.String())

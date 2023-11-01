@@ -92,7 +92,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		// Register all `configData`s
 		for _, c := range *configs {
-			e.registry.register(c)
+			e.registry.Register(c)
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
@@ -102,13 +102,13 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 		// Register all `Module`s
 		for _, m := range modules {
-			e.registry.register(m)
+			e.registry.Register(m)
 			m.registry = e.registry
 		}
 	}
 }
 
-func createBobConfigSpoof(c *map[string]configData) *bob.BobConfig {
+func createBobConfigSpoof(c *map[string]*configData) *bob.BobConfig {
 
 	config := &bob.BobConfig{}
 
