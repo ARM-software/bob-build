@@ -1,4 +1,4 @@
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "int_flag", "string_flag")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # gazelle:bob_root
@@ -64,6 +64,16 @@ config_setting(
     flag_values = {
         ":debug": "true",
     },
+)
+
+string_flag(
+    name = "string_option",
+    build_setting_default = False,
+)
+
+int_flag(
+    name = "int_option",
+    build_setting_default = False,
 )
 
 # depends on: //:debug
