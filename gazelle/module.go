@@ -322,3 +322,7 @@ func (m *Module) buildGlobFilegroup() *rule.Rule {
 func (m *Module) SetIndex(i uint32) {
 	m.idx = i
 }
+
+func (m *Module) GetIndex() uint32 {
+	return m.idx
+}
