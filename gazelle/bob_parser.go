@@ -67,7 +67,7 @@ func (p *bobParser) parse() []*Module {
 			p.rootPath)
 
 		parseBpModule(ctx.Module(), func(feature string, attribute string, v interface{}) {
-			m.addFeatureAttribute(feature, attribute, v)
+			m.AddFeatureAttribute(feature, attribute, v)
 		})
 
 		modulesMutex.Lock()
