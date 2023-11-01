@@ -2,11 +2,13 @@ package plugin
 
 import (
 	"fmt"
-	bob "github.com/ARM-software/bob-build/core"
-	"github.com/google/blueprint"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	bob "github.com/ARM-software/bob-build/core"
+	"github.com/ARM-software/bob-build/gazelle/common"
+	"github.com/google/blueprint"
+	"github.com/stretchr/testify/assert"
 )
 
 type SourceProps struct {
@@ -105,7 +107,7 @@ func TestParseBpModule(t *testing.T) {
 	parseBpModule(bpModule, handler)
 
 	assert.Equal(t, 2, len(features), "Wrong features count")
-	assert.Contains(t, features, ConditionDefault, fmt.Sprintf("No '%s' found", ConditionDefault))
+	assert.Contains(t, features, common.ConditionDefault, fmt.Sprintf("No '%s' found", common.ConditionDefault))
 	assert.Contains(t, features, "Feature_y", "No 'Feature_y' found")
 
 	for _, f := range features {
@@ -117,6 +119,6 @@ func TestParseBpModule(t *testing.T) {
 		}
 	}
 
-	assert.Contains(t, features[ConditionDefault]["Srcs"], "main.c")
+	assert.Contains(t, features[common.ConditionDefault]["Srcs"], "main.c")
 	assert.Contains(t, features["Feature_y"]["Srcs"], "libA.c")
 }

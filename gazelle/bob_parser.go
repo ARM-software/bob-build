@@ -12,13 +12,10 @@ import (
 	bob "github.com/ARM-software/bob-build/core"
 	bob_file "github.com/ARM-software/bob-build/core/file"
 	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
+	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
-)
-
-const (
-	ConditionDefault string = "//conditions:default"
 )
 
 type valueHandler func(feature string, attribute string, v interface{})
@@ -168,7 +165,7 @@ func parseBpModuleProperties(v interface{}, handler valueHandler) {
 			if propValue.Field(i).Kind() == reflect.Struct && name == "Features" {
 				parseBpModuleFeatures(fieldValue, handler)
 			} else {
-				parseProperties(ConditionDefault, name, fieldValue, handler)
+				parseProperties(common.ConditionDefault, name, fieldValue, handler)
 			}
 		}
 	}

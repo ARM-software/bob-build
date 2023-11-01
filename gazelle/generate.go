@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -325,7 +326,7 @@ func getValueString(value interface{}) (string, bool) {
 // the location in `build.bp`
 func getFeatureCondition(f string) string {
 
-	if f == ConditionDefault {
+	if f == common.ConditionDefault {
 		return f
 	} else {
 		return fmt.Sprintf(":config_%s", strings.ToLower(f))
