@@ -90,7 +90,7 @@ func (m *Module) addDefaultAttribute(attribute string, a Attribute) {
 	m.defaults[attribute] = a
 }
 
-func (m *Module) addFeatureAttribute(feature string, attribute string, a Attribute) {
+func (m *Module) AddFeatureAttribute(feature string, attribute string, a Attribute) {
 
 	if feature == common.ConditionDefault {
 		m.addDefaultAttribute(attribute, a)
