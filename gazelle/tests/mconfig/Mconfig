@@ -20,6 +20,19 @@ config DEBUG
     bool "Set debug flags"
     default y
 
+
+config STRING_OPTION
+	string
+	default "FEATURE_A" if FEATURE_A && NEW_HW
+	default "FEATURE_B" if FEATURE_B && !NEW_HW
+
+
+config INT_OPTION
+	int
+	default 1 if FEATURE_A && NEW_HW
+	default 2 if FEATURE_B && !NEW_HW
+
+
 menu "A menu"
 	depends on DEBUG
 
