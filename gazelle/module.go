@@ -82,7 +82,7 @@ func (m *Module) GetLabel() label.Label {
 	return m.bazelLabel
 }
 
-func (m Module) setRegistry(r *registry.Registry) {
+func (m *Module) SetRegistry(r *registry.Registry) {
 	m.registry = r
 }
 

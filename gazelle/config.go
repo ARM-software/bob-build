@@ -103,7 +103,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		// Register all `Module`s
 		for _, m := range modules {
 			e.registry.Register(m)
-			m.registry = e.registry
+			m.SetRegistry(e.registry)
 		}
 	}
 }
