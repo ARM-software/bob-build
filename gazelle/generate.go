@@ -11,6 +11,7 @@ import (
 
 	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/ARM-software/bob-build/gazelle/registry"
+	"github.com/ARM-software/bob-build/gazelle/types"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -77,9 +78,9 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 		for _, mod := range modulesToGen {
 			m, _ := e.registry.RetrieveByName(mod.GetName())
 
-			if g, ok := m.(generator); ok {
+			if g, ok := m.(types.Generator); ok {
 
-				rule, err := g.generateRule()
+				rule, err := g.GenerateRule()
 
 				if err != nil {
 					log.Println(err.Error())
