@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	bzl "github.com/bazelbuild/buildtools/build"
@@ -89,7 +90,7 @@ func (m *Module) addDefaultAttribute(attribute string, a Attribute) {
 
 func (m *Module) addFeatureAttribute(feature string, attribute string, a Attribute) {
 
-	if feature == ConditionDefault {
+	if feature == common.ConditionDefault {
 		m.addDefaultAttribute(attribute, a)
 	} else if f, ok := m.features[feature]; ok {
 		f[attribute] = a

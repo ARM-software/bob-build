@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ARM-software/bob-build/gazelle/common"
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	bzl "github.com/bazelbuild/buildtools/build"
 )
@@ -119,7 +120,7 @@ func (s SelectStringListWithGlob) BzlExpr() bzl.Expr {
 	hasDefaultKey := false
 
 	for key := range s {
-		if key == ConditionDefault {
+		if key == common.ConditionDefault {
 			hasDefaultKey = true
 		} else {
 			keys = append(keys, key)
@@ -143,14 +144,14 @@ func (s SelectStringListWithGlob) BzlExpr() bzl.Expr {
 
 	// ConditionDefault in the end of the `select`
 	if hasDefaultKey {
-		v = s[ConditionDefault].BzlExpr()
+		v = s[common.ConditionDefault].BzlExpr()
 	} else {
 		// empty '//conditions:default'
 		v = rule.ExprFromValue([]string{})
 	}
 
 	args = append(args, &bzl.KeyValueExpr{
-		Key:   &bzl.StringExpr{Value: ConditionDefault},
+		Key:   &bzl.StringExpr{Value: common.ConditionDefault},
 		Value: v,
 	})
 
