@@ -177,7 +177,7 @@ func buildListExpressionFromAttribute(m *Module, attr string) bzl.Expr {
 		attribute := m.features[name]
 		data := make(types.SelectStringListWithGlob)
 		if srcs, ok := attribute[attr].([]string); ok {
-			data[getFeatureCondition(name)] = types.MakeStringListWithGlob(resolveLabels(srcs, m))
+			data[common.GetFeatureCondition(name)] = types.MakeStringListWithGlob(resolveLabels(srcs, m))
 			list = append(list, data.BzlExpr())
 		}
 	}
@@ -271,7 +271,7 @@ func (m *Module) buildFilegroup() *rule.Rule {
 		attr := m.features[name]
 		data := make(types.SelectStringListWithGlob)
 		if srcs, ok := attr["Srcs"].([]string); ok {
-			data[getFeatureCondition(name)] = types.MakeStringListWithGlob(srcs)
+			data[common.GetFeatureCondition(name)] = types.MakeStringListWithGlob(srcs)
 			list = append(list, data.BzlExpr())
 		}
 	}
