@@ -118,7 +118,7 @@ func NewModule(moduleName string, moduleType string, relPath string, rootPath st
 	return m
 }
 
-func (m *Module) generateRule() (r *rule.Rule, err error) {
+func (m *Module) GenerateRule() (r *rule.Rule, err error) {
 
 	switch m.moduleType {
 	case ModuleFilegroup:

@@ -185,3 +185,7 @@ func (s SelectStringListWithGlob) BzlExpr() bzl.Expr {
 
 	return sel
 }
+
+type Generator interface {
+	GenerateRule() (*rule.Rule, error)
+}
