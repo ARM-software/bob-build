@@ -6,7 +6,6 @@ load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 go_library(
     name = "plugin",
     srcs = [
-        "bob_parser.go",
         "config.go",
         "fix.go",
         "flags.go",
@@ -23,6 +22,7 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/gazelle",
     visibility = ["//visibility:public"],
     deps = [
+        "//blueprint/parser",
         "//common",
         "//config",
         "//module",
@@ -77,7 +77,6 @@ go_test(
     # TODO: The name should be `plugin_test`
     name = "gazelle_test",
     srcs = [
-        "bob_parser_test.go",
         "config_test.go",
     ],
     # TODO: we need to keep here as it sets the embed to `:gazelle` incorrectly.

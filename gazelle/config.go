@@ -8,6 +8,7 @@ import (
 
 	bob "github.com/ARM-software/bob-build/core"
 
+	bparser "github.com/ARM-software/bob-build/gazelle/blueprint/parser"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -96,8 +97,8 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
-		bparser := NewBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
-		modules := bparser.Parse()
+		bp := bparser.NewBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
+		modules := bp.Parse()
 
 		// Register all `Module`s
 		for _, m := range modules {
