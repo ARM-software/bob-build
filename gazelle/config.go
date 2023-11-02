@@ -10,6 +10,7 @@ import (
 
 	bparser "github.com/ARM-software/bob-build/gazelle/blueprint/parser"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
+	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -85,13 +86,13 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 		fileNames := []string{"Mconfig"}
 
-		mconfigParser := newMconfigParser(c.RepoRoot, rel)
-		configs, err := mconfigParser.parse(&fileNames)
+		mconfigParser := mparser.NewMconfigParser(c.RepoRoot, rel)
+		configs, err := mconfigParser.Parse(&fileNames)
 		if err != nil {
 			log.Fatalf("Mconfig parse failed: %v\n", err)
 		}
 
-		// Register all `configData`s
+		// Register all `mparser.ConfigData`s
 		for _, c := range *configs {
 			e.registry.Register(c)
 		}
@@ -108,7 +109,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	}
 }
 
-func createBobConfigSpoof(c *map[string]*configData) *bob.BobConfig {
+func createBobConfigSpoof(c *map[string]*mparser.ConfigData) *bob.BobConfig {
 
 	config := &bob.BobConfig{}
 

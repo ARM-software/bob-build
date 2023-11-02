@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
+	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/ARM-software/bob-build/gazelle/types"
@@ -111,7 +112,7 @@ func generateConfigs(r *registry.Registry, relPath string) []*rule.Rule {
 		// To properly test generation of multiple configs
 		// at once the order needs to be preserved
 		// Sort all configs by its Position
-		configsToGen := make([]*configData, 0)
+		configsToGen := make([]*mparser.ConfigData, 0)
 
 		regs, ok := r.RetrieveByPath(relPath)
 		if !ok {
@@ -119,7 +120,7 @@ func generateConfigs(r *registry.Registry, relPath string) []*rule.Rule {
 		}
 
 		for _, reg := range regs {
-			if cfg, ok := reg.(*configData); ok && cfg.Ignore != "y" {
+			if cfg, ok := reg.(*mparser.ConfigData); ok && cfg.Ignore != "y" {
 				configsToGen = append(configsToGen, cfg)
 			}
 		}

@@ -1,4 +1,4 @@
-package plugin
+package parser
 
 import (
 	"bufio"
@@ -68,8 +68,8 @@ func init() {
 	}()
 }
 
-// mconfigParser implements a parser for Mconfig files that extracts configs
-type mconfigParser struct {
+// MconfigParser implements a parser for Mconfig files that extracts configs
+type MconfigParser struct {
 	// The value of `language.GenerateArgs.Config.RepoRoot`.
 	repoRoot string
 
@@ -77,7 +77,7 @@ type mconfigParser struct {
 	relPackagePath string
 }
 
-type configData struct {
+type ConfigData struct {
 	Datatype   string      `json:"datatype"`
 	RelPath    string      `json:"relPath"`
 	Type       string      `json:"type"`
@@ -90,33 +90,33 @@ type configData struct {
 	Name       string
 }
 
-var _ registry.Registrable = (*configData)(nil)
+var _ registry.Registrable = (*ConfigData)(nil)
 
-func (c *configData) GetName() string {
+func (c *ConfigData) GetName() string {
 	return c.Name
 }
 
-func (c *configData) GetRelativePath() string {
+func (c *ConfigData) GetRelativePath() string {
 	return c.RelPath
 }
 
-func (c *configData) GetLabel() label.Label {
+func (c *ConfigData) GetLabel() label.Label {
 	return c.BazelLabel
 }
 
-// Constructs a new `mconfigParser`
-func newMconfigParser(repoRoot string, relPackagePath string) *mconfigParser {
-	return &mconfigParser{
+// Constructs a new `MconfigParser`
+func NewMconfigParser(repoRoot string, relPackagePath string) *MconfigParser {
+	return &MconfigParser{
 		repoRoot:       repoRoot,
 		relPackagePath: relPackagePath,
 	}
 }
 
-func (p *mconfigParser) parse(fileNames *[]string) (*map[string]*configData, error) {
+func (p *MconfigParser) Parse(fileNames *[]string) (*map[string]*ConfigData, error) {
 	parserMutex.Lock()
 	defer parserMutex.Unlock()
 
-	var configs map[string]*configData
+	var configs map[string]*ConfigData
 
 	for _, f := range *fileNames {
 
@@ -154,7 +154,7 @@ func (p *mconfigParser) parse(fileNames *[]string) (*map[string]*configData, err
 	return &configs, nil
 }
 
-func resolveConfigLabels(c *map[string]*configData, root string) {
+func resolveConfigLabels(c *map[string]*ConfigData, root string) {
 	for k, v := range *c {
 		relPath := filepath.Clean(v.RelPath)
 
