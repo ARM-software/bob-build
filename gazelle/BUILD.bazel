@@ -6,7 +6,7 @@ load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 go_library(
     name = "plugin",
     srcs = [
-        "config.go",
+        "configure.go",
         "fix.go",
         "flags.go",
         "generate.go",
