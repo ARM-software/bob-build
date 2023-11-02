@@ -15,7 +15,6 @@ go_library(
         "kinds.go",
         "language.go",
         "mconfig_parser.go",
-        "module.go",
         "resolve.go",
     ],
     data = [
@@ -26,6 +25,7 @@ go_library(
     deps = [
         "//common",
         "//config",
+        "//module",
         "//registry",
         "//types",
         "//util",

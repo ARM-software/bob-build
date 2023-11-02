@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
+	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/ARM-software/bob-build/gazelle/types"
 	"github.com/ARM-software/bob-build/internal/utils"
@@ -63,10 +64,10 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 		// at once the order needs to be preserved
 		// Sort modules by its `idx` index
 
-		modulesToGen := make([]*Module, 0)
+		modulesToGen := make([]*mod.Module, 0)
 
 		for _, reg := range regs {
-			if mod, ok := reg.(*Module); ok {
+			if mod, ok := reg.(*mod.Module); ok {
 				modulesToGen = append(modulesToGen, mod)
 			}
 		}
