@@ -7,6 +7,7 @@ import (
 
 	bob "github.com/ARM-software/bob-build/core"
 	"github.com/ARM-software/bob-build/gazelle/common"
+	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/google/blueprint"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +39,7 @@ func (m *testModule) GenerateBuildActions(blueprint.ModuleContext) {
 
 func TestParseBpModule(t *testing.T) {
 
-	features := make(map[string]AttributesMap)
+	features := make(map[string]mod.AttributesMap)
 
 	bobConfig := &bob.BobConfig{}
 
@@ -95,7 +96,7 @@ func TestParseBpModule(t *testing.T) {
 		if f, ok := features[feature]; ok {
 			f[attribute] = v
 		} else {
-			features[feature] = make(AttributesMap)
+			features[feature] = make(mod.AttributesMap)
 			features[feature][attribute] = v
 		}
 	}

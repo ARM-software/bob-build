@@ -13,6 +13,7 @@ import (
 	bob_file "github.com/ARM-software/bob-build/core/file"
 	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/gazelle/common"
+	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/proptools"
@@ -36,7 +37,7 @@ func newBobParser(rootPath string, relPath string, BobIgnoreDir []string, config
 	}
 }
 
-func (p *bobParser) parse() []*Module {
+func (p *bobParser) parse() []*mod.Module {
 	// We only need the Blueprint context to parse the modules, we discard it afterwards.
 	bp := blueprint.NewContext()
 
@@ -55,12 +56,12 @@ func (p *bobParser) parse() []*Module {
 	bp.RegisterBottomUpMutator("default_deps2", bob.DefaultDepsStage2Mutator).Parallel()
 	bp.RegisterBottomUpMutator("default_applier", bob.DefaultApplierMutator).Parallel()
 
-	var modules []*Module
-	var modulesMap map[string]*Module = make(map[string]*Module)
+	var modules []*mod.Module
+	var modulesMap map[string]*mod.Module = make(map[string]*mod.Module)
 	var modulesMutex sync.RWMutex
 
 	bp.RegisterBottomUpMutator("register_bob_modules", func(ctx blueprint.BottomUpMutatorContext) {
-		m := NewModule(
+		m := mod.NewModule(
 			ctx.ModuleName(),
 			ctx.ModuleType(),
 			filepath.Join(p.relPath, ctx.ModuleDir()),
