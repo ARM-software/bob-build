@@ -29,6 +29,7 @@ go_test(
     ],
     embed = [":parser"],
     deps = [
+        "//mconfig/parser",
         "@bazel_gazelle//label:go_default_library",
         "@bob//core",
         "@com_github_google_blueprint//:blueprint",
