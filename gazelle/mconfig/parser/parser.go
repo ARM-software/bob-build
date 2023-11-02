@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	bob "github.com/ARM-software/bob-build/core"
 	"github.com/ARM-software/bob-build/gazelle/registry"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
@@ -167,4 +168,27 @@ func resolveConfigLabels(c *map[string]*ConfigData, root string) {
 
 		(*c)[k] = v
 	}
+}
+
+func CreateBobConfigSpoof(c *map[string]*ConfigData) *bob.BobConfig {
+
+	config := &bob.BobConfig{}
+
+	// prepare feature list
+	config.Properties.FeatureList = make([]string, 0)
+	config.Properties.Features = make(map[string]bool)
+	config.Properties.Properties = make(map[string]interface{})
+
+	config.Properties.Properties["osx"] = bool(false) // shared lib factory requires this.
+
+	for k, v := range *c {
+		if v.Ignore != "y" {
+			config.Properties.FeatureList = append(config.Properties.FeatureList, strings.ToLower(k))
+			// To be safe set everything to false by default.
+			config.Properties.Features[k] = false
+			config.Properties.Properties[k] = v
+		}
+	}
+
+	return config
 }

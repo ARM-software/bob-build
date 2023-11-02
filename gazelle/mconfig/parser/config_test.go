@@ -1,34 +1,33 @@
-package plugin
+package parser
 
 import (
 	"reflect"
 	"testing"
 
-	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBobConfigSpoof(t *testing.T) {
 
-	var configs map[string]*mparser.ConfigData = make(map[string]*mparser.ConfigData)
+	var configs map[string]*ConfigData = make(map[string]*ConfigData)
 
-	configs["feature_x"] = &mparser.ConfigData{Type: "config", Datatype: "bool"}
-	configs["feature_y"] = &mparser.ConfigData{Type: "config", Datatype: "string"}
+	configs["feature_x"] = &ConfigData{Type: "config", Datatype: "bool"}
+	configs["feature_y"] = &ConfigData{Type: "config", Datatype: "string"}
 
-	bobConfig := createBobConfigSpoof(&configs)
+	bobConfig := CreateBobConfigSpoof(&configs)
 
 	assert.Equal(t, len(bobConfig.Properties.FeatureList), 2, "Wrong features inside config")
 	assert.Contains(t, bobConfig.Properties.FeatureList, "feature_x")
 	assert.Contains(t, bobConfig.Properties.FeatureList, "feature_y")
 
-	if v, ok := bobConfig.Properties.Properties["feature_x"].(*mparser.ConfigData); ok {
+	if v, ok := bobConfig.Properties.Properties["feature_x"].(*ConfigData); ok {
 		assert.Equal(t, "bool", v.Datatype)
 		assert.Equal(t, "config", v.Type)
 	} else {
 		t.Errorf("configData.Datatype of 'feature_x' has wrong type: %s", reflect.TypeOf(v))
 	}
 
-	if v, ok := bobConfig.Properties.Properties["feature_y"].(*mparser.ConfigData); ok {
+	if v, ok := bobConfig.Properties.Properties["feature_y"].(*ConfigData); ok {
 		assert.Equal(t, "string", v.Datatype)
 		assert.Equal(t, "config", v.Type)
 	} else {

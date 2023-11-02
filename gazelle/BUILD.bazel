@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
 # gazelle:exclude tests
@@ -68,21 +68,4 @@ gazelle(
         "-build_file_proto_mode=disable_global",
     ],
     command = "update-repos",
-)
-
-go_test(
-    # TODO: The name should be `plugin_test`
-    name = "gazelle_test",
-    srcs = [
-        "config_test.go",
-    ],
-    # TODO: we need to keep here as it sets the embed to `:gazelle` incorrectly.
-    embed = [":plugin"],  # keep
-    deps = [
-        "//mconfig/parser",
-        "@bazel_gazelle//label:go_default_library",
-        "@bob//core",
-        "@com_github_google_blueprint//:blueprint",
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ],
 )

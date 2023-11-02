@@ -4,9 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
-
-	bob "github.com/ARM-software/bob-build/core"
 
 	bparser "github.com/ARM-software/bob-build/gazelle/blueprint/parser"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
@@ -97,7 +94,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			e.registry.Register(c)
 		}
 
-		bobConfig := createBobConfigSpoof(configs)
+		bobConfig := mparser.CreateBobConfigSpoof(configs)
 		bp := bparser.NewBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
 		modules := bp.Parse()
 
@@ -107,27 +104,4 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			m.SetRegistry(e.registry)
 		}
 	}
-}
-
-func createBobConfigSpoof(c *map[string]*mparser.ConfigData) *bob.BobConfig {
-
-	config := &bob.BobConfig{}
-
-	// prepare feature list
-	config.Properties.FeatureList = make([]string, 0)
-	config.Properties.Features = make(map[string]bool)
-	config.Properties.Properties = make(map[string]interface{})
-
-	config.Properties.Properties["osx"] = bool(false) // shared lib factory requires this.
-
-	for k, v := range *c {
-		if v.Ignore != "y" {
-			config.Properties.FeatureList = append(config.Properties.FeatureList, strings.ToLower(k))
-			// To be safe set everything to false by default.
-			config.Properties.Features[k] = false
-			config.Properties.Properties[k] = v
-		}
-	}
-
-	return config
 }
