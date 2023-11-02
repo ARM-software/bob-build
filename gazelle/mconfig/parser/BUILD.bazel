@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "parser",
@@ -24,5 +24,16 @@ go_library(
         "@com_github_google_blueprint//parser",
         "@com_github_google_blueprint//proptools",
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+    ],
+)
+
+go_test(
+    name = "parser_test",
+    srcs = [
+        "config_test.go",
+    ],
+    embed = [":parser"],
+    deps = [
+        "@com_github_stretchr_testify//assert:go_default_library",
     ],
 )
