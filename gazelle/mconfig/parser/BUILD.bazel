@@ -5,6 +5,9 @@ go_library(
     srcs = [
         "parser.go",
     ],
+    data = [
+        "@bob//config_system:get_configs_gazelle",
+    ],
     importpath = "github.com/ARM-software/bob-build/gazelle/mconfig/parser",
     visibility = ["//visibility:public"],
     deps = [

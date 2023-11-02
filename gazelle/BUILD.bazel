@@ -15,9 +15,6 @@ go_library(
         "language.go",
         "resolve.go",
     ],
-    data = [
-        "@bob//config_system:get_configs_gazelle",
-    ],
     importpath = "github.com/ARM-software/bob-build/gazelle",
     visibility = ["//visibility:public"],
     deps = [
