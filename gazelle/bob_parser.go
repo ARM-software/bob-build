@@ -21,15 +21,15 @@ import (
 
 type valueHandler func(feature string, attribute string, v interface{})
 
-type bobParser struct {
+type BobParser struct {
 	rootPath     string
 	relPath      string // Relative path from workspace to bob_root
 	BobIgnoreDir []string
 	config       *bob.BobConfig
 }
 
-func newBobParser(rootPath string, relPath string, BobIgnoreDir []string, config *bob.BobConfig) *bobParser {
-	return &bobParser{
+func NewBobParser(rootPath string, relPath string, BobIgnoreDir []string, config *bob.BobConfig) *BobParser {
+	return &BobParser{
 		rootPath:     rootPath,
 		relPath:      relPath,
 		BobIgnoreDir: BobIgnoreDir,
@@ -37,7 +37,7 @@ func newBobParser(rootPath string, relPath string, BobIgnoreDir []string, config
 	}
 }
 
-func (p *bobParser) parse() []*mod.Module {
+func (p *BobParser) Parse() []*mod.Module {
 	// We only need the Blueprint context to parse the modules, we discard it afterwards.
 	bp := blueprint.NewContext()
 
@@ -77,7 +77,7 @@ func (p *bobParser) parse() []*mod.Module {
 		modules = append(modules, m)
 	}).Parallel()
 
-	bpToParse, err := findBpFiles(p.rootPath, p.relPath, p.BobIgnoreDir)
+	bpToParse, err := FindBpFiles(p.rootPath, p.relPath, p.BobIgnoreDir)
 	if err != nil {
 		log.Fatalf("Creating bplist failed: %v\n", err)
 	}
@@ -111,7 +111,7 @@ func (p *bobParser) parse() []*mod.Module {
 	return modules
 }
 
-func findBpFiles(root string, rel string, ignoreDirs []string) ([]string, error) {
+func FindBpFiles(root string, rel string, ignoreDirs []string) ([]string, error) {
 	var files []string
 
 	err := filepath.WalkDir(filepath.Join(root, rel), func(path string, d fs.DirEntry, err error) error {
