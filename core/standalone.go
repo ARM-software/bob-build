@@ -6,7 +6,7 @@
 package core
 
 import (
-	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/google/blueprint"
@@ -64,7 +64,9 @@ func GetLogger() *warnings.WarningLogger {
 
 func SetupLogger(env *config.EnvironmentVariables) {
 	if env == nil {
-		logger = warnings.New(io.Discard, "")
+		// ioutil.Discard has been deprecated since 1.16, but Bob supports as old as 1.11, move to io.Discard
+		// once ready
+		logger = warnings.New(ioutil.Discard, "")
 	} else {
 		f, err := os.OpenFile(env.LogWarningsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 		if err != nil {
