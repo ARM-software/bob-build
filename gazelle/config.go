@@ -96,9 +96,8 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 
 		bobConfig := createBobConfigSpoof(configs)
-		bobParser := newBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
-
-		modules := bobParser.parse()
+		bparser := NewBobParser(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
+		modules := bparser.Parse()
 
 		// Register all `Module`s
 		for _, m := range modules {
