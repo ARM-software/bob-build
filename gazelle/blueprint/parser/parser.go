@@ -1,4 +1,4 @@
-package plugin
+package parser
 
 import (
 	"io/fs"
