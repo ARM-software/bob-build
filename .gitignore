@@ -47,3 +47,4 @@ build-*
 
 # Bazel
 bazel-*
+user.bazelrc

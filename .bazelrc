@@ -11,3 +11,5 @@ common:ci --spawn_strategy=local
 build:ci --verbose_failures
 test:ci --test_output=errors
 test:ci --test_verbose_timeout_warnings
+
+try-import %workspace%/user.bazelrc
