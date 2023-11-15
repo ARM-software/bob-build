@@ -5,6 +5,7 @@ go_library(
     srcs = ["util.go"],
     importpath = "github.com/ARM-software/bob-build/gazelle/util",
     visibility = ["//visibility:public"],
+    deps = ["@bazel_gazelle//language:go_default_library"],
 )
 
 go_test(
