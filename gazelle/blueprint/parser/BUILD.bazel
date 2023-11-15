@@ -6,16 +6,8 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/gazelle/blueprint/parser",
     visibility = ["//visibility:public"],
     deps = [
-        "//common",
         "//mapper",
-        "//module",
-        "//util",
-        "@bob//core",
-        "@bob//core/file",
-        "@bob//core/toolchain",
-        "@com_github_google_blueprint//:blueprint",
         "@com_github_google_blueprint//parser",
-        "@com_github_google_blueprint//proptools",
     ],
 )
 
@@ -24,11 +16,7 @@ go_test(
     srcs = ["parser_test.go"],
     embed = [":parser"],
     deps = [
-        "//common",
-        "//mconfig/parser",
-        "//module",
         "@bob//core",
         "@com_github_google_blueprint//:blueprint",
-        "@com_github_stretchr_testify//assert:go_default_library",
     ],
 )
