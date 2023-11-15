@@ -11,9 +11,6 @@ go_library(
     deps = [
         "//logic",
         "//mapper",
-        "//registry",
-        "@bazel_gazelle//label:go_default_library",
-        "@bob//core",
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",
     ],
 )
@@ -22,7 +19,4 @@ go_test(
     name = "parser_test",
     srcs = ["config_test.go"],
     embed = [":parser"],
-    deps = [
-        "@com_github_stretchr_testify//assert:go_default_library",
-    ],
 )

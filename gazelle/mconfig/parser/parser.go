@@ -9,16 +9,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
-	bob "github.com/ARM-software/bob-build/core"
 	"github.com/ARM-software/bob-build/gazelle/logic"
 	"github.com/ARM-software/bob-build/gazelle/mapper"
-	"github.com/ARM-software/bob-build/gazelle/registry"
-	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 )
 
@@ -73,12 +68,6 @@ func init() {
 
 // Parser implements a parser for Mconfig files that extracts configs
 type Parser struct {
-	// The value of `language.GenerateArgs.Config.RepoRoot`.
-	repoRoot string
-
-	// The value of `language.GenerateArgs.Rel`.
-	relPackagePath string
-
 	m *mapper.Mapper
 }
 
@@ -101,22 +90,7 @@ type ConfigData struct {
 	Ignore              string               `json:"bob_ignore,omitempty"`
 	Depends             interface{}          `json:"depends"`
 	Position            uint32               `json:"position"`
-	BazelLabel          label.Label          //TODO: remove me
 	Name                string
-}
-
-var _ registry.Registrable = (*ConfigData)(nil)
-
-func (c *ConfigData) GetName() string {
-	return c.Name
-}
-
-func (c *ConfigData) GetRelativePath() string {
-	return c.RelPath
-}
-
-func (c *ConfigData) GetLabel() label.Label {
-	return c.BazelLabel
 }
 
 func New(m *mapper.Mapper) *Parser {
@@ -179,92 +153,4 @@ func (p *Parser) Parse(
 	}
 
 	return &configs, nil
-}
-
-// Constructs a new `Parser`
-func NewLegacy(repoRoot string, relPackagePath string) *Parser {
-	return &Parser{
-		repoRoot:       repoRoot,
-		relPackagePath: relPackagePath,
-	}
-}
-
-func (p *Parser) ParseLegacy(fileNames *[]string) (*map[string]*ConfigData, error) {
-	parserMutex.Lock()
-	defer parserMutex.Unlock()
-
-	var configs map[string]*ConfigData
-
-	for _, f := range *fileNames {
-
-		req := map[string]interface{}{
-			"root_path":        p.repoRoot,
-			"rel_package_path": p.relPackagePath,
-			"file_name":        f,
-			"ignore_source":    false,
-		}
-
-		encoder := json.NewEncoder(parserStdin)
-		if err := encoder.Encode(&req); err != nil {
-			return nil, fmt.Errorf("failed to encode: %w", err)
-		}
-
-		reader := bufio.NewReader(parserStdout)
-		data, err := reader.ReadBytes(0)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read: %w", err)
-		}
-
-		if len(data) > 0 {
-			// remove delimiter
-			data = data[:len(data)-1]
-
-			err = json.Unmarshal(data, &configs)
-			if err != nil {
-				return nil, fmt.Errorf("failed to unmarshal: %w", err)
-			}
-		}
-	}
-
-	resolveConfigLabels(&configs, p.repoRoot)
-
-	return &configs, nil
-}
-
-func resolveConfigLabels(c *map[string]*ConfigData, root string) {
-	for k, v := range *c {
-		relPath := filepath.Clean(v.RelPath)
-
-		if relPath == "." {
-			relPath = ""
-		}
-
-		v.Name = strings.ToLower(k)
-		v.BazelLabel = label.Label{Pkg: relPath, Name: v.Name}
-
-		(*c)[k] = v
-	}
-}
-
-func CreateBobConfigSpoof(c *map[string]*ConfigData) *bob.BobConfig {
-
-	config := &bob.BobConfig{}
-
-	// prepare feature list
-	config.Properties.FeatureList = make([]string, 0)
-	config.Properties.Features = make(map[string]bool)
-	config.Properties.Properties = make(map[string]interface{})
-
-	config.Properties.Properties["osx"] = bool(false) // shared lib factory requires this.
-
-	for k, v := range *c {
-		if v.Ignore != "y" {
-			config.Properties.FeatureList = append(config.Properties.FeatureList, strings.ToLower(k))
-			// To be safe set everything to false by default.
-			config.Properties.Features[k] = false
-			config.Properties.Properties[k] = v
-		}
-	}
-
-	return config
 }
