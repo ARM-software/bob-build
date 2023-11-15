@@ -5,4 +5,12 @@ go_library(
     srcs = ["config.go"],
     importpath = "github.com/ARM-software/bob-build/gazelle/config",
     visibility = ["//visibility:public"],
+    deps = [
+        "//blueprint/builder",
+        "//blueprint/parser",
+        "//logic/builder",
+        "//mapper",
+        "//mconfig/builder",
+        "//mconfig/parser",
+    ],
 )
