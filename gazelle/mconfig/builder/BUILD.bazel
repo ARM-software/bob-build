@@ -16,7 +16,6 @@ go_library(
         "@bazel_gazelle//label:go_default_library",
         "@bazel_gazelle//language:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
-        "@bob//internal/utils",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
     ],
 )

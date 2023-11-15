@@ -7,10 +7,6 @@ load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 # gazelle:build_file_name BUILD.bazel
 # gazelle:resolve go github.com/stretchr/testify/assert @com_github_stretchr_testify//assert:go_default_library
 # gazelle:resolve go github.com/bazelbuild/buildtools/build @com_github_bazelbuild_buildtools//build:go_default_library
-# gazelle:resolve go github.com/ARM-software/bob-build/core @bob//core
-# gazelle:resolve go github.com/ARM-software/bob-build/core/file @bob//core/file
-# gazelle:resolve go github.com/ARM-software/bob-build/core/toolchain @bob//core/toolchain
-# gazelle:resolve go github.com/ARM-software/bob-build/internal/utils @bob//internal/utils
 
 go_library(
     name = "plugin",
@@ -40,11 +36,6 @@ go_library(
         "@bazel_gazelle//repo:go_default_library",
         "@bazel_gazelle//resolve:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
-        "@bob//core",
-        "@bob//core/config",
-        "@bob//core/file",
-        "@bob//core/toolchain",
-        "@bob//internal/utils",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
         "@com_github_google_blueprint//:blueprint",
         "@com_github_google_blueprint//parser",

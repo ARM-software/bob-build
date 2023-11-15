@@ -15,8 +15,4 @@ go_test(
     name = "parser_test",
     srcs = ["parser_test.go"],
     embed = [":parser"],
-    deps = [
-        "@bob//core",
-        "@com_github_google_blueprint//:blueprint",
-    ],
 )
