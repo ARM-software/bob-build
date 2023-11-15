@@ -28,3 +28,13 @@ func MergeResults(args ...language.GenerateResult) (merged language.GenerateResu
 	}
 	return
 }
+
+// In go1.21 use the "slices" stdlib lib for this instead.
+func Contains[T comparable](elems []T, v T) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
