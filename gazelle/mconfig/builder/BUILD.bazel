@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "builder",
+    srcs = ["builder.go"],
+    importpath = "github.com/ARM-software/bob-build/gazelle/mconfig/builder",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//common",
+        "//kinds",
+        "//logic",
+        "//logic/builder",
+        "//mapper",
+        "//mconfig/parser",
+        "//util",
+        "@bazel_gazelle//label:go_default_library",
+        "@bazel_gazelle//language:go_default_library",
+        "@bazel_gazelle//rule:go_default_library",
+        "@bob//internal/utils",
+        "@com_github_bazelbuild_buildtools//build:go_default_library",
+    ],
+)
