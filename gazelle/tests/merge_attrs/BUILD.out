@@ -4,55 +4,67 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "int_flag", "strin
 
 bool_flag(
     name = "feature_a",
-    build_setting_default = False,
+    build_setting_default = True,
 )
 
 string_flag(
     name = "option_b",
-    build_setting_default = "--secret",
+    build_setting_default = "--no-secret",
 )
 
 int_flag(
     name = "max_counter",
-    build_setting_default = 44,
+    build_setting_default = 1,
 )
 
 cc_library(
     name = "lib_merge_defines",
-    srcs = [
-        "libfoo.cpp",
-    ],
-    hdrs = [
-        "libfoo.h",
-    ] + select({
-        ":config_feature_a": [
-            "src/libs/libb.h",
-        ],
+    srcs = ["libfoo.cpp"],
+    hdrs = ["libfoo.h"] + select({
         "//conditions:default": [],
+        "//:[FEATURE_A]": ["src/libs/libb.h"],
     }),
     defines = [
-        "PRESERVE_DEF",
         "NEW_FORWARDED_DEFINE",
+        "PRESERVE_DEF",
     ],
-    linkstatic = True,
-    local_defines = [
-        "NEW_LOCAL_DEFINE",
-    ],
+    local_defines = ["NEW_LOCAL_DEFINE"],
 )
 
 filegroup(
     name = "merge_filegroup",
     srcs = glob(["srcs/*.c"]) + select({
-        ":config_feature_a": [
-            "internal/file2.c",
-        ],
         "//conditions:default": [],
+        "//:[FEATURE_A]": ["internal/file2.c"],
     }),
 )
 
 config_setting(
-    name = "config_feature_a",
-    flag_values = {
-        ":feature_a": "true",
-    },
+    name = "[__FEATURE_A]",
+    flag_values = {"//:FEATURE_A": True},
+)
+
+config_setting(
+    name = "![FEATURE_A]",
+    flag_values = {"//:FEATURE_A": False},
+)
+
+alias(
+    name = "[FEATURE_A]",
+    actual = ":[__FEATURE_A]",
+)
+
+bool_flag(
+    name = "FEATURE_A",
+    build_setting_default = False,
+)
+
+string_flag(
+    name = "OPTION_B",
+    build_setting_default = "--secret",
+)
+
+int_flag(
+    name = "MAX_COUNTER",
+    build_setting_default = 44,
 )

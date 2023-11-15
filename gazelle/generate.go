@@ -3,18 +3,16 @@ package plugin
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
-	"github.com/ARM-software/bob-build/gazelle/kinds"
+	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
 	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
-	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/registry"
-	"github.com/ARM-software/bob-build/gazelle/types"
+	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -58,51 +56,34 @@ var (
 // log.Print.
 func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	result := language.GenerateResult{}
-	rel := filepath.Clean(args.Rel)
-	rules := generateConfigs(e.registry, rel)
 
-	if regs, ok := e.registry.RetrieveByPath(rel); ok {
-		// To properly test generation of multiple modules
-		// at once the order needs to be preserved
-		// Sort modules by its `idx` index
+	cfgs := args.Config.Exts[BobExtensionName].(pluginConfig.ConfigMap)
+	pc := cfgs[args.Rel]
 
-		modulesToGen := make([]*mod.Module, 0)
+	if pc.IsIgnored {
+		return result
+	}
 
-		for _, reg := range regs {
-			if mod, ok := reg.(*mod.Module); ok {
-				modulesToGen = append(modulesToGen, mod)
-			}
-		}
-
-		sort.Slice(modulesToGen, func(i, j int) bool {
-			return (*modulesToGen[i]).GetIndex() < (*modulesToGen[j]).GetIndex()
-		})
-
-		for _, mod := range modulesToGen {
-			m, _ := e.registry.RetrieveByName(mod.GetName())
-
-			if g, ok := m.(types.Generator); ok {
-
-				rule, err := g.GenerateRule()
-
-				if err != nil {
-					log.Println(err.Error())
-				} else {
-					rules = append(rules, rule)
-				}
+	for _, file := range args.RegularFiles {
+		if util.Contains(pc.Mconfig.Filenames, file) {
+			if ast, ok := pc.Files[file]; ok {
+				mr := pc.Mconfig.Builder.Build(args, ast)
+				result = util.MergeResults(result, mr)
 			}
 		}
 	}
 
-	for _, r := range rules {
-		if r.IsEmpty(kinds.Kinds[r.Kind()]) {
-			result.Empty = append(result.Empty, r)
-		} else {
-			result.Gen = append(result.Gen, r)
-			result.Imports = append(result.Imports, r.PrivateAttr(""))
+	for _, file := range args.RegularFiles {
+		if util.Contains(pc.Blueprint.Filenames, file) {
+			if ast, ok := pc.Files[file]; ok {
+				br := pc.Blueprint.Builder.Build(args, ast)
+				result = util.MergeResults(result, br)
+			}
 		}
 	}
 
+	// Check if there are any rules to be generated from the logical expression module.
+	result = util.MergeResults(result, pc.Logic.Builder.Build(args))
 	return result
 }
 

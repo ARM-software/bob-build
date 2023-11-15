@@ -3,109 +3,177 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # gazelle:bob_root
 
-bool_flag(
-    name = "feature_a",
-    build_setting_default = False,
+config_setting(
+    name = "[__FEATURE_A]",
+    flag_values = {"//:FEATURE_A": True},
 )
 
 config_setting(
-    name = "config_feature_a",
-    flag_values = {
-        ":feature_a": "true",
-    },
+    name = "![FEATURE_A]",
+    flag_values = {"//:FEATURE_A": False},
+)
+
+alias(
+    name = "[FEATURE_A]",
+    actual = ":[__FEATURE_A]",
+)
+
+config_setting(
+    name = "[__FEATURE_B]",
+    flag_values = {"//:FEATURE_B": True},
+)
+
+config_setting(
+    name = "![FEATURE_B]",
+    flag_values = {"//:FEATURE_B": False},
+)
+
+alias(
+    name = "[FEATURE_B]",
+    actual = ":[__FEATURE_B]",
+)
+
+config_setting(
+    name = "[__NEW_HW]",
+    flag_values = {"//:NEW_HW": True},
+)
+
+config_setting(
+    name = "![NEW_HW]",
+    flag_values = {"//:NEW_HW": False},
+)
+
+alias(
+    name = "[NEW_HW]",
+    actual = "//:([__NEW_HW]*[FEATURE_B])",
+)
+
+config_setting(
+    name = "[__DEBUG]",
+    flag_values = {"//:DEBUG": True},
+)
+
+config_setting(
+    name = "![DEBUG]",
+    flag_values = {"//:DEBUG": False},
+)
+
+alias(
+    name = "[DEBUG]",
+    actual = ":[__DEBUG]",
+)
+
+config_setting(
+    name = "[__AN_OPTION]",
+    flag_values = {"//:AN_OPTION": True},
+)
+
+config_setting(
+    name = "![AN_OPTION]",
+    flag_values = {"//:AN_OPTION": False},
+)
+
+alias(
+    name = "[AN_OPTION]",
+    actual = "//:([__AN_OPTION]*[DEBUG])",
+)
+
+config_setting(
+    name = "[__FOO_MENU]",
+    flag_values = {"//:FOO_MENU": True},
+)
+
+config_setting(
+    name = "![FOO_MENU]",
+    flag_values = {"//:FOO_MENU": False},
+)
+
+alias(
+    name = "[FOO_MENU]",
+    actual = ":[__FOO_MENU]",
 )
 
 bool_flag(
-    name = "feature_b",
+    name = "FEATURE_A",
+    build_setting_default = False,
+)
+
+bool_flag(
+    name = "FEATURE_B",
     build_setting_default = True,
 )
 
-config_setting(
-    name = "config_feature_b",
-    flag_values = {
-        ":feature_b": "true",
-    },
-)
-
-# depends on: //:feature_b
 bool_flag(
-    name = "new_hw",
+    name = "NEW_HW",
     build_setting_default = False,
 )
 
-config_setting(
-    name = "interim_config_new_hw",
-    flag_values = {
-        ":new_hw": "true",
-    },
-)
-
-selects.config_setting_group(
-    name = "config_new_hw",
-    match_all = [
-        ":interim_config_new_hw",
-        "//:config_feature_b",
-    ],
-    visibility = [":__subpackages__"],
-)
-
 string_flag(
-    name = "option_b",
+    name = "OPTION_B",
     build_setting_default = "--secret",
 )
 
 bool_flag(
-    name = "debug",
+    name = "DEBUG",
     build_setting_default = True,
-)
-
-config_setting(
-    name = "config_debug",
-    flag_values = {
-        ":debug": "true",
-    },
 )
 
 string_flag(
-    name = "string_option",
-    build_setting_default = "",
+    name = "STRING_OPTION",
+    build_setting_default = select({
+        "//:([FEATURE_A]*[NEW_HW])": "FEATURE_A",
+        "//:([FEATURE_B]*![NEW_HW])": "FEATURE_B",
+        "//conditions:default": "",
+    }),
 )
 
 int_flag(
-    name = "int_option",
-    build_setting_default = 0,
+    name = "INT_OPTION",
+    build_setting_default = select({
+        "//:([FEATURE_A]*[NEW_HW])": 1,
+        "//:([FEATURE_B]*![NEW_HW])": 2,
+        "//conditions:default": 0,
+    }),
 )
 
-# depends on: //:debug
 bool_flag(
-    name = "an_option",
+    name = "AN_OPTION",
     build_setting_default = True,
 )
 
-config_setting(
-    name = "interim_config_an_option",
-    flag_values = {
-        ":an_option": "true",
-    },
-)
-
-selects.config_setting_group(
-    name = "config_an_option",
-    match_all = [
-        ":interim_config_an_option",
-        "//:config_debug",
-    ],
-    visibility = [":__subpackages__"],
-)
-
 bool_flag(
-    name = "foo_menu",
+    name = "FOO_MENU",
     build_setting_default = False,
 )
 
-config_setting(
-    name = "config_foo_menu",
-    flag_values = {
-        ":foo_menu": "true",
-    },
+selects.config_setting_group(
+    name = "([__NEW_HW]*[FEATURE_B])",
+    match_all = [
+        "//:[__NEW_HW]",
+        "//:[FEATURE_B]",
+    ],
+)
+
+selects.config_setting_group(
+    name = "([FEATURE_A]*[NEW_HW])",
+    match_all = [
+        "//:[FEATURE_A]",
+        "//:[NEW_HW]",
+    ],
+)
+
+selects.config_setting_group(
+    name = "([FEATURE_B]*![NEW_HW])",
+    match_all = [
+        "//:[FEATURE_B]",
+        "//:![NEW_HW]",
+    ],
+)
+
+selects.config_setting_group(
+    name = "([__AN_OPTION]*[DEBUG])",
+    match_all = [
+        "//:[__AN_OPTION]",
+        "//:[DEBUG]",
+    ],
 )

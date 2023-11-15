@@ -2,59 +2,79 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 # gazelle:bob_root
 
+config_setting(
+    name = "[__FEATURE_A]",
+    flag_values = {"//:FEATURE_A": True},
+)
+
+config_setting(
+    name = "![FEATURE_A]",
+    flag_values = {"//:FEATURE_A": False},
+)
+
+alias(
+    name = "[FEATURE_A]",
+    actual = ":[__FEATURE_A]",
+)
+
+config_setting(
+    name = "[__FEATURE_B]",
+    flag_values = {"//:FEATURE_B": True},
+)
+
+config_setting(
+    name = "![FEATURE_B]",
+    flag_values = {"//:FEATURE_B": False},
+)
+
+alias(
+    name = "[FEATURE_B]",
+    actual = ":[__FEATURE_B]",
+)
+
+config_setting(
+    name = "[__DEBUG]",
+    flag_values = {"//:DEBUG": True},
+)
+
+config_setting(
+    name = "![DEBUG]",
+    flag_values = {"//:DEBUG": False},
+)
+
+alias(
+    name = "[DEBUG]",
+    actual = ":[__DEBUG]",
+)
+
 bool_flag(
-    name = "feature_a",
+    name = "FEATURE_A",
     build_setting_default = False,
 )
 
-config_setting(
-    name = "config_feature_a",
-    flag_values = {
-        ":feature_a": "true",
-    },
-)
-
 bool_flag(
-    name = "feature_b",
+    name = "FEATURE_B",
     build_setting_default = True,
 )
 
-config_setting(
-    name = "config_feature_b",
-    flag_values = {
-        ":feature_b": "true",
-    },
-)
-
 string_flag(
-    name = "option_b",
+    name = "OPTION_B",
     build_setting_default = "--secret",
 )
 
 bool_flag(
-    name = "debug",
+    name = "DEBUG",
     build_setting_default = True,
-)
-
-config_setting(
-    name = "config_debug",
-    flag_values = {
-        ":debug": "true",
-    },
 )
 
 filegroup(
     name = "greet_srcs",
     srcs = glob(["srcs/*.c"]) + select({
-        ":config_feature_a": [
-            "internal/file1.c",
-        ],
         "//conditions:default": [],
+        "//:[FEATURE_A]": ["internal/file1.c"],
     }) + select({
-        ":config_feature_b": [
-            "internal/file2.c",
-        ],
         "//conditions:default": [],
+        "//:[FEATURE_B]": ["internal/file2.c"],
     }),
 )
 
@@ -64,6 +84,6 @@ filegroup(
         ["lib/**/*.c"],
         allow_empty = False,
         exclude = ["lib/**/exclude_*.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )

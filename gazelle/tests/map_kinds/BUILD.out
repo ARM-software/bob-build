@@ -4,26 +4,42 @@ load("//tools/bob:def.bzl", "my_config_setting")
 # gazelle:bob_root
 # gazelle:map_kind config_setting my_config_setting //tools/bob:def.bzl
 
+my_config_setting(
+    name = "[__FEATURE_A]",
+    flag_values = {"//:FEATURE_A": True},
+)
+
+my_config_setting(
+    name = "![FEATURE_A]",
+    flag_values = {"//:FEATURE_A": False},
+)
+
+alias(
+    name = "[FEATURE_A]",
+    actual = ":[__FEATURE_A]",
+)
+
+my_config_setting(
+    name = "[__FEATURE_B]",
+    flag_values = {"//:FEATURE_B": True},
+)
+
+my_config_setting(
+    name = "![FEATURE_B]",
+    flag_values = {"//:FEATURE_B": False},
+)
+
+alias(
+    name = "[FEATURE_B]",
+    actual = ":[__FEATURE_B]",
+)
+
 bool_flag(
-    name = "feature_a",
+    name = "FEATURE_A",
     build_setting_default = False,
 )
 
-my_config_setting(
-    name = "config_feature_a",
-    flag_values = {
-        ":feature_a": "true",
-    },
-)
-
 bool_flag(
-    name = "feature_b",
+    name = "FEATURE_B",
     build_setting_default = True,
-)
-
-my_config_setting(
-    name = "config_feature_b",
-    flag_values = {
-        ":feature_b": "true",
-    },
 )

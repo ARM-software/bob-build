@@ -1,10 +1,18 @@
 # gazelle:bob_root
 
+cc_binary(
+    name = "bob_binary",
+    srcs = ["src.cpp"],
+)
+
+cc_library(
+    name = "libbob_shared_library",
+    srcs = ["lib.c"],
+)
+
 cc_library(
     name = "libbob_static_library",
-    srcs = [
-        "lib.c",
-    ],
+    srcs = ["lib.c"],
 )
 
 filegroup(
@@ -13,7 +21,7 @@ filegroup(
         ["lib/**/*.c"],
         allow_empty = False,
         exclude = ["lib/**/exclude_*.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -22,10 +30,17 @@ filegroup(
     srcs = glob(["*.c"]),
 )
 
+genrule(
+    name = "bob_genrule",
+    srcs = ["in.c"],
+)
+
+cc_test(
+    name = "bob_test",
+    srcs = ["main.cpp"],
+)
+
 cc_library(
     name = "libbob_library",
-    srcs = [
-        "src.c",
-    ],
-    linkstatic = True,
+    srcs = ["src.c"],
 )
