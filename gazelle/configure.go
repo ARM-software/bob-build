@@ -57,8 +57,6 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	if f != nil {
 		for _, d := range f.Directives {
 			switch d.Key {
-			case BobRootDirective:
-				pc.BobWorkspaceRootRelPath = rel
 			case BobIgnoreDirDirective:
 				pc.BobIgnoreDir = append(pc.BobIgnoreDir, d.Value)
 			}

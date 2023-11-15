@@ -28,27 +28,22 @@ type LogicConfig struct {
 // Config stores the plugin configuration, it is created for each directory in which the plugin runs.
 // The structure is designed to inherit parent configuration to propagate settings on a tree level.
 type Config struct {
-	parent                  *Config
-	RepositoryRootPath      string   // Absolute path to the root of the workspace.
-	BobWorkspaceRootRelPath string   // Relative module path to Bob workspace root.
-	BobIgnoreDir            []string // Relative path to ignore list from workspace root
-
-	IsIgnored bool
-	Mapper    *mapper.Mapper
-	Blueprint BlueprintConfig
-	Mconfig   MconfigConfig
-	Logic     LogicConfig            // Configuration for generating logical expressions.
-	Files     map[string]interface{} // Parsed file AST
+	parent       *Config
+	BobIgnoreDir []string // Relative path to ignore list from workspace root
+	IsIgnored    bool
+	Mapper       *mapper.Mapper
+	Blueprint    BlueprintConfig
+	Mconfig      MconfigConfig
+	Logic        LogicConfig            // Configuration for generating logical expressions.
+	Files        map[string]interface{} // Parsed file AST
 
 }
 
 func (c *Config) NewChild() *Config {
 	return &Config{
-		parent:                  c,
-		RepositoryRootPath:      c.RepositoryRootPath,
-		BobWorkspaceRootRelPath: c.BobWorkspaceRootRelPath,
-		BobIgnoreDir:            c.BobIgnoreDir,
-		IsIgnored:               c.IsIgnored,
+		parent:       c,
+		BobIgnoreDir: c.BobIgnoreDir,
+		IsIgnored:    c.IsIgnored,
 
 		Blueprint: BlueprintConfig{
 			// Pass parent scope for blueprint parsing
@@ -69,7 +64,6 @@ func NewRootConfig(repositoryRootPath string) *Config {
 	m := mapper.NewMapper()
 	lb := lb.New(m)
 	return &Config{
-		RepositoryRootPath: repositoryRootPath,
 		Mconfig: MconfigConfig{
 			Filenames: []string{"Mconfig"}, //Default filenames to parse
 			Builder:   mb.NewBuilder(m, lb),
