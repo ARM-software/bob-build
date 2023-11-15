@@ -13,5 +13,6 @@ go_library(
 go_test(
     name = "registry_test",
     srcs = ["registry_test.go"],
-    embed = ["registry"],
+    embed = [":registry"],
+    deps = ["@bazel_gazelle//label:go_default_library"],
 )

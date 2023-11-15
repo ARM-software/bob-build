@@ -1,7 +1,16 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
+# To update build files for the plugin itself run `bazelisk run @bob//:gazelle`
+# gazelle:prefix github.com/ARM-software/bob-build/gazelle
 # gazelle:exclude tests
+# gazelle:build_file_name BUILD.bazel
+# gazelle:resolve go github.com/stretchr/testify/assert @com_github_stretchr_testify//assert:go_default_library
+# gazelle:resolve go github.com/bazelbuild/buildtools/build @com_github_bazelbuild_buildtools//build:go_default_library
+# gazelle:resolve go github.com/ARM-software/bob-build/core @bob//core
+# gazelle:resolve go github.com/ARM-software/bob-build/core/file @bob//core/file
+# gazelle:resolve go github.com/ARM-software/bob-build/core/toolchain @bob//core/toolchain
+# gazelle:resolve go github.com/ARM-software/bob-build/internal/utils @bob//internal/utils
 
 go_library(
     name = "plugin",

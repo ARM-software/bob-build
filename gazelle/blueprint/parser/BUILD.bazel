@@ -2,9 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "parser",
-    srcs = [
-        "parser.go",
-    ],
+    srcs = ["parser.go"],
     importpath = "github.com/ARM-software/bob-build/gazelle/blueprint/parser",
     visibility = ["//visibility:public"],
     deps = [
@@ -14,23 +12,19 @@ go_library(
         "@bob//core",
         "@bob//core/file",
         "@bob//core/toolchain",
-        "@com_github_bazelbuild_buildtools//build:go_default_library",
         "@com_github_google_blueprint//:blueprint",
-        "@com_github_google_blueprint//parser",
         "@com_github_google_blueprint//proptools",
-        "@io_bazel_rules_go//go/tools/bazel:go_default_library",
     ],
 )
 
 go_test(
     name = "parser_test",
-    srcs = [
-        "parser_test.go",
-    ],
+    srcs = ["parser_test.go"],
     embed = [":parser"],
     deps = [
+        "//common",
         "//mconfig/parser",
-        "@bazel_gazelle//label:go_default_library",
+        "//module",
         "@bob//core",
         "@com_github_google_blueprint//:blueprint",
         "@com_github_stretchr_testify//assert:go_default_library",
