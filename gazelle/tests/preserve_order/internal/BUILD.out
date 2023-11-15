@@ -1,43 +1,43 @@
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
-bool_flag(
-    name = "feature_b",
-    build_setting_default = True,
+config_setting(
+    name = "[__FEATURE_B]",
+    flag_values = {"//internal:FEATURE_B": True},
 )
 
 config_setting(
-    name = "config_feature_b",
-    flag_values = {
-        ":feature_b": "true",
-    },
+    name = "![FEATURE_B]",
+    flag_values = {"//internal:FEATURE_B": False},
+)
+
+alias(
+    name = "[FEATURE_B]",
+    actual = ":[__FEATURE_B]",
+)
+
+bool_flag(
+    name = "FEATURE_B",
+    build_setting_default = True,
 )
 
 filegroup(
     name = "fg_201",
-    srcs = [
-        "srcs/input_201.c",
-    ],
+    srcs = ["srcs/input_201.c"],
 )
 
 filegroup(
     name = "fg_202",
-    srcs = [
-        "srcs/input_202.c",
-    ],
+    srcs = ["srcs/input_202.c"],
 )
 
 filegroup(
     name = "fg_203",
-    srcs = [
-        "srcs/input_203.c",
-    ],
+    srcs = ["srcs/input_203.c"],
 )
 
 filegroup(
     name = "fg_204",
-    srcs = [
-        "srcs/input_204.c",
-    ],
+    srcs = ["srcs/input_204.c"],
 )
 
 filegroup(
@@ -45,22 +45,17 @@ filegroup(
     srcs = glob(
         ["lib/**/*_204_1.c"],
         allow_empty = True,
-        exclude_directories = 1,
     ),
 )
 
 filegroup(
     name = "fg_205",
-    srcs = [
-        "srcs/input_205.c",
-    ],
+    srcs = ["srcs/input_205.c"],
 )
 
 filegroup(
     name = "fg_206",
-    srcs = [
-        "srcs/input_206.c",
-    ],
+    srcs = ["srcs/input_206.c"],
 )
 
 filegroup(
@@ -69,7 +64,7 @@ filegroup(
         ["lib/**/*_207.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_207.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -79,7 +74,7 @@ filegroup(
         ["lib/**/*_208.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_208.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -89,7 +84,7 @@ filegroup(
         ["lib/**/*_209.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_209.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -99,7 +94,7 @@ filegroup(
         ["lib/**/*_210.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_210.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -109,7 +104,7 @@ filegroup(
         ["lib/**/*_211.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_211.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )
 
@@ -119,6 +114,6 @@ filegroup(
         ["lib/**/*_212.c"],
         allow_empty = True,
         exclude = ["lib/**/exclude_*_212.cpp"],
-        exclude_directories = 1,
+        exclude_directories = True,
     ),
 )

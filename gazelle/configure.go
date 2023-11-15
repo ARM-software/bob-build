@@ -1,13 +1,10 @@
 package plugin
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
-	bparser "github.com/ARM-software/bob-build/gazelle/blueprint/parser"
 	pluginConfig "github.com/ARM-software/bob-build/gazelle/config"
-	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -40,11 +37,10 @@ func (e *BobExtension) KnownDirectives() []string {
 // f is the build file for the current directory or nil if there is no
 // existing build file.
 func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
-
-	isBobRoot := false
 	if _, exists := c.Exts[BobExtensionName]; !exists {
 		rootCfg := pluginConfig.NewRootConfig(c.RepoRoot)
 		c.Exts[BobExtensionName] = pluginConfig.ConfigMap{"": rootCfg}
+		rootCfg.Blueprint.Builder.ConfigureDefault()
 	}
 
 	configs := c.Exts[BobExtensionName].(pluginConfig.ConfigMap)
@@ -63,7 +59,6 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 			switch d.Key {
 			case BobRootDirective:
 				pc.BobWorkspaceRootRelPath = rel
-				isBobRoot = true
 			case BobIgnoreDirDirective:
 				pc.BobIgnoreDir = append(pc.BobIgnoreDir, d.Value)
 			}
@@ -72,36 +67,28 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 
 	for _, ignored := range pc.BobIgnoreDir {
 		if isChild, _ := util.IsChildFilepath(ignored, rel); isChild {
-			isBobRoot = false // This path is in the ignored list
+			pc.IsIgnored = true
 		}
 	}
 
-	if isBobRoot {
+	// Parse ASTs
+	if dir, err := os.Open(filepath.Join(c.RepoRoot, rel)); err == nil {
+		if files, err := dir.ReadDir(0); err == nil {
+			for _, file := range files {
+				if file.Type().IsDir() {
+					continue
+				}
 
-		if _, err := os.Stat(filepath.Join(c.RepoRoot, rel, "Mconfig")); err != nil {
-			log.Fatalf("No root Mconfig file: %v\n", err)
+				if util.Contains(pc.Mconfig.Filenames, file.Name()) {
+					pc.Files[file.Name()], err = pc.Mconfig.Parser.Parse(c.RepoRoot, rel, file.Name())
+				} else if util.Contains(pc.Blueprint.Filenames, file.Name()) {
+					pc.Files[file.Name()], err = pc.Blueprint.Parser.Parse(c.RepoRoot, rel, file.Name())
+				}
+			}
+		} else {
+			panic(err)
 		}
-		fileNames := []string{"Mconfig"}
-
-		mconfigParser := mparser.NewLegacy(c.RepoRoot, rel)
-		configs, err := mconfigParser.ParseLegacy(&fileNames)
-		if err != nil {
-			log.Fatalf("Mconfig parse failed: %v\n", err)
-		}
-
-		// Register all `mparser.ConfigData`s
-		for _, c := range *configs {
-			e.registry.Register(c)
-		}
-
-		bobConfig := mparser.CreateBobConfigSpoof(configs)
-		bp := bparser.NewLegacy(c.RepoRoot, rel, pc.BobIgnoreDir, bobConfig)
-		modules := bp.ParseLegacy()
-
-		// Register all `Module`s
-		for _, m := range modules {
-			e.registry.Register(m)
-			m.SetRegistry(e.registry)
-		}
+	} else {
+		panic(err)
 	}
 }
