@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
+	"github.com/ARM-software/bob-build/gazelle/kinds"
 	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/registry"
@@ -94,7 +95,7 @@ func (e *BobExtension) GenerateRules(args language.GenerateArgs) language.Genera
 	}
 
 	for _, r := range rules {
-		if r.IsEmpty(bobKinds[r.Kind()]) {
+		if r.IsEmpty(kinds.Kinds[r.Kind()]) {
 			result.Empty = append(result.Empty, r)
 		} else {
 			result.Gen = append(result.Gen, r)

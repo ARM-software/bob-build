@@ -30,6 +30,7 @@ go_library(
         "//blueprint/parser",
         "//common",
         "//config",
+        "//kinds",
         "//mconfig/parser",
         "//module",
         "//registry",
