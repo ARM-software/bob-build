@@ -9,6 +9,8 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/gazelle/mconfig/parser",
     visibility = ["//visibility:public"],
     deps = [
+        "//logic",
+        "//mapper",
         "//registry",
         "@bazel_gazelle//label:go_default_library",
         "@bob//core",

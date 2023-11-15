@@ -142,8 +142,8 @@ func generateConfigs(r *registry.Registry, relPath string) []*rule.Rule {
 			rFlag := generateFlag(ruleName, v.Name)
 
 			// 'build_setting_default' value is mandatory
-			if d, ok := v.Default.([]interface{}); ok && len(d) == 2 {
-				setBuildSettingDefault(rFlag, d[1])
+			if len(v.Default) == 2 {
+				setBuildSettingDefault(rFlag, v.Default[1])
 			} else {
 				// TODO: handle conditional defaults
 				switch v.Datatype {

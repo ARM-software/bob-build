@@ -83,8 +83,8 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 		}
 		fileNames := []string{"Mconfig"}
 
-		mconfigParser := mparser.NewMconfigParser(c.RepoRoot, rel)
-		configs, err := mconfigParser.Parse(&fileNames)
+		mconfigParser := mparser.NewLegacy(c.RepoRoot, rel)
+		configs, err := mconfigParser.ParseLegacy(&fileNames)
 		if err != nil {
 			log.Fatalf("Mconfig parse failed: %v\n", err)
 		}
