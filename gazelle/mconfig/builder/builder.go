@@ -13,7 +13,6 @@ import (
 	"github.com/ARM-software/bob-build/gazelle/mapper"
 	mparser "github.com/ARM-software/bob-build/gazelle/mconfig/parser"
 	"github.com/ARM-software/bob-build/gazelle/util"
-	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -275,7 +274,7 @@ func (b *Builder) Build(args language.GenerateArgs, file interface{}) (result la
 	for _, v := range configsToGen {
 
 		// v.Datatype should be one of ["bool", "string", "int"]
-		if !utils.Contains([]string{"bool", "string", "int"}, v.Datatype) {
+		if !util.Contains([]string{"bool", "string", "int"}, v.Datatype) {
 			log.Printf("Unsupported config of type '%s'", v.Datatype)
 			break
 		}
