@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -13,23 +14,32 @@ import (
 	bob_file "github.com/ARM-software/bob-build/core/file"
 	bob_toolchain "github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/gazelle/common"
+	"github.com/ARM-software/bob-build/gazelle/mapper"
 	mod "github.com/ARM-software/bob-build/gazelle/module"
 	"github.com/ARM-software/bob-build/gazelle/util"
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/parser"
 	"github.com/google/blueprint/proptools"
 )
 
 type valueHandler func(feature string, attribute string, v interface{})
 
-type BobParser struct {
-	rootPath     string
-	relPath      string // Relative path from workspace to bob_root
-	BobIgnoreDir []string
-	config       *bob.BobConfig
+type Parser struct {
+	rootPath     string         // TODO: remove
+	relPath      string         // TODO: remove
+	BobIgnoreDir []string       // TODO: remove
+	config       *bob.BobConfig // TODO: remove
+
+	m     *mapper.Mapper
+	scope *parser.Scope
 }
 
-func NewBobParser(rootPath string, relPath string, BobIgnoreDir []string, config *bob.BobConfig) *BobParser {
-	return &BobParser{
+func (p *Parser) GetScope() *parser.Scope {
+	return p.scope
+}
+
+func NewLegacy(rootPath string, relPath string, BobIgnoreDir []string, config *bob.BobConfig) *Parser {
+	return &Parser{
 		rootPath:     rootPath,
 		relPath:      relPath,
 		BobIgnoreDir: BobIgnoreDir,
@@ -37,7 +47,46 @@ func NewBobParser(rootPath string, relPath string, BobIgnoreDir []string, config
 	}
 }
 
-func (p *BobParser) Parse() []*mod.Module {
+func New(
+	m *mapper.Mapper,
+	parent *parser.Scope) *Parser {
+
+	return &Parser{
+		m:     m,
+		scope: parser.NewScope(parent),
+	}
+}
+
+func (p *Parser) Parse(rootPath, pkgPath, fileName string) (*parser.File, error) {
+	absolute := filepath.Join(rootPath, pkgPath, fileName)
+
+	f, err := os.OpenFile(absolute, os.O_RDONLY, 0400)
+	if err != nil {
+		log.Fatalf("Failed to read file:'%v' with error:'%v'\n", absolute, err)
+		return nil, err
+	}
+
+	ast, errs := parser.ParseAndEval(filepath.Join(pkgPath, "build.bp"), f, p.scope)
+	if len(errs) != 0 {
+		return nil, fmt.Errorf("Failed to parse blueprint file %v with %v", absolute, errs)
+	}
+
+	// Given a valid AST, register all module targets in mapper
+	for _, def := range ast.Defs {
+		switch def := def.(type) {
+		case *parser.Module:
+			if prop, ok := def.GetProperty("name"); ok {
+				target := prop.Value.(*parser.String).Value
+				label := mapper.MakeLabel(target, pkgPath)
+				p.m.Map(label, target)
+			}
+		}
+	}
+
+	return ast, nil
+}
+
+func (p *Parser) ParseLegacy() []*mod.Module {
 	// We only need the Blueprint context to parse the modules, we discard it afterwards.
 	bp := blueprint.NewContext()
 
