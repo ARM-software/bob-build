@@ -32,7 +32,6 @@ go_library(
         "//config",
         "//kinds",
         "//mconfig/parser",
-        "//registry",
         "//types",
         "//util",
         "@bazel_gazelle//config:go_default_library",
