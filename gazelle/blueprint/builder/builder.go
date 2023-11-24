@@ -22,10 +22,10 @@ type Builder struct {
 
 	lb *lb.Builder
 
-	// Maps from to attr names per module
+	// Maps attr names from Bob to Bazel per module
 	attrNameMapping map[string]map[string]string
 
-	// Maps from to attr names per module
+	// Map attr type from Bob name to AttrType per module
 	attrTypeMapping map[string]map[string]attr.AttrType
 }
 
@@ -58,7 +58,6 @@ func (b *Builder) constructAttributes(mod *parser.Module) (attrs []attr.Attribut
 		// Check for Mconfig feature by querying the label mapper
 		label := b.m.FromValue(strings.ToUpper(prop.Name))
 
-		// fmt.Printf("l:%v %v\n", label, &logic.Identifier{strings.ToUpper(prop.Name)})
 		if label != nil {
 			for _, featured := range prop.Value.(*parser.Map).Properties {
 				if m[featured.Name] == nil {
@@ -208,11 +207,7 @@ func (b *Builder) createRule(mod *parser.Module) (*rule.Rule, error) {
 			attr.SetGlobArgs(globArgs)
 		}
 
-		// deps := b.logic.GenerateConfigSetting(attr)
-
-		// fmt.Printf("attr:%#v\n", attr)
 		r.SetAttr(attr.ToName(), attr)
-
 	}
 
 	return r, nil
