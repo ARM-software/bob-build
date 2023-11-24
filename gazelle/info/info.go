@@ -1,4 +1,4 @@
-package kinds
+package info
 
 import (
 	"github.com/bazelbuild/bazel-gazelle/rule"

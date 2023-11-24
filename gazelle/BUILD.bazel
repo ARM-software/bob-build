@@ -26,7 +26,7 @@ go_library(
         "//blueprint/parser",
         "//common",
         "//config",
-        "//kinds",
+        "//info",
         "//mconfig/parser",
         "//types",
         "//util",

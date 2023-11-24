@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	"github.com/ARM-software/bob-build/gazelle/common"
-	"github.com/ARM-software/bob-build/gazelle/kinds"
+	"github.com/ARM-software/bob-build/gazelle/info"
 	"github.com/ARM-software/bob-build/gazelle/logic"
 	lb "github.com/ARM-software/bob-build/gazelle/logic/builder"
 	"github.com/ARM-software/bob-build/gazelle/mapper"
@@ -292,7 +292,7 @@ func (b *Builder) Build(args language.GenerateArgs, file interface{}) (result la
 	}
 
 	for _, r := range rules {
-		if r.IsEmpty(kinds.Kinds[r.Kind()]) {
+		if r.IsEmpty(info.Kinds[r.Kind()]) {
 			result.Empty = append(result.Empty, r)
 		} else {
 			result.Gen = append(result.Gen, r)
