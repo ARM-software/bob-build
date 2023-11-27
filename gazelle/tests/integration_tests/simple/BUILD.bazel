@@ -1,7 +1,4 @@
 cc_library(
     name = "simple",
-    srcs = [
-        "main.c",
-    ],
-    linkstatic = True,
+    srcs = ["main.c"],
 )
