@@ -354,7 +354,6 @@ func addBinaryProps(mod bpwriter.Module, m *ModuleBinary, ctx blueprint.ModuleCo
 			addHWASANProps(mod)
 		}
 	}
-
 }
 
 func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.ModuleContext) {
@@ -369,7 +368,9 @@ func addStaticOrSharedLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blu
 	// This part handles the target libraries.
 	// We disable multilib if this module depends on generated libraries
 	// (which can't support multilib).
-	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	if m.Properties.TargetType == toolchain.TgtTypeTarget &&
+		!linksToGeneratedLibrary(ctx) &&
+		!backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
 		mod.AddString("compile_multilib", "both")
 	}
 }
@@ -720,7 +721,9 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	// TODO: Make addRequiredModules generic and enable it if needed
 	// addRequiredModules(mod, m, ctx)
 
-	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	if m.Properties.TargetType == toolchain.TgtTypeTarget &&
+		!linksToGeneratedLibrary(ctx) &&
+		!backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
 		mod.AddString("compile_multilib", "both")
 	}
 }
@@ -802,7 +805,9 @@ func (g *androidBpGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blue
 		addHWASANProps(mod)
 	}
 
-	if m.Properties.TargetType == toolchain.TgtTypeTarget && !linksToGeneratedLibrary(ctx) {
+	if m.Properties.TargetType == toolchain.TgtTypeTarget &&
+		!linksToGeneratedLibrary(ctx) &&
+		!backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
 		mod.AddString("compile_multilib", "both")
 	}
 
