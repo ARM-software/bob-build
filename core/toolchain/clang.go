@@ -198,6 +198,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 
 	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
 	tc.flagCache = newFlagCache()
+	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
 	return
 }
