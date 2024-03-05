@@ -43,9 +43,8 @@ bob_gensrcs {
     export_include_dirs: [
         ".",
     ],
-    depfile: true,
     tool_files: ["generator.py"],
-    cmd: "python ${location} --in ${in} --depfile ${depfile} --gen ${out}",
+    cmd: "python ${location} --in ${in} --gen ${out}",
 }
 
 bob_gensrcs {

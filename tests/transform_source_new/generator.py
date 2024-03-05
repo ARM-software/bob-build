@@ -111,6 +111,8 @@ def main():
             outfile.write(header_template.format(func=func))
 
     if args.depfile:
+        # https://android.googlesource.com/platform/build/+/main/Changes.md#gensrcs-starts-disallowing-depfile-property
+        print("`--depfile` is deprecated and should not be used!!!")
         template = "{target}: {deps}\n"
         dep_str = "{} \\\n\t".format(args.input)
         with open(args.depfile, "w") as depfile:
