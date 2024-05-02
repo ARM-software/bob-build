@@ -11,5 +11,8 @@ func (g *androidBpGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.
 		utils.Die("%v", err.Error())
 	}
 	mod.AddStringList("srcs", m.Properties.Srcs)
+	if m.Properties.Enabled != nil {
+		mod.AddBool("enabled", *m.Properties.Enabled)
+	}
 	addProvenanceProps(ctx, mod, m)
 }

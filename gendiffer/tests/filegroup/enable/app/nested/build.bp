@@ -1,0 +1,23 @@
+bob_filegroup {
+    name: "filegroup",
+    srcs: ["src/dummy01.c"],
+    enabled: false,
+}
+
+bob_filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+    enabled: false,
+}
+
+bob_filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":glob",
+        ":forward_filegroup",
+    ],
+    // Conditional
+    builder_android_bp: {
+        enabled: false,
+    },
+}

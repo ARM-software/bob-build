@@ -1,0 +1,23 @@
+bob_glob {
+    name: "glob",
+    srcs: ["**/main.c"],
+    allow_empty: false,
+}
+
+bob_static_library {
+    name: "lib",
+    srcs: [
+        ":all_filegroup",
+    ],
+    enabled: false,
+
+}
+
+bob_binary {
+    name: "bin",
+    enabled: false,
+    srcs: [
+        ":all_filegroup",
+    ],
+
+}
