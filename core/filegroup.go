@@ -15,6 +15,7 @@ type ModuleFilegroup struct {
 		SourceProps
 		TagableProps
 		Features
+		EnableableProps
 	}
 }
 
@@ -24,9 +25,15 @@ type filegroupInterface interface {
 	file.Resolver
 	file.Provider
 	Tagable
+	enableable
+	Featurable
 }
 
 var _ filegroupInterface = (*ModuleFilegroup)(nil) // impl check
+
+func (m *ModuleFilegroup) getEnableableProps() *EnableableProps {
+	return &m.Properties.EnableableProps
+}
 
 func (m *ModuleFilegroup) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	m.Properties.ResolveFiles(ctx)
@@ -56,6 +63,7 @@ func (m *ModuleFilegroup) FeaturableProperties() []interface{} {
 	return []interface{}{
 		&m.Properties.SourceProps,
 		&m.Properties.TagableProps,
+		&m.Properties.EnableableProps,
 	}
 }
 
@@ -85,7 +93,7 @@ func (m *ModuleFilegroup) GetTags() []string {
 
 func filegroupFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleFilegroup{}
-	module.Properties.Features.Init(&config.Properties, SourceProps{}, TagableProps{})
+	module.Properties.Features.Init(&config.Properties, SourceProps{}, TagableProps{}, EnableableProps{})
 	return module, []interface{}{&module.Properties,
 		&module.SimpleName.Properties}
 }

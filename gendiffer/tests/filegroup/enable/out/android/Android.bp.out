@@ -1,0 +1,33 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: [
+        "build.bp",
+        "nested/build.bp",
+    ],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+filegroup {
+    name: "all_filegroup",
+    srcs: [
+        ":glob",
+        ":forward_filegroup",
+    ],
+    enabled: false,
+}
+
+filegroup {
+    name: "filegroup",
+    srcs: ["nested/src/dummy01.c"],
+    enabled: false,
+}
+
+filegroup {
+    name: "forward_filegroup",
+    srcs: [":filegroup"],
+    enabled: false,
+}
+
