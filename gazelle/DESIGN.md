@@ -14,7 +14,7 @@ shed some light on how this should work.
 │                                                                                      │
 │  ┌─────────┐      ┌───────────┐       ┌─────────────────┐                            │
 │  │         │      │           │       │                 │                            │
-│  │ Config  ├─────►│  Context  ├───┬──►│ MconfigParser   ├───────────┐                │
+│  │ Config  ├─────►│  Files[]  ├───┬──►│ MconfigParser   ├───────────┐                │
 │  │         │      │           │   │   │                 │           │                │
 │  └─────────┘      └───────────┘   │   └─────────────────┘           │                │
 │                       ▲    ▲      │                                 │                │
@@ -24,26 +24,26 @@ shed some light on how this should work.
 │                       │    │          │                 │      │    │                │
 │                       │    │          └─────────────────┘      │    │                │
 │                       │    │                                   │    │                │
-│                       │    │     ValidateAndRegister()         │    │                │
+│                       │    │     Parse()                       │    │                │
 │                       │    └───────────────────────────────────┘    │                │
 │                       │                                             │                │
 │                       │                                             │                │
-│                       │          Register()                         │                │
+│                       │          Parse()                            │                │
 │                       └─────────────────────────────────────────────┘                │
 │                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────────────────────────────────────────┐
-│ GenerateRules()                                                                      │
-│                                                                                      │
-│   ┌─────────────────┐                    ┌─────────────┐             ┌────────────┐  │
-│   │                 │  MakeBuilders()    │             │   Build()   │            │  │
-│   │ config[relPath] ├───────────────────►│ ruleBuiler  ├────────────►│ *rule.Rule │  │
-│   │                 │                    │             │             │            │  │
-│   └─────────────────┘                    ├─────────────┤             └────────────┘  │
-│                                          └─────────────┘                             │
-│                                                                                      │
-└──────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│ GenerateRules()                                   │
+│                                                   │
+│   ┌─────────────────┐             ┌────────────┐  │
+│   │                 │   Build()   │            │  │
+│   │ config[relPath] ├────────────►│ *rule.Rule │  │
+│   │                 │             │            │  │
+│   └─────────────────┘             └────────────┘  │
+│                                                   │
+│                                                   │
+└───────────────────────────────────────────────────┘
 ```
 
 Any Gazelle plugin requires a parser and a rule set.
@@ -51,31 +51,16 @@ In the case of Bob we actually require two parsers, one for Mconfig and one for 
 Fortunately we can reuse existing rules for C/C++ since we are not adding a new language support.
 
 In a regular plugin design it would be commonplace to parse files given as an argument to `GenerateRules`.
-Unfortunately this is not easily done with Bob, as both Mconfig and Blueprint parse files recursively.
-Whilst it's possible to parse a single Blueprint file at a time, in order to resolve `bob_defaults` we must
-have the entire build DAG available.
-
-For this reason the key design is to do the Parsing during the call to `Configure`. The `Context` object stores the
-Bob workspace data, including the registered modules and the root path which is required to resolve Bazel targets.
+Unfortunately this is not easily done with Bob, as both Mconfig and Blueprint may have dependencies
+on each other. For this reason the parsing is done at `Configure()` call time and the ASTs are stored
+in the config struct in memory.
 
 ### Target Mapping
 
 In Bob, all targets are global and their names are unique across the workspace.
 This means that the generator needs to translate Bob targets to Bazel targets to create the correct `srcs`, `data` and `deps` attributes.
 
-The `Context` object stores this mapping and needs to be injected into the `ruleBuilder`.
-
-### `bob_defaults` resolution
-
-To support Bob features, the plugin reuses the existing Bob mutators for handling defaults:
-
-```go
-	bp.RegisterBottomUpMutator("default_deps1", bob.DefaultDepsStage1Mutator).Parallel()
-	bp.RegisterBottomUpMutator("default_deps2", bob.DefaultDepsStage2Mutator).Parallel()
-	bp.RegisterBottomUpMutator("default_applier", bob.DefaultApplierMutator).Parallel()
-```
-
-This simply flattens all the attributes for us before parsing.
+The `Mapper` object stores this mapping across a Bob build project and is shared between the Mconfig and Blueprint builders.
 
 ### Bob feature handling
 
@@ -173,47 +158,13 @@ This saves us code at the cost of complexity, there is no need for type assertio
 The current Mconfig parser is implemented in Python, the final user configuration is passed into Bob as a file.
 To be able to generate all the user flags however, we need to return the raw parsed configuration.
 
-We can implement a simple interfaces that accepts JSON requests over stdin:
-
-```python
-def main(stdin, stdout):
-    ignore_missing = False
-
-    for request in stdin:
-        request = json.loads(request)
-
-        repo_root = request["repo_root"]
-        rel_package_path = request["rel_package_path"]
-
-        lexer = lex_wrapper.LexWrapper(ignore_missing)
-        lexer.source(Path(repo_root, rel_package_path, 'Mconfig'))
-
-        configuration = syntax.parser.parse(None, debug=False, lexer=lexer)
-
-        print(json.dumps(sanitize(configuration)), end="", file=stdout, flush=True)
-        stdout.buffer.write(bytes([0]))
-        stdout.flush()
-```
+We can implement a simple interfaces that accepts JSON requests over stdin, see `config_system/get_configs_gazelle.py`.
 
 This is based on the existing implementation in `config_system/config_system/data.py`.
 
-Note however that the current parser implementation automatically crawls the directory on the `source` command:
+We set `ignore_source = True` to ensure that the parser is not recursive.
 
-```python
-    def source(self, fname):
-        """Handle the source command, ensuring we open the file relative to
-        the directory containing the first Mconfig."""
-        if self.root_dir is not None:
-            fname = os.path.join(self.root_dir, fname)
-
-        self.open(fname)
-```
-
-This is actually not ideal because Gazelle works on directory level. However Mconfig flags are global in scope, meaning that there is no restriction at using a flag declared in `subdir1/` for a Blueprint file in `subdir2/`.
-This means that all the configs need to be parsed before rule generation takes place.
-
-One major downside of parsing at root repo level only is that **all** of the config flags will be generated into a single BUILD.bazel file.
-This would result in a massive file, ideally we should make the changes to the parser to only parse the current file and do this for every directory at Config time.
+The parsed config is returned as JSON to the plugin.
 
 #### Interfacing with Go plugin
 
@@ -222,24 +173,11 @@ From there we simply marshal the request struct and feed it into the parser whic
 
 ### Blueprint
 
-The Blueprint parser is relatively straightforward, once all the factories have been registered we simply need to find all the files for Blueprint to process and fire the `ResolveDependencies` call:
+The Blueprint parser is relatively straightforward:
 
 ```go
-	bpToParse := findBpFiles(bobRootPath)
-	bp.ParseFileList(bobRootPath, bpToParse, nil)
-	bp.ResolveDependencies(nil)
+	f, err := os.OpenFile(absolute, os.O_RDONLY, 0400)
+    ast, errs := parser.ParseAndEval(filepath.Join(pkgPath, "build.bp"), f, p.scope)
 ```
 
-This is enough for Blueprint to run all the mutators we have registered and by this point we will have a map of intermediate objects ready for processing.
-
-## Plugin Config (Directives)
-
-### bob_root
-
-Marks the root directory for Bob files.
-Can be used multiple times to support Monorepos.
-
-### bob_cull_missing_deps
-
-Optionally enable deleting rules if missing dependencies are required.
-Allows for a green Bazel build during migration.
+The important caveat here is that the plugin needs to manage the scope for the `parser.File` object.
