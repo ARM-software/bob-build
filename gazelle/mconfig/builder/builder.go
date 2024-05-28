@@ -3,6 +3,7 @@ package builder
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"sort"
 
@@ -42,14 +43,21 @@ func ParseLogic(m *mapper.Mapper, expr interface{}) logic.Expr {
 			"identifier": logic.IdentifierType,
 		}
 
+		t, ok := types[rv.Index(0).Interface().(string)]
+		if !ok {
+			fmt.Fprintf(os.Stderr, "WARNING: unsupported expression type: '%v'\n", expr)
+			break
+		}
 		var args []logic.Expr
 		for i := 1; i < rv.Len(); i++ {
-			args = append(args, ParseLogic(m, rv.Index(i).Interface()))
+			comp := ParseLogic(m, rv.Index(i).Interface())
+			if comp == nil {
+				break
+			}
+			args = append(args, comp)
 		}
 
-		if t, ok := types[rv.Index(0).Interface().(string)]; ok {
-			return logic.NewExpr(t, args...)
-		}
+		return logic.NewExpr(t, args...)
 	}
 
 	return nil
@@ -58,7 +66,8 @@ func ParseLogic(m *mapper.Mapper, expr interface{}) logic.Expr {
 
 func LiteralExpressionToBzl(expression []interface{}) bzl.Expr {
 	if len(expression) != 2 {
-		panic(fmt.Sprintf("Cannot convert expression '%v' to value literal", expression))
+		fmt.Fprintf(os.Stderr, "WARNING: Cannot convert expression '%v' to value literal\n", expression)
+		return nil
 	}
 
 	switch expression[0].(string) {
@@ -70,8 +79,9 @@ func LiteralExpressionToBzl(expression []interface{}) bzl.Expr {
 	case "number":
 		return &bzl.LiteralExpr{Token: fmt.Sprintf("%d", int(expression[1].(float64)))}
 	default:
-		panic(fmt.Sprintf("Cannot convert expression '%v' to value literal, unknown type", expression))
+		fmt.Fprintf(os.Stderr, "WARNING: Cannot convert expression '%v' to value literal, unknown type\n", expression)
 	}
+	return nil
 }
 
 type FlagDefaultValue struct {
@@ -91,6 +101,10 @@ func (b *Builder) NewFlagDefaultValue(rel string, c *mparser.ConfigData) *FlagDe
 
 		for _, conditional := range c.ConditionalDefaults {
 			t := logic.Flatten(ParseLogic(b.m, conditional.Condition))
+			if t == nil {
+				fmt.Fprintf(os.Stderr, "WARNING: unsupported conditional expression: '%v'\n", conditional.Condition)
+				continue
+			}
 			l := b.lb.RequestLogicalExpr(rel, t)
 			conditionLabels = append(conditionLabels, l)
 			conditionals[l] = LiteralExpressionToBzl(conditional.Expression)
