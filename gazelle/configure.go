@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	BobRootDirective      = "bob_root" // Directive used to mark the root module of the Bob workspace
-	BobIgnoreDirDirective = "bob_ignore"
+	BobRootDirective = "bob_root" // Directive used to mark the root module of the Bob workspace
+	ExcludeDirective = "exclude"
 )
 
 // KnownDirectives returns a list of directive keys that this Configurer can
@@ -21,7 +21,7 @@ const (
 func (e *BobExtension) KnownDirectives() []string {
 	return []string{
 		BobRootDirective,
-		BobIgnoreDirDirective,
+		ExcludeDirective,
 	}
 }
 
@@ -57,7 +57,7 @@ func (e *BobExtension) Configure(c *config.Config, rel string, f *rule.File) {
 	if f != nil {
 		for _, d := range f.Directives {
 			switch d.Key {
-			case BobIgnoreDirDirective:
+			case ExcludeDirective:
 				pc.BobIgnoreDir = append(pc.BobIgnoreDir, d.Value)
 			}
 		}
