@@ -103,7 +103,7 @@ func (b *Builder) NewFlagDefaultValue(rel string, c *mparser.ConfigData) *FlagDe
 			t := logic.Flatten(ParseLogic(b.m, conditional.Condition))
 			if t == nil {
 				fmt.Fprintf(os.Stderr, "WARNING: unsupported conditional expression: '%v'\n", conditional.Condition)
-				continue
+				return nil
 			}
 			l := b.lb.RequestLogicalExpr(rel, t)
 			conditionLabels = append(conditionLabels, l)
@@ -113,6 +113,10 @@ func (b *Builder) NewFlagDefaultValue(rel string, c *mparser.ConfigData) *FlagDe
 
 	if c.Default != nil {
 		defaultValue = LiteralExpressionToBzl(c.Default)
+		if defaultValue == nil {
+			fmt.Fprintf(os.Stderr, "WARNING: cannot determine literal expression from default: '%v'\n", c.Default)
+			return nil
+		}
 	} else {
 		switch c.Datatype {
 		case "int":
@@ -296,7 +300,12 @@ func (b *Builder) Build(args language.GenerateArgs, file interface{}) (result la
 		ruleName := fmt.Sprintf("%s_flag", v.Datatype)
 		flag := rule.NewRule(ruleName, v.Name)
 
-		flag.SetAttr("build_setting_default", b.NewFlagDefaultValue(args.Rel, v))
+		build_setting_default := b.NewFlagDefaultValue(args.Rel, v)
+		if build_setting_default != nil {
+			flag.SetAttr("build_setting_default", build_setting_default)
+		} else {
+			fmt.Fprintf(os.Stderr, "WARNING: Could not determine build setting default for %v\n", v.Name)
+		}
 
 		// Only bool is supported currently for flag values.
 		if v.Datatype == "bool" {
