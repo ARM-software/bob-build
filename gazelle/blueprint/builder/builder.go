@@ -50,15 +50,18 @@ func (b *Builder) ConfigureDefault() {
 	b.ConfigureAttribute("bob_library", attr.AttrTypeSelective, "linkstatic", "")
 }
 
+func (b *Builder) isFeature(prop *parser.Property) bool {
+	_, isMap := prop.Value.(*parser.Map)
+	label := b.m.FromValue(strings.ToUpper(prop.Name))
+	return isMap && label != nil
+}
+
 func (b *Builder) constructAttributes(mod *parser.Module) (attrs []attr.Attribute) {
 
 	m := map[string]attr.Attribute{}
 	for _, prop := range mod.Map.Properties {
 
-		// Check for Mconfig feature by querying the label mapper
-		label := b.m.FromValue(strings.ToUpper(prop.Name))
-
-		if label != nil {
+		if b.isFeature(prop) {
 			for _, featured := range prop.Value.(*parser.Map).Properties {
 				if m[featured.Name] == nil {
 					m[featured.Name] = attr.NewAttribute(
