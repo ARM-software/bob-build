@@ -2,6 +2,7 @@ package bp2bzl
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ARM-software/bob-build/gazelle/mapper"
@@ -101,7 +102,7 @@ func (t *Transformer) Transform(expr parser.Expression) bzl.Expr {
 			Op: fmt.Sprintf("%s", e.Operator),
 		}
 	default:
-		fmt.Printf("Unhandled type %#v\n", expr)
+		log.Printf("Unhandled type %#v\n", expr)
 	}
 	return nil
 }
