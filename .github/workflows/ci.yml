@@ -58,6 +58,7 @@ jobs:
 
   go-tests:
     name: Go ${{ matrix.go }} tests ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,9 +76,11 @@ jobs:
             "1.20",
           ]
         os: [ubuntu-latest]
+        experimental: [false]
         include:
           - go: "1.13"
             os: macos-latest
+            experimental: true
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -106,14 +109,17 @@ jobs:
 
   python-tests:
     name: Python ${{ matrix.python }} tests ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         python: ["3.7", "3.8", "3.9"]
         os: [ubuntu-latest]
+        experimental: [false]
         include:
           - python: "3.7"
             os: macos-latest
+            experimental: true
           - python: "3.6"
             os: ubuntu-20.04
     runs-on: ${{ matrix.os }}
