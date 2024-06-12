@@ -1,0 +1,23 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_library_static {
+    name: "header_lib",
+    local_include_dirs: ["."],
+    export_system_include_dirs : ["."],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "my_foo",
+    srcs: ["foo.c"],
+    static_libs: ["header_lib"],
+    compile_multilib: "both",
+}
+

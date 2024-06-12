@@ -1,0 +1,20 @@
+bob_static_library {
+    name: "header_lib",
+    srcs: [
+        "A/header_a.h",
+        "B/header_b.h",
+    ],
+    export_local_system_include_dirs: ["."],
+}
+
+bob_static_library {
+    name: "my_foo",
+    srcs: [
+        "foo.c",
+        "foo.h",
+    ],
+    static_libs: [
+        "header_lib",
+    ],
+    build_by_default: true,
+}
