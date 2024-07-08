@@ -14,12 +14,12 @@ This functionality is currently under development, this document will be updated
 
 Our Gazelle extension adds new directives.
 
-| **Directive**                                                                                                                            | **Default value** |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| **Directive**                                                                           | **Default value** |
+| --------------------------------------------------------------------------------------- | ----------------- |
 | `# gazelle:exclude`                                                                     | `nil`             |
 | Specificies a directory relative to the bob root to ignore when parsing build.bp files. |                   |
-| `# gazelle:bob_root`                                                                                                                     | `nil`             |
-| Specificies the bob root directory.                                                                                                      |                   |
+| `# gazelle:bob_root`                                                                    | `nil`             |
+| Specificies the bob root directory.                                                     |                   |
 
 [bazel]: https://bazel.build/
 [gazelle]: https://github.com/bazelbuild/bazel-gazelle
