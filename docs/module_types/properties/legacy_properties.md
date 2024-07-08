@@ -448,6 +448,12 @@ or make variables is not possible.
 The [`match_srcs`](../strings.md#match_srcs) function can be used in
 this property to reference files listed in `srcs`.
 
+## `export_ldflags`
+
+List of strings; default is `[]`
+
+Linker flags exported to modules which depend on the current one.
+
 ## `cmd`
 
 String; required
