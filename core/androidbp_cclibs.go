@@ -309,11 +309,7 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 
 	_, installRel, ok := getSoongInstallPath(m.getInstallableProps())
 	if ok && installRel != "" {
-		if backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
-			mod.AddString("relative_install_path", installRel+"64")
-		} else {
-			mod.AddString("relative_install_path", installRel)
-		}
+		mod.AddString("relative_install_path", installRel)
 	}
 
 	addProvenanceProps(ctx, mod, &m)

@@ -10,7 +10,6 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
-	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/bpwriter"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -31,14 +30,7 @@ func writeDataResourceModule(m bpwriter.Module, src, installRel, linkName string
 func writeCodeResourceModule(m bpwriter.Module, src, installRel, linkName string) {
 	m.AddStringList("srcs", []string{src})
 	m.AddString("stem", filepath.Base(src))
-
-	if installRel != "" {
-		if backend.Get().GetToolchain(toolchain.TgtTypeTarget).Is64BitOnly() {
-			m.AddString("relative_install_path", installRel+"64")
-		} else {
-			m.AddString("relative_install_path", installRel)
-		}
-	}
+	m.AddString("relative_install_path", installRel)
 }
 
 func (m *ModuleResource) getAndroidbpResourceName(src string) string {
