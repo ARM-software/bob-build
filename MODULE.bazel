@@ -31,13 +31,17 @@ pip.parse(
     python_version = "3.11",
     requirements_lock = "//config_system:requirements_lock.txt",
 )
-use_repo(pip, "pip")
+use_repo(
+    pip,
+    config_deps = "pip",
+)
 
 python = use_extension("@rules_python//extensions:python.bzl", "python")
 python.toolchain(
     is_default = True,
     python_version = "3.11",
 )
+use_repo(python, "python_3_11", "python_versions")
 
 # Set up dependencies
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
