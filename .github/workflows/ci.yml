@@ -76,7 +76,9 @@ jobs:
           ]
         os: [ubuntu-latest]
         include:
-          - go: "1.13"
+          - go: "1.18"
+            os: macos-13
+          - go: "1.20"
             os: macos-latest
     runs-on: ${{ matrix.os }}
 
@@ -113,6 +115,8 @@ jobs:
         os: [ubuntu-latest]
         include:
           - python: "3.7"
+            os: macos-13
+          - python: "3.9"
             os: macos-latest
           - python: "3.6"
             os: ubuntu-20.04
