@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sebastian Birunt <sebastian.birunt@arm.com>
+Date: Fri, 9 Aug 2024 13:46:34 +0200
+Subject: fix: remove blueprint dep
+
+Remove 'blueprint' dependency for `bzlmod`.
+
+Change-Id: I8b814d2c4b8b06769a956ce523b68d7982b3abe4
+
+diff --git a/go.mod b/go.mod
+index 5c71efc..e2fda6f 100644
+--- a/go.mod
++++ b/go.mod
+@@ -3,8 +3,5 @@ module github.com/ARM-software/bob-build
+ go 1.11
+ 
+ require (
+-	github.com/google/blueprint v0.0.0-20200402195805-6957a46d38c9
+ 	github.com/stretchr/testify v1.6.0
+ )
+-
+-replace github.com/google/blueprint v0.0.0-20200402195805-6957a46d38c9 => ./blueprint
+-- 
+2.43.2
+
