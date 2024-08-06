@@ -63,6 +63,7 @@ go_library(
         "tagable.go",
         "template.go",
     ],
+    data = glob(["blueprint/**"]),
     importpath = "github.com/ARM-software/bob-build/core",
     visibility = ["//visibility:public"],
     deps = [

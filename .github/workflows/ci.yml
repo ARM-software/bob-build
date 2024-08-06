@@ -223,7 +223,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazel: ["latest", "6.2.0", "6.0.0"]
+        bazel: ["6.5.0", "6.2.0", "6.0.0"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -254,7 +254,7 @@ jobs:
   bazel-coverage:
     name: "Bazel Coverage"
     env:
-      USE_BAZEL_VERSION: latest
+      USE_BAZEL_VERSION: "6.5.0"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

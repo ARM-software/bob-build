@@ -2,6 +2,7 @@ filegroup(
     name = "blueprint-patches",
     srcs = [
         "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
+        "@bob//patches:blueprint/0002-fix-remove-blueprint-dep.patch",
     ],
     visibility = ["//visibility:public"],
 )
