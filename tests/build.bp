@@ -74,5 +74,6 @@ bob_alias {
         "bob_test_version_script",
         "bob_test_system_includes",
         "bob_test_strict_bins",
+        "bob_test_toolchain_flags",
     ],
 }
