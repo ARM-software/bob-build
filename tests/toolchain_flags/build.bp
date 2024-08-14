@@ -59,8 +59,18 @@ bob_library {
     target: {
         install_group: "IG_libs",
     },
-
+    copts: [
+        "-fPIC",
+    ],
     host_supported: true,
     target_supported: true,
     build_by_default: true,
+}
+
+bob_alias {
+    name: "bob_test_toolchain_flags",
+    srcs: [
+        "foo:host",
+        "foo:target",
+    ],
 }
