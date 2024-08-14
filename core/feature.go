@@ -28,10 +28,6 @@ type Features struct {
 	BlueprintEmbed interface{}
 }
 
-type singleFeature struct {
-	BlueprintEmbed interface{}
-}
-
 func typesOf(list ...interface{}) []reflect.Type {
 	types := make([]reflect.Type, len(list))
 	for i, element := range list {
@@ -71,19 +67,13 @@ func (f *Features) Init(properties *config.Properties, list ...interface{}) {
 	for i, featureName := range properties.FeatureList {
 		fields[i] = reflect.StructField{
 			Name: featurePropertyName(featureName),
-			Type: reflect.TypeOf(singleFeature{}),
+			Type: reflect.PtrTo(propsType),
 		}
 	}
 
 	bpFeatureStruct := reflect.StructOf(fields)
 	instancePtr := reflect.New(bpFeatureStruct)
 	f.BlueprintEmbed = instancePtr.Interface()
-
-	instance := reflect.Indirect(instancePtr)
-	for i := range properties.FeatureList {
-		propsInFeature := instance.Field(i).Addr().Interface().(*singleFeature)
-		propsInFeature.BlueprintEmbed = reflect.New(propsType).Interface()
-	}
 
 }
 
@@ -174,13 +164,11 @@ func (f *Features) AppendProps(dst []interface{}, properties *config.Properties)
 			if !featureStruct.IsValid() {
 				utils.Die("Field returned for property %s isn't valid\n", featureFieldName)
 			}
-			// AppendProperties expects a pointer to a struct.
-			featureStructPointer := featureStruct.FieldByName("BlueprintEmbed").Interface()
 
 			// If featureProps is nil then we've determined that we can skip this,
-			// so avoid calling AppendProperties
-			if featureStructPointer != nil {
-				err := AppendMatchingProperties(dst, featureStructPointer)
+			// so avoid calling AppendMatchingProperties
+			if !featureStruct.IsNil() {
+				err := AppendMatchingProperties(dst, featureStruct.Interface())
 				if err != nil {
 					return err
 				}
