@@ -56,14 +56,19 @@ func (features *Features) injectData(featureName string, path string, data inter
 		panic(fmt.Sprintf("invalid '%s'\n", path))
 	}
 
-	propsInFeatureVal := allFeatures.FieldByName(featureName)
-	if !propsInFeatureVal.IsValid() {
+	value := allFeatures.FieldByName(featureName)
+	if !value.IsValid() {
 		printDebug(reflect.ValueOf(allFeatures))
 		panic(fmt.Sprintf("Couldn't find struct for feature '%s'", featureName))
 	}
-	propsInFeature := propsInFeatureVal.Interface().(singleFeature)
 
-	value := reflect.ValueOf(propsInFeature.BlueprintEmbed).Elem()
+	if value.IsNil() {
+		// Blueprint would automatically allocate structs when their
+		// pointers are nil - do the same here
+		value.Set(reflect.New(value.Type().Elem()))
+	}
+	// Dereference the pointer to the property struct
+	value = value.Elem()
 
 	for _, name := range strings.Split(path, ".") {
 		previous := value
@@ -121,7 +126,7 @@ func createTestModuleAndFeatures() (testProps, config.Properties) {
 
 	properties := enabledFeatures(featuresNames...)
 
-	module.Init(&properties,
+	module.Features.Init(&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
 		testPropsGroupC{},
@@ -164,7 +169,7 @@ func Test_should_not_change_when_appending_empty_features(t *testing.T) {
 	module, properties := createTestModuleAndFeatures()
 
 	// BlueprintEmbed must be inited! So BlueprintEmbed can't be nil!
-	module.Init( // Just make new Init so we will have "empty structure"
+	module.Features.Init( // Just make new Init so we will have "empty structure"
 		&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
@@ -436,13 +441,14 @@ func Test_should_composite_new_type(t *testing.T) {
 
 	// We need to init all available features (important)
 	properties := enabledFeatures("feature_compose")
-	module.Init(&properties,
+	module.Features.Init(&properties,
 		testPropsGroupA{},
 		testPropsGroupB{},
 	)
 
+	featuresStruct := reflect.ValueOf(module.Features.BlueprintEmbed).Elem()
 	// Uncomment if you want to "view for development purposes"
-	//printDebug(reflect.ValueOf(module.BlueprintEmbed).Elem())
+	//printDebug(featuresStruct)
 	// Above function will print:
 	// {
 	//   Feature_compose: struct { FieldA string; FieldC string; FieldF string; FieldB string }
@@ -454,9 +460,15 @@ func Test_should_composite_new_type(t *testing.T) {
 	//   }
 	// }
 
+	feature := featuresStruct.FieldByName("Feature_compose")
+	// Allocate the property struct for this feature so we can set its
+	// properties
+	feature.Set(reflect.New(feature.Type().Elem()))
+
+	// Dereference the pointer to the property struct
+	feature = feature.Elem()
+
 	// Below code shouldn't fail
-	propsInFeature := reflect.ValueOf(module.BlueprintEmbed).Elem().FieldByName("Feature_compose").Interface().(singleFeature)
-	feature := reflect.ValueOf(propsInFeature.BlueprintEmbed).Elem()
 	feature.FieldByName("FieldA").SetString("+value_a")
 	feature.FieldByName("FieldB").SetString("+value_b")
 }
