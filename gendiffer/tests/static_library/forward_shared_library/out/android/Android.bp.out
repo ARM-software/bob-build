@@ -1,0 +1,107 @@
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "binary_with_shared_lib",
+    srcs: ["src2.c"],
+    shared_libs: ["libfinal"],
+}
+
+cc_binary {
+    name: "binary_with_static_lib",
+    srcs: ["src1.c"],
+    shared_libs: ["libbaar"],
+    static_libs: [
+        "libstatic_6",
+        "libstatic_4",
+        "libstatic_3",
+        "libstatic_2",
+        "libstatic_1",
+    ],
+}
+
+cc_library_shared {
+    name: "libbaar",
+    srcs: ["baar.c"],
+    compile_multilib: "both",
+}
+
+cc_library_shared {
+    name: "libfinal",
+    shared_libs: ["libbaar"],
+    static_libs: [
+        "libstatic_4",
+        "libstatic_3",
+        "libstatic_2",
+        "libstatic_1",
+    ],
+    whole_static_libs: ["libstatic_6"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_1",
+    srcs: ["lib1.c"],
+    shared_libs: ["libbaar"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_2",
+    srcs: ["lib2.c"],
+    static_libs: ["libstatic_1"],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_3",
+    srcs: ["lib3.c"],
+    static_libs: [
+        "libstatic_2",
+        "libstatic_1",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_4",
+    srcs: ["lib4.c"],
+    static_libs: [
+        "libstatic_3",
+        "libstatic_2",
+        "libstatic_1",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_5",
+    srcs: ["lib5.c"],
+    static_libs: [
+        "libstatic_4",
+        "libstatic_3",
+        "libstatic_2",
+        "libstatic_1",
+    ],
+    compile_multilib: "both",
+}
+
+cc_library_static {
+    name: "libstatic_6",
+    srcs: ["lib6.c"],
+    static_libs: [
+        "libstatic_4",
+        "libstatic_3",
+        "libstatic_2",
+        "libstatic_1",
+    ],
+    whole_static_libs: ["libstatic_5"],
+    compile_multilib: "both",
+}
+

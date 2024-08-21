@@ -1,0 +1,75 @@
+
+
+bob_shared_library {
+    name: "libbaar",
+    srcs: [
+        "baar.c",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_1",
+    srcs: ["lib1.c"],
+    shared_libs: [
+        "libbaar",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_2",
+    srcs: ["lib2.c"],
+    static_libs: [
+        "libstatic_1",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_3",
+    srcs: ["lib3.c"],
+    static_libs: [
+        "libstatic_2",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_4",
+    srcs: ["lib4.c"],
+    static_libs: [
+        "libstatic_3",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_5",
+    srcs: ["lib5.c"],
+    static_libs: [
+        "libstatic_4",
+    ],
+}
+
+bob_static_library {
+    name: "libstatic_6",
+    srcs: ["lib6.c"],
+    whole_static_libs: [
+        "libstatic_5",
+    ],
+}
+
+bob_binary {
+    name: "binary_with_static_lib",
+    srcs: ["src1.c"],
+    static_libs: ["libstatic_6"],
+}
+
+bob_shared_library {
+    name: "libfinal",
+    build_by_default: true,
+    whole_static_libs: ["libstatic_6"],
+    forwarding_shlib: true,
+}
+
+bob_binary {
+    name: "binary_with_shared_lib",
+    srcs: ["src2.c"],
+    shared_libs: ["libfinal"],
+}
