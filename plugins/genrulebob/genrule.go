@@ -264,6 +264,13 @@ func (m *genrulebobCommon) getHostBin(ctx android.ModuleContext) android.Optiona
 	return htp.HostToolPath()
 }
 
+// Previous Soong version does not contain yet `android.OutputFilesProvider` interface
+// who replaced older `android.OutputFileProducer`.
+// Define common interface to cover all AOSP versions.
+type OutputFilesProvider interface {
+	OutputFiles(tag string) (android.Paths, error)
+}
+
 func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]string, dependents []android.Path) {
 	args = map[string]string{
 		"gen_dir":         pathForModuleGen(ctx).String(),
@@ -314,14 +321,14 @@ func (m *genrulebobCommon) getArgs(ctx android.ModuleContext) (args map[string]s
 			out := ccmod.OutputFile()
 			dependents = append(dependents, out.Path())
 			args[varName+"_out"] = out.String()
-		} else if gsf, ok := dep.(android.OutputFileProducer); ok {
+		} else if gsf, ok := dep.(OutputFilesProvider); ok {
 			if outs, err := gsf.OutputFiles(""); err != nil {
 				panic(err)
 			} else {
 				addOutputs(outs)
 			}
 		} else if sfg, ok := dep.(genrule.SourceFileGenerator); ok {
-			// On Android 12 `genrule.Module` does not implement `android.OutputFileProducer` yet,
+			// On Android 12 `genrule.Module` does not implement `android.OutputFilesProvider` yet,
 			// does generated sources has to be grabbed by genrule.SourceFileGenerator
 			outs := sfg.GeneratedSourceFiles()
 			addOutputs(outs)
