@@ -35,7 +35,7 @@ do the heavy lifting. As such it has similarities with
 
 To use Bob you will need:
 
-- golang (>=1.11)
+- golang (>=1.18)
 - ninja-build (>=1.8)
 - python3 (>=3.6)
 - python3-ply
