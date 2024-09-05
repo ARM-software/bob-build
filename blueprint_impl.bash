@@ -30,15 +30,21 @@ BUILDDIR="${BUILDDIR}/.minibootstrap" build_go minibp github.com/google/blueprin
 
 BUILDDIR="${BUILDDIR}/.minibootstrap" build_go bpglob github.com/google/blueprint/bootstrap/bpglob
 
+NINJA_ARGS=()
+# Newer `ninja` does not have `dupbuild` warning flag
+if ! test "${NINJA} -w list | grep -q '^  dupbuild'"; then
+  NINJA_ARGS+=( "-w" "dupbuild=err" )
+fi
+
 # Build the bootstrap build.ninja
-"${NINJA}" -w dupbuild=err -f "${BUILDDIR}/.minibootstrap/build.ninja"
+"${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/.minibootstrap/build.ninja"
 
 # Build the primary builder and the main build.ninja
-"${NINJA}" -w dupbuild=err -f "${BUILDDIR}/.bootstrap/build.ninja"
+"${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/.bootstrap/build.ninja"
 
 # SKIP_NINJA can be used by wrappers that wish to run ninja themselves.
 if [ -z "$SKIP_NINJA" ]; then
-    "${NINJA}" -w dupbuild=err -f "${BUILDDIR}/build.ninja" "$@"
+    "${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/build.ninja" "$@"
 else
     exit 0
 fi
