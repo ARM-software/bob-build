@@ -94,5 +94,6 @@ go_repository(
     patch_args = ["-p1"],
     patches = [
         "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
+        "@bob//patches:blueprint/0003-fix-remove-dupbuild-flag.patch",
     ],
 )

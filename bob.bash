@@ -50,8 +50,14 @@ export CCACHE_SLOPPINESS=file_macro,time_macros
 # dependencies on builds where everything else is using absolute paths.
 export CCACHE_BASEDIR=
 
+NINJA_ARGS=()
+# Newer `ninja` does not have `dupbuild` warning flag
+if ! test "${NINJA} -w list | grep -q '^  dupbuild'"; then
+  NINJA_ARGS+=( "-w" "dupbuild=err" )
+fi
+
 # Build the builder if necessary
 BUILDDIR="${BUILDDIR}" SKIP_NINJA=true "${BOB_DIR}/blueprint/blueprint.bash"
 
 # Do the actual build
-"${NINJA}" -f "${BUILDDIR}/build.ninja" -w dupbuild=err "$@"
+"${NINJA}" -f "${BUILDDIR}/build.ninja" "${NINJA_ARGS[@]}" "$@"
