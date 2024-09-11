@@ -79,6 +79,7 @@ blueprint.from_commit(
     patch_strip = 1,
     patches = [
         "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
+        "@bob//patches:blueprint/0003-fix-remove-dupbuild-flag.patch",
     ],
 )
 use_repo(blueprint, "com_github_google_blueprint")

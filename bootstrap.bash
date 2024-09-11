@@ -143,3 +143,4 @@ else
 fi
 create_config_symlinks "${BOB_DIR_FROM_BUILD}" "${BUILDDIR}"
 create_bob_symlinks "${BOB_DIR_FROM_BUILD}" "${BUILDDIR}"
+apply_blueprint_patches "${BOB_DIR_FROM_BUILD}"
