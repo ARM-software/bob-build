@@ -72,6 +72,8 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
         final_value = str(final_value)
     elif opt["datatype"] == "bool":
         final_value = "y" if final_value else "n"
+        if final_value == requested_value.lower():
+            return
 
     if final_value == requested_value:
         return
@@ -110,14 +112,16 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
         )
         return
 
-    logger.error(
-        "%s=%s was ignored or overriden. Value is '%s' %s %s",
-        key,
-        requested_value,
-        final_value,
-        type(requested_value),
-        type(final_value),
-    )
+    if type(opt["value"]) is bool:
+        msg = "{} has wrong value '{}'. Value has to be of type {}: 'Y', 'y', 'N' or 'n'".format(
+            key, requested_value, type(opt["value"])
+        )
+    else:
+        msg = "{} has wrong value '{}'. Value has to be of type {}".format(
+            key, requested_value, type(opt["value"])
+        )
+
+    logger.error(msg)
 
 
 def check_values_as_requested(args):
