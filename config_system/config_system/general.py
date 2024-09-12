@@ -474,7 +474,7 @@ def set_config_if_prompt(key, value, is_user_set=True, source="cmd_line"):
     if "title" in c:
         logger.debug("Setting %s : %s " % (key, value))
         if c["datatype"] == "bool":
-            value = True if value == "y" else False
+            value = True if value.lower() == "y" else False
         if is_user_set:
             c["source"] = source
         set_config(key, value, is_user_set)
