@@ -36,7 +36,7 @@ Supports:
 | [`owner`](properties/legacy_properties.md#owner)                         | String; default is `none`; **deprecated**<br> If set, then the module is considered proprietary.                                      |
 | [`tags`](properties/common_properties.md#tags)                           | List of strings; default is `[]`                                                                                                      |
 | [`enabled`](properties/common_properties.md#enabled)                     | Boolean; default is `true`.                                                                                                           |
-| `build_by_default`                                                       | Boolean; default is `true`<br>Whether it is built by default in a build with no targets requested.                                    |
+| `build_by_default`                                                       | Boolean; default is `false`<br>Whether it is built by default in a build with no targets requested.                                   |
 | `add_to_alias`                                                           | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`.               |
 | [`install_group`](properties/legacy_properties.md#install_group)         | Target; default is `none`<br>Module name of a `bob_install_group` specifying an installation directory.                               |
 | [`install_deps`](properties/legacy_properties.md#install_deps)           | List of targets; default is `[]`<br>Other modules which must be installed.                                                            |
