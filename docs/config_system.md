@@ -385,10 +385,10 @@ A configuration plugin is a Python script containing the following:
 import config_system
 
 def plugin_exec():
-    # Read options using get_config
+    # Read options using `get_config()`
     if config_system.get_config("TARGET_TOOLCHAIN_CLANG")["value"] == "y":
         ...
-    # Write them using set_config
+    # Write them using `set_config()`
     if find_unit_test_framework():
         config_system.set_config("UNIT_TEST_FRAMEWORK_FOUND", "y")
 ```

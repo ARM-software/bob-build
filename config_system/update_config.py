@@ -14,7 +14,7 @@ from config_system.general import (
     init_config,
     read_config,
     read_profile_file,
-    set_config_if_prompt,
+    set_config,
     write_config,
     can_enable,
     write_depfile,
@@ -194,7 +194,7 @@ def main():
     for arg in args.args:
         key, value = parse_config_arg(arg)
         if key:
-            set_config_if_prompt(key, value, True)
+            set_config(key, value, True)
         else:
             logger.info("Reading %s" % arg)
             read_profile_file(arg)

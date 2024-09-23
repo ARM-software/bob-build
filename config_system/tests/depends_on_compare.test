@@ -8,7 +8,7 @@ config STRING_OPTION
     default "no"
 
 config INT_OPTION
-    int
+    int "Integer option"
     default 21
 
 config OPTION

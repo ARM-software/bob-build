@@ -47,10 +47,6 @@ def runtest(name):
                     )
                     tests_failed += 1
             elif action == "SET":
-                if value == "y":
-                    value = True
-                elif value == "n":
-                    value = False
                 config_system.set_config(key, value)
             else:
                 raise Exception("Unexpected action %s" % action)
