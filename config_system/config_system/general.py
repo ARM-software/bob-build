@@ -3,6 +3,7 @@ import os
 import re
 
 from config_system import data, expr, utils
+from typing import Union
 
 
 logger = logging.getLogger(__name__)
@@ -73,12 +74,12 @@ def enforce_dependent_values(stage, fix_bools=False, error_level=logging.WARNING
                 raise Exception("Unmet direct dependencies without select")
 
             if fix_bools:
-                set_config_internal(i, False)
+                __set_config_internal(i, False)
 
         elif c["datatype"] == "string":
-            set_config_internal(i, "")
+            __set_config_internal(i, "")
         elif c["datatype"] == "int":
-            set_config_internal(i, 0)
+            __set_config_internal(i, 0)
 
 
 def check_type(key, config, actual):
@@ -156,7 +157,7 @@ def read_profile_file(profile_filename):
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
                         if quoted == '"':
                             value = re.sub(r"\\(.)", r"\1", value)
-                        set_config_if_prompt(key, value, True, source=source)
+                        set_config(key, value, True, source=source)
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as _:  # noqa: F841
@@ -184,7 +185,7 @@ def read_config_file(config_filename):
                         is_user_set = True if m.group(2) else False
                         source = m.group(3) if m.group(3) else ""
                         value = "n"
-                        set_config_if_prompt(key, value, is_user_set, source)
+                        set_config(key, value, is_user_set, source)
                     # else ignore comment
                 else:
                     line = line.split(
@@ -203,7 +204,7 @@ def read_config_file(config_filename):
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
                         if quoted == '"':
                             value = re.sub(r"\\(.)", r"\1", value)
-                        set_config_if_prompt(key, value, is_user_set, source)
+                        set_config(key, value, is_user_set, source)
                     else:
                         raise Exception("Couldn't parse ", line)
     except IOError as _:  # noqa: F841
@@ -409,7 +410,7 @@ def update_choice_default(c):
             s_rank = k_rank
 
     if selection != choice_group.get("selected"):
-        set_config_internal(selection, True)
+        __set_config_internal(selection, True)
 
 
 def update_bob_ignore(k):
@@ -439,24 +440,26 @@ def update_defaults(k):
     if "default_cond" in c:
         for i in c["default_cond"]:
             if expr.condexpr_value(i["cond"]):
-                set_config_internal(k, expr.expr_value(i["expr"]))
+                __set_config_internal(k, expr.expr_value(i["expr"]))
                 return
 
     # None of the conditioned defaults match
     if "default" in c:
-        set_config_internal(k, expr.expr_value(c["default"]))
+        __set_config_internal(k, expr.expr_value(c["default"]))
         return
 
     # No default - so set bools to 'n'
     if c["datatype"] == "bool":
-        set_config_internal(k, False)
+        __set_config_internal(k, False)
     elif c["datatype"] == "string":
-        set_config_internal(k, "")
+        __set_config_internal(k, "")
     elif c["datatype"] == "int":
-        set_config_internal(k, 0)
+        __set_config_internal(k, 0)
 
 
-def set_config_if_prompt(key, value, is_user_set=True, source="cmd_line"):
+def set_config(
+    key: str, value: str, is_user_set: bool = True, source: str = "cmd_line"
+) -> None:
     """
     Used to set the option value from the command line, and through
     profile files. Only options that have prompts (indicating they are
@@ -469,22 +472,30 @@ def set_config_if_prompt(key, value, is_user_set=True, source="cmd_line"):
     except KeyError:
         logger.warning("Ignoring unknown configuration option %s" % key)
         return
+
+    if type(value) is not str:
+        raise TypeError("value must be str, passed '{}'".format(type(value)))
+
     c["is_new"] = False
     logger.debug(c)
     if "title" in c:
         logger.debug("Setting %s : %s " % (key, value))
         if c["datatype"] == "bool":
             value = True if value.lower() == "y" else False
+        if c["datatype"] == "int":
+            value = int(value)
         if is_user_set:
             c["source"] = source
-        set_config(key, value, is_user_set)
+        __set_config(key, value, is_user_set)
+    else:
+        logger.debug("Ignoring setting non-prompted configuration option %s" % key)
 
 
-def set_config_internal(key, value):
-    # Internally most calls to set_config are not (directly) the result of the
+def __set_config_internal(key, value):
+    # Internally most calls to __set_config are not (directly) the result of the
     # user specifying the value, so this helper function avoids the need to
     # explicitly set is_user_set=False on every call
-    set_config(key, value, is_user_set=False)
+    __set_config(key, value, is_user_set=False)
 
 
 def set_config_selectifs(key):
@@ -499,11 +510,13 @@ def set_config_selectifs(key):
                 force_config(k[0], False, key)
 
 
-def set_config(key, value, is_user_set=True):  # noqa: C901
+def __set_config(  # noqa: C901
+    key: str, value: Union[str, bool, int], is_user_set: bool = True
+) -> None:
     try:
         c = data.get_config(key)
     except KeyError:
-        logger.warning("Ignoring unknown configuration option %s" % key)
+        logger.warning("Ignoring unknown configuration option '%s'." % key)
         return
 
     # Validate input
@@ -514,17 +527,13 @@ def set_config(key, value, is_user_set=True):  # noqa: C901
             % (key, value)
         )
         return
-    elif c["datatype"] == "int":
-        # We get a string from menus and file reading. Always convert
-        # to an integer. Output a warning if we can't convert to an integer
-        try:
-            value = int(value)
-        except ValueError:
-            logger.warning(
-                "Ignoring integer configuration option %s with non-integer value '%s'"
-                % (key, value)
-            )
-            return
+    elif c["datatype"] == "int" and type(value) is not int:
+        # This interface should always receive an integer.
+        logger.warning(
+            "Ignoring integer configuration option %s with non-integer value '%s'."
+            % (key, value)
+        )
+        return
 
     # Record user specified value even if it is (currently) impossible
     c["is_user_set"] |= is_user_set
@@ -561,7 +570,7 @@ def set_config(key, value, is_user_set=True):  # noqa: C901
             # Member of a choice group - unset all other items
             for k in cg["configs"]:
                 if k != key:
-                    set_config(k, False, is_user_set=is_user_set)
+                    __set_config(k, False, is_user_set=is_user_set)
                     if data.get_config(k)["value"] is True:
                         # Failed to turn the other option off, so set this to n
                         c["value"] = False
@@ -594,13 +603,13 @@ def set_config(key, value, is_user_set=True):  # noqa: C901
         for k in c["rdepends"]:
             c2 = data.get_config(k)
             if c2["value"] is True and not can_enable(c2):
-                set_config_internal(k, False)
+                __set_config_internal(k, False)
             elif not c2["is_user_set"]:
                 update_defaults(k)
             elif "choice_group" in c2:
                 update_choice_default(c2["choice_group"])
             elif "requested_value" in c2 and c2["value"] != c2["requested_value"]:
-                set_config(k, c2["requested_value"])
+                __set_config(k, c2["requested_value"])
 
     if "rdefault" in c:
         # Check whether any default values need updating
@@ -637,9 +646,9 @@ def force_config(key, value, source):
         return
 
     if len(c["selected_by"]) > 0:
-        set_config_internal(key, True)
+        __set_config_internal(key, True)
     elif "requested_value" in c:
-        set_config(key, c["requested_value"])
+        __set_config(key, c["requested_value"])
     else:
         update_defaults(key)
 
@@ -850,7 +859,7 @@ class MenuItem(object):
                 return
 
             if config["datatype"] == "bool":
-                set_config(self.value, True)
+                set_config(self.value, "y")
 
     def clear(self):
         """Sets a boolean option to false"""
@@ -861,7 +870,7 @@ class MenuItem(object):
                 return
 
             if config["datatype"] == "bool":
-                set_config(self.value, False)
+                set_config(self.value, "n")
 
     def toggle(self):
         if self.type in ["config", "menuconfig"]:

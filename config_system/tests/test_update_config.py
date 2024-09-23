@@ -321,7 +321,7 @@ option_depends_on_plugin_testdata = [
 from config_system import set_config
 
 def plugin_exec():
-    set_config("PLUGIN_SET_OPTION", True)
+    set_config("PLUGIN_SET_OPTION", "y")
 """,
         """
 config PLUGIN_SET_OPTION
