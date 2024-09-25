@@ -33,13 +33,11 @@ http_archive(
     ],
 )
 
-rules_python_version = "0.18.1"
-
 http_archive(
     name = "rules_python",
-    sha256 = "29a801171f7ca190c543406f9894abf2d483c206e14d6acbd695623662320097",
-    strip_prefix = "rules_python-{}".format(rules_python_version),
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/{}.tar.gz".format(rules_python_version),
+    sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
+    strip_prefix = "rules_python-0.36.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.36.0/rules_python-0.36.0.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
@@ -55,10 +53,13 @@ py_repositories()
 # TODO: Fix config system import structure
 # http_archive(
 #     name = "rules_python_gazelle_plugin",
-#     sha256 = "29a801171f7ca190c543406f9894abf2d483c206e14d6acbd695623662320097",
-#     strip_prefix = "rules_python-{}/gazelle".format(rules_python_version),
-#     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/{}.tar.gz".format(rules_python_version),
+#     sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
+#     strip_prefix = "rules_python-0.36.0/gazelle",
+#     url = "https://github.com/bazelbuild/rules_python/releases/download/0.36.0/rules_python-0.36.0.tar.gz",
 # )
+# load("@rules_python_gazelle_plugin//:deps.bzl", _py_gazelle_deps = "gazelle_deps")
+
+# _py_gazelle_deps()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")  # keep
