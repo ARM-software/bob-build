@@ -28,7 +28,7 @@ jobs:
     name: Commit checks
     strategy:
       matrix:
-        go: ["1.13"]
+        go: ["1.18"]
         os: [ubuntu-latest]
         python: ["3.x"]
     runs-on: ${{ matrix.os }}
