@@ -91,7 +91,7 @@ go_dependencies()
 go_rules_dependencies()
 
 # 1.18 for latest rules_go and Gazelle.
-# Bob itself supports >=1.11
+# Bob itself supports >=1.18
 go_register_toolchains(version = "1.18")
 
 # TODO: Fix config system import structure
