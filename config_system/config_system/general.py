@@ -1,13 +1,32 @@
+import functools
 import logging
 import os
 import re
+import warnings
+
 
 from config_system import data, expr, utils
 from typing import Union
 
+warnings.simplefilter("always", DeprecationWarning)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+
+def deprecated(use: str = ""):
+    def deprecated_func(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            msg = f"'{f.__name__}' is deprecated."
+            if use:
+                msg += f" Use '{use}' instead."
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return deprecated_func
 
 
 def can_enable(config):
@@ -489,6 +508,22 @@ def set_config(
         __set_config(key, value, is_user_set)
     else:
         logger.debug("Ignoring setting non-prompted configuration option %s" % key)
+
+
+@deprecated(use="set_config")
+def set_config_if_prompt(
+    key: str,
+    value: Union[str, bool, int],
+    is_user_set: bool = True,
+    source: str = "cmd_line",
+) -> None:
+    if type(value) is str:
+        set_config(key, value, is_user_set, source)
+    elif type(value) is bool:
+        v = "y" if value else "n"
+        set_config(key, v, is_user_set, source)
+    elif type(value) is int:
+        set_config(key, str(value), is_user_set, source)
 
 
 def __set_config_internal(key, value):
