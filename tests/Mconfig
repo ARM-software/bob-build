@@ -288,3 +288,15 @@ config KERNEL_CC
 config KERNEL_CLANG_TRIPLE
 	string "Kernel Clang triple"
 	default "x86_64-linux-gnu" if ANDROID
+
+config USER_SETTING_1
+    bool "User setting 1"
+    default n
+
+config USER_SETTING_2
+    bool "User setting 2"
+    default n
+
+config NON_USER_SETTABLE
+    bool
+    default n
