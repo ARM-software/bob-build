@@ -378,7 +378,13 @@ func (m *genrulebobCommon) writeNinjaRules(ctx android.ModuleContext, args map[s
 		ruleparams.Deps = blueprint.DepsGCC
 	}
 
-	rule := ctx.Rule(pctx, "bob_gen_"+ctx.ModuleName(), ruleparams, keys...)
+	var namespacePrefix string
+	namespace := ctx.Namespace().Path
+	if namespace != "." {
+		namespacePrefix = strings.ReplaceAll(namespace, "/", "_") + "_"
+	}
+
+	rule := ctx.Rule(pctx, "bob_gen_"+namespacePrefix+ctx.ModuleName(), ruleparams, keys...)
 
 	for _, io := range m.inouts {
 		// `args` is slightly different for each inout, but blueprint's
