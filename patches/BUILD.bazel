@@ -1,9 +1,0 @@
-filegroup(
-    name = "blueprint-patches",
-    srcs = [
-        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
-        "@bob//patches:blueprint/0002-fix-remove-blueprint-dep.patch",
-        "@bob//patches:blueprint/0003-fix-remove-dupbuild-flag.patch",
-    ],
-    visibility = ["//visibility:public"],
-)

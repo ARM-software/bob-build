@@ -1,9 +1,13 @@
 name: CI
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - master_sub
   pull_request:
-    branches: [master]
+    branches:
+      - master
+      - master_sub
 
 env:
   GOPROXY: https://proxy.golang.org

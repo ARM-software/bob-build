@@ -76,11 +76,6 @@ go_repository(
     name = "com_github_google_blueprint",
     commit = "6957a46d",
     importpath = "github.com/google/blueprint",
-    patch_args = ["-p1"],
-    patches = [
-        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
-        "@bob//patches:blueprint/0003-fix-remove-dupbuild-flag.patch",
-    ],
 )
 
 load("//:deps.bzl", "go_dependencies")
