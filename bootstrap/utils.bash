@@ -48,29 +48,3 @@ function create_bob_symlinks() {
     ln -sf "${BOB_DIR}/bob.bash" "${BUILDDIR}/bob"
     ln -sf "${BOB_DIR}/bob_graph.bash" "${BUILDDIR}/bob_graph"
 }
-
-function apply_blueprint_patches() {
-    local BOB_DIR="${1}"
-
-    # blueprint patches
-    declare -a patches=(
-        "../patches/blueprint/0001-feat-visit-modules-with-position.patch"
-        "../patches/blueprint/0003-fix-remove-dupbuild-flag.patch"
-    )
-
-    pushd "${BOB_DIR}" > /dev/null || return
-
-    # reset `blueprint` submodule
-    git submodule update --init --recursive
-
-    pushd "blueprint" > /dev/null || return
-
-    # apply patches
-    for p in "${patches[@]}"
-    do
-        git am -q < "${p}"
-    done
-
-    popd > /dev/null || return
-    popd > /dev/null || return
-}
