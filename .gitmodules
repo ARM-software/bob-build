@@ -1,4 +1,4 @@
-[submodule "blueprint"]
+[submodule "blueprint_module"]
 	path = blueprint
-	url = ../../google/blueprint
-	branch = master
+	url = ./
+	branch = blueprint

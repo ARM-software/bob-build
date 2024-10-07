@@ -2,25 +2,11 @@ load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 def go_dependencies():
     go_repository(
-        name = "com_github_bazelbuild_bazel_gazelle",
-        build_file_proto_mode = "disable_global",
-        importpath = "github.com/bazelbuild/bazel-gazelle",
-        sum = "h1:uFYs0rkVtEwZ6PlVQAXkBrIvWtIljMG8YR67LGiopeY=",
-        version = "v0.29.0",
-    )
-    go_repository(
         name = "com_github_bazelbuild_buildtools",
         build_file_proto_mode = "disable_global",
         importpath = "github.com/bazelbuild/buildtools",
-        sum = "h1:DraHsDqTYhf6w1369EEdFyA5hjJnGX88xNJRv1+20E0=",
-        version = "v0.0.0-20230111132423-06e8e2436a75",
-    )
-    go_repository(
-        name = "com_github_bazelbuild_rules_go",
-        build_file_proto_mode = "disable_global",
-        importpath = "github.com/bazelbuild/rules_go",
-        sum = "h1:vbnESGv/t2WgGEbXatwbXAS95dTx93Lv6Uh5QkVF13s=",
-        version = "v0.37.0",
+        sum = "h1:VNqmvOfFzn2Hrtoni8vqgXlIQ4C2Zt22fxeZ9gOOkp0=",
+        version = "v0.0.0-20240313121412-66c605173954",
     )
     go_repository(
         name = "com_github_bmatcuk_doublestar_v4",

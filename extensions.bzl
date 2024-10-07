@@ -9,6 +9,8 @@ def _impl_blueprint(module_ctx):
                 importpath = "github.com/google/blueprint",
                 patch_args = ["-p{}".format(tag.patch_strip)],
                 patches = tag.patches,
+                remote = "ssh://eu-gerrit-1.euhpc.arm.com:29418/GPU-SW/midgard_sw/ARM-software/bob-build",
+                vcs = "git",
             )
 
 _from_commit = tag_class(

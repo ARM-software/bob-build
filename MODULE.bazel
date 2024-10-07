@@ -75,11 +75,6 @@ use_repo(
 
 blueprint = use_extension("@bob//:extensions.bzl", "blueprint")
 blueprint.from_commit(
-    commit = "6957a46d",
-    patch_strip = 1,
-    patches = [
-        "@bob//patches:blueprint/0001-feat-visit-modules-with-position.patch",
-        "@bob//patches:blueprint/0003-fix-remove-dupbuild-flag.patch",
-    ],
+    commit = "e18ba9b96682ff547120f5bd8b0da7ed017d0986",  # `blueprint` branch
 )
 use_repo(blueprint, "com_github_google_blueprint")
