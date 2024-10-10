@@ -130,31 +130,6 @@ func (m *ModuleLibrary) getGeneratedHeaderModules(ctx blueprint.BaseModuleContex
 	return
 }
 
-func addPGOProps(m bpwriter.Module, props AndroidPGOProps) {
-	if props.Pgo.Profile_file == nil {
-		return
-	}
-
-	g := m.NewGroup("pgo")
-
-	// `instrumentation` controls whether PGO is used for this module. This function checks
-	// `profile_file` at the start; if it was set, we can infer that PGO is being used.
-	g.AddBool("instrumentation", true)
-
-	// Sampling-based PGO is not currently supported, so Soong only allows
-	// this to be false. There is therefore no need to set it explicitly.
-	// g.AddBool("sampling", false)
-	g.AddStringList("benchmarks", props.Pgo.Benchmarks)
-
-	g.AddString("profile_file", *props.Pgo.Profile_file)
-
-	// If not overridden explicitly, don't set it, which will result in
-	// Soong's default value of `true` being used.
-	g.AddOptionalBool("enable_profile_use", props.Pgo.Enable_profile_use)
-
-	g.AddStringList("cflags", props.Pgo.Cflags)
-}
-
 func addMTEProps(m bpwriter.Module, props AndroidMTEProps) {
 	memtagHeap := proptools.Bool(props.Mte.Memtag_heap)
 	diagMemtagHeap := proptools.Bool(props.Mte.Diag_memtag_heap)
@@ -313,7 +288,6 @@ func addCcLibraryProps(mod bpwriter.Module, m ModuleLibrary, ctx blueprint.Modul
 	}
 
 	addProvenanceProps(ctx, mod, &m)
-	addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 	addRequiredModules(mod, m, ctx)
 
 	if m.Properties.Post_install_cmd != nil ||
@@ -714,9 +688,6 @@ func (g *androidBpGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx bl
 	if bc != nil && !proptools.Bool(bc.GetMteProps(ctx).Mte.Diag_memtag_heap) && bc.IsHwAsanEnabled() {
 		addHWASANProps(mod)
 	}
-
-	// TODO: Make addPGOProps generic and enable it if needed
-	// addPGOProps(mod, m.Properties.Build.AndroidPGOProps)
 
 	// TODO: Make addRequiredModules generic and enable it if needed
 	// addRequiredModules(mod, m, ctx)
