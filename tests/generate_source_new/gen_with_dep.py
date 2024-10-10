@@ -7,7 +7,6 @@ import os
 parser = argparse.ArgumentParser(description="Test generator outputing depfile")
 parser.add_argument("--in", nargs="*", dest="input", action="store", help="Input files")
 parser.add_argument("-o", "--output", help="Output file")
-parser.add_argument("-d", "--depfile", help="Dependency file")
 parser.add_argument(
     "--gen-implicit-out",
     action="store_true",
@@ -30,11 +29,6 @@ with open(args.output, "w") as out:
 
         with open(input_file, "r") as f:
             out.write(f.read())
-
-template = "{target}: {deps}\n"
-dep_str = " \\\n\t".join(args.input)
-with open(args.depfile, "w") as depfile:
-    depfile.write(template.format(target=args.output, deps=dep_str))
 
 # create empty file for test purposes, in the same folder as out file
 if args.gen_implicit_out:

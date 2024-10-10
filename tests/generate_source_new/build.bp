@@ -126,12 +126,10 @@ bob_genrule {
     tool_files: ["generator.py"],
     cmd: "python3 ${location generator.py} --in ${in} --out ${out}",
     linux: {
-        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
-        depfile: true,
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --config ${bob_config}",
     },
     android: {
-        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --depfile ${depfile} --config ${bob_config}",
-        depfile: true,
+        cmd: "python3 ${location generator.py} --in ${in} --out ${out} --config ${bob_config}",
     },
     build_by_default: true,
 }
@@ -195,9 +193,8 @@ bob_genrule {
         "depgen2.in",
     ],
     out: ["output.txt"],
-    depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "${location} -o ${out} -d ${depfile} --in ${in}",
+    cmd: "${location} -o ${out} --in ${in}",
 }
 
 bob_genrule {
@@ -210,9 +207,8 @@ bob_genrule {
         "output.txt",
         "out.h",
     ],
-    depfile: true,
     tool_files: ["gen_with_dep.py"],
-    cmd: "${location} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${in}",
+    cmd: "${location} --gen-implicit-out -o ${genDir}/output.txt --in ${in}",
 }
 
 bob_genrule {
@@ -252,8 +248,7 @@ bob_genrule {
         "gen_with_dep.py",
         "depgen1.in",
     ],
-    depfile: true,
-    cmd: "${location gen_with_dep.py} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${location depgen1.in} ${in}",
+    cmd: "${location gen_with_dep.py} --gen-implicit-out -o ${genDir}/output.txt --in ${location depgen1.in} ${in}",
 }
 
 bob_genrule {

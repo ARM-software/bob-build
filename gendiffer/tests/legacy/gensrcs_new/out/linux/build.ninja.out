@@ -45,10 +45,6 @@ rule g.bob.executable
     command = ${build_wrapper} ${linker} ${in} -o ${out} ${ldflags} ${static_libs} -L${shared_libs_dir} ${shared_libs_flags} ${ldlibs}
     description = ${out}
 
-rule g.bob.touch
-    command = touch -c ${out}
-    description = touch ${out}
-
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
@@ -75,59 +71,29 @@ build exclude_support: phony ${g.bob.BuildDir}/gen/exclude_support/input1.out $
         ${g.bob.BuildDir}/gen/exclude_support/input3.out
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  gen_source_depfile_new
+# Module:  gen_source_implicit_outs_new
 # Variant:
 # Type:    bob_genrule
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: nested/build.bp:redacted
 
-rule m.gen_source_depfile_new_.gen_gen_source_depfile_new
-    command = ${tool_1} -o ${_out_} -d ${depfile} --in ${in}
+rule m.gen_source_implicit_outs_new_.gen_gen_source_implicit_outs_new
+    command = ${tool_1} --gen-implicit-out -o ${genDir}/output.txt --in ${in}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt: $
-        m.gen_source_depfile_new_.gen_gen_source_depfile_new $
+build ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/output.txt $
+        ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/out.h: $
+        m.gen_source_implicit_outs_new_.gen_gen_source_implicit_outs_new $
         ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
         ${g.bob.SrcDir}/nested/gen_with_dep.py
-    depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_new/gen_source_depfile_new.d
-    _out_ = ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt
+    _out_ = ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/output.txt ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/out.h
+    genDir = ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new
     tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py
 
-build gen_source_depfile_new: phony $
-        ${g.bob.BuildDir}/gen/gen_source_depfile_new/output.txt
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  gen_source_depfile_with_implicit_outs_new
-# Variant:
-# Type:    bob_genrule
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: nested/build.bp:redacted
-
-rule m.gen_source_depfile_with_implicit_outs_new_.gen_gen_source_depfile_with_implicit_outs_new
-    command = ${tool_1} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${in}
-    description = ${out}
-    restat = true
-
-build ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/out.h: $
-        g.bob.touch $
-        ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt
-
-build $
-        ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt $
-        : $
-        m.gen_source_depfile_with_implicit_outs_new_.gen_gen_source_depfile_with_implicit_outs_new $
-        ${g.bob.SrcDir}/nested/depgen1.in ${g.bob.SrcDir}/nested/depgen2.in | $
-        ${g.bob.SrcDir}/nested/gen_with_dep.py
-    depfile = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/gen_source_depfile_with_implicit_outs_new.d
-    deps = gcc
-    _out_ = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/out.h
-    genDir = ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new
-    tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py
-
-build gen_source_depfile_with_implicit_outs_new: phony $
-        ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/output.txt $
-        ${g.bob.BuildDir}/gen/gen_source_depfile_with_implicit_outs_new/out.h
+build gen_source_implicit_outs_new: phony $
+        ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/output.txt $
+        ${g.bob.BuildDir}/gen/gen_source_implicit_outs_new/out.h
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  generate_feature_command_new
@@ -207,19 +173,15 @@ build generate_source_multiple_in_out_new: phony $
 # Defined: build.bp:redacted
 
 rule m.generate_source_multiple_out_new_.gen_generate_source_multiple_out_new
-    command = python ${tool_1} --in ${in} --out ${_out_} --config ${bob_config} --depfile ${depfile} --out-src ${genDir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}
+    command = python ${tool_1} --in ${in} --out ${_out_} --config ${bob_config} --out-src ${genDir}/mali_config.cpp --expect-in before_generate.in ${bob_config_opts}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp $
-        : g.bob.touch $
-        ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp
-
-build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp: $
+build ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp $
+        ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp $
+        : $
         m.generate_source_multiple_out_new_.gen_generate_source_multiple_out_new $
         ${g.bob.SrcDir}/before_generate.in | ${g.bob.SrcDir}/generator.py
-    depfile = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/generate_source_multiple_out_new.d
-    deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out.cpp ${g.bob.BuildDir}/gen/generate_source_multiple_out_new/multiple_out2.cpp
     bob_config = %REDACTED_CONFIG_FILE%
     bob_config_opts = 
@@ -501,20 +463,16 @@ build multi_src_tag: phony ${g.bob.BuildDir}/gen/multi_src_tag/deps.cpp
 # Defined: nested/build.bp:redacted
 
 rule m.multi_tool_file_.gen_multi_tool_file
-    command = ${tool_1} --gen-implicit-out -o ${genDir}/output.txt -d ${depfile} --in ${tool_2} ${in}
+    command = ${tool_1} --gen-implicit-out -o ${genDir}/output.txt --in ${tool_2} ${in}
     description = ${out}
     restat = true
 
-build ${g.bob.BuildDir}/gen/multi_tool_file/out.h: g.bob.touch $
-        ${g.bob.BuildDir}/gen/multi_tool_file/output.txt
-
-build ${g.bob.BuildDir}/gen/multi_tool_file/output.txt: $
+build ${g.bob.BuildDir}/gen/multi_tool_file/output.txt $
+        ${g.bob.BuildDir}/gen/multi_tool_file/out.h: $
         m.multi_tool_file_.gen_multi_tool_file $
         ${g.bob.SrcDir}/nested/depgen2.in | $
         ${g.bob.SrcDir}/nested/gen_with_dep.py $
         ${g.bob.SrcDir}/nested/depgen1.in
-    depfile = ${g.bob.BuildDir}/gen/multi_tool_file/multi_tool_file.d
-    deps = gcc
     _out_ = ${g.bob.BuildDir}/gen/multi_tool_file/output.txt ${g.bob.BuildDir}/gen/multi_tool_file/out.h
     genDir = ${g.bob.BuildDir}/gen/multi_tool_file
     tool_1 = ${g.bob.SrcDir}/nested/gen_with_dep.py

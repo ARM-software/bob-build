@@ -8,7 +8,6 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 
 	"github.com/google/blueprint"
-	"github.com/google/blueprint/proptools"
 )
 
 /*
@@ -64,10 +63,6 @@ func (m *ModuleGenrule) ResolveFiles(ctx blueprint.BaseModuleContext) {
 	for _, out := range m.Properties.Out {
 		fp := file.NewPath(out, ctx.ModuleName(), file.TypeGenerated)
 		files = files.AppendIfUnique(fp)
-	}
-
-	if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
-		files = append(files, file.NewPath(utils.FlattenPath(m.Name())+".d", m.Name(), file.TypeDep|file.TypeGenerated|file.TypeImplicit))
 	}
 
 	m.Properties.ResolvedOut = files
