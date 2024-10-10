@@ -14,7 +14,6 @@ type StrictGenerateProps struct {
 	Srcs                []string // TODO: This module should probalby make use of LegacySourceProps
 	Exclude_srcs        []string
 	Cmd                 *string
-	Depfile             *bool
 	Export_include_dirs []string
 	Tool_files          []string
 	Tools               []string

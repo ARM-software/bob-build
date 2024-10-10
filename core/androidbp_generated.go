@@ -125,16 +125,10 @@ func expandGenruleCmd(gc *ModuleStrictGenerateCommon, ctx blueprint.ModuleContex
 		case "gen_dir":
 			return "$(genDir)"
 		case "bob_config":
-			if !proptools.Bool(gc.Properties.Depfile) {
-				utils.Die("%s references Bob config but depfile not enabled. "+
-					"Config dependencies must be declared via a depfile!", gc.Name())
-			}
+			// TODO: Add config file dependency if needed
 			return config.GetEnvironmentVariables().ConfigFile
 		case "bob_config_json":
-			if !proptools.Bool(gc.Properties.Depfile) {
-				utils.Die("%s references Bob config but depfile not enabled. "+
-					"Config dependencies must be declared via a depfile!", gc.Name())
-			}
+			// TODO: Add config json file dependency if needed
 			return config.GetEnvironmentVariables().ConfigJSON
 		case "bob_config_opts":
 			return config.GetEnvironmentVariables().ConfigOpts
@@ -188,7 +182,6 @@ func (g *androidBpGenerator) androidGenerateCommonActions(gc *ModuleStrictGenera
 	}
 
 	m.AddString("cmd", strings.TrimSpace(cmd))
-	m.AddOptionalBool("depfile", gc.Properties.Depfile)
 	m.AddOptionalBool("enabled", gc.Properties.Enabled)
 	m.AddStringList("export_include_dirs", gc.Properties.Export_include_dirs)
 	m.AddStringList("tool_files", gc.Properties.Tool_files)

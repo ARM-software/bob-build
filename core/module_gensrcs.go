@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/blueprint"
 	"github.com/google/blueprint/pathtools"
-	"github.com/google/blueprint/proptools"
 )
 
 /*
@@ -85,11 +84,6 @@ func (m *ModuleGensrcs) ResolveOutFiles(ctx blueprint.BaseModuleContext) {
 		func(fp file.Path) bool {
 			fpOut := file.NewPath(pathtools.ReplaceExtension(fp.ScopedPath(), m.Properties.Output_extension), ctx.ModuleName(), file.TypeGenerated)
 			files = files.AppendIfUnique(fpOut)
-
-			if proptools.Bool(m.ModuleStrictGenerateCommon.Properties.Depfile) {
-				depOut := file.NewPath(fp.ScopedPath()+".d", ctx.ModuleName(), file.TypeDep|file.TypeGenerated|file.TypeImplicit)
-				files = files.AppendIfUnique(depOut)
-			}
 
 			return true
 		})

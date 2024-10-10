@@ -26,25 +26,12 @@ genrule {
 }
 
 genrule {
-    name: "gen_source_depfile_new",
+    name: "gen_source_implicit_outs_new",
     srcs: [
         "nested/depgen1.in",
         "nested/depgen2.in",
     ],
-    cmd: "$(location) -o $(out) -d $(depfile) --in $(in)",
-    depfile: true,
-    tool_files: ["nested/gen_with_dep.py"],
-    out: ["output.txt"],
-}
-
-genrule {
-    name: "gen_source_depfile_with_implicit_outs_new",
-    srcs: [
-        "nested/depgen1.in",
-        "nested/depgen2.in",
-    ],
-    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(in)",
-    depfile: true,
+    cmd: "$(location) --gen-implicit-out -o $(genDir)/output.txt --in $(in)",
     tool_files: ["nested/gen_with_dep.py"],
     out: [
         "output.txt",
@@ -90,8 +77,7 @@ genrule {
 genrule {
     name: "generate_source_multiple_out_new",
     srcs: ["before_generate.in"],
-    cmd: "python $(location) --in $(in) --out $(out) --config %REDACTED_CONFIG_FILE% --depfile $(depfile) --out-src $(genDir)/mali_config.cpp --expect-in before_generate.in",
-    depfile: true,
+    cmd: "python $(location) --in $(in) --out $(out) --config %REDACTED_CONFIG_FILE% --out-src $(genDir)/mali_config.cpp --expect-in before_generate.in",
     tool_files: ["generator.py"],
     out: [
         "multiple_out.cpp",
@@ -190,8 +176,7 @@ genrule {
 genrule {
     name: "multi_tool_file",
     srcs: ["nested/depgen2.in"],
-    cmd: "$(location nested/gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt -d $(depfile) --in $(location nested/depgen1.in) $(in)",
-    depfile: true,
+    cmd: "$(location nested/gen_with_dep.py) --gen-implicit-out -o $(genDir)/output.txt --in $(location nested/depgen1.in) $(in)",
     tool_files: [
         "nested/gen_with_dep.py",
         "nested/depgen1.in",

@@ -65,6 +65,6 @@ load("//gendiffer:gendiffer.bzl", "bob_generation_test")
 
 To update the expected outputs locally, you must run:
 
-`UPDATE_SNAPSNOTS="true" bazel run //gendiffer/tests:<target>`
+`UPDATE_SNAPSHOTS="true" bazel run //gendiffer/tests:<target>`
 
 where target is e.g. `example_linux` or `example_android`

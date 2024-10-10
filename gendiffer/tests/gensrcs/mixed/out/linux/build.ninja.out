@@ -237,21 +237,19 @@ default gen_new_transform_out
 # Defined: build.bp:redacted
 
 rule m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp
-    command = python ${tool_1} --in ${in} --depfile ${depfile} --gen ${_out_}
+    command = python ${tool_1} --in ${in} --gen ${_out_}
     description = ${out}
     restat = true
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f2.in $
         | ${g.bob.SrcDir}/generator.py
-    depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f2.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
 build ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp: $
         m.gensrcs_multiple_cpp_.gen_gensrcs_multiple_cpp ${g.bob.SrcDir}/f3.in $
         | ${g.bob.SrcDir}/generator.py
-    depfile = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.in.d
     _out_ = ${g.bob.BuildDir}/gen/gensrcs_multiple_cpp/f3.cpp
     tool_1 = ${g.bob.SrcDir}/generator.py
 
