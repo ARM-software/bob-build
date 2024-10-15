@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "pathtools",
+    srcs = [
+        "fs.go",
+        "glob.go",
+        "lists.go",
+    ],
+    importpath = "github.com/google/blueprint/pathtools",
+    visibility = ["//visibility:public"],
+    deps = ["//deptools"],
+)
+
+go_test(
+    name = "pathtools_test",
+    srcs = [
+        "fs_test.go",
+        "glob_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":pathtools"],
+)

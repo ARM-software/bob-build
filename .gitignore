@@ -1,2 +1,6 @@
 out.test
 src.test
+
+# Bazel
+bazel-*
+user.bazelrc

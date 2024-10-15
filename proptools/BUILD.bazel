@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "proptools",
+    srcs = [
+        "clone.go",
+        "escape.go",
+        "extend.go",
+        "filter.go",
+        "proptools.go",
+        "tag.go",
+        "typeequal.go",
+        "unpack.go",
+    ],
+    importpath = "github.com/google/blueprint/proptools",
+    visibility = ["//visibility:public"],
+    deps = ["//parser"],
+)
+
+go_test(
+    name = "proptools_test",
+    srcs = [
+        "clone_test.go",
+        "escape_test.go",
+        "extend_test.go",
+        "filter_test.go",
+        "proptools_test.go",
+        "tag_test.go",
+        "typeequal_test.go",
+        "unpack_test.go",
+    ],
+    embed = [":proptools"],
+    deps = ["//parser"],
+)

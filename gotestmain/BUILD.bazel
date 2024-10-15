@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "gotestmain_lib",
+    srcs = [
+        "dummy.go",
+        "gotestmain.go",
+    ],
+    importpath = "github.com/google/blueprint/gotestmain",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "gotestmain",
+    embed = [":gotestmain_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "gotestmain_test",
+    srcs = ["testmain_test.go"],
+    embed = [":gotestmain_lib"],
+)

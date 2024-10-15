@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "bootstrap",
+    srcs = [
+        "bootstrap.go",
+        "cleanup.go",
+        "command.go",
+        "config.go",
+        "doc.go",
+        "glob.go",
+        "writedocs.go",
+    ],
+    importpath = "github.com/google/blueprint/bootstrap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:blueprint",
+        "//bootstrap/bpdoc",
+        "//deptools",
+        "//pathtools",
+    ],
+)

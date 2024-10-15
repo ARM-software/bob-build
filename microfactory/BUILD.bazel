@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "microfactory",
+    srcs = ["microfactory.go"],
+    importpath = "github.com/google/blueprint/microfactory",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "microfactory_test",
+    srcs = ["microfactory_test.go"],
+    embed = [":microfactory"],
+)

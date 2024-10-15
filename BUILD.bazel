@@ -1,0 +1,46 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+# gazelle:prefix github.com/google/blueprint
+gazelle(name = "gazelle")
+
+go_library(
+    name = "blueprint",
+    srcs = [
+        "context.go",
+        "doc.go",
+        "glob.go",
+        "live_tracker.go",
+        "mangle.go",
+        "module_ctx.go",
+        "name_interface.go",
+        "ninja_defs.go",
+        "ninja_strings.go",
+        "ninja_writer.go",
+        "package_ctx.go",
+        "scope.go",
+        "singleton_ctx.go",
+    ],
+    importpath = "github.com/google/blueprint",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//parser",
+        "//pathtools",
+        "//proptools",
+    ],
+)
+
+go_test(
+    name = "blueprint_test",
+    srcs = [
+        "context_test.go",
+        "glob_test.go",
+        "module_ctx_test.go",
+        "ninja_strings_test.go",
+        "ninja_writer_test.go",
+        "splice_modules_test.go",
+        "visit_test.go",
+    ],
+    embed = [":blueprint"],
+    deps = ["//parser"],
+)

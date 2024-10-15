@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "bpdoc",
+    srcs = [
+        "bpdoc.go",
+        "properties.go",
+        "reader.go",
+    ],
+    importpath = "github.com/google/blueprint/bootstrap/bpdoc",
+    visibility = ["//visibility:public"],
+    deps = ["//proptools"],
+)
+
+go_test(
+    name = "bpdoc_test",
+    srcs = [
+        "bpdoc_test.go",
+        "properties_test.go",
+        "reader_test.go",
+    ],
+    embed = [":bpdoc"],
+    deps = ["//:blueprint"],
+)

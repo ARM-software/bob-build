@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "loadplugins_lib",
+    srcs = ["loadplugins.go"],
+    importpath = "github.com/google/blueprint/loadplugins",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "loadplugins",
+    embed = [":loadplugins_lib"],
+    visibility = ["//visibility:public"],
+)
