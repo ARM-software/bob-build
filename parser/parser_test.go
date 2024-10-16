@@ -441,7 +441,7 @@ var validParseTestCases = []struct {
 		[]*CommentGroup{
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"// comment1"},
 						Slash:   mkpos(3, 2, 3),
 					},
@@ -449,7 +449,7 @@ var validParseTestCases = []struct {
 			},
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"/* test */"},
 						Slash:   mkpos(21, 3, 7),
 					},
@@ -457,7 +457,7 @@ var validParseTestCases = []struct {
 			},
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"// comment2"},
 						Slash:   mkpos(37, 4, 4),
 					},
@@ -465,7 +465,7 @@ var validParseTestCases = []struct {
 			},
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"// comment3"},
 						Slash:   mkpos(67, 5, 19),
 					},
@@ -1124,11 +1124,11 @@ var validParseTestCases = []struct {
 		[]*CommentGroup{
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"// comment1"},
 						Slash:   mkpos(3, 2, 3),
 					},
-					&Comment{
+					{
 						Comment: []string{"// comment2"},
 						Slash:   mkpos(17, 3, 3),
 					},
@@ -1136,11 +1136,11 @@ var validParseTestCases = []struct {
 			},
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"/* comment3", "		   comment4 */"},
-						Slash: mkpos(32, 5, 3),
+						Slash:   mkpos(32, 5, 3),
 					},
-					&Comment{
+					{
 						Comment: []string{"// comment5"},
 						Slash:   mkpos(63, 7, 3),
 					},
@@ -1148,15 +1148,15 @@ var validParseTestCases = []struct {
 			},
 			{
 				Comments: []*Comment{
-					&Comment{
+					{
 						Comment: []string{"/* comment6 */"},
 						Slash:   mkpos(78, 9, 3),
 					},
-					&Comment{
+					{
 						Comment: []string{"/* comment7 */"},
 						Slash:   mkpos(93, 9, 18),
 					},
-					&Comment{
+					{
 						Comment: []string{"// comment8"},
 						Slash:   mkpos(108, 9, 33),
 					},

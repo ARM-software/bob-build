@@ -43,7 +43,7 @@ var ninjaEscaper = strings.NewReplacer(
 
 // ShellEscapeList takes a slice of strings that may contain characters that are meaningful to bash and
 // escapes them if necessary by wrapping them in single quotes, and replacing internal single quotes with
-// '\'' (one single quote to end the quoting, a shell-escaped single quote to insert a real single
+// '\” (one single quote to end the quoting, a shell-escaped single quote to insert a real single
 // quote, and then a single quote to restarting quoting.  A new slice containing the escaped strings
 // is returned.
 func ShellEscapeList(slice []string) []string {
@@ -58,7 +58,7 @@ func ShellEscapeList(slice []string) []string {
 
 // ShellEscapeList takes string that may contain characters that are meaningful to bash and
 // escapes it if necessary by wrapping it in single quotes, and replacing internal single quotes with
-// '\'' (one single quote to end the quoting, a shell-escaped single quote to insert a real single
+// '\” (one single quote to end the quoting, a shell-escaped single quote to insert a real single
 // quote, and then a single quote to restarting quoting.
 func ShellEscape(s string) string {
 	shellUnsafeChar := func(r rune) bool {

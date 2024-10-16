@@ -53,9 +53,13 @@ type unpackContext struct {
 // If a property a.b.c has a value, a field with the matching name in each runtime value is initialized
 // from it. See PropertyNameForField for field and property name matching.
 // For instance, if the input contains
-//   { foo: "abc", bar: {x: 1},}
+//
+//	{ foo: "abc", bar: {x: 1},}
+//
 // and a runtime value being has been declared as
-//   var v struct { Foo string; Bar int }
+//
+//	var v struct { Foo string; Bar int }
+//
 // then v.Foo will be set to "abc" and v.Bar will be set to 1
 // (cf. unpack_test.go for further examples)
 //

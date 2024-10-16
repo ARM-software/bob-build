@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "proptools",
@@ -19,6 +19,7 @@ go_library(
 
 go_test(
     name = "proptools_test",
+    size = "small",
     srcs = [
         "clone_test.go",
         "escape_test.go",

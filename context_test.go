@@ -176,8 +176,9 @@ func TestContextParse(t *testing.T) {
 // |===B---D       - represents a non-walkable edge
 // A               = represents a walkable edge
 // |===C===E---G
-//     |       |   A should not be visited because it's the root node.
-//     |===F===|   B, D and E should not be walked.
+//
+//	|       |   A should not be visited because it's the root node.
+//	|===F===|   B, D and E should not be walked.
 func TestWalkDeps(t *testing.T) {
 	ctx := NewContext()
 	ctx.MockFileSystem(map[string][]byte{
@@ -186,31 +187,31 @@ func TestWalkDeps(t *testing.T) {
 			    name: "A",
 			    deps: ["B", "C"],
 			}
-			
+
 			bar_module {
 			    name: "B",
 			    deps: ["D"],
 			}
-			
+
 			foo_module {
 			    name: "C",
 			    deps: ["E", "F"],
 			}
-			
+
 			foo_module {
 			    name: "D",
 			}
-			
+
 			bar_module {
 			    name: "E",
 			    deps: ["G"],
 			}
-			
+
 			foo_module {
 			    name: "F",
 			    deps: ["G"],
 			}
-			
+
 			foo_module {
 			    name: "G",
 			}
@@ -251,9 +252,10 @@ func TestWalkDeps(t *testing.T) {
 // |===B---D           - represents a non-walkable edge
 // A                   = represents a walkable edge
 // |===C===E===\       A should not be visited because it's the root node.
-//     |       |       B, D should not be walked.
-//     |===F===G===H   G should be visited multiple times
-//         \===/       H should only be visited once
+//
+//	|       |       B, D should not be walked.
+//	|===F===G===H   G should be visited multiple times
+//	    \===/       H should only be visited once
 func TestWalkDepsDuplicates(t *testing.T) {
 	ctx := NewContext()
 	ctx.MockFileSystem(map[string][]byte{
@@ -329,11 +331,13 @@ func TestWalkDepsDuplicates(t *testing.T) {
 	}
 }
 
-//                     - represents a non-walkable edge
+//   - represents a non-walkable edge
+//
 // A                   = represents a walkable edge
 // |===B-------\       A should not be visited because it's the root node.
-//     |       |       B -> D should not be walked.
-//     |===C===D===E   B -> C -> D -> E should be walked
+//
+//	|       |       B -> D should not be walked.
+//	|===C===D===E   B -> C -> D -> E should be walked
 func TestWalkDepsDuplicates_IgnoreFirstPath(t *testing.T) {
 	ctx := NewContext()
 	ctx.MockFileSystem(map[string][]byte{
@@ -588,7 +592,7 @@ func TestParseFailsForModuleWithoutName(t *testing.T) {
 			foo_module {
 			    name: "A",
 			}
-			
+
 			bar_module {
 			    deps: ["A"],
 			}

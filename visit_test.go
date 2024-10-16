@@ -74,18 +74,20 @@ func visitMutator(ctx TopDownMutatorContext) {
 	}
 }
 
-// A
-// |
-// B
-// |\
-// C \
-//  \|
-//   D
-//   |
-//   E
-//  / \
-//  \ /
-//   F
+// /
+//
+//	A
+//	|
+//	B
+//	|\
+//	C \
+//	 \|
+//	  D
+//	  |
+//	  E
+//	 / \
+//	 \ /
+//	  F
 func setupVisitTest(t *testing.T) *Context {
 	ctx := NewContext()
 	ctx.RegisterModuleType("visit_module", newVisitModule)
@@ -98,22 +100,22 @@ func setupVisitTest(t *testing.T) *Context {
 				name: "A",
 				visit: ["B"],
 			}
-	
+
 			visit_module {
 				name: "B",
 				visit: ["C", "D"],
 			}
-	
+
 			visit_module {
 				name: "C",
 				visit: ["D"],
 			}
-	
+
 			visit_module {
 				name: "D",
 				visit: ["E"],
 			}
-	
+
 			visit_module {
 				name: "E",
 				visit: ["F", "F"],

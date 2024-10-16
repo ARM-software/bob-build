@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 # Go to srcdir
-cd $(dirname ${BASH_SOURCE[0]})/..
+cd "$(dirname ${BASH_SOURCE[0]})/.."
 
 rm -rf out.test
 mkdir out.test

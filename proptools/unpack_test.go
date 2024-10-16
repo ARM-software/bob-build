@@ -301,8 +301,8 @@ var validUnpackTestCases = []struct {
 				Listoflists [][]string
 			}{
 				Listoflists: [][]string{
-					[]string{"abc"},
-					[]string{"def"},
+					{"abc"},
+					{"def"},
 				},
 			},
 		},

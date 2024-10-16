@@ -10,7 +10,7 @@ if [ -z "$BLUEPRINT_LIST_FILE" ]; then
   OUR_LIST_FILE="${BUILDDIR}/.bootstrap/bplist"
   TEMP_LIST_FILE="${OUR_FILES_LIST}.tmp"
   mkdir -p "$(dirname ${OUR_LIST_FILE})"
-  (cd "$SRCDIR";
+  (cd "$SRCDIR" || exit;
     find . -mindepth 1 -type d \( -name ".*" -o -execdir test -e {}/.out-dir \; \) -prune \
       -o -name $TOPNAME -print | sort) >"${TEMP_LIST_FILE}"
   if cmp -s "${OUR_LIST_FILE}" "${TEMP_LIST_FILE}"; then
@@ -37,14 +37,15 @@ if ! test "${NINJA} -w list | grep -q '^  dupbuild'"; then
 fi
 
 # Build the bootstrap build.ninja
-"${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/.minibootstrap/build.ninja"
+#
+"${NINJA}" "${NINJA_ARGS[@]}" -f "${BUILDDIR}/.minibootstrap/build.ninja"
 
 # Build the primary builder and the main build.ninja
-"${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/.bootstrap/build.ninja"
+"${NINJA}" "${NINJA_ARGS[@]}" -f "${BUILDDIR}/.bootstrap/build.ninja"
 
 # SKIP_NINJA can be used by wrappers that wish to run ninja themselves.
 if [ -z "$SKIP_NINJA" ]; then
-    "${NINJA}" ${NINJA_ARGS[@]} -f "${BUILDDIR}/build.ninja" "$@"
+    "${NINJA}" "${NINJA_ARGS[@]}" -f "${BUILDDIR}/build.ninja" "$@"
 else
     exit 0
 fi
