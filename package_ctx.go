@@ -31,29 +31,29 @@ import (
 // passed to all calls to define module- or singleton-specific Ninja
 // definitions.  For example:
 //
-//     package blah
+//	package blah
 //
-//     import (
-//         "blueprint"
-//     )
+//	import (
+//	    "blueprint"
+//	)
 //
-//     var (
-//         pctx = NewPackageContext("path/to/blah")
+//	var (
+//	    pctx = NewPackageContext("path/to/blah")
 //
-//         myPrivateVar = pctx.StaticVariable("myPrivateVar", "abcdef")
-//         MyExportedVar = pctx.StaticVariable("MyExportedVar", "$myPrivateVar 123456!")
+//	    myPrivateVar = pctx.StaticVariable("myPrivateVar", "abcdef")
+//	    MyExportedVar = pctx.StaticVariable("MyExportedVar", "$myPrivateVar 123456!")
 //
-//         SomeRule = pctx.StaticRule(...)
-//     )
+//	    SomeRule = pctx.StaticRule(...)
+//	)
 //
-//     // ...
+//	// ...
 //
-//     func (m *MyModule) GenerateBuildActions(ctx blueprint.Module) {
-//         ctx.Build(pctx, blueprint.BuildParams{
-//             Rule:    SomeRule,
-//             Outputs: []string{"$myPrivateVar"},
-//         })
-//     }
+//	func (m *MyModule) GenerateBuildActions(ctx blueprint.Module) {
+//	    ctx.Build(pctx, blueprint.BuildParams{
+//	        Rule:    SomeRule,
+//	        Outputs: []string{"$myPrivateVar"},
+//	    })
+//	}
 type PackageContext interface {
 	Import(pkgPath string)
 	ImportAs(as, pkgPath string)
@@ -190,25 +190,25 @@ func pkgPathToName(pkgPath string) string {
 // "${pkg.Variable}", while the imported rules can simply be accessed as
 // exported Go variables from the package.  For example:
 //
-//     import (
-//         "blueprint"
-//         "foo/bar"
-//     )
+//	import (
+//	    "blueprint"
+//	    "foo/bar"
+//	)
 //
-//     var pctx = NewPackagePath("blah")
+//	var pctx = NewPackagePath("blah")
 //
-//     func init() {
-//         pctx.Import("foo/bar")
-//     }
+//	func init() {
+//	    pctx.Import("foo/bar")
+//	}
 //
-//     ...
+//	...
 //
-//     func (m *MyModule) GenerateBuildActions(ctx blueprint.Module) {
-//         ctx.Build(pctx, blueprint.BuildParams{
-//             Rule:    bar.SomeRule,
-//             Outputs: []string{"${bar.SomeVariable}"},
-//         })
-//     }
+//	func (m *MyModule) GenerateBuildActions(ctx blueprint.Module) {
+//	    ctx.Build(pctx, blueprint.BuildParams{
+//	        Rule:    bar.SomeRule,
+//	        Outputs: []string{"${bar.SomeVariable}"},
+//	    })
+//	}
 //
 // Note that the local name used to refer to the package in Ninja variable names
 // is derived from pkgPath by extracting the last path component.  This differs

@@ -34,7 +34,9 @@ function build_go
     local mf_version=3
 
     local mf_src="${BLUEPRINTDIR}/microfactory"
+    # shellcheck disable=SC2155
     local mf_bin="${BUILDDIR}/microfactory_$(uname)"
+    # shellcheck disable=SC2155
     local mf_version_file="${BUILDDIR}/.microfactory_$(uname)_version"
     local built_bin="${BUILDDIR}/$1"
     local from_src=1
@@ -48,7 +50,8 @@ function build_go
     local mf_cmd
     if [ $from_src -eq 1 ]; then
         # `go run` requires a single main package, so create one
-        local gen_src_dir="${BUILDDIR}/.microfactory_$(uname)_intermediates/src"
+        # shellcheck disable=SC2155
+        local gen_src_dir="${BUILDDIR}/.microfactory_$(uname)_intermediates/src" || true
         mkdir -p "${gen_src_dir}"
         sed "s/^package microfactory/package main/" "${mf_src}/microfactory.go" >"${gen_src_dir}/microfactory.go"
 
@@ -59,7 +62,7 @@ function build_go
 
     rm -f "${BUILDDIR}/.$1.trace"
     # GOROOT must be absolute because `go run` changes the local directory
-    GOROOT=$(cd $GOROOT; pwd) ${mf_cmd} -b "${mf_bin}" \
+    GOROOT=$(cd $GOROOT || exit; pwd) ${mf_cmd} -b "${mf_bin}" \
             -pkg-path "github.com/google/blueprint=${BLUEPRINTDIR}" \
             -trimpath "${SRCDIR}" \
             ${EXTRA_ARGS} \

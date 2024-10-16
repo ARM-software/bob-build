@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Version of ninja to build -- can be any git revision
-VERSION="v1.7.1"
-
 set -ev
 
 SCRIPT_HASH=$(sha1sum ${BASH_SOURCE[0]} | awk '{print $1}')

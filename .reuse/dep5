@@ -1,0 +1,26 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Contact: Arm Ltd. <developers@arm.com>
+
+Files:
+  .gitignore
+  .travis.yml
+  .travis.*.sh
+  **Blueprints
+  **.bash
+  **.sh
+  go.mod
+  CONTRIBUTING.md
+  README.md
+  bootstrap/build.ninja
+  **.go
+Copyright: 2020 Google Inc.
+License: Apache-2.0
+
+Files:
+  *.bzl
+  **.bazel
+  *WORKSPACE
+  *WORKSPACE.bzlmod
+  .bazelversion
+Copyright: 2024 Arm Ltd. <developers@arm.com>
+License: CC0-1.0

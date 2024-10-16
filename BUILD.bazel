@@ -1,5 +1,5 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@gazelle//:def.bzl", "gazelle")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 # gazelle:prefix github.com/google/blueprint
 gazelle(name = "gazelle")
@@ -32,6 +32,7 @@ go_library(
 
 go_test(
     name = "blueprint_test",
+    size = "small",
     srcs = [
         "context_test.go",
         "glob_test.go",
