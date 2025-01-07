@@ -142,9 +142,10 @@ func genrulebobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	// init module with target-specific variants info, needed also to get install path right
-	// (hardcode to device variant, host variant currently not supported)
-	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
+	// init module with no variants info, since we don't support multi-variants
+	// for this kind of genrule.
+	android.InitAndroidModule(m)
+
 	return m
 }
 
@@ -154,9 +155,10 @@ func gensrcsbobFactory() android.Module {
 	// note: we register our custom properties first, to take precedence before common ones
 	m.AddProperties(&m.Properties)
 	m.AddProperties(&m.genrulebobCommon.Properties)
-	// init module with target-specific variants info, needed also to get install path right
-	// (hardcode to device variant, host variant currently not supported)
-	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
+	// init module with no variants info, since we don't support multi-variants
+	// for this kind of genrule.
+	android.InitAndroidModule(m)
+
 	return m
 }
 
