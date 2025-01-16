@@ -10,6 +10,7 @@ go_library(
 
 go_test(
     name = "mapper_test",
+    size = "small",
     srcs = ["mapper_test.go"],
     embed = [":mapper"],
     deps = ["@com_github_stretchr_testify//assert:go_default_library"],

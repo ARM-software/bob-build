@@ -10,6 +10,7 @@ go_library(
 
 go_test(
     name = "util_test",
+    size = "small",
     srcs = ["util_test.go"],
     embed = [":util"],
     deps = [

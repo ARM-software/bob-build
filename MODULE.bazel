@@ -6,17 +6,22 @@ module(
 
 print("WARNING: The `bob-build` Bazel module is still highly experimental and subject to change at any time. Only use it to try out bzlmod for now.")
 
-bazel_dep(name = "bazel_skylib", version = "1.3.0")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_multirun", version = "0.6.0")
-bazel_dep(name = "rules_go", version = "0.49.0", repo_name = "io_bazel_rules_go")
-bazel_dep(name = "gazelle", version = "0.32.0", repo_name = "bazel_gazelle")
-bazel_dep(name = "rules_python", version = "0.32.2")
+bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "gazelle", version = "0.41.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "blueprint", version = "0.0.1", repo_name = "com_github_google_blueprint")
+local_path_override(
+    module_name = "blueprint",
+    path = "blueprint",
+)
 
 go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
 
 # NOTE: https://github.com/bazelbuild/bazel-gazelle/issues/1469
 go_sdk.download(
-    version = "1.20",
+    version = "1.18",
 )
 use_repo(
     go_sdk,
@@ -72,9 +77,3 @@ use_repo(
     "com_github_stretchr_testify",
     "in_gopkg_yaml_v3",
 )
-
-blueprint = use_extension("@bob//:extensions.bzl", "blueprint")
-blueprint.from_commit(
-    commit = "e18ba9b96682ff547120f5bd8b0da7ed017d0986",  # `blueprint` branch
-)
-use_repo(blueprint, "com_github_google_blueprint")
