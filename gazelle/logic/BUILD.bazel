@@ -12,6 +12,7 @@ go_library(
 
 go_test(
     name = "logic_test",
+    size = "small",
     srcs = [
         "flatten_test.go",
         "logic_test.go",

@@ -102,7 +102,6 @@ bootstrap_go_package {
     pkgPath: "github.com/ARM-software/bob-build/core",
 }
 
-
 bootstrap_go_package {
     name: "bob-toolchain-mapper",
     srcs: [
@@ -113,7 +112,6 @@ bootstrap_go_package {
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/toolchain/mapper",
 }
-
 
 bootstrap_go_package {
     name: "bob-backend",
@@ -155,7 +153,6 @@ bootstrap_go_package {
     ],
     pkgPath: "github.com/ARM-software/bob-build/core/flag",
 }
-
 
 bootstrap_go_package {
     name: "bob-file",
@@ -268,7 +265,7 @@ bootstrap_go_package {
         "internal/graph/graph.go",
     ],
     testSrcs: [
-        "internal/graph/graph_test.go"
+        "internal/graph/graph_test.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/internal/graph",
 }

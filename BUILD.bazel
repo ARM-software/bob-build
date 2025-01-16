@@ -40,8 +40,19 @@ gazelle(
 # This breaks the pre-commit convention which uses relative paths from workspace root.
 # This wrapper captures the location of the needed binary and changes dir to the working
 # directory before calling bpfmt.
-sh_binary(
+py_binary(
     name = "bpfmt_wrapper",
-    srcs = ["bpfmt_wrapper.sh"],
+    srcs = [
+        "bpfmt_wrapper.py",
+    ],
+    args = [
+        "--bpfmt",
+        "$(rlocationpath @com_github_google_blueprint//bpfmt)",
+    ],
     data = ["@com_github_google_blueprint//bpfmt"],
+    main = "bpfmt_wrapper.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@rules_python//python/runfiles",
+    ],
 )
