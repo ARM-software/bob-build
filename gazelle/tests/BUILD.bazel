@@ -1,10 +1,10 @@
 load("@bazel_gazelle//:def.bzl", "gazelle_generation_test")
 
 [gazelle_generation_test(
-    name = file[0:-len("/WORKSPACE")],
+    name = file[0:-len("/MODULE.bazel")],
     size = "small",
     gazelle_binary = "//:gazelle_bin",
     test_data = glob(
-        include = [file[0:-len("/WORKSPACE")] + "/**"],
+        include = [file[0:-len("/MODULE.bazel")] + "/**"],
     ),
-) for file in glob(["**/WORKSPACE"])]
+) for file in glob(["**/MODULE.bazel"])]

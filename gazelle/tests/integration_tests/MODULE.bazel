@@ -1,0 +1,23 @@
+module(
+    name = "gazelle_integration_tests",
+    version = "0.0.1",
+    repo_name = "gazelle_integration_tests",
+)
+
+bazel_dep(name = "bob-gazelle", version = "0.0.1", repo_name = "gazelle")
+local_path_override(
+    module_name = "bob-gazelle",
+    path = "../../",
+)
+
+bazel_dep(name = "bob-build", version = "0.0.1", repo_name = "bob")
+local_path_override(
+    module_name = "bob-build",
+    path = "../../../",
+)
+
+bazel_dep(name = "blueprint", version = "0.0.1", repo_name = "com_github_google_blueprint")
+local_path_override(
+    module_name = "blueprint",
+    path = "../../../blueprint",
+)
