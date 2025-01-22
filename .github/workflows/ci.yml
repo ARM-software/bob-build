@@ -99,15 +99,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.7", "3.8", "3.9"]
+        python: ["3.8", "3.9", "3.10"]
         os: [ubuntu-latest]
         include:
-          - python: "3.7"
+          - python: "3.8"
             os: macos-13
-          - python: "3.9"
+          - python: "3.10"
             os: macos-latest
-          - python: "3.6"
-            os: ubuntu-20.04
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -199,7 +197,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazel: ["6.5.0", "6.2.0", "6.0.0"]
+        bazel: ["8.0.0"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -230,7 +228,7 @@ jobs:
   bazel-coverage:
     name: "Bazel Coverage"
     env:
-      USE_BAZEL_VERSION: "6.5.0"
+      USE_BAZEL_VERSION: "8.0.0"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
