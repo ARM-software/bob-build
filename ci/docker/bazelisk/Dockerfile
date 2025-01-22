@@ -1,7 +1,7 @@
 ARG GO_VERSION=1.18
 FROM golang:${GO_VERSION}-bullseye as bazelisk
 
-ARG BAZELISK_VERSION=1.11.0
+ARG BAZELISK_VERSION=1.24.0
 RUN CGO_ENABLED=0 GOOS=linux GOBIN=/opt/bazelisk/bin go install github.com/bazelbuild/bazelisk@v${BAZELISK_VERSION}
 
 FROM debian:bullseye-slim
@@ -31,7 +31,6 @@ COPY --from=bazelisk /opt/bazelisk/bin/bazelisk .local/bin/bazelisk
 ENV PATH /home/ci/.local/bin:$PATH
 ENV BAZELISK_HOME /home/ci/.cache/bazelisk
 
-# Pre-download some bazel version to save time in CI
+# Pre-download _latest_ bazel version to save time in CI
 RUN USE_BAZEL_VERSION=latest bazelisk --version && \
-	USE_BAZEL_VERSION=6.0.0 bazelisk --version && \
-	USE_BAZEL_VERSION=5.4.0 bazelisk --version
+     USE_BAZEL_VERSION=8.0.0 bazelisk --version
