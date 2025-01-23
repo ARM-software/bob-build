@@ -4,7 +4,7 @@ module(
     repo_name = "bob",
 )
 
-print("WARNING: The `bob-build` Bazel module is still highly experimental and subject to change at any time. Only use it to try out bzlmod for now.")
+print("WARNING: The `bob-build` Bazel module is still highly experimental and subject to change at any time!")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_multirun", version = "0.6.0")
