@@ -253,17 +253,21 @@ func Main() {
 	defer MetaDataWriteToFile(env.BuildMetaFile)
 
 	if builder_ninja {
-		if cfg.Properties.GetBool("android") == true {
+		cfg.Generator = &linuxGenerator{}
+	} else if builder_android_bp {
+		out_of_tree, _ := cfg.Properties.GetBoolMaybe("android_out_of_tree")
+		// We do not want to enforce all bob projects setting up the out of tree flag,
+		// therefore we need to first check there is a property to check. Otherwise we can
+		// assume it is false.
+		if out_of_tree {
 			cfg.Generator = &androidNinjaGenerator{}
 		} else {
-			cfg.Generator = &linuxGenerator{}
-		}
-	} else if builder_android_bp {
-		cfg.Generator = &androidBpGenerator{}
+			cfg.Generator = &androidBpGenerator{}
 
-		// Do not run in parallel to avoid locking issues on the map
-		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
-		ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
+			// Do not run in parallel to avoid locking issues on the map
+			ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
+			ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
+		}
 	} else {
 		utils.Die("Unknown builder backend")
 	}
