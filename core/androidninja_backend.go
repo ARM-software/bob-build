@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
 )
 
@@ -8,88 +9,88 @@ type androidNinjaGenerator struct {
 }
 
 // aliasActions implements generatorBackend.
-func (*androidNinjaGenerator) aliasActions(*ModuleAlias, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) aliasActions(m *ModuleAlias, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // binaryActions implements generatorBackend.
-func (*androidNinjaGenerator) binaryActions(*ModuleBinary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) binaryActions(m *ModuleBinary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // executableTestActions implements generatorBackend.
-func (*androidNinjaGenerator) executableTestActions(*ModuleTest, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) executableTestActions(m *ModuleTest, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // filegroupActions implements generatorBackend.
-func (*androidNinjaGenerator) filegroupActions(*ModuleFilegroup, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // genBinaryActions implements generatorBackend.
-func (*androidNinjaGenerator) genBinaryActions(*generateBinary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // genSharedActions implements generatorBackend.
-func (*androidNinjaGenerator) genSharedActions(*generateSharedLibrary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // genStaticActions implements generatorBackend.
-func (*androidNinjaGenerator) genStaticActions(*generateStaticLibrary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // generateSourceActions implements generatorBackend.
-func (*androidNinjaGenerator) generateSourceActions(*ModuleGenerateSource, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) generateSourceActions(m *ModuleGenerateSource, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // genruleActions implements generatorBackend.
-func (*androidNinjaGenerator) genruleActions(*ModuleGenrule, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) genruleActions(m *ModuleGenrule, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // gensrcsActions implements generatorBackend.
-func (*androidNinjaGenerator) gensrcsActions(*ModuleGensrcs, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) gensrcsActions(m *ModuleGensrcs, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // kernelModuleActions implements generatorBackend.
-func (*androidNinjaGenerator) kernelModuleActions(*ModuleKernelObject, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) kernelModuleActions(m *ModuleKernelObject, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // resourceActions implements generatorBackend.
-func (*androidNinjaGenerator) resourceActions(*ModuleResource, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) resourceActions(m *ModuleResource, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // sharedActions implements generatorBackend.
-func (*androidNinjaGenerator) sharedActions(*ModuleSharedLibrary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // staticActions implements generatorBackend.
-func (*androidNinjaGenerator) staticActions(*ModuleStaticLibrary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // strictBinaryActions implements generatorBackend.
-func (*androidNinjaGenerator) strictBinaryActions(*ModuleStrictBinary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // strictLibraryActions implements generatorBackend.
-func (*androidNinjaGenerator) strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // transformSourceActions implements generatorBackend.
-func (*androidNinjaGenerator) transformSourceActions(*ModuleTransformSource, blueprint.ModuleContext) {
-	panic("unimplemented")
+func (*androidNinjaGenerator) transformSourceActions(m *ModuleTransformSource, ctx blueprint.ModuleContext) {
+	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
 }
 
 // Compile time check for interface `androidNinjaGenerator` being compliant with generatorBackend
