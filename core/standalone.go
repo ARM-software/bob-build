@@ -253,7 +253,11 @@ func Main() {
 	defer MetaDataWriteToFile(env.BuildMetaFile)
 
 	if builder_ninja {
-		cfg.Generator = &linuxGenerator{}
+		if cfg.Properties.GetBool("android") == true {
+			cfg.Generator = &androidNinjaGenerator{}
+		} else {
+			cfg.Generator = &linuxGenerator{}
+		}
 	} else if builder_android_bp {
 		cfg.Generator = &androidBpGenerator{}
 

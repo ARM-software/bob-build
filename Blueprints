@@ -33,6 +33,7 @@ bootstrap_go_package {
     srcs: [
         "core/alias.go",
         "core/android.go",
+	"core/androidninja_backend.go",
         "core/androidbp_backend.go",
         "core/androidbp_cclibs.go",
         "core/androidbp_filegroup.go",
@@ -125,6 +126,7 @@ bootstrap_go_package {
     ],
     srcs: [
         "core/backend/androidbp.go",
+	"core/backend/androidninja.go",
         "core/backend/backend.go",
         "core/backend/linux.go",
         "core/backend/mock.go",

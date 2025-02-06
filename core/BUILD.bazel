@@ -11,6 +11,7 @@ go_library(
         "androidbp_generated.go",
         "androidbp_kernel_module.go",
         "androidbp_resource.go",
+        "androidninja_backend.go",
         "binary.go",
         "build.go",
         "build_props.go",
