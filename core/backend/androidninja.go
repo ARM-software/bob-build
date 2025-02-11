@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"path/filepath"
+
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
@@ -11,19 +13,30 @@ type AndroidNinjaPlatform struct {
 	env        *config.EnvironmentVariables
 }
 
+func NewAndroidNinjaPlatform(env *config.EnvironmentVariables, cfg *config.Properties) Platform {
+	p := AndroidNinjaPlatform{
+		env: env,
+	}
+
+	p.Init(cfg)
+
+	return &p
+
+}
+
 // BinaryOutputDir implements Platform.
 func (*AndroidNinjaPlatform) BinaryOutputDir(tgt toolchain.TgtType) string {
-	panic("unimplemented")
+	return filepath.Join("$BuildDir", string(tgt), "executable")
 }
 
 // BobScriptsDir implements Platform.
 func (*AndroidNinjaPlatform) BobScriptsDir() string {
-	panic("unimplemented")
+	return "${BobScriptsDir}"
 }
 
 // BuildDir implements Platform.
 func (*AndroidNinjaPlatform) BuildDir() string {
-	panic("unimplemented")
+	return "${BuildDir}"
 }
 
 // EscapeFlag implements Platform.
@@ -32,13 +45,13 @@ func (*AndroidNinjaPlatform) EscapeFlag(string) string {
 }
 
 // GetToolchain implements Platform.
-func (*AndroidNinjaPlatform) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
-	panic("unimplemented")
+func (g *AndroidNinjaPlatform) GetToolchain(tgt toolchain.TgtType) toolchain.Toolchain {
+	return g.toolchains.GetToolchain(tgt)
 }
 
 // Init implements Platform.
-func (*AndroidNinjaPlatform) Init(*config.Properties) {
-	panic("unimplemented")
+func (g *AndroidNinjaPlatform) Init(config *config.Properties) {
+	g.toolchains.Configure(config)
 }
 
 // KernelModOutputDir implements Platform.
@@ -48,17 +61,17 @@ func (*AndroidNinjaPlatform) KernelModOutputDir() string {
 
 // SharedLibsDir implements Platform.
 func (*AndroidNinjaPlatform) SharedLibsDir(tgt toolchain.TgtType) string {
-	panic("unimplemented")
+	return filepath.Join("${BuildDir}", string(tgt), "shared")
 }
 
 // SourceDir implements Platform.
 func (*AndroidNinjaPlatform) SourceDir() string {
-	panic("unimplemented")
+	return "${SrcDir}"
 }
 
 // SourceOutputDir implements Platform.
-func (*AndroidNinjaPlatform) SourceOutputDir(blueprint.Module) string {
-	panic("unimplemented")
+func (*AndroidNinjaPlatform) SourceOutputDir(m blueprint.Module) string {
+	return filepath.Join("${BuildDir}", "gen", m.Name())
 }
 
 // StaticLibOutputDir implements Platform.
