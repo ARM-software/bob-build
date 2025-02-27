@@ -24,6 +24,10 @@ config FUCHSIA
 
 endchoice
 
+config ANDROID_OUT_OF_TREE
+	bool "AndroidOutOfTree"
+	depends on ANDROID
+	default n
 
 choice
 	prompt "Builder"

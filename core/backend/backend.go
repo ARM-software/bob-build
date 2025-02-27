@@ -51,7 +51,12 @@ func Setup(env *config.EnvironmentVariables, cfg *config.Properties) {
 			case cfg.GetBool("builder_ninja"):
 				platform = NewLinuxPlatform(env, cfg)
 			case cfg.GetBool("builder_android_bp"):
-				platform = NewAndroidPlatform(env, cfg)
+				out_of_tree, _ := cfg.GetBoolMaybe("android_out_of_tree")
+				if out_of_tree {
+					platform = NewAndroidNinjaPlatform(env, cfg)
+				} else {
+					platform = NewAndroidPlatform(env, cfg)
+				}
 			default:
 				utils.Die("Unknown builder backend")
 			}

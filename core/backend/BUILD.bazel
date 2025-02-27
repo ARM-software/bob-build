@@ -4,6 +4,7 @@ go_library(
     name = "backend",
     srcs = [
         "androidbp.go",
+        "androidninja.go",
         "backend.go",
         "linux.go",
         "mock.go",

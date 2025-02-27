@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"reflect"
@@ -44,6 +45,17 @@ func (properties Properties) GetBool(name string) bool {
 	}
 	utils.Die("Property %s is not a bool", name)
 	return !ret
+}
+
+// If a boolean property doesn't exist, assume it's false
+func (properties Properties) GetBoolMaybe(name string) (bool, error) {
+	elem, ok := properties.Properties[name]
+	if ok {
+		ret, _ := elem.(bool)
+		return ret, nil
+	} else {
+		return false, errors.New("No property")
+	}
 }
 
 func (properties Properties) GetInt(name string) int {
