@@ -1,6 +1,6 @@
-FROM golang:1.20-bullseye as go
+FROM golang:1.22-bullseye as go
 
-ARG BAZELISK_VERSION=1.16.0
+ARG BAZELISK_VERSION=1.25.0
 RUN CGO_ENABLED=0 GOOS=linux GOBIN=/opt/bazelisk/bin go install github.com/bazelbuild/bazelisk@v${BAZELISK_VERSION}
 
 FROM debian:bullseye-slim
