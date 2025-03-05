@@ -20,7 +20,14 @@ jobs:
         with:
           python-version: "3.11"
       - uses: actions/setup-go@v5
-      - uses: bazelbuild/setup-bazelisk@v3
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
       - run: echo "PATH=$PATH:/home/runner/go/bin" >> $GITHUB_ENV
       - uses: pre-commit/action@v3.0.0
 
@@ -205,24 +212,35 @@ jobs:
         with:
           fetch-depth: 0
           submodules: "true"
-      - uses: bazelbuild/setup-bazelisk@v3
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
       - name: Mount bazel cache # Optional
         uses: actions/cache@v4
         with:
           path: "~/.cache/bazel"
           key: bazel-${{matrix.bazel}}-${{matrix.os}}
+      - name: Bazel version
+        run: bazelisk version
       - name: Bazel test `bob`
-        run: bazel test --config=ci //...
+        run: bazelisk test --config=ci //...
       - name: Bazel test `bob-gazelle`
-        run: bazel test --config=ci //...
+        run: bazelisk test --config=ci //...
         working-directory: ./gazelle
       - name: Bazel test `bob-gazelle integration tests`
         run: |
-          bazel run @gazelle//:gazelle --config=ci
-          if [[ `git diff` ]]; then
+          bazelisk run @gazelle//:gazelle --config=ci
+          LOG=`git diff`
+          if [[ -n "${LOG}" ]]; then
+            printf >&2 "%s\n" "${LOG}"
             exit 1
           fi
-          bazel build //...
+          bazelisk build //...
         working-directory: ./gazelle/tests/integration_tests
 
   bazel-coverage:
@@ -235,7 +253,14 @@ jobs:
         with:
           fetch-depth: 0
           submodules: "true"
-      - uses: bazelbuild/setup-bazelisk@v3
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
       - name: Mount bazel cache
         uses: actions/cache@v4
         with:
@@ -243,10 +268,12 @@ jobs:
           key: bazel-coverage
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
+        with:
+          ref: v1.14
       - name: Generate Coverage
         run: |
-          bazel clean --expunge
-          bazel coverage --config=ci --instrument_test_targets --@io_bazel_rules_go//go/config:cover_format=lcov --combined_report=lcov --cache_test_results=no //...
+          bazelisk clean --expunge
+          bazelisk coverage --config=ci --instrument_test_targets --@io_bazel_rules_go//go/config:cover_format=lcov --combined_report=lcov --cache_test_results=no //...
           cp "$(bazelisk info output_path)/_coverage/_coverage_report.dat" coverage_report.dat
       - name: Report code coverage
         uses: zgosalvez/github-actions-report-lcov@v4
