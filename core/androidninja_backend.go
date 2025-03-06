@@ -95,7 +95,7 @@ func (g *androidNinjaGenerator) binaryActions(m *ModuleBinary, ctx blueprint.Mod
 	addPhony(m, ctx, installDeps, optional)
 }
 
-func (g *androidNinjaGenerator) getCommonLibArgs(m *ModuleBinary, ctx blueprint.ModuleContext) map[string]string {
+func (g *androidNinjaGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
 	tc := backend.Get().GetToolchain(m.getTarget())
 
 	ldflags := m.FlagsIn().Filtered(func(f flag.Flag) bool {
@@ -161,7 +161,7 @@ func (g *androidNinjaGenerator) getCommonLibArgs(m *ModuleBinary, ctx blueprint.
 	return args
 }
 
-func (g *androidNinjaGenerator) getSharedLibFlags(m *ModuleBinary, ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
+func (g *androidNinjaGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) (ldlibs []string, ldflags []string) {
 	// With forwarding shared library we do not have to use
 	// --no-as-needed for dependencies because it is already set
 	useNoAsNeeded := !m.IsForwardingSharedLibrary()
@@ -241,7 +241,7 @@ func (g *androidNinjaGenerator) getSharedLibFlags(m *ModuleBinary, ctx blueprint
 	return
 }
 
-func (g *androidNinjaGenerator) ccLinkImplicits(l *ModuleBinary, ctx blueprint.ModuleContext, useToc bool) []string {
+func (g *androidNinjaGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleContext, useToc bool) []string {
 	implicits := utils.NewStringSlice(GetWholeStaticLibs(ctx), l.GetStaticLibs(ctx))
 	if useToc {
 		implicits = append(implicits, g.getSharedLibTocPaths(ctx)...)
@@ -295,7 +295,7 @@ func (g *androidNinjaGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContex
 	return
 }
 
-func (g *androidNinjaGenerator) CompileObjs(l *ModuleBinary, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
+func (g *androidNinjaGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
 	orderOnly := GetGeneratedHeadersFiles(ctx)
 
 	// tc := backend.Get().GetToolchain(tgtType)
@@ -387,7 +387,7 @@ func (g *androidNinjaGenerator) CompileObjs(l *ModuleBinary, ctx blueprint.Modul
 	return objectFiles, nonCompiledDeps
 }
 
-func (g *androidNinjaGenerator) ObjDir(m *ModuleBinary) string {
+func (g *androidNinjaGenerator) ObjDir(m Compilable) string {
 	return filepath.Join("${BuildDir}", string(m.getTarget()), "objects", m.outputName()) + string(os.PathSeparator)
 }
 
@@ -760,8 +760,84 @@ func (g *androidNinjaGenerator) resourceActions(m *ModuleResource, ctx blueprint
 }
 
 // sharedActions implements generatorBackend.
-func (*androidNinjaGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) sharedActions(m *ModuleSharedLibrary, ctx blueprint.ModuleContext) {
+	tc := backend.Get().GetToolchain(m.getTarget())
+	objs, implicits := g.CompileObjs(m, ctx, tc)
+
+	installDeps := g.install(m, ctx)
+	g.SharedSymlinkActions(ctx, m)
+	g.SharedLinkActions(ctx, m, tc, objs, implicits)
+	g.SharedTocActions(ctx, m)
+
+	installDeps = append(installDeps, file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
+}
+
+func (g *androidNinjaGenerator) SharedLinkActions(ctx blueprint.ModuleContext,
+	m BackendCommonLibraryInterface,
+	tc toolchain.Toolchain,
+	objs []string, implicits []string) {
+
+	buildWrapperDeps := []string{}
+	bc := GetModuleBackendConfiguration(ctx, m)
+	if bc != nil {
+		_, buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+	}
+
+	orderOnly := buildWrapperDeps
+	if enableToc {
+		// Add an order only dependecy on the actual libraries to cover
+		// the case where the .so is deleted but the toc is still
+		// present.
+		orderOnly = append(orderOnly, g.getSharedLibLinkPaths(ctx)...)
+	}
+
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeShared) && !p.IsSymLink() },
+		func(p file.Path) string { return p.BuildPath() })
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:      sharedLibraryRule,
+			Outputs:   outs,
+			Inputs:    objs,
+			Implicits: append(g.ccLinkImplicits(m, ctx, enableToc), implicits...),
+			OrderOnly: orderOnly,
+			Optional:  true,
+			Args:      g.getCommonLibArgs(m, ctx),
+		})
+
+}
+
+func (g *androidNinjaGenerator) SharedTocActions(ctx blueprint.ModuleContext,
+	m BackendCommonSharedLibraryInterface) {
+	if toc, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+		outputdir := backend.Get().SharedLibsDir(m.getTarget())
+		soFile := filepath.Join(outputdir, m.getRealName())
+		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
+	}
+}
+
+func (g *androidNinjaGenerator) SharedSymlinkActions(ctx blueprint.ModuleContext,
+	m BackendCommonLibraryInterface) (deps []string) {
+
+	m.OutFiles().ForEachIf(
+		func(fp file.Path) bool { return fp.IsSymLink() },
+		func(fp file.Path) bool {
+			ctx.Build(pctx,
+				blueprint.BuildParams{
+					Rule:     symlinkRule,
+					Inputs:   []string{fp.ExpandLink().BuildPath()},
+					Outputs:  []string{fp.BuildPath()},
+					Args:     map[string]string{"target": fp.ExpandLink().UnScopedPath()},
+					Optional: true,
+				})
+			deps = append(deps, fp.BuildPath())
+			return true
+		})
+
+	return
 }
 
 // staticActions implements generatorBackend.
