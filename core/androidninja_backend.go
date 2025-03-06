@@ -63,8 +63,24 @@ func (*androidNinjaGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint
 }
 
 // genBinaryActions implements generatorBackend.
-func (*androidNinjaGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) genBinaryActions(m *generateBinary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
+
+	// Create a rule to copy the generated binary
+	// from gen_dir to the common binary directory
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:   copyRule,
+			Inputs: file.GetOutputs(m),
+			Outputs: []string{filepath.Join(
+				backend.Get().BinaryOutputDir(m.getTarget()),
+				m.outputFileName())},
+			Optional: true,
+		})
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 // genSharedActions implements generatorBackend.
