@@ -841,8 +841,69 @@ func (g *androidNinjaGenerator) SharedSymlinkActions(ctx blueprint.ModuleContext
 }
 
 // staticActions implements generatorBackend.
-func (*androidNinjaGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) staticActions(m *ModuleStaticLibrary, ctx blueprint.ModuleContext) {
+	// Calculate and record outputs
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+
+	// The archiver rules do not allow adding arguments that the user can
+	// set, so does not support nonCompiledDeps
+	objectFiles, _ := g.CompileObjs(m, ctx, tc)
+
+	g.ArchivableActions(ctx, m, tc, objectFiles)
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
+}
+
+func (g *androidNinjaGenerator) ArchivableActions(ctx blueprint.ModuleContext,
+	m Archivable,
+	tc toolchain.Toolchain,
+	objs []string) {
+	wholeStaticLibs := GetWholeStaticLibs(ctx)
+
+	rule := staticLibraryRule
+	arBinary, _ := tc.GetArchiver()
+
+	args := map[string]string{
+		"ar":            arBinary,
+		"build_wrapper": "",
+	}
+
+	bc := GetModuleBackendConfiguration(ctx, m)
+	buildWrapperDeps := []string{}
+	if bc != nil {
+		args["build_wrapper"], buildWrapperDeps = bc.GetBuildWrapperAndDeps(ctx)
+
+	}
+
+	implicits := wholeStaticLibs
+
+	if len(wholeStaticLibs) > 0 {
+		rule = wholeStaticLibraryRule
+		args["whole_static_libs"] = strings.Join(wholeStaticLibs, " ")
+	} else if len(objs) == 0 && getConfig(ctx).Properties.GetBool("osx") {
+		// OSX workaround, see rule for details.
+		rule = emptyStaticLibraryRule
+		// To create an empty lib, we require a dummy object file,
+		// we use the detected compiler to emit it.
+		cc, _ := tc.GetCCompiler()
+		args["ccompiler"] = cc
+	}
+
+	outs := m.OutFiles().ToStringSliceIf(
+		func(p file.Path) bool { return p.IsType(file.TypeArchive) },
+		func(p file.Path) string { return p.BuildPath() })
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:      rule,
+			Outputs:   outs,
+			Inputs:    objs,
+			Implicits: implicits,
+			OrderOnly: buildWrapperDeps,
+			Optional:  true,
+			Args:      args,
+		})
 }
 
 // strictBinaryActions implements generatorBackend.
