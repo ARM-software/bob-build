@@ -381,8 +381,12 @@ func (*androidNinjaGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx b
 }
 
 // transformSourceActions implements generatorBackend.
-func (*androidNinjaGenerator) transformSourceActions(m *ModuleTransformSource, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) transformSourceActions(m *ModuleTransformSource, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 // Compile time check for interface `androidNinjaGenerator` being compliant with generatorBackend
