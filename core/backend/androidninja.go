@@ -76,7 +76,7 @@ func (*AndroidNinjaPlatform) SourceOutputDir(m blueprint.Module) string {
 
 // StaticLibOutputDir implements Platform.
 func (*AndroidNinjaPlatform) StaticLibOutputDir(tgt toolchain.TgtType) string {
-	panic("unimplemented")
+	return filepath.Join("${BuildDir}", string(tgt), "static")
 }
 
 var _ Platform = (*AndroidNinjaPlatform)(nil)
