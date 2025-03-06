@@ -6,6 +6,7 @@ import (
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -16,8 +17,33 @@ type androidNinjaGenerator struct {
 }
 
 // aliasActions implements generatorBackend.
-func (*androidNinjaGenerator) aliasActions(m *ModuleAlias, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (*androidNinjaGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
+	srcs := []string{}
+
+	/* Only depend on enabled targets */
+	ctx.VisitDirectDepsIf(
+		func(p blueprint.Module) bool { return ctx.OtherModuleDependencyTag(p) == tag.AliasTag },
+		func(p blueprint.Module) {
+			if e, ok := p.(enableable); ok {
+				if !isEnabled(e) {
+					return
+				}
+			}
+			name := ctx.OtherModuleName(p)
+			if lib, ok := p.(phonyInterface); ok {
+				name = lib.shortName()
+			}
+
+			srcs = append(srcs, name)
+		})
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:     blueprint.Phony,
+			Inputs:   srcs,
+			Outputs:  []string{a.Name()},
+			Optional: true,
+		})
 }
 
 // binaryActions implements generatorBackend.
