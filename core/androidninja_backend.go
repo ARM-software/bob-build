@@ -7,6 +7,7 @@ import (
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/tag"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/ARM-software/bob-build/internal/warnings"
 	"github.com/google/blueprint"
@@ -67,8 +68,46 @@ func (*androidNinjaGenerator) genBinaryActions(m *generateBinary, ctx blueprint.
 }
 
 // genSharedActions implements generatorBackend.
-func (*androidNinjaGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) genSharedActions(m *generateSharedLibrary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
+
+	// Create a rule to copy the generated library
+	// from gen_dir to the common library directory
+	soFile := g.getSharedLibLinkPath(m)
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:     copyRule,
+			Inputs:   file.GetOutputs(m),
+			Outputs:  []string{soFile},
+			Optional: true,
+		})
+
+	if toc, ok := m.OutFiles().FindSingle(
+		func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+		g.addSharedLibToc(ctx, soFile, toc.BuildPath(), m.getTarget())
+	}
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
+}
+
+func (g *androidNinjaGenerator) getSharedLibLinkPath(t *generateSharedLibrary) string {
+	return filepath.Join(backend.Get().SharedLibsDir(t.getTarget()), t.outputFileName())
+}
+
+func (g *androidNinjaGenerator) addSharedLibToc(ctx blueprint.ModuleContext, soFile, tocFile string, tgt toolchain.TgtType) {
+	tc := backend.Get().GetToolchain(tgt)
+	tocFlags := tc.GetLibraryTocFlags()
+
+	ctx.Build(pctx,
+		blueprint.BuildParams{
+			Rule:     tocRule,
+			Outputs:  []string{tocFile},
+			Inputs:   []string{soFile},
+			Optional: true,
+			Args:     map[string]string{"tocflags": strings.Join(tocFlags, " ")},
+		})
 }
 
 // genStaticActions implements generatorBackend.
