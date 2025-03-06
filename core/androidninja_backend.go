@@ -953,8 +953,20 @@ func (g *androidNinjaGenerator) strictBinaryActions(m *ModuleStrictBinary, ctx b
 }
 
 // strictLibraryActions implements generatorBackend.
-func (*androidNinjaGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) strictLibraryActions(m *ModuleStrictLibrary, ctx blueprint.ModuleContext) {
+	tc := backend.Get().GetToolchain(m.Properties.TargetType)
+
+	objs, implicits := g.CompileObjs(m, ctx, tc)
+
+	g.SharedLinkActions(ctx, m, tc, objs, implicits)
+	g.SharedTocActions(ctx, m)
+
+	g.ArchivableActions(ctx, m, tc, objs)
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	installDeps = append(installDeps, g.SharedSymlinkActions(ctx, m)...)
+
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 // transformSourceActions implements generatorBackend.
