@@ -754,8 +754,9 @@ func (*androidNinjaGenerator) kernelModuleActions(m *ModuleKernelObject, ctx blu
 }
 
 // resourceActions implements generatorBackend.
-func (*androidNinjaGenerator) resourceActions(m *ModuleResource, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) resourceActions(m *ModuleResource, ctx blueprint.ModuleContext) {
+	installDeps := g.install(m, ctx)
+	addPhony(m, ctx, installDeps, false)
 }
 
 // sharedActions implements generatorBackend.
