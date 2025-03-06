@@ -58,7 +58,7 @@ func (*androidNinjaGenerator) executableTestActions(m *ModuleTest, ctx blueprint
 
 // filegroupActions implements generatorBackend.
 func (*androidNinjaGenerator) filegroupActions(m *ModuleFilegroup, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+
 }
 
 // genBinaryActions implements generatorBackend.
