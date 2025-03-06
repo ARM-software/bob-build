@@ -30,6 +30,21 @@ use_repo(
 
 register_toolchains("@go_toolchains//:all")
 
+# We have to avoid the `chmod`/`chown`/`id` unhermetic-ness
+# TODO: remove this when `ignore_root_user_error` is hermetic
+# https://github.com/bazelbuild/rules_python/issues/2016
+dev = use_extension(
+    "@rules_python//python/extensions:python.bzl",
+    "python",
+    dev_dependency = True,
+)
+dev.toolchain(
+    configure_coverage_tool = True,
+    # TODO: change the code to use Python for `chmod`/`id`
+    ignore_root_user_error = True,
+    python_version = "3.11",
+)
+
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pip",
