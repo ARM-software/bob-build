@@ -343,8 +343,11 @@ func (g *androidNinjaGenerator) genruleActions(m *ModuleGenrule, ctx blueprint.M
 }
 
 // gensrcsActions implements generatorBackend.
-func (*androidNinjaGenerator) gensrcsActions(m *ModuleGensrcs, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.ModuleContext) {
+	inouts := gr.generateInouts(ctx)
+	g.generateStrictCommonActions(&gr.ModuleStrictGenerateCommon, ctx, inouts)
+
+	addPhony(gr, ctx, file.GetOutputs(gr), !isBuiltByDefault(gr))
 }
 
 // kernelModuleActions implements generatorBackend.
