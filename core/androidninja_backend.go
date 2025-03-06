@@ -72,8 +72,12 @@ func (*androidNinjaGenerator) genSharedActions(m *generateSharedLibrary, ctx blu
 }
 
 // genStaticActions implements generatorBackend.
-func (*androidNinjaGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+func (g *androidNinjaGenerator) genStaticActions(m *generateStaticLibrary, ctx blueprint.ModuleContext) {
+	inouts := m.generateInouts(ctx, g)
+	g.generateCommonActions(&m.ModuleGenerateCommon, ctx, inouts)
+
+	installDeps := append(g.install(m, ctx), file.GetOutputs(m)...)
+	addPhony(m, ctx, installDeps, !isBuiltByDefault(m))
 }
 
 func (g *androidNinjaGenerator) buildRules(r *ruleContext, ctx blueprint.ModuleContext) {
