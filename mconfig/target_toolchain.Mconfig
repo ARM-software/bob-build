@@ -17,6 +17,7 @@ config TARGET_64BIT_ONLY
 config TARGET_CLANG_PREFIX
 	string "Target Clang compiler prefix"
 	default "prebuilts/clang/host/linux-x86/clang-r383902b/bin/" if ANDROID_PLATFORM_VERSION = 11 && BUILDER_ANDROID_BP # android-11-release
+	default "prebuilts/clang/host/linux-x86/clang-r522817/bin/" if ANDROID_PLATFORM_VERSION > 14 && BUILDER_ANDROID_BP
 	default "prebuilts/clang/host/linux-x86/clang-r416183b1/bin/" if ANDROID_PLATFORM_VERSION > 11 && BUILDER_ANDROID_BP
 	default ""
 	help

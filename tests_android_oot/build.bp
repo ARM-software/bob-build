@@ -1,0 +1,8 @@
+subname = "build.bp"
+
+bob_alias {
+    name: "bob_oot_tests",
+    srcs: [
+        "bob_test_external_libs",
+    ],
+}

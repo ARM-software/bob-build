@@ -24,6 +24,7 @@ License: Apache-2.0
 Files:
   *.md
   tests/*
+  tests_android_oot/*
   */tests/*
   .github/*
   config_system/pytest.ini

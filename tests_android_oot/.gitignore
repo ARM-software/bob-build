@@ -1,0 +1,5 @@
+# Ignore default build directory
+build/
+
+# Bob symlink created for Bob tests
+bob

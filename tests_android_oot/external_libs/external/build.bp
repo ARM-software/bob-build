@@ -1,0 +1,9 @@
+bob_external_shared_library {
+    name: "liblog",
+    export_cflags: [
+        "-I{{.android_build_top}}/prebuilts/vndk/v34/arm64/include/system/logging/liblog/include_vndk",
+        "-I{{.android_build_top}}/prebuilts/vndk/v34/arm64/include/generated-headers/bionic/libc/libc/android_vendor.34_arm64_armv8-a_shared/gen/include",
+    ],
+    export_ldflags: ["-L{{.android_build_top}}/prebuilts/vndk/v34/arm64/arch-arm64-armv8-a/shared/llndk-stub"],
+    ldlibs: ["-llog"],
+}

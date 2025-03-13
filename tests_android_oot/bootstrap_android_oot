@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+# This script sets up the source tree for Android Out Of Tree build.
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+BOB_DIR=bob
+
+source "${SCRIPT_DIR}/bootstrap_utils.sh"
+
+BASENAME=$(basename "$0")
+function usage {
+    cat <<EOF
+$BASENAME
+
+Sets up the Bob tests to build for Android using Android.bp files.
+
+Usage:
+ $BASENAME CONFIG_OPTIONS...
+ $BASENAME --menuconfig
+
+  CONFIG_OPTIONS is a list of configuration items that can include .config
+  profiles and explicit options (like DEBUG=y)
+
+Options
+  -c, --configdir   Set configuration directory
+  -m, --menuconfig  Open configuration editor
+  -h, --help        Help text
+
+Examples:
+  $BASENAME ANDROID_N=y DEBUG=n
+  $BASENAME --menuconfig
+EOF
+}
+
+MENU=0
+PARAMS=$(getopt -o c:b:hm -l configdir:,help,menuconfig --name "$(basename "$0")" -- "$@")
+
+eval set -- "$PARAMS"
+unset PARAMS
+
+while true ; do
+    case $1 in
+        -c | --configdir)
+            shift
+            CONFIG_DIR="$1"
+            shift
+            ;;
+        -b | --builddir)
+            shift
+            BUILDDIR="$1"
+            shift
+            ;;
+        -m | --menuconfig)
+            MENU=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -h | --help | *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+[[ -n ${OUT} ]] || { echo "\$OUT is not set - did you run 'lunch'?"; exit 1; }
+[[ -n ${ANDROID_BUILD_TOP} ]] || { echo "\$ANDROID_BUILD_TOP is not set - did you run 'lunch'?"; exit 1; }
+
+# Select a BUILDDIR if not provided one
+if [[ -z "$BUILDDIR" ]]; then
+    echo "BUILDDIR is not set - using build"
+    BUILDDIR=build
+fi
+
+# The tests need a symlink in the source directory to the parent bob
+# directory, as Blueprint won't accept ..
+create_link .. "${SCRIPT_DIR}/${BOB_DIR}"
+
+# Find 'ANDROID_VERSION'
+ANDROID_VERSION_PY=$(realpath "${SCRIPT_DIR}/${BOB_DIR}/scripts/android_version.py")
+pushd "${ANDROID_BUILD_TOP}" > /dev/null || exit
+ANDROID_VERSION="$(${ANDROID_VERSION_PY})"
+popd > /dev/null || exit
+
+### Variables required for Bob and Android Out Of Tree bootstrap ###
+export CONFIGNAME="bob.config"
+export SRCDIR="${SCRIPT_DIR}"
+export BUILDDIR
+export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
+export BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
+export BOB_META_FILE="${BUILDDIR}/.bob.meta.json"
+export BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
+export BOB_CONFIG_PLUGINS="${SRCDIR}/plugins/prepare_android"
+export CONFIG_DIR
+
+# Bootstrap Bob
+"${SCRIPT_DIR}/${BOB_DIR}/bootstrap_linux.bash"
+
+# Pick up some info that bob has worked out
+source "${BUILDDIR}/.bob.bootstrap"
+
+# Setup the buildme script to just run bob
+ln -sf "bob" "${BUILDDIR}/buildme"
+
+# echo "To configure the build directory, run ${BUILDDIR}/config ARGS"
+if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
+    printf "Running configuration:\n  \e[35m%s/config ANDROID=y ANDROID_OUT_OF_TREE=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION=\"%s\" %s\e[0m\n" "${BUILDDIR}" "${ANDROID_VERSION}" "$@"
+    "${BUILDDIR}/config" ANDROID=y ANDROID_OUT_OF_TREE=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" "$@"
+fi
+
+if [ $MENU -eq 1 ] ; then
+    "${BUILDDIR}/menuconfig"
+fi
+
+# Print info for users
+printf "\nTo build run:\n  \e[35m${BUILDDIR}/buildme\e[0m\n\n"

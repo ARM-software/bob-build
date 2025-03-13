@@ -1,0 +1,18 @@
+// try to use android's `liblog.so` library
+bob_shared_library {
+    name: "libA",
+    srcs: [
+        "libA.c",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    export_local_include_dirs: ["."],
+    cflags: ["-DDEBUG=1"],
+    ldflags: [
+        // "-nostdlibinc",
+        "--sysroot={{.android_build_top}}/prebuilts/runtime/mainline/runtime/sdk/android/arm64",
+        "-L{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
+        "-Wl,-rpath-link,{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
+    ],
+}

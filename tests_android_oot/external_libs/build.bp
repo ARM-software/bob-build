@@ -1,0 +1,20 @@
+bob_binary {
+    name: "use_log_binary",
+    srcs: ["main.c"],
+    ldflags: [
+        // "-nostdlibinc",
+        "--sysroot={{.android_build_top}}/prebuilts/runtime/mainline/runtime/sdk/android/arm64",
+        "-L{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
+        "-Wl,-rpath-link,{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
+    ],
+    shared_libs: [
+        "libA",
+    ],
+}
+
+bob_alias {
+    name: "bob_test_external_libs",
+    srcs: [
+        "use_log_binary",
+    ],
+}
