@@ -238,6 +238,12 @@ func (g *androidNinjaGenerator) getSharedLibFlags(m BackendCommonLibraryInterfac
 			ldlibs = append(ldlibs, tc.GetLinker().SetRpath(rpaths))
 		}
 	}
+
+	// https://stackoverflow.com/questions/47279824/android-ndk-dlopen-failed/48291044#48291044
+	if l, ok := m.(BackendCommonSharedLibraryInterface); ok {
+		ldlibs = append(ldlibs, "-Wl,-soname,"+l.getRealName())
+	}
+
 	return
 }
 
