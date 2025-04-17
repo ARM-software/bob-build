@@ -310,6 +310,11 @@ func getSoongCompatFile(config *BobConfig) string {
 		text:     "a.SetPath(\"LOCAL_SOONG_INSTALLED_MODULE\", base.katiInstalls[len(base.katiInstalls)-1].to)\n",
 	}
 
+	androidHostToolProviderInfoProviderMatcher := codeMatcher{
+		filename: "build/soong/android/module.go",
+		text:     "\nvar HostToolProviderInfoProvider = blueprint.NewProvider[HostToolProviderInfo]()\n",
+	}
+
 	// List of compatibility layers, ordered from oldest Soong version
 	// support to newest.
 	allSoongCompats := []compatVersion{
@@ -337,8 +342,19 @@ func getSoongCompatFile(config *BobConfig) string {
 				androidMkExtraEntriesContextMatcher,
 				androidMkSoongInstallTargetsMatcher,
 			},
-			[]int{13},
+			[]int{13, 14, 15},
 			"soong_compat_02_AndroidMkSoongInstallTargets.go",
+		},
+		// Soong HostToolProviderInfoProvider
+		{
+			[]codeMatcher{
+				listOfAndroidMkEntriesMatcher,
+				androidMkExtraEntriesContextMatcher,
+				androidMkSoongInstallTargetsMatcher,
+				androidHostToolProviderInfoProviderMatcher,
+			},
+			[]int{16},
+			"soong_compat_03_HostBinProvider.go",
 		},
 	}
 

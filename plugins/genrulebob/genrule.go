@@ -4,7 +4,6 @@
 package genrulebob
 
 import (
-	"fmt"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -258,12 +257,10 @@ func (m *genrulebobCommon) getHostBin(ctx android.ModuleContext) android.Optiona
 	if m.Properties.Host_bin == "" {
 		return android.OptionalPath{}
 	}
+
 	hostBinModule := ctx.GetDirectDepWithTag(m.Properties.Host_bin, hostToolBinTag)
-	htp, ok := hostBinModule.(genrule.HostToolProvider)
-	if !ok {
-		panic(fmt.Errorf("%s is not a host tool", m.Properties.Host_bin))
-	}
-	return htp.HostToolPath()
+
+	return soong_compat.GetHostBinPath(ctx, hostBinModule, m.Properties.Host_bin)
 }
 
 // Previous Soong version does not contain yet `android.OutputFilesProvider` interface

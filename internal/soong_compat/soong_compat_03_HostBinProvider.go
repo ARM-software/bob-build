@@ -20,18 +20,18 @@ func ConvertAndroidMkExtraEntriesFunc(f AndroidMkExtraEntriesFunc) []android.And
 }
 
 func SoongSupportsMkInstallTargets() bool {
-	return false
+	return true
 }
 
-// This definition is compatible with Soong SHAs _before_
+// This definition is compatible with Soong SHAs _after_
 // `dd9ccb4234dfc88a004e36b2c0500769a5f50ad3
 // Add ModuleProxy that should be used when visiting deps.`
 func GetHostBinPath(ctx android.ModuleContext, m blueprint.Module, host_bin string) android.OptionalPath {
-	htp, ok := m.(android.HostToolProvider)
+	htp, ok := android.OtherModuleProvider(ctx, m, android.HostToolProviderInfoProvider)
 
 	if !ok {
-		panic(fmt.Errorf("%s is not a host tool", host_bin))
+		panic(fmt.Errorf("No HostToolProviderInfoProvider for %s module!", host_bin))
 	}
 
-	return htp.HostToolPath()
+	return htp.HostToolPath
 }
