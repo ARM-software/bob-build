@@ -1,4 +1,0 @@
-cc_library(
-    name = "simple",
-    srcs = ["main.c"],
-)

@@ -1,4 +1,0 @@
-bob_library {
-    name: "lib",
-    srcs: ["lib.cpp"],
-}

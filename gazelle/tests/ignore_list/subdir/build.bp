@@ -1,4 +1,0 @@
-bob_filegroup {
-    name: "should_include_two",
-    srcs: ["*.c"],
-}

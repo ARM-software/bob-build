@@ -1,3 +1,0 @@
-config FEATURE_A
-    bool "Enable Feature A"
-    default y

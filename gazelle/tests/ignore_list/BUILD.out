@@ -1,8 +1,0 @@
-# gazelle:bob_root
-# gazelle:exclude subdir/subdir_nested
-# gazelle:exclude subdir_two
-
-filegroup(
-    name = "should_include",
-    srcs = glob(["*.c"]),
-)
