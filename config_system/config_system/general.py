@@ -292,6 +292,15 @@ def get_user_set_options():
     return user_set_options
 
 
+def includes_select(config, select):
+    """Return true if the option can select `select`"""
+    opt = data.get_config(config)
+    if "select" in opt:
+        return select in opt.get("select")
+
+    return False
+
+
 def get_options_selecting(selected):
     """Return the options which select `selected`"""
     opt = data.get_config(selected)
