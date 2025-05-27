@@ -13,7 +13,10 @@ def plugin_exec():
         logger.error("ANDROID_BUILD_TOP is not set - did you run 'lunch'?")
         raise e
 
-    clang_prefix = android_build_top + "/" + get_config_string("TARGET_CLANG_PREFIX")
-
-    set_config("TARGET_CLANG_PREFIX", clang_prefix)
+    target_clang_prefix = (
+        android_build_top + "/" + get_config_string("TARGET_CLANG_PREFIX")
+    )
+    host_clang_prefix = android_build_top + "/" + get_config_string("HOST_CLANG_PREFIX")
+    set_config("TARGET_CLANG_PREFIX", target_clang_prefix)
+    set_config("HOST_CLANG_PREFIX", host_clang_prefix)
     set_config("ANDROID_BUILD_TOP", android_build_top)
