@@ -6,6 +6,7 @@ import (
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/google/blueprint"
+	"github.com/google/blueprint/proptools"
 )
 
 type AndroidNinjaPlatform struct {
@@ -40,8 +41,8 @@ func (*AndroidNinjaPlatform) BuildDir() string {
 }
 
 // EscapeFlag implements Platform.
-func (*AndroidNinjaPlatform) EscapeFlag(string) string {
-	panic("unimplemented")
+func (*AndroidNinjaPlatform) EscapeFlag(s string) string {
+	return proptools.NinjaAndShellEscape(s)
 }
 
 // GetToolchain implements Platform.

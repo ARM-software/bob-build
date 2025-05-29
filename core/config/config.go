@@ -213,6 +213,7 @@ func CreateMockConfig(overrides map[string]interface{}) *Properties {
 	// Minimum config required for the toolchain backend to be instantiated correctly:
 	properties.Properties["builder_ninja"] = false
 	properties.Properties["builder_android_bp"] = false
+	properties.Properties["builder_android_ninja"] = false
 	properties.Properties["as_binary"] = "as"
 
 	properties.Properties["target_toolchain_clang"] = false

@@ -25,8 +25,9 @@ config FUCHSIA
 endchoice
 
 config ANDROID_OUT_OF_TREE
-	bool "AndroidOutOfTree"
+	bool
 	depends on ANDROID
+	default y if BUILDER_ANDROID_NINJA
 	default n
 
 choice
@@ -43,6 +44,12 @@ config BUILDER_ANDROID_BP
 	depends on ANDROID
 	help
 	  Generate Android.bp fragments for use with Android.
+
+config BUILDER_ANDROID_NINJA
+	bool "Android.bp"
+	depends on ANDROID
+	help
+	  Generate build.ninja for Android out of tree build.
 
 config BUILDER_NINJA
 	bool "Ninja"

@@ -35,6 +35,10 @@
     "ignore": false,
     "value": true
   },
+  "builder_android_ninja": {
+    "ignore": false,
+    "value": false
+  },
   "builder_ninja": {
     "ignore": false,
     "value": false

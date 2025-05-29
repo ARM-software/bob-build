@@ -105,6 +105,7 @@ func Main() {
 
 	builder_ninja := cfg.Properties.GetBool("builder_ninja")
 	builder_android_bp := cfg.Properties.GetBool("builder_android_bp")
+	builder_android_ninja := cfg.Properties.GetBool("builder_android_ninja")
 
 	// Depend on the config file
 	pctx.AddNinjaFileDeps(env.ConfigJSON, getPathInBuildDir(".env.hash"))
@@ -255,19 +256,18 @@ func Main() {
 	if builder_ninja {
 		cfg.Generator = &linuxGenerator{}
 	} else if builder_android_bp {
-		out_of_tree, _ := cfg.Properties.GetBoolMaybe("android_out_of_tree")
-		// We do not want to enforce all bob projects setting up the out of tree flag,
-		// therefore we need to first check there is a property to check. Otherwise we can
-		// assume it is false.
-		if out_of_tree {
-			cfg.Generator = &androidNinjaGenerator{}
-		} else {
-			cfg.Generator = &androidBpGenerator{}
+		cfg.Generator = &androidBpGenerator{}
 
-			// Do not run in parallel to avoid locking issues on the map
-			ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
-			ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
+		// Do not run in parallel to avoid locking issues on the map
+		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
+		ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
+	} else if builder_android_ninja {
+		// `builder_android_ninja` denotes it is Android out of tree build
+		// thus `android_out_of_tree` should be `true`.
+		if out_of_tree, _ := cfg.Properties.GetBoolMaybe("android_out_of_tree"); !out_of_tree {
+			panic("Wrong configuration for 'builder_android_ninja' and 'android_out_of_tree'.")
 		}
+		cfg.Generator = &androidNinjaGenerator{}
 	} else {
 		utils.Die("Unknown builder backend")
 	}
