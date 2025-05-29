@@ -24,12 +24,6 @@ config FUCHSIA
 
 endchoice
 
-config ANDROID_OUT_OF_TREE
-	bool
-	depends on ANDROID
-	default y if BUILDER_ANDROID_NINJA
-	default n
-
 choice
 	prompt "Builder"
 	default BUILDER_ANDROID_BP if ANDROID

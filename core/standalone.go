@@ -262,11 +262,6 @@ func Main() {
 		ctx.RegisterBottomUpMutator("collect_buildbp", collectBuildBpFilesMutator)
 		ctx.RegisterSingletonType("androidbp_singleton", androidBpSingletonFactory)
 	} else if builder_android_ninja {
-		// `builder_android_ninja` denotes it is Android out of tree build
-		// thus `android_out_of_tree` should be `true`.
-		if out_of_tree, _ := cfg.Properties.GetBoolMaybe("android_out_of_tree"); !out_of_tree {
-			panic("Wrong configuration for 'builder_android_ninja' and 'android_out_of_tree'.")
-		}
 		cfg.Generator = &androidNinjaGenerator{}
 	} else {
 		utils.Die("Unknown builder backend")

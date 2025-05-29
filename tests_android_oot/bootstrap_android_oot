@@ -106,8 +106,8 @@ ln -sf "bob" "${BUILDDIR}/buildme"
 
 # echo "To configure the build directory, run ${BUILDDIR}/config ARGS"
 if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
-    printf "Running configuration:\n  \e[35m%s/config ANDROID=y ANDROID_OUT_OF_TREE=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION=\"%s\" %s\e[0m\n" "${BUILDDIR}" "${ANDROID_VERSION}" "$@"
-    "${BUILDDIR}/config" ANDROID=y ANDROID_OUT_OF_TREE=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" "$@"
+    printf "Running configuration:\n  \e[35m%s/config ANDROID=y BUILDER_ANDROID_NINJA=y ANDROID_PLATFORM_VERSION=\"%s\" %s\e[0m\n" "${BUILDDIR}" "${ANDROID_VERSION}" "$@"
+    "${BUILDDIR}/config" ANDROID=y BUILDER_ANDROID_NINJA=y ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then

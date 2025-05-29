@@ -105,10 +105,8 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 
 	tc.target = props.GetString(string(tgt) + "_clang_triple")
 
-	out_of_tree, _ := props.GetBoolMaybe("android_out_of_tree")
-
 	// Here we add flags relating to android out of tree builds
-	if out_of_tree {
+	if out_of_tree := props.GetBool("builder_android_ninja"); out_of_tree {
 		tc.cflags = append(tc.cflags, "-DANDROID")
 
 		if tgt == TgtTypeTarget {
