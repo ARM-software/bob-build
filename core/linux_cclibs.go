@@ -59,11 +59,14 @@ type Compilable interface {
 func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, tc toolchain.Toolchain) ([]string, []string) {
 	orderOnly := GetGeneratedHeadersFiles(ctx)
 
-	// tc := backend.Get().GetToolchain(tgtType)
 	as, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
+
 	cflagsList := []string{}
+	asflagsList := []string{}
+	ccflagsList := []string{}
+	cxxflagsList := []string{}
 
 	// Get all the required flags and group them into includes and everything else.
 	// This should make it easier to visually inspect the flags in logs/ninja files.
@@ -71,21 +74,21 @@ func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, 
 		func(f flag.Flag) {
 			switch {
 			case (f.Type() & flag.TypeCompilable) == flag.TypeC: //c exclusive flags
-				cctargetflags = append(cctargetflags, f.ToString())
+				ccflagsList = append(ccflagsList, f.ToString())
 			case f.MatchesType(flag.TypeCC | flag.TypeInclude):
 				cflagsList = append(cflagsList, f.ToString())
 			case f.MatchesType(flag.TypeAsm):
-				astargetflags = append(astargetflags, f.ToString())
+				asflagsList = append(asflagsList, f.ToString())
 			case f.MatchesType(flag.TypeCpp):
-				cxxtargetflags = append(cxxtargetflags, f.ToString())
+				cxxflagsList = append(cxxflagsList, strings.Clone(f.ToString()))
 			}
 		},
 	)
 
-	ctx.Variable(pctx, "asflags", strings.Join(astargetflags, " "))
+	ctx.Variable(pctx, "asflags", utils.Join(astargetflags, asflagsList))
 	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
-	ctx.Variable(pctx, "conlyflags", strings.Join(cctargetflags, " "))
-	ctx.Variable(pctx, "cxxflags", strings.Join(cxxtargetflags, " "))
+	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags, ccflagsList))
+	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags, cxxflagsList))
 
 	objectFiles := []string{}
 	nonCompiledDeps := []string{}
