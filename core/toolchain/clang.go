@@ -119,10 +119,12 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 			tc.cflags = append(tc.cflags, "-Wno-implicit-function-declaration", "-Wno-int-conversion")
 			android_build_top := props.GetString("android_build_top")
 			tc.cflags = append(tc.cflags, "-I"+android_build_top+"/prebuilts/clang/host/linux-x86/clang-r522817/include/c++/v1/",
-				"-I"+android_build_top+"/prebuilts/vndk/v34/arm64/include/generated-headers/bionic/libc/libc/android_vendor.34_arm64_armv8-a_shared/gen/include",
-				"-I"+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/uapi/asm-arm64/",
-				"-I"+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/android/uapi/",
-				"-I"+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/uapi/")
+				"-isystem "+android_build_top+"/prebuilts/vndk/v34/arm64/include/generated-headers/bionic/libc/libc/android_vendor.34_arm64_armv8-a_shared/gen/include",
+				"-isystem "+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/uapi/asm-arm64/",
+				"-isystem "+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/android/uapi/",
+				"-isystem "+android_build_top+"/prebuilts/vndk/v34/arm64/include/bionic/libc/kernel/uapi/",
+				"-isystem "+android_build_top+"/prebuilts/runtime/mainline/runtime/sdk/common_os/include/bionic/libc",
+			)
 
 			tc.cflags = append(tc.cflags,
 				"-Wno-format-insufficient-args",
