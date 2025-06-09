@@ -1,0 +1,18 @@
+bob_defaults {
+    name: "tagable_targetable",
+    target: {
+        tags: ["owner:target"],
+    },
+    host: {
+        tags: ["owner:host"],
+    },
+}
+
+bob_kernel_module {
+    name: "ko_tagable_targetable",
+    srcs: [
+        "src.c",
+        "Kbuild",
+    ],
+    defaults: ["tagable_targetable"],
+}

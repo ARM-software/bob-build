@@ -40,14 +40,16 @@ rule g.bootstrap.cp
     description = cp ${out}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  tagable
+# Module:  ko_tagable_featurable
 # Variant:
 # Type:    bob_kernel_module
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-build ${g.bob.BuildDir}/target/kernel_modules/tagable/tagable.ko: g.bob.kbuild $
-        ${g.bob.SrcDir}/src.c ${g.bob.SrcDir}/Kbuild | ${g.bob.kmod_build}
+build $
+        ${g.bob.BuildDir}/target/kernel_modules/ko_tagable_featurable/ko_tagable_featurable.ko $
+        : g.bob.kbuild ${g.bob.SrcDir}/src.c ${g.bob.SrcDir}/Kbuild | $
+        ${g.bob.kmod_build}
     cc_flag = 
     clang_triple_flag = 
     extra_cflags = 
@@ -58,14 +60,16 @@ build ${g.bob.BuildDir}/target/kernel_modules/tagable/tagable.ko: g.bob.kbuild $
     kernel_dir = 
     ld_flag = 
     make_args = 
-    output_module_dir = ${g.bob.BuildDir}/target/kernel_modules/tagable
+    output_module_dir = ${g.bob.BuildDir}/target/kernel_modules/ko_tagable_featurable
 
-build ${g.bob.BuildDir}/target/kernel_modules/tagable/Module.symvers: phony $
-        ${g.bob.BuildDir}/target/kernel_modules/tagable/tagable.ko
+build $
+        ${g.bob.BuildDir}/target/kernel_modules/ko_tagable_featurable/Module.symvers $
+        : phony $
+        ${g.bob.BuildDir}/target/kernel_modules/ko_tagable_featurable/ko_tagable_featurable.ko
 
-build tagable: phony $
-        ${g.bob.BuildDir}/target/kernel_modules/tagable/tagable.ko
-default tagable
+build ko_tagable_featurable: phony $
+        ${g.bob.BuildDir}/target/kernel_modules/ko_tagable_featurable/ko_tagable_featurable.ko
+default ko_tagable_featurable
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap

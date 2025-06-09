@@ -21,7 +21,7 @@ const (
 	DeprecatedFilegroupSrcs           Category = "deprecated-filegroup-srcs"
 	UnmatchedNonCompileSrcsWarning    Category = "unmatched-non-compile-srcs"
 	DeprecatedOwnerProp               Category = "deprecated-owner-prop"
-	AndroidOutOfTreeUnsupportedModule Category = "androud-out-of-tree-unsupported-module"
+	AndroidOutOfTreeUnsupportedModule Category = "android-out-of-tree-unsupported-module"
 )
 
 var categoriesMap = map[string]Category{

@@ -1,0 +1,19 @@
+bob_defaults {
+    name: "tagable_featurable",
+    linux: {
+        tags: ["owner:linux"],
+    },
+
+    android: {
+        tags: ["owner:android"],
+    },
+}
+
+bob_kernel_module {
+    name: "ko_tagable_featurable",
+    srcs: [
+        "src.c",
+        "Kbuild",
+    ],
+    defaults: ["tagable_featurable"],
+}

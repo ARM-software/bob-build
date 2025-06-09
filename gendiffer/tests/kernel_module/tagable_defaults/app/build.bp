@@ -1,0 +1,15 @@
+bob_defaults {
+    name: "tagable_defaults",
+    tags: [
+        "owner:{{.tag_owner}}",
+    ],
+}
+
+bob_kernel_module {
+    name: "ko_tagable_defaults",
+    srcs: [
+        "src.c",
+        "Kbuild",
+    ],
+    defaults: ["tagable_defaults"],
+}

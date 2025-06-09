@@ -262,7 +262,7 @@ func (g *androidBpGenerator) generateSourceActions(gs *ModuleGenerateSource, ctx
 	populateCommonProps(&gs.ModuleGenerateCommon, ctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
-	addInstallProps(m, gs.getInstallableProps(), true)
+	addInstallProps(m, gs.getInstallableProps())
 }
 
 func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, ctx blueprint.ModuleContext) {
@@ -292,5 +292,5 @@ func (g *androidBpGenerator) transformSourceActions(ts *ModuleTransformSource, c
 	populateCommonProps(&ts.ModuleGenerateCommon, ctx, m)
 
 	// No AndroidProps in gen sources, so always in vendor for now
-	addInstallProps(m, ts.getInstallableProps(), true)
+	addInstallProps(m, ts.getInstallableProps())
 }

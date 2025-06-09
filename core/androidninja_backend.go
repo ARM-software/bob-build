@@ -759,7 +759,9 @@ func (g *androidNinjaGenerator) gensrcsActions(gr *ModuleGensrcs, ctx blueprint.
 
 // kernelModuleActions implements generatorBackend.
 func (*androidNinjaGenerator) kernelModuleActions(m *ModuleKernelObject, ctx blueprint.ModuleContext) {
-	GetLogger().Warn(warnings.AndroidOutOfTreeUnsupportedModule, ctx.BlueprintsFile(), ctx.ModuleName())
+	if enabledAndRequired(m) {
+		utils.Die("Kernel modules are not supported in Android builds (%s)", m.Name())
+	}
 }
 
 // resourceActions implements generatorBackend.

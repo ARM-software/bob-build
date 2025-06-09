@@ -19,4 +19,8 @@ bob_kernel_module {
     osx: {
         enabled: false,
     },
+    android: {
+        // We don't support kernel module building on Android.
+        enabled: false,
+    },
 }

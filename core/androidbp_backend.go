@@ -39,6 +39,13 @@ func AndroidBpFile() bpwriter.File {
 	return outputFile
 }
 
+// kernelModuleActions implements generatorBackend.
+func (*androidBpGenerator) kernelModuleActions(m *ModuleKernelObject, ctx blueprint.ModuleContext) {
+	if enabledAndRequired(m) {
+		utils.Die("Kernel modules are not supported in Android builds (%s)", m.Name())
+	}
+}
+
 // Translate `bob_alias` to `phony` rules in Android.bp
 func (g *androidBpGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
 	srcs := []string{}
@@ -116,7 +123,7 @@ func addProvenanceProps(ctx blueprint.ModuleContext, writer bpwriter.Module, mod
 
 }
 
-func addInstallProps(m bpwriter.Module, props *InstallableProps, proprietary bool) {
+func addInstallProps(m bpwriter.Module, props *InstallableProps) {
 	installBase, installRel, ok := getSoongInstallPath(props)
 	if ok {
 		switch installBase {
@@ -132,12 +139,8 @@ func addInstallProps(m bpwriter.Module, props *InstallableProps, proprietary boo
 			 * so request the `/data` partition and add the `nativetest`
 			 * part in as another relative component. */
 			m.AddBool("install_in_data", true)
-			if proprietary {
-				// Vendor modules need an additional path element to match cc_test
-				installRel = filepath.Join("nativetest", "vendor", installRel)
-			} else {
-				installRel = filepath.Join("nativetest", installRel)
-			}
+			// Vendor modules need an additional path element to match cc_test
+			installRel = filepath.Join("nativetest", "vendor", installRel)
 		default:
 			/* Paths like `lib/modules` are implicitly in /system, or /vendor, but
 			 * unlike e.g. a library, which would add the `lib` for us, we need to add

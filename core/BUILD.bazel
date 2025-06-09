@@ -9,7 +9,6 @@ go_library(
         "androidbp_cclibs.go",
         "androidbp_filegroup.go",
         "androidbp_generated.go",
-        "androidbp_kernel_module.go",
         "androidbp_resource.go",
         "androidninja_backend.go",
         "binary.go",
