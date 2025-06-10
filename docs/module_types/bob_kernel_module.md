@@ -4,7 +4,7 @@
 
 ```bp
 bob_kernel_module {
-    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, cflags, tags, owner, include_dirs, local_include_dirs, kbuild_options, extra_symbols, make_args, kernel_dir, kernel_cross_compile, kernel_cc, kernel_hostcc, kernel_clang_triple, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args,
+    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, cflags, tags, include_dirs, local_include_dirs, kbuild_options, extra_symbols, make_args, kernel_dir, kernel_cross_compile, kernel_cc, kernel_hostcc, kernel_clang_triple, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args,
 }
 ```
 
@@ -42,7 +42,6 @@ Supports:
 | [`defaults`](properties/legacy_properties.md#defaults)                     | List of [`bob_defaults`](bob_defaults.md); default is `[]`                                                                                                                                                                                                                   |
 | [`cflags`](properties/legacy_properties.md#cflags)                         | List of strings; default is `[]`<br>Flags used for C/C++ compilation.                                                                                                                                                                                                        |
 | [`tags`](properties/common_properties.md#tags)                             | List of strings; default is `[]`                                                                                                                                                                                                                                             |
-| [`owner`](properties/legacy_properties.md#owner)                           | String; default is `none`; **deprecated**<br> If set, then the module is considered proprietary.                                                                                                                                                                             |
 | [`include_dirs`](properties/legacy_properties.md#include_dirs)             | List of strings; default is `[]`<br>A list of include directories to use. These are expected to be system headers, and will usually be an absolute path.                                                                                                                     |
 | [`local_include_dirs`](properties/legacy_properties.md#local_include_dirs) | List of strings; default is `[]`<br>A list of include directories to use. These are relative to the `build.bp` containing the module definition                                                                                                                              |
 | `kbuild_options`                                                           | List of strings; <br>Linux kernel config options to emulate. <br> These are passed to Kbuild in the `make` command-line, and set in the source code via `EXTRA_CFLAGS`. These should usually include the `CONFIG_` prefix, although it is possible to omit this if required. |

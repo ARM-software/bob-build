@@ -68,12 +68,7 @@ func (g *androidBpGenerator) resourceActions(r *ModuleResource, ctx blueprint.Mo
 		// So place resources in /data/nativetest to align with cc_test.
 		//modType = "prebuilt_testcase_bob"
 		modType = "prebuilt_data_bob"
-		if r.Properties.isProprietary() {
-			// Vendor modules need an additional path element to match cc_test
-			installRel = filepath.Join("nativetest", "vendor", installRel)
-		} else {
-			installRel = filepath.Join("nativetest", installRel)
-		}
+		installRel = filepath.Join("nativetest", installRel)
 		write = writeDataResourceModule
 	} else {
 		panic(fmt.Errorf("Could not detect partition for install path '%s'", installBase))

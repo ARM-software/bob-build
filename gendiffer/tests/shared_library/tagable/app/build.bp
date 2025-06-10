@@ -6,7 +6,6 @@ bob_shared_library {
         "bar",
         "owner:baz",
     ],
-    owner: "baz",
 
 }
 
@@ -18,7 +17,6 @@ bob_shared_library {
         "bar",
         "owner:baz",
     ],
-    owner: "baz",
 
     target: {
         tags: ["target"],

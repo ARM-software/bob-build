@@ -6,7 +6,6 @@ bob_binary {
         "bar",
         "owner:{{.tag_owner}}",
     ],
-    owner: "baz",
 }
 
 bob_defaults {
@@ -20,7 +19,6 @@ bob_binary {
     name: "bin_tagable_defaults",
     srcs: ["src.cpp"],
     defaults: ["tagable_defaults"],
-    owner: "baz",
 }
 
 bob_defaults {
@@ -37,7 +35,6 @@ bob_binary {
     name: "bin_tagable_targetable",
     srcs: ["src.cpp"],
     defaults: ["tagable_targetable"],
-    owner: "baz",
     host_supported: true,
     build_by_default: true,
 }
@@ -57,5 +54,4 @@ bob_binary {
     name: "bin_tagable_featurable",
     srcs: ["src.cpp"],
     defaults: ["tagable_featurable"],
-    owner: "baz",
 }

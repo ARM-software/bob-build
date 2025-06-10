@@ -3,11 +3,6 @@
 There are a few properties that are specific to Android builds,
 that map to information that the Android build system wants.
 
-The `owner` property maps to the related Soong property. This needs to
-be set to the organisation responsible for the module. When non-empty
-Bob will also set `proprietary` to `true` and the module will end up in
-the vendor tree.
-
 Installation on Android requires careful setup. The install paths must
 be setup to match Android's install locations for the module
 type. This includes whether the module is for host or target, and

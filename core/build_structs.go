@@ -103,12 +103,6 @@ type BobConfig struct {
 type AndroidProps struct {
 	// Values to use on Android for LOCAL_MODULE_TAGS, defining which builds this module is built for
 	Tags []string
-	// Value to use on Android for LOCAL_MODULE_OWNER
-	Owner *string
-}
-
-func (p *AndroidProps) isProprietary() bool {
-	return p.Owner != nil
 }
 
 // AndroidPGOProps defines properties used to support profile-guided optimization.

@@ -9,7 +9,6 @@ import (
 	"github.com/ARM-software/bob-build/core/tag"
 	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
-	"github.com/ARM-software/bob-build/internal/warnings"
 
 	"github.com/google/blueprint"
 )
@@ -389,12 +388,4 @@ func installGroupMutator(ctx blueprint.TopDownMutatorContext) {
 			props.InstallGroupPath = path
 		}
 	}
-
-	// TODO: This should be done in a dedicated mutator for prop checks.
-	if res, ok := ctx.Module().(*ModuleResource); ok {
-		if res.Properties.AndroidProps.Owner != nil {
-			GetLogger().Warn(warnings.DeprecatedOwnerProp, ctx.BlueprintsFile(), ctx.ModuleName())
-		}
-	}
-
 }

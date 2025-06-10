@@ -4,7 +4,7 @@
 
 ```bp
 bob_resource {
-    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, tags, owner,
+    name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, tags,
 }
 ```
 
@@ -18,8 +18,7 @@ relative to the binaries.
 For the Android.bp backend, the `install_path` set in the
 `bob_install_group` must be prefixed by a known string to select an
 appropriate directory. Currently `data`, `firmware`, `etc`, `bin` and
-`tests` are supported. The `owner` property also influences which
-partition the files will be installed.
+`tests` are supported.
 
 Supports:
 
@@ -33,7 +32,6 @@ Supports:
 | [`srcs`](properties/strict_properties.md)                                | List of sources; default is `[]`<br>Source files to copy to the installation directory.patterns.                                      |
 | `exclude_srcs`                                                           | List of exclude patterns; default is `[]`<br> Files to be removed from `srcs`.<br>Supports wildcards, with the same caveat as `srcs`. |
 | `add_to_alias`                                                           | Target; default is `none`<br>Allows this alias to add itself to another alias.<br>Should refer to existing `bob_alias`.               |
-| [`owner`](properties/legacy_properties.md#owner)                         | String; default is `none`; **deprecated**<br> If set, then the module is considered proprietary.                                      |
 | [`tags`](properties/common_properties.md#tags)                           | List of strings; default is `[]`                                                                                                      |
 | [`enabled`](properties/common_properties.md#enabled)                     | Boolean; default is `true`.                                                                                                           |
 | `build_by_default`                                                       | Boolean; default is `false`<br>Whether it is built by default in a build with no targets requested.                                   |

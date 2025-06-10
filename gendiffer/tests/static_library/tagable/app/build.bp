@@ -6,7 +6,6 @@ bob_static_library {
         "bar",
         "owner:{{.tag_owner}}",
     ],
-    owner: "baz",
     build_by_default: true,
 }
 
@@ -21,7 +20,6 @@ bob_static_library {
     name: "lib_tagable_defaults",
     srcs: ["src.cpp"],
     defaults: ["tagable_defaults"],
-    owner: "baz",
     build_by_default: true,
 }
 
@@ -39,7 +37,6 @@ bob_static_library {
     name: "lib_tagable_targetable",
     srcs: ["src.cpp"],
     defaults: ["tagable_targetable"],
-    owner: "baz",
     host_supported: true,
     build_by_default: true,
 }
@@ -59,6 +56,5 @@ bob_static_library {
     name: "lib_tagable_featurable",
     srcs: ["src.cpp"],
     defaults: ["tagable_featurable"],
-    owner: "baz",
     build_by_default: true,
 }

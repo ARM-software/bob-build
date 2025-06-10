@@ -80,15 +80,6 @@ field is `false`, so it is not settable in Bob.
 
 On backends other than Android.bp, these properties will be ignored.
 
-## `owner`
-
-String; default is `none`; **deprecated**
-
-If set, then the module is considered proprietary. For the Soong plugin this will
-usually be installed in the vendor partition.
-
-This field is deprecated and no longer recommended. Please see [tags](./common_properties.md#tags) for an alternative.
-
 ## `strip`
 
 When set, strip symbols and debug information from libraries and

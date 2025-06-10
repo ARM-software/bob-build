@@ -23,7 +23,6 @@ bob_resource {
         "bar",
         "owner:baz",
     ],
-    owner: "baz",
     relative_install_path: "bob_tests",
     build_by_default: true,
 }

@@ -20,7 +20,6 @@ const (
 	RelativeUpLinkWarning             Category = "relative-up-link"
 	DeprecatedFilegroupSrcs           Category = "deprecated-filegroup-srcs"
 	UnmatchedNonCompileSrcsWarning    Category = "unmatched-non-compile-srcs"
-	DeprecatedOwnerProp               Category = "deprecated-owner-prop"
 	AndroidOutOfTreeUnsupportedModule Category = "android-out-of-tree-unsupported-module"
 )
 
@@ -30,7 +29,6 @@ var categoriesMap = map[string]Category{
 	"RelativeUpLinkWarning":             RelativeUpLinkWarning,
 	"DeprecatedFilegroupSrcs":           DeprecatedFilegroupSrcs,
 	"UnmatchedNonCompileSrcsWarning":    UnmatchedNonCompileSrcsWarning,
-	"DeprecatedOwnerProp":               DeprecatedOwnerProp,
 	"AndroidOutOfTreeUnsupportedModule": AndroidOutOfTreeUnsupportedModule,
 }
 
@@ -40,7 +38,6 @@ var categoriesMessages = map[Category]string{
 	RelativeUpLinkWarning:             "Relative up-links in `srcs` are not allowed. Use `bob_filegroup` instead.",
 	DeprecatedFilegroupSrcs:           "Use of `filegroup_srcs` is deprecated. Use `:<target_name>` in `srcs` instead.",
 	UnmatchedNonCompileSrcsWarning:    "Non-compiled sources have not been matched fully.",
-	DeprecatedOwnerProp:               "The `owner` property is no longer used. Please use the `tags` property with `owner:<owner>`.",
 	AndroidOutOfTreeUnsupportedModule: "Android of out tree does not support all module types yet.",
 }
 
