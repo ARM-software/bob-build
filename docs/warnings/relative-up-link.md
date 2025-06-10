@@ -28,9 +28,8 @@ bob_filegroup {
 bob_generate_source {
     name: "my_generate",
     srcs: [
-        "main.cpp",
+        "main.cpp", ":my_filegroup"
     ],
-    filegroup_srcs: ["my_filegroup"],
 }
 ```
 

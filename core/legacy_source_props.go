@@ -18,9 +18,6 @@ type LegacySourceProps struct {
 	Srcs []string
 	// The list of source files that should not be included. Use with care.
 	Exclude_srcs []string
-	// A list of filegroup modules that provide srcs, these are directly added to Srcs.
-	// We do not currently re-use Srcs for this
-	Filegroup_srcs []string
 
 	ResolvedSrcs file.Paths `blueprint:"mutated"` // Glob results.
 }
@@ -43,10 +40,6 @@ func (s *LegacySourceProps) processPaths(ctx blueprint.BaseModuleContext) {
 		}
 	}
 
-	if len(s.Filegroup_srcs) > 0 {
-		GetLogger().Warn(warnings.DeprecatedFilegroupSrcs, ctx.BlueprintsFile(), ctx.ModuleName())
-	}
-
 	srcs := utils.MixedListToFiles(s.Srcs)
 	targets := utils.MixedListToBobTargets(s.Srcs)
 
@@ -67,7 +60,7 @@ func (s *LegacySourceProps) ResolveFiles(ctx blueprint.BaseModuleContext) {
 }
 
 func (s *LegacySourceProps) GetTargets() []string {
-	return append(s.Filegroup_srcs, utils.MixedListToBobTargets(s.Srcs)...)
+	return utils.MixedListToBobTargets(s.Srcs)
 }
 
 func (s *LegacySourceProps) GetFiles(ctx blueprint.BaseModuleContext) file.Paths {

@@ -117,7 +117,7 @@ CONFIG_JSON="${CONFIGDIR}/.bob.config.json"
 BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
 
 # space separated values, e.g. "*:W RelativeUpLinkWarning:E"
-BOB_LOG_WARNINGS="DeprecatedFilegroupSrcs:W"
+BOB_LOG_WARNINGS=""
 
 export BOB_DIR
 export CONFIG_FILE

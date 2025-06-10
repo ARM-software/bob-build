@@ -350,14 +350,6 @@ The `exclude_srcs` property will remove files from `srcs`, for example things
 which were picked up by a glob. `exclude_srcs` also supports wildcards, with
 the same caveat as `srcs`.
 
-## `filegroup_srcs`
-
-List of targets; default is `[]`
-
-The `filegroup_srcs` property will append files to `srcs` that are listed inside of
-a `bob_filegroup` module. These are used so you can re-use collections of files &
-to closer align to Bazel/Android.
-
 ## `add_to_alias`
 
 Adds this module to an alias. This is equivalent to adding `bob_module.name` to

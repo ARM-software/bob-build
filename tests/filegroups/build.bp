@@ -30,6 +30,5 @@ bob_alias {
     name: "bob_test_filegroups",
     srcs: [
         "test_filegroup_simple",
-        "test_filegroup_simple_deprecated",
     ],
 }

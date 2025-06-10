@@ -34,8 +34,7 @@ bob_filegroup {
 bob_binary {
     name: "my_binary",
     defaults: ["my_defaults"],
-    srcs: ["main.cpp"],
-    filegroup_srcs: ["my_filegroup"],
+    srcs: ["main.cpp", ":my_filegroup"],
 }
 ```
 

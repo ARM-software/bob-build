@@ -37,9 +37,7 @@ bob_generate_source {
     srcs: [
         ":generate_input",
         "before_generate3.in",
-    ],
-    filegroup_srcs: [
-        "generate_input_two",
+        ":generate_input_two",
     ],
     out: ["multiple_in.cpp"],
 

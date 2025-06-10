@@ -192,9 +192,8 @@ rule m.generate_source_multiple_in_.gen_generate_source_multiple_in
 
 build ${g.bob.BuildDir}/gen/generate_source_multiple_in/multiple_in.cpp: $
         m.generate_source_multiple_in_.gen_generate_source_multiple_in $
-        ${g.bob.SrcDir}/before_generate3.in $
-        ${g.bob.SrcDir}/before_generate2.in ${g.bob.SrcDir}/before_generate.in $
-        | ${g.bob.SrcDir}/generator.py
+        ${g.bob.SrcDir}/before_generate3.in ${g.bob.SrcDir}/before_generate.in $
+        ${g.bob.SrcDir}/before_generate2.in | ${g.bob.SrcDir}/generator.py
     _out_ = ${g.bob.BuildDir}/gen/generate_source_multiple_in/multiple_in.cpp
     tool = ${g.bob.SrcDir}/generator.py
 
