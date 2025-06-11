@@ -19,7 +19,7 @@ from config_system.general import (
     can_enable,
     write_depfile,
 )
-from config_system.data import get_config
+from config_system.data import get_config, get_choice_group
 from config_system.expr import format_dependency_list
 
 root_logger = logging.getLogger()
@@ -113,15 +113,27 @@ def check_value_as_requested(key, requested_value, later_keys, later_values):
         return
 
     if type(opt["value"]) is bool:
-        msg = "{} has wrong value '{}'. Value has to be of type {}: 'Y', 'y', 'N' or 'n'".format(
-            key, requested_value, type(opt["value"])
-        )
+        if requested_value.lower() not in ["y", "n"]:
+            msg = "{} config has wrong value '{}'. It has to be one of: 'Y', 'y', 'N' or 'n'".format(
+                key, requested_value
+            )
+            logger.error(msg)
+            return
+
+        if "choice_group" in opt:
+            group = opt["choice_group"]
+            cg = get_choice_group(group)
+            msg = "{} config cannot be unset as it is the default one and no other choice for '{}' was set.".format(
+                key, cg["title"]
+            )
+            logger.error(msg)
+            return
+
     else:
         msg = "{} has wrong value '{}'. Value has to be of type {}".format(
             key, requested_value, type(opt["value"])
         )
-
-    logger.error(msg)
+        logger.error(msg)
 
 
 def check_values_as_requested(args):
