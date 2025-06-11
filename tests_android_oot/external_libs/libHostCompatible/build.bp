@@ -1,0 +1,14 @@
+bob_external_shared_library {
+    name: "libHostCompatible",
+    target: {
+        export_cflags: [
+            "-DTARGET",
+        ],
+    },
+    host: {
+        export_ldflags: [
+            "-DHOST",
+        ],
+    },
+    host_supported: true,
+}

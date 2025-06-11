@@ -92,7 +92,7 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 export BOB_LOG_WARNINGS_FILE="${BUILDDIR}/.bob.warnings.csv"
 export BOB_META_FILE="${BUILDDIR}/.bob.meta.json"
 export BOB_LOG_WARNINGS=""
-export BOB_CONFIG_PLUGINS="${SRCDIR}/plugins/prepare_android"
+export BOB_CONFIG_PLUGINS="${SCRIPT_DIR}/${BOB_DIR}/plugins/prepare_android"
 export CONFIG_DIR
 
 # Bootstrap Bob

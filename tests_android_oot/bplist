@@ -4,3 +4,4 @@
 ./external_libs/build.bp
 ./external_libs/external/build.bp
 ./external_libs/libA/build.bp
+./external_libs/libHostCompatible/build.bp

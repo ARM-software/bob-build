@@ -108,6 +108,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	// Here we add flags relating to android out of tree builds
 	if out_of_tree := props.GetBool("builder_android_ninja"); out_of_tree {
 		tc.cflags = append(tc.cflags, "-DANDROID")
+		tc.cflags = append(tc.cflags, "-Wno-unused-but-set-variable")
 
 		if tgt == TgtTypeTarget {
 			tc.target = "aarch64-linux-android10000" // TODO: This should detect API version instead of dev?

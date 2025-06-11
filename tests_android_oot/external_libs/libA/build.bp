@@ -15,4 +15,5 @@ bob_shared_library {
         "-L{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
         "-Wl,-rpath-link,{{.android_build_top}}/prebuilts/clang/host/linux-x86/clang-r522817/android_libc++/platform/aarch64/lib",
     ],
+    host_supported: true,
 }

@@ -12,9 +12,23 @@ bob_binary {
     ],
 }
 
+bob_binary {
+    name: "use_host_compatible_library",
+    srcs: [
+        "use_host.cpp",
+    ],
+    shared_libs: [
+        "libHostCompatible",
+    ],
+    target_supported: false,
+    host_supported: true,
+    build_by_default: true,
+}
+
 bob_alias {
     name: "bob_test_external_libs",
     srcs: [
         "use_log_binary",
+        "use_host_compatible_library",
     ],
 }

@@ -6,4 +6,5 @@ bob_external_shared_library {
     ],
     export_ldflags: ["-L{{.android_build_top}}/prebuilts/vndk/v34/arm64/arch-arm64-armv8-a/shared/llndk-stub"],
     ldlibs: ["-llog"],
+    host_supported: true,
 }
