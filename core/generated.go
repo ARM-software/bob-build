@@ -127,7 +127,10 @@ func generatedDependerMutator(ctx blueprint.BottomUpMutatorContext) {
 		}
 	}
 
-	if _, ok := getGenerator(ctx).(*linuxGenerator); ok {
+	_, isLinuxGenerator := getGenerator(ctx).(*linuxGenerator)
+	_, isAndroidNinjaGenerator := getGenerator(ctx).(*androidNinjaGenerator)
+
+	if isLinuxGenerator || isAndroidNinjaGenerator {
 		if agsc, ok := getStrictGenerateCommon(ctx.Module()); ok {
 			for _, s := range agsc.Properties.Srcs {
 				if s[0] == ':' {
