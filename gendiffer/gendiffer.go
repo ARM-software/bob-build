@@ -169,8 +169,9 @@ func checkFile(args *generationArgs, filename string) error {
 }
 
 var generated = map[string]string{
-	"android": "Android.bp",
-	"linux":   "build.ninja",
+	"android":     "Android.bp",
+	"linux":       "build.ninja",
+	"android_oot": "build.ninja",
 }
 
 func singleBobGenerationTest(t *testing.T, args *generationArgs) {
@@ -194,7 +195,6 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 
 		if _, fErr := os.Stat(destFile); errors.Is(fErr, os.ErrNotExist) {
 			data := []byte(fmt.Sprintf("%d\n", exitCode))
-
 			if err := os.WriteFile(destFile, data, 0644); err != nil {
 				t.Fatalf("Cannot create file: '%s'", destFile)
 			}

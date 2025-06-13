@@ -9,6 +9,8 @@ exports_files([
     "bob.android.config",
     "bob.android.config.json",
     "bob.android.config.d",
+    "bob.android_oot.config",
+    "bob.android_oot.config.json",
 ])
 
 filegroup(

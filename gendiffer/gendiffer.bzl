@@ -22,9 +22,12 @@ def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
                 Label("//gendiffer:bob.android.config"),
                 Label("//gendiffer:bob.android.config.json"),
                 Label("//gendiffer:bob.android.config.d"),
+                Label("//gendiffer:bob.android_oot.config"),
+                Label("//gendiffer:bob.android_oot.config.json"),
             ],
             testonly = False,
             **kwargs
         )
+        # TODO: add "android_oot" when all tests generated for Android ninja backend.
         for backend in ["android", "linux"]
     ]
