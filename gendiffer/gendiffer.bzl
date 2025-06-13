@@ -28,6 +28,5 @@ def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
             testonly = False,
             **kwargs
         )
-        # TODO: add "android_oot" when all tests generated for Android ninja backend.
-        for backend in ["android", "linux"]
+        for backend in ["android", "linux", "android_oot"]
     ]

@@ -1,0 +1,4 @@
+[31merror:[0m redacted/build.bp:160:22: unrecognized property "static_lib_toggle"
+[31merror:[0m redacted/build.bp:176:22: unrecognized property "static_lib_toggle"
+[31merror:[0m redacted/build.bp:191:12: unrecognized property "not_osx"
+[31merror:[0m redacted/build.bp:204:12: unrecognized property "not_osx"

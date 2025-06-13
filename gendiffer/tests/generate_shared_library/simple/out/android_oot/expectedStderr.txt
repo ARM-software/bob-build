@@ -1,0 +1,1 @@
+Error executing string '{{.gen_cc}} -fPIC -o ${out} -shared ${in}; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.': template: TemplateProps:1:2: executing "TemplateProps" at <.gen_cc>: map has no entry for key "gen_cc"

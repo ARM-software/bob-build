@@ -1,0 +1,1 @@
+Error executing string '-DTEMPLATE_TEST_VALUE={{.template_test_value}}': template: TemplateProps:1:24: executing "TemplateProps" at <.template_test_value>: map has no entry for key "template_test_value"
