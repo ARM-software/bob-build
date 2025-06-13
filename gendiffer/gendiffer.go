@@ -131,6 +131,17 @@ func checkFileContents(args *generationArgs, filename string, data []byte) error
 	data = redact(args, data)
 
 	if args.ShouldUpdate {
+		// if no existing file, create it
+		if _, fErr := os.Stat(absolute); errors.Is(fErr, os.ErrNotExist) {
+			outFile := path.Join(args.BuildWorkspaceDirectory, args.TestDataPathRelative, "out", args.BackendType, filename)
+			f, err := os.Create(outFile)
+			if err != nil {
+				return err
+			}
+			f.Close()
+			absolute = f.Name()
+		}
+
 		if err := os.WriteFile(absolute, data, 0644); err != nil {
 			return err
 		}
@@ -186,18 +197,24 @@ func singleBobGenerationTest(t *testing.T, args *generationArgs) {
 	err := runCmd.Run()
 
 	if args.ShouldUpdate {
-		destFile := path.Join(args.BuildWorkspaceDirectory, args.TestDataPathRelative, "out", args.BackendType, expectedExitCodeFilename)
+		outDir := path.Join(args.BuildWorkspaceDirectory, args.TestDataPathRelative, "out", args.BackendType)
+		destFile := path.Join(outDir, expectedExitCodeFilename)
+
+		if _, fErr := os.Stat(outDir); errors.Is(fErr, os.ErrNotExist) {
+			if dirErr := os.MkdirAll(outDir, 0755); dirErr != nil {
+				t.Fatalf("Cannot create directory: '%s'", outDir)
+			}
+		}
 
 		exitCode := 0
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			exitCode = exitErr.ExitCode()
 		}
 
-		if _, fErr := os.Stat(destFile); errors.Is(fErr, os.ErrNotExist) {
-			data := []byte(fmt.Sprintf("%d\n", exitCode))
-			if err := os.WriteFile(destFile, data, 0644); err != nil {
-				t.Fatalf("Cannot create file: '%s'", destFile)
-			}
+		data := []byte(fmt.Sprintf("%d\n", exitCode))
+
+		if err := os.WriteFile(destFile, data, 0644); err != nil {
+			t.Fatalf("Cannot create file: '%s'", destFile)
 		}
 
 		expectedExitCode = exitCode
