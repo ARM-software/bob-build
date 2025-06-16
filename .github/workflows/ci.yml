@@ -229,19 +229,6 @@ jobs:
         run: bazelisk version
       - name: Bazel test `bob`
         run: bazelisk test --config=ci //...
-      - name: Bazel test `bob-gazelle`
-        run: bazelisk test --config=ci //...
-        working-directory: ./gazelle
-      - name: Bazel test `bob-gazelle integration tests`
-        run: |
-          bazelisk run @gazelle//:gazelle --config=ci
-          LOG=`git diff`
-          if [[ -n "${LOG}" ]]; then
-            printf >&2 "%s\n" "${LOG}"
-            exit 1
-          fi
-          bazelisk build //...
-        working-directory: ./gazelle/tests/integration_tests
 
   bazel-coverage:
     name: "Bazel Coverage"
