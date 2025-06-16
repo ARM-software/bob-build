@@ -127,6 +127,7 @@ check_build_output "${build_dir}"
 # should still work. Re-use the last directory
 echo -e "\n* \e[1;32mChecking rebootstrap\e[0m"
 tests/bootstrap_linux -o ${build_dir}
+${build_dir}/config ${OPTIONS}
 ${build_dir}/buildme bob_tests
 
 # Check static archives are built from scratch. Re-use the last directory
