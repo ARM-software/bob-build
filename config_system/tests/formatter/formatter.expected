@@ -53,6 +53,7 @@ config FOO
 	bool "Foo"
 	select FIRST_OPTION
 	depends on FOOBAR
+	tag TAG_ONE
 	help
 	  text written in multiple paragraphs
 

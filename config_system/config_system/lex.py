@@ -37,6 +37,7 @@ tokens = (
     "INT",
     "LBRACKET",
     "RBRACKET",
+    "TAG",
     "MENU",
     "ENDMENU",
     "MAINMENU",
@@ -80,6 +81,7 @@ commands = (
     "source",
     "source_local",
     "string",
+    "tag",
     "visible",
     "warning",
 )

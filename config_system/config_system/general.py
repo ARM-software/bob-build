@@ -136,6 +136,7 @@ def validate_configs():
                         "Select option must have type bool but got type %s instead"
                         % c1["datatype"]
                     )
+
         if "select" in c:
             for k in c["select"]:
                 try:
@@ -292,13 +293,37 @@ def get_user_set_options():
     return user_set_options
 
 
-def includes_select(config, select):
-    """Return true if the option can select `select`"""
+def tagged(config, tag):
+    """Return true if the option is tagged `tag`"""
     opt = data.get_config(config)
-    if "select" in opt:
-        return select in opt.get("select")
+    if "tag" in opt:
+        return tag in opt.get("tag")
 
     return False
+
+
+def get_tags():
+    """
+    Return a list of all the tags.
+    """
+    tags = set()
+    for i_type, i_symbol in data.iter_symbols_menuorder():
+        if i_type in ["config", "menuconfig"]:
+            c = data.get_config(i_symbol)
+            if "tag" in c:
+                for tag in c["tag"]:
+                    tags.add(tag)
+    return list(tags)
+
+
+def get_options_tagged(tag):
+    """Return the options which are tagged `tag`"""
+    options = []
+    for i_type, i_symbol in data.iter_symbols_menuorder():
+        if i_type in ["config", "menuconfig"]:
+            if tagged(i_symbol, tag):
+                options.append(i_symbol)
+    return options
 
 
 def get_options_selecting(selected):

@@ -326,6 +326,28 @@ config DEBUG_BUILD
 	select BUILD_UNIT_TESTS if UNIT_TEST_FRAMEWORK_FOUND
 ```
 
+#### Tagging options
+
+The `tag` keyword means that, regardless of if a given option is enabled, it will be tagged
+according to the value given.
+
+For example, the `DEBUG_BUILD` option above could be modified as follows:
+
+```
+# ...inside "Build type" choice group
+
+config DEBUG_BUILD
+	bool "Debug build"
+	tag INTERNAL
+```
+
+The values passed to `tag` are not validated by Bob and they have no
+bearing on the configuration of the option. However, the tags
+can be queried at configuration time to allow for additional configuration
+information to be shown. For example, if you add a tag called `INTERNAL`
+you could produce errors for any user set option that is tagged internal
+regardless of if the user set it to enabled or disabled.
+
 #### Menus
 
 Putting options between `menu` and `endmenu` keywords will make them appear in

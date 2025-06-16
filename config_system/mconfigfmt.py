@@ -38,6 +38,7 @@ set_config_props = {
     "HELP",
     "WARNING",
     "BOB_IGNORE",
+    "TAG",
 }
 set_binary_ops = {
     "ANDAND",

@@ -18,6 +18,7 @@ load("@config_deps//:requirements.bzl", "requirement")
     for test in [
         "test_type_strictness",
         "test_expressions",
+        "test_tags",
     ]
 ]
 

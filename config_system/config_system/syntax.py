@@ -292,6 +292,7 @@ def p_type(p):
 def p_config_options(p):
     """config_options : config_options config_type
     | config_options config_select
+    | config_options config_tag
     | config_options config_default
     | config_options config_bob_ignore
     | config_options config_depends
@@ -319,6 +320,11 @@ def p_config_type(p):
 def p_config_select(p):
     "config_select : SELECT IDENTIFIER EOL"
     p[0] = {"select": [p[2]]}
+
+
+def p_config_tag(p):
+    "config_tag : TAG IDENTIFIER EOL"
+    p[0] = {"tag": [p[2]]}
 
 
 def p_config_select_if(p):
