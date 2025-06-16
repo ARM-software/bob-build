@@ -87,7 +87,9 @@ rm -rf "${TEST_DIRS[@]}"
 # Test by explicitly requesting the `bob_tests` alias, which should include all
 # test cases, including alias tests, which can't just set `build_by_default`.
 
+echo -e "* \e[1;32mBuilding 'bob_tests'\e[0m"
 # Build with working directory in source directory
+echo -e "\e[1;94mWorking directory in source directory\e[0m"
 build_dir=build-in-src
 pushd "tests" &> /dev/null
 ./bootstrap_linux -o ${build_dir}
@@ -96,12 +98,14 @@ check_build_output "${build_dir}"
 popd &> /dev/null
 
 # Build in an independent working directory
+echo -e "\e[1;94m\nIndependent working directory\e[0m"
 build_dir=build-indep
 tests/bootstrap_linux -o ${build_dir}
 ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 
 # Build in a directory referred to via a symlink
+echo -e "\e[1;94m\nDirectory referred to via a symlink...\e[0m"
 build_dir=build-link
 mkdir -p build-link-target/builds/build
 ln -s build-link-target/builds/build ${build_dir}
@@ -110,6 +114,7 @@ ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 
 # Build with the working directory in the output directory
+echo -e "\e[1;94m\nWorking directory in the output directory\e[0m"
 build_dir=build-in-outp
 mkdir ${build_dir}
 pushd ${build_dir} &> /dev/null
@@ -120,12 +125,12 @@ check_build_output "${build_dir}"
 
 # A re-bootstrapped build directory with a different working directory
 # should still work. Re-use the last directory
-echo Checking rebootstrap
+echo -e "\n* \e[1;32mChecking rebootstrap\e[0m"
 tests/bootstrap_linux -o ${build_dir}
 ${build_dir}/buildme bob_tests
 
 # Check static archives are built from scratch. Re-use the last directory
-echo Reconfiguring to check archives are clean
+echo -e "\n* \e[1;32mReconfiguring to check archives are clean\e[0m"
 ${build_dir}/config ${OPTIONS} STATIC_LIB_TOGGLE=y
 ${build_dir}/buildme bob_tests
 
@@ -192,6 +197,7 @@ function check_dep_not_updated() {
 
 ## Various checks that dependency tracking is working. Re-use the
 ## build-indep build directory from above.
+echo -e "\n* \e[1;32mChecking dependency tracking\e[0m"
 build_dir=build-indep
 
 # library dependencies on source files
