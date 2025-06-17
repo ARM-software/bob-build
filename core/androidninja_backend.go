@@ -19,6 +19,18 @@ import (
 type androidNinjaGenerator struct {
 }
 
+func pathToLibFlagAndroid(path string) string {
+	// TODO should we create a separate rule for this use case?
+	// Same as pathToLibFlag but doesn't require that libraries start with
+	// "lib". This is required for build 'system' Android libraries like AIDLs
+	// ourselves.
+	_, base := filepath.Split(path)
+	ext := filepath.Ext(base)
+	base = strings.TrimSuffix(base, ext)
+	base = strings.TrimPrefix(base, "lib")
+	return "-l" + base
+}
+
 // aliasActions implements generatorBackend.
 func (*androidNinjaGenerator) aliasActions(a *ModuleAlias, ctx blueprint.ModuleContext) {
 	srcs := []string{}
@@ -181,7 +193,7 @@ func (g *androidNinjaGenerator) getSharedLibFlags(m BackendCommonLibraryInterfac
 						ldlibs = append(ldlibs, tc.GetLinker().KeepUnusedDependencies())
 					}
 				}
-				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
+				ldlibs = append(ldlibs, pathToLibFlagAndroid(sl.outputName()))
 				if b.isForwardingSharedLibrary() {
 					if useNoAsNeeded {
 						ldlibs = append(ldlibs, tc.GetLinker().DropUnusedDependencies())
@@ -192,7 +204,7 @@ func (g *androidNinjaGenerator) getSharedLibFlags(m BackendCommonLibraryInterfac
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
-				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
+				ldlibs = append(ldlibs, pathToLibFlagAndroid(sl.outputName()))
 				if installPath, ok := sl.ModuleGenerateCommon.Properties.InstallableProps.getInstallPath(); ok {
 					libPaths = utils.AppendIfUnique(libPaths, installPath)
 				}
@@ -205,7 +217,7 @@ func (g *androidNinjaGenerator) getSharedLibFlags(m BackendCommonLibraryInterfac
 					return f.MatchesType(flag.TypeLinker)
 				}).ToStringSlice()...)
 			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
-				ldlibs = append(ldlibs, pathToLibFlag(sl.Name()+".so"))
+				ldlibs = append(ldlibs, pathToLibFlagAndroid(sl.Name()+".so"))
 			} else {
 				utils.Die("%s is not a shared library", ctx.OtherModuleName(m))
 			}
