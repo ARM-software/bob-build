@@ -1,1 +1,0 @@
-Error executing string '{{.gen_cc}} -c -o ${gen_dir}/libblah.o ${in}; {{.gen_ar}} rcs ${out} ${gen_dir}/libblah.o; mkdir -p ${gen_dir}/include; cp ${module_dir}/libblah/libblah.h ${module_dir}/libblah/libblah_feature.h ${gen_dir}/include/.': template: TemplateProps:1:2: executing "TemplateProps" at <.gen_cc>: map has no entry for key "gen_cc"

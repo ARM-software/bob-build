@@ -55,6 +55,14 @@
     "ignore": false,
     "value": false
   },
+  "gen_ar": {
+    "ignore": false,
+    "value": "ar"
+  },
+  "gen_cc": {
+    "ignore": false,
+    "value": "gcc"
+  },
   "host_64bit_only": {
     "ignore": false,
     "value": false
@@ -184,6 +192,14 @@
     "value": ""
   },
   "host_xcode_triple": {
+    "ignore": false,
+    "value": ""
+  },
+  "kernel_cc": {
+    "ignore": false,
+    "value": ""
+  },
+  "kernel_clang_triple": {
     "ignore": false,
     "value": ""
   },
@@ -354,5 +370,9 @@
   "windows": {
     "ignore": false,
     "value": false
+  },
+  "tag_owner": {
+    "ignore": false,
+    "value": "baz"
   }
 }

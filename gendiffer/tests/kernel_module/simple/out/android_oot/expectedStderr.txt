@@ -1,1 +1,1 @@
-Error executing string '{{.kernel_cc}}': template: TemplateProps:1:2: executing "TemplateProps" at <.kernel_cc>: map has no entry for key "kernel_cc"
+Kernel modules are not supported in Android builds (test_module1)
