@@ -23,32 +23,38 @@ SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 source "${SCRIPT_DIR}/pathtools.bash"
 source "${SCRIPT_DIR}/bootstrap/utils.bash"
 
-if ! command -v go &> /dev/null
+if command -v bazel-bob-build.exe &> /dev/null
 then
-    >&2 echo "ERROR: Go is required for Bob, please install and try again."
-    exit 1
-fi
+  GOROOT="/dev/null"
+  export GOROOT
+else
+  if ! command -v go &> /dev/null
+  then
+      >&2 echo "ERROR: Go is required for Bob, please install and try again."
+      exit 1
+  fi
 
-if [ -z "${GO120_NO_STD_INSTALL-}" ]; then
-  GO120_NO_STD_INSTALL=0
-fi
+  if [ -z "${GO120_NO_STD_INSTALL-}" ]; then
+    GO120_NO_STD_INSTALL=0
+  fi
 
-go_version=$(go version | { read _ _ v _; echo "${v#go}"; })
-if [ "$(printf "%s\n1.20\n" "$go_version" | sort -t '.' -k 1,1 -k 2,2 -g | head -n 1)" == "1.20" ]; then
-  # Since go 1.20, std modules are not installed by default. This breaks Blueprint.
-  # Pre-install these modules before proceeding.
-  # Should the GOPATH change or be deleted this script may have to be re-run.
-  if [ ${GO120_NO_STD_INSTALL} = 0 ]; then
-    echo 'WARNING: Go >=1.20 is not fully supported by Bob/Blueprint and requires a pre-installed Go `std` package on the system. Attempting workaround. You may disable this workaround by setting `GO120_NO_STD_INSTALL=1`'
+  go_version=$(go version | { read _ _ v _; echo "${v#go}"; })
+  if [ "$(printf "%s\n1.20\n" "$go_version" | sort -t '.' -k 1,1 -k 2,2 -g | head -n 1)" == "1.20" ]; then
+    # Since go 1.20, std modules are not installed by default. This breaks Blueprint.
+    # Pre-install these modules before proceeding.
+    # Should the GOPATH change or be deleted this script may have to be re-run.
+    if [ ${GO120_NO_STD_INSTALL} = 0 ]; then
+      echo 'WARNING: Go >=1.20 is not fully supported by Bob/Blueprint and requires a pre-installed Go `std` package on the system. Attempting workaround. You may disable this workaround by setting `GO120_NO_STD_INSTALL=1`'
 
-    ret=0
-    (GODEBUG=installgoroot=all go install std) || ret=$?
+      ret=0
+      (GODEBUG=installgoroot=all go install std) || ret=$?
 
-    if [ $ret -eq 126 ]; then
-      echo 'WARNING: Permissions failed when installing Go standard library. Build will proceed assuming a sandboxed envrioment, if you are not in a sandbox with a pre-existing Go `std` library installed please run `GODEBUG=installgoroot=all go install std` with sudo.'
-    elif [ $ret -ne 0 ]; then
-      echo 'ERROR: Unexpected error installing Go `std` package for Go >=1.20. Error code:' $ret
-      exit $ret
+      if [ $ret -eq 126 ]; then
+        echo 'WARNING: Permissions failed when installing Go standard library. Build will proceed assuming a sandboxed envrioment, if you are not in a sandbox with a pre-existing Go `std` library installed please run `GODEBUG=installgoroot=all go install std` with sudo.'
+      elif [ $ret -ne 0 ]; then
+        echo 'ERROR: Unexpected error installing Go `std` package for Go >=1.20. Error code:' $ret
+        exit $ret
+      fi
     fi
   fi
 fi
