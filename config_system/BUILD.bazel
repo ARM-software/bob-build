@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@config_deps//:requirements.bzl", "requirement")
 
 exports_files(
@@ -53,6 +54,12 @@ py_binary(
     imports = ["."],
     visibility = ["//visibility:public"],
     deps = ["//config_system"],
+)
+
+native_binary(
+    name = "bazel-bob-update-config",
+    src = "update_config",
+    visibility = ["//visibility:public"],
 )
 
 py_binary(

@@ -33,8 +33,16 @@ done
 # Move to the working directory
 cd -P "${WORKDIR}"
 
+# Allow passed in `update_config`
+if command -v bazel-bob-update-config.exe &> /dev/null
+then
+  UPDATE_CONFIG=bazel-bob-update-config.exe
+else
+  UPDATE_CONFIG="${BOB_DIR}/config_system/update_config.py"
+fi
+
 # shellcheck disable=SC2294
-eval "${BOB_DIR}/config_system/update_config.py" --new -d "${SRCDIR}/Mconfig" \
+eval "${UPDATE_CONFIG}" --new -d "${SRCDIR}/Mconfig" \
     "${BOB_CONFIG_OPTS}" "${BOB_CONFIG_PLUGIN_OPTS}" \
     -j "${CONFIG_JSON}" \
     -c "${CONFIG_FILE}" \
