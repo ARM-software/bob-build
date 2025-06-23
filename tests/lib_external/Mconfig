@@ -1,0 +1,11 @@
+
+
+
+config ZLIB_CFLAGS
+	string "zlib CFLAGS"
+
+config ZLIB_LDFLAGS
+	string "zlib LDFLAGS"
+
+config ZLIB_LDLIBS
+	string "zlib LDLIBS"

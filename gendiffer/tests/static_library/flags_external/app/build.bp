@@ -1,0 +1,141 @@
+
+
+bob_shared_library {
+    name: "external_shared",
+    builder_ninja: {
+        export_cflags: ["-DEXTERNAL_SHARED"],
+        export_ldflags: ["ldflags"],
+        ldlibs: ["libs"],
+    },
+    external: true,
+}
+
+bob_static_library {
+    name: "external_static",
+    external: true,
+}
+
+bob_static_library {
+    name: "lib_provider",
+    export_local_system_include_dirs: [
+        "export/local/system/include/lib/provider",
+    ],
+    export_local_include_dirs: [
+        "export/local/include/lib/provider",
+    ],
+    local_include_dirs: [
+        "local/include/lib/provider",
+    ],
+    include_dirs: [
+        "include/lib/provider",
+    ],
+
+    shared_libs: ["external_shared"],
+    static_libs: [
+        "external_static",
+    ],
+
+    srcs: [
+        "src/lib_provider.c",
+        "src/lib_provider.s",
+        "src/lib_provider.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_PROVIDER_LIB",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_PROVIDER_LIB",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_PROVIDER_LIB",
+    ],
+    asflags: [
+        "-DASFLAGS_PROVIDER_LIB",
+    ],
+    ldflags: [
+        "-O1",
+    ],
+
+    export_cflags: ["-DCFLAGS_PROVIDER_EXPORT"],
+
+}
+
+bob_static_library {
+    name: "lib_consumer",
+    static_libs: [
+        "lib_provider",
+        "external_static",
+    ],
+    shared_libs: ["external_shared"],
+    export_local_system_include_dirs: [
+        "export/local/system/include/lib/consumer",
+    ],
+    export_local_include_dirs: [
+        "export/local/include/lib/consumer",
+    ],
+    local_include_dirs: [
+        "local/include/lib/consumer",
+    ],
+    include_dirs: [
+        "include/lib/consumer",
+    ],
+
+    srcs: [
+        "src/lib_consumer.c",
+        "src/lib_consumer.s",
+        "src/lib_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_LIB",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_LIB",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_LIB",
+    ],
+    asflags: [
+        "-DASFLAGS_LIB",
+    ],
+    ldflags: [
+        "-O2",
+    ],
+}
+
+bob_binary {
+    name: "bin_consumer",
+    static_libs: [
+        "lib_provider",
+        "lib_consumer",
+        "external_static",
+    ],
+    shared_libs: ["external_shared"],
+    local_include_dirs: [
+        "local/include/bin/consumer",
+    ],
+    include_dirs: [
+        "include/bin/consumer",
+    ],
+
+    srcs: [
+        "src/bin_consumer.c",
+        "src/bin_consumer.s",
+        "src/bin_consumer.cpp",
+    ],
+    cflags: [
+        "-DCFLAGS_BIN",
+    ],
+    conlyflags: [
+        "-DCONLYFLAGS_BIN",
+    ],
+    cxxflags: [
+        "-DCXXFLAGS_BIN",
+    ],
+    asflags: [
+        "-DASFLAGS_BIN",
+    ],
+    ldflags: [
+        "-O3",
+    ],
+
+}

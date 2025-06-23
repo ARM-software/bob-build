@@ -1,0 +1,12 @@
+bob_shared_library {
+    name: "sharedtest",
+    srcs: ["lib.c"],
+    cflags: ["-DFUNC_NAME=sharedtest_installed"],
+    build_by_default: true,
+}
+
+bob_shared_library {
+    name: "sharedtest_depends",
+    shared_libs: ["sharedtest"],
+    build_by_default: true,
+}

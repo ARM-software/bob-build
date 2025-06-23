@@ -81,6 +81,7 @@ PROJ_DIR=$(relative_path "${ANDROID_BUILD_TOP}" "${SCRIPT_DIR}")
 
 # Add a symlink to enable the external_libs test
 create_link external_lib.bp "${SCRIPT_DIR}/external_libs/external/Android.bp"
+create_link lib_external_lib.bp "${SCRIPT_DIR}/lib_external/external/Android.bp"
 
 # Change to the working directory
 cd "${ANDROID_BUILD_TOP}" || exit

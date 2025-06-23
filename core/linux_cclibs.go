@@ -320,7 +320,9 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.SharedTag },
 		func(m blueprint.Module) {
 			if t, ok := m.(targetableModule); ok {
-				libs = append(libs, g.getSharedLibLinkPath(t))
+				if e, ok := m.(externable); !ok || !isExternal(e) {
+					libs = append(libs, g.getSharedLibLinkPath(t))
+				}
 			} else if _, ok := m.(*ModuleExternalLibrary); ok {
 				// Don't try and guess the path to external libraries,
 				// and as they are outside of the build we don't need to
@@ -338,9 +340,11 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 		func(m blueprint.Module) {
 			if _, ok := m.(sharedLibProducer); ok { //Remove this check and replace it with an API call
 				if m, ok := m.(file.Provider); ok {
-					if toc, ok := m.OutFiles().FindSingle(
-						func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
-						libs = append(libs, toc.BuildPath())
+					if e, ok := m.(externable); !ok || !isExternal(e) {
+						if toc, ok := m.OutFiles().FindSingle(
+							func(p file.Path) bool { return p.IsType(file.TypeToc) }); ok {
+							libs = append(libs, toc.BuildPath())
+						}
 					}
 				}
 			} else if _, ok := m.(*ModuleExternalLibrary); ok {
@@ -365,24 +369,35 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 	ctx.VisitDirectDepsIf(
 		func(m blueprint.Module) bool { return ctx.OtherModuleDependencyTag(m) == tag.SharedTag },
 		func(m blueprint.Module) {
+
 			if sl, ok := m.(*ModuleSharedLibrary); ok {
-				b := &sl.ModuleLibrary.Properties.Build
-				if b.isForwardingSharedLibrary() {
-					hasForwardingLib = true
-					ldlibs = append(ldlibs, tc.GetLinker().KeepSharedLibraryTransitivity())
-					if useNoAsNeeded {
-						ldlibs = append(ldlibs, tc.GetLinker().KeepUnusedDependencies())
+				if isExternal(m.(*ModuleSharedLibrary)) {
+					ldlibs = append(ldlibs, sl.FlagsOut().Filtered(func(f flag.Flag) bool {
+						return f.MatchesType(flag.TypeLinkLibrary)
+					}).ToStringSlice()...)
+
+					ldflags = append(ldflags, sl.FlagsOut().Filtered(func(f flag.Flag) bool {
+						return f.MatchesType(flag.TypeLinker)
+					}).ToStringSlice()...)
+				} else {
+					b := &sl.ModuleLibrary.Properties.Build
+					if b.isForwardingSharedLibrary() {
+						hasForwardingLib = true
+						ldlibs = append(ldlibs, tc.GetLinker().KeepSharedLibraryTransitivity())
+						if useNoAsNeeded {
+							ldlibs = append(ldlibs, tc.GetLinker().KeepUnusedDependencies())
+						}
 					}
-				}
-				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
-				if b.isForwardingSharedLibrary() {
-					if useNoAsNeeded {
-						ldlibs = append(ldlibs, tc.GetLinker().DropUnusedDependencies())
+					ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))
+					if b.isForwardingSharedLibrary() {
+						if useNoAsNeeded {
+							ldlibs = append(ldlibs, tc.GetLinker().DropUnusedDependencies())
+						}
+						ldlibs = append(ldlibs, tc.GetLinker().DropSharedLibraryTransitivity())
 					}
-					ldlibs = append(ldlibs, tc.GetLinker().DropSharedLibraryTransitivity())
-				}
-				if installPath, ok := sl.Properties.InstallableProps.getInstallPath(); ok {
-					libPaths = utils.AppendIfUnique(libPaths, installPath)
+					if installPath, ok := sl.Properties.InstallableProps.getInstallPath(); ok {
+						libPaths = utils.AppendIfUnique(libPaths, installPath)
+					}
 				}
 			} else if sl, ok := m.(*generateSharedLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.outputName()))

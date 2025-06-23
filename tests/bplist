@@ -29,6 +29,7 @@
 ./kernel_module/build.bp
 ./kernel_module/module1/build.bp
 ./kernel_module/module2/build.bp
+./lib_external/build.bp
 ./match_source/build.bp
 ./multiple_tools/build.bp
 ./output/build.bp

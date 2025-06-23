@@ -19,6 +19,11 @@ import (
 
 var depOutputsVarRegexp = regexp.MustCompile(`^\$\{(.+)_out\}$`)
 
+type ExternalableProps struct {
+	// Used to disable the generation of build rules. If this is set to false, no build rule will be generated.
+	External *bool
+}
+
 // ModuleLibrary is a base class for modules which are generated from sets of object files
 type ModuleLibrary struct {
 	module.ModuleBase
@@ -28,6 +33,7 @@ type ModuleLibrary struct {
 		TransitiveLibraryProps
 		Build
 		TagableProps
+		ExternalableProps
 
 		// The list of default properties that should prepended to all configuration
 		Defaults []string
@@ -81,6 +87,7 @@ func (m *ModuleLibrary) FeaturableProperties() []interface{} {
 		&m.Properties.Build.BuildProps,
 		&m.Properties.Build.SplittableProps,
 		&m.Properties.TagableProps,
+		&m.Properties.ExternalableProps,
 	}
 }
 
@@ -116,6 +123,9 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 			if _, ok := m.(*ModuleExternalLibrary); ok {
 				return false
 			}
+			if ml, ok := m.(*ModuleLibrary); ok && isExternal(ml) {
+				return false
+			}
 			if depTag == tag.InstallTag || depTag == tag.SharedTag {
 				return true
 			}
@@ -125,6 +135,22 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 
 func (m *ModuleLibrary) getEnableableProps() *EnableableProps {
 	return &m.Properties.Build.EnableableProps
+}
+
+type externable interface {
+	getExternalableProps() *ExternalableProps
+}
+
+func (m *ModuleLibrary) getExternalableProps() *ExternalableProps {
+	return &m.Properties.ExternalableProps
+}
+
+func isExternal(e externable) bool {
+	props := e.getExternalableProps()
+	if props.External != nil {
+		return *props.External
+	}
+	return false
 }
 
 func (m *ModuleLibrary) getAliasList() []string {
@@ -547,7 +573,8 @@ func (m *ModuleLibrary) LibraryFactory(config *BobConfig, module blueprint.Modul
 		CommonProps{},
 		BuildProps{},
 		SplittableProps{},
-		TagableProps{})
+		TagableProps{},
+		ExternalableProps{})
 	m.Properties.Host.init(&config.Properties,
 		CommonProps{},
 		BuildProps{},
@@ -598,7 +625,9 @@ func checkLibraryFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	} else if sl, ok := m.(*ModuleSharedLibrary); ok {
 		props := sl.Properties
-		sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
+		if !isExternal(sl) {
+			sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
+		}
 		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
 		sl.checkField(props.Mte.Diag_memtag_heap == nil, "memtag_heap")
 	} else if sl, ok := m.(*ModuleStaticLibrary); ok {
@@ -721,18 +750,20 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 		}
 
 		if depLib, ok := dep.(*ModuleStaticLibrary); ok {
-			// TODO: whole static libs should use a tag with relevant information.
-			for _, subLib := range depLib.Properties.Whole_static_libs {
-				if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
-					utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",
-						ctx.Module().Name(), firstContainingLib,
-						depLib.Name(), subLib)
-				} else {
-					insideWholeLibs[subLib] = depLib.Name()
+			if !isExternal(depLib) {
+				// TODO: whole static libs should use a tag with relevant information.
+				for _, subLib := range depLib.Properties.Whole_static_libs {
+					if firstContainingLib, ok := insideWholeLibs[subLib]; ok {
+						utils.Die("%s links with %s and %s, which both contain %s as whole_static_libs",
+							ctx.Module().Name(), firstContainingLib,
+							depLib.Name(), subLib)
+					} else {
+						insideWholeLibs[subLib] = depLib.Name()
+					}
 				}
-			}
-			for _, subLib := range depLib.Properties.Static_libs {
-				allImportedStaticLibs[subLib] = true
+				for _, subLib := range depLib.Properties.Static_libs {
+					allImportedStaticLibs[subLib] = true
+				}
 			}
 
 			propagateOtherExportedProperties(l, depLib)

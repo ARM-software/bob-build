@@ -1,0 +1,13 @@
+cc_library_static {
+    name: "libbob_test_lib_external_static",
+    srcs: ["external_lib.c"],
+    cflags: ["-DFUNC_NAME=external_static"],
+    export_include_dirs: ["static"],
+}
+
+cc_library_shared {
+    name: "libbob_test_lib_external_shared",
+    srcs: ["external_lib.c"],
+    cflags: ["-DFUNC_NAME=external_shared"],
+    export_include_dirs: ["shared"],
+}

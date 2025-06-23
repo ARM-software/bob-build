@@ -96,7 +96,7 @@ func (m *ModuleSharedLibrary) GetBackendConfiguration(ctx blueprint.ModuleContex
 }
 
 func (m *ModuleSharedLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	if isEnabled(m) {
+	if isEnabled(m) && !isExternal(m) {
 		getGenerator(ctx).sharedActions(m, ctx)
 	}
 }
