@@ -27,6 +27,9 @@ func pathToLibFlagAndroid(path string) string {
 	_, base := filepath.Split(path)
 	ext := filepath.Ext(base)
 	base = strings.TrimSuffix(base, ext)
+	if base == "" {
+		utils.Die("Shared library name is empty")
+	}
 	base = strings.TrimPrefix(base, "lib")
 	return "-l" + base
 }
