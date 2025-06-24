@@ -183,3 +183,8 @@ func externalLibFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module.Properties.Target.init(&config.Properties, ExternalLibProps{})
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
+
+var _ externableLibrary = (*ModuleExternalLibrary)(nil) // impl check
+func (m *ModuleExternalLibrary) isExternal() bool {
+	return true
+}

@@ -120,10 +120,7 @@ func (m *ModuleLibrary) getInstallDepPhonyNames(ctx blueprint.ModuleContext) []s
 			depTag := ctx.OtherModuleDependencyTag(m)
 			// External libraries do not have a build target so don't
 			// try to add a dependency on them.
-			if _, ok := m.(*ModuleExternalLibrary); ok {
-				return false
-			}
-			if ml, ok := m.(*ModuleLibrary); ok && isExternal(ml) {
+			if e, ok := m.(externableLibrary); ok && e.isExternal() {
 				return false
 			}
 			if depTag == tag.InstallTag || depTag == tag.SharedTag {
@@ -137,16 +134,13 @@ func (m *ModuleLibrary) getEnableableProps() *EnableableProps {
 	return &m.Properties.Build.EnableableProps
 }
 
-type externable interface {
-	getExternalableProps() *ExternalableProps
+type externableLibrary interface {
+	isExternal() bool
+	flag.Provider
 }
 
-func (m *ModuleLibrary) getExternalableProps() *ExternalableProps {
-	return &m.Properties.ExternalableProps
-}
-
-func isExternal(e externable) bool {
-	props := e.getExternalableProps()
+func (m *ModuleLibrary) isExternal() bool {
+	props := &m.Properties.ExternalableProps
 	if props.External != nil {
 		return *props.External
 	}
@@ -625,7 +619,7 @@ func checkLibraryFieldsMutator(ctx blueprint.BottomUpMutatorContext) {
 		b.checkField(props.Forwarding_shlib == nil, "forwarding_shlib")
 	} else if sl, ok := m.(*ModuleSharedLibrary); ok {
 		props := sl.Properties
-		if !isExternal(sl) {
+		if !sl.isExternal() {
 			sl.checkField(len(props.Export_ldflags) == 0, "export_ldflags")
 		}
 		sl.checkField(props.Mte.Memtag_heap == nil, "memtag_heap")
@@ -750,7 +744,7 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 		}
 
 		if depLib, ok := dep.(*ModuleStaticLibrary); ok {
-			if !isExternal(depLib) {
+			if !depLib.isExternal() {
 				// TODO: whole static libs should use a tag with relevant information.
 				for _, subLib := range depLib.Properties.Whole_static_libs {
 					if firstContainingLib, ok := insideWholeLibs[subLib]; ok {

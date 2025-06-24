@@ -14,7 +14,7 @@ var _ BackendConfiguration = (*ModuleStaticLibrary)(nil)         // impl check
 var _ BackendConfigurationProvider = (*ModuleStaticLibrary)(nil) // impl check
 
 func (m *ModuleStaticLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	if isEnabled(m) && !isExternal(m) {
+	if isEnabled(m) && !m.isExternal() {
 		getGenerator(ctx).staticActions(m, ctx)
 	}
 }
@@ -28,7 +28,7 @@ func (m ModuleStaticLibrary) GetProperties() interface{} {
 }
 
 func (m *ModuleStaticLibrary) OutFiles() (srcs file.Paths) {
-	if !isExternal(m) {
+	if !m.isExternal() {
 		fp := file.NewPath(m.outputFileName(), string(m.getTarget()), file.TypeArchive|file.TypeInstallable)
 		srcs = srcs.AppendIfUnique(fp)
 	}
