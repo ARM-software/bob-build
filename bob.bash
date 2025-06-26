@@ -1,8 +1,4 @@
 #!/bin/bash
-
-
-
-
 set -e
 
 # Switch to the build directory
