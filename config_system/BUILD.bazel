@@ -63,6 +63,20 @@ native_binary(
 )
 
 py_binary(
+    name = "generate_config_json",
+    srcs = ["generate_config_json.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//config_system"],
+)
+
+native_binary(
+    name = "bazel-bob-generate-config-json",
+    src = "generate_config_json",
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
     name = "get_configs_gazelle",
     srcs = ["get_configs_gazelle.py"],
     imports = ["."],

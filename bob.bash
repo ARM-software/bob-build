@@ -24,10 +24,17 @@ if [[ -e "${CONFIG_FILE}.error" ]]; then
     exit 1
 fi
 
+# Allow passing in the Bazel target for `generate_config_json.py`
+if command -v bazel-bob-generate-config-json.exe >/dev/null; then
+    GENERATE_CONFIG_JSON="bazel-bob-generate-config-json.exe"
+else
+    GENERATE_CONFIG_JSON="${BOB_DIR}/config_system/generate_config_json.py"
+fi
+
 # Refresh the configuration. This means that options changed or added since the
 # last build will be chosen from their defaults automatically, so that users
 # don't have to reconfigure manually if the config database changes.
-python3 "${BOB_DIR}/config_system/generate_config_json.py" \
+"${GENERATE_CONFIG_JSON}" \
        "${CONFIG_FILE}" --database "${SRCDIR}/Mconfig" \
        --json "${CONFIG_JSON}" ${BOB_CONFIG_OPTS}
 
