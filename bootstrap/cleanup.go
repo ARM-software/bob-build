@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -93,9 +95,24 @@ func parseNinjaLog(ninjaBuildDir string, under []string) ([]string, error) {
 
 	scanner := bufio.NewScanner(logFile)
 
-	// Check that the first line indicates that this is a Ninja log version 5
-	const expectedFirstLine = "# ninja log v5"
-	if !scanner.Scan() || scanner.Text() != expectedFirstLine {
+	// Check that the first line indicates that this is a Ninja log version >= 5 && <= 7
+	checkVersion := func(s string, min uint, max uint) bool {
+		re := regexp.MustCompile("# ninja log v(?P<ver>\\d+)$")
+		matches := re.FindStringSubmatch(s)
+		idx := re.SubexpIndex("ver")
+
+		if len(matches) != 2 {
+			return false
+		}
+
+		if v, err := strconv.ParseUint(matches[idx], 10, 32); err == nil {
+			return (uint(v) >= min && uint(v) <= max)
+		}
+
+		return false
+	}
+
+	if !scanner.Scan() || !checkVersion(scanner.Text(), 5, 7) {
 		return nil, errors.New("unrecognized ninja log format")
 	}
 
