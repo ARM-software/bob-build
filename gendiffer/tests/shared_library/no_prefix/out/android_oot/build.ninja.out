@@ -103,7 +103,7 @@ build ${g.bob.BuildDir}/target/shared/sharedtest_depends.so: $
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -lsharedtest -Wl,-soname,sharedtest_depends.so -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    shared_libs_flags = -l:sharedtest.so -Wl,-soname,sharedtest_depends.so -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
 build ${g.bob.BuildDir}/target/shared/sharedtest_depends.so.toc: $

@@ -25,13 +25,17 @@ func pathToLibFlagAndroid(path string) string {
 	// "lib". This is required for build 'system' Android libraries like AIDLs
 	// ourselves.
 	_, base := filepath.Split(path)
-	ext := filepath.Ext(base)
-	base = strings.TrimSuffix(base, ext)
 	if base == "" {
 		utils.Die("Shared library name is empty")
 	}
-	base = strings.TrimPrefix(base, "lib")
-	return "-l" + base
+	if strings.HasPrefix(base, "lib") {
+		base = strings.TrimPrefix(base, "lib")
+		ext := filepath.Ext(base)
+		base = strings.TrimSuffix(base, ext)
+		return "-l" + base
+	} else {
+		return "-l:" + base + ".so"
+	}
 }
 
 // aliasActions implements generatorBackend.
