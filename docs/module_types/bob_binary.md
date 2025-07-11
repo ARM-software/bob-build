@@ -1,7 +1,5 @@
 # `bob_binary`
 
-> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md)
-
 ```bp
 bob_binary {
     name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, target_supported, target, host_supported, host, out, cflags, cxxflags, asflags, conlyflags, ldflags, ldlibs, static_libs, shared_libs, generated_headers, generated_sources, generated_deps, tags, strip, include_dirs, local_include_dirs, build_wrapper, add_lib_dirs_to_rpath, install_group, install_deps, relative_install_path, debug_info, post_install_tool, post_install_cmd, post_install_args, version_script

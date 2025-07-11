@@ -16,10 +16,6 @@ The command will be run once - with `${in}` being the paths in
 The source and tool paths should be relative to the directory of the
 `build.bp` containing the `bob_genrule`.
 
-Supports:
-
-- [Gazelle generation](../../gazelle/README.md)
-
 ## Properties
 
 |                                                    |                                                                                                                                                                                                                                                                                                                                     |

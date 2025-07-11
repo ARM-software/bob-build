@@ -15,7 +15,6 @@ go_library(
         "//core/config",
         "//core/toolchain",
         "//internal/utils",
-        "//internal/warnings",
         "@com_github_google_blueprint//:blueprint",
         "@com_github_google_blueprint//proptools",
     ],

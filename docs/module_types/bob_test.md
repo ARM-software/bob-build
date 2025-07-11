@@ -13,10 +13,6 @@ Indicates a test binary.
 On Linux this module behaves like an executable.
 On Android this module generates test targets.
 
-Supports:
-
-- [Gazelle generation](../../gazelle/README.md)
-
 ## Properties
 
 |                                                |                                                                                                       |

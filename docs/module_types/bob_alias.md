@@ -1,7 +1,5 @@
 # `bob_alias`
 
-> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 ```bp
 bob_alias {
 name, srcs, add_to_alias,

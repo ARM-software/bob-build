@@ -7,7 +7,6 @@ repos:
           ^config_system/tests/formatter/|
           gendiffer/tests.*build.ninja|
           gendiffer/tests.*Android.bp|
-          gazelle/tests/.*/expectedStderr.txt|
           patches/
           )
       - id: end-of-file-fixer

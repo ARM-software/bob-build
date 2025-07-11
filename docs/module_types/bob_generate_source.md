@@ -1,6 +1,6 @@
 # `bob_generate_source`
 
-> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md), please refer to the [migration guide](./migration/bob_generate_source.md).
+> Use [bob_genrule](./bob_genrule.md) instead. Please refer to the [migration guide](./migration/bob_generate_source.md).
 
 ```bp
 bob_generate_source {

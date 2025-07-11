@@ -9,10 +9,6 @@ bob_glob {
 Glob is a helper module that finds all files that match certain path patterns
 and returns a list of their paths.
 
-Supports:
-
-- [Gazelle generation](../../gazelle/README.md)
-
 ## Properties
 
 |                                                |                                                                                                                                                  |

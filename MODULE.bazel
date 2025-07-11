@@ -40,10 +40,12 @@ dev = use_extension(
 )
 dev.toolchain(
     configure_coverage_tool = True,
-    # TODO: change the code to use Python for `chmod`/`id`
     ignore_root_user_error = True,
+    # TODO: change the code to use Python for `chmod`/`id`
+    is_default = True,
     python_version = "3.11",
 )
+use_repo(dev, "python_3_11", "python_versions")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
@@ -55,13 +57,6 @@ use_repo(
     pip,
     config_deps = "pip",
 )
-
-python = use_extension("@rules_python//extensions:python.bzl", "python")
-python.toolchain(
-    is_default = True,
-    python_version = "3.11",
-)
-use_repo(python, "python_3_11", "python_versions")
 
 # Set up dependencies
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")

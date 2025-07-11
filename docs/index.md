@@ -14,8 +14,6 @@
 
 ### Legacy Modules
 
-> Legacy modules will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 - [bob_alias](module_types/bob_alias.md)
 - [bob_binary](module_types/bob_binary.md)
 - [bob_defaults](module_types/bob_defaults.md)
@@ -40,3 +38,8 @@
 - [bob_genrule](module_types/bob_genrule.md)
 - [bob_gensrcs](module_types/bob_gensrcs.md)
 - [bob_test](module_types/bob_test.md)
+
+## Migration
+
+- [bob_generate_source -> bob_genrule](module_types/migration/bob_generate_source.md)
+- [bob_transform_source -> bob_gensrcs](module_types/migration/bob_transform_source.md)

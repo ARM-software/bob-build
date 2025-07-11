@@ -105,7 +105,7 @@ ${build_dir}/config ${OPTIONS} && ${build_dir}/buildme bob_tests
 check_build_output "${build_dir}"
 
 # Build in a directory referred to via a symlink
-echo -e "\e[1;94m\nDirectory referred to via a symlink...\e[0m"
+echo -e "\e[1;94m\nDirectory referred to via a symlink\e[0m"
 build_dir=build-link
 mkdir -p build-link-target/builds/build
 ln -s build-link-target/builds/build ${build_dir}
@@ -263,7 +263,7 @@ UPDATE=("${build_dir}"/gen/multiple_tools_generate_sources/tool_first_out.c
         "${build_dir}"/gen/multiple_tools_generate_sources/tool_second_out.c)
 check_dep_updated "generate source with multiple tools" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 
-if [ "$OS" != "OSX" ] ; then
+if [ "$OS" != "OSX" ]; then
     # simple version script
     SRC=tests/version_script/exports0.map
     UPDATE=("${build_dir}"/target/shared/libshared_vs_simple.so)

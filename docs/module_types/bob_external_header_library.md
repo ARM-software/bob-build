@@ -1,7 +1,5 @@
 # `bob_external_header_library`
 
-> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 ```bp
 bob_external_header_library {
     name, export_cflags, export_ldflags, ldlibs,

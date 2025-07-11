@@ -13,7 +13,6 @@ to enforce no relative uplinks and to closer align to Bazel.
 Supports:
 
 - [features](../features.md)
-- [Gazelle generation](../../gazelle/README.md)
 
 ## Properties
 

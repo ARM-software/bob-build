@@ -1,6 +1,6 @@
 # `bob_transform_source`
 
-> This is a legacy target and will not be supported by the [Gazelle plugin](../../gazelle/README.md), please refer to the [migration guide](./migration/bob_transform_source.md).
+> Use [bob_gensrcs](./bob_gensrcs.md) instead. Please refer to the [migration guide](./migration/bob_transform_source.md).
 
 ```bp
 bob_transform_source {

@@ -19,10 +19,6 @@ of input file where `${out}` being the path of input with replaced extension
 The source and `tool_files` paths should be relative to the directory of the
 `build.bp` containing the `bob_gensrcs`.
 
-Supports:
-
-- [Gazelle generation](../../gazelle/README.md)
-
 ## Properties
 
 |                                                    |                                                                                                                                                                                                                                                                                                                                     |

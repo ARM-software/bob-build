@@ -1,7 +1,5 @@
 # Module: bob_resource
 
-> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 ```bp
 bob_resource {
     name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args, tags,

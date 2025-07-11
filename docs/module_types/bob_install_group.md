@@ -1,7 +1,5 @@
 # `bob_install_group`
 
-> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 ```bp
 bob_install_group {
     name, install_path

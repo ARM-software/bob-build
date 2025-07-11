@@ -1,7 +1,5 @@
 # `bob_kernel_module`
 
-> This is a legacy target will not be supported by the [Gazelle plugin](../../gazelle/README.md).
-
 ```bp
 bob_kernel_module {
     name, srcs, exclude_srcs, enabled, build_by_default, add_to_alias, defaults, cflags, tags, include_dirs, local_include_dirs, kbuild_options, extra_symbols, make_args, kernel_dir, kernel_cross_compile, kernel_cc, kernel_hostcc, kernel_clang_triple, install_group, install_deps, relative_install_path, post_install_tool, post_install_cmd, post_install_args,
