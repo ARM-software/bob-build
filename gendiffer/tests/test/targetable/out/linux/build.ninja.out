@@ -108,7 +108,7 @@ default simple_bob_test_target
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Singleton: bootstrap
-# Factory:   github.com/google/blueprint/bootstrap.Main.func4
+# Factory:   github.com/google/blueprint/bootstrap.Main.newSingletonFactory.func4
 
 rule s.bootstrap.bigbpDocs
     command = ${g.bootstrap.BinDir}/minibp -p -l redacted/bplist -b ${g.bootstrap.buildDir} --docs ${out} ${g.bootstrap.srcDir}/build.bp
