@@ -86,15 +86,15 @@ def pkg_config():
 
             cflags = check_output(cmd + [pkg, "--cflags"])
             if cflags != "":
-                set_config(pkg_config_cflags, cflags)
+                set_config(pkg_config_cflags, cflags, is_user_set=False)
 
             ldflags = check_output(cmd + [pkg, "--libs-only-L"])
             if ldflags != "":
-                set_config(pkg_config_ldflags, ldflags)
+                set_config(pkg_config_ldflags, ldflags, is_user_set=False)
 
             libs = check_output(cmd + [pkg, "--libs-only-l"])
             if libs != "":
-                set_config(pkg_config_libs, libs)
+                set_config(pkg_config_libs, libs, is_user_set=False)
 
 
 def plugin_exec():
