@@ -21,6 +21,20 @@ if [ -z "$BLUEPRINT_LIST_FILE" ]; then
   BLUEPRINT_LIST_FILE="${OUR_LIST_FILE}"
 fi
 
+# Use pre-built Bob to generate, if available
+if command -v bazel-bob-build.exe >/dev/null; then
+  mkdir -p "${BUILDDIR}/.bootstrap/bin"
+  ln -sf "$(command -v bazel-bob-build.exe)" "${BUILDDIR}/.bootstrap/bin/bob"
+  bazel-bob-build.exe \
+    -l "${BLUEPRINT_LIST_FILE}" \
+    -b "${BUILDDIR}" \
+    -n "${BUILDDIR}" \
+    -d "${BUILDDIR}/ninja.build.d" \
+    -o "${BUILDDIR}/build.ninja" \
+    "${SRCDIR}/build.bp"
+  exit 0
+fi
+
 export GOROOT
 export BLUEPRINT_LIST_FILE
 
