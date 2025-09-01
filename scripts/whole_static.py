@@ -12,15 +12,15 @@ import sys
 import tempfile
 
 
-def list_archive_contents(archive):
-    cmd = ["ar", "t", archive]
+def list_archive_contents(ar, archive):
+    cmd = [ar, "t", archive]
     out = subprocess.check_output(cmd)
     contents = out.decode("utf-8").splitlines()
     return [i.strip() for i in contents]
 
 
 def extract_archive(ar, dest, archive):
-    contents = list_archive_contents(archive)
+    contents = list_archive_contents(ar, archive)
     # Some linkers put extra files inside the archive, which should be ignored.
     contents = [i for i in contents if os.path.splitext(i)[1] == ".o"]
 
