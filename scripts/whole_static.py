@@ -2,7 +2,6 @@
 
 
 from __future__ import print_function
-from collections import defaultdict
 
 import argparse
 import os
@@ -10,6 +9,17 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections import defaultdict
+from pathlib import Path
+
+
+def resolve(value):
+    if os.path.sep not in value:
+        value = shutil.which(value)
+        assert value is not None
+        return Path(value)
+    path = Path(value)
+    return path.resolve()
 
 
 def list_archive_contents(ar, archive):
@@ -62,7 +72,7 @@ def parse_args():
     ap = argparse.ArgumentParser()
 
     ap.add_argument("--build-wrapper", required=False)
-    ap.add_argument("--ar", required=True)
+    ap.add_argument("--ar", required=True, type=resolve)
     ap.add_argument("--out", required=True)
     ap.add_argument("inputs", nargs="+")
 
