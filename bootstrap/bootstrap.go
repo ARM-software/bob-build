@@ -727,32 +727,6 @@ func (s *singleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
 			})
 		}
 
-		// Generate build system docs for the primary builder.  Generating docs reads the source
-		// files used to build the primary builder, but that dependency will be picked up through
-		// the dependency on the primary builder itself.  There are no dependencies on the
-		// Blueprints files, as any relevant changes to the Blueprints files would have caused
-		// a rebuild of the primary builder.
-		docsFile := filepath.Join(docsDir, primaryBuilderName+".html")
-		bigbpDocs := ctx.Rule(pctx, "bigbpDocs",
-			blueprint.RuleParams{
-				Command: fmt.Sprintf("%s %s -b $buildDir --docs $out %s", primaryBuilderFile,
-					primaryBuilderExtraFlags, topLevelBlueprints),
-				CommandDeps: []string{primaryBuilderFile},
-				Description: fmt.Sprintf("%s docs $out", primaryBuilderName),
-			})
-
-		ctx.Build(pctx, blueprint.BuildParams{
-			Rule:    bigbpDocs,
-			Outputs: []string{docsFile},
-		})
-
-		// Add a phony target for building the documentation
-		ctx.Build(pctx, blueprint.BuildParams{
-			Rule:    blueprint.Phony,
-			Outputs: []string{"blueprint_docs"},
-			Inputs:  []string{docsFile},
-		})
-
 		// Add a phony target for building various tools that are part of blueprint
 		ctx.Build(pctx, blueprint.BuildParams{
 			Rule:    blueprint.Phony,
