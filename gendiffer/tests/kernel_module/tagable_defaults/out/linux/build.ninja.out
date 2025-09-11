@@ -24,8 +24,6 @@ g.bootstrap.buildDir = redacted
 
 g.bootstrap.ninjaBuildDir = redacted
 
-g.bootstrap.srcDir = redacted
-
 builddir = ${g.bootstrap.ninjaBuildDir}
 
 rule g.bob.kbuild
@@ -75,20 +73,9 @@ default ko_tagable_defaults
 # Singleton: bootstrap
 # Factory:   github.com/google/blueprint/bootstrap.Main.newSingletonFactory.func4
 
-rule s.bootstrap.bigbpDocs
-    command = ${g.bootstrap.BinDir}/minibp -p -l redacted/bplist -b ${g.bootstrap.buildDir} --docs ${out} ${g.bootstrap.srcDir}/build.bp
-    description = minibp docs ${out}
-
 build ${g.bootstrap.buildDir}/bin/minibp: g.bootstrap.cp $
         ${g.bootstrap.BinDir}/minibp
 default ${g.bootstrap.buildDir}/bin/minibp
-
-build ${g.bootstrap.buildDir}/.primary/docs/minibp.html: s.bootstrap.bigbpDocs $
-        | ${g.bootstrap.BinDir}/minibp
-default ${g.bootstrap.buildDir}/.primary/docs/minibp.html
-
-build blueprint_docs: phony ${g.bootstrap.buildDir}/.primary/docs/minibp.html
-default blueprint_docs
 
 build blueprint_tools: phony
 default blueprint_tools
