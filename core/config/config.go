@@ -86,6 +86,17 @@ func (properties Properties) GetString(name string) string {
 	return ""
 }
 
+func (properties Properties) GetStringIfExists(name string) string {
+	elem, ok := properties.Properties[name]
+	if ok {
+		if ret, ok := elem.(string); ok {
+			return ret
+		}
+		utils.Die("Property %s is not a string", name)
+	}
+	return ""
+}
+
 func (properties Properties) StringMap() map[string]string {
 	return properties.stringMap
 }

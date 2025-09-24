@@ -453,6 +453,17 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
 	}
 
+	// TODO Mirror the platform flag code to the GCC toolchain
+	// TODO Make a separate bazel toolchain
+
+	if cxxflags := props.GetStringIfExists(string(tgt) + "_cxxflags"); cxxflags != "" {
+		tc.cxxflags = append(tc.cxxflags, cxxflags)
+	}
+
+	if ldflags := props.GetStringIfExists(string(tgt) + "_ldflags"); ldflags != "" {
+		tc.ldflags = append(tc.cxxflags, ldflags)
+	}
+
 	sysroot := props.GetString(string(tgt) + "_sysroot")
 	if sysroot != "" {
 		tc.cflags = append(tc.cflags, "--sysroot="+sysroot)
@@ -538,6 +549,10 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	// Combine cflags and cxxflags once here, to avoid appending during
 	// every call to GetCXXCompiler().
 	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
+
+	if cflags := props.GetStringIfExists(string(tgt) + "_cflags"); cflags != "" {
+		tc.cflags = append(tc.cxxflags, cflags)
+	}
 
 	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
 	tc.flagCache = newFlagCache()
