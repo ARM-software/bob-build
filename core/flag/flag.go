@@ -2,8 +2,10 @@ package flag
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/google/blueprint"
 )
 
@@ -103,6 +105,10 @@ func FromIncludePath(path string, tag Type) Flag {
 }
 
 func FromIncludePathOwned(path string, owner blueprint.Module, tag Type) Flag {
+	env := config.GetEnvironmentVariables()
+	if relative, err := filepath.Rel(env.SrcDir, path); err == nil && !strings.HasPrefix(relative, "..") {
+		path = relative
+	}
 	return Flag{
 		owner: owner,
 		raw:   path,

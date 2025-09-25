@@ -160,7 +160,13 @@ func getBackendPathInBuildDir(g generatorBackend, elems ...string) string {
 // Construct a path to a file within the source directory to be used
 // in backend output files.
 func getBackendPathInSourceDir(g generatorBackend, elems ...string) string {
-	return filepath.Join(append([]string{backend.Get().SourceDir()}, elems...)...)
+	srcDir := backend.Get().SourceDir()
+	path := filepath.Join(elems...)
+	env := config.GetEnvironmentVariables()
+	if relative, err := filepath.Rel(env.SrcDir, path); err == nil && !strings.HasPrefix(relative, "..") {
+		path = relative
+	}
+	return filepath.Join(srcDir, path)
 }
 
 // Construct paths to files within the source directory to be used in

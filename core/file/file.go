@@ -3,8 +3,10 @@ package file
 import (
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
+	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/core/toolchain"
 )
 
@@ -160,6 +162,10 @@ func New(relativePath string, namespace string, tag Type) Path {
 	} else {
 		backendPath = backend.Get().SourceDir()
 		scopedPath = FileNoNameSpace
+		env := config.GetEnvironmentVariables()
+		if relative, err := filepath.Rel(env.SrcDir, relativePath); err == nil && !strings.HasPrefix(relative, "..") {
+			relativePath = relative
+		}
 	}
 
 	return Path{

@@ -13,6 +13,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core/backend",
+        "//core/config",
         "@com_github_google_blueprint//:blueprint",
     ],
 )
