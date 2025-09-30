@@ -9,11 +9,11 @@
   },
   "android": {
     "ignore": false,
-    "value": true
+    "value": false
   },
   "android_platform_version": {
     "ignore": false,
-    "value": 13
+    "value": 0
   },
   "armclang_ar_binary": {
     "ignore": false,
@@ -33,7 +33,7 @@
   },
   "builder_android_bp": {
     "ignore": false,
-    "value": true
+    "value": false
   },
   "builder_android_ninja": {
     "ignore": false,
@@ -41,7 +41,7 @@
   },
   "builder_ninja": {
     "ignore": false,
-    "value": false
+    "value": true
   },
   "debug": {
     "ignore": false,
@@ -205,7 +205,7 @@
   },
   "linux": {
     "ignore": false,
-    "value": false
+    "value": true
   },
   "ndebug": {
     "ignore": false,
@@ -213,7 +213,7 @@
   },
   "not_builder_android_bp": {
     "ignore": false,
-    "value": false
+    "value": true
   },
   "not_osx": {
     "ignore": false,
@@ -329,8 +329,19 @@
   },
   "target_gnu_flags": {
     "ignore": false,
-    "value": ""
+    "value": "-O3"
   },
+
+  "target_64bit_only": {
+    "ignore": false,
+    "value": true
+  },
+
+  "target_64bit_only": {
+    "ignore": false,
+    "value": true
+  },
+
   "target_gnu_prefix": {
     "ignore": false,
     "value": ""
@@ -365,11 +376,11 @@
   },
   "target_toolchain_clang": {
     "ignore": false,
-    "value": false
+    "value": true
   },
   "target_toolchain_gnu": {
     "ignore": false,
-    "value": true
+    "value": false
   },
   "target_toolchain_xcode": {
     "ignore": false,
@@ -403,12 +414,8 @@
     "ignore": false,
     "value": "-lz"
   },
-  "tag_owner": {
-    "ignore": false,
-    "value": "baz"
-  },
   "cxxflags": {
     "ignore": false,
-    "value": "-DANDROID"
+    "value": "-DFOO=\"header.hpp\" -DFOO -Wl,-rpath=\"some thing\""
   }
 }

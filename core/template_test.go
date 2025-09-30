@@ -76,9 +76,9 @@ func TestApplyTemplate(t *testing.T) {
 	assert.Equalf(t, "0", props.B2, "B2 incorrect")
 
 	// Check templates have been expanded in arrays of strings
-	assert.Equalf(t, "alpha", arr[0], "arr[0] incorrect")
-	assert.Equalf(t, "beta", arr[1], "arr[1] incorrect")
-	assert.Equalf(t, "gamma", arr[2], "arr[2] incorrect")
+	assert.Equalf(t, "alpha", props.StrArray[0], "arr[0] incorrect")
+	assert.Equalf(t, "beta", props.StrArray[1], "arr[1] incorrect")
+	assert.Equalf(t, "gamma", props.StrArray[2], "arr[2] incorrect")
 
 	// Check templates have been expanded in pointers to strings
 	assert.Equalf(t, "alpha1", refA, "refA incorrect")
@@ -149,14 +149,85 @@ func TestApplyTemplateNested(t *testing.T) {
 	assert.Equalf(t, "1", props.B.B2, "B.B2 incorrect")
 
 	// Check templates have been expanded in arrays of strings
-	assert.Equalf(t, "alpha", arr[0], "arr[0] incorrect")
-	assert.Equalf(t, "beta", arr[1], "arr[1] incorrect")
-	assert.Equalf(t, "gamma", arr[2], "arr[2] incorrect")
-	assert.Equalf(t, "beta", arrB[0], "arrB[0] incorrect")
-	assert.Equalf(t, "gamma", arrB[1], "arrB[1] incorrect")
-	assert.Equalf(t, "alpha", arrB[2], "arrB[2] incorrect")
+	assert.Equalf(t, "alpha", props.A.StrArray[0], "arr[0] incorrect")
+	assert.Equalf(t, "beta", props.A.StrArray[1], "arr[1] incorrect")
+	assert.Equalf(t, "gamma", props.A.StrArray[2], "arr[2] incorrect")
+	assert.Equalf(t, "beta", props.B.StrArray[0], "arrB[0] incorrect")
+	assert.Equalf(t, "gamma", props.B.StrArray[1], "arrB[1] incorrect")
+	assert.Equalf(t, "alpha", props.B.StrArray[2], "arrB[2] incorrect")
 
 	// Check templates have been expanded in pointers to strings
 	assert.Equalf(t, "alpha1", refA, "refA incorrect")
 	assert.Equalf(t, "beta0", refB, "refB incorrect")
+}
+
+func TestShellExpressionSplitter(t *testing.T) {
+	a := "-DFOO -DBAR"
+	refA := []string{
+		"-DFOO",
+		"-DBAR",
+	}
+	b := "-DFOO=\"BAR ZETA\" -DOTHER"
+	refB := []string{
+		"-DFOO=BAR ZETA",
+		"-DOTHER",
+	}
+
+	c := "-Wl,-rpath=otherthing -DFOO"
+	refC := []string{
+		"-Wl,-rpath=otherthing",
+		"-DFOO",
+	}
+
+	d := "-Wl,-rpath=otherthing -DFOO -Wl,-rpath=\"with space\""
+	refD := []string{
+		"-Wl,-rpath=otherthing",
+		"-DFOO",
+		"-Wl,-rpath=with space",
+	}
+
+	assert.Equalf(t, refA, SplitShell(a), "refA incorrect")
+	assert.Equalf(t, refB, SplitShell(b), "refB incorrect")
+	assert.Equalf(t, refC, SplitShell(c), "refC incorrect")
+	assert.Equalf(t, refD, SplitShell(d), "refD incorrect")
+}
+
+type TestShlexProps struct {
+	A []string
+	B []string
+}
+
+func TestShlexExpansion(t *testing.T) {
+	config := setupTestConfig(map[string]string{
+		"flags1": "-DFOO -DBAR=\"some value\"",
+		"flags2": "-Wl,-rpath=otherthing -DFOO -Wl,-rpath=\"with space\"",
+	})
+	arrA := []string{
+		"{{shlex .flags1}}",
+		"-DFLAG",
+	}
+	refA := []string{
+		"-DFOO",
+		"-DBAR=\"some value\"",
+		"-DFLAG",
+	}
+	arrB := []string{
+		"{{shlex .flags2}}",
+		"-DFLAG",
+	}
+	refB := []string{
+		"-Wl,-rpath=otherthing",
+		"-DFOO",
+		"-Wl,-rpath=\"with space\"",
+		"-DFLAG",
+	}
+
+	props := TestShlexProps{
+		arrA,
+		arrB,
+	}
+
+	ApplyTemplate(&props, config)
+	assert.Equalf(t, refA, props.A, "A incorrect")
+	assert.Equalf(t, refB, props.B, "B incorrect")
 }

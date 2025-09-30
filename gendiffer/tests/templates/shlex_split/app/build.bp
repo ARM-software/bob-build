@@ -1,0 +1,33 @@
+// This is an example build definition that builds a single binary,
+// hello_world from hello_world.cpp, and puts it in the
+// ${BUILDDIR}/out/bin directory.
+
+bob_defaults {
+    name: "build_defaults",
+    cflags: [
+        "{{shlex .cxxflags}}",
+        "-Wl,-rpath=otherthing",
+        "-Wall",
+        "-pedantic",
+    ],
+}
+
+bob_install_group {
+    name: "bin",
+    builder_android_bp: {
+        install_path: "bin",
+    },
+    builder_ninja: {
+        install_path: "out/bin",
+    },
+}
+
+bob_binary {
+    name: "hello_world",
+    defaults: ["build_defaults"],
+    srcs: ["hello_world.cpp"],
+    install_group: "bin",
+    cflags: [
+        "-D=\"CFLAG WITH SPACES\"",
+    ],
+}
