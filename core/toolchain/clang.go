@@ -461,7 +461,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	}
 
 	if ldflags := props.GetStringIfExists(string(tgt) + "_ldflags"); ldflags != "" {
-		tc.ldflags = append(tc.cxxflags, ldflags)
+		tc.ldflags = append(tc.ldflags, ldflags)
 	}
 
 	sysroot := props.GetString(string(tgt) + "_sysroot")
@@ -551,7 +551,7 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	tc.cxxflags = append(tc.cxxflags, tc.cflags...)
 
 	if cflags := props.GetStringIfExists(string(tgt) + "_cflags"); cflags != "" {
-		tc.cflags = append(tc.cxxflags, cflags)
+		tc.cflags = append(tc.cflags, cflags)
 	}
 
 	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
