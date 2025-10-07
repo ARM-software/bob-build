@@ -86,8 +86,8 @@ func (g *linuxGenerator) CompileObjs(l Compilable, ctx blueprint.ModuleContext, 
 	)
 
 	ctx.Variable(pctx, "asflags", utils.Join(astargetflags, asflagsList))
-	ctx.Variable(pctx, "cflags", strings.Join(cflagsList, " "))
-	ctx.Variable(pctx, "conlyflags", utils.Join(cctargetflags, ccflagsList))
+	ctx.Variable(pctx, "cflags", utils.Join(cctargetflags, cflagsList))
+	ctx.Variable(pctx, "conlyflags", strings.Join(ccflagsList, " "))
 	ctx.Variable(pctx, "cxxflags", utils.Join(cxxtargetflags, cxxflagsList))
 
 	objectFiles := []string{}
