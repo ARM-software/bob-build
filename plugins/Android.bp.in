@@ -47,7 +47,7 @@ bootstrap_go_package {
         "bob-utils-@@PROJ_UID@@",
     ],
     srcs: [
-        "@@BOB_DIR@@/plugins/genrulebob/genrule.go",
+        "@@BOB_DIR@@/plugins/genrulebob/@@GENRULEBOB@@",
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/genrulebob",
 }

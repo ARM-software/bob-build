@@ -275,19 +275,29 @@ func (cm *codeMatcher) match() bool {
 		return *cm.result
 	}
 
+	const errMsg = "%s\nWARNING: '%s' match failed!\n"
+
 	matched := false
-	contents, err := ioutil.ReadFile(cm.filename)
-	if err == nil {
-		matched = strings.Contains(string(contents), cm.text)
+
+	f, err := os.Open(cm.filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, errMsg, err.Error(), cm.text)
+		matched = false
 	} else {
-		fmt.Fprintf(os.Stderr,
-			"WARNING: Could not open file %s to determine Soong "+
-				"compatibility layer: %s\n"+
-				"Compilation of Bob plugins may fail!\n",
-			err.Error(), cm.filename)
+		defer f.Close()
+
+		b := new(strings.Builder)
+		if _, err := io.Copy(b, f); err != nil {
+			fmt.Fprintf(os.Stderr, errMsg, err.Error(), cm.text)
+			matched = false
+		} else {
+			re := regexp.MustCompile(cm.text)
+			matched = re.MatchString(b.String())
+		}
 	}
 
 	cm.result = &matched
+
 	return matched
 }
 
@@ -300,7 +310,7 @@ func getSoongCompatFile(config *BobConfig) string {
 
 	listOfAndroidMkEntriesMatcher := codeMatcher{
 		filename: "build/soong/android/androidmk.go",
-		text:     "\n\tAndroidMkEntries() []AndroidMkEntries\n",
+		text:     "\n\tAndroidMkEntries\\(\\) \\[\\]AndroidMkEntries\n",
 	}
 
 	androidMkExtraEntriesContextMatcher := codeMatcher{
@@ -310,12 +320,22 @@ func getSoongCompatFile(config *BobConfig) string {
 
 	androidMkSoongInstallTargetsMatcher := codeMatcher{
 		filename: "build/soong/android/androidmk.go",
-		text:     "a.SetPath(\"LOCAL_SOONG_INSTALLED_MODULE\", base.katiInstalls[len(base.katiInstalls)-1].to)\n",
+		text:     "a.SetPath\\(\"LOCAL_SOONG_INSTALLED_MODULE\", (base|info).[Kk]atiInstalls\\[len\\((base|info).[Kk]atiInstalls\\)-1\\].to\\)\n",
 	}
 
 	androidHostToolProviderInfoProviderMatcher := codeMatcher{
 		filename: "build/soong/android/module.go",
-		text:     "\nvar HostToolProviderInfoProvider = blueprint.NewProvider[HostToolProviderInfo]()\n",
+		text:     "\nvar HostToolProviderInfoProvider = blueprint.NewProvider\\[HostToolProviderInfo\\]\\(\\)\n",
+	}
+
+	andridModuleOrProxyMatcher := codeMatcher{
+		filename: "build/soong/android/module_proxy.go",
+		text:     "\ntype ModuleOrProxy interface {\n",
+	}
+
+	andridVisitModuleProxyMatcher := codeMatcher{
+		filename: "build/soong/android/base_module_context.go",
+		text:     "\n\tVisitDirectDepsProxyWithTag\\(tag blueprint.DependencyTag, visit func\\(proxy ModuleProxy\\)\\)\n",
 	}
 
 	// List of compatibility layers, ordered from oldest Soong version
@@ -358,6 +378,19 @@ func getSoongCompatFile(config *BobConfig) string {
 			},
 			[]int{16},
 			"soong_compat_03_HostBinProvider.go",
+		},
+		// Soong HostToolProviderInfoProvider
+		{
+			[]codeMatcher{
+				listOfAndroidMkEntriesMatcher,
+				androidMkExtraEntriesContextMatcher,
+				androidMkSoongInstallTargetsMatcher,
+				androidHostToolProviderInfoProviderMatcher,
+				andridModuleOrProxyMatcher,
+				andridVisitModuleProxyMatcher,
+			},
+			[]int{16},
+			"soong_compat_04_ModuleProxy.go",
 		},
 	}
 
@@ -431,11 +464,20 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	// bob dir must be relative to source dir
 	srcToBobDir, _ := filepath.Rel(getSourceDir(), getBobDir())
 
+	soongCompatFile := getSoongCompatFile(getConfig(ctx))
+
 	// substitute template variables
 	text := string(content)
 	text = strings.Replace(text, "@@PROJ_UID@@", projUid, -1)
 	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
-	text = strings.Replace(text, "@@SOONG_COMPAT@@", getSoongCompatFile(getConfig(ctx)), -1)
+	text = strings.Replace(text, "@@SOONG_COMPAT@@", soongCompatFile, -1)
+
+	if soongCompatFile == "soong_compat_04_ModuleProxy.go" {
+		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule_module_proxy.go", -1)
+	} else {
+		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule.go", -1)
+	}
+
 	sb.WriteString(text)
 	sb.WriteString("\n")
 
