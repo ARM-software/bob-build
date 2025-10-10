@@ -140,7 +140,13 @@ func getPathInBuildDir(elems ...string) string {
 //
 // This is _not_ intended for use in writing ninja rules.
 func getPathInSourceDir(elems ...string) string {
-	return filepath.Join(append([]string{getSourceDir()}, elems...)...)
+	srcDir := getSourceDir()
+	path := filepath.Join(elems...)
+	env := config.GetEnvironmentVariables()
+	if relative, err := filepath.Rel(env.SrcDir, path); err == nil && !strings.HasPrefix(relative, "..") {
+		path = relative
+	}
+	return filepath.Join(srcDir, path)
 }
 
 // Construct paths to files within the source directory that Go can
