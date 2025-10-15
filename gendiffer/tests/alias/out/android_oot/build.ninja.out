@@ -177,8 +177,6 @@ build libA__target: phony ${g.bob.BuildDir}/target/static/libA.a
 
 build ${g.bootstrap.buildDir}/bin/minibp: g.bootstrap.cp $
         ${g.bootstrap.BinDir}/minibp
-default ${g.bootstrap.buildDir}/bin/minibp
 
 build blueprint_tools: phony
-default blueprint_tools
 

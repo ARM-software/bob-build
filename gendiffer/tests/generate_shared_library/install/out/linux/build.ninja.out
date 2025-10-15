@@ -142,8 +142,6 @@ build libblah_shared: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_shared.so $
 
 build ${g.bootstrap.buildDir}/bin/minibp: g.bootstrap.cp $
         ${g.bootstrap.BinDir}/minibp
-default ${g.bootstrap.buildDir}/bin/minibp
 
 build blueprint_tools: phony
-default blueprint_tools
 

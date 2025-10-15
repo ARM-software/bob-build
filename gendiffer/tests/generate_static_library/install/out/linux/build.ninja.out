@@ -120,8 +120,6 @@ build libblah_static: phony ${g.bob.BuildDir}/gen_sh_lib/libblah_static.a $
 
 build ${g.bootstrap.buildDir}/bin/minibp: g.bootstrap.cp $
         ${g.bootstrap.BinDir}/minibp
-default ${g.bootstrap.buildDir}/bin/minibp
 
 build blueprint_tools: phony
-default blueprint_tools
 
