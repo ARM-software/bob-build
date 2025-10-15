@@ -721,17 +721,19 @@ func (s *singleton) GenerateBuildActions(ctx blueprint.SingletonContext) {
 			// binary to the "bin" directory to make it easier to find.
 			finalMinibp := filepath.Join("$buildDir", "bin", primaryBuilderName)
 			ctx.Build(pctx, blueprint.BuildParams{
-				Rule:    cp,
-				Inputs:  []string{primaryBuilderFile},
-				Outputs: []string{finalMinibp},
+				Rule:     cp,
+				Inputs:   []string{primaryBuilderFile},
+				Outputs:  []string{finalMinibp},
+				Optional: true,
 			})
 		}
 
 		// Add a phony target for building various tools that are part of blueprint
 		ctx.Build(pctx, blueprint.BuildParams{
-			Rule:    blueprint.Phony,
-			Outputs: []string{"blueprint_tools"},
-			Inputs:  blueprintTools,
+			Rule:     blueprint.Phony,
+			Outputs:  []string{"blueprint_tools"},
+			Inputs:   blueprintTools,
+			Optional: true,
 		})
 	}
 }
