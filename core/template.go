@@ -94,8 +94,7 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 		}
 
 		// Capture group is always first index. It has to exist since we have a match
-		key := strings.TrimLeft(captures[1], ".")
-		val := stringvalues[key]
+		val := stringvalues[captures[1]]
 		escaped := strings.ReplaceAll(val, "\"", "\"\\\"")
 		split := splitShell(escaped)
 		newSlice = append(newSlice, split...)
