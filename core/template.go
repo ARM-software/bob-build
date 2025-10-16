@@ -83,7 +83,7 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 	if field.Index(0).Kind() != reflect.String {
 		return
 	}
-	var newSlice []string = make([]string, 0)
+	newSlice := make([]string, 0, field.Len())
 	for j := 0; j < field.Len(); j++ {
 		elem := field.Index(j)
 		match := shlexRegexpr.MatchString(elem.String())
