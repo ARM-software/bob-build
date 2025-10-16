@@ -12,7 +12,7 @@ import (
 	"github.com/ARM-software/bob-build/internal/utils"
 )
 
-func SplitShell(s string) []string {
+func splitShell(s string) []string {
 	var out []string
 	var buf []rune
 	inQuotes := false
@@ -95,7 +95,7 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 		key := strings.TrimLeft(captures[1], ".")
 		val := stringvalues[key]
 		escaped := strings.ReplaceAll(val, "\"", "\"\\\"")
-		split := SplitShell(escaped)
+		split := splitShell(escaped)
 		newSlice = append(newSlice, split...)
 	}
 

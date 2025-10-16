@@ -186,10 +186,10 @@ func TestShellExpressionSplitter(t *testing.T) {
 		"-Wl,-rpath=with space",
 	}
 
-	assert.Equalf(t, refA, SplitShell(a), "refA incorrect")
-	assert.Equalf(t, refB, SplitShell(b), "refB incorrect")
-	assert.Equalf(t, refC, SplitShell(c), "refC incorrect")
-	assert.Equalf(t, refD, SplitShell(d), "refD incorrect")
+	assert.Equalf(t, refA, splitShell(a), "refA incorrect")
+	assert.Equalf(t, refB, splitShell(b), "refB incorrect")
+	assert.Equalf(t, refC, splitShell(c), "refC incorrect")
+	assert.Equalf(t, refD, splitShell(d), "refD incorrect")
 }
 
 type TestShlexProps struct {
