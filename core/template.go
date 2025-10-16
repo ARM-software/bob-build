@@ -73,7 +73,7 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 var shlexPattern = "^\\{\\{\\s*shlex\\s+\\.(\\w+)\\s*\\}\\}$"
 var shlexRegexpr = regexp.MustCompile(shlexPattern)
 
-// When processing a slice and expanding templates, we won't to
+// When processing a slice and expanding templates, we want to
 // specifically not process untemplated strings as templated
 // strings will under-go a shlex split
 func shlexExpand(field reflect.Value, stringvalues map[string]string) {
