@@ -69,13 +69,14 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 	elem.SetString(buf.String())
 }
 
+// matches a value in the format of {{shlex .<value>}}
+var shlexPattern = "^\\{\\{\\s*shlex\\s+\\.(\\w+)\\s*\\}\\}$"
+var shlexRegexpr = regexp.MustCompile(shlexPattern)
+
 // When processing a slice and expanding templates, we won't to
 // specifically not process untemplated strings as templated
 // strings will under-go a shlex split
 func shlexExpand(field reflect.Value, stringvalues map[string]string) {
-	// matches a value in the format of {{shlex .<value>}}
-	pattern := "^\\{\\{\\s*shlex\\s+\\.(\\w+)\\s*\\}\\}$"
-	regexpr := regexp.MustCompile(pattern)
 	if field.Len() < 1 {
 		return
 	}
@@ -85,12 +86,12 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 	var newSlice []string = make([]string, 0)
 	for j := 0; j < field.Len(); j++ {
 		elem := field.Index(j)
-		match := regexpr.MatchString(elem.String())
+		match := shlexRegexpr.MatchString(elem.String())
 		if !match {
 			newSlice = append(newSlice, elem.String())
 			continue
 		}
-		captures := regexpr.FindStringSubmatch(elem.String())
+		captures := shlexRegexpr.FindStringSubmatch(elem.String())
 		// Capture group is always first index. It has to exist since we have a match
 		key := strings.TrimLeft(captures[1], ".")
 		val := stringvalues[key]
