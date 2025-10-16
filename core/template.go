@@ -86,12 +86,13 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 	newSlice := make([]string, 0, field.Len())
 	for j := 0; j < field.Len(); j++ {
 		elem := field.Index(j)
-		match := shlexRegexpr.MatchString(elem.String())
-		if !match {
+
+		captures := shlexRegexpr.FindStringSubmatch(elem.String())
+		if len(captures) == 0 {
 			newSlice = append(newSlice, elem.String())
 			continue
 		}
-		captures := shlexRegexpr.FindStringSubmatch(elem.String())
+
 		// Capture group is always first index. It has to exist since we have a match
 		key := strings.TrimLeft(captures[1], ".")
 		val := stringvalues[key]
