@@ -75,7 +75,7 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 	// matches a value in the format of {{shlex .<value>}}
 	pattern := "^\\{\\{\\s*shlex\\s+\\.(\\w+)\\s*\\}\\}$"
-	regexpr, _ := regexp.Compile(pattern)
+	regexpr := regexp.MustCompile(pattern)
 	if field.Len() < 1 {
 		return
 	}
