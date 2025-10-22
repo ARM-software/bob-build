@@ -410,5 +410,9 @@
   "cxxflags": {
     "ignore": false,
     "value": "-DANDROID"
+  },
+  "custom_toolchain": {
+    "ignore": false,
+    "value": false
   }
 }

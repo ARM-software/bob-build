@@ -199,6 +199,9 @@ config PKG_CONFIG_PACKAGES
 	  The default value contains packages normally used in the
 	  selected configuration.
 
+config CUSTOM_TOOLCHAIN
+	bool "custom_toolchain"
+
 config PKG_CONFIG_SYSROOT_DIR
 	depends on PKG_CONFIG
 	string "PKG_CONFIG_SYSROOT_DIR"

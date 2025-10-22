@@ -48,6 +48,9 @@ config TARGET_TOOLCHAIN_XCODE
 
 endchoice
 
+config CUSTOM_TOOLCHAIN
+	bool
+
 choice
 	prompt "Host toolchain"
 	default HOST_TOOLCHAIN_CLANG if TARGET_TOOLCHAIN_CLANG

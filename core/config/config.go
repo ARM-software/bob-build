@@ -250,6 +250,7 @@ func CreateMockConfig(overrides map[string]interface{}) *Properties {
 	properties.Properties["host_sysroot"] = ""
 	properties.Properties["host_gnu_flags"] = ""
 	properties.Properties["host_64bit_only"] = false
+	properties.Properties["custom_toolchain"] = false
 
 	// Override the basic set of configs with user provided values
 	for k, v := range overrides {

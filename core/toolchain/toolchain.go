@@ -207,7 +207,11 @@ func (tcs *ToolchainSet) GetToolchain(tgt TgtType) Toolchain {
 }
 
 func (tcs *ToolchainSet) Configure(props *config.Properties) {
-
+	if props.GetBool("custom_toolchain") {
+		tcs.target = newToolchainCustomCross(props)
+		tcs.host = newToolchainCustomNative(props)
+		return
+	}
 	if props.GetBool("target_toolchain_clang") {
 		tcs.target = newToolchainClangCross(props)
 	} else if props.GetBool("target_toolchain_gnu") {

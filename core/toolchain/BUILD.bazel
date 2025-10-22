@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "armclang.go",
         "clang.go",
+        "custom.go",
         "gnu.go",
         "linker.go",
         "toolchain.go",

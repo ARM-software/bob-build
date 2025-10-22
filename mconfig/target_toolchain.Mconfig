@@ -207,3 +207,15 @@ config TARGET_NM_BINARY
 	help
 	  The nm executable that we can use to read the dynamic symbol
 	  table in target libraries.
+
+### User custom toolchain
+
+config TARGET_CC_BINARY
+	string ""
+	default ""
+	depends on CUSTOM_TOOLCHAIN
+
+config TARGET_CXX_BINARY
+	string ""
+	default ""
+	depends on CUSTOM_TOOLCHAIN

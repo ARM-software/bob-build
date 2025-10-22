@@ -402,5 +402,9 @@
   "zlib_ldlibs": {
     "ignore": false,
     "value": "-lz"
+  },
+  "custom_toolchain": {
+    "ignore": false,
+    "value": false
   }
 }

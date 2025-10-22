@@ -210,3 +210,15 @@ config HOST_NM_BINARY
 	help
 	  The nm executable that we can use to read the dynamic symbol
 	  table in host libraries.
+
+### User custom toolchain
+
+config HOST_CC_BINARY
+	string ""
+	default ""
+	depends on CUSTOM_TOOLCHAIN
+
+config HOST_CXX_BINARY
+	string ""
+	default ""
+	depends on CUSTOM_TOOLCHAIN

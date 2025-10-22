@@ -417,5 +417,9 @@
   "cxxflags": {
     "ignore": false,
     "value": "-DFOO=\"header.hpp\" -DFOO -Wl,-rpath=\"some thing\""
+  },
+  "custom_toolchain": {
+    "ignore": false,
+    "value": false
   }
 }
