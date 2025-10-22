@@ -198,6 +198,7 @@ bootstrap_go_package {
         "core/toolchain/gnu.go",
         "core/toolchain/custom.go",
         "core/toolchain/linker.go",
+        "core/toolchain/customlinker.go",
         "core/toolchain/toolchain.go",
         "core/toolchain/xcode.go",
         "core/toolchain/xcode_linker.go",

@@ -6,6 +6,7 @@ go_library(
         "armclang.go",
         "clang.go",
         "custom.go",
+        "customlinker.go",
         "gnu.go",
         "linker.go",
         "toolchain.go",

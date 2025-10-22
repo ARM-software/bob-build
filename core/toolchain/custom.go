@@ -89,7 +89,7 @@ func newToolchainCustom(props *config.Properties, tgt TgtType) (tc toolchainCust
 		tc.cflags = append(tc.cflags, cflags)
 	}
 
-	tc.linker = newDefaultLinker(tc.cxxBinary, tc.cflags, []string{})
+	tc.linker = newCustomLinker(tc.cxxBinary, tc.cflags, []string{})
 	tc.flagCache = newFlagCache()
 	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
