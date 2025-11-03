@@ -42,7 +42,7 @@ func (tc toolchainCustom) GetCXXCompiler() (string, []string) {
 }
 
 func (tc toolchainCustom) GetLinker() Linker {
-	return newDefaultLinker(tc.cxxBinary, tc.ldflags, tc.ldlibs)
+	return newCustomLinker(tc.cxxBinary, tc.ldflags, tc.ldlibs)
 }
 
 func (tc toolchainCustom) GetStripFlags() []string {
