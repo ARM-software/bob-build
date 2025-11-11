@@ -38,6 +38,7 @@ bootstrap_go_package {
     name: "bob-plugins-genrulebob-@@PROJ_UID@@",
     pluginFor: ["soong_build"],
     deps: [
+        @@DEPS@@
         "blueprint",
         "soong-android",
         "soong-cc",

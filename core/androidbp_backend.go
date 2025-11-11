@@ -471,12 +471,16 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	text = strings.Replace(text, "@@PROJ_UID@@", projUid, -1)
 	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
 	text = strings.Replace(text, "@@SOONG_COMPAT@@", soongCompatFile, -1)
+	var deps string
 
 	if soongCompatFile == "soong_compat_04_ModuleProxy.go" {
 		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule_module_proxy.go", -1)
+		deps = "\"blueprint-gobtools\","
 	} else {
 		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule.go", -1)
 	}
+
+	text = strings.Replace(text, "@@DEPS@@", deps, -1)
 
 	if getConfig(ctx).Properties.GetBool("android_bp_use_soong_namespace") {
 		sb.WriteString("soong_namespace {}\n\n")
