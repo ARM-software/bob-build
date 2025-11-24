@@ -44,11 +44,11 @@ def parse_kbuild_options(kbuild_options):
 def check_kbuild_option_conflicts(kdir, option, value):
     """
     Checks whether kbuild_option is already defined in the kernel config
-    causing conflicts by overriding them in EXTRA_CFLAGS
+    causing conflicts by overriding them in CFLAGS_MODULE
     :return: Zero(0) if there is no conflict, one(1) otherwise
     """
     message = (
-        "Overridden '{0}' option in EXTRA_CFLAGS. "
+        "Overridden '{0}' option in CFLAGS_MODULE. "
         "Bob was asked to set the kernel option '{0}={1}', "
         "which is already present in the kernel's config. "
         "Please disable this option in the kernel "
@@ -98,7 +98,7 @@ def build_module(
     Invoke an out of tree kernel build.
     """
     # Invoke the kernel build system
-    cmd = [make_command, "-C", kdir, "M=" + module_dir, "EXTRA_CFLAGS=" + extra_cflags]
+    cmd = [make_command, "-C", kdir, "M=" + module_dir, "CFLAGS_MODULE=" + extra_cflags]
     cmd.extend(make_args)
 
     # Sanitize the environment - we should only use build options passed in via
@@ -258,10 +258,10 @@ def parse_args():
         "--kbuild-options",
         nargs="+",
         default=[],
-        help="Kernel config options to enable, that get added to EXTRA_CFLAGS too",
+        help="Kernel config options to enable, that get added to CFLAGS_MODULE too",
     )
     group.add_argument(
-        "--extra-cflags", default="", help="Options to add to EXTRA_CFLAGS as a string"
+        "--extra-cflags", default="", help="Options to add to CFLAGS_MODULE as a string"
     )
     group.add_argument(
         "make_args",
@@ -317,7 +317,7 @@ def main():
     if kbuild_conflicts > 0:
         sys.exit(1)
 
-    # Prepend EXTRA_CFLAGS with modified include paths
+    # Prepend CFLAGS_MODULE with modified include paths
     includes = ["-I" + s for s in search_path]
     extra_cflags = (
         " ".join(includes) + " " + args.extra_cflags + " " + " ".join(kbuild_cflags)
