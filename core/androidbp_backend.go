@@ -328,6 +328,11 @@ func getSoongCompatFile(config *BobConfig) string {
 		text:     "\nvar HostToolProviderInfoProvider = blueprint.NewProvider\\[HostToolProviderInfo\\]\\(\\)\n",
 	}
 
+	androidCommonModuleInfoProviderMatcher := codeMatcher{
+		filename: "build/soong/android/module.go",
+		text:     "\nvar CommonModuleInfoProvider = blueprint.NewProvider\\[\\*CommonModuleInfo\\]\\(\\)\n",
+	}
+
 	andridModuleOrProxyMatcher := codeMatcher{
 		filename: "build/soong/android/module_proxy.go",
 		text:     "\ntype ModuleOrProxy interface {\n",
@@ -391,6 +396,18 @@ func getSoongCompatFile(config *BobConfig) string {
 			},
 			[]int{16},
 			"soong_compat_04_ModuleProxy.go",
+		},
+		{
+			[]codeMatcher{
+				listOfAndroidMkEntriesMatcher,
+				androidMkExtraEntriesContextMatcher,
+				androidMkSoongInstallTargetsMatcher,
+				androidCommonModuleInfoProviderMatcher,
+				andridModuleOrProxyMatcher,
+				andridVisitModuleProxyMatcher,
+			},
+			[]int{16, 17},
+			"soong_compat_05_CommonModuleInfoProvider.go",
 		},
 	}
 
@@ -473,13 +490,16 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	text = strings.Replace(text, "@@SOONG_COMPAT@@", soongCompatFile, -1)
 	var deps string
 
+	genrulebob := "genrule.go"
 	if soongCompatFile == "soong_compat_04_ModuleProxy.go" {
-		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule_module_proxy.go", -1)
+		genrulebob = "genrule_module_proxy.go"
 		deps = "\"blueprint-gobtools\","
-	} else {
-		text = strings.Replace(text, "@@GENRULEBOB@@", "genrule.go", -1)
+	} else if soongCompatFile == "soong_compat_05_CommonModuleInfoProvider.go" {
+		genrulebob = "genrule_common_module_info.go"
+		deps = "\"blueprint-gobtools\","
 	}
 
+	text = strings.Replace(text, "@@GENRULEBOB@@", genrulebob, -1)
 	text = strings.Replace(text, "@@DEPS@@", deps, -1)
 
 	if getConfig(ctx).Properties.GetBool("android_bp_use_soong_namespace") {
