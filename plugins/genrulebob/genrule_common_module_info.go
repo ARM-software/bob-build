@@ -90,6 +90,7 @@ type genruleInterface interface {
 type genrulebobCommon struct {
 	android.ModuleBase
 
+	blueprint.ModuleUsesIncrementalWalkDeps
 	Properties commonProps
 
 	genDir               android.Path
