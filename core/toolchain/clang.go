@@ -453,9 +453,6 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 		tc.ldflags = append(tc.ldflags, "-target", tc.target)
 	}
 
-	// TODO Mirror the platform flag code to the GCC toolchain
-	// TODO Make a separate bazel toolchain
-
 	if cxxflags := props.GetStringIfExists(string(tgt) + "_cxxflags"); cxxflags != "" {
 		tc.cxxflags = append(tc.cxxflags, cxxflags)
 	}

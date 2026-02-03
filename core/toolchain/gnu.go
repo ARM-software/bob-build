@@ -28,6 +28,7 @@ type toolchainGnuCommon struct {
 	linker        Linker
 	prefix        string
 	cflags        []string // Flags for both C and C++
+	cxxflags      []string // Flags just for C++
 	ldflags       []string // Linker flags, including anything required for C++
 	binDir        string
 	flagCache     *flagSupportedCache
@@ -55,7 +56,7 @@ func (tc toolchainGnuCommon) GetCCompiler() (string, []string) {
 }
 
 func (tc toolchainGnuCommon) GetCXXCompiler() (tool string, flags []string) {
-	return tc.gxxBinary, tc.cflags
+	return tc.gxxBinary, tc.cxxflags
 }
 
 func (tc toolchainGnuCommon) GetLinker() Linker {
@@ -175,6 +176,18 @@ func newToolchainGnuCommon(props *config.Properties, tgt TgtType) (tc toolchainG
 	tc.gccBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cxx_binary")
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
+
+	if cflags := props.GetStringIfExists(string(tgt) + "_cflags"); cflags != "" {
+		tc.cflags = append(tc.cflags, cflags)
+	}
+
+	if cxxflags := props.GetStringIfExists(string(tgt) + "_cxxflags"); cxxflags != "" {
+		tc.cxxflags = append(tc.cxxflags, cxxflags)
+	}
+
+	if ldflags := props.GetStringIfExists(string(tgt) + "_ldflags"); ldflags != "" {
+		tc.ldflags = append(tc.ldflags, ldflags)
+	}
 
 	sysroot := props.GetString(string(tgt) + "_sysroot")
 	if sysroot != "" {
