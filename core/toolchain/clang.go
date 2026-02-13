@@ -1,6 +1,11 @@
 package toolchain
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
@@ -41,6 +46,40 @@ type toolchainClangCross struct {
 	toolchainClangCommon
 }
 
+type clangLinker struct {
+	defaultLinker
+	useGnuBinutils bool
+}
+
+func (l clangLinker) GetForwardingLibFlags() string {
+	if l.useGnuBinutils {
+		return "-fuse-ld=bfd"
+	}
+	return "-fuse-ld=lld"
+}
+
+func (l clangLinker) KeepSharedLibraryTransitivity() string {
+	if l.useGnuBinutils {
+		return l.defaultLinker.KeepSharedLibraryTransitivity()
+	}
+	// lld does not support --copy-dt-needed-entries
+	return ""
+}
+
+func (l clangLinker) DropSharedLibraryTransitivity() string {
+	if l.useGnuBinutils {
+		return l.defaultLinker.DropSharedLibraryTransitivity()
+	}
+	// lld does not support --no-copy-dt-needed-entries
+	return ""
+}
+
+func newClangLinker(tool string, flags, libs []string, useGnuBinutils bool) (linker clangLinker) {
+	linker.defaultLinker = newDefaultLinker(tool, flags, libs)
+	linker.useGnuBinutils = useGnuBinutils
+	return
+}
+
 func (tc toolchainClangCommon) GetArchiver() (string, []string) {
 	if tc.useGnuBinutils {
 		return tc.gnu.GetArchiver()
@@ -64,7 +103,10 @@ func (tc toolchainClangCommon) GetCXXCompiler() (string, []string) {
 }
 
 func (tc toolchainClangCommon) GetLinker() Linker {
-	return newDefaultLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs)
+	if tc.linker != nil {
+		return tc.linker
+	}
+	return newClangLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs, tc.useGnuBinutils)
 }
 
 func (tc toolchainClangCommon) GetStripFlags() []string {
@@ -107,6 +149,8 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 
 	// Here we add flags relating to android out of tree builds
 	if out_of_tree := props.GetBool("builder_android_ninja"); out_of_tree {
+		fuseLdFlag := selectSupportedFuseLdFlag(tc.clangBinary, []string{"lld", "gold", "bfd"})
+
 		tc.cflags = append(tc.cflags, "-DANDROID")
 		tc.cflags = append(tc.cflags, "-Wno-unused-but-set-variable")
 
@@ -415,7 +459,6 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 				"-L"+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/x86_64-linux/lib64/",
 				"-B"+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/lib/gcc/x86_64-linux/4.8.3/",
 				"--sysroot="+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot",
-				"-fuse-ld=lld",
 				"-Wl,--icf=safe",
 				"-Wl,--no-demangle",
 				"-Wa,--noexecstack",
@@ -423,6 +466,9 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 				"--gcc-toolchain="+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/",
 				"-fstack-protector-strong",
 			)
+			if fuseLdFlag != "" {
+				tc.cflags = append(tc.cflags, fuseLdFlag)
+			}
 
 			tc.ldflags = append(tc.cflags,
 				"-target x86_64-linux-gnu",
@@ -433,7 +479,6 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 				"-L"+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/x86_64-linux/lib64/",
 				"-B"+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/lib/gcc/x86_64-linux/4.8.3/",
 				"--sysroot="+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/sysroot",
-				"-fuse-ld=lld",
 				"-Wl,--icf=safe",
 				"-Wl,--no-demangle",
 				"-Wa,--noexecstack",
@@ -445,6 +490,9 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 				"-Wl,-rpath,"+android_build_top+"/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8/x86_64-linux/lib64/",
 				"-Wl,-rpath,"+android_build_top+"/prebuilts/build-tools/linux-x86/lib64/", // this needs to be exported
 			)
+			if fuseLdFlag != "" {
+				tc.ldflags = append(tc.ldflags, fuseLdFlag)
+			}
 		}
 	}
 
@@ -474,6 +522,11 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	useGnuLibgcc := props.GetBool(string(tgt) + "_clang_use_gnu_libgcc")
 
 	tc.useGnuBinutils = props.GetBool(string(tgt) + "_clang_use_gnu_binutils")
+	if tc.useGnuBinutils {
+		tc.ldflags = append(tc.ldflags, "-fuse-ld=bfd")
+	} else {
+		tc.ldflags = append(tc.ldflags, "-fuse-ld=lld")
+	}
 
 	if tc.useGnuBinutils || useGnuStl || useGnuCrt || useGnuLibgcc {
 		if tgt == TgtTypeHost {
@@ -551,11 +604,52 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 		tc.cflags = append(tc.cflags, cflags)
 	}
 
-	tc.linker = newDefaultLinker(tc.clangxxBinary, tc.cflags, []string{})
+	tc.linker = newClangLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs, tc.useGnuBinutils)
 	tc.flagCache = newFlagCache()
 	tc.is64BitOnly = props.GetBool(string(tgt) + "_64bit_only")
 
 	return
+}
+
+func selectSupportedFuseLdFlag(compiler string, candidates []string) string {
+	for _, candidate := range candidates {
+		if !linkerExists(compiler, candidate) {
+			continue
+		}
+		if fuseLdSupported(compiler, candidate) {
+			return "-fuse-ld=" + candidate
+		}
+	}
+	return ""
+}
+
+func linkerExists(compiler, linker string) bool {
+	names := []string{"ld." + linker}
+	if linker == "lld" {
+		names = append(names, "lld")
+	}
+	for _, name := range names {
+		if _, err := exec.LookPath(name); err == nil {
+			return true
+		}
+	}
+	if compiler == "" {
+		return false
+	}
+	compilerDir := filepath.Dir(compiler)
+	for _, name := range names {
+		if _, err := os.Stat(filepath.Join(compilerDir, name)); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func fuseLdSupported(compiler, linker string) bool {
+	cmd := exec.Command(compiler, "-fuse-ld="+linker, "-x", "c", "-", "-o", os.DevNull)
+	cmd.Stdin = strings.NewReader("int main(){return 0;}")
+	_, err := cmd.CombinedOutput()
+	return err == nil
 }
 
 func newToolchainClangNative(props *config.Properties) (tc toolchainClangNative) {
