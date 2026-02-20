@@ -237,6 +237,8 @@ func CreateMockConfig(overrides map[string]interface{}) *Properties {
 	properties.Properties["target_gnu_cxx_binary"] = "cxx"
 	properties.Properties["target_sysroot"] = ""
 	properties.Properties["target_gnu_flags"] = ""
+	properties.Properties["target_nm_binary"] = "nm"
+	properties.Properties["target_ranlib_binary"] = "ranlib"
 	properties.Properties["target_64bit_only"] = false
 
 	properties.Properties["host_toolchain_clang"] = false
@@ -249,6 +251,8 @@ func CreateMockConfig(overrides map[string]interface{}) *Properties {
 	properties.Properties["host_gnu_cxx_binary"] = "cxx"
 	properties.Properties["host_sysroot"] = ""
 	properties.Properties["host_gnu_flags"] = ""
+	properties.Properties["host_nm_binary"] = "nm"
+	properties.Properties["host_ranlib_binary"] = "ranlib"
 	properties.Properties["host_64bit_only"] = false
 	properties.Properties["custom_toolchain"] = false
 

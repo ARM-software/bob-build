@@ -117,11 +117,17 @@ def main():
         debug_info_tool = args.objcopy_tool
         strip_tool = args.objcopy_tool
 
-    if args.debug_file:
-        make_dir(os.path.dirname(args.debug_file))
-        create_debug_info(args.input, args.debug_file, debug_info_tool)
+    debug_file = args.debug_file
+    # GNU debuglink sections are for ELF objects; archives (.a) don't support
+    # them and objcopy will fail when trying to add one to each member.
+    if args.format == "elf" and debug_file and args.input.endswith(".a"):
+        debug_file = None
 
-    write_output(args.input, args.output, args.debug_file, args.strip, strip_tool)
+    if debug_file:
+        make_dir(os.path.dirname(args.debug_file))
+        create_debug_info(args.input, debug_file, debug_info_tool)
+
+    write_output(args.input, args.output, debug_file, args.strip, strip_tool)
 
 
 if __name__ == "__main__":

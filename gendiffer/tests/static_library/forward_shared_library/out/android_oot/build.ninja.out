@@ -88,11 +88,11 @@ build ${g.bob.BuildDir}/target/executable/binary_with_shared_lib: $
         ${g.bob.BuildDir}/target/shared/libfinal.so.toc || $
         ${g.bob.BuildDir}/target/shared/libfinal.so
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
-    shared_libs_flags = -Wl,--copy-dt-needed-entries -Wl,--no-as-needed -lfinal -Wl,--as-needed -Wl,--no-copy-dt-needed-entries -fuse-ld=bfd -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
+    shared_libs_flags = $ -Wl,--no-as-needed -lfinal -Wl,--as-needed  -fuse-ld=lld -Wl,-rpath-link,${g.bob.BuildDir}/target/shared
     static_libs = 
 
 build binary_with_shared_lib: phony $
@@ -127,7 +127,7 @@ build ${g.bob.BuildDir}/target/executable/binary_with_static_lib: $
         ${g.bob.BuildDir}/target/shared/libbaar.so.toc || $
         ${g.bob.BuildDir}/target/shared/libbaar.so
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -158,7 +158,7 @@ build ${g.bob.BuildDir}/target/objects/libbaar/baar.c.o: g.bob.cc $
 build ${g.bob.BuildDir}/target/shared/libbaar.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/libbaar/baar.c.o
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -187,7 +187,7 @@ build ${g.bob.BuildDir}/target/shared/libfinal.so: g.bob.shared_library | $
         ${g.bob.BuildDir}/target/shared/libbaar.so.toc || $
         ${g.bob.BuildDir}/target/shared/libbaar.so
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--no-as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--no-as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

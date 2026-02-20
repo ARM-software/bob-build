@@ -70,7 +70,7 @@ build ${g.bob.BuildDir}/target/objects/bin_a/src.c.o: g.bob.cc $
 build ${g.bob.BuildDir}/target/executable/bin_a: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/bin_a/src.c.o
     build_wrapper = ccache
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -100,7 +100,7 @@ build ${g.bob.BuildDir}/target/objects/bin_b/src.c.o: g.bob.cc $
 build ${g.bob.BuildDir}/target/executable/bin_b: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/bin_b/src.c.o
     build_wrapper = ${g.bob.SrcDir}/src/wrapper.py llvm-objcopy
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -130,7 +130,7 @@ build ${g.bob.BuildDir}/target/objects/lib_a/src.c.o: g.bob.cc $
 build ${g.bob.BuildDir}/target/shared/lib_a.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/lib_a/src.c.o
     build_wrapper = ccache
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -165,7 +165,7 @@ build ${g.bob.BuildDir}/target/objects/lib_b/src.c.o: g.bob.cc $
 build ${g.bob.BuildDir}/target/shared/lib_b.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/lib_b/src.c.o
     build_wrapper = ${g.bob.SrcDir}/src/wrapper.py llvm-objcopy
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

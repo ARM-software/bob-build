@@ -175,6 +175,8 @@ config HOST_OBJDUMP_BINARY
 
 config HOST_AR_BINARY
 	string "GNU and Clang Archiver binary"
+	default HOST_GNU_PREFIX + "gcc-ar" if HOST_TOOLCHAIN_GNU
+	default "llvm-ar" if HOST_TOOLCHAIN_CLANG
 	default "ar"
 	help
 	  The name of the archiver used to create host static libraries.
@@ -205,11 +207,21 @@ config HOST_OTOOL_BINARY
 
 config HOST_NM_BINARY
 	string "Host nm"
+	default HOST_GNU_PREFIX + "gcc-nm" if HOST_TOOLCHAIN_GNU
+	default "llvm-nm" if HOST_TOOLCHAIN_CLANG
 	default "nm"
-	depends on HOST_TOOLCHAIN_XCODE
 	help
 	  The nm executable that we can use to read the dynamic symbol
 	  table in host libraries.
+
+config HOST_RANLIB_BINARY
+	string "Host ranlib"
+	default HOST_GNU_PREFIX + "gcc-ranlib" if HOST_TOOLCHAIN_GNU
+	default "llvm-ranlib" if HOST_TOOLCHAIN_CLANG
+	default "ranlib"
+	help
+	  The ranlib executable that we can use to generate the archive
+	  index for host static libraries.
 
 ### User custom toolchain
 

@@ -8,6 +8,8 @@ type toolchainCustom struct {
 	// Options read from the config:
 	arBinary      string
 	asBinary      string
+	nmBinary      string
+	ranlibBinary  string
 	objcopyBinary string
 	objdumpBinary string
 	ccBinary      string // C Compiler
@@ -45,6 +47,14 @@ func (tc toolchainCustom) GetLinker() Linker {
 	return newCustomLinker(tc.cxxBinary, tc.ldflags, tc.ldlibs)
 }
 
+func (tc toolchainCustom) GetNm() (string, []string) {
+	return tc.nmBinary, []string{}
+}
+
+func (tc toolchainCustom) GetRanlib() (string, []string) {
+	return tc.ranlibBinary, []string{}
+}
+
 func (tc toolchainCustom) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
@@ -70,6 +80,8 @@ func (tc toolchainCustom) Is64BitOnly() bool {
 func newToolchainCustom(props *config.Properties, tgt TgtType) (tc toolchainCustom) {
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = props.GetString("as_binary")
+	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
+	tc.ranlibBinary = props.GetString(string(tgt) + "_ranlib_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")

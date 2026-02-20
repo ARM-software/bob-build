@@ -219,7 +219,7 @@ build ${g.bob.BuildDir}/target/executable/validate_link_generate_sources_new: $
         ${g.bob.BuildDir}/target/objects/validate_link_generate_sources_new/gen/generate_source_multiple_colon_dep/out5.cpp.o $
         ${g.bob.BuildDir}/target/objects/validate_link_generate_sources_new/gen/generate_source_multiple_colon_dep/out6.cpp.o
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

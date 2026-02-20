@@ -65,7 +65,7 @@ build ${g.bob.BuildDir}/target/objects/hello_world/hello_world.cpp.o: $
 build ${g.bob.BuildDir}/target/executable/hello_world: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/hello_world/hello_world.cpp.o
     build_wrapper = 
-    ldflags = -Wl,--as-needed
+    ldflags = -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

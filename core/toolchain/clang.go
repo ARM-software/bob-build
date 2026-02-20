@@ -14,6 +14,8 @@ type toolchainClangCommon struct {
 	// Options read from the config:
 	arBinary       string
 	asBinary       string
+	nmBinary       string
+	ranlibBinary   string
 	objcopyBinary  string
 	objdumpBinary  string
 	clangBinary    string
@@ -109,6 +111,20 @@ func (tc toolchainClangCommon) GetLinker() Linker {
 	return newClangLinker(tc.clangxxBinary, tc.ldflags, tc.ldlibs, tc.useGnuBinutils)
 }
 
+func (tc toolchainClangCommon) GetNm() (string, []string) {
+	if tc.useGnuBinutils {
+		return tc.gnu.GetNm()
+	}
+	return tc.nmBinary, []string{}
+}
+
+func (tc toolchainClangCommon) GetRanlib() (string, []string) {
+	if tc.useGnuBinutils {
+		return tc.gnu.GetRanlib()
+	}
+	return tc.ranlibBinary, []string{}
+}
+
 func (tc toolchainClangCommon) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
@@ -138,6 +154,8 @@ func newToolchainClangCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	// This is not necessarily the case. This will need to be updated when we support clang on linux without a GNU Toolchain.
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
+	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
+	tc.ranlibBinary = props.GetString(string(tgt) + "_ranlib_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")

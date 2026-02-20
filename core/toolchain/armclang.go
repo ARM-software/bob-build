@@ -9,6 +9,8 @@ import (
 type toolchainArmClang struct {
 	arBinary      string
 	asBinary      string
+	nmBinary      string
+	ranlibBinary  string
 	objcopyBinary string
 	objdumpBinary string
 	ccBinary      string
@@ -49,6 +51,14 @@ func (tc toolchainArmClang) GetLinker() Linker {
 	return tc.linker
 }
 
+func (tc toolchainArmClang) GetNm() (string, []string) {
+	return tc.nmBinary, []string{}
+}
+
+func (tc toolchainArmClang) GetRanlib() (string, []string) {
+	return tc.ranlibBinary, []string{}
+}
+
 func (tc toolchainArmClang) GetStripFlags() []string {
 	return []string{
 		"--format", "elf",
@@ -75,6 +85,8 @@ func newToolchainArmClangCommon(props *config.Properties, tgt TgtType) (tc toolc
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = tc.prefix + props.GetString("armclang_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("armclang_as_binary")
+	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
+	tc.ranlibBinary = props.GetString(string(tgt) + "_ranlib_binary")
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")
 	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_armclang_cc_binary")

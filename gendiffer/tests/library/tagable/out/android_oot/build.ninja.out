@@ -65,7 +65,7 @@ build ${g.bob.BuildDir}/target/objects/tagable/src.cpp.o: g.bob.cxx $
 build ${g.bob.BuildDir}/target/shared/tagable.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/tagable/src.cpp.o
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -102,7 +102,7 @@ build ${g.bob.BuildDir}/target/shared/tagable_features.so: $
         g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/tagable_features/src.cpp.o
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

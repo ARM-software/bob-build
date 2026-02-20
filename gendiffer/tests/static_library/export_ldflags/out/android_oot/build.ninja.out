@@ -82,7 +82,7 @@ build ${g.bob.BuildDir}/target/executable/binary_has_indirect_ldlibs: $
         ${g.bob.BuildDir}/target/static/libstatic_with_ldlibs2.a $
         ${g.bob.BuildDir}/target/static/libstatic_with_ldlibs1.a
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 --export_flag1 --export_flag_duplicate --export_flag2 --export_flag_duplicate -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld --export_flag1 --export_flag_duplicate --export_flag2 --export_flag_duplicate -Wl,--as-needed
     ldlibs = -l1 -luniquelib -l2
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -116,7 +116,7 @@ build ${g.bob.BuildDir}/target/shared/libshared_has_indirect_ldlibs.so: $
         | ${g.bob.BuildDir}/target/static/libstatic_with_ldlibs2.a $
         ${g.bob.BuildDir}/target/static/libstatic_with_ldlibs1.a
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 --export_flag1 --export_flag_duplicate --export_flag2 --export_flag_duplicate -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld --export_flag1 --export_flag_duplicate --export_flag2 --export_flag_duplicate -Wl,--as-needed
     ldlibs = -l1 -luniquelib -l2
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
@@ -206,7 +206,7 @@ build ${g.bob.BuildDir}/target/executable/uses_shared: g.bob.executable $
         ${g.bob.BuildDir}/target/shared/libshared_has_indirect_ldlibs.so.toc $
         || ${g.bob.BuildDir}/target/shared/libshared_has_indirect_ldlibs.so
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

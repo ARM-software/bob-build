@@ -81,7 +81,8 @@ TEST_DIRS=("build-indep"
            "build-in-outp"
            "tests/build-in-src"
            "build-link"
-           "build-link-target")
+           "build-link-target"
+           "build-gcc-ar")
 rm -rf "${TEST_DIRS[@]}"
 
 # Test by explicitly requesting the `bob_tests` alias, which should include all
@@ -291,6 +292,22 @@ if [ "$OS" != "OSX" ]; then
             "${build_dir}"/gen/gen_output/input_two.gen)
     check_dep_updated "host_bin toc linking" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
+
+# Check gcc-ar inference when cross-compiler name includes a prefix
+echo -e "\n* \e[1;32mChecking gcc-ar inference\e[0m"
+build_dir=build-gcc-ar
+tmp_toolchain_dir="$(mktemp -d)"
+cat > "${tmp_toolchain_dir}/aarch64-linux-gnu-gcc" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+chmod +x "${tmp_toolchain_dir}/aarch64-linux-gnu-gcc"
+PATH="${tmp_toolchain_dir}:${PATH}" tests/bootstrap_linux -o ${build_dir}
+PATH="${tmp_toolchain_dir}:${PATH}" ${build_dir}/config ${OPTIONS} TARGET_GNU_CC_BINARY=aarch64-linux-gnu-gcc TARGET_GNU_PREFIX=""
+PATH="${tmp_toolchain_dir}:${PATH}" ${build_dir}/buildme bob_test_gcc_ar_infer
+PATH="${tmp_toolchain_dir}:${PATH}" ${build_dir}/buildme bob_test_gcc_nm_infer
+PATH="${tmp_toolchain_dir}:${PATH}" ${build_dir}/buildme bob_test_gcc_ranlib_infer
+rm -rf "${tmp_toolchain_dir}"
 
 # Clean up
 rm -rf "${TEST_DIRS[@]}"

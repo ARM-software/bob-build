@@ -172,6 +172,8 @@ config TARGET_OBJDUMP_BINARY
 
 config TARGET_AR_BINARY
 	string "GNU and Clang Archiver binary"
+	default TARGET_GNU_PREFIX + "gcc-ar" if TARGET_TOOLCHAIN_GNU
+	default "llvm-ar" if TARGET_TOOLCHAIN_CLANG
 	default "ar"
 	help
 	  The name of the archiver used to create target static libraries.
@@ -202,11 +204,21 @@ config TARGET_OTOOL_BINARY
 
 config TARGET_NM_BINARY
 	string "Target nm"
+	default TARGET_GNU_PREFIX + "gcc-nm" if TARGET_TOOLCHAIN_GNU
+	default "llvm-nm" if TARGET_TOOLCHAIN_CLANG
 	default "nm"
-	depends on TARGET_TOOLCHAIN_XCODE
 	help
 	  The nm executable that we can use to read the dynamic symbol
 	  table in target libraries.
+
+config TARGET_RANLIB_BINARY
+	string "Target ranlib"
+	default TARGET_GNU_PREFIX + "gcc-ranlib" if TARGET_TOOLCHAIN_GNU
+	default "llvm-ranlib" if TARGET_TOOLCHAIN_CLANG
+	default "ranlib"
+	help
+	  The ranlib executable that we can use to generate the archive
+	  index for target static libraries.
 
 ### User custom toolchain
 

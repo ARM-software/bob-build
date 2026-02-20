@@ -66,7 +66,7 @@ build ${g.bob.BuildDir}/target/executable/bob_binary: g.bob.executable $
         ${g.bob.BuildDir}/target/objects/bob_binary/src.cpp.o | $
         ${g.bob.BuildDir}/target/static/bob_static_library.a
     build_wrapper = 
-    ldflags = -target aarch64-linux-android10000 -Wl,--as-needed
+    ldflags = -target aarch64-linux-android10000 -fuse-ld=lld -Wl,--as-needed
     ldlibs = 
     linker = prebuilts/clang/host/linux-x86/clang-r522817/bin/clang++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

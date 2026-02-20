@@ -3,18 +3,19 @@ package toolchain
 import "github.com/ARM-software/bob-build/core/config"
 
 type toolchainXcode struct {
-	arBinary    string
-	asBinary    string
-	dsymBinary  string
-	stripBinary string
-	otoolBinary string
-	nmBinary    string
-	ccBinary    string
-	cxxBinary   string
-	linker      Linker
-	prefix      string
-	target      string
-	flagCache   *flagSupportedCache
+	arBinary     string
+	asBinary     string
+	dsymBinary   string
+	stripBinary  string
+	otoolBinary  string
+	nmBinary     string
+	ranlibBinary string
+	ccBinary     string
+	cxxBinary    string
+	linker       Linker
+	prefix       string
+	target       string
+	flagCache    *flagSupportedCache
 
 	cflags  []string
 	ldflags []string
@@ -50,6 +51,14 @@ func (tc toolchainXcode) GetLinker() Linker {
 	return tc.linker
 }
 
+func (tc toolchainXcode) GetNm() (string, []string) {
+	return tc.nmBinary, []string{}
+}
+
+func (tc toolchainXcode) GetRanlib() (string, []string) {
+	return tc.ranlibBinary, []string{}
+}
+
 func (tc toolchainXcode) GetStripFlags() []string {
 	return []string{
 		"--format", "macho",
@@ -82,6 +91,7 @@ func newToolchainXcodeCommon(props *config.Properties, tgt TgtType) (tc toolchai
 	tc.stripBinary = props.GetString(string(tgt) + "_strip_binary")
 	tc.otoolBinary = props.GetString(string(tgt) + "_otool_binary")
 	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
+	tc.ranlibBinary = props.GetString(string(tgt) + "_ranlib_binary")
 
 	tc.ccBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cc_binary")
 	tc.cxxBinary = tc.prefix + props.GetString(string(tgt)+"_clang_cxx_binary")

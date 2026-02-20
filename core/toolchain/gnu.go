@@ -21,6 +21,8 @@ type toolchainGnu interface {
 type toolchainGnuCommon struct {
 	arBinary      string
 	asBinary      string
+	nmBinary      string
+	ranlibBinary  string
 	objcopyBinary string
 	objdumpBinary string
 	gccBinary     string
@@ -61,6 +63,14 @@ func (tc toolchainGnuCommon) GetCXXCompiler() (tool string, flags []string) {
 
 func (tc toolchainGnuCommon) GetLinker() Linker {
 	return tc.linker
+}
+
+func (tc toolchainGnuCommon) GetNm() (string, []string) {
+	return tc.nmBinary, []string{}
+}
+
+func (tc toolchainGnuCommon) GetRanlib() (string, []string) {
+	return tc.ranlibBinary, []string{}
 }
 
 func (tc toolchainGnuCommon) GetStripFlags() []string {
@@ -131,6 +141,92 @@ func (tc toolchainGnuCommon) Is64BitOnly() bool {
 	return tc.is64BitOnly
 }
 
+// If the GNU prefix is not set and tools default to "gcc-*", derive a
+// prefix from the GCC binary (e.g. aarch64-linux-gnu-gcc -> aarch64-linux-gnu-gcc-ar).
+func inferGccWrapper(ccBinary, wrapper string) string {
+	base := filepath.Base(ccBinary)
+	dir := filepath.Dir(ccBinary)
+
+	idx := strings.LastIndex(base, "gcc")
+	if idx < 0 {
+		return ""
+	}
+	pre := base[:idx]
+	post := base[idx+len("gcc"):]
+	if post != "" && !strings.HasPrefix(post, "-") {
+		// "gcc" is not a distinct suffix (e.g. "mygccfoo"), so don't guess.
+		return ""
+	}
+	inferred := pre + "gcc-" + wrapper + post
+
+	if filepath.IsAbs(ccBinary) || strings.Contains(ccBinary, string(os.PathSeparator)) {
+		return filepath.Join(dir, inferred)
+	}
+	return inferred
+}
+
+func inferToolFromGcc(ccBinary, tool string, keepSuffix bool) string {
+	base := filepath.Base(ccBinary)
+	dir := filepath.Dir(ccBinary)
+
+	idx := strings.LastIndex(base, "gcc")
+	if idx < 0 {
+		return ""
+	}
+	pre := base[:idx]
+	post := base[idx+len("gcc"):]
+	if post != "" && !strings.HasPrefix(post, "-") {
+		return ""
+	}
+	if !keepSuffix {
+		post = ""
+	}
+	inferred := pre + tool + post
+
+	if filepath.IsAbs(ccBinary) || strings.Contains(ccBinary, string(os.PathSeparator)) {
+		return filepath.Join(dir, inferred)
+	}
+	return inferred
+}
+
+func toolExists(tool string) bool {
+	if tool == "" {
+		return false
+	}
+	if filepath.IsAbs(tool) || strings.Contains(tool, string(os.PathSeparator)) {
+		return utils.IsExecutable(tool)
+	}
+	_, err := exec.LookPath(tool)
+	return err == nil
+}
+
+func maybeInferWrapper(tool, ccBinary, wrapper string) string {
+	if filepath.Base(tool) != "gcc-"+wrapper {
+		return tool
+	}
+	inferred := inferGccWrapper(ccBinary, wrapper)
+	if inferred != "" && toolExists(inferred) {
+		return inferred
+	}
+	if toolExists(tool) {
+		return tool
+	}
+
+	// gcc-* wrapper not available, try binutils-style tools derived from gcc.
+	if inferredTool := inferToolFromGcc(ccBinary, wrapper, true); inferredTool != "" && toolExists(inferredTool) {
+		return inferredTool
+	}
+	if inferredTool := inferToolFromGcc(ccBinary, wrapper, false); inferredTool != "" && toolExists(inferredTool) {
+		return inferredTool
+	}
+
+	// Last resort: plain tool name.
+	if toolExists(wrapper) {
+		return wrapper
+	}
+	return tool
+}
+
 // Prefixed standalone toolchains (e.g. aarch64-linux-gnu-gcc) often ship with a
 // directory of symlinks containing un-prefixed names e.g. just 'ld', instead of
 // 'aarch64-linux-gnu-ld'. Some Clang installations won't use the prefix, even
@@ -169,12 +265,21 @@ func newToolchainGnuCommon(props *config.Properties, tgt TgtType) (tc toolchainG
 	tc.prefix = props.GetString(string(tgt) + "_gnu_prefix")
 	tc.arBinary = props.GetString(string(tgt) + "_ar_binary")
 	tc.asBinary = tc.prefix + props.GetString("as_binary")
+	tc.nmBinary = props.GetString(string(tgt) + "_nm_binary")
+	tc.ranlibBinary = props.GetString(string(tgt) + "_ranlib_binary")
 
 	tc.objcopyBinary = props.GetString(string(tgt) + "_objcopy_binary")
 	tc.objdumpBinary = props.GetString(string(tgt) + "_objdump_binary")
 
 	tc.gccBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cc_binary")
 	tc.gxxBinary = tc.prefix + props.GetString(string(tgt)+"_gnu_cxx_binary")
+
+	// If the prefix is empty, derive gcc-* wrappers from the compiler name.
+	if tc.prefix == "" {
+		tc.arBinary = maybeInferWrapper(tc.arBinary, tc.gccBinary, "ar")
+		tc.nmBinary = maybeInferWrapper(tc.nmBinary, tc.gccBinary, "nm")
+		tc.ranlibBinary = maybeInferWrapper(tc.ranlibBinary, tc.gccBinary, "ranlib")
+	}
 	tc.binDir = filepath.Dir(getToolPath(tc.gccBinary))
 
 	if cflags := props.GetStringIfExists(string(tgt) + "_cflags"); cflags != "" {

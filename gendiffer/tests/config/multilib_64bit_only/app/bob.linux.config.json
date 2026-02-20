@@ -151,6 +151,10 @@
     "ignore": false,
     "value": ""
   },
+  "host_ranlib_binary": {
+    "ignore": false,
+    "value": ""
+  },
   "host_objcopy_binary": {
     "ignore": false,
     "value": "objcopy"
@@ -347,6 +351,10 @@
     "value": ""
   },
   "target_nm_binary": {
+    "ignore": false,
+    "value": ""
+  },
+  "target_ranlib_binary": {
     "ignore": false,
     "value": ""
   },

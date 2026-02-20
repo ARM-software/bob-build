@@ -50,6 +50,7 @@
 ./target_specific_static_libs/build.bp
 ./templates/build.bp
 ./toolchain_flags/build.bp
+./toolchain_gcc_ar/build.bp
 ./transform_source/build.bp
 ./transform_source_new/build.bp
 ./version_script/build.bp

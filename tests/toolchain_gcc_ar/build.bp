@@ -1,0 +1,42 @@
+check_cmd = "${tool} ${out} ${args} ${ar} ${cc}"
+check_nm_cmd = "${tool} ${out} ${args} ${nm} ${cc}"
+check_ranlib_cmd = "${tool} ${out} ${args} ${ranlib} ${cc}"
+
+bob_generate_source {
+    name: "bob_test_gcc_ar_infer",
+    cmd: check_cmd,
+    tools: ["check_gcc_ar.py"],
+    args: [
+        "aarch64-linux-gnu-gcc-ar",
+        "aarch64-linux-gnu-gcc",
+    ],
+    out: ["ar.txt"],
+    target: "target",
+    build_by_default: false,
+}
+
+bob_generate_source {
+    name: "bob_test_gcc_nm_infer",
+    cmd: check_nm_cmd,
+    tools: ["check_gcc_nm.py"],
+    args: [
+        "aarch64-linux-gnu-gcc-nm",
+        "aarch64-linux-gnu-gcc",
+    ],
+    out: ["nm.txt"],
+    target: "target",
+    build_by_default: false,
+}
+
+bob_generate_source {
+    name: "bob_test_gcc_ranlib_infer",
+    cmd: check_ranlib_cmd,
+    tools: ["check_gcc_ranlib.py"],
+    args: [
+        "aarch64-linux-gnu-gcc-ranlib",
+        "aarch64-linux-gnu-gcc",
+    ],
+    out: ["ranlib.txt"],
+    target: "target",
+    build_by_default: false,
+}

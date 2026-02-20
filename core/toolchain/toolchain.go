@@ -27,6 +27,8 @@ type Toolchain interface {
 	GetCCompiler() (tool string, flags []string)
 	GetCXXCompiler() (tool string, flags []string)
 	GetLinker() Linker
+	GetNm() (tool string, flags []string)
+	GetRanlib() (tool string, flags []string)
 	GetStripFlags() []string
 	GetLibraryTocFlags() []string
 	CheckFlagIsSupported(language, flag string) bool

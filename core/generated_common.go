@@ -223,6 +223,8 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 
 	tc := b.GetToolchain(m.Properties.Target)
 	arBinary, _ := tc.GetArchiver()
+	nmBinary, _ := tc.GetNm()
+	ranlibBinary, _ := tc.GetRanlib()
 	asBinary, astargetflags := tc.GetAssembler()
 	cc, cctargetflags := tc.GetCCompiler()
 	cxx, cxxtargetflags := tc.GetCXXCompiler()
@@ -235,6 +237,8 @@ func (m *ModuleGenerateCommon) getArgs(ctx blueprint.ModuleContext) (string, map
 	env := config.GetEnvironmentVariables()
 	args := map[string]string{
 		"ar":              arBinary,
+		"nm":              nmBinary,
+		"ranlib":          ranlibBinary,
 		"as":              asBinary,
 		"asflags":         utils.Join(astargetflags, props.Asflags),
 		"bob_config":      env.ConfigFile,
