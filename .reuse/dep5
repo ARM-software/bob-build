@@ -28,7 +28,8 @@ Files:
   */tests/*
   .github/*
   config_system/pytest.ini
-  config_system/requirements_lock.txt
+  config_system/requirements_test_lock.txt
+  config_system/requirements_runtime_lock.txt
   *go.mod
   *go.sum
   *go.work

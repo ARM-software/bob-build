@@ -1,4 +1,4 @@
-load("@config_deps//:requirements.bzl", "requirement")
+load("@config_test_deps//:requirements.bzl", "requirement")
 
 [
     py_test(

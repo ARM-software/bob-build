@@ -51,12 +51,26 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pip",
     python_version = "3.11",
-    requirements_lock = "//config_system:requirements_lock.txt",
+    requirements_lock = "//config_system:requirements_runtime_lock.txt",
 )
+
+test_pip = use_extension(
+    "@rules_python//python/extensions:pip.bzl",
+    "pip",
+    dev_dependency = True,
+)
+test_pip.parse(
+    hub_name = "config_test_deps",
+    python_version = "3.11",
+    requirements_lock = "//config_system:requirements_test_lock.txt",
+)
+
 use_repo(
     pip,
     config_deps = "pip",
 )
+
+use_repo(test_pip, "config_test_deps")
 
 # Set up dependencies
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
