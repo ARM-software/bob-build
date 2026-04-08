@@ -33,6 +33,9 @@ def get_platform_version():
     if "baklava" in str(platform_version).lower():
         return 16
 
+    if "cinnamonbun" in str(platform_version).lower():
+        return 17
+
     if platform_version.isalpha():
         # aosp master may have a single letter for PLATFORM_VERSION eg. 'Q' for Android 10
         platform_version = ord(platform_version[0]) - 71
