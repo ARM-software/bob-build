@@ -60,6 +60,7 @@ bootstrap_go_package {
         "core/generated_props.go",
         "core/glob.go",
         "core/graphviz.go",
+        "core/import_cc.go",
         "core/install.go",
         "core/kernel_module.go",
         "core/late_template.go",
