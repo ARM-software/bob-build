@@ -1,3 +1,4 @@
+soong_namespace{}
 
 bootstrap_go_package {
     name: "bob-soong_compat-@@PROJ_UID@@",
