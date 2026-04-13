@@ -436,6 +436,9 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	text = strings.Replace(text, "@@PROJ_UID@@", projUid, -1)
 	text = strings.Replace(text, "@@BOB_DIR@@", srcToBobDir, -1)
 	text = strings.Replace(text, "@@SOONG_COMPAT@@", getSoongCompatFile(getConfig(ctx)), -1)
+	if getConfig(ctx).Properties.GetBool("android_bp_use_soong_namespace") {
+		sb.WriteString("soong_namespace {}\n\n")
+	}
 	sb.WriteString(text)
 	sb.WriteString("\n")
 

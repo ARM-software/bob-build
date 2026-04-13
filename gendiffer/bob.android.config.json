@@ -422,5 +422,9 @@
   "custom_toolchain": {
     "ignore": false,
     "value": false
+  },
+  "android_bp_use_soong_namespace": {
+    "ignore": false,
+    "value": false
   }
 }

@@ -106,7 +106,7 @@ ANDROID_VERSION="$("${SCRIPT_DIR}/${BOB_DIR}/scripts/android_version.py")"
 
 if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" "$@"
+    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y ANDROID_BP_USE_SOONG_NAMESPACE=n ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then

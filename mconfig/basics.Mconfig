@@ -55,3 +55,10 @@ endchoice
 config ANDROID_PLATFORM_VERSION
 	int "Android PLATFORM_VERSION"
 	depends on ANDROID
+
+config ANDROID_BP_USE_SOONG_NAMESPACE
+	bool "Emit soong_namespace in generated Android.bp"
+	depends on ANDROID && BUILDER_ANDROID_BP
+	default y
+	help
+	  Emit a top-level soong_namespace {} stanza in the generated Android.bp.
