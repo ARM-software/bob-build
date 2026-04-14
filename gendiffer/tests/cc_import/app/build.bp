@@ -1,0 +1,12 @@
+bob_import_cc {
+    name: "import_lib_a",
+    headers: [
+        "libA/includes/a.h",
+        "libA/includes/a2.h",
+    ],
+}
+
+bob_import_cc {
+    name: "import_lib_b",
+    headers: ["libB/includes/b.h"],
+}
