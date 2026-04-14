@@ -53,6 +53,7 @@ bob_alias {
         "bob_test_generated_headers",
         "bob_test_globs",
         "bob_test_header_libs",
+        "bob_test_import_headeronly_lib",
         "bob_test_install_deps",
         "bob_test_kernel_module",
         "bob_test_lib_external_libs",

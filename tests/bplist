@@ -5,6 +5,7 @@
 ./bob/Blueprints
 ./bob/blueprint/Blueprints
 ./build.bp
+./cc_import/build.bp
 ./command_vars/build.bp
 ./cxx11_simple/build.bp
 ./escaping/build.bp
