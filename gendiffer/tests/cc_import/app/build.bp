@@ -4,9 +4,21 @@ bob_import_cc {
         "libA/includes/a.h",
         "libA/includes/a2.h",
     ],
+    target: "target",
 }
 
 bob_import_cc {
     name: "import_lib_b",
     headers: ["libB/includes/b.h"],
+    target: "target",
+}
+
+bob_shared_library {
+    name: "shared_lib",
+    srcs: [
+        "main.cpp",
+    ],
+    shared_libs: [
+        "import_lib_a",
+    ],
 }

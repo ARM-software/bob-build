@@ -3,8 +3,11 @@ package core
 import (
 	"path/filepath"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
+	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
+	"github.com/ARM-software/bob-build/core/toolchain"
 	"github.com/ARM-software/bob-build/internal/utils"
 	"github.com/google/blueprint"
 )
@@ -13,6 +16,7 @@ import (
 // headers, defines, `src` aka library, strip_include_prefix
 type ImportCCProps struct {
 	Headers []string
+	Target  toolchain.TgtType
 }
 
 type ModuleImportCC struct {
@@ -22,6 +26,8 @@ type ModuleImportCC struct {
 		ImportCCProps
 	}
 }
+
+var _ splittable = (*ModuleImportCC)(nil)
 
 type importCCInterface interface {
 	splittable
@@ -45,6 +51,12 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 		files = append(files, fp)
 	}
 
+	return
+}
+
+func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
+	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
+	flags = append(flags, flag.FromIncludePath(headerPath, flag.Type(file.TypeLink|file.TypeShared)))
 	return
 }
 
@@ -90,3 +102,27 @@ func (g *androidBpGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.Mo
 func (m *ModuleImportCC) GenerateBuildActions(ctx blueprint.ModuleContext) {
 	getGenerator(ctx).importCCActions(m, ctx)
 }
+
+// Support Splittable properties
+func (m *ModuleImportCC) supportedVariants() []toolchain.TgtType {
+	return []toolchain.TgtType{m.Properties.Target}
+}
+
+func (m *ModuleImportCC) setVariant(variant toolchain.TgtType) {
+	// No need to actually track this, as a single target is always supported
+}
+
+func (m *ModuleImportCC) disable() {
+	// This should never actually be called, as we will always support one target
+	panic("disable() called on ModuleImportCC")
+}
+
+func (m *ModuleImportCC) getSplittableProps() *SplittableProps {
+	return &m.Properties.SplittableProps
+}
+
+func (m *ModuleImportCC) getTarget() toolchain.TgtType {
+	return m.Properties.Target
+}
+
+// End Support Splittable properties
