@@ -15,8 +15,9 @@ import (
 // TODO: Add Props one by one and test functionality of
 // headers, defines, `src` aka library, strip_include_prefix
 type ImportCCProps struct {
-	Headers []string
-	Target  toolchain.TgtType
+	Headers  []string
+	Target   toolchain.TgtType
+	Linkopts []string
 }
 
 type ModuleImportCC struct {
@@ -57,6 +58,15 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
 	flags = append(flags, flag.FromIncludePath(headerPath, flag.Type(file.TypeLink|file.TypeShared)))
+	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Linkopts",
+			Tag:          flag.TypeTransitiveLinker,
+			Factory:      flag.FromStringOwned,
+		},
+	}
+	flags = append(flags, flag.ParseFromProperties(nil, lut, m.Properties)...)
+
 	return
 }
 

@@ -1,0 +1,21 @@
+bob_import_cc {
+    name: "import_lib_a",
+    headers: [
+        "libA/includes/a.h",
+        "libA/includes/a2.h",
+    ],
+    target: "target",
+    linkopts: [
+        "-shared",
+    ],
+}
+
+bob_shared_library {
+    name: "shared_lib",
+    srcs: [
+        "main.cpp",
+    ],
+    shared_libs: [
+        "import_lib_a",
+    ],
+}
