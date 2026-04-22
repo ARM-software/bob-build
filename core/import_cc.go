@@ -18,6 +18,7 @@ type ImportCCProps struct {
 	Headers  []string
 	Target   toolchain.TgtType
 	Linkopts []string
+	Defines  []string
 }
 
 type ModuleImportCC struct {
@@ -59,6 +60,11 @@ func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
 	flags = append(flags, flag.FromIncludePath(headerPath, flag.Type(file.TypeLink|file.TypeShared)))
 	lut := flag.FlagParserTable{
+		{
+			PropertyName: "Defines",
+			Tag:          flag.TypeExported | flag.TypeTransitive,
+			Factory:      flag.FromDefineOwned,
+		},
 		{
 			PropertyName: "Linkopts",
 			Tag:          flag.TypeTransitiveLinker,
