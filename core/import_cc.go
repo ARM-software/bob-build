@@ -58,7 +58,7 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 
 func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
-	flags = append(flags, flag.FromIncludePath(headerPath, flag.Type(file.TypeLink|file.TypeShared)))
+	flags = append(flags, flag.FromIncludePathOwned(headerPath, m, flag.TypeInclude))
 	lut := flag.FlagParserTable{
 		{
 			PropertyName: "Defines",
