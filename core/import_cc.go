@@ -19,6 +19,7 @@ type ImportCCProps struct {
 	Target   toolchain.TgtType
 	Linkopts []string
 	Defines  []string
+	Includes []string
 }
 
 type ModuleImportCC struct {
@@ -34,6 +35,7 @@ var _ splittable = (*ModuleImportCC)(nil)
 type importCCInterface interface {
 	splittable
 	file.Provider
+	flag.Provider
 }
 
 func (m *ModuleImportCC) shortName() string {
@@ -43,6 +45,7 @@ func (m *ModuleImportCC) shortName() string {
 func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 	m.Properties.Headers = utils.PrefixDirs(m.Properties.Headers, prefix)
+	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
 }
 
 func (m *ModuleImportCC) OutFiles() (files file.Paths) {
@@ -58,7 +61,7 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 
 func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
-	flags = append(flags, flag.FromIncludePathOwned(headerPath, m, flag.TypeInclude))
+	flags = append(flags, flag.FromIncludePathOwned(headerPath, m, flag.TypeInclude|flag.TypeExported))
 	lut := flag.FlagParserTable{
 		{
 			PropertyName: "Defines",
@@ -72,6 +75,11 @@ func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 		},
 	}
 	flags = append(flags, flag.ParseFromProperties(nil, lut, m.Properties)...)
+
+	for _, dir := range m.Properties.Includes {
+		fp := file.NewPath(dir, m.Name(), file.TypeHeader)
+		flags = append(flags, flag.FromIncludePath(fp.BuildPath(), flag.TypeInclude|flag.TypeExported))
+	}
 
 	return
 }

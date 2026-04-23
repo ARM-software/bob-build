@@ -94,7 +94,7 @@ default import_lib_b
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.shared_lib_target.cflags = 
+m.shared_lib_target.cflags = -I${g.bob.BuildDir}/gen/import_lib_a -I${g.bob.SrcDir}/libB/includes
 m.shared_lib_target.cxxflags = 
 
 build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
@@ -107,7 +107,7 @@ build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
 build ${g.bob.BuildDir}/target/shared/shared_lib.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o
     build_wrapper = 
-    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a
+    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a -I${g.bob.SrcDir}/libB/includes
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

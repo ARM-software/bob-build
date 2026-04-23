@@ -9,7 +9,9 @@ bob_import_cc {
 
 bob_import_cc {
     name: "import_lib_b",
-    headers: ["libB/includes/b.h"],
+    includes: [
+        "libB/includes",
+    ],
     target: "target",
 }
 
@@ -20,6 +22,7 @@ bob_shared_library {
     ],
     shared_libs: [
         "import_lib_a",
+        "import_lib_b",
     ],
     cflags: [
         "-fPIC",

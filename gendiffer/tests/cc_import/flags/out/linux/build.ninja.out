@@ -80,7 +80,7 @@ default import_lib_a
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.shared_lib_target.cflags = -DFOO
+m.shared_lib_target.cflags = -DFOO -I${g.bob.BuildDir}/gen/import_lib_a
 m.shared_lib_target.cxxflags = 
 
 build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $

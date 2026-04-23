@@ -4,6 +4,9 @@ bob_import_cc {
         "libA/includes/a.h",
         "libA/includes/a2.h",
     ],
+    includes: [
+        "libB/includes",
+    ],
     target: "target",
 }
 
