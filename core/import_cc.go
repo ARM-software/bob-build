@@ -2,6 +2,7 @@ package core
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
@@ -15,6 +16,7 @@ import (
 // TODO: Add Props one by one and test functionality of
 // headers, defines, `src` aka library, strip_include_prefix
 type ImportCCProps struct {
+	Src      string
 	Headers  []string
 	Target   toolchain.TgtType
 	Linkopts []string
@@ -38,6 +40,23 @@ type importCCInterface interface {
 	flag.Provider
 }
 
+func (m *ModuleImportCC) isHeaderOnlyLib() bool {
+	if m.Properties.Src == "" {
+		return true
+	}
+	return false
+}
+
+func (m *ModuleImportCC) getLibFileType() file.Type {
+	if strings.HasSuffix(m.Name(), ".so") {
+		return file.TypeShared
+	}
+	if strings.HasSuffix(m.Name(), ".a") {
+		return file.TypeArchive
+	}
+	return file.TypeUnset
+}
+
 func (m *ModuleImportCC) shortName() string {
 	return m.Name()
 }
@@ -46,6 +65,9 @@ func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 	m.Properties.Headers = utils.PrefixDirs(m.Properties.Headers, prefix)
 	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
+	if !m.isHeaderOnlyLib() {
+		m.Properties.Src = filepath.Join(prefix, m.Properties.Src)
+	}
 }
 
 func (m *ModuleImportCC) OutFiles() (files file.Paths) {
@@ -53,6 +75,12 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 		src := file.NewPath(h, m.Name(), file.TypeHeader)
 		// `file.TypeGenerated` makes the file path exist under `$BUILDDIR/gen`
 		fp := file.NewLink(h, m.Name(), &src, file.TypeHeader|file.TypeGenerated)
+		files = append(files, fp)
+	}
+	if !m.isHeaderOnlyLib() {
+		lib := m.Properties.Src
+		src := file.NewPath(lib, m.Name(), m.getLibFileType())
+		fp := file.NewLink(lib, m.Name(), &src, m.getLibFileType()|file.TypeGenerated)
 		files = append(files, fp)
 	}
 
@@ -80,7 +108,9 @@ func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 		fp := file.NewPath(dir, m.Name(), file.TypeHeader)
 		flags = append(flags, flag.FromIncludePath(fp.BuildPath(), flag.TypeInclude|flag.TypeExported))
 	}
-
+	if !m.isHeaderOnlyLib() {
+		flags = append(flags, flag.FromString(pathToLibFlag(m.Properties.Src), flag.TypeLinker))
+	}
 	return
 }
 

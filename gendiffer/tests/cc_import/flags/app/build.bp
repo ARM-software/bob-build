@@ -11,6 +11,7 @@ bob_import_cc {
     linkopts: [
         "-shared",
     ],
+    src: "liba.so",
 }
 
 bob_shared_library {

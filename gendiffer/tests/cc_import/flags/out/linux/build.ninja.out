@@ -69,8 +69,13 @@ build ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h: g.bob.symlink $
         ${g.bob.SrcDir}/libA/includes/a2.h
     target = ../../../../../libA/includes/a2.h
 
+build ${g.bob.BuildDir}/gen/import_lib_a/liba.so: g.bob.symlink $
+        ${g.bob.BuildDir}/import_lib_a/shared/liba.so
+    target = ../../../liba.so
+
 build import_lib_a: phony ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a.h $
-        ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h
+        ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h $
+        ${g.bob.BuildDir}/gen/import_lib_a/liba.so
 default import_lib_a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -93,7 +98,7 @@ build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
 build ${g.bob.BuildDir}/target/shared/shared_lib.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o
     build_wrapper = 
-    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a -DFOO -shared
+    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a -DFOO -shared -la
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared
