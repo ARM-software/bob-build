@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
@@ -14,10 +13,9 @@ import (
 )
 
 // TODO: Add Props one by one and test functionality of
-// headers, defines, `src` aka library, strip_include_prefix
+// strip_include_prefix, cflags
 type ImportCCProps struct {
 	Src      string
-	Headers  []string
 	Target   toolchain.TgtType
 	Linkopts []string
 	Defines  []string
@@ -63,7 +61,6 @@ func (m *ModuleImportCC) shortName() string {
 
 func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
-	m.Properties.Headers = utils.PrefixDirs(m.Properties.Headers, prefix)
 	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
 	if !m.isHeaderOnlyLib() {
 		m.Properties.Src = filepath.Join(prefix, m.Properties.Src)
@@ -71,12 +68,6 @@ func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 }
 
 func (m *ModuleImportCC) OutFiles() (files file.Paths) {
-	for _, h := range m.Properties.Headers {
-		src := file.NewPath(h, m.Name(), file.TypeHeader)
-		// `file.TypeGenerated` makes the file path exist under `$BUILDDIR/gen`
-		fp := file.NewLink(h, m.Name(), &src, file.TypeHeader|file.TypeGenerated)
-		files = append(files, fp)
-	}
 	if !m.isHeaderOnlyLib() {
 		lib := m.Properties.Src
 		src := file.NewPath(lib, m.Name(), m.getLibFileType())
@@ -88,8 +79,6 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 }
 
 func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
-	headerPath := filepath.Join(backend.Get().BuildDir(), "gen", m.shortName())
-	flags = append(flags, flag.FromIncludePathOwned(headerPath, m, flag.TypeInclude|flag.TypeExported))
 	lut := flag.FlagParserTable{
 		{
 			PropertyName: "Defines",

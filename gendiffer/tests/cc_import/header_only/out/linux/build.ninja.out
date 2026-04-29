@@ -46,10 +46,6 @@ rule g.bob.shared_library_toc
     description = Generate toc ${out}
     restat = true
 
-rule g.bob.symlink
-    command = for i in ${out}; do ln -nsf ${target} $$i; done;
-    description = ${out}
-
 rule g.bootstrap.cp
     command = cp ${in} ${out}
     description = cp ${out}
@@ -61,31 +57,8 @@ rule g.bootstrap.cp
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-build ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a.h: g.bob.symlink $
-        ${g.bob.SrcDir}/libA/includes/a.h
-    target = ../../../../../libA/includes/a.h
-
-build ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h: g.bob.symlink $
-        ${g.bob.SrcDir}/libA/includes/a2.h
-    target = ../../../../../libA/includes/a2.h
-
-build import_lib_a: phony ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a.h $
-        ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h
+build import_lib_a: phony
 default import_lib_a
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Module:  import_lib_b
-# Variant: target
-# Type:    bob_import_cc
-# Factory: github.com/ARM-software/bob-build/core.Main.func1.1
-# Defined: build.bp:redacted
-
-build ${g.bob.BuildDir}/gen/import_lib_b/libB/includes/b.h: g.bob.symlink $
-        ${g.bob.SrcDir}/libB/includes/b.h
-    target = ../../../../../libB/includes/b.h
-
-build import_lib_b: phony ${g.bob.BuildDir}/gen/import_lib_b/libB/includes/b.h
-default import_lib_b
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  shared_lib
@@ -94,7 +67,7 @@ default import_lib_b
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.shared_lib_target.cflags = -I${g.bob.BuildDir}/gen/import_lib_a -I${g.bob.SrcDir}/libB/includes
+m.shared_lib_target.cflags = -I${g.bob.SrcDir}/libA/includes
 m.shared_lib_target.cxxflags = 
 
 build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
@@ -107,7 +80,7 @@ build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
 build ${g.bob.BuildDir}/target/shared/shared_lib.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o
     build_wrapper = 
-    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a -I${g.bob.SrcDir}/libB/includes
+    ldflags = -Wl,--as-needed -I${g.bob.SrcDir}/libA/includes
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

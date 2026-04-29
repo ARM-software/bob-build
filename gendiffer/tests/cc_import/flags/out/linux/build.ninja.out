@@ -61,21 +61,11 @@ rule g.bootstrap.cp
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-build ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a.h: g.bob.symlink $
-        ${g.bob.SrcDir}/libA/includes/a.h
-    target = ../../../../../libA/includes/a.h
+build ${g.bob.BuildDir}/gen/import_lib_a/liba.a: g.bob.symlink $
+        ${g.bob.BuildDir}/import_lib_a/static/liba.a
+    target = ../../../liba.a
 
-build ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h: g.bob.symlink $
-        ${g.bob.SrcDir}/libA/includes/a2.h
-    target = ../../../../../libA/includes/a2.h
-
-build ${g.bob.BuildDir}/gen/import_lib_a/liba.so: g.bob.symlink $
-        ${g.bob.BuildDir}/import_lib_a/shared/liba.so
-    target = ../../../liba.so
-
-build import_lib_a: phony ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a.h $
-        ${g.bob.BuildDir}/gen/import_lib_a/libA/includes/a2.h $
-        ${g.bob.BuildDir}/gen/import_lib_a/liba.so
+build import_lib_a: phony ${g.bob.BuildDir}/gen/import_lib_a/liba.a
 default import_lib_a
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -85,7 +75,7 @@ default import_lib_a
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 
-m.shared_lib_target.cflags = -DFOO -I${g.bob.BuildDir}/gen/import_lib_a
+m.shared_lib_target.cflags = -DFOO -I${g.bob.SrcDir}/libA/includes
 m.shared_lib_target.cxxflags = 
 
 build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
@@ -98,7 +88,7 @@ build ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o: g.bob.cxx $
 build ${g.bob.BuildDir}/target/shared/shared_lib.so: g.bob.shared_library $
         ${g.bob.BuildDir}/target/objects/shared_lib/main.cpp.o
     build_wrapper = 
-    ldflags = -Wl,--as-needed -I${g.bob.BuildDir}/gen/import_lib_a -DFOO -shared -la
+    ldflags = -Wl,--as-needed -DFOO -shared -I${g.bob.SrcDir}/libA/includes -la
     ldlibs = 
     linker = g++
     shared_libs_dir = ${g.bob.BuildDir}/target/shared

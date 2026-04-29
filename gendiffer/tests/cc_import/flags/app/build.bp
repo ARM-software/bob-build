@@ -1,8 +1,7 @@
 bob_import_cc {
     name: "import_lib_a",
-    headers: [
-        "libA/includes/a.h",
-        "libA/includes/a2.h",
+    includes: [
+        "libA/includes",
     ],
     target: "target",
     defines: [
@@ -11,7 +10,7 @@ bob_import_cc {
     linkopts: [
         "-shared",
     ],
-    src: "liba.so",
+    src: "liba.a",
 }
 
 bob_shared_library {
