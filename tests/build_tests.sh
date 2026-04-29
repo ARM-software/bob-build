@@ -293,6 +293,9 @@ if [ "$OS" != "OSX" ]; then
     check_dep_updated "host_bin toc linking" "${build_dir}" "${SRC}" "${UPDATE[@]}"
 fi
 
+echo -e "\n* \e[1;32mChecking Bazel cc_import workflow\e[0m"
+tests/bazel_cc_import/run_test.sh build-bazel-import
+
 # Check gcc-ar inference when cross-compiler name includes a prefix
 echo -e "\n* \e[1;32mChecking gcc-ar inference\e[0m"
 build_dir=build-gcc-ar

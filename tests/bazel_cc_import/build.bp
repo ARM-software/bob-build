@@ -1,0 +1,26 @@
+bob_binary {
+    name: "bob_test_bazel_cc_import_header_only_normal",
+    srcs: ["consumer/header_only/normal.c"],
+    header_libs: ["tests_bazel_cc_import_bazel_header_only_normal_normal"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_header_only_includes",
+    srcs: ["consumer/header_only/includes.c"],
+    header_libs: ["tests_bazel_cc_import_bazel_header_only_includes_includes"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_header_only_strip_prefix",
+    srcs: ["consumer/header_only/strip_prefix.c"],
+    header_libs: ["tests_bazel_cc_import_bazel_header_only_strip_prefix_strip_prefix"],
+}
+
+bob_alias {
+    name: "bob_test_bazel_import",
+    srcs: [
+        "bob_test_bazel_cc_import_header_only_normal",
+        "bob_test_bazel_cc_import_header_only_includes",
+        "bob_test_bazel_cc_import_header_only_strip_prefix",
+    ],
+}

@@ -1,0 +1,72 @@
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("//tests/bazel_cc_import/bazel:buildbp.bzl", "bp_content")
+load("//tests/bazel_cc_import/bazel:name.bzl", "bp_target_name")
+load("@bazel_skylib//lib:collections.bzl", "collections")
+load("@bazel_skylib//lib:paths.bzl", "paths")
+
+def _include_dir_relative_path(header, include_dirs):
+    best = None
+    for include_dir in include_dirs:
+        for path in [header.short_path, header.path]:
+            if path != include_dir and paths.starts_with(path, include_dir):
+                relative = paths.relativize(path, include_dir)
+                if best == None or len(relative) < len(best):
+                    best = relative
+    return best
+
+def _get_headers(compilation_info):
+    include_dirs = compilation_info.system_includes.to_list() + \
+                   compilation_info.includes.to_list() + \
+                   compilation_info.external_includes.to_list()
+    include_dirs = collections.uniq(include_dirs)
+
+    headers = {}
+    for header in compilation_info.headers.to_list():
+        include_path = _include_dir_relative_path(header, include_dirs)
+        if include_path:
+            headers[paths.normalize(include_path)] = header
+        else:
+            headers[paths.normalize(header.short_path)] = header
+
+    return headers
+
+def _symlink_headers(ctx, module_dir, dir_name, headers):
+    outputs = []
+
+    for include_path in sorted(headers.keys()):
+        out = ctx.actions.declare_file(module_dir + "/" + dir_name + "/" + include_path)
+        ctx.actions.symlink(output = out, target_file = headers[include_path])
+        outputs.append(out)
+
+    return outputs
+
+def _bob_import_cc_aspect_impl(target, ctx):
+    defines = []
+    src = None
+    header_outputs = []
+    include_destination = "include"
+
+    target_name = bp_target_name(ctx.label)
+    defines = []
+    if CcInfo in target:
+        compilation_context = target[CcInfo].compilation_context
+        defines = compilation_context.defines.to_list()
+        headers = _get_headers(compilation_context)
+        header_outputs = _symlink_headers(ctx, target_name, include_destination, headers)
+
+    target_name = bp_target_name(ctx.label)
+    includes = [include_destination]
+
+    out = ctx.actions.declare_file(target_name + "/build.bp")
+    ctx.actions.write(out, bp_content(target_name, src, includes, defines))
+
+    outputs = [out] + header_outputs
+
+    return [
+        OutputGroupInfo(bob_import_cc_bp = depset(outputs)),
+    ]
+
+bob_import_cc_aspect = aspect(
+    implementation = _bob_import_cc_aspect_impl,
+    attr_aspects = [],  # TODO we will have to traverse things for more complex cases.
+)
