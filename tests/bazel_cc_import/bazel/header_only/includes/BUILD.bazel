@@ -1,0 +1,6 @@
+cc_library(
+    name = "includes",
+    hdrs = ["subfolder/api.h"],
+    defines = ["VALUE_SUM=22"],
+    includes = ["subfolder"],
+)

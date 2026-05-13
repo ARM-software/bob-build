@@ -1,0 +1,5 @@
+cc_library(
+    name = "normal",
+    hdrs = ["api.h"],
+    defines = ["VALUE_SUM=22"],
+)

@@ -1,0 +1,19 @@
+cc_library(
+    name = "simple",
+    srcs = ["impl.c"],
+    hdrs = ["api.h"],
+    defines = ["VALUE_SUM=22"],
+    local_defines = ["VALUE_A=19"],
+    visibility = ["//visibility:public"],
+)
+
+cc_shared_library(
+    name = "shared",
+    visibility = ["//visibility:public"],
+    deps = [":simple"],
+)
+
+cc_static_library(
+    name = "static",
+    deps = [":simple"],
+)

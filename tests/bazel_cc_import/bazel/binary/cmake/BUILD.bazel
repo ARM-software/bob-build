@@ -1,0 +1,31 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "CMakeLists.txt",
+        "impl.c",
+    ],
+)
+
+cmake(
+    name = "cmake",
+    copts = ["-DVALUE_A=19"],
+    defines = ["VALUE_SUM=22"],
+    lib_source = ":srcs",
+    out_binaries = ["cmake_test"],
+    deps = ["//tests/bazel_cc_import/bazel/library/cmake"],
+)
+
+filegroup(
+    name = "extract_binary",
+    srcs = [":cmake"],
+    output_group = "cmake_test",
+)
+
+native_binary(
+    name = "binary",
+    src = ":extract_binary",
+    visibility = ["//visibility:public"],
+)

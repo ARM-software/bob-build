@@ -1,0 +1,27 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "CMakeLists.txt",
+        "api.h",
+        "impl.c",
+    ],
+)
+
+cmake(
+    name = "cmake",
+    copts = ["-DVALUE_A=19"],
+    defines = ["VALUE_SUM=22"],
+    lib_source = ":srcs",
+    out_shared_libs = ["libcmake_test_shared.so"],
+    out_static_libs = ["libcmake_test_static.a"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "libcmake_test_shared.so",
+    srcs = [":cmake"],
+    output_group = "libcmake_test_shared.so",
+    visibility = ["//visibility:public"],
+)

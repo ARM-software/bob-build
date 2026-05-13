@@ -1,0 +1,17 @@
+cc_library(
+    name = "dependency",
+    srcs = ["impl.c"],
+    hdrs = ["api.h"],
+    defines = ["VALUE_SUM=19+VALUE_B"],
+    deps = ["//tests/bazel_cc_import/bazel/library/dependency/sublib"],
+)
+
+cc_shared_library(
+    name = "shared",
+    deps = [":dependency"],
+)
+
+cc_static_library(
+    name = "static",
+    deps = [":dependency"],
+)

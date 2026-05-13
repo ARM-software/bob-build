@@ -1,0 +1,7 @@
+cc_library(
+    name = "sublib",
+    srcs = ["impl.c"],
+    hdrs = ["api.h"],
+    defines = ["VALUE_B=3"],
+    visibility = ["//visibility:public"],
+)

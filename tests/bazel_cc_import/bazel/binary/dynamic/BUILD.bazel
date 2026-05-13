@@ -1,0 +1,6 @@
+cc_binary(
+    name = "dynamic",
+    srcs = ["impl.c"],
+    dynamic_deps = ["//tests/bazel_cc_import/bazel/library/simple:shared"],
+    deps = ["//tests/bazel_cc_import/bazel/library/simple"],
+)

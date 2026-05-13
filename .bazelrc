@@ -12,4 +12,6 @@ build:ci --verbose_failures
 test:ci --test_output=errors
 test:ci --test_verbose_timeout_warnings
 
+build --experimental_cc_static_library
+
 try-import %workspace%/user.bazelrc

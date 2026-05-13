@@ -1,0 +1,6 @@
+cc_library(
+    name = "strip_prefix",
+    hdrs = ["subfolder/nested/api.h"],
+    defines = ["VALUE_SUM=22"],
+    strip_include_prefix = "subfolder",
+)
