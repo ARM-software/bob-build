@@ -16,11 +16,53 @@ bob_binary {
     header_libs: ["tests_bazel_cc_import_bazel_header_only_strip_prefix_strip_prefix"],
 }
 
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_simple_shared",
+    srcs: ["consumer/library/simple.c"],
+    shared_libs: ["tests_bazel_cc_import_bazel_library_simple_shared"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_simple_static",
+    srcs: ["consumer/library/simple.c"],
+    static_libs: ["tests_bazel_cc_import_bazel_library_simple_static"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_dependency_shared",
+    srcs: ["consumer/library/dependency.c"],
+    shared_libs: ["tests_bazel_cc_import_bazel_library_dependency_shared"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_dependency_static",
+    srcs: ["consumer/library/dependency.c"],
+    static_libs: ["tests_bazel_cc_import_bazel_library_dependency_static"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_cmake_static",
+    srcs: ["consumer/library/cmake.c"],
+    static_libs: ["tests_bazel_cc_import_bazel_library_cmake_static"],
+}
+
+bob_binary {
+    name: "bob_test_bazel_cc_import_library_cmake_shared",
+    srcs: ["consumer/library/cmake.c"],
+    shared_libs: ["tests_bazel_cc_import_bazel_library_cmake_shared"],
+}
+
 bob_alias {
     name: "bob_test_bazel_import",
     srcs: [
         "bob_test_bazel_cc_import_header_only_normal",
         "bob_test_bazel_cc_import_header_only_includes",
         "bob_test_bazel_cc_import_header_only_strip_prefix",
+        "bob_test_bazel_cc_import_library_simple_shared",
+        "bob_test_bazel_cc_import_library_simple_static",
+        "bob_test_bazel_cc_import_library_dependency_shared",
+        "bob_test_bazel_cc_import_library_dependency_static",
+        "bob_test_bazel_cc_import_library_cmake_static",
+        "bob_test_bazel_cc_import_library_cmake_shared",
     ],
 }

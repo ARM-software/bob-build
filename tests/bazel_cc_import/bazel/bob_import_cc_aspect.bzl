@@ -84,6 +84,42 @@ def _symlink_headers(ctx, module_dir, dir_name, headers):
 
     return outputs
 
+def _library_file(target):
+    candidates = []
+
+    def add_candidate(file):
+        if file.path.endswith(".a") or file.path.endswith(".so"):
+            candidates.append(file)
+
+    # cc_shared_library has this
+    for file in target[DefaultInfo].files.to_list():
+        add_candidate(file)
+
+    if not candidates and CcInfo in target:
+        linking_context = target[CcInfo].linking_context
+        for linker_input in linking_context.linker_inputs.to_list():
+            for library in linker_input.libraries:
+                for file in [
+                    library.dynamic_library,
+                    library.static_library,
+                ]:
+                    add_candidate(file)
+
+    if len(candidates) > 1:
+        fail("More than one lib output in '" + str(target) + "' " + str(candidates))
+
+    if len(candidates) == 0:
+        # header only lib
+        return None
+
+    return candidates[0]
+
+def _symlink_library(ctx, module_dir, dir_name, library):
+    include_path = paths.join(dir_name, library.basename)
+    out = ctx.actions.declare_file(module_dir + "/" + include_path)
+    ctx.actions.symlink(output = out, target_file = library)
+    return include_path, out
+
 def _write_bp(ctx, target_name, src, defines, includes):
     out = ctx.actions.declare_file(target_name + "/build.bp")
     ctx.actions.write(out, bp_content(target_name, src, includes, defines))
@@ -119,6 +155,11 @@ def _gen_bob_import_impl(ctx):
 
         includes = [include_destination]
         src = None
+
+        library = _library_file(dep)
+        if library:
+            src, library_out = _symlink_library(ctx, target_name, library_destination, library)
+            outputs.append(library_out)
 
         outputs.append(_write_bp(ctx, target_name, src, defines, includes))
         output.extend(outputs)

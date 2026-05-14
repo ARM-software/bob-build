@@ -79,6 +79,10 @@ TEST_EXECUTABLES=(
     bob_test_bazel_cc_import_header_only_normal
     bob_test_bazel_cc_import_header_only_includes
     bob_test_bazel_cc_import_header_only_strip_prefix
+    bob_test_bazel_cc_import_library_simple_shared
+    bob_test_bazel_cc_import_library_simple_static
+    bob_test_bazel_cc_import_library_dependency_shared
+    bob_test_bazel_cc_import_library_dependency_static
 )
 
 for executable in "${TEST_EXECUTABLES[@]}"; do

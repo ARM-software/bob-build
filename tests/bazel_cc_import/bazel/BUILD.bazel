@@ -6,5 +6,11 @@ gen_bob_import(
         "//tests/bazel_cc_import/bazel/header_only/includes",
         "//tests/bazel_cc_import/bazel/header_only/normal",
         "//tests/bazel_cc_import/bazel/header_only/strip_prefix",
+        "//tests/bazel_cc_import/bazel/library/cmake:shared",
+        "//tests/bazel_cc_import/bazel/library/cmake:static",
+        "//tests/bazel_cc_import/bazel/library/dependency:shared",
+        "//tests/bazel_cc_import/bazel/library/dependency:static",
+        "//tests/bazel_cc_import/bazel/library/simple:shared",
+        "//tests/bazel_cc_import/bazel/library/simple:static",
     ],
 )
