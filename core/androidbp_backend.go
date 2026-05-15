@@ -343,6 +343,16 @@ func getSoongCompatFile(config *BobConfig) string {
 		text:     "\n\tVisitDirectDepsProxyWithTag\\(tag blueprint.DependencyTag, visit func\\(proxy ModuleProxy\\)\\)\n",
 	}
 
+	androidHostToolInfoMatcher := codeMatcher{
+		filename: "build/soong/android/module.go",
+		text:     "\n\tHostToolInfo                   \\*HostToolInfo\n",
+	}
+
+	androidCustomEncProviderMatcher := codeMatcher{
+		filename: "build/blueprint/provider.go",
+		text:     "\nfunc NewProvider\\[K gobtools.CustomEnc\\]\\(\\) ProviderKey\\[K\\] {\n",
+	}
+
 	// List of compatibility layers, ordered from oldest Soong version
 	// support to newest.
 	allSoongCompats := []compatVersion{
@@ -402,12 +412,27 @@ func getSoongCompatFile(config *BobConfig) string {
 				listOfAndroidMkEntriesMatcher,
 				androidMkExtraEntriesContextMatcher,
 				androidMkSoongInstallTargetsMatcher,
+				androidHostToolProviderInfoProviderMatcher,
+				andridModuleOrProxyMatcher,
+				andridVisitModuleProxyMatcher,
+				androidCustomEncProviderMatcher,
+			},
+			[]int{16, 17},
+			"soong_compat_05_Provider_Enc_Dec.go",
+		},
+		{
+			[]codeMatcher{
+				listOfAndroidMkEntriesMatcher,
+				androidMkExtraEntriesContextMatcher,
+				androidMkSoongInstallTargetsMatcher,
 				androidCommonModuleInfoProviderMatcher,
 				andridModuleOrProxyMatcher,
 				andridVisitModuleProxyMatcher,
+				androidHostToolInfoMatcher,
+				androidCustomEncProviderMatcher,
 			},
 			[]int{16, 17},
-			"soong_compat_05_CommonModuleInfoProvider.go",
+			"soong_compat_06_CommonModuleInfoProvider.go",
 		},
 	}
 
@@ -491,10 +516,13 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 	var deps string
 
 	genrulebob := "genrule.go"
-	if soongCompatFile == "soong_compat_04_ModuleProxy.go" {
+	switch soongCompatFile {
+	case "soong_compat_04_ModuleProxy.go":
+		genrulebob = "genrule_module_proxy.go"
+	case "soong_compat_05_Provider_Enc_Dec.go":
 		genrulebob = "genrule_module_proxy.go"
 		deps = "\"blueprint-gobtools\","
-	} else if soongCompatFile == "soong_compat_05_CommonModuleInfoProvider.go" {
+	case "soong_compat_06_CommonModuleInfoProvider.go":
 		genrulebob = "genrule_common_module_info.go"
 		deps = "\"blueprint-gobtools\","
 	}

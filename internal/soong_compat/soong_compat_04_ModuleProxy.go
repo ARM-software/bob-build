@@ -8,6 +8,15 @@ import (
 	"fmt"
 )
 
+type GenruleOutputInfo struct {
+	Outputs         android.Paths
+	ImplicitOutputs android.Paths
+}
+
+type GenruleExportInclInfo struct {
+	ExportIncludes android.Paths
+}
+
 // This definition is compatible with Soong SHAs after `aa2555387 Add ctx to
 // AndroidMkExtraEntriesFunc`
 func ConvertAndroidMkExtraEntriesFunc(f AndroidMkExtraEntriesFunc) []android.AndroidMkExtraEntriesFunc {
