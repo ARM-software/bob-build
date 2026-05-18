@@ -208,10 +208,11 @@ func (m *ModuleGenerateCommon) hostBinName(ctx blueprint.ModuleContext) (name st
 		func(module blueprint.Module) {
 			_, bin_ok := module.(*ModuleBinary)
 			_, genbin_ok := module.(*generateBinary)
-			if bin_ok || genbin_ok {
+			_, importbin_ok := module.(*ModuleImportCCBinary)
+			if bin_ok || genbin_ok || importbin_ok {
 				name = module.Name()
 			} else {
-				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", module.Name())
+				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary`, `bob_generate_binary`, nor `bob_import_cc_binary`", module.Name())
 			}
 		})
 

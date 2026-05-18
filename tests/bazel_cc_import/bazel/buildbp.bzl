@@ -20,3 +20,11 @@ def library_bp_content(name, src, includes, defines):
     content += "    target: \"target\",\n"
     content += "}\n"
     return content
+
+def binary_bp_content(name, src):
+    content = "bob_import_cc_binary {\n"
+    content += "    name: " + _quote(name) + ",\n"
+    content += "    src: " + _quote(src) + ",\n"
+    content += "    target: \"target\",\n"
+    content += "}\n"
+    return content

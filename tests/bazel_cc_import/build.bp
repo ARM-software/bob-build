@@ -52,6 +52,13 @@ bob_binary {
     shared_libs: ["tests_bazel_cc_import_bazel_library_cmake_shared"],
 }
 
+bob_genrule {
+    name: "bob_test_bazel_cc_import_binary_genrule_tool",
+    out: ["bazel_imported_tool_output.txt"],
+    tools: ["tests_bazel_cc_import_bazel_binary_tool_tool"],
+    cmd: "actual=0; ${location} || actual=$$?; test \"$$actual\" = 42; printf '%s\\n' \"$$actual\" > ${out}",
+}
+
 bob_alias {
     name: "bob_test_bazel_import",
     srcs: [
@@ -64,5 +71,6 @@ bob_alias {
         "bob_test_bazel_cc_import_library_dependency_static",
         "bob_test_bazel_cc_import_library_cmake_static",
         "bob_test_bazel_cc_import_library_cmake_shared",
+        "bob_test_bazel_cc_import_binary_genrule_tool",
     ],
 }

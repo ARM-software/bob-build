@@ -1,0 +1,5 @@
+bob_import_cc_binary {
+    name: "imported_tool",
+    src: "bin/imported_tool",
+    target: "target",
+}

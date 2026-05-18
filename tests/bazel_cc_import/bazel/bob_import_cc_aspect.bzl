@@ -1,5 +1,5 @@
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
-load("//tests/bazel_cc_import/bazel:buildbp.bzl", "library_bp_content")
+load("//tests/bazel_cc_import/bazel:buildbp.bzl", "binary_bp_content", "library_bp_content")
 load("//tests/bazel_cc_import/bazel:name.bzl", "bp_target_name")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
@@ -88,7 +88,7 @@ def _library_file(target):
     candidates = []
 
     def add_candidate(file):
-        if file.path.endswith(".a") or file.path.endswith(".so"):
+        if _is_library_file(file):
             candidates.append(file)
 
     # cc_shared_library has this
@@ -114,16 +114,28 @@ def _library_file(target):
 
     return candidates[0]
 
-def _symlink_library(ctx, module_dir, dir_name, library):
-    include_path = paths.join(dir_name, library.basename)
-    out = ctx.actions.declare_file(module_dir + "/" + include_path)
-    ctx.actions.symlink(output = out, target_file = library)
-    return include_path, out
+def _is_library_file(file):
+    return file.path.endswith(".a") or file.path.endswith(".so")
 
-def _write_bp(ctx, target_name, src, defines, includes):
-    out = ctx.actions.declare_file(target_name + "/build.bp")
-    ctx.actions.write(out, library_bp_content(target_name, src, includes, defines))
-    return out
+def _binary_file(target):
+    if DefaultInfo not in target:
+        return None
+
+    candidates = []
+    for file in target[DefaultInfo].files.to_list():
+        if not file.is_directory and not _is_library_file(file):
+            candidates.append(file)
+
+    if len(candidates) == 1:
+        return candidates[0]
+
+    return None
+
+def _symlink_file(ctx, module_dir, dir_name, file):
+    destination = paths.join(dir_name, file.basename)
+    out = ctx.actions.declare_file(module_dir + "/" + destination)
+    ctx.actions.symlink(output = out, target_file = file)
+    return destination, out
 
 def _bob_import_cc_aspect_impl(target, ctx):
     headers, defines = _compilation_info(target, ctx)
@@ -146,22 +158,38 @@ def _gen_bob_import_impl(ctx):
         target_name = bp_target_name(dep.label)
         include_destination = "include"
         library_destination = "lib"
+        binary_destination = "bin"
 
         outputs = []
+        content = None
 
         headers = dep[ImportCcAspectInfo].headers
         defines = dep[ImportCcAspectInfo].defines
-        outputs.extend(_symlink_headers(ctx, target_name, include_destination, headers))
 
         includes = [include_destination]
         src = None
 
         library = _library_file(dep)
         if library:
-            src, library_out = _symlink_library(ctx, target_name, library_destination, library)
+            src, library_out = _symlink_file(ctx, target_name, library_destination, library)
             outputs.append(library_out)
+            outputs.extend(_symlink_headers(ctx, target_name, include_destination, headers))
+            content = library_bp_content(target_name, src, includes, defines)
+        else:
+            binary = _binary_file(dep)
+            if binary:
+                src, out_binary = _symlink_file(ctx, target_name, binary_destination, binary)
+                outputs.append(out_binary)
+                content = binary_bp_content(target_name, src)
+            else:
+                header_outputs = _symlink_headers(ctx, target_name, include_destination, headers)
+                outputs.extend(header_outputs)
+                content = library_bp_content(target_name, None, includes, defines)
 
-        outputs.append(_write_bp(ctx, target_name, src, defines, includes))
+        out_bp = ctx.actions.declare_file(target_name + "/build.bp")
+        ctx.actions.write(out_bp, content)
+
+        output.append(out_bp)
         output.extend(outputs)
 
     return [

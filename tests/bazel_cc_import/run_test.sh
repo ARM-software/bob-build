@@ -75,6 +75,12 @@ ln -sf "bob" "${BOB_BUILD_DIR}/buildme"
 "${BOB_BUILD_DIR}/config"
 "${BOB_BUILD_DIR}/buildme" bob_test_bazel_import
 
+IMPORTED_TOOL_OUTPUT="${BOB_BUILD_DIR}/gen/bob_test_bazel_cc_import_binary_genrule_tool/bazel_imported_tool_output.txt"
+if [[ "$(<"${IMPORTED_TOOL_OUTPUT}")" != "42" ]]; then
+    echo "Expected imported Bazel tool exit code to be 42, got: $(<"${IMPORTED_TOOL_OUTPUT}")" >&2
+    exit 1
+fi
+
 TEST_EXECUTABLES=(
     bob_test_bazel_cc_import_header_only_normal
     bob_test_bazel_cc_import_header_only_includes

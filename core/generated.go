@@ -183,8 +183,11 @@ func hostBinOuts(hostBin *string, ctx blueprint.ModuleContext) (string, []string
 				hostBinTarget = b.getTarget()
 			} else if gb, ok := child.(*generateBinary); ok {
 				outputs = file.GetOutputs(gb)
+			} else if ib, ok := child.(*ModuleImportCCBinary); ok {
+				outputs = file.GetOutputs(ib)
+				hostBinTarget = ib.getTarget()
 			} else {
-				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary` nor `bob_generate_binary`", parent.Name())
+				ctx.PropertyErrorf("host_bin", "%s is not a `bob_binary`, `bob_generate_binary`, nor `bob_import_cc_binary`", child.Name())
 				return false
 			}
 

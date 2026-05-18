@@ -90,6 +90,7 @@ type generatorBackend interface {
 	strictBinaryActions(*ModuleStrictBinary, blueprint.ModuleContext)
 	strictLibraryActions(*ModuleStrictLibrary, blueprint.ModuleContext)
 	importCCLibraryActions(*ModuleImportCCLibrary, blueprint.ModuleContext)
+	importCCBinaryActions(*ModuleImportCCBinary, blueprint.ModuleContext)
 	executableTestActions(*ModuleTest, blueprint.ModuleContext)
 }
 
@@ -659,4 +660,5 @@ func RegisterModuleTypes(register func(string, FactoryWithConfig)) {
 	register("bob_test", executableTestFactory)
 
 	register("bob_import_cc_library", importCCLibraryFactory)
+	register("bob_import_cc_binary", importCCBinaryFactory)
 }
