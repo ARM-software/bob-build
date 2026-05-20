@@ -1,5 +1,5 @@
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
-load("//tests/bazel_cc_import/bazel:buildbp.bzl", "bp_content")
+load("//tests/bazel_cc_import/bazel:buildbp.bzl", "library_bp_content")
 load("//tests/bazel_cc_import/bazel:name.bzl", "bp_target_name")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
@@ -122,7 +122,7 @@ def _symlink_library(ctx, module_dir, dir_name, library):
 
 def _write_bp(ctx, target_name, src, defines, includes):
     out = ctx.actions.declare_file(target_name + "/build.bp")
-    ctx.actions.write(out, bp_content(target_name, src, includes, defines))
+    ctx.actions.write(out, library_bp_content(target_name, src, includes, defines))
     return out
 
 def _bob_import_cc_aspect_impl(target, ctx):

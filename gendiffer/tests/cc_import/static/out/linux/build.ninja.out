@@ -53,7 +53,7 @@ rule g.bootstrap.cp
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  import_lib_a
 # Variant: target
-# Type:    bob_import_cc
+# Type:    bob_import_cc_library
 # Factory: github.com/ARM-software/bob-build/core.Main.func1.1
 # Defined: build.bp:redacted
 

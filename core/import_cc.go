@@ -13,7 +13,7 @@ import (
 
 // TODO: Add Props one by one and test functionality of
 // strip_include_prefix, cflags
-type ImportCCProps struct {
+type ImportCCLibraryProps struct {
 	Src      string
 	Target   toolchain.TgtType
 	Linkopts []string
@@ -21,30 +21,30 @@ type ImportCCProps struct {
 	Includes []string
 }
 
-type ModuleImportCC struct {
+type ModuleImportCCLibrary struct {
 	module.ModuleBase
 	Properties struct {
 		SplittableProps
-		ImportCCProps
+		ImportCCLibraryProps
 	}
 }
 
-var _ splittable = (*ModuleImportCC)(nil)
+var _ splittable = (*ModuleImportCCLibrary)(nil)
 
-type importCCInterface interface {
+type importCCLibraryInterface interface {
 	splittable
 	file.Provider
 	flag.Provider
 }
 
-func (m *ModuleImportCC) isHeaderOnlyLib() bool {
+func (m *ModuleImportCCLibrary) isHeaderOnlyLib() bool {
 	if m.Properties.Src == "" {
 		return true
 	}
 	return false
 }
 
-func (m *ModuleImportCC) getLibFileType() file.Type {
+func (m *ModuleImportCCLibrary) getLibFileType() file.Type {
 	switch filepath.Ext(m.Properties.Src) {
 	case ".so", ".dll", ".dylib":
 		return file.TypeShared
@@ -55,11 +55,11 @@ func (m *ModuleImportCC) getLibFileType() file.Type {
 	}
 }
 
-func (m *ModuleImportCC) shortName() string {
+func (m *ModuleImportCCLibrary) shortName() string {
 	return m.Name()
 }
 
-func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
+func (m *ModuleImportCCLibrary) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 	m.Properties.Includes = utils.PrefixDirs(m.Properties.Includes, prefix)
 	if !m.isHeaderOnlyLib() {
@@ -67,7 +67,7 @@ func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 	}
 }
 
-func (m *ModuleImportCC) OutFiles() (files file.Paths) {
+func (m *ModuleImportCCLibrary) OutFiles() (files file.Paths) {
 	if !m.isHeaderOnlyLib() {
 		files = append(files, file.NewPath(m.Properties.Src, file.FileNoNameSpace, file.TypeSrc|m.getLibFileType()))
 	}
@@ -75,7 +75,7 @@ func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 	return
 }
 
-func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
+func (m *ModuleImportCCLibrary) FlagsOut() (flags flag.Flags) {
 	lut := flag.FlagParserTable{
 		{
 			PropertyName: "Defines",
@@ -102,50 +102,50 @@ func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 	return
 }
 
-func (m *ModuleImportCC) exportSharedLibs() []string { return []string{} }
+func (m *ModuleImportCCLibrary) exportSharedLibs() []string { return []string{} }
 
-func importCCFactory(config *BobConfig) (blueprint.Module, []interface{}) {
-	module := &ModuleImportCC{}
+func importCCLibraryFactory(config *BobConfig) (blueprint.Module, []interface{}) {
+	module := &ModuleImportCCLibrary{}
 
 	return module, []interface{}{&module.Properties, &module.SimpleName.Properties}
 }
 
-func (g *linuxGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.ModuleContext) {
+func (g *linuxGenerator) importCCLibraryActions(m *ModuleImportCCLibrary, ctx blueprint.ModuleContext) {
 	addPhony(m, ctx, nil, false)
 }
 
-func (g *androidNinjaGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.ModuleContext) {
+func (g *androidNinjaGenerator) importCCLibraryActions(m *ModuleImportCCLibrary, ctx blueprint.ModuleContext) {
 
 }
 
 // TODO: Does android need to generate anything? A "promise" that'll exist?
-func (g *androidBpGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.ModuleContext) {
+func (g *androidBpGenerator) importCCLibraryActions(m *ModuleImportCCLibrary, ctx blueprint.ModuleContext) {
 
 }
 
-func (m *ModuleImportCC) GenerateBuildActions(ctx blueprint.ModuleContext) {
-	getGenerator(ctx).importCCActions(m, ctx)
+func (m *ModuleImportCCLibrary) GenerateBuildActions(ctx blueprint.ModuleContext) {
+	getGenerator(ctx).importCCLibraryActions(m, ctx)
 }
 
 // Support Splittable properties
-func (m *ModuleImportCC) supportedVariants() []toolchain.TgtType {
+func (m *ModuleImportCCLibrary) supportedVariants() []toolchain.TgtType {
 	return []toolchain.TgtType{m.Properties.Target}
 }
 
-func (m *ModuleImportCC) setVariant(variant toolchain.TgtType) {
+func (m *ModuleImportCCLibrary) setVariant(variant toolchain.TgtType) {
 	// No need to actually track this, as a single target is always supported
 }
 
-func (m *ModuleImportCC) disable() {
+func (m *ModuleImportCCLibrary) disable() {
 	// This should never actually be called, as we will always support one target
-	panic("disable() called on ModuleImportCC")
+	panic("disable() called on ModuleImportCCLibrary")
 }
 
-func (m *ModuleImportCC) getSplittableProps() *SplittableProps {
+func (m *ModuleImportCCLibrary) getSplittableProps() *SplittableProps {
 	return &m.Properties.SplittableProps
 }
 
-func (m *ModuleImportCC) getTarget() toolchain.TgtType {
+func (m *ModuleImportCCLibrary) getTarget() toolchain.TgtType {
 	return m.Properties.Target
 }
 

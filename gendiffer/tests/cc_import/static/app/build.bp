@@ -1,4 +1,4 @@
-bob_import_cc {
+bob_import_cc_library {
     name: "import_lib_a",
     target: "target",
     src: "liba.a",

@@ -325,7 +325,7 @@ func (g *linuxGenerator) getSharedLibLinkPaths(ctx blueprint.ModuleContext) (lib
 				// add a dependency on them anyway.
 			} else if t, ok := m.(targetableModule); ok {
 				libs = append(libs, g.getSharedLibLinkPath(t))
-			} else if _, ok := m.(*ModuleImportCC); ok {
+			} else if _, ok := m.(*ModuleImportCCLibrary); ok {
 				// TODO: Does anything need to be propogated here?
 			} else {
 				utils.Die("%s doesn't support targets", ctx.OtherModuleName(m))
@@ -349,7 +349,7 @@ func (g *linuxGenerator) getSharedLibTocPaths(ctx blueprint.ModuleContext) (libs
 						libs = append(libs, toc.BuildPath())
 					}
 				}
-			} else if _, ok := m.(*ModuleImportCC); ok {
+			} else if _, ok := m.(*ModuleImportCCLibrary); ok {
 				// TODO: Do we need to append a lib here?
 			} else {
 				utils.Die("%s doesn't produce a shared library", ctx.OtherModuleName(m))
@@ -405,7 +405,7 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 				}
 			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.Name()+".so"))
-			} else if sl, ok := m.(*ModuleImportCC); ok {
+			} else if sl, ok := m.(*ModuleImportCCLibrary); ok {
 				ldflags = append(ldflags, sl.FlagsOut().Filtered(func(f flag.Flag) bool {
 					return f.MatchesType(flag.TypeLinkLibrary | flag.TypeLinker | flag.TypeTransitiveLinker)
 				}).ToStringSlice()...)

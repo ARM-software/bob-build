@@ -10,8 +10,8 @@ def _string_list(name, values):
     out += "    ],\n"
     return out
 
-def bp_content(name, src, includes, defines):
-    content = "bob_import_cc {\n"
+def library_bp_content(name, src, includes, defines):
+    content = "bob_import_cc_library {\n"
     content += "    name: " + _quote(name) + ",\n"
     if src:
         content += "    src: " + _quote(src) + ",\n"

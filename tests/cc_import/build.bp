@@ -1,4 +1,4 @@
-bob_import_cc {
+bob_import_cc_library {
     name: "import_lib_a",
     includes: [
         "libA/includes",
@@ -6,7 +6,7 @@ bob_import_cc {
     target: "target",
 }
 
-bob_import_cc {
+bob_import_cc_library {
     name: "import_lib_b",
     includes: [
         "libB/includes",
