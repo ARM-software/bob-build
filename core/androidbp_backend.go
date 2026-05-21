@@ -517,6 +517,8 @@ func (s *androidBpSingleton) GenerateBuildActions(ctx blueprint.SingletonContext
 
 	genrulebob := "genrule.go"
 	switch soongCompatFile {
+	case "soong_compat_00_pqr.go", "soong_compat_01_AndroidMkExtraEntries_ctx.go", "soong_compat_02_AndroidMkSoongInstallTargets.go", "soong_compat_03_HostBinProvider.go":
+		deps = "\"blueprint\","
 	case "soong_compat_04_ModuleProxy.go":
 		genrulebob = "genrule_module_proxy.go"
 	case "soong_compat_05_Provider_Enc_Dec.go":
