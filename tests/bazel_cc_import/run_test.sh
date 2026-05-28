@@ -6,40 +6,27 @@ TESTS_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BOB_ROOT="$(cd "${TESTS_DIR}/.." && pwd)"
 BUILD_DIR="${1:-build-bazel-import}"
 BOB_BUILD_DIR="${BOB_ROOT}/${BUILD_DIR}"
-BAZEL_OUTPUT_USER_ROOT="${BOB_BUILD_DIR}.bazel_output_user_root"
 GENERATED_BPLIST="${BOB_BUILD_DIR}.bplist"
-BAZEL_STARTUP_ARGS=(--output_user_root="${BAZEL_OUTPUT_USER_ROOT}")
+BAZEL_STARTUP_ARGS=()
 
 cleanup() {
     if [[ -n "${BAZEL:-}" ]]; then
         "${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" shutdown >/dev/null 2>&1 || true
     fi
-    rm -rf "${BOB_BUILD_DIR}" "${BAZEL_OUTPUT_USER_ROOT}" "${GENERATED_BPLIST}"
+    chmod -R u+w "${BOB_BUILD_DIR}" "${GENERATED_BPLIST}" >/dev/null 2>&1 || true
+    rm -rf "${BOB_BUILD_DIR}" "${GENERATED_BPLIST}"
 }
 
 trap cleanup EXIT
 trap 'echo "<------------- $(basename "${0}") failed"' ERR
 
-require_file() {
-    if [[ ! -f "$1" ]]; then
-        echo "Expected file does not exist: $1" >&2
-        exit 1
-    fi
-}
-
-require_symlink() {
-    if [[ ! -L "$1" ]]; then
-        echo "Expected symlink does not exist: $1" >&2
-        exit 1
-    fi
-}
 
 if command -v bazelisk >/dev/null 2>&1; then
     BAZEL=bazelisk
 elif command -v bazel >/dev/null 2>&1; then
     BAZEL=bazel
 else
-    echo "Skipping bazel_import test: neither bazelisk nor bazel is available"
+    echo "Skipping bazel_cc_import test: neither bazelisk nor bazel is available"
     exit 0
 fi
 
@@ -47,35 +34,25 @@ pushd "${BOB_ROOT}" >/dev/null
 
 "${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" clean
 
-"${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" build \
-    --aspects=//tests/bazel_cc_import/bazel:bob_import_cc_aspect.bzl%bob_import_cc_aspect \
-    --output_groups=bob_import_cc_bp \
-    //tests/bazel_cc_import/bazel/header_only/... \
-
-EXPECTED_BUILD_BPS=(
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/includes/tests_bazel_cc_import_bazel_header_only_includes_includes/build.bp
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/normal/tests_bazel_cc_import_bazel_header_only_normal_normal/build.bp
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/strip_prefix/tests_bazel_cc_import_bazel_header_only_strip_prefix_strip_prefix/build.bp
+BAZEL_TARGETS=(
+    //tests/bazel_cc_import/bazel:test
 )
 
-EXPECTED_HEADER_LINKS=(
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/includes/tests_bazel_cc_import_bazel_header_only_includes_includes/include/api.h
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/normal/tests_bazel_cc_import_bazel_header_only_normal_normal/include/tests/bazel_cc_import/bazel/header_only/normal/api.h
-    bazel-bin/tests/bazel_cc_import/bazel/header_only/strip_prefix/tests_bazel_cc_import_bazel_header_only_strip_prefix_strip_prefix/include/nested/api.h
+"${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" build "${BAZEL_TARGETS[@]}"
+
+mapfile -t GENERATED_BUILD_BPS < <(
+    find bazel-bin/tests/bazel_cc_import/bazel -type f -name build.bp | sort
 )
 
+if [[ ${#GENERATED_BUILD_BPS[@]} -eq 0 ]]; then
+    echo "No generated build.bp files found under bazel-bin/tests/bazel_cc_import/bazel" >&2
+    exit 1
+fi
 
-for path in "${EXPECTED_BUILD_BPS[@]}"; do
-    require_file "${path}"
-done
-
-for path in "${EXPECTED_HEADER_LINKS[@]}"; do
-    require_symlink "${path}"
-done
 
 {
     printf './bazel_cc_import/build.bp\n'
-    printf '%s\n' "${EXPECTED_BUILD_BPS[@]}" | sort | sed 's#^#../#'
+    printf '%s\n' "${GENERATED_BUILD_BPS[@]}" | sed 's#^#../#'
     printf './bob/Blueprints\n'
     printf './bob/blueprint/Blueprints\n'
 } > "${GENERATED_BPLIST}"

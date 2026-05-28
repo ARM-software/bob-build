@@ -4,6 +4,8 @@ load("//tests/bazel_cc_import/bazel:name.bzl", "bp_target_name")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
+ImportCcAspectInfo = provider(fields = ["defines", "headers"])
+
 def _include_dir_relative_path(header, include_dirs):
     best = None
     for include_dir in include_dirs:
@@ -22,6 +24,13 @@ def _get_headers(compilation_info):
 
     headers = {}
     for header in compilation_info.headers.to_list():
+        if headers.get(""):
+            fail("More than one header dir")
+
+        if header.is_directory:
+            headers[""] = header
+            continue
+
         include_path = _include_dir_relative_path(header, include_dirs)
         if include_path:
             headers[paths.normalize(include_path)] = header
@@ -30,43 +39,99 @@ def _get_headers(compilation_info):
 
     return headers
 
+def _merge_import_info(info_sets):
+    headers = {}
+    defines = []
+
+    for info in info_sets:
+        headers.update(info.headers)
+        defines.extend(info.defines)
+
+    return headers, collections.uniq(defines)
+
+def _compilation_info(target, ctx):
+    info_sets = []
+
+    if CcInfo in target:
+        compilation_context = target[CcInfo].compilation_context
+        info_sets.append(
+            ImportCcAspectInfo(
+                headers = _get_headers(compilation_context),
+                defines = compilation_context.defines.to_list(),
+            ),
+        )
+
+    for attr_name in ["deps", "srcs"]:
+        for dep in getattr(ctx.rule.attr, attr_name, []):
+            if ImportCcAspectInfo in dep:
+                info_sets.append(dep[ImportCcAspectInfo])
+
+    if not info_sets:
+        return {}, []
+
+    return _merge_import_info(info_sets)
+
 def _symlink_headers(ctx, module_dir, dir_name, headers):
     outputs = []
 
     for include_path in sorted(headers.keys()):
-        out = ctx.actions.declare_file(module_dir + "/" + dir_name + "/" + include_path)
+        if include_path == "":
+            out = ctx.actions.declare_directory(module_dir + "/" + dir_name)
+        else:
+            out = ctx.actions.declare_file(module_dir + "/" + dir_name + "/" + include_path)
         ctx.actions.symlink(output = out, target_file = headers[include_path])
         outputs.append(out)
 
     return outputs
 
-def _bob_import_cc_aspect_impl(target, ctx):
-    defines = []
-    src = None
-    header_outputs = []
-    include_destination = "include"
-
-    target_name = bp_target_name(ctx.label)
-    defines = []
-    if CcInfo in target:
-        compilation_context = target[CcInfo].compilation_context
-        defines = compilation_context.defines.to_list()
-        headers = _get_headers(compilation_context)
-        header_outputs = _symlink_headers(ctx, target_name, include_destination, headers)
-
-    target_name = bp_target_name(ctx.label)
-    includes = [include_destination]
-
+def _write_bp(ctx, target_name, src, defines, includes):
     out = ctx.actions.declare_file(target_name + "/build.bp")
     ctx.actions.write(out, bp_content(target_name, src, includes, defines))
+    return out
 
-    outputs = [out] + header_outputs
+def _bob_import_cc_aspect_impl(target, ctx):
+    headers, defines = _compilation_info(target, ctx)
 
     return [
-        OutputGroupInfo(bob_import_cc_bp = depset(outputs)),
+        ImportCcAspectInfo(
+            headers = headers,
+            defines = defines,
+        ),
     ]
 
 bob_import_cc_aspect = aspect(
     implementation = _bob_import_cc_aspect_impl,
-    attr_aspects = [],  # TODO we will have to traverse things for more complex cases.
+    attr_aspects = ["deps", "srcs"],
+)
+
+def _gen_bob_import_impl(ctx):
+    output = []
+    for dep in ctx.attr.deps:
+        target_name = bp_target_name(dep.label)
+        include_destination = "include"
+        library_destination = "lib"
+
+        outputs = []
+
+        headers = dep[ImportCcAspectInfo].headers
+        defines = dep[ImportCcAspectInfo].defines
+        outputs.extend(_symlink_headers(ctx, target_name, include_destination, headers))
+
+        includes = [include_destination]
+        src = None
+
+        outputs.append(_write_bp(ctx, target_name, src, defines, includes))
+        output.extend(outputs)
+
+    return [
+        DefaultInfo(
+            files = depset(output),
+        ),
+    ]
+
+gen_bob_import = rule(
+    implementation = _gen_bob_import_impl,
+    attrs = {
+        "deps": attr.label_list(aspects = [bob_import_cc_aspect]),
+    },
 )

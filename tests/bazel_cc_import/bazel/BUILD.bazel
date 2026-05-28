@@ -1,0 +1,10 @@
+load("//tests/bazel_cc_import/bazel:bob_import_cc_aspect.bzl", "gen_bob_import")
+
+gen_bob_import(
+    name = "test",
+    deps = [
+        "//tests/bazel_cc_import/bazel/header_only/includes",
+        "//tests/bazel_cc_import/bazel/header_only/normal",
+        "//tests/bazel_cc_import/bazel/header_only/strip_prefix",
+    ],
+)
