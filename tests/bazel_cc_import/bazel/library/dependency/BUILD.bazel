@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
+
 cc_library(
     name = "dependency",
     srcs = ["impl.c"],
@@ -8,10 +11,12 @@ cc_library(
 
 cc_shared_library(
     name = "shared",
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
     deps = [":dependency"],
 )
 
 cc_static_library(
     name = "static",
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
     deps = [":dependency"],
 )

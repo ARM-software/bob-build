@@ -15,7 +15,7 @@ cmake(
     defines = ["VALUE_SUM=22"],
     lib_source = ":srcs",
     out_binaries = ["cmake_test"],
-    deps = ["//tests/bazel_cc_import/bazel/library/cmake"],
+    deps = ["//tests/bazel_cc_import/bazel/library/cmake:shared"],
 )
 
 filegroup(

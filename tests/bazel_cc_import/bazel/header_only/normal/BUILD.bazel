@@ -1,5 +1,8 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "normal",
     hdrs = ["api.h"],
     defines = ["VALUE_SUM=22"],
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
 )

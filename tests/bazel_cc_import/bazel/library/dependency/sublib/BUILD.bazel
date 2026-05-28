@@ -1,7 +1,9 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "sublib",
     srcs = ["impl.c"],
     hdrs = ["api.h"],
     defines = ["VALUE_B=3"],
-    visibility = ["//visibility:public"],
+    visibility = ["//tests/bazel_cc_import/bazel/library/dependency:__pkg__"],
 )

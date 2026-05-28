@@ -1,19 +1,26 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
+
 cc_library(
     name = "simple",
     srcs = ["impl.c"],
     hdrs = ["api.h"],
     defines = ["VALUE_SUM=22"],
     local_defines = ["VALUE_A=19"],
-    visibility = ["//visibility:public"],
+    visibility = ["//tests/bazel_cc_import/bazel/binary:__subpackages__"],
 )
 
 cc_shared_library(
     name = "shared",
-    visibility = ["//visibility:public"],
+    visibility = [
+        "//tests/bazel_cc_import/bazel:__pkg__",
+        "//tests/bazel_cc_import/bazel/binary:__subpackages__",
+    ],
     deps = [":simple"],
 )
 
 cc_static_library(
     name = "static",
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
     deps = [":simple"],
 )

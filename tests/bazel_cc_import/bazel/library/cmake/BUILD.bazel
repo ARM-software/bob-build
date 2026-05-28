@@ -10,18 +10,22 @@ filegroup(
 )
 
 cmake(
-    name = "cmake",
+    name = "shared",
     copts = ["-DVALUE_A=19"],
     defines = ["VALUE_SUM=22"],
     lib_source = ":srcs",
     out_shared_libs = ["libcmake_test_shared.so"],
-    out_static_libs = ["libcmake_test_static.a"],
-    visibility = ["//visibility:public"],
+    visibility = [
+        "//tests/bazel_cc_import/bazel:__pkg__",
+        "//tests/bazel_cc_import/bazel/binary:__subpackages__",
+    ],
 )
 
-filegroup(
-    name = "libcmake_test_shared.so",
-    srcs = [":cmake"],
-    output_group = "libcmake_test_shared.so",
-    visibility = ["//visibility:public"],
+cmake(
+    name = "static",
+    copts = ["-DVALUE_A=19"],
+    defines = ["VALUE_SUM=22"],
+    lib_source = ":srcs",
+    out_static_libs = ["libcmake_test_static.a"],
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
 )

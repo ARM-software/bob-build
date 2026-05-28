@@ -1,6 +1,9 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 cc_library(
     name = "includes",
     hdrs = ["subfolder/api.h"],
     defines = ["VALUE_SUM=22"],
     includes = ["subfolder"],
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
 )
