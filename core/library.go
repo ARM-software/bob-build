@@ -769,6 +769,8 @@ func exportLibFlagsMutator(ctx blueprint.TopDownMutatorContext) {
 			// libraries.
 		} else if depLib, ok := dep.(*ModuleExternalLibrary); ok {
 			propagateOtherExportedProperties(l, depLib)
+		} else if depLib, ok := dep.(*ModuleImportCC); ok {
+			propagateOtherExportedProperties(l, depLib)
 		} else if _, ok := dep.(*ModuleStrictLibrary); ok {
 			// TODO: Propogate flags here?
 		} else {

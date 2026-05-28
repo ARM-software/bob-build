@@ -406,7 +406,9 @@ func (g *linuxGenerator) getSharedLibFlags(m BackendCommonLibraryInterface, ctx 
 			} else if sl, ok := m.(*ModuleStrictLibrary); ok {
 				ldlibs = append(ldlibs, pathToLibFlag(sl.Name()+".so"))
 			} else if sl, ok := m.(*ModuleImportCC); ok {
-				ldflags = append(ldflags, sl.FlagsOut().ToStringSlice()...)
+				ldflags = append(ldflags, sl.FlagsOut().Filtered(func(f flag.Flag) bool {
+					return f.MatchesType(flag.TypeLinkLibrary | flag.TypeLinker | flag.TypeTransitiveLinker)
+				}).ToStringSlice()...)
 			} else {
 				utils.Die("%s is not a shared library", ctx.OtherModuleName(m))
 			}

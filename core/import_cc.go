@@ -2,7 +2,6 @@ package core
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
@@ -46,13 +45,14 @@ func (m *ModuleImportCC) isHeaderOnlyLib() bool {
 }
 
 func (m *ModuleImportCC) getLibFileType() file.Type {
-	if strings.HasSuffix(m.Name(), ".so") {
+	switch filepath.Ext(m.Properties.Src) {
+	case ".so", ".dll", ".dylib":
 		return file.TypeShared
-	}
-	if strings.HasSuffix(m.Name(), ".a") {
+	case ".a":
 		return file.TypeArchive
+	default:
+		return file.TypeUnset
 	}
-	return file.TypeUnset
 }
 
 func (m *ModuleImportCC) shortName() string {
@@ -69,10 +69,7 @@ func (m *ModuleImportCC) processPaths(ctx blueprint.BaseModuleContext) {
 
 func (m *ModuleImportCC) OutFiles() (files file.Paths) {
 	if !m.isHeaderOnlyLib() {
-		lib := m.Properties.Src
-		src := file.NewPath(lib, m.Name(), m.getLibFileType())
-		fp := file.NewLink(lib, m.Name(), &src, m.getLibFileType()|file.TypeGenerated)
-		files = append(files, fp)
+		files = append(files, file.NewPath(m.Properties.Src, file.FileNoNameSpace, file.TypeSrc|m.getLibFileType()))
 	}
 
 	return
@@ -98,10 +95,14 @@ func (m *ModuleImportCC) FlagsOut() (flags flag.Flags) {
 		flags = append(flags, flag.FromIncludePath(fp.BuildPath(), flag.TypeInclude|flag.TypeExported))
 	}
 	if !m.isHeaderOnlyLib() {
-		flags = append(flags, flag.FromString(pathToLibFlag(m.Properties.Src), flag.TypeLinker))
+		if fp, ok := m.OutFiles().FindSingle(func(p file.Path) bool { return p.IsType(m.getLibFileType()) }); ok {
+			flags = append(flags, flag.FromString(fp.BuildPath(), flag.TypeLinkLibrary|flag.TypeExported))
+		}
 	}
 	return
 }
+
+func (m *ModuleImportCC) exportSharedLibs() []string { return []string{} }
 
 func importCCFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 	module := &ModuleImportCC{}
@@ -110,27 +111,7 @@ func importCCFactory(config *BobConfig) (blueprint.Module, []interface{}) {
 }
 
 func (g *linuxGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.ModuleContext) {
-	installDeps := []string{}
-	m.OutFiles().ForEachIf(
-		func(fp file.Path) bool { return fp.IsSymLink() },
-		func(fp file.Path) bool {
-			if relative, err := filepath.Rel(fp.RelBuildPath(), fp.ExpandLink().RelBuildPath()); err == nil {
-				ctx.Build(pctx,
-					blueprint.BuildParams{
-						Rule:     symlinkRule,
-						Inputs:   []string{fp.ExpandLink().BuildPath()},
-						Outputs:  []string{fp.BuildPath()},
-						Args:     map[string]string{"target": relative},
-						Optional: true,
-					})
-				installDeps = append(installDeps, fp.BuildPath())
-				return true
-			}
-
-			return false
-		})
-
-	addPhony(m, ctx, installDeps, false) // Always add the symlinks
+	addPhony(m, ctx, nil, false)
 }
 
 func (g *androidNinjaGenerator) importCCActions(m *ModuleImportCC, ctx blueprint.ModuleContext) {

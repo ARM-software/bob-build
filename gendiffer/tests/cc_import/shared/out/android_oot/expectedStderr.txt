@@ -1,0 +1,1 @@
+import_lib_a doesn't support targets
