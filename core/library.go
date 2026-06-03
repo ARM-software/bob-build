@@ -714,7 +714,7 @@ func propagateOtherExportedProperties(m *ModuleLibrary, depLib SharedLibraryExpo
 		})
 
 	props.Ldflags = append(props.Ldflags, depLib.FlagsOut().Filtered(func(f flag.Flag) bool {
-		return f.MatchesType(flag.TypeLinker)
+		return f.MatchesType(flag.TypeLinker | flag.TypeTransitiveLinker)
 	}).ToStringSlice()...)
 
 	// Header libraries are *not* propagated here, because they are currently

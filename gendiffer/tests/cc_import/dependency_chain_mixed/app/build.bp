@@ -1,0 +1,52 @@
+bob_import_cc_library {
+    name: "import_static",
+    target: "target",
+    src: "libimport_static.a",
+    includes: [
+        "import_static/include",
+    ],
+    defines: [
+        "IMPORT_STATIC_DEFINE",
+    ],
+    linkopts: [
+        "-Wl,--import-static-linkopt",
+    ],
+}
+
+bob_import_cc_library {
+    name: "import_shared",
+    target: "target",
+    src: "libimport_shared.so",
+    includes: [
+        "import_shared/include",
+    ],
+    defines: [
+        "IMPORT_SHARED_DEFINE",
+    ],
+    linkopts: [
+        "-Wl,--import-shared-linkopt",
+    ],
+}
+
+bob_static_library {
+    name: "mixed_wrapper",
+    srcs: [
+        "mixed_wrapper.cpp",
+    ],
+    static_libs: [
+        "import_static",
+    ],
+    shared_libs: [
+        "import_shared",
+    ],
+}
+
+bob_binary {
+    name: "mixed_consumer",
+    srcs: [
+        "mixed_consumer.cpp",
+    ],
+    static_libs: [
+        "mixed_wrapper",
+    ],
+}

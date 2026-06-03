@@ -1,0 +1,34 @@
+bob_import_cc_library {
+    name: "import_shared",
+    target: "target",
+    src: "libimport_shared.so",
+    includes: [
+        "import_shared/include",
+    ],
+    defines: [
+        "IMPORT_SHARED_DEFINE",
+    ],
+    linkopts: [
+        "-Wl,--import-shared-linkopt",
+    ],
+}
+
+bob_shared_library {
+    name: "shared_wrapper",
+    srcs: [
+        "shared_wrapper.cpp",
+    ],
+    shared_libs: [
+        "import_shared",
+    ],
+}
+
+bob_binary {
+    name: "shared_consumer",
+    srcs: [
+        "shared_consumer.cpp",
+    ],
+    shared_libs: [
+        "shared_wrapper",
+    ],
+}

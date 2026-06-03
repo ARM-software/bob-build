@@ -1,0 +1,29 @@
+
+
+genrule {
+    name: "_check_buildbp_updates_redacted",
+    srcs: ["build.bp"],
+    out: ["androidbp_up_to_date"],
+    tool_files: ["scripts/verify_hash.py"],
+    cmd: "python $(location scripts/verify_hash.py) --hash redacted --out $(out) -- $(in)",
+}
+
+cc_binary {
+    name: "static_consumer",
+    srcs: ["static_consumer.cpp"],
+    cflags: ["-DIMPORT_STATIC_DEFINE"],
+    static_libs: [
+        "static_wrapper",
+        "import_static",
+    ],
+    ldflags: ["-Wl,--import-static-linkopt"],
+}
+
+cc_library_static {
+    name: "static_wrapper",
+    srcs: ["static_wrapper.cpp"],
+    cflags: ["-DIMPORT_STATIC_DEFINE"],
+    static_libs: ["import_static"],
+    compile_multilib: "both",
+}
+

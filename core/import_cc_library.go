@@ -92,7 +92,7 @@ func (m *ModuleImportCCLibrary) FlagsOut() (flags flag.Flags) {
 
 	for _, dir := range m.Properties.Includes {
 		fp := file.NewPath(dir, m.Name(), file.TypeHeader)
-		flags = append(flags, flag.FromIncludePath(fp.BuildPath(), flag.TypeInclude|flag.TypeExported))
+		flags = append(flags, flag.FromIncludePath(fp.BuildPath(), flag.TypeInclude|flag.TypeExported|flag.TypeTransitive))
 	}
 	if !m.isHeaderOnlyLib() {
 		if fp, ok := m.OutFiles().FindSingle(func(p file.Path) bool { return p.IsType(m.getLibFileType()) }); ok {

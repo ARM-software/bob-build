@@ -1,0 +1,34 @@
+bob_import_cc_library {
+    name: "import_static",
+    target: "target",
+    src: "libimport_static.a",
+    includes: [
+        "import_static/include",
+    ],
+    defines: [
+        "IMPORT_STATIC_DEFINE",
+    ],
+    linkopts: [
+        "-Wl,--import-static-linkopt",
+    ],
+}
+
+bob_static_library {
+    name: "static_wrapper",
+    srcs: [
+        "static_wrapper.cpp",
+    ],
+    static_libs: [
+        "import_static",
+    ],
+}
+
+bob_binary {
+    name: "static_consumer",
+    srcs: [
+        "static_consumer.cpp",
+    ],
+    static_libs: [
+        "static_wrapper",
+    ],
+}
