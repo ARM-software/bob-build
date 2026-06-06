@@ -66,14 +66,17 @@ func (handler *graphMutatorHandler) ResolveDependencySortMutator(ctx blueprint.B
 
 	temporaryPaths := map[string][]string{} // For preserving order in declaration
 
-	for i, previous := range mainBuild.Static_libs {
-		for j := i + 1; j < len(mainBuild.Static_libs); j++ {
-			lib := mainBuild.Static_libs[j]
-			if !g.IsReachable(lib, previous) {
-				if g.AddEdge(previous, lib) {
-					temporaryPaths[previous] = append(temporaryPaths[previous], lib)
-					g.SetEdgeColor(previous, lib, "pink")
-				}
+	for j := 1; j < len(mainBuild.Static_libs); j++ {
+		lib := mainBuild.Static_libs[j]
+		reachableFromLib := graph.GetSubgraphNodeSet(g, lib)
+		for i := 0; i < j; i++ {
+			previous := mainBuild.Static_libs[i]
+			if reachableFromLib[previous] {
+				continue
+			}
+			if g.AddEdge(previous, lib) {
+				temporaryPaths[previous] = append(temporaryPaths[previous], lib)
+				g.SetEdgeColor(previous, lib, "pink")
 			}
 		}
 	}

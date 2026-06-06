@@ -53,18 +53,23 @@ func applyTemplateString(elem reflect.Value, stringvalues map[string]string, fun
 		utils.Die("elem is not a string")
 	}
 
+	input := elem.String()
+	if !strings.Contains(input, "{{") {
+		return
+	}
+
 	t := template.New("TemplateProps")
 	t.Option("missingkey=error")
 	t.Funcs(funcmap)
 
-	tmpl, err := t.Parse(elem.String())
+	tmpl, err := t.Parse(input)
 	if err != nil {
-		utils.Die("Error parsing string '%s': %s", elem.String(), err.Error())
+		utils.Die("Error parsing string '%s': %s", input, err.Error())
 	}
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, stringvalues)
 	if err != nil {
-		utils.Die("Error executing string '%s': %s", elem.String(), err.Error())
+		utils.Die("Error executing string '%s': %s", input, err.Error())
 	}
 	elem.SetString(buf.String())
 }
@@ -86,10 +91,15 @@ func shlexExpand(field reflect.Value, stringvalues map[string]string) {
 	newSlice := make([]string, 0, field.Len())
 	for j := 0; j < field.Len(); j++ {
 		elem := field.Index(j)
+		input := elem.String()
+		if !strings.Contains(input, "{{") {
+			newSlice = append(newSlice, input)
+			continue
+		}
 
-		captures := shlexRegexpr.FindStringSubmatch(elem.String())
+		captures := shlexRegexpr.FindStringSubmatch(input)
 		if len(captures) == 0 {
-			newSlice = append(newSlice, elem.String())
+			newSlice = append(newSlice, input)
 			continue
 		}
 

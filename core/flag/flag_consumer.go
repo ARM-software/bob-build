@@ -22,6 +22,15 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 	// * Transitive exports. These make `reexport_libs` obsolete.
 
 	visited := map[string]bool{}
+	addedFlags := map[string]bool{}
+	appendIfUnique := func(f Flag) {
+		flagString := f.ToString()
+		if addedFlags[flagString] {
+			return
+		}
+		addedFlags[flagString] = true
+		ret = append(ret, f)
+	}
 
 	ctx.VisitDirectDeps(func(child blueprint.Module) {
 		if visited[child.Name()] {
@@ -36,9 +45,7 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 				},
 			)
 
-			flags.ForEach(func(f Flag) {
-				ret = ret.AppendIfUnique(f)
-			})
+			flags.ForEach(appendIfUnique)
 		}
 	})
 
@@ -55,9 +62,7 @@ func ReferenceFlagsInTransitive(ctx blueprint.BaseModuleContext) (ret Flags) {
 				},
 			)
 
-			flags.ForEach(func(f Flag) {
-				ret = ret.AppendIfUnique(f)
-			})
+			flags.ForEach(appendIfUnique)
 		}
 
 		return true

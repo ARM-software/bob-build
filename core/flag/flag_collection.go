@@ -5,8 +5,9 @@ package flag
 type Flags []Flag
 
 func (fs Flags) Contains(query Flag) bool {
+	queryString := query.ToString()
 	for _, f := range fs {
-		if f.ToString() == query.ToString() {
+		if f.ToString() == queryString {
 			return true
 		}
 	}
@@ -83,14 +84,16 @@ func (fs Flags) IteratePredicate(predicate func(Flag) bool) <-chan Flag {
 }
 
 func (fs Flags) ForEach(functor func(Flag)) {
-	for f := range fs.Iterate() {
+	for _, f := range fs {
 		functor(f)
 	}
 }
 
 func (fs Flags) ForEachIf(predicate func(Flag) bool, functor func(Flag)) {
-	for f := range fs.IteratePredicate(predicate) {
-		functor(f)
+	for _, f := range fs {
+		if predicate(f) {
+			functor(f)
+		}
 	}
 }
 

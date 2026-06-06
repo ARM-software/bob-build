@@ -229,14 +229,20 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 func (f *Features) AppendProps(dst []interface{}, properties *config.Properties) error {
 	// featuresData is struct created in Features.Init function
 	featuresData := reflect.ValueOf(f.BlueprintEmbed).Elem()
+	featuresType := featuresData.Type()
 
-	for _, featureKey := range properties.FeatureList {
+	for i, featureKey := range properties.FeatureList {
 		if properties.Features[featureKey] { // Check the feature is enabled
-			// Features are matched like "Feature_name" - feature structure
-			featureFieldName := featurePropertyName(featureKey)
-			featureStruct := featuresData.FieldByName(featureFieldName)
-			if !featureStruct.IsValid() {
-				utils.Die("Field returned for property %s isn't valid\n", featureFieldName)
+			if i >= featuresData.NumField() {
+				utils.Die("Field returned for property %s isn't valid\n", featureKey)
+			}
+
+			// featureStructType creates fields in FeatureList order. Indexing avoids
+			// a reflective name lookup for every enabled feature on every module.
+			featureStruct := featuresData.Field(i)
+			expectedFieldName := featurePropertyName(featureKey)
+			if featuresType.Field(i).Name != expectedFieldName {
+				utils.Die("Field returned for property %s isn't valid\n", expectedFieldName)
 			}
 
 			// If featureProps is nil then we've determined that we can skip this,

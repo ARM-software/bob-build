@@ -656,13 +656,19 @@ func walkDownNoCopy(graph Graph, nodeID string, visited map[string]bool,
 
 // A faster alternative to GetSubgraph(graph, start).GetNodeCount()
 func GetSubgraphNodeCount(graph Graph, start string) int {
+	return len(GetSubgraphNodeSet(graph, start))
+}
+
+// A faster alternative to GetSubgraph(graph, start).GetNodes() when only
+// membership queries are needed.
+func GetSubgraphNodeSet(graph Graph, start string) map[string]bool {
 	visited := make(map[string]bool)
 
 	walkDownNoCopy(graph, start, visited,
 		func(Graph, string, map[string]bool) bool { return false },
 		func(Graph, string, string, map[string]bool) bool { return false })
 
-	return len(visited)
+	return visited
 }
 
 // A faster alternative to GetSubgraph(graph, start).HasNode(target)
