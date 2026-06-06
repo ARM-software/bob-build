@@ -2,11 +2,78 @@ package core
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/ARM-software/bob-build/core/config"
 	"github.com/ARM-software/bob-build/internal/utils"
 )
+
+var featureTypeCache = struct {
+	sync.RWMutex
+	coalesced map[string]reflect.Type
+	features  map[featureStructTypeKey]reflect.Type
+}{
+	coalesced: make(map[string]reflect.Type),
+	features:  make(map[featureStructTypeKey]reflect.Type),
+}
+
+type featureStructTypeKey struct {
+	featureList string
+	propsType   reflect.Type
+}
+
+func reflectTypeCacheKey(t reflect.Type) string {
+	return t.PkgPath() + "\x00" + t.String()
+}
+
+func reflectTypeListCacheKey(list []reflect.Type) string {
+	var builder strings.Builder
+	for _, typ := range list {
+		key := reflectTypeCacheKey(typ)
+		builder.WriteString(strconv.Itoa(len(key)))
+		builder.WriteByte(':')
+		builder.WriteString(key)
+	}
+	return builder.String()
+}
+
+func featureListCacheKey(features []string) string {
+	return strings.Join(features, "\x00")
+}
+
+func featureStructType(properties *config.Properties, propsType reflect.Type) reflect.Type {
+	key := featureStructTypeKey{
+		featureList: featureListCacheKey(properties.FeatureList),
+		propsType:   propsType,
+	}
+
+	featureTypeCache.RLock()
+	cached, ok := featureTypeCache.features[key]
+	featureTypeCache.RUnlock()
+	if ok {
+		return cached
+	}
+
+	featureTypeCache.Lock()
+	defer featureTypeCache.Unlock()
+	if cached, ok := featureTypeCache.features[key]; ok {
+		return cached
+	}
+
+	fields := make([]reflect.StructField, len(properties.FeatureList))
+	for i, featureName := range properties.FeatureList {
+		fields[i] = reflect.StructField{
+			Name: featurePropertyName(featureName),
+			Type: reflect.PtrTo(propsType),
+		}
+	}
+
+	cached = reflect.StructOf(fields)
+	featureTypeCache.features[key] = cached
+	return cached
+}
 
 // featurePropertyName returns name of feature. Name needs to start from capital letter because
 // this is how it works in go exported/unexported properties
@@ -62,17 +129,7 @@ func (f *Features) Init(properties *config.Properties, list ...interface{}) {
 	}
 
 	propsType := coalesceTypes(typesOf(list...)...)
-	fields := make([]reflect.StructField, len(properties.FeatureList))
-
-	for i, featureName := range properties.FeatureList {
-		fields[i] = reflect.StructField{
-			Name: featurePropertyName(featureName),
-			Type: reflect.PtrTo(propsType),
-		}
-	}
-
-	bpFeatureStruct := reflect.StructOf(fields)
-	instancePtr := reflect.New(bpFeatureStruct)
+	instancePtr := reflect.New(featureStructType(properties, propsType))
 	f.BlueprintEmbed = instancePtr.Interface()
 
 }
@@ -130,6 +187,21 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 		return list[0]
 	}
 
+	key := reflectTypeListCacheKey(list)
+
+	featureTypeCache.RLock()
+	cached, ok := featureTypeCache.coalesced[key]
+	featureTypeCache.RUnlock()
+	if ok {
+		return cached
+	}
+
+	featureTypeCache.Lock()
+	defer featureTypeCache.Unlock()
+	if cached, ok := featureTypeCache.coalesced[key]; ok {
+		return cached
+	}
+
 	fieldsKeys := map[string]bool{}
 	fields := []reflect.StructField{}
 
@@ -146,7 +218,9 @@ func coalesceTypes(list ...reflect.Type) reflect.Type {
 		}
 	}
 
-	return reflect.StructOf(fields)
+	cached = reflect.StructOf(fields)
+	featureTypeCache.coalesced[key] = cached
+	return cached
 }
 
 // AppendProps merges properties from BlueprintEmbed to dst, but only for enabled features

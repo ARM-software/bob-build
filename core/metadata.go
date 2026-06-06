@@ -49,8 +49,13 @@ func metaDataCollector(ctx blueprint.BottomUpMutatorContext) {
 			})
 	}
 
+	seenDeps := map[string]bool{}
 	ctx.WalkDeps(func(dep, parent blueprint.Module) bool {
-		meta.TransitiveDeps = utils.AppendIfUnique(meta.TransitiveDeps, dep.Name())
+		name := dep.Name()
+		if !seenDeps[name] {
+			seenDeps[name] = true
+			meta.TransitiveDeps = append(meta.TransitiveDeps, name)
+		}
 		return true
 	})
 
