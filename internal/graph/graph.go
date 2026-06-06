@@ -659,24 +659,89 @@ func GetSubgraphNodeCount(graph Graph, start string) int {
 	return len(GetSubgraphNodeSet(graph, start))
 }
 
-// A faster alternative to GetSubgraph(graph, start).GetNodes() when only
-// membership queries are needed.
-func GetSubgraphNodeSet(graph Graph, start string) map[string]bool {
+func getSubgraphNodeSetConcrete(graph *graph, start string) map[string]bool {
+	graph.mutex.RLock()
+	defer graph.mutex.RUnlock()
+
 	visited := make(map[string]bool)
 
-	walkDownNoCopy(graph, start, visited,
+	var walk func(string)
+	walk = func(nodeID string) {
+		if visited[nodeID] {
+			return
+		}
+		visited[nodeID] = true
+
+		node, ok := graph.nodeMap[nodeID]
+		if !ok {
+			return
+		}
+		for _, targetID := range node.targets {
+			walk(targetID)
+		}
+	}
+
+	walk(start)
+	return visited
+}
+
+// A faster alternative to GetSubgraph(graph, start).GetNodes() when only
+// membership queries are needed.
+func GetSubgraphNodeSet(input Graph, start string) map[string]bool {
+	if concrete, ok := input.(*graph); ok {
+		return getSubgraphNodeSetConcrete(concrete, start)
+	}
+
+	visited := make(map[string]bool)
+
+	walkDownNoCopy(input, start, visited,
 		func(Graph, string, map[string]bool) bool { return false },
 		func(Graph, string, string, map[string]bool) bool { return false })
 
 	return visited
 }
 
-// A faster alternative to GetSubgraph(graph, start).HasNode(target)
-func GetSubgraphHasNode(graph Graph, start string, target string) bool {
+func getSubgraphHasNodeConcrete(graph *graph, start string, target string) bool {
+	graph.mutex.RLock()
+	defer graph.mutex.RUnlock()
+
 	visited := make(map[string]bool)
 	hasNode := false
 
-	walkDownNoCopy(graph, start, visited,
+	var walk func(string)
+	walk = func(nodeID string) {
+		if hasNode || visited[nodeID] {
+			return
+		}
+		visited[nodeID] = true
+		if nodeID == target {
+			hasNode = true
+			return
+		}
+
+		node, ok := graph.nodeMap[nodeID]
+		if !ok {
+			return
+		}
+		for _, targetID := range node.targets {
+			walk(targetID)
+		}
+	}
+
+	walk(start)
+	return hasNode
+}
+
+// A faster alternative to GetSubgraph(graph, start).HasNode(target)
+func GetSubgraphHasNode(input Graph, start string, target string) bool {
+	if concrete, ok := input.(*graph); ok {
+		return getSubgraphHasNodeConcrete(concrete, start, target)
+	}
+
+	visited := make(map[string]bool)
+	hasNode := false
+
+	walkDownNoCopy(input, start, visited,
 		func(_ Graph, nodeID string, _ map[string]bool) bool {
 			if nodeID != target {
 				return false
@@ -720,12 +785,62 @@ func GetSubgraphs(graph Graph) []Graph {
 // A subgraph of a graph G is another graph formed from a subset of the vertices and edges of G.
 // The vertex subset must include all endpoints of the edge subset.
 // subgraph: https://en.wikipedia.org/wiki/Glossary_of_graph_theory_terms#subgraph
-func GetSubgraph(graph Graph, start string) Graph {
+func GetSubgraph(input Graph, start string) Graph {
+	if concrete, ok := input.(*graph); ok {
+		return getSubgraphConcrete(concrete, start)
+	}
+
 	visited := make(map[string]bool)
 
 	sub := NewGraph(start)
-	walkDown(graph, sub, start, visited)
+	walkDown(input, sub, start, visited)
 
+	return sub
+}
+
+func copyNodeFromConcrete(dst *graph, src *graph, nodeID string) {
+	dst.addNode(nodeID)
+
+	srcNode, ok := src.nodeMap[nodeID]
+	if !ok {
+		return
+	}
+
+	dstNode := dst.nodeMap[nodeID]
+	dstNode.attributes = srcNode.attributes
+	dstNode.priority = srcNode.priority
+}
+
+func getSubgraphConcrete(src *graph, start string) Graph {
+	src.mutex.RLock()
+	defer src.mutex.RUnlock()
+
+	sub := &graph{
+		name:    start,
+		nodeMap: make(map[string]*node),
+	}
+
+	var walk func(string)
+	walk = func(nodeID string) {
+		copyNodeFromConcrete(sub, src, nodeID)
+
+		srcNode, ok := src.nodeMap[nodeID]
+		if !ok {
+			return
+		}
+
+		for _, targetID := range srcNode.targets {
+			copyNodeFromConcrete(sub, src, targetID)
+			if sub.addEdge(nodeID, targetID) {
+				if attributes, ok := srcNode.edgeAttributes[targetID]; ok {
+					sub.nodeMap[nodeID].edgeAttributes[targetID] = attributes
+				}
+				walk(targetID)
+			}
+		}
+	}
+
+	walk(start)
 	return sub
 }
 
