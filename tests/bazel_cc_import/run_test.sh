@@ -40,6 +40,38 @@ BAZEL_TARGETS=(
 
 "${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" build "${BAZEL_TARGETS[@]}"
 
+assert_bazel_build_fails() {
+    local target="$1"
+    local expected="$2"
+    local log_file
+    log_file="$(mktemp)"
+
+    echo "Checking unsupported Bazel import: ${target}"
+
+    if "${BAZEL}" "${BAZEL_STARTUP_ARGS[@]}" build "${target}" >"${log_file}" 2>&1; then
+        echo "Expected '${target}' to fail" >&2
+        rm -f "${log_file}"
+        exit 1
+    fi
+
+    if ! grep -Fq "${expected}" "${log_file}"; then
+        echo "Expected '${target}' failure to contain '${expected}', got:" >&2
+        cat "${log_file}" >&2
+        rm -f "${log_file}"
+        exit 1
+    fi
+
+    rm -f "${log_file}"
+}
+
+assert_bazel_build_fails \
+    //tests/bazel_cc_import/bazel:dynamic_deps_unsupported_test \
+    "dynamic dependencies are not supported for Bob imports"
+
+assert_bazel_build_fails \
+    //tests/bazel_cc_import/bazel:multi_output_unsupported_test \
+    "Bob import generation supports one output per Bazel target"
+
 mapfile -t GENERATED_BUILD_BPS < <(
     find bazel-bin/tests/bazel_cc_import/bazel -type f -name build.bp | sort
 )

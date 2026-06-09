@@ -1,8 +1,8 @@
+load("@bazel_skylib//lib:collections.bzl", "collections")
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//tests/bazel_cc_import/bazel:buildbp.bzl", "binary_bp_content", "library_bp_content")
 load("//tests/bazel_cc_import/bazel:name.bzl", "bp_target_name")
-load("@bazel_skylib//lib:collections.bzl", "collections")
-load("@bazel_skylib//lib:paths.bzl", "paths")
 
 ImportCcAspectInfo = provider(fields = ["defines", "headers"])
 
@@ -84,7 +84,19 @@ def _symlink_headers(ctx, module_dir, dir_name, headers):
 
     return outputs
 
-def _library_file(target):
+def _unique_files_by_path(files):
+    seen = {}
+    deduped = []
+    for file in files:
+        if file and not seen.get(file.path):
+            seen[file.path] = True
+            deduped.append(file)
+    return deduped
+
+def _file_list(files):
+    return ", ".join([file.short_path for file in files])
+
+def _library_files(target):
     candidates = []
 
     def add_candidate(file):
@@ -92,10 +104,14 @@ def _library_file(target):
             candidates.append(file)
 
     # cc_shared_library has this
-    for file in target[DefaultInfo].files.to_list():
-        add_candidate(file)
+    if DefaultInfo in target:
+        for file in target[DefaultInfo].files.to_list():
+            add_candidate(file)
 
-    if not candidates and CcInfo in target:
+    if candidates:
+        return _unique_files_by_path(candidates)
+
+    if CcInfo in target:
         linking_context = target[CcInfo].linking_context
         for linker_input in linking_context.linker_inputs.to_list():
             for library in linker_input.libraries:
@@ -105,8 +121,10 @@ def _library_file(target):
                 ]:
                     add_candidate(file)
 
-    if len(candidates) > 1:
-        fail("More than one lib output in '" + str(target) + "' " + str(candidates))
+    return _unique_files_by_path(candidates)
+
+def _library_file(target):
+    candidates = _library_files(target)
 
     if len(candidates) == 0:
         # header only lib
@@ -117,19 +135,53 @@ def _library_file(target):
 def _is_library_file(file):
     return file.path.endswith(".a") or file.path.endswith(".so")
 
-def _binary_file(target):
+def _binary_files(target):
     if DefaultInfo not in target:
-        return None
+        return []
 
     candidates = []
     for file in target[DefaultInfo].files.to_list():
         if not file.is_directory and not _is_library_file(file):
             candidates.append(file)
 
+    return _unique_files_by_path(candidates)
+
+def _binary_file(target):
+    candidates = _binary_files(target)
+
     if len(candidates) == 1:
         return candidates[0]
 
     return None
+
+def _multiple_outputs_reason(output_type, files):
+    return "produces multiple " + output_type + " outputs (" + _file_list(files) + "); " + \
+           "Bob import generation supports one output per Bazel target"
+
+def _fail_on_unsupported_outputs(target):
+    libraries = _library_files(target)
+    binaries = _binary_files(target)
+
+    if len(libraries) > 1:
+        fail(_multiple_outputs_reason("library", libraries))
+    if len(binaries) > 1:
+        fail(_multiple_outputs_reason("binary", binaries))
+    if libraries and binaries:
+        fail(
+            "produces both library and binary outputs (" + _file_list(libraries + binaries) + "); " +
+            "Bob import generation supports either one library or one binary per Bazel target",
+        )
+
+def _target_labels(targets):
+    return ", ".join([str(target.label) for target in targets])
+
+def _fail_on_unsupported_dynamic_deps(ctx):
+    dynamic_deps = getattr(ctx.rule.attr, "dynamic_deps", [])
+    if dynamic_deps:
+        fail(
+            "declares dynamic_deps (" + _target_labels(dynamic_deps) + "); " +
+            "dynamic dependencies are not supported for Bob imports",
+        )
 
 def _symlink_file(ctx, module_dir, dir_name, file):
     destination = paths.join(dir_name, file.basename)
@@ -138,6 +190,8 @@ def _symlink_file(ctx, module_dir, dir_name, file):
     return destination, out
 
 def _bob_import_cc_aspect_impl(target, ctx):
+    _fail_on_unsupported_dynamic_deps(ctx)
+
     headers, defines = _compilation_info(target, ctx)
 
     return [
@@ -155,6 +209,8 @@ bob_import_cc_aspect = aspect(
 def _gen_bob_import_impl(ctx):
     output = []
     for dep in ctx.attr.deps:
+        _fail_on_unsupported_outputs(dep)
+
         target_name = bp_target_name(dep.label)
         include_destination = "include"
         library_destination = "lib"

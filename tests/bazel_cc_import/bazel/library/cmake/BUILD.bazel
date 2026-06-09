@@ -29,3 +29,13 @@ cmake(
     out_static_libs = ["libcmake_test_static.a"],
     visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
 )
+
+cmake(
+    name = "multiple",
+    copts = ["-DVALUE_A=19"],
+    defines = ["VALUE_SUM=22"],
+    lib_source = ":srcs",
+    out_shared_libs = ["libcmake_test_shared.so"],
+    out_static_libs = ["libcmake_test_static.a"],
+    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
+)

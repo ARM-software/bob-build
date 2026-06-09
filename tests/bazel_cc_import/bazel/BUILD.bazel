@@ -15,3 +15,15 @@ gen_bob_import(
         "//tests/bazel_cc_import/bazel/library/simple:static",
     ],
 )
+
+gen_bob_import(
+    name = "dynamic_deps_unsupported_test",
+    tags = ["manual"],
+    deps = ["//tests/bazel_cc_import/bazel/binary/dynamic"],
+)
+
+gen_bob_import(
+    name = "multi_output_unsupported_test",
+    tags = ["manual"],
+    deps = ["//tests/bazel_cc_import/bazel/library/cmake:multiple"],
+)
