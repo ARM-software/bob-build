@@ -3,5 +3,5 @@ load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 cc_binary(
     name = "tool",
     srcs = ["impl.c"],
-    visibility = ["//tests/bazel_cc_import/bazel:__pkg__"],
+    visibility = ["//visibility:public"],
 )
