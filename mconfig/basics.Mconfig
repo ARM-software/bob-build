@@ -56,6 +56,12 @@ config ANDROID_PLATFORM_VERSION
 	int "Android PLATFORM_VERSION"
 	depends on ANDROID
 
+config ANDROID_BP_SOONG_COMPAT_FILE
+	string "Android.bp Soong compatibility file"
+	depends on ANDROID && BUILDER_ANDROID_BP
+	help
+	  Selected Soong compatibility file for Bob's Android.bp plugins.
+
 config ANDROID_BP_USE_SOONG_NAMESPACE
 	bool "Emit soong_namespace in generated Android.bp"
 	depends on ANDROID && BUILDER_ANDROID_BP

@@ -92,10 +92,18 @@ export BLUEPRINT_LIST_FILE="${SRCDIR}/bplist"
 source "${BUILDDIR}/.bob.bootstrap"
 
 ANDROID_VERSION="$("${SCRIPT_DIR}/${BOB_DIR}/scripts/android_version.py")"
+SOONG_COMPAT_FILE="$("${SCRIPT_DIR}/${BOB_DIR}/scripts/detect_soong_compat.py" \
+    --android-top "${ANDROID_BUILD_TOP}" \
+    --android-platform-version "${ANDROID_VERSION}")"
 
 if [ $MENU -ne 1 ] || [ ! -f "${BPBUILD_DIR}/${CONFIGNAME}" ] ; then
     # Have arguments or missing bob.config. Run config.
-    "${BPBUILD_DIR}/config" ANDROID=y BUILDER_ANDROID_BP=y ANDROID_PLATFORM_VERSION=${ANDROID_VERSION} "$@"
+    "${BPBUILD_DIR}/config" \
+        ANDROID=y \
+        BUILDER_ANDROID_BP=y \
+        ANDROID_PLATFORM_VERSION="${ANDROID_VERSION}" \
+        ANDROID_BP_SOONG_COMPAT_FILE="${SOONG_COMPAT_FILE}" \
+        "$@"
 fi
 
 if [ $MENU -eq 1 ] ; then

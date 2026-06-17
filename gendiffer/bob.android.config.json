@@ -15,6 +15,10 @@
     "ignore": false,
     "value": 13
   },
+  "android_bp_soong_compat_file": {
+    "ignore": false,
+    "value": "soong_compat_02_AndroidMkSoongInstallTargets.go"
+  },
   "armclang_ar_binary": {
     "ignore": false,
     "value": "armar"
