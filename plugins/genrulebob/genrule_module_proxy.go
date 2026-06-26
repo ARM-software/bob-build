@@ -582,6 +582,13 @@ func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args ma
 
 	implicits = append(implicits, dependentTools...)
 
+	if m.Properties.Rsp_content != nil {
+		orig := *m.Properties.Rsp_content
+		expanded := expandRspContent(orig, args)
+		m.Properties.Rsp_content = &expanded
+
+	}
+
 	return
 }
 

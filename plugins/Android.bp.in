@@ -48,6 +48,7 @@ bootstrap_go_package {
     ],
     srcs: [
         "@@BOB_DIR@@/plugins/genrulebob/@@GENRULEBOB@@",
+        "@@BOB_DIR@@/plugins/genrulebob/rsp_expand.go",
     ],
     pkgPath: "github.com/ARM-software/bob-build/plugins/genrulebob",
 }
