@@ -56,3 +56,7 @@ py_binary(
         "@rules_python//python/runfiles",
     ],
 )
+
+exports_files(
+    srcs = ["scripts/host_explore.py"],
+)
