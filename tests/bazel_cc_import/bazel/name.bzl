@@ -8,12 +8,6 @@ def _sanitize(value):
             sanitized += "_"
     return sanitized
 
-def _strip_label_prefix(value):
-    for i in range(len(value)):
-        c = value[i]
-        if c != "@" and c != "/":
-            return value[i:]
-    return ""
-
 def bp_target_name(label):
-    return _sanitize(_strip_label_prefix(str(label)))
+    # TODO There could be collisions between targets in different repos.
+    return _sanitize("%s_%s" % (label.package, label.name))
