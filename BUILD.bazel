@@ -1,4 +1,5 @@
 load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@rules_python//python:defs.bzl", "py_binary")
 
 # TODO: Fix config system import structure
 # load("@rules_python_gazelle_plugin//:def.bzl", "GAZELLE_PYTHON_RUNTIME_DEPS")
