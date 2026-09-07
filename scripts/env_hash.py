@@ -31,6 +31,7 @@ def hash_env():
         "PATH",
         # bob-build
         "BOB_ALWAYS_LINK_SHARED_LIBS",
+        "BOB_BAZEL_CONFIG_TARGET",
         "BOB_BOOTSTRAP_VERSION",
         "BOB_CONFIG_OPTS",
         "BOB_CONFIG_PLUGIN_OPTS",

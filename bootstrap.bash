@@ -12,6 +12,8 @@
 # BOB_CONFIG_OPTS - Configuration options to be used when calling the
 #                   configuration system.
 # BOB_CONFIG_PLUGINS - Configuration system plugins to use
+# BOB_BAZEL_CONFIG_TARGET - Optional Bazel target that generates an Mconfig
+#                           input file when config is passed --platforms.
 
 # The location that this script is called from determines the working
 # directory of the build.
@@ -87,6 +89,10 @@ fi
 
 if [[ -z "$BOB_CONFIG_PLUGINS" ]]; then
   BOB_CONFIG_PLUGINS=""
+fi
+
+if [[ -z "$BOB_BAZEL_CONFIG_TARGET" ]]; then
+  BOB_BAZEL_CONFIG_TARGET=""
 fi
 
 if [ "${BUILDDIR}" = "." ] ; then

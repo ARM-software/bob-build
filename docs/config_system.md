@@ -47,6 +47,36 @@ User-set options are not preserved between invocations - i.e. specifying e.g.
 preserved if `$BUILDDIR/config` is run a subsequent time without specifying
 `ENABLE_FOO=y`.
 
+#### Bazel mode
+
+If any argument is `--platforms` or starts with `--platforms=`, `config` uses
+Bazel to generate the input configuration. All command-line arguments are
+forwarded to Bazel unchanged and are not interpreted as profiles or Mconfig
+assignments by the `config` wrapper.
+
+For example:
+
+```bash
+$BUILDDIR/config \
+	--platforms=//bazel/package/path/to/platform \
+```
+
+In this mode, `config` runs the target defined by `BOB_BAZEL_CONFIG_TARGET` using `bazelisk`.
+
+The project must set `BOB_BAZEL_CONFIG_TARGET` before bootstrapping Bob. For example:
+
+```bash
+export BOB_BAZEL_CONFIG_TARGET=//bazel/package:path/to/config
+```
+
+The
+target must produce one configuration file. `config` builds the target, queries
+Bazel for its output, and passes that file to the normal Mconfig update process.
+If the project does not configure a target, using `--platforms` reports an
+error.
+
+In this mode Bazel is responsible for choosing all Mconfig assignments.
+
 ### $BUILDDIR/menuconfig
 
 This is an ncurses-based graphical tool to enable and disable options, and is
