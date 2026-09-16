@@ -22,6 +22,8 @@ type BuildProps struct {
 	Asflags []string
 	// Flags used for linking
 	Ldflags []string
+	// Linker scripts passed to the linker
+	Linker_scripts []string
 	// Same as ldflags, but specified on static libraries and propagated to
 	// the top-level build object.
 	Export_ldflags []string
@@ -148,13 +150,14 @@ func (b *BuildProps) processBuildWrapper(ctx blueprint.BaseModuleContext) {
 	}
 }
 
-// Add module paths to srcs, exclude_srcs, local_include_dirs, export_local_include_dirs
-// and post_install_tool
+// Add module paths to export_local_include_dirs, export_local_system_include_dirs,
+// linker_scripts and post_install_tool
 func (b *BuildProps) processPaths(ctx blueprint.BaseModuleContext) {
 	prefix := projectModuleDir(ctx)
 
 	b.Export_local_include_dirs = utils.PrefixDirs(b.Export_local_include_dirs, prefix)
 	b.Export_local_system_include_dirs = utils.PrefixDirs(b.Export_local_system_include_dirs, prefix)
+	b.Linker_scripts = utils.PrefixDirs(b.Linker_scripts, prefix)
 
 	b.processBuildWrapper(ctx)
 }

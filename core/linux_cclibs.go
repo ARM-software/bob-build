@@ -462,6 +462,10 @@ type BackendCommonSharedLibraryInterface interface {
 	getRealName() string
 }
 
+type linkerScriptProvider interface {
+	getLinkerScripts(ctx blueprint.ModuleContext) []string
+}
+
 func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx blueprint.ModuleContext) map[string]string {
 	tc := backend.Get().GetToolchain(m.getTarget())
 
@@ -491,6 +495,11 @@ func (g *linuxGenerator) getCommonLibArgs(m BackendCommonLibraryInterface, ctx b
 	versionScript := m.getVersionScript(ctx)
 	if versionScript != nil {
 		ldflags = append(ldflags, tc.GetLinker().SetVersionScript(*versionScript))
+	}
+	if p, ok := m.(linkerScriptProvider); ok {
+		for _, script := range p.getLinkerScripts(ctx) {
+			ldflags = append(ldflags, "-Wl,"+script)
+		}
 	}
 
 	sharedLibLdlibs, sharedLibLdflags := g.getSharedLibFlags(m, ctx)
@@ -540,6 +549,9 @@ func (g *linuxGenerator) ccLinkImplicits(l linkableModule, ctx blueprint.ModuleC
 	versionScript := l.getVersionScript(ctx)
 	if versionScript != nil {
 		implicits = append(implicits, *versionScript)
+	}
+	if p, ok := l.(linkerScriptProvider); ok {
+		implicits = append(implicits, p.getLinkerScripts(ctx)...)
 	}
 
 	return implicits

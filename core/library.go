@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strings"
 
+	"github.com/ARM-software/bob-build/core/backend"
 	"github.com/ARM-software/bob-build/core/file"
 	"github.com/ARM-software/bob-build/core/flag"
 	"github.com/ARM-software/bob-build/core/module"
@@ -522,6 +524,23 @@ func (m *ModuleLibrary) getVersionScript(ctx blueprint.ModuleContext) *string {
 	}
 
 	return nil
+}
+
+func (m *ModuleLibrary) getLinkerScripts(ctx blueprint.ModuleContext) []string {
+	scripts := m.Properties.Build.Linker_scripts
+	srcDir := backend.Get().SourceDir()
+
+	// linker_scripts are module-relative in build.bp. processPaths prefixes them
+	// with the module directory, but Bazel backends also need them under SourceDir.
+	// Prefix only if not already under SourceDir to avoid double-prefixing.
+	for i, script := range scripts {
+		if filepath.IsAbs(script) || script == srcDir || strings.HasPrefix(script, srcDir+"/") {
+			continue
+		}
+		scripts[i] = getBackendPathInSourceDir(getGenerator(ctx), script)
+	}
+
+	return scripts
 }
 
 func (m *ModuleLibrary) processPaths(ctx blueprint.BaseModuleContext) {
