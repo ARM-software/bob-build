@@ -89,5 +89,43 @@ bob_alias {
         "uses_partially_generated_library",
         "uses_reexporting_library",
         "uses_library_with_private_generated_headers",
+        "uses_host_tool_generated_headers",
     ],
+}
+
+// A generator's host-only build headers must not leak to target consumers.
+bob_binary {
+    name: "private_header_host_tool",
+    srcs: ["private_header_host_tool.c"],
+    generated_headers: ["generated_header"],
+    host_supported: true,
+    target_supported: false,
+}
+
+bob_generate_source {
+    name: "host_tool_generated_header",
+    host_bin: "private_header_host_tool",
+    out: ["host_tool_output.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "${host_bin} ${out}",
+}
+
+// Genuine generated-header dependencies must still propagate transitively.
+bob_generate_source {
+    name: "nested_host_tool_generated_header",
+    generated_deps: ["host_tool_generated_header"],
+    out: ["nested_host_tool_output.h"],
+    export_gen_include_dirs: ["."],
+    cmd: "cp ${host_tool_generated_header_out} ${out}",
+}
+
+bob_binary {
+    name: "uses_host_tool_generated_headers",
+    srcs: ["check_host_tool_headers.c"],
+    generated_headers: ["nested_host_tool_generated_header"],
+    builder_ninja: {
+        // Ninja requires direct generated-header dependencies; the Soong
+        // fixture deliberately exercises its transitive header exports.
+        generated_headers: ["host_tool_generated_header"],
+    },
 }

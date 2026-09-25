@@ -448,15 +448,15 @@ func (m *genrulebobCommon) calcExportGenIncludeDirs(ctx android.ModuleContext) a
 		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(ctx, dir))
 	}
 
-	// Add include dirs of our all dependencies
-	ctx.WalkDepsProxy(func(child android.ModuleProxy, parent android.ModuleProxy) bool {
+	// Generated dependencies publish their transitive header directories.
+	// Do not walk through host tools and expose their private build headers.
+	ctx.VisitDirectDepsProxy(func(child android.ModuleProxy) {
 		genruleExportInclInfo, ok := android.OtherModuleProvider(ctx, child, GenruleExportInclInfoProvider)
 		if ok {
 			for _, p := range genruleExportInclInfo.ExportIncludes {
 				allIncludeDirs = append(allIncludeDirs, p)
 			}
 		}
-		return true
 	})
 
 	// Make unique items as for recursive passes it may contain redundant ones
@@ -555,18 +555,12 @@ func (m *genrulebob) createInouts(ctx android.ModuleContext,
 var GenruleExportInclInfoProvider = blueprint.NewProvider[soong_compat.GenruleExportInclInfo]()
 
 func (m *genrulebobCommon) setupBuildActions(ctx android.ModuleContext) (args map[string]string, implicits []android.Path) {
-	var allIncludeDirs android.Paths
-
-	for _, dir := range m.Properties.Export_gen_include_dirs {
-		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(ctx, dir))
-	}
-
-	android.SetProvider(ctx, GenruleExportInclInfoProvider, soong_compat.GenruleExportInclInfo{ExportIncludes: allIncludeDirs})
-
 	args, implicits = m.getArgs(ctx)
 
 	m.genDir = pathForModuleGen(ctx)
 	m.exportGenIncludeDirs = m.calcExportGenIncludeDirs(ctx)
+	android.SetProvider(ctx, GenruleExportInclInfoProvider,
+		soong_compat.GenruleExportInclInfo{ExportIncludes: m.exportGenIncludeDirs})
 
 	if hostBin := m.getHostBin(ctx); hostBin.Valid() {
 		args["host_bin"] = hostBin.String()

@@ -446,14 +446,15 @@ func (m *genrulebobCommon) calcExportGenIncludeDirs(ctx android.ModuleContext) a
 		allIncludeDirs = append(allIncludeDirs, pathForModuleGen(ctx, dir))
 	}
 
-	// Add include dirs of our all dependencies
-	ctx.WalkDeps(func(child android.Module, parent android.Module) bool {
+	// Generated dependencies already export their transitive header dirs.
+	// Do not walk through host tools: their private build headers describe
+	// the build machine, not the consumer of the generated source.
+	ctx.VisitDirectDeps(func(child android.Module) {
 		if cmod, ok := child.(genruleInterface); ok {
 			for _, dir := range cmod.GeneratedHeaderDirs() {
 				allIncludeDirs = append(allIncludeDirs, dir)
 			}
 		}
-		return true
 	})
 
 	// Make unique items as for recursive passes it may contain redundant ones
