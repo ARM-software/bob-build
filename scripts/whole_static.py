@@ -4,13 +4,28 @@
 from __future__ import print_function
 
 import argparse
+import errno
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from collections import defaultdict
 from pathlib import Path
+
+
+def rmtree_with_retry(path):
+    """Retry ENOTEMPTY by rescanning the tree for entries missed during removal."""
+    retry_delays = (0.1, 0.2, 0.4, 0.8)
+    for attempt in range(len(retry_delays) + 1):
+        try:
+            shutil.rmtree(path)
+            return
+        except OSError as e:
+            if e.errno != errno.ENOTEMPTY or attempt == len(retry_delays):
+                raise
+        time.sleep(retry_delays[attempt])
 
 
 def resolve(value):
@@ -127,7 +142,15 @@ def main():
         )
         sys.exit(1)
     finally:
-        shutil.rmtree(tmpdir)
+        build_failed = sys.exc_info()[0] is not None
+        try:
+            rmtree_with_retry(tmpdir)
+        except OSError as e:
+            sys.stderr.write(
+                "Error: Couldn't remove temporary directory '%s': %s\n" % (tmpdir, e)
+            )
+            if not build_failed:
+                raise
 
 
 if __name__ == "__main__":
