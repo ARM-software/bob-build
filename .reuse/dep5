@@ -27,6 +27,7 @@ Files:
   tests_android_oot/*
   */tests/*
   .github/*
+  .gitlab-ci.yml
   config_system/pytest.ini
   config_system/requirements_test_lock.txt
   config_system/requirements_runtime_lock.txt

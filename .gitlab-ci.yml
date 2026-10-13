@@ -1,0 +1,48 @@
+default:
+  image: golang:1.22-bookworm
+  before_script:
+    - apt-get update -qq
+    - >-
+      apt-get install -y --no-install-recommends
+      build-essential gcc-aarch64-linux-gnu ninja-build rsync
+      python3-dev python3-venv python3-ply python-is-python3
+    - python3 -m venv --system-site-packages /tmp/ci-venv
+    - export PATH="/tmp/ci-venv/bin:$PATH"
+    - go install github.com/bazelbuild/bazelisk@v1.25.0
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+
+pre-commit:
+  script:
+    - python3 -m pip install pre-commit==3.0.2
+    - pre-commit run --all-files --show-diff-on-failure
+
+go-tests:
+  script:
+    - .github/run_go_tests.sh
+    - go vet ./...
+
+python-tests:
+  script:
+    - python3 -m pip install -r .github/pip_requirements.txt
+    - config_system/tests/run_tests.py
+    - config_system/tests/run_tests_formatter.py
+    - python3 -m pytest config_system
+    - python3 -m pytest scripts/env_hash.py
+
+build-tests:
+  # TODO: Add AOSP tests.
+  # TODO: Re-enable the variables and bootstrap commands once the merge base
+  # with master includes vendored Blueprint.
+  # variables:
+  #   GIT_DEPTH: "0"
+  script:
+    - tests/build_tests.sh
+    - tests/relative_path_tests.sh
+    - .github/build_example_proj.sh
+    # - git fetch origin master:refs/remotes/origin/master
+    # - .github/run_bootstrap_test.sh
+
+bazel:
+  script:
+    - bazelisk test --config=ci //...
+    - (cd blueprint && bazelisk build --config=ci //...)
