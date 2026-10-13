@@ -44,3 +44,9 @@ Files:
   DCO.txt
 Copyright: 2018-2023 Arm Ltd. <developers@arm.com>
 License: CC0-1.0
+
+Files:
+  blueprint/.travis.yml
+  blueprint/bootstrap/build.ninja
+Copyright: 2020 Google Inc.
+License: Apache-2.0

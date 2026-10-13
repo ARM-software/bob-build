@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "bpglob_lib",
+    srcs = ["bpglob.go"],
+    importpath = "github.com/google/blueprint/bootstrap/bpglob",
+    visibility = ["//visibility:private"],
+    deps = ["//pathtools"],
+)
+
+go_binary(
+    name = "bpglob",
+    embed = [":bpglob_lib"],
+    visibility = ["//visibility:public"],
+)

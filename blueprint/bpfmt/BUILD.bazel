@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "bpfmt_lib",
+    srcs = ["bpfmt.go"],
+    importpath = "github.com/google/blueprint/bpfmt",
+    visibility = ["//visibility:private"],
+    deps = ["//parser"],
+)
+
+go_binary(
+    name = "bpfmt",
+    embed = [":bpfmt_lib"],
+    visibility = ["//visibility:public"],
+)

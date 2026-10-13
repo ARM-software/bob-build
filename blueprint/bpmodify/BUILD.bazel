@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "bpmodify_lib",
+    srcs = ["bpmodify.go"],
+    importpath = "github.com/google/blueprint/bpmodify",
+    visibility = ["//visibility:private"],
+    deps = ["//parser"],
+)
+
+go_binary(
+    name = "bpmodify",
+    embed = [":bpmodify_lib"],
+    visibility = ["//visibility:public"],
+)
