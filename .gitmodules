@@ -1,4 +1,0 @@
-[submodule "blueprint_module"]
-	path = blueprint
-	url = ./
-	branch = blueprint
