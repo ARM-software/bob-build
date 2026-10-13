@@ -31,16 +31,14 @@ python-tests:
 
 build-tests:
   # TODO: Add AOSP tests.
-  # TODO: Re-enable the variables and bootstrap commands once the merge base
-  # with master includes vendored Blueprint.
-  # variables:
-  #   GIT_DEPTH: "0"
+  variables:
+    GIT_DEPTH: "0"
   script:
     - tests/build_tests.sh
     - tests/relative_path_tests.sh
     - .github/build_example_proj.sh
-    # - git fetch origin master:refs/remotes/origin/master
-    # - .github/run_bootstrap_test.sh
+    - git fetch origin master:refs/remotes/origin/master
+    - .github/run_bootstrap_test.sh
 
 bazel:
   script:

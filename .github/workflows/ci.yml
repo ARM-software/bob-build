@@ -194,9 +194,8 @@ jobs:
       - name: Test example project
         run: .github/build_example_proj.sh
 
-      # TODO: Re-enable once the merge base with master includes vendored Blueprint.
-      # - name: Bootstrap version test
-      #   run: .github/run_bootstrap_test.sh
+      - name: Bootstrap version test
+        run: .github/run_bootstrap_test.sh
 
   bazel:
     name: "Bazel ${{matrix.bazel}} ${{ matrix.os }}"
