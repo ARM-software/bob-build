@@ -6,7 +6,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOBIN=/usr/local/bin go install github.com/bazelbui
 
 # Install packages
 # git required for blueprint
-# build-essential needed for io_bazel_rules_go
+# build-essential needed for rules_go
 RUN apt update \
  && apt -y --no-install-recommends install \
       ca-certificates \

@@ -1,4 +1,4 @@
-load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 load("@rules_python//python:defs.bzl", "py_binary")
 
 # TODO: Fix config system import structure
@@ -11,8 +11,8 @@ load("@rules_python//python:defs.bzl", "py_binary")
 gazelle_binary(
     name = "gazelle_binary",
     languages = [
-        "@bazel_gazelle//language/go",
-        "@bazel_gazelle//language/proto",
+        "@gazelle//language/go",
+        "@gazelle//language/proto",
         # TODO: Fix config system import structure
         # "@rules_python_gazelle_plugin//python",
     ],

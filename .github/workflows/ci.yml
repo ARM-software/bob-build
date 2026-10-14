@@ -260,7 +260,7 @@ jobs:
       - name: Generate Coverage
         run: |
           bazelisk clean --expunge
-          bazelisk coverage --config=ci --instrument_test_targets --@io_bazel_rules_go//go/config:cover_format=lcov --combined_report=lcov --cache_test_results=no //...
+          bazelisk coverage --config=ci --instrument_test_targets --@rules_go//go/config:cover_format=lcov --combined_report=lcov --cache_test_results=no //...
           cp "$(bazelisk info output_path)/_coverage/_coverage_report.dat" coverage_report.dat
       - name: Report code coverage
         uses: zgosalvez/github-actions-report-lcov@v4

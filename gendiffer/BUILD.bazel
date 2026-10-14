@@ -27,5 +27,5 @@ bzl_library(
     name = "gendiffer",
     srcs = ["gendiffer.bzl"],
     visibility = ["//:__subpackages__"],
-    deps = ["@io_bazel_rules_go//go:def"],
+    deps = ["@rules_go//go:def"],
 )

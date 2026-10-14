@@ -8,7 +8,7 @@ FROM debian:bookworm-slim
 
 # Install packages
 # git required for blueprint
-# build-essential needed for io_bazel_rules_go
+# build-essential needed for rules_go
 RUN apt-get update \
  && apt-get -y --no-install-recommends install \
       ca-certificates \

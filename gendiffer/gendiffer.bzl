@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 
 def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
     [
@@ -6,7 +6,7 @@ def bob_generation_test(name, bob_binary, test_data, size = "small", **kwargs):
             name = name + "_" + backend,
             srcs = [Label("//gendiffer:gendiffer.go")],
             deps = [
-                "@io_bazel_rules_go//go/tools/bazel:go_default_library",
+                "@rules_go//go/tools/bazel:go_default_library",
             ],
             args = [
                 "-backend=%s" % backend,
