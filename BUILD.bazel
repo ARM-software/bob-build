@@ -59,5 +59,15 @@ py_binary(
 )
 
 exports_files(
-    srcs = ["scripts/host_explore.py"],
+    srcs = [
+        "mconfig/basics.Mconfig",
+        "mconfig/host_toolchain.Mconfig",
+        "mconfig/target_toolchain.Mconfig",
+        "mconfig/toolchain.Mconfig",
+        "scripts/env_hash.py",
+        "scripts/host_explore.py",
+        "scripts/library_toc.py",
+        "scripts/minimal_config.py",
+        "scripts/whole_static.py",
+    ],
 )
