@@ -43,3 +43,23 @@ build-tests:
 bazel:
   script:
     - bazelisk test --config=ci //...
+
+release:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cli:v1.116.0
+  before_script:
+    - apk add --no-cache python3
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+  variables:
+    GLAB_ENABLE_CI_AUTOLOGIN: "true"
+  # Prevent simultaneous jobs from publishing the same SHA.
+  resource_group: bazel-release
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+      when: manual
+      allow_failure: true
+  script:
+    - python3 ci/publish_release.py
+  artifacts:
+    paths:
+      - release/
