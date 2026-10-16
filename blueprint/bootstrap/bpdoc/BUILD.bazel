@@ -1,5 +1,10 @@
 load("@rules_go//go:def.bzl", "go_library")
 
+# These tests are not currently configured for Bazel.
+# gazelle:exclude bpdoc_test.go
+# gazelle:exclude properties_test.go
+# gazelle:exclude reader_test.go
+
 go_library(
     name = "bpdoc",
     srcs = [
@@ -9,7 +14,7 @@ go_library(
     ],
     importpath = "github.com/google/blueprint/bootstrap/bpdoc",
     visibility = ["//visibility:public"],
-    deps = ["//proptools"],
+    deps = ["//blueprint/proptools"],
 )
 
 # TODO: FIX ME!
@@ -21,5 +26,5 @@ go_library(
 #         "reader_test.go",
 #     ],
 #     embed = [":bpdoc"],
-#     deps = ["//:blueprint"],
+#     deps = ["//blueprint:blueprint"],
 # )

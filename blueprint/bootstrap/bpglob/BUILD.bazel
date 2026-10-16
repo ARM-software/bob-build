@@ -5,7 +5,7 @@ go_library(
     srcs = ["bpglob.go"],
     importpath = "github.com/google/blueprint/bootstrap/bpglob",
     visibility = ["//visibility:private"],
-    deps = ["//pathtools"],
+    deps = ["//blueprint/pathtools"],
 )
 
 go_binary(

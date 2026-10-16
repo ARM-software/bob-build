@@ -101,7 +101,8 @@ For more information see the [documentation](docs/build_defs.md).
 
 ### Directory structure
 
-`blueprint` - this is a git submodule containing the required version of Blueprint
+`blueprint` - contains the vendored Blueprint sources, built as part of Bob's
+Bazel module
 
 `config_system` - contains the Python-based configuration system
 

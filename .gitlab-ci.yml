@@ -43,4 +43,3 @@ build-tests:
 bazel:
   script:
     - bazelisk test --config=ci //...
-    - (cd blueprint && bazelisk build --config=ci //...)

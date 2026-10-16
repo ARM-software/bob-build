@@ -1,5 +1,9 @@
 load("@rules_go//go:def.bzl", "go_library")
 
+# These tests are not currently configured for Bazel.
+# gazelle:exclude fs_test.go
+# gazelle:exclude glob_test.go
+
 go_library(
     name = "pathtools",
     srcs = [
@@ -9,7 +13,7 @@ go_library(
     ],
     importpath = "github.com/google/blueprint/pathtools",
     visibility = ["//visibility:public"],
-    deps = ["//deptools"],
+    deps = ["//blueprint/deptools"],
 )
 
 # TODO: FIX ME!

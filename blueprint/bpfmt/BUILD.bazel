@@ -5,7 +5,7 @@ go_library(
     srcs = ["bpfmt.go"],
     importpath = "github.com/google/blueprint/bpfmt",
     visibility = ["//visibility:private"],
-    deps = ["//parser"],
+    deps = ["//blueprint/parser"],
 )
 
 go_binary(

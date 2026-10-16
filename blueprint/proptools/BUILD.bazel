@@ -14,7 +14,7 @@ go_library(
     ],
     importpath = "github.com/google/blueprint/proptools",
     visibility = ["//visibility:public"],
-    deps = ["//parser"],
+    deps = ["//blueprint/parser"],
 )
 
 go_test(
@@ -31,5 +31,5 @@ go_test(
         "unpack_test.go",
     ],
     embed = [":proptools"],
-    deps = ["//parser"],
+    deps = ["//blueprint/parser"],
 )

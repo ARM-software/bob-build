@@ -5,7 +5,7 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/google/blueprint/microfactory/main",
     visibility = ["//visibility:private"],
-    deps = ["//microfactory"],
+    deps = ["//blueprint/microfactory"],
 )
 
 go_binary(

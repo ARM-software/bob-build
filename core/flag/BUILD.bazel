@@ -12,9 +12,9 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/core/flag",
     visibility = ["//visibility:public"],
     deps = [
+        "//blueprint",
         "//core/backend",
         "//core/config",
-        "@com_github_google_blueprint//:blueprint",
     ],
 )
 

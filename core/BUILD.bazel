@@ -68,6 +68,10 @@ go_library(
     importpath = "github.com/ARM-software/bob-build/core",
     visibility = ["//visibility:public"],
     deps = [
+        "//blueprint",
+        "//blueprint/bootstrap",
+        "//blueprint/pathtools",
+        "//blueprint/proptools",
         "//core/backend",
         "//core/config",
         "//core/file",
@@ -83,10 +87,6 @@ go_library(
         "//internal/graph",
         "//internal/utils",
         "//internal/warnings",
-        "@com_github_google_blueprint//:blueprint",
-        "@com_github_google_blueprint//bootstrap",
-        "@com_github_google_blueprint//pathtools",
-        "@com_github_google_blueprint//proptools",
     ],
 )
 

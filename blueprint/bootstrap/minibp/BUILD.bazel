@@ -6,8 +6,8 @@ go_library(
     importpath = "github.com/google/blueprint/bootstrap/minibp",
     visibility = ["//visibility:private"],
     deps = [
-        "//:blueprint",
-        "//bootstrap",
+        "//blueprint",
+        "//blueprint/bootstrap",
     ],
 )
 

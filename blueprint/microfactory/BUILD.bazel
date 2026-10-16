@@ -1,5 +1,8 @@
 load("@rules_go//go:def.bzl", "go_library")
 
+# This test is not currently configured for Bazel.
+# gazelle:exclude microfactory_test.go
+
 go_library(
     name = "microfactory",
     srcs = ["microfactory.go"],
