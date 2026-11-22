@@ -208,17 +208,20 @@ def read_config_file(config_filename):
                         set_config(key, value, is_user_set, source)
                     # else ignore comment
                 else:
-                    line = line.split(
-                        "#", 1
-                    )  # Strip comment from line eg. "xyz # comment"
-                    comment = line[1] if len(line) > 1 else ""
+                    # Strip comment from line eg. "xyz # comment". A '#'
+                    # inside a quoted string value is part of the value.
+                    m = re.match(r'((?:[^"#]|"(?:[^"\\]|\\.)*")*)(?:#(.*))?$', line)
+                    if m:
+                        line, comment = m.group(1), m.group(2) or ""
+                    else:
+                        line, _, comment = line.partition("#")
                     if comment:
                         # match the source if present eg. " set by user (source)"
                         m = re.match(r" set by user(?: \((.+)\))?", comment)
                         if m:
                             is_user_set = True
                             source = m.group(1) if m.group(1) else ""
-                    line = line[0].rstrip()  # Remove extra space before comment
+                    line = line.rstrip()  # Remove extra space before comment
                     m = re.match(r"CONFIG_([^=]+)=(\"?)(.*)\2", line)
                     if m:
                         (key, quoted, value) = (m.group(1), m.group(2), m.group(3))
