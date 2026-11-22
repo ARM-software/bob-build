@@ -378,5 +378,56 @@ def test_option_depends_on_plugin(caplog, mocker, tmpdir, plugin, mconfig, args)
     assert len(errors) == 0
 
 
+string_value_round_trip_testdata = [
+    # A '#' inside a quoted string value is part of the value
+    'CONFIG_NAME="build #42" # set by user (cmd_line)',
+    # An escaped quote followed by '#' inside the value
+    'CONFIG_NAME="say \\"hi\\" #1" # set by user (cmd_line)',
+    # No '#' in the value
+    'CONFIG_NAME="plain" # set by user (cmd_line)',
+]
+
+
+@pytest.mark.parametrize("name_line", string_value_round_trip_testdata)
+def test_string_value_round_trip(mocker, tmpdir, name_line):
+    """
+    A user-set string value must survive being read back from the config
+    file when another option is changed.
+    """
+    mconfig = """
+config NAME
+    string "Name"
+    default "x"
+
+config OTHER
+    string "Other"
+    default ""
+"""
+    config_fname = tmpdir.join("bob.config")
+    mconfig_fname = tmpdir.join("Mconfig")
+    mconfig_fname.write(mconfig, "wt")
+    config_fname.write(name_line + "\n" + 'CONFIG_OTHER=""\n', "wt")
+
+    mocker.patch(
+        "update_config.parse_args",
+        new=lambda: argparse.Namespace(
+            config=str(config_fname),
+            database=str(mconfig_fname),
+            json=None,
+            new=False,
+            plugin=[],
+            depfile=None,
+            ignore_missing=False,
+            args=["OTHER=y"],
+        ),
+    )
+
+    update_config.counter.reset()
+    assert update_config.main() == 0
+
+    lines = config_fname.read().splitlines()
+    assert name_line in lines
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main(sys.argv))
